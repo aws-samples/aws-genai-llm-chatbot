@@ -1,0 +1,5 @@
+aws-lambda-powertools
+cfnresponse
+psycopg2-binary
+pgvector
+urllib3<2

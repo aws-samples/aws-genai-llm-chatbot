@@ -1,0 +1,3 @@
+huggingface-hub
+hf-transfer
+boto3

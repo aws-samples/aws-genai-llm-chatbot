@@ -1,0 +1,10 @@
+aws_lambda_powertools
+aws-xray-sdk
+langchain
+psycopg2-binary
+pgvector
+unstructured
+pdf2image
+tabulate
+nltk
+urllib3<2
