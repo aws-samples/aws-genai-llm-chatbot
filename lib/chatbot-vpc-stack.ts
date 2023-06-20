@@ -32,35 +32,25 @@ export class ChatBotVpcStack extends cdk.Stack {
       ],
     });
 
-    // Create VPC Endpoint for SageMaker Runtime
-    new ec2.InterfaceVpcEndpoint(this, 'SageMakerRuntimeEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
-      vpc: vpc,
-      open: true,
+    // Create a VPC endpoint for S3.
+    vpc.addGatewayEndpoint('S3Endpoint', {
+      service: ec2.GatewayVpcEndpointAwsService.S3,
     });
 
-    // Create VPC Endpoint for S3
-    const s3GatewayEndpoint = new ec2.GatewayVpcEndpoint(this, 'S3GatewayEndpoint', {
-      service: ec2.GatewayVpcEndpointAwsService.S3,
-      vpc: vpc,
+    // Create a VPC endpoint for DynamoDB.
+    vpc.addGatewayEndpoint('DynamoDBEndpoint', {
+      service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
     });
-    const s3InterfaceEndpoint = new ec2.InterfaceVpcEndpoint(this, 'S3Endpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.S3,
-      vpc: vpc,
-      subnets: {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-      },
-      open: true,
-    });
-    s3InterfaceEndpoint.node.addDependency(s3GatewayEndpoint);
 
     // Create VPC Endpoint for Secrets Manager
-    new ec2.InterfaceVpcEndpoint(this, 'SecretsManagerEndpoint', {
+    vpc.addInterfaceEndpoint('SecretsManagerEndpoint', {
       service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
-      vpc: vpc,
-      subnets: {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-      },
+      open: true,
+    });
+
+    // Create VPC Endpoint for SageMaker Runtime
+    vpc.addInterfaceEndpoint('SageMakerRuntimeEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
       open: true,
     });
 

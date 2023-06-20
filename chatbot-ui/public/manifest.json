@@ -1,18 +1,6 @@
 {
-  "short_name": "LLM ChatBot",
-  "name": "AWS LLM ChatBot Sample",
-  "icons": [
-    {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
+  "short_name": "AWS LLM ChatBot",
+  "name": "AWS Multi LLM ChatBot Sample",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",

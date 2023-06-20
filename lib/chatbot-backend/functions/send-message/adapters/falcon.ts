@@ -3,7 +3,7 @@ import { SageMakerLLMContentHandler } from 'langchain/llms/sagemaker_endpoint';
 import { ModelAdapterBase } from './base';
 import { ChatMode, ContentType, GetPromptArgs } from '../types';
 
-const stopWords = ['<|endoftext|>', '\nUser:', 'Falcon:', '</s>'];
+const stopWords = ['<|endoftext|>', 'User:', 'Falcon:', '</s>'];
 
 class FalconContentHandler implements SageMakerLLMContentHandler {
   contentType = ContentType.APPLICATION_JSON;
