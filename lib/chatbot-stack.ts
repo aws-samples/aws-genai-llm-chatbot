@@ -45,9 +45,8 @@ export class ChatBotStack extends cdk.Stack {
           kind: ModelKind.Container,
           modelId: 'tiiuae/falcon-40b-instruct',
           container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
-          instanceType: 'ml.g4dn.12xlarge', // use g5.24xlarge to increase speed
+          instanceType: 'ml.g5.24xlarge',
           env: {
-            HF_MODEL_QUANTIZE: 'bitsandbytes', // comment with g5.24xlarge
             SM_NUM_GPUS: '4',
           },
         },
