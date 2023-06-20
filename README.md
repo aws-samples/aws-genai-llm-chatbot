@@ -39,7 +39,7 @@ The repository also includes a **full-fledged UI** built with [React](https://re
 
 ## LLM sources 
 
-This sample comes with a prupose-built CDK Construct, [LargeLanguageModel](./lib/large-language-model/index.ts#12), which helps abstracting 3 different types of model deployments
+This sample comes with a prupose-built CDK Construct, [LargeLanguageModel](./lib/large-language-model/index.ts#L12), which helps abstracting 3 different types of model deployments
 
 #### SageMaker Foundation Models
 The sample allows you to deploy models from [**Amazon SageMaker Foundation models**](https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-choose.html) by specifying the model ARN. This simplifies the deployment process of these powerful AI models on AWS.
@@ -121,7 +121,7 @@ This stack contains the necessary resources to set up a chatbot system, includin
 This stack also incorporates "model adapters", enabling the setup of different parameters and functions for specific models without changing the core logic to perform requests and consume responses from SageMaker endpoints for different LLMs.
 
 ### [Optional] Semantic Search Stack 
-This stack is `disabled` by default. To enable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#13)
+This stack is `disabled` by default. To enable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#L13)
 
 An optional semantic search stack that deploys:
 - A vector database via a custom construct built on top of PostgreSQL on RDS with pgvector.
@@ -132,7 +132,7 @@ An optional semantic search stack that deploys:
 
 
 ## [Optional] User Interface
-This stack is `enabled` by default. To disable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#12)
+This stack is `enabled` by default. To disable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#L12)
 
 A comprehensive UI built with [React](https://react.dev/) that interacts with the deployed LLMs as chatbots, supporting sync requests and streaming modes to hit LLM endpoints, managing conversation history, stopping model generation in streaming mode, and switching between all deployed models for experimentation.
 
@@ -278,7 +278,7 @@ npx cdk destroy --all
 ```
 
 # Deploying additional models
-As part of this sample, you can find some additional model by uncommenting code in [lib/chatbot-stack.ts](./lib/chatbot-stack.ts#58)
+As part of this sample, you can find some additional model by uncommenting code in [lib/chatbot-stack.ts](./lib/chatbot-stack.ts#L58)
 
 > **Note**: We strongly suggest to deploy one new model at the time, since the SageMaker endpoint creations and rollback time can take time.
 
@@ -351,7 +351,7 @@ export class NewModelAdapter extends ModelAdapterBase {
 }
 ```
 
-Add your `Adapter` to the [model registry](./lib/chatbot-backend/functions/send-message/adapters/registry.ts#26).
+Add your `Adapter` to the [model registry](./lib/chatbot-backend/functions/send-message/adapters/registry.ts#L26).
 
 ```typescript
 ...
