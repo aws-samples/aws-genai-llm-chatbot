@@ -18,7 +18,7 @@
 ## Ready to use
 This sample provides code ready to use so you can start **experimenting right away without service quota increase or preview access requests.**
 
-However, for enchanced performances and additional features provided in this sample such as **Amazon SageMaker Foundation models** support you are required to request such increases and preview access. More details here.
+However, for enchanced performances and additional features provided in this sample such as **Amazon SageMaker Foundation models** support you are required to request such increases and preview access.
 
 ## Multimodel 
 You have the flexibility to test multiple LLM models concurrently. This unique feature is enabled by a user-friendly web UI, allowing for a smoother comparison and assessment of different models within your own VPC.
@@ -114,7 +114,7 @@ You might consider requesting an increase in service quota for specific SageMake
 
 ## Foundation Models Preview Access
 If you are looking to deploy models from SageMaker foundation models, you need to request preview access from the AWS console.
-Futhermore, make sure which regions are currently supported for SageMaker foundation models here.
+Futhermore, make sure which regions are currently supported for SageMaker foundation models.
 
 # Deploy
 
