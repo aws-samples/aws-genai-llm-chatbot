@@ -19,7 +19,7 @@
 ## Comprehensive, ready to use
 This sample provides code ready to use so you can start **experimenting with different LLMs and prompts.**
 
-For additional features provided in this sample such as [**Amazon SageMaker Foundation models**](https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-choose.html) support you are required to request such increases and preview access.
+For additional features provided in this sample such as [**Amazon SageMaker Foundation models**](https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-choose.html) support you are required to request [quota increases and preview access](#service-quotas-and-preview-access).
 
 ## Multimodel 
 You have the flexibility to test multiple LLM models concurrently. This unique feature is enabled by a user-friendly web UI, allowing for a experimentation of different models within your own VPC.
