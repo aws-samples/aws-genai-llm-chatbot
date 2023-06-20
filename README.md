@@ -210,7 +210,7 @@ The solution will be deployed into your AWS account using infrastructure-as-code
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/aws-samples/aws-genai-llm-chatbot
+git clone https://github.com/aws-samples/aws-genai-llm-chatbot.git
 ```
 
 2. Navigate to this project on your computer using your terminal:
