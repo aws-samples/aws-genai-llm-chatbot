@@ -282,7 +282,7 @@ As part of this sample, you can find some additional model by uncommenting code 
 
 > **Note**: We strongly suggest to deploy one new model at the time, since the SageMaker endpoint creations and rollback time can take time.
 
-For new models make sure to select the right type of `kind` depending on the source of the LLM see [related sectin above](#llm-providers).
+For new models make sure to select the right type of `kind` depending on the source of the LLM see [related section above](#llm-sources).
 
 Create a `model adapter` by extending the [ModelAdapterBase](./lib/chatbot-backend/functions/send-message/adapters/base.ts).
 
