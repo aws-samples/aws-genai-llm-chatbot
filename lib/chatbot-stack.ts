@@ -4,7 +4,11 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 import { ChatBotBackendStack } from './chatbot-backend/chatbot-backend-stack';
-import { LargeLanguageModel, ModelKind, ContainerImages } from './large-language-model';
+import {
+  LargeLanguageModel,
+  ModelKind,
+  ContainerImages,
+} from './large-language-model';
 
 export interface ChatBotStackProps extends cdk.StackProps {
   vpc: ec2.Vpc;
@@ -14,7 +18,10 @@ export interface ChatBotStackProps extends cdk.StackProps {
 
 export class ChatBotStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ChatBotStackProps) {
-    super(scope, id, props);
+    super(scope, id, {
+      description: 'AWS LLM CHATBOT (uksb-1tupboc16)',
+      ...props,
+    });
 
     const { vpc, semanticSearchApi, maxParallelLLMQueries } = props;
 
@@ -28,20 +35,24 @@ export class ChatBotStack extends cdk.Stack {
   }
 
   createLLMs({ vpc }: { vpc: ec2.Vpc }) {
-    const falcon40bInstruct = new LargeLanguageModel(this, 'tiiuae-falcon40b-instruct', {
-      vpc,
-      region: this.region,
-      model: {
-        kind: ModelKind.Container,
-        modelId: 'tiiuae/falcon-40b-instruct',
-        container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
-        instanceType: 'ml.g4dn.12xlarge', // use g5.24xlarge to increase speed
-        env: {
-          HF_MODEL_QUANTIZE: 'bitsandbytes', // comment with g5.24xlarge
-          SM_NUM_GPUS: '4',
+    const falcon40bInstruct = new LargeLanguageModel(
+      this,
+      'tiiuae-falcon40b-instruct',
+      {
+        vpc,
+        region: this.region,
+        model: {
+          kind: ModelKind.Container,
+          modelId: 'tiiuae/falcon-40b-instruct',
+          container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
+          instanceType: 'ml.g4dn.12xlarge', // use g5.24xlarge to increase speed
+          env: {
+            HF_MODEL_QUANTIZE: 'bitsandbytes', // comment with g5.24xlarge
+            SM_NUM_GPUS: '4',
+          },
         },
-      },
-    });
+      }
+    );
 
     /*
 
