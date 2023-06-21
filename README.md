@@ -93,7 +93,7 @@ new LargeLanguageModel(this, 'ModelId', {
   region: this.region,
   model: {
     kind: ModelKind.CustomScript
-    modelId: 'modelId', // i.e. sentence-transformers/all-MiniLM-L6-v2
+    modelId: 'modelId', // i.e. sentence-transformers/all-MiniLM-L6-v2 - this must match HuggingFace Model ID
     codeFolder: 'localFolder', // see for example ./lib/semantic-search/embeddings-model
     container: 'container-arn' // One from https://github.com/aws/deep-learning-containers/blob/master/available_images.md
     instanceType: 'instanceType', // i.e. g5.12xlarge
