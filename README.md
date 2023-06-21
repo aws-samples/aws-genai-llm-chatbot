@@ -50,13 +50,13 @@ new LargeLanguageModel(this, 'FoundationModelId', {
   region: this.region,
   model: {
     kind: ModelKind.Package,
-    modelId: 'modelId', // i.e. ai21/j2-grande-instruct-v1
+    modelId: 'modelId', // i.e. ai21/j2-grande-instruct-v1 - this is an arbitrary ID  
     instanceType: 'instanceType', // i.e. ml.g5.12xlarge
     packages: (scope) =>
       new cdk.CfnMapping(scope, 'AI21GrandeInstructModelPackageMapping', {
         lazy: true,
         mapping: {
-          'region': { arn: 'container-arn' },
+          'region': { arn: 'container-arn' }, // ARN usually found in sample notebook from SageMaker foundation page
         },
       }),
     },
@@ -72,7 +72,7 @@ new LargeLanguageModel(this, 'HFModel', {
     region: this.region,
     model: {
       kind: ModelKind.Container,
-      modelId: 'modelId', // i.e. tiiuae/falcon-40b-instruct
+      modelId: 'modelId', // i.e. tiiuae/falcon-40b-instruct - this must match HuggingFace Model ID
       container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
       instanceType: 'instanceType', // i.e. ml.g5.24xlarge
       env: {
