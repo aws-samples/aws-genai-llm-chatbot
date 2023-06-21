@@ -85,15 +85,21 @@ new LargeLanguageModel(this, 'HFModel', {
 #### Models with custom inference
 While the options above are preferred, for broader compatibility, the sample also showcases deployment of all other models from Hugging Face not supported by HuggingFace LLM Infernce container using custom inference code. This process is powered by **AWS CodeBuild**.
 
+For this kind of deployment you need to choose the right container for your model from this list of [AWS Deep Learning Containers](https://github.com/aws/deep-learning-containers/blob/master/available_images.md). Based on PyTorch/Transformers versions, Python version etc.
+
 ```typescript
 new LargeLanguageModel(this, 'ModelId', {
-    vpc,
-    region: this.region,
+  vpc,
+  region: this.region,
+  model: {
+    kind: ModelKind.CustomScript
     modelId: 'modelId', // i.e. sentence-transformers/all-MiniLM-L6-v2
     codeFolder: 'localFolder', // see for example ./lib/semantic-search/embeddings-model
+    container: 'container-arn' // One from https://github.com/aws/deep-learning-containers/blob/master/available_images.md
     instanceType: 'instanceType', // i.e. g5.12xlarge
-    codeBuildComputeType: codebuild.ComputeType.LARGE, // Size of CodeBuild instance. Must have enough storage to download the whole model repository from HuggingFace  
-  });
+    codeBuildComputeType: codebuild.ComputeType.LARGE, // Size of CodeBuild instance. Must have enough storage to download the whole model repository from HuggingFace
+  }
+});
 ```
 
 ## Semantic search
