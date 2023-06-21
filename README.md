@@ -92,10 +92,10 @@ new LargeLanguageModel(this, 'ModelId', {
   vpc,
   region: this.region,
   model: {
-    kind: ModelKind.CustomScript
+    kind: ModelKind.CustomScript,
     modelId: 'modelId', // i.e. sentence-transformers/all-MiniLM-L6-v2 - this must match HuggingFace Model ID
     codeFolder: 'localFolder', // see for example ./lib/semantic-search/embeddings-model
-    container: 'container-arn' // One from https://github.com/aws/deep-learning-containers/blob/master/available_images.md
+    container: 'container-arn', // One from https://github.com/aws/deep-learning-containers/blob/master/available_images.md
     instanceType: 'instanceType', // i.e. g5.12xlarge
     codeBuildComputeType: codebuild.ComputeType.LARGE, // Size of CodeBuild instance. Must have enough storage to download the whole model repository from HuggingFace
   }
