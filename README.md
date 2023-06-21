@@ -53,7 +53,7 @@ new LargeLanguageModel(this, 'FoundationModelId', {
     modelId: 'modelId', // i.e. ai21/j2-grande-instruct-v1 - this is an arbitrary ID  
     instanceType: 'instanceType', // i.e. ml.g5.12xlarge
     packages: (scope) =>
-      new cdk.CfnMapping(scope, 'AI21GrandeInstructModelPackageMapping', {
+      new cdk.CfnMapping(scope, 'ModelPackageMapping', {
         lazy: true,
         mapping: {
           'region': { arn: 'container-arn' }, // ARN usually found in sample notebook from SageMaker foundation page
