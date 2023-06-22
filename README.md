@@ -202,7 +202,7 @@ You have:
 2. `AdministratorAccess` policy granted to your AWS account (for production, we recommend restricting access as needed)
 3. Both console and programmatic access
 4. [AWS CLI](https://aws.amazon.com/cli/) installed and configured to use with your AWS account
-5. [NodeJS 12+](https://nodejs.org/en/download/) installed
+5. [NodeJS 18+](https://nodejs.org/en/download/) installed
 6. [Typescript 3.8+](https://www.typescriptlang.org/download) installed
 7. [AWS CDK CLI](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed
 8. [Docker](https://docs.docker.com/get-docker/) installed

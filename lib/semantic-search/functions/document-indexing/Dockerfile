@@ -5,7 +5,7 @@ RUN yum update -y && yum install -y wget tar gzip \
     libXinerama.x86_64 java-1.8.0-openjdk-devel && \
     yum clean all
 
-RUN wget -O - "http://download.documentfoundation.org/libreoffice/stable/7.5.4/rpm/x86_64/LibreOffice_7.5.4_Linux_x86-64_rpm.tar.gz" | tar -xvzf -
+RUN wget -O - "http://downloadarchive.documentfoundation.org/libreoffice/old/7.5.3.2/rpm/x86_64/LibreOffice_7.5.3.2_Linux_x86-64_rpm.tar.gz" | tar -xvzf -
 
 RUN yum localinstall -y LibreOffice_*/RPMS/*.rpm && \
     rm -rf LibreOffice_* 
