@@ -390,7 +390,7 @@ new LargeLanguageModel(this, 'NewModel', {
 
 This sample was made possible thanks to the following libraries:
 - [langchain](https://python.langchain.com/docs/get_started/introduction.html) from [Harrison Chase](https://github.com/hwchase17)
-- [pgvector](https://github.com/sbtinstruments/asyncio-mqtt) from [Andrew Kane](https://github.com/ankane)
+- [pgvector](https://github.com/pgvector/pgvector) from [Andrew Kane](https://github.com/ankane)
 
 # License
 
