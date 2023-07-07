@@ -129,6 +129,8 @@ This stack also incorporates "model adapters", enabling the setup of different p
 ### [Optional] Semantic Search Stack 
 This stack is `disabled` by default. To enable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#L13)
 
+![sample](assets/semantic/architecture.jpg "Semantic Stack Architecture Diagram")
+
 An optional semantic search stack that deploys:
 - A vector database via a custom construct built on top of PostgreSQL on RDS with pgvector.
 - An embeddings model on SageMaker to generate embeddings.
@@ -136,6 +138,7 @@ An optional semantic search stack that deploys:
 - An S3 bucket to store documents that, once uploaded, are automatically split up, converted into embeddings, and stored in the vector database.
 - A Lambda function showcasing how to run hybrid search with pgvector. This function also serves as the entry point for this stack.
 
+![sample](assets/semantic/vectordb-query.jpg "Life of a query")
 
 ## [Optional] User Interface
 This stack is `enabled` by default. To disable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#L12)
