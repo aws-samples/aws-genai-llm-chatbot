@@ -53,7 +53,13 @@ export class SemanticSearchStack extends cdk.Stack {
     this.createAPI({ vpc, dbInstance, embeddingsEndpoint: embeddingsEndpoint });
   }
 
-  private createVectorDB({ vpc, indexTypes }: { vpc: ec2.Vpc; indexTypes: SemanticSearchIndexType[] }) {
+  private createVectorDB({
+    vpc,
+    indexTypes,
+  }: {
+    vpc: ec2.Vpc;
+    indexTypes: SemanticSearchIndexType[];
+  }) {
     const dbInstance = new rds.DatabaseInstance(this, 'DatabaseInstance', {
       vpc: vpc,
       vpcSubnets: {
@@ -72,22 +78,32 @@ export class SemanticSearchStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const databaseSetupFunction = new lambda.DockerImageFunction(this, 'DatabaseSetupFunction', {
-      code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, './functions/vectordb-setup')),
-      architecture: lambda.Architecture.X86_64,
-      timeout: cdk.Duration.minutes(5),
-      memorySize: 1024,
-      vpc: vpc,
-      logRetention: logs.RetentionDays.ONE_WEEK,
-    });
+    const databaseSetupFunction = new lambda.DockerImageFunction(
+      this,
+      'DatabaseSetupFunction',
+      {
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, './functions/vectordb-setup')
+        ),
+        architecture: lambda.Architecture.X86_64,
+        timeout: cdk.Duration.minutes(5),
+        memorySize: 1024,
+        vpc: vpc,
+        logRetention: logs.RetentionDays.ONE_WEEK,
+      }
+    );
 
     dbInstance.secret?.grantRead(databaseSetupFunction);
     dbInstance.connections.allowDefaultPortFrom(databaseSetupFunction);
 
-    const databaseSetupProvider = new cr.Provider(this, 'DatabaseSetupProvider', {
-      vpc,
-      onEventHandler: databaseSetupFunction,
-    });
+    const databaseSetupProvider = new cr.Provider(
+      this,
+      'DatabaseSetupProvider',
+      {
+        vpc,
+        onEventHandler: databaseSetupFunction,
+      }
+    );
 
     new cdk.CustomResource(this, 'DatabaseSetupResource', {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -102,34 +118,55 @@ export class SemanticSearchStack extends cdk.Stack {
   }
 
   private createEmbeddingsEndpoint({ vpc }: { vpc: ec2.Vpc }) {
-    const embeddingsModel = new HuggingFaceCustomScriptModel(this, 'EmbeddingsModel', {
-      vpc,
-      region: this.region,
-      modelId: ['sentence-transformers/all-MiniLM-L6-v2', 'cross-encoder/ms-marco-MiniLM-L-12-v2'],
-      codeFolder: './lib/semantic-search/embeddings-model',
-      instanceType: 'ml.g4dn.xlarge',
-      codeBuildComputeType: codebuild.ComputeType.LARGE,
-    });
+    const embeddingsModel = new HuggingFaceCustomScriptModel(
+      this,
+      'EmbeddingsCustomModel',
+      {
+        vpc,
+        region: this.region,
+        modelId: [
+          'sentence-transformers/all-MiniLM-L6-v2',
+          'cross-encoder/ms-marco-MiniLM-L-12-v2',
+        ],
+        codeFolder: './lib/semantic-search/embeddings-model',
+        instanceType: 'ml.g4dn.xlarge',
+        codeBuildComputeType: codebuild.ComputeType.LARGE,
+      }
+    );
 
     return { embeddingsEndpoint: embeddingsModel.endpoint };
   }
 
-  private createAPI({ vpc, dbInstance, embeddingsEndpoint }: { vpc: ec2.Vpc; dbInstance: rds.DatabaseInstance; embeddingsEndpoint: sagemaker.CfnEndpoint }) {
-    const semanticSearchApi = new lambda.DockerImageFunction(this, 'SemanticSearchApi', {
-      code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, './functions/semantic-search-api')),
-      architecture: lambda.Architecture.X86_64,
-      vpc,
-      timeout: cdk.Duration.minutes(1),
-      memorySize: 1024,
-      logRetention: logs.RetentionDays.ONE_DAY,
-      environment: {
-        REGION_NAME: this.region,
-        LOG_LEVEL: 'DEBUG',
-        DB_SECRET_ID: dbInstance.secret?.secretArn as string,
-        EMBEDDINGS_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
-        CROSS_ENCODER_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
-      },
-    });
+  private createAPI({
+    vpc,
+    dbInstance,
+    embeddingsEndpoint,
+  }: {
+    vpc: ec2.Vpc;
+    dbInstance: rds.DatabaseInstance;
+    embeddingsEndpoint: sagemaker.CfnEndpoint;
+  }) {
+    const semanticSearchApi = new lambda.DockerImageFunction(
+      this,
+      'SemanticSearchApi',
+      {
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, './functions/semantic-search-api')
+        ),
+        architecture: lambda.Architecture.X86_64,
+        vpc,
+        timeout: cdk.Duration.minutes(1),
+        memorySize: 1024,
+        logRetention: logs.RetentionDays.ONE_DAY,
+        environment: {
+          REGION_NAME: this.region,
+          LOG_LEVEL: 'DEBUG',
+          DB_SECRET_ID: dbInstance.secret?.secretArn as string,
+          EMBEDDINGS_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
+          CROSS_ENCODER_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
+        },
+      }
+    );
 
     dbInstance.secret?.grantRead(semanticSearchApi);
     dbInstance.connections.allowDefaultPortFrom(semanticSearchApi);
@@ -138,7 +175,7 @@ export class SemanticSearchStack extends cdk.Stack {
       new iam.PolicyStatement({
         actions: ['sagemaker:InvokeEndpoint'],
         resources: [embeddingsEndpoint.ref],
-      }),
+      })
     );
 
     this.semanticSearchApi = semanticSearchApi;
