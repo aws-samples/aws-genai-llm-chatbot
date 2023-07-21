@@ -103,7 +103,7 @@ new LargeLanguageModel(this, 'ModelId', {
 ```
 
 ## Semantic search
-The sample provides an optional stack to implement a **vector database** on **Amazon RDS** with **pgvector** and embeddings. 
+The sample provides an optional stack to implement a **vector database** on **Amazon Aurora PostgreSQL** with **pgvector** and embeddings. 
 
 Allowing **Hybrid Searches** performed with a combination of Similiary Search and a Full Text Search, which enable an emerging patterns in LLM applications such as "In-Context Learning" (RAG) with automatic document indexing on **Amazon S3** upload.
 
@@ -132,7 +132,7 @@ This stack is `disabled` by default. To enable it update [bin/aws-genai-llm-chat
 ![sample](assets/semantic/architecture.jpg "Semantic Stack Architecture Diagram")
 
 An optional semantic search stack that deploys:
-- A vector database via a custom construct built on top of PostgreSQL on RDS with pgvector.
+- A vector database via a custom construct built on top of Amazon Aurora PostgreSQL with pgvector.
 - An embeddings model on SageMaker to generate embeddings.
 - Encoders model on SageMaker used to rank sentences by similarity.
 - An S3 bucket to store documents that, once uploaded, are automatically split up, converted into embeddings, and stored in the vector database.
