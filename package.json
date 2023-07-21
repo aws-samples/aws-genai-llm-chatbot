@@ -44,10 +44,10 @@
     "typescript": "~4.9.5"
   },
   "dependencies": {
-    "@aws-cdk/aws-amplify-alpha": "^2.84.0-alpha.0",
-    "@aws-cdk/aws-cognito-identitypool-alpha": "^2.84.0-alpha.0",
-    "aws-cdk": "^2.84.0",
-    "aws-cdk-lib": "^2.84.0",
+    "@aws-cdk/aws-amplify-alpha": "^2.88.0-alpha.0",
+    "@aws-cdk/aws-cognito-identitypool-alpha": "^2.88.0-alpha.0",
+    "aws-cdk": "^2.88.0",
+    "aws-cdk-lib": "^2.88.0",
     "constructs": "^10.2.55",
     "uuid": "^9.0.0",
     "zlib": "^1.0.5"
