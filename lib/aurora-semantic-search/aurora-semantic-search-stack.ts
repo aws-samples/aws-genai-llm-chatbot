@@ -14,13 +14,13 @@ import { Construct } from 'constructs';
 import { DocumentIndexingStack } from './document-indexing-stack';
 import { HuggingFaceCustomScriptModel } from '../large-language-model/hf-custom-script-model';
 
-export enum SemanticSearchIndexType {
+export enum PGVectorIndexType {
   COSINE = 'cosine',
   L2 = 'l2',
   INNER = 'inner',
 }
 
-export interface SemanticSearchStackProps extends cdk.StackProps {
+export interface AuroraSemanticSearchStackProps extends cdk.StackProps {
   vpc: ec2.Vpc;
   /**
   https://github.com/pgvector/pgvector
@@ -31,26 +31,30 @@ export interface SemanticSearchStackProps extends cdk.StackProps {
   You can add an index to use approximate nearest neighbor search, which trades some recall for performance. 
   Unlike typical indexes, you will see different results for queries after adding an approximate index.
   **/
-  indexTypes?: SemanticSearchIndexType[];
+  indexTypes?: PGVectorIndexType[];
 }
 
-export class SemanticSearchStack extends cdk.Stack {
+export class AuroraSemanticSearchStack extends cdk.Stack {
   public semanticSearchApi: lambda.DockerImageFunction;
 
-  constructor(scope: Construct, id: string, props: SemanticSearchStackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: AuroraSemanticSearchStackProps
+  ) {
     super(scope, id, props);
 
     const { vpc, indexTypes = [] } = props;
 
-    const { dbInstance } = this.createVectorDB({ vpc, indexTypes });
+    const { dbCluster } = this.createVectorDB({ vpc, indexTypes });
     const { embeddingsEndpoint } = this.createEmbeddingsEndpoint({ vpc });
     new DocumentIndexingStack(this, 'DocumentIndexingStack', {
       vpc,
-      dbInstance,
+      dbCluster,
       embeddingsEndpoint,
     });
 
-    this.createAPI({ vpc, dbInstance, embeddingsEndpoint: embeddingsEndpoint });
+    this.createAPI({ vpc, dbCluster, embeddingsEndpoint: embeddingsEndpoint });
   }
 
   private createVectorDB({
@@ -58,24 +62,16 @@ export class SemanticSearchStack extends cdk.Stack {
     indexTypes,
   }: {
     vpc: ec2.Vpc;
-    indexTypes: SemanticSearchIndexType[];
+    indexTypes: PGVectorIndexType[];
   }) {
-    const dbInstance = new rds.DatabaseInstance(this, 'DatabaseInstance', {
-      vpc: vpc,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-      },
-      storageEncrypted: true,
-      securityGroups: [
-        new ec2.SecurityGroup(this, 'DatabaseSecurityGroup', {
-          vpc: vpc,
-          allowAllOutbound: true,
-        }),
-      ],
-      engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_15_3,
+    const dbCluster = new rds.DatabaseCluster(this, 'AuroraDatabase', {
+      engine: rds.DatabaseClusterEngine.auroraPostgres({
+        version: rds.AuroraPostgresEngineVersion.VER_15_3,
       }),
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      writer: rds.ClusterInstance.serverlessV2('ServerlessInstance'),
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
     });
 
     const databaseSetupFunction = new lambda.DockerImageFunction(
@@ -93,8 +89,8 @@ export class SemanticSearchStack extends cdk.Stack {
       }
     );
 
-    dbInstance.secret?.grantRead(databaseSetupFunction);
-    dbInstance.connections.allowDefaultPortFrom(databaseSetupFunction);
+    dbCluster.secret?.grantRead(databaseSetupFunction);
+    dbCluster.connections.allowDefaultPortFrom(databaseSetupFunction);
 
     const databaseSetupProvider = new cr.Provider(
       this,
@@ -105,22 +101,28 @@ export class SemanticSearchStack extends cdk.Stack {
       }
     );
 
-    new cdk.CustomResource(this, 'DatabaseSetupResource', {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      serviceToken: databaseSetupProvider.serviceToken,
-      properties: {
-        DB_SECRET_ID: dbInstance.secret?.secretArn as string,
-        INDEX_TYPES: indexTypes.join(','),
-      },
-    });
+    const dbSetupResource = new cdk.CustomResource(
+      this,
+      'DatabaseSetupResource',
+      {
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        serviceToken: databaseSetupProvider.serviceToken,
+        properties: {
+          DB_SECRET_ID: dbCluster.secret?.secretArn as string,
+          INDEX_TYPES: indexTypes.join(','),
+        },
+      }
+    );
 
-    return { dbInstance };
+    dbSetupResource.node.addDependency(dbCluster);
+
+    return { dbCluster };
   }
 
   private createEmbeddingsEndpoint({ vpc }: { vpc: ec2.Vpc }) {
     const embeddingsModel = new HuggingFaceCustomScriptModel(
       this,
-      'EmbeddingsCustomScriptModel',
+      'EmbeddingsModel',
       {
         vpc,
         region: this.region,
@@ -128,7 +130,7 @@ export class SemanticSearchStack extends cdk.Stack {
           'sentence-transformers/all-MiniLM-L6-v2',
           'cross-encoder/ms-marco-MiniLM-L-12-v2',
         ],
-        codeFolder: './lib/semantic-search/embeddings-model',
+        codeFolder: './lib/aurora-semantic-search/embeddings-model',
         instanceType: 'ml.g4dn.xlarge',
         codeBuildComputeType: codebuild.ComputeType.LARGE,
       }
@@ -139,11 +141,11 @@ export class SemanticSearchStack extends cdk.Stack {
 
   private createAPI({
     vpc,
-    dbInstance,
+    dbCluster,
     embeddingsEndpoint,
   }: {
     vpc: ec2.Vpc;
-    dbInstance: rds.DatabaseInstance;
+    dbCluster: rds.DatabaseInstance | rds.DatabaseCluster;
     embeddingsEndpoint: sagemaker.CfnEndpoint;
   }) {
     const semanticSearchApi = new lambda.DockerImageFunction(
@@ -161,15 +163,15 @@ export class SemanticSearchStack extends cdk.Stack {
         environment: {
           REGION_NAME: this.region,
           LOG_LEVEL: 'DEBUG',
-          DB_SECRET_ID: dbInstance.secret?.secretArn as string,
+          DB_SECRET_ID: dbCluster.secret?.secretArn as string,
           EMBEDDINGS_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
           CROSS_ENCODER_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
         },
       }
     );
 
-    dbInstance.secret?.grantRead(semanticSearchApi);
-    dbInstance.connections.allowDefaultPortFrom(semanticSearchApi);
+    dbCluster.secret?.grantRead(semanticSearchApi);
+    dbCluster.connections.allowDefaultPortFrom(semanticSearchApi);
 
     semanticSearchApi.addToRolePolicy(
       new iam.PolicyStatement({

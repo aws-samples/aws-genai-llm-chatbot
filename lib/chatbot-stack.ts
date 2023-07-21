@@ -11,6 +11,7 @@ import {
 } from './large-language-model';
 
 export interface ChatBotStackProps extends cdk.StackProps {
+  prefix: string;
   vpc: ec2.Vpc;
   semanticSearchApi: lambda.Function | null;
   maxParallelLLMQueries: number;
@@ -23,10 +24,11 @@ export class ChatBotStack extends cdk.Stack {
       ...props,
     });
 
-    const { vpc, semanticSearchApi, maxParallelLLMQueries } = props;
+    const { prefix, vpc, semanticSearchApi, maxParallelLLMQueries } = props;
 
     const largeLanguageModels = this.createLLMs({ vpc });
     new ChatBotBackendStack(this, 'ChatBotBackendStack', {
+      prefix,
       vpc: vpc,
       semanticSearchApi,
       largeLanguageModels,
@@ -54,21 +56,21 @@ export class ChatBotStack extends cdk.Stack {
     );
 
     /*
-
       Examples of other models you can use below
-
     */
 
-    // const lightGPT = new LargeLanguageModel(this, 'AmazonLightGPT', {
-    //   vpc,
-    //   region: this.region,
-    //   model: {
-    //     kind: ModelKind.Container,
-    //     modelId: 'amazon/LightGPT',
-    //     container: ContainerImages.DJL_INFERENCE_DEEPSPEED_LATEST,
-    //     instanceType: 'ml.g4dn.2xlarge',
-    //   },
-    // });
+    /*
+    const lightGPT = new LargeLanguageModel(this, 'AmazonLightGPT', {
+      vpc,
+      region: this.region,
+      model: {
+        kind: ModelKind.Container,
+        modelId: 'amazon/LightGPT',
+        container: ContainerImages.DJL_INFERENCE_DEEPSPEED_LATEST,
+        instanceType: 'ml.g4dn.2xlarge',
+      },
+    });
+    */
 
     /*
     const redPajama7b = new LargeLanguageModel(this, 'RedPajama-INCITE-7B-Chat', {
