@@ -120,7 +120,7 @@ export class SemanticSearchStack extends cdk.Stack {
   private createEmbeddingsEndpoint({ vpc }: { vpc: ec2.Vpc }) {
     const embeddingsModel = new HuggingFaceCustomScriptModel(
       this,
-      'EmbeddingsCustomModel',
+      'EmbeddingsCustomScriptModel',
       {
         vpc,
         region: this.region,
