@@ -70,29 +70,29 @@ export class ChatBotUIStack extends cdk.Stack {
       aws_cognito_region: this.region,
       aws_user_pools_id: ssm.StringParameter.fromStringParameterName(
         this,
-        'UserPoolId',
+        'CognitoUserPoolId',
         `/chatbot/${prefix}/cognito/user-pool-id`
       ).stringValue,
       aws_user_pools_web_client_id: ssm.StringParameter.fromStringParameterName(
         this,
-        'UserPoolClientId',
+        'CognitoUserPoolClientId',
         `/chatbot/${prefix}/cognito/user-pool-client-id`
       ).stringValue,
       identityPoolId: ssm.StringParameter.fromStringParameterName(
         this,
-        'IdentityPoolId',
+        'CognitoIdentityPoolId',
         `/chatbot/${prefix}/cognito/identity-pool-id`
       ).stringValue,
       client: {
         name: 'lambda',
         send_endpoint: ssm.StringParameter.fromStringParameterName(
           this,
-          'ChatBotEndpointSend',
+          'ChatBotEndpointSendMessage',
           `/chatbot/${prefix}/endpoints/send-message`
         ).stringValue,
         action_endpoint: ssm.StringParameter.fromStringParameterName(
           this,
-          'ChatBotEndpointAction',
+          'ChatBotEndpointChatAction',
           `/chatbot/${prefix}/endpoints/chat-action`
         ).stringValue,
       },
