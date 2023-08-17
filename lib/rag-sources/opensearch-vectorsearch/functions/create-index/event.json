@@ -1,0 +1,7 @@
+{
+  "RequestType": "Create",
+  "ResourceProperties": {
+    "IndexName": "docbig",
+    "Endpoint": "https://6a3ii04j9w2wbtce1ail.eu-west-1.aoss.amazonaws.com"
+  }
+}
