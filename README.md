@@ -1,174 +1,165 @@
 # Deploy a multi LLM powered chatbot using AWS CDK on AWS
 
-![sample](assets/sample.gif "AWS MULTI LLM CHATBOT SAMPLE")
+![sample](assets/sample.gif "AWS GenAI Chatbot")
 
 ## Table of content
 - [Features](#features)
 - [Architecture](#architecture)
-- [Security](#security)
 - [Precautions](#precautions)
-- [Service Quotas and Preview Access](#service-quotas-and-preview-access)
+- [Preview Access and Service Quotas](#service-quotas-and-preview-access)
+- [Models Providers](#providers)
+  - [Amazon Bedrock](#amazon-bedrock-preview)
+  - [Self-hosted models on SageMaker](#self-hosted-models-on-sagemaker)
+  - [3P models providers](#3p-models-providers)
 - [Deploy](#deploy)
 - [Clean up](#clean-up)
-- [Deploying additional models](#deploying-additional-models)
+- [Authors](#authors)
 - [Credits](#credits)
 - [License](#license)
 
 # Features
 
-## Comprehensive, ready to use
+## Modular, comprehensive and ready to use
 This sample provides code ready to use so you can start **experimenting with different LLMs and prompts.**
 
-For additional features provided in this sample such as [**Amazon SageMaker Foundation models**](https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-choose.html) support you are required to request [quota increases and preview access](#service-quotas-and-preview-access).
-
-## Multimodel 
-You have the flexibility to test multiple LLM models concurrently. This unique feature is enabled by a user-friendly web UI, allowing for a experimentation of different models within your own VPC.
-
-<img src="assets/multimodel.gif" width="80%">
-
-## AWS Lambda Response Streaming
-The sample takes advantage of the newly released [**AWS Lambda Response Streaming**](https://aws.amazon.com/blogs/compute/introducing-aws-lambda-response-streaming/) feature, replicating LLM streaming capabilities even with synchronous requests to **SageMaker endpoint** by querying for completion for small batches of tokens iteratively.
+Supported models providers:
+- [Amazon Bedrock](https://aws.amazon.com/bedrock/) (_currently in preview_)
+- [Amazon SageMaker](https://aws.amazon.com/sagemaker/) self hosted models from Foundation, Jumpstart and HuggingFace.
+- External providers via API such as AI21 Labs, Cohere, OpenAI, etc. [See available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list.
 
 
-| <img src="assets/modes/streaming.gif" width="100%"> | <img src="assets/modes/standard.gif" width="97%"> |
+## Multiple RAG sources
+This sample provides comes with CDK constructs to allow you to optionally deploy one or more of:
+
+- [Amazon Aurora with pgvector](https://aws.amazon.com/sagemaker/)
+- [Amazon OpenSearch VectorSearch](https://aws.amazon.com/bedrock/)
+- [Amazon Kendra](https://aws.amazon.com/sagemaker/)
+
+
+| <img src="assets/kendra-rag-sample.gif" width="95%" > | <img src="assets/opensearchvectorsearch-rag-sample.gif" with="97%" >  |
 |:--:|:--:|
-| Small batches of tokens predictions  | Standard single blocking request |
+| Example with Kendra as RAG source | Example with Amazon OpenSearch Vector Search as RAG source |
 
-## Full-fledged UI
-The repository also includes a **full-fledged UI** built with [React](https://react.dev/) to interact with the deployed LLMs as chatbots. It supports both standard requests and streaming modes for hitting LLM endpoint, allows managing conversation history, switching between deployed models, and even features a dark mode for user preference. Hosted on **[Amazon S3](https://aws.amazon.com/s3/)** and distributed with [**Amazon CloudFront**](https://aws.amazon.com/cloudfront/).
+## Full-fledged User Interface
+The repository includes a CDK construct to deploy  a **full-fledged UI** built with [React](https://react.dev/) to interact with the deployed LLMs as chatbots. Hosted on [Amazon S3](https://aws.amazon.com/s3/) and distributed with [Amazon CloudFront](https://aws.amazon.com/cloudfront/). Protected with [Amazon Cognito Authentication](https://aws.amazon.com/cognito/) to help you interact and experiment with multiple LLMs, multiple RAG sources, conversational history support and documents upload.
+The interface layer between the UI and backend is build on top of [Amazon API Gateway WebSocket APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html).
 
-## LLM sources 
 
-This sample comes with a prupose-built CDK Construct, [LargeLanguageModel](./lib/large-language-model/index.ts#L12), which helps abstracting 3 different types of model deployments
+Build on top of [AWS Cloudscape Design System](https://cloudscape.design/).
 
-#### SageMaker Foundation Models
-The sample allows you to deploy models from [**Amazon SageMaker Foundation models**](https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-choose.html) by specifying the model ARN. This simplifies the deployment process of these powerful AI models on AWS.
-
-```typescript
-new LargeLanguageModel(this, 'FoundationModelId', {
-  vpc,
-  region: this.region,
-  model: {
-    kind: ModelKind.Package,
-    modelId: 'modelId', // i.e. ai21/j2-grande-instruct-v1 - this is an arbitrary ID  
-    instanceType: 'instanceType', // i.e. ml.g5.12xlarge
-    packages: (scope) =>
-      new cdk.CfnMapping(scope, 'ModelPackageMapping', {
-        lazy: true,
-        mapping: {
-          'region': { arn: 'container-arn' }, // ARN usually found in sample notebook from SageMaker foundation page
-        },
-      }),
-    },
-});
-```
-
-#### Hugging Face LLM Inference Container
-The solution provides support for all publicly accessible LLMs supported by [HuggingFace LLM Inference container](https://huggingface.co/blog/sagemaker-huggingface-llm), thereby expanding your model options and letting you leverage a wide variety of pre-trained models available on this platform.
-
-```typescript
-new LargeLanguageModel(this, 'HFModel', {
-    vpc,
-    region: this.region,
-    model: {
-      kind: ModelKind.Container,
-      modelId: 'modelId', // i.e. tiiuae/falcon-40b-instruct - this must match HuggingFace Model ID
-      container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
-      instanceType: 'instanceType', // i.e. ml.g5.24xlarge
-      env: {
-        ...
-      },
-    },
-  });
-```
-
-#### Models with custom inference
-While the options above are preferred, for broader compatibility, the sample also showcases deployment of all other models from Hugging Face not supported by HuggingFace LLM Infernce container using custom inference code. This process is powered by **AWS CodeBuild**.
-
-For this kind of deployment you need to choose the right container for your model from this list of [AWS Deep Learning Containers](https://github.com/aws/deep-learning-containers/blob/master/available_images.md). Based on PyTorch/Transformers versions, Python version etc.
-
-```typescript
-new LargeLanguageModel(this, 'ModelId', {
-  vpc,
-  region: this.region,
-  model: {
-    kind: ModelKind.CustomScript,
-    modelId: 'modelId', // i.e. sentence-transformers/all-MiniLM-L6-v2 - this must match HuggingFace Model ID
-    codeFolder: 'localFolder', // see for example ./lib/aurora-semantic-search/embeddings-model
-    container: 'container-arn', // One from https://github.com/aws/deep-learning-containers/blob/master/available_images.md
-    instanceType: 'instanceType', // i.e. g5.12xlarge
-    codeBuildComputeType: codebuild.ComputeType.LARGE, // Size of CodeBuild instance. Must have enough storage to download the whole model repository from HuggingFace
-  }
-});
-```
-
-## Semantic search
-The sample provides an optional stack to implement a **vector database** on **Amazon Aurora PostgreSQL** with **pgvector** and embeddings. 
-
-Allowing **Hybrid Searches** performed with a combination of Similiary Search and a Full Text Search, which enable an emerging patterns in LLM applications such as "In-Context Learning" (RAG) with automatic document indexing on **Amazon S3** upload.
 
 # Architecture
-Here's an overview of the sample's architecture
+This repository comes with several reusable CDK constructs. Giving you freedom to decide what the deploy and what not. 
+
+Here's an overview: 
 
 ![sample](assets/architecture.png "Architecture Diagram")
 
-### VPC Stack
-This stack deploys public, private, and isolated subnets. The public subnet is used for the chatbot backend supporting the user interface, the private subnet is used for SageMaker models, and the isolated subnet is used for the RDS database. Additionally, this stack deploys VPC endpoints for SageMaker endpoints, AWS Secrets Manager, S3, and Amazon DynamoDB, ensuring that traffic stays within the VPC when appropriate.
+## Available CDK Constructs
 
-### ChatBot Stack
-This stack contains the necessary resources to set up a chatbot system, including:
-- The ability to deploy one or more large language models through a custom construct, supporting three different techniques: 
-  - Deploying models from SageMaker Foundation models by specifying the specific model ARN.
-  - Deploying models supported by the HuggingFace TGI container.
-  - Deploying all other models from Hugging Face with custom inference code.
-- Backend resources for the user interface, including chat backend actions and a Cognito user pool for authentication.
-- A DynamoDB-backed system for managing conversation history.
+### Authentication
+This [CDK constructs](./lib/authentication/index.ts) provides necessary Amazon Cognito resources to support user authentication.
 
-This stack also incorporates "model adapters", enabling the setup of different parameters and functions for specific models without changing the core logic to perform requests and consume responses from SageMaker endpoints for different LLMs.
 
-### [Optional] Semantic Search Stack 
-This stack is `disabled` by default. To enable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#L13)
+### Websocket Interface
+This [CDK constructs](./lib/websocket-interface/index.ts) deployes a websocket based interface layer to allow two-way communication between the user interface and the model interface.
 
-![sample](assets/semantic/architecture.jpg "Semantic Stack Architecture Diagram")
 
-An optional semantic search stack that deploys:
-- A vector database via a custom construct built on top of Amazon Aurora PostgreSQL with pgvector.
-- An embeddings model on SageMaker to generate embeddings.
-- Encoders model on SageMaker used to rank sentences by similarity.
-- An S3 bucket to store documents that, once uploaded, are automatically split up, converted into embeddings, and stored in the vector database.
-- A Lambda function showcasing how to run hybrid search with pgvector. This function also serves as the entry point for this stack.
+### Main Topic and Queues - FIFO
+This is not a CDK construct but it's important to note that messages are delivered via [Amazon SQS FIFO](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html) queues and routed via an [Amazon SNS FIFO Topic](https://aws.amazon.com/blogs/aws/introducing-amazon-sns-fifo-first-in-first-out-pub-sub-messaging/). 
 
-![sample](assets/semantic/vectordb-query.jpg "Life of a query")
+FIFO is used to ensure the correct order of messages inflow/outflow to keep a "chatbot conversation" always consistent for both user and LLM. Also to ensure that, where streaming tokens, is used the order of tokens is also always respected.
 
-## [Optional] User Interface
-This stack is `enabled` by default. To disable it update [bin/aws-genai-llm-chatbot.ts](./bin/aws-genai-llm-chatbot.ts#L12)
+### Model Interface
+[CDK constructs](./lib/model-interfaces/) which deploye resources, dependencies and data storage to integrate with multiple LLM sources and providers. 
+To facilitate further integrations and future updates and reduce amount of customization required, we provide code built with known existing LLM oriented frameworks.
 
-A comprehensive UI built with [React](https://react.dev/) that interacts with the deployed LLMs as chatbots, supporting sync requests and streaming modes to hit LLM endpoints, managing conversation history, stopping model generation in streaming mode, and switching between all deployed models for experimentation.
+Pre-built model interafaces:
+- [LangchainModelInterface](./lib/model-interfaces/langchain/index.ts): python-centric and built on top of [Langchain framework](https://python.langchain.com/docs/get_started/introduction.html).
 
-# Security
+#### Model Adapters
+The model interface carries a concept of [ModelAdapter](./lib/model-interfaces/langchain/functions/request-handler/adapters/base/base.py) with it. 
+It's a class that you can inherit and ovveride specific methods to integrate with different models that might have different requirements in terms of prompt structure or parameters. 
 
-This sample underscores the importance of infrastructure security in deploying LLM applications. Here are the key security measures showcased in this sample:
+It also natively support subscription to [LangChain Callback Handlers](https://python.langchain.com/docs/modules/callbacks/).
 
-## Deployment in Private and Isolated Subnets
-The LLM models and vector databases are deployed in private and isolated subnets, providing an additional layer of protection.
+This repository provides some [sample adapetrs](./lib/model-interfaces/langchain/functions/request-handler/adapters/) that you can take inspiration from to integrate with other models. Read more about it [here](./lib/model-interfaces/langchain/README.md).
 
-## Use of VPC Endpoints
-**VPC endpoints** are used for in-VPC traffic, ensuring that traffic that doesn't need to leave the VPC stays within the VPC.
+### SageMaker Model
+A prupose-built CDK Construct, [SageMakerModel](./lib/sagemaker-model/index.ts), which helps facilitate the deployment of model to SageMaker, you can use this layer to deploy:
+- Models from SageMaker Foundation Models/Jumpstart
+- Model supported by [HuggingFace LLM Inference container](https://huggingface.co/blog/sagemaker-huggingface-llm).
+- Models from HuggingFace with custom inference code.
 
-## Amazon Cognito Authentication for User Interface
-Leverage [**Amazon Cognito**](https://aws.amazon.com/cognito/) for user interface authentication, ensuring secure access to the chatbot.
+### Layer 
+The [Layer construct](./lib/layer/index.ts) in CDK provides an easier mechanism to manage and deploy AWS Lambda layers. You can specify dependencies and requirements in a local folder and the layer will pack, zip and upload the depedencies autonomously to S3 and generate the Lambda Layer. 
 
-# Precautions
+### VPC 
+This [CDK construct](./lib/vpc/index.ts) simply deploys public, private, and isolated subnets. Additionally, this stack deploys VPC endpoints for SageMaker endpoints, AWS Secrets Manager, S3, and Amazon DynamoDB, ensuring that traffic stays within the VPC when appropriate.
+
+
+## Retrieval Augmented Generation (RAG) CDK Constructs
+This repo also comes with [CDK constructs](./lib/rag-sources/) to help you getting started with pre-built RAG sources.
+
+All RAG constructs leverages the same pattern of implementing:
+- An ingestion queue to recieve upload/delete S3 events for documents
+- An ingestion, converstion and storage mechanism which is specific to the RAG source
+- An API endpoint to expose RAG results to consumers, in our case the model interface. 
+
+In this sample each RAG sources is exposes endpoints and formats results in order to be used as [LangChain RemoteRetriever](https://js.langchain.com/docs/modules/data_connection/retrievers/integrations/remote-retriever) from the Model Interface. 
+
+This aims to allow seamless integration with Langchain chains and workflows.
+
+
+![sample](assets/rag.png "Architecture Diagram")
+
+
+### Amazon Aurora with pgvector
+The [CDK construct](./lib/rag-sources/aurora-pgvector/index.ts) deployes a **vector database** on **Amazon Aurora PostgreSQL** with **pgvector** and embeddings. 
+
+- `Embeddings Model`: [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- `Ranking Model`: [cross-encoder/ms-marco-MiniLM-L-12-v2](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-12-v2)
+
+
+**Hybrid search** is performed with a combination of 
+- Similiary Search
+- Full Text Search
+- Reranking of results
+
+![sample](assets/vectordb-query.jpg "Life of a query")
+
+Check [here](./lib/aws-genai-llm-chatbot-stack.ts#L251) to learn how to enable it in the stack.
+
+### Amazon OpenSearch VectorSearch (requires Bedrock Preview Access)
+The [CDK construct](./lib/rag-sources/opensearch-vectorsearch/index.ts) deployes a AOSS vector database capabilities with required collection, VPC endpoints, data access, encryption policies and a an index that can be used with embeddings produced by [Amazon Titan Embeddings](https://aws.amazon.com/bedrock/titan/)
+
+- `Embeddings Model`: [Amazon Titan Embeddings](https://aws.amazon.com/bedrock/titan/)
+
+Check [here](./lib/aws-genai-llm-chatbot-stack.ts#L232)  to learn how to enable it in the stack.
+
+
+### Amazon Kendra
+This [CDK Construct](./lib/rag-sources/kendra-search/index.ts) deployes an [Amazon Kendra Index](https://docs.aws.amazon.com/kendra/latest/dg/hiw-index.html) and necessary resoures to ingest documents and search them via [LangChain Amazon Kendra Index Retriever](https://python.langchain.com/docs/integrations/retrievers/amazon_kendra_retriever).
+
+Make sure to review [Amazon Kendra Pricing](https://aws.amazon.com/kendra/pricing/) before deploying it.
+
+Check [here](./lib/aws-genai-llm-chatbot-stack.ts#L206) to learn how to enable it in the stack.
+
+# ⚠️ Precautions ⚠️
 
 Before you begin using the sample, there are certain precautions you must take into account:
 
-- **Cost Management**: Be mindful of the costs associated with AWS resources. While the sample is designed to be cost-effective, leaving resources running for extended periods or deploying numerous LLMs can quickly lead to increased costs.
+- **Cost Management with self hosted models**: Be mindful of the costs associated with AWS resources, especially with SageMaker models which are billed by the hour. While the sample is designed to be cost-effective, leaving serverful resources running for extended periods or deploying numerous LLMs can quickly lead to increased costs.
 
 - **Licensing obligations**: If you choose to use any datasets or models alongside the provided samples, ensure you check LLM code and comply with all licensing obligations attached to them.
 
+- **This is a sample**: the code provided as part of this repository shouldn't be used for production workloads without further reviews and adaptation.
 
-# Service Quotas and Preview Access
-No service quota or preview access is needed to start experimenting with the provided sample. However to leverage specific features and for enchanced speed you are currently required to request quota increase and preview access. Specifically:
+# Preview Access and Service Quotas
+- **Amazon Bedrock**
+If you are looking to interact with models from Amazon Bedrock FMs, you need to request preview access from the AWS console.
+Futhermore, make sure which regions are currently supported for Amazon Bedrock.
+
 
 - **Instance type quota increase**
 You might consider requesting an increase in service quota for specific SageMaker instance types such as the `ml.g5` instance type. This will give access to latest generation of GPU/Multi-GPU instances types. You can do this from the AWS console.
@@ -177,25 +168,84 @@ You might consider requesting an increase in service quota for specific SageMake
 If you are looking to deploy models from SageMaker foundation models, you need to request preview access from the AWS console.
 Futhermore, make sure which regions are currently supported for SageMaker foundation models.
 
+
+# Providers
+
+## Amazon Bedrock (Preview)
+[Amazon Bedrock](https://aws.amazon.com/bedrock/) is a fully managed service that makes foundation models (FMs) from Amazon and leading AI startups available through an API, so you can choose from various FMs to find the model that's best suited for your use case. With the Amazon Bedrock serverless experience, you can quickly get started, easily experiment with FMs, privately customize FMs with your own data, and seamlessly integrate and deploy them into your applications using AWS tools and capabilities.
+
+If your account has access to Amazon Bedrock, there's no additional action required and you can deploy this sample as it is and Bedrock models will appear in your model list.
+
+## Self Hosted Models on SageMaker 
+
+This sample comes with a prupose-built CDK Construct, [SageMakerModel](./lib/sagemaker-model/index.ts), which helps abstracting 3 different types of model deployments:
+
+- Models from SageMaker Foundation Models/Jumpstart.
+- Model supported by HuggingFace LLM Inference container.
+- Models from HuggingFace with custom inference code.
+
+Read more details [here](./lib/sagemaker-model/README.md).
+
+
+## 3P Models Providers
+You can also interact with external providers via their API such as AI21 Labs, Cohere, OpenAI, etc. 
+
+The provider must be supported in the [Model Interface](./lib/model-interfaces/langchain/functions/request-handler/index.py), [see available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list of providers.
+
+Usually an `API_KEY` is required to integrated with 3P models. To do so, the [Model Interface](./lib/model-interfaces/langchain/index.ts) deployes a Secrets in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), intially with an empty JSON `{}`, where you can add your API KEYS for one or more providers. 
+
+These keys will be injected at runtime into the Lambda function Environment Variables, they won't be visibile in the AWS Lambda Console.
+
+For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Cohere endponts:
+- Open the [Model Interface Keys Secret](./lib/model-interfaces/langchain/index.ts#L38) in Secrets Manager. You can find the secret name in the stack output too.
+- Update the Secrets by adding a key to the JSON 
+```json
+{
+  "AI21_API_KEY": "xxxxx",
+  "OPENAI_API_KEY": "sk-xxxxxxxxxxxxxxx",
+  "COHERE_API_KEY": "xxxxx",
+}
+``` 
+N.B: In case of no keys needs, the secret value must be an empty JSON `{}`, NOT an empty string `''`.
+
+make sure that the environment variable matches what is expected by the framework in use, like Langchain ([see available langchain integrations](https://python.langchain.com/docs/integrations/llms/).
+
+
 # Deploy
 
-###  Prerequisites
+### 1. IMPORTANT Prerequisites for models providers
 
-###  Request quota increase for ml.g5 instances
-Most LLMs require instances with 1 or multiple GPUs. If you are deploying models that can run on CPUs only, you can skip this step.
+⚠️ IMPORTANT: Depending on the Model Provider you want to use there are different prerequisites. ⚠️
 
-To achieve this you will need to request specific `ml.g5` instance types depending on the model deployed.
+### WITH Amazon Bedrock
+If you want to use Amazon Bedrock you must sign up for preview access from the AWS console. 
 
-For example, with `Falcon-40B-instrcut` you should request `ml.g5.24xlarge` instance.
+If access is granted you need to add the `region` and `endpoint_url` provided as part of the preview access in [lib/aws-genai-llm-chatbot-stack.ts](./lib/aws-genai-llm-chatbot-stack.ts##L28)
 
-For example look for: `ml.g5.24xlarge for endpoint usage` in case your model needs a `ml.g5.24xlarge`.
+```
+const bedrockRegion = 'region';
+const bedrockEndpointUrl = 'https://endpoint-url';
+```
 
-Quota increase can be requested from the AWS console under self-service **[Service Quotas](https://console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)**.
+After this you can jump to the next step: [Enviroment](#environment-setup).
 
-![sample](assets/screenshots/service-quota.png "Amazon SageMaker Service Quota")
+### WITHOUT Amazon Bedrock
+If you don't have access to Amazon Bedrock you can choose to:
+
+#### a. Deploy a self hosted model on Sagemaker. 
+To facilitate this steps there are [2 commented examples](./lib/aws-genai-llm-chatbot-stack.ts#L96) on how to deploy:
+- [amazon/FalconLite](./lib/aws-genai-llm-chatbot-stack.ts#L98)
+- [LLama2](./lib/aws-genai-llm-chatbot-stack.ts#L98)
+
+More instructions on how to deploy other models [here](./lib/sagemaker-model/README.md).
 
 
-###  Environment
+#### b. Interact with a 3P models providers
+
+You can find how [here](#3p-models-providers).
+
+
+### 2. Environment setup
 
 Verify that your environment satisfies the following prerequisites:
 
@@ -212,7 +262,7 @@ You have:
 9. [Python 3+](https://www.python.org/downloads/) installed
 
 
-### Prepare CDK
+### 3. Prepare CDK
 
 The solution will be deployed into your AWS account using infrastructure-as-code wih the [AWS Cloud Development Kit](https://aws.amazon.com/cdk/) (CDK).
 
@@ -242,7 +292,7 @@ npm install
 npx cdk bootstrap aws://{targetAccountId}/{targetRegion}
 ```
 
-### Deploy the solution to your AWS Account
+### 4. Deploy the solution to your AWS Account
 
 1. Verify that Docker is running with the following command:
 
@@ -259,24 +309,26 @@ Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docke
 2. Deploy the sample using the following CDK command:
 
 ```bash
-npx cdk deploy --all
+npx cdk deploy
 ```
 
-> **Note**: This step duration can vary a lot, depending on the model(s) you want to deploy, for example the very first deployment with Falcon-40B can take about 30 minutes.
+> **Note**: This step duration can vary a lot, depending on the Constructs you are deploying. Can go from 6m with basic usage with Amazon Bedrock to 40m deploying all RAG sources an self hosted models.
 
 
 3. You can view the progress of your CDK deployment in the [CloudFormation console](https://console.aws.amazon.com/cloudformation/home) in the selected region.
 
-4. Once deployed, take note of the UI URL `GenAI-ChatBotUIStack.DomainName` value
+4. Once deployed, take note of the `User Interface`, `User Pool` and, if you want to interact with [3P models providers](#3p-models-providers) the `Secret` that will hold the various `API_KEYS`.  
 
 ```bash
 ...
 Outputs:
-GenAI-ChatBotUIStack.DomainName = dxxxxxxxxxxxxx.cloudfront.net
+AwsGenaiLllmChatbotStack.WebInterfaceUserInterfaceUrlXXXXX = dxxxxxxxxxxxxx.cloudfront.net
+AwsGenaiLllmChatbotStack.AuthenticationUserPoolLinkXXXXX = https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx
+AwsGenaiLllmChatbotStack1.LangchainInterfaceKeysSecretsNameXXXX = LangchainInterfaceKeySecret-xxxxxx
 ...
 ```
 
-5. Make sure to add a user to the generated **Cognito User Pool** from `GenAI-ChatBotStack` in order to be able to access the webapp.
+5. Finally, add a user to the generated **Cognito User Pool** in order to be able to access the user interface.
 
 
 # Clean up
@@ -286,107 +338,9 @@ You can remove the stacks and all the associated resources created in your AWS a
 npx cdk destroy --all
 ```
 
-# Deploying additional models
-As part of this sample, you can find some additional model by uncommenting code in [lib/chatbot-stack.ts](./lib/chatbot-stack.ts#L58)
-
-> **Note**: We strongly suggest to deploy one new model at the time, since the SageMaker endpoint creations and rollback time can take time.
-
-For new models make sure to select the right type of `kind` depending on the source of the LLM see [related section above](#llm-sources).
-
-Create a `model adapter` by extending the [ModelAdapterBase](./lib/chatbot-backend/functions/send-message/adapters/base.ts).
-
-You can find examples of model adapters in [lib/chatbot-backend/functions/send-message/adapters](./lib/chatbot-backend/functions/send-message/adapters/)
-
-```typescript
-export class NewModelAdapter extends ModelAdapterBase {
-  /*
-    Set up model-specific LancgChain content handler.
-  */
-  getContentHandler() {
-    return new NewModelContentHandler();
-  }
-
-  /*
-    Method to give ability to generated model-specific prompts
-  */
-  async getPrompt(args: GetPromptArgs) {
-    /* 
-      For each request, you will have access to:
-
-      args.prompt 
-      string containg the user request
-      
-      args.context
-      if semantic serach is enabled and hybrid search returns text similar to prompt is available here to use as context in the format of 
-      [
-        'string1',
-        'string2',
-      ]
-
-      args.history
-      list of previous turns of conversation in the format of 
-      [
-        { sender: 'user/system', 'content': 'message'},
-        ...
-      ]
-      
-       Example code:
-
-      const { prompt, history, context } = args;
-
-      const historyString = history.map((h) => `${h.sender}: ${h.content}`).join('\n');
-      const contextString = context.length > 0 ? context.join('\n') : 'No context.';
-
-      let completePrompt = `You are a helpful AI assistant. The following is a conversation between you (the system) and the user.\n${historyString || 'No history.'}\n\n`;
-      completePrompt += `This is the context for the current request:\n${contextString}\n`;
-      completePrompt += `Write a response that appropriately completes the request based on the context provided and the conversastion history.\nRequest:\n${prompt}\nResponse:\n`;
-
-      return completePrompt;
-
-    */
-  }
-
-  /*
-    Method to define the model-specific stopWords
-    stopWords are used as reference to when stop text generations.
-  */
-  async getStopWords() {
-  /*
-    Example:
-
-    return ['<|endoftext|>', 'User:', 'Falcon:', '</s>'];
-  */
-  }
-}
-```
-
-Add your `Adapter` to the [model registry](./lib/chatbot-backend/functions/send-message/adapters/registry.ts#L26).
-
-```typescript
-...
-modelAdapterRegistry.add(/^your-regex/, NewModelAdapter);
-```
-RegEx expression will allow you to use the same adapter for a different models matching your regex.
-
-For example `/^tiiuae\/falcon/` will match all model IDs starting with `tiiuae/falcon`
-
-
-Finally, add your model to [lib/chatbot-stack.ts](./lib/chatbot-stack.ts)
-```typescript
-new LargeLanguageModel(this, 'NewModel', {
-    vpc,
-    region: this.region,
-    model: {
-      kind: ModelKind.Container, // or the preferred kind
-      modelId: 'modelId', // i.e. tiiuae/falcon-40b-instruct, 
-      container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
-      instanceType: 'instanceType', // i.e. ml.g5.24xlarge
-      env: {
-        ...
-      },
-    },
-  });
-```
+# Authors
+- [Bigad Soleiman](https://www.linkedin.com/in/bigadsoleiman/)
+- [Sergey Pugachev](https://www.linkedin.com/in/spugachev/)
 
 
 # Credits

@@ -1,8 +1,0 @@
-{
-  "short_name": "AWS LLM ChatBot",
-  "name": "AWS Multi LLM ChatBot Sample",
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
-}

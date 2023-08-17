@@ -1,0 +1,7 @@
+aws_lambda_powertools
+aws_xray_sdk
+boto3-1.28.21-py3-none-any.whl
+botocore-1.31.21-py3-none-any.whl
+langchain
+opensearch-py
+requests-aws4auth
