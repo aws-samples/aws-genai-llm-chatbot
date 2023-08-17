@@ -31,9 +31,9 @@ Supported models providers:
 ## Multiple RAG sources
 This sample provides comes with CDK constructs to allow you to optionally deploy one or more of:
 
-- [Amazon Aurora with pgvector](https://aws.amazon.com/sagemaker/)
-- [Amazon OpenSearch VectorSearch](https://aws.amazon.com/bedrock/)
-- [Amazon Kendra](https://aws.amazon.com/sagemaker/)
+- [Amazon Aurora Serverless with pgvector](https://aws.amazon.com/about-aws/whats-new/2023/07/amazon-aurora-postgresql-pgvector-vector-storage-similarity-search/)
+- [Amazon OpenSearch VectorSearch](https://aws.amazon.com/blogs/big-data/amazon-opensearch-services-vector-database-capabilities-explained/)
+- [Amazon Kendra](https://aws.amazon.com/kendra/)
 
 
 | <img src="assets/kendra-rag-sample.gif" width="95%" > | <img src="assets/opensearchvectorsearch-rag-sample.gif" with="97%" >  |
