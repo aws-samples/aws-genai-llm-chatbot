@@ -75,7 +75,7 @@ FIFO is used to ensure the correct order of messages inflow/outflow to keep a "c
 To facilitate further integrations and future updates and reduce amount of customization required, we provide code built with known existing LLM oriented frameworks.
 
 Pre-built model interafaces:
-- [LangchainModelInterface](./lib/model-interfaces/langchain/index.ts): python-centric and built on top of [Langchain framework](https://python.langchain.com/docs/get_started/introduction.html).
+- [LangchainModelInterface](./lib/model-interfaces/langchain/index.ts): python-centric and built on top of [Langchain framework](https://python.langchain.com/docs/get_started/introduction.html) and leveraging [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) as [LangChain Memory](https://python.langchain.com/docs/integrations/memory/dynamodb_chat_message_history).
 
 #### Model Adapters
 The model interface carries a concept of [ModelAdapter](./lib/model-interfaces/langchain/functions/request-handler/adapters/base/base.py) with it. 
