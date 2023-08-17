@@ -106,7 +106,7 @@ All RAG constructs leverages the same pattern of implementing:
 - An ingestion, converstion and storage mechanism which is specific to the RAG source
 - An API endpoint to expose RAG results to consumers, in our case the model interface. 
 
-In this sample each RAG sources is exposes endpoints and formats results in order to be used as [LangChain RemoteRetriever](https://js.langchain.com/docs/modules/data_connection/retrievers/integrations/remote-retriever) from the Model Interface. 
+In this sample each RAG sources is exposes endpoints and formats results in order to be used as [LangChain RemoteRetriever](https://js.langchain.com/docs/modules/data_connection/retrievers/integrations/remote-retriever) from the Model Interface as part of a [ConversationalRetrievalChain](https://python.langchain.com/docs/use_cases/question_answering/how_to/chat_vector_db). 
 
 This aims to allow seamless integration with Langchain chains and workflows.
 
