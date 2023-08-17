@@ -1,4 +1,4 @@
-# Deploy a multi LLM powered chatbot using AWS CDK on AWS
+# Deploy a multi LLM, multi RAG powered chatbot using AWS CDK on AWS
 
 ![sample](assets/sample.gif "AWS GenAI Chatbot")
 
