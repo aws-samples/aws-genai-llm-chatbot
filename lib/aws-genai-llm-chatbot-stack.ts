@@ -184,7 +184,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     const openSearchVectorSearch = new OpenSearchVectorSearch(this, 'OpenSearchVectorSearch', {
       vpc: vpc.vpc,
       dataBucket: dataBucket,
-      collectionName: 'genai-chatbot-86',
+      collectionName: 'genai-chatbot',
       indexName: 'docs',
       dimension: 4096, // 4096 is the default dimension for Amazon Titan Embeddings
       architecture,
