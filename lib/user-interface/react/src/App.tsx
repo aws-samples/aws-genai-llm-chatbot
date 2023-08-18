@@ -7,7 +7,7 @@ import { AppContext } from './components/app-context';
 import Home from './pages/Home';
 import Chatbot from './pages/Chatbot';
 import Files from './pages/Files';
-import Topbar from './components/topbar';
+import Topbar from './components/Topbar';
 
 function App() {
   const appConfig = useContext(AppContext);
