@@ -1,7 +1,6 @@
 import * as path from 'path';
 
 import * as cdk from 'aws-cdk-lib';
-import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -72,7 +71,13 @@ export class AuroraPgVector extends Construct {
     });
     this.ingestionQueue = documentIndexing.ingestionQueue;
 
-    this.createAPI({ vpc, dbCluster, embeddingsEndpoint: embeddingsEndpoint, runtime, architecture });
+    this.createAPI({
+      vpc,
+      dbCluster,
+      embeddingsEndpoint: embeddingsEndpoint,
+      runtime,
+      architecture,
+    });
   }
 
   private createVectorDB({ vpc, indexTypes, architecture}: { vpc: ec2.Vpc; indexTypes: PGVectorIndexType[], architecture: lambda.Architecture}) {
@@ -86,31 +91,45 @@ export class AuroraPgVector extends Construct {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
     });
 
-    const databaseSetupFunction = new lambda.DockerImageFunction(this, 'DatabaseSetupFunction', {
-      code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, './functions/vectordb-setup')),
-      architecture,
-      timeout: cdk.Duration.minutes(5),
-      memorySize: 1024,
-      vpc: vpc,
-      logRetention: logs.RetentionDays.ONE_WEEK,
-    });
+    const databaseSetupFunction = new lambda.DockerImageFunction(
+      this,
+      'DatabaseSetupFunction',
+      {
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, './functions/vectordb-setup')
+        ),
+        architecture,
+        timeout: cdk.Duration.minutes(5),
+        memorySize: 1024,
+        vpc: vpc,
+        logRetention: logs.RetentionDays.ONE_WEEK,
+      }
+    );
 
     dbCluster.secret?.grantRead(databaseSetupFunction);
     dbCluster.connections.allowDefaultPortFrom(databaseSetupFunction);
 
-    const databaseSetupProvider = new cr.Provider(this, 'DatabaseSetupProvider', {
-      vpc,
-      onEventHandler: databaseSetupFunction,
-    });
+    const databaseSetupProvider = new cr.Provider(
+      this,
+      'DatabaseSetupProvider',
+      {
+        vpc,
+        onEventHandler: databaseSetupFunction,
+      }
+    );
 
-    const dbSetupResource = new cdk.CustomResource(this, 'DatabaseSetupResource', {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      serviceToken: databaseSetupProvider.serviceToken,
-      properties: {
-        DB_SECRET_ID: dbCluster.secret?.secretArn as string,
-        INDEX_TYPES: indexTypes.join(','),
-      },
-    });
+    const dbSetupResource = new cdk.CustomResource(
+      this,
+      'DatabaseSetupResource',
+      {
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        serviceToken: databaseSetupProvider.serviceToken,
+        properties: {
+          DB_SECRET_ID: dbCluster.secret?.secretArn as string,
+          INDEX_TYPES: indexTypes.join(','),
+        },
+      }
+    );
 
     dbSetupResource.node.addDependency(dbCluster);
 
@@ -123,7 +142,10 @@ export class AuroraPgVector extends Construct {
       region: cdk.Aws.REGION,
       model: {
         type: DeploymentType.CustomInferenceScript,
-        modelId: ['sentence-transformers/all-MiniLM-L6-v2', 'cross-encoder/ms-marco-MiniLM-L-12-v2'],
+        modelId: [
+          'sentence-transformers/all-MiniLM-L6-v2',
+          'cross-encoder/ms-marco-MiniLM-L-12-v2',
+        ],
         codeFolder: path.join(__dirname, './embeddings-model'),
         instanceType: 'ml.g4dn.xlarge',
       },
@@ -132,22 +154,40 @@ export class AuroraPgVector extends Construct {
     return { embeddingsEndpoint: embeddingsModel.endpoint };
   }
 
-  private createAPI({ vpc, dbCluster, embeddingsEndpoint, runtime, architecture }: { vpc: ec2.Vpc; dbCluster: rds.DatabaseInstance | rds.DatabaseCluster; embeddingsEndpoint: sagemaker.CfnEndpoint; runtime: lambda.Runtime; architecture: lambda.Architecture }) {
-    const semanticSearchApi = new lambda.DockerImageFunction(this, 'SemanticSearchApi', {
-      code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, './functions/semantic-search-api')),
-      architecture,
-      vpc,
-      timeout: cdk.Duration.minutes(1),
-      memorySize: 1024,
-      logRetention: logs.RetentionDays.ONE_DAY,
-      environment: {
-        REGION_NAME: cdk.Aws.REGION,
-        LOG_LEVEL: 'DEBUG',
-        DB_SECRET_ID: dbCluster.secret?.secretArn as string,
-        EMBEDDINGS_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
-        CROSS_ENCODER_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
-      },
-    });
+  private createAPI({
+    vpc,
+    dbCluster,
+    embeddingsEndpoint,
+    runtime,
+    architecture,
+  }: {
+    vpc: ec2.Vpc;
+    dbCluster: rds.DatabaseInstance | rds.DatabaseCluster;
+    embeddingsEndpoint: sagemaker.CfnEndpoint;
+    runtime: lambda.Runtime;
+    architecture: lambda.Architecture;
+  }) {
+    const semanticSearchApi = new lambda.DockerImageFunction(
+      this,
+      'SemanticSearchApi',
+      {
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, './functions/semantic-search-api')
+        ),
+        architecture,
+        vpc,
+        timeout: cdk.Duration.minutes(1),
+        memorySize: 1024,
+        logRetention: logs.RetentionDays.ONE_DAY,
+        environment: {
+          REGION_NAME: cdk.Aws.REGION,
+          LOG_LEVEL: 'DEBUG',
+          DB_SECRET_ID: dbCluster.secret?.secretArn as string,
+          EMBEDDINGS_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
+          CROSS_ENCODER_ENDPOINT_NAME: embeddingsEndpoint.attrEndpointName,
+        },
+      }
+    );
 
     dbCluster.secret?.grantRead(semanticSearchApi);
     dbCluster.connections.allowDefaultPortFrom(semanticSearchApi);
@@ -156,7 +196,7 @@ export class AuroraPgVector extends Construct {
       new iam.PolicyStatement({
         actions: ['sagemaker:InvokeEndpoint'],
         resources: [embeddingsEndpoint.ref],
-      }),
+      })
     );
 
     this.semanticSearchApi = semanticSearchApi;
@@ -196,7 +236,7 @@ export class AuroraPgVector extends Construct {
       new iam.PolicyStatement({
         actions: ['sagemaker:InvokeEndpoint'],
         resources: [embeddingsEndpoint.ref],
-      }),
+      })
     );
 
     const api = new apigateway.LambdaRestApi(this, 'AuroraPgVectorApi2', {
