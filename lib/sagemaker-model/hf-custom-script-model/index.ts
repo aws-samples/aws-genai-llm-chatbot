@@ -23,6 +23,8 @@ export interface HuggingFaceCustomScriptModelProps {
   codeFolder?: string;
   codeBuildComputeType?: codebuild.ComputeType;
   env?: { [key: string]: string };
+  architecture?: lambda.Architecture;
+  runtime?: lambda.Runtime;
 }
 
 export class HuggingFaceCustomScriptModel extends Construct {
@@ -32,7 +34,7 @@ export class HuggingFaceCustomScriptModel extends Construct {
   constructor(scope: Construct, id: string, props: HuggingFaceCustomScriptModelProps) {
     super(scope, id);
 
-    const { vpc, region, instanceType, container, codeFolder, codeBuildComputeType, env } = props;
+    const { vpc, region, instanceType, container, codeFolder, codeBuildComputeType, env, architecture = lambda.Architecture.X86_64, runtime = lambda.Runtime.PYTHON_3_11 } = props;
     const modelId = Array.isArray(props.modelId) ? props.modelId.join(',') : props.modelId;
 
     const buildBucket = new s3.Bucket(this, 'BuildBucket', {
@@ -144,8 +146,8 @@ export class HuggingFaceCustomScriptModel extends Construct {
 
     // custom resource lamdba handlers
     const onEventHandler = new lambda.Function(this, 'OnEventHandler', {
-      runtime: lambda.Runtime.PYTHON_3_11,
-      architecture: lambda.Architecture.X86_64,
+      runtime,
+      architecture,
       code: lambda.Code.fromAsset(path.join(__dirname, './build-function')),
       handler: 'index.on_event',
     });
@@ -160,8 +162,8 @@ export class HuggingFaceCustomScriptModel extends Construct {
 
     // custom resource lamdba handlers
     const isCompleteHandler = new lambda.Function(this, 'IsCompleteHandler', {
-      runtime: lambda.Runtime.PYTHON_3_11,
-      architecture: lambda.Architecture.X86_64,
+      runtime,
+      architecture,
       code: lambda.Code.fromAsset(path.join(__dirname, './build-function')),
       handler: 'index.is_complete',
     });

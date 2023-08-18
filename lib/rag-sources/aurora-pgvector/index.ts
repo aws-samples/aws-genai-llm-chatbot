@@ -62,7 +62,7 @@ export class AuroraPgVector extends Construct {
     }
 
     const { dbCluster } = this.createVectorDB({ vpc, indexTypes, architecture });
-    const { embeddingsEndpoint } = this.createEmbeddingsEndpoint({ vpc });
+    const { embeddingsEndpoint } = this.createEmbeddingsEndpoint({ vpc, architecture, runtime });
     const documentIndexing = new DocumentIndexing(this, 'DocumentIndexing', {
       vpc,
       dbCluster,
@@ -137,7 +137,7 @@ export class AuroraPgVector extends Construct {
     return { dbCluster };
   }
 
-  private createEmbeddingsEndpoint({ vpc }: { vpc: ec2.Vpc }) {
+  private createEmbeddingsEndpoint({ vpc, architecture, runtime }: { vpc: ec2.Vpc; architecture: lambda.Architecture; runtime: lambda.Runtime }) {
     const embeddingsModel = new SageMakerModel(this, 'EmbeddingsModel', {
       vpc,
       region: cdk.Aws.REGION,
@@ -149,6 +149,8 @@ export class AuroraPgVector extends Construct {
         ],
         codeFolder: path.join(__dirname, './embeddings-model'),
         instanceType: 'ml.g4dn.xlarge',
+        architecture,
+        runtime,
       },
     });
 

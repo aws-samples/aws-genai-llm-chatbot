@@ -15,13 +15,15 @@ import { UserInterface } from './user-interface';
 import { Vpc } from './vpc';
 import { WebSocketInterface } from './websocket-interface';
 
+// Define common architecture and runtime for all lambda functions
+// Before switching the architecture to ARM64, make sure to update all Dockerfiles FROM line to use the correct base image
+const architecture = lambda.Architecture.X86_64;
+const runtime = lambda.Runtime.PYTHON_3_11;
+
+
 export class AwsGenaiLllmChatbotStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-    // Define common architecture and runtime for all lambda functions
-    const architecture = lambda.Architecture.X86_64;
-    const runtime = lambda.Runtime.PYTHON_3_11;
 
     /* --- BASIC USAGE --- */
 
@@ -85,7 +87,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     );
 
     /* --- OPTIONAL: SELF HOSTED MODELS ON SAGEMAKER --- */
-    /*
+    
     // Falcon Lite example from HuggingFace
     const falconLite = new SageMakerModel(this, 'FalconLite', {
       vpc: vpc.vpc,
@@ -116,7 +118,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       name: 'FalconLite',
       endpoint: falconLite.endpoint,
     });
-
+    /*
     // LLAMA V2 example from Jumpstart
     const llamav2 = new SageMakerModel(this, 'LLamaV2', {
       vpc: vpc.vpc,
@@ -142,7 +144,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     */
 
     /* --- OPTIONAL: RAG SECTION --- */
-    /*
+    
     // Create a topic for the data bucket this will act as a message bus only for uploaded/deleted documents
     const dataTopic = new sns.Topic(this, 'DataTopic');
 
@@ -184,7 +186,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     const openSearchVectorSearch = new OpenSearchVectorSearch(this, 'OpenSearchVectorSearch', {
       vpc: vpc.vpc,
       dataBucket: dataBucket,
-      collectionName: 'genai-chatbot',
+      collectionName: 'genai-chatbot-2',
       indexName: 'docs',
       dimension: 4096, // 4096 is the default dimension for Amazon Titan Embeddings
       architecture,
@@ -243,7 +245,6 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       type: 'aurorapgvector',
       api: auroraPgVector.api,
     });
-    */
 
     /* --- USER INTERFACE --- */
     // User Interface Construct
@@ -259,7 +260,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
 
     // Enable cors for the data bucket to allow uploads from the user interface
     // ref: https://docs.amplify.aws/lib/storage/getting-started/q/platform/js/#amazon-s3-bucket-cors-policy-setup
-    /*     
+        
     dataBucket.addCorsRule({
       allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
       allowedOrigins: [`https://${userInterface.distributionDomainName}`],
@@ -268,7 +269,5 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       exposedHeaders: ['x-amz-server-side-encryption', 'x-amz-request-id', 'x-amz-id-2', 'ETag'],
       maxAge: 3000,
     });
-    */
-
   }
 }

@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 export interface SageMakerModelProps extends cdk.NestedStackProps {
@@ -41,4 +42,6 @@ export interface ModelCustomScriptConfig extends Omit<ModelConfigBase, 'modelId'
   codeFolder: string;
   container?: string;
   env?: { [key: string]: string };
+  architecture?: lambda.Architecture;
+  runtime?: lambda.Runtime;
 }
