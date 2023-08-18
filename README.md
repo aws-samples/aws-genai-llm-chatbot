@@ -253,13 +253,10 @@ You can find how [here](#3p-models-providers).
 ### (Optional) If using AWS Cloud9
 If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the solution from you will need the following before proceeding:
 - at least `m5.large` as Instance type.
-- use `Amazon Linux` as platform.
-- increase instance EBS volume size to at least `100GB`
-  - Read how you can increase the EBS volume size [here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize)
-- Run the following commands from C9 terminal
+- use `Amazon Linux 2` as the platform.
+- increase the instance's EBS volume size to at least 100GB. To do this, run the following commands from the Cloud9 terminal. See the documentation for more details [here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
 ```
-sudo growpart /dev/nvme0n1 1
-sudo xfs_growfs -d /
+./assets/cloud9-resize.sh 100
 ```
 
 ### 2. Environment setup
