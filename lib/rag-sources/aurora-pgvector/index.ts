@@ -61,11 +61,7 @@ export class AuroraPgVector extends Construct {
       });
     }
 
-    const { dbCluster } = this.createVectorDB({
-      vpc,
-      indexTypes,
-      architecture,
-    });
+    const { dbCluster } = this.createVectorDB({ vpc, indexTypes, architecture });
     const { embeddingsEndpoint } = this.createEmbeddingsEndpoint({ vpc });
     const documentIndexing = new DocumentIndexing(this, 'DocumentIndexing', {
       vpc,
@@ -84,15 +80,7 @@ export class AuroraPgVector extends Construct {
     });
   }
 
-  private createVectorDB({
-    vpc,
-    indexTypes,
-    architecture,
-  }: {
-    vpc: ec2.Vpc;
-    indexTypes: PGVectorIndexType[];
-    architecture: lambda.Architecture;
-  }) {
+  private createVectorDB({ vpc, indexTypes, architecture}: { vpc: ec2.Vpc; indexTypes: PGVectorIndexType[], architecture: lambda.Architecture}) {
     const dbCluster = new rds.DatabaseCluster(this, 'AuroraDatabase', {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_15_3,
