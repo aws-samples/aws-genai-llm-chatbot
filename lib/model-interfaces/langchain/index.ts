@@ -20,6 +20,8 @@ interface LangChainInterfaceProps extends cdk.NestedStackProps {
   messagesTopic: sns.Topic;
   bedrockRegion?: string;
   bedrockEndpointUrl?: string;
+  architecture: lambda.Architecture;
+  runtime: lambda.Runtime;
 }
 
 export class LangChainInterface extends Construct {
@@ -29,10 +31,7 @@ export class LangChainInterface extends Construct {
   constructor(scope: Construct, id: string, props: LangChainInterfaceProps) {
     super(scope, id);
 
-    const { messagesTopic, bedrockRegion, bedrockEndpointUrl } = props;
-
-    const architecture = lambda.Architecture.ARM_64;
-    const runtime = lambda.Runtime.PYTHON_3_11;
+    const { messagesTopic, bedrockRegion, bedrockEndpointUrl, architecture, runtime } = props;
 
     // create secret for 3P models keys
     const keysSecrets = new secretsmanager.Secret(this, 'KeySecrets', {

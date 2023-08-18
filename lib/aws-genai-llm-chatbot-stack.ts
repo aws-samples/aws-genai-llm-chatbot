@@ -20,7 +20,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     super(scope, id, props);
 
     // Define common architecture and runtime for all lambda functions
-    const architecture = lambda.Architecture.ARM_64;
+    const architecture = lambda.Architecture.X86_64;
     const runtime = lambda.Runtime.PYTHON_3_11;
 
     /* --- BASIC USAGE --- */
@@ -67,6 +67,8 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       messagesTopic,
       bedrockRegion,
       bedrockEndpointUrl,
+      architecture,
+      runtime,
     });
 
     // Route all incoming messages to the langchain model interface queue
@@ -81,17 +83,6 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
         },
       }),
     );
-
-    // User Interface Construct
-    // This is the web interface for the chatbot
-    const userInterface = new UserInterface(this, 'WebInterface', {
-      userPoolId: authentication.userPool.userPoolId,
-      userPoolClientId: authentication.userPoolClient.userPoolClientId,
-      identityPoolId: authentication.identityPool.identityPoolId,
-      webSocketApiUrl: websocketInterface.webSocketApiUrl,
-      architecture,
-      // storageBucket: dataBucket, // move this construct to the bottom of the file and uncomment this line to enable file uploads from the user interface to the data bucket for RAG source(s)
-    });
 
     /* --- OPTIONAL: SELF HOSTED MODELS ON SAGEMAKER --- */
     /*
@@ -152,7 +143,6 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
 
     /* --- OPTIONAL: RAG SECTION --- */
     /*
-
     // Create a topic for the data bucket this will act as a message bus only for uploaded/deleted documents
     const dataTopic = new sns.Topic(this, 'DataTopic');
 
@@ -185,18 +175,6 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       }),
     );
 
-
-    // Enable cors for the data bucket to allow uploads from the user interface
-    // ref: https://docs.amplify.aws/lib/storage/getting-started/q/platform/js/#amazon-s3-bucket-cors-policy-setup
-    dataBucket.addCorsRule({
-      allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
-      allowedOrigins: [userInterface.distributionDomainName],
-      // allowedOrigins: ['*'], // use this for local web development
-      allowedHeaders: ['*'],
-      exposedHeaders: ['x-amz-server-side-encryption', 'x-amz-request-id', 'x-amz-id-2', 'ETag'],
-      maxAge: 3000,
-    });
-
     // Route all upload/delete events to the data topic
     dataBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new s3Notifications.SnsDestination(dataTopic));
     dataBucket.addEventNotification(s3.EventType.OBJECT_REMOVED, new s3Notifications.SnsDestination(dataTopic));
@@ -206,7 +184,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     const openSearchVectorSearch = new OpenSearchVectorSearch(this, 'OpenSearchVectorSearch', {
       vpc: vpc.vpc,
       dataBucket: dataBucket,
-      collectionName: 'genai-chatbot',
+      collectionName: 'genai-chatbot-86',
       indexName: 'docs',
       dimension: 4096, // 4096 is the default dimension for Amazon Titan Embeddings
       architecture,
@@ -266,5 +244,31 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       api: auroraPgVector.api,
     });
     */
+
+    /* --- USER INTERFACE --- */
+    // User Interface Construct
+    // This is the web interface for the chatbot
+    const userInterface = new UserInterface(this, 'WebInterface', {
+      userPoolId: authentication.userPool.userPoolId,
+      userPoolClientId: authentication.userPoolClient.userPoolClientId,
+      identityPoolId: authentication.identityPool.identityPoolId,
+      webSocketApiUrl: websocketInterface.webSocketApiUrl,
+      architecture,
+      // dataBucket, // uncomment this line to enable file uploads from the user interface to the data bucket for RAG source(s)
+    });
+
+    // Enable cors for the data bucket to allow uploads from the user interface
+    // ref: https://docs.amplify.aws/lib/storage/getting-started/q/platform/js/#amazon-s3-bucket-cors-policy-setup
+    /*     
+    dataBucket.addCorsRule({
+      allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
+      allowedOrigins: [`https://${userInterface.distributionDomainName}`],
+      // allowedOrigins: ['*'], // use this for local web development
+      allowedHeaders: ['*'],
+      exposedHeaders: ['x-amz-server-side-encryption', 'x-amz-request-id', 'x-amz-id-2', 'ETag'],
+      maxAge: 3000,
+    });
+    */
+
   }
 }

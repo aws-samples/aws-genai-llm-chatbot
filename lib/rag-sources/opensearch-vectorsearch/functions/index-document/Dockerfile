@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.11-arm64
+FROM public.ecr.aws/lambda/python:3.11
 
 RUN yum update -y 
 RUN yum install -y git wget

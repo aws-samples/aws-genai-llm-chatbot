@@ -145,7 +145,7 @@ export class HuggingFaceCustomScriptModel extends Construct {
     // custom resource lamdba handlers
     const onEventHandler = new lambda.Function(this, 'OnEventHandler', {
       runtime: lambda.Runtime.PYTHON_3_11,
-      architecture: lambda.Architecture.ARM_64,
+      architecture: lambda.Architecture.X86_64,
       code: lambda.Code.fromAsset(path.join(__dirname, './build-function')),
       handler: 'index.on_event',
     });
@@ -161,7 +161,7 @@ export class HuggingFaceCustomScriptModel extends Construct {
     // custom resource lamdba handlers
     const isCompleteHandler = new lambda.Function(this, 'IsCompleteHandler', {
       runtime: lambda.Runtime.PYTHON_3_11,
-      architecture: lambda.Architecture.ARM_64,
+      architecture: lambda.Architecture.X86_64,
       code: lambda.Code.fromAsset(path.join(__dirname, './build-function')),
       handler: 'index.is_complete',
     });
