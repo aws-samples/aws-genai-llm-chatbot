@@ -249,6 +249,18 @@ More instructions on how to deploy other models [here](./lib/sagemaker-model/REA
 You can find how [here](#3p-models-providers).
 
 
+
+### (Optional) If using AWS Cloud9
+If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the solution from you will need the following before proceeding:
+- at least `m5.large` as Instance type.
+- increase instance EBS volume size to at least `100GB`
+  - Read how you can increase the EBS volume size [here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize)
+- Run the following commands from C9 terminal
+```
+sudo growpart /dev/nvme0n1 1
+sudo xfs_growfs -d /
+```
+
 ### 2. Environment setup
 
 Verify that your environment satisfies the following prerequisites:
@@ -266,16 +278,6 @@ You have:
 9. [Python 3+](https://www.python.org/downloads/) installed
 
 
-### 2a. (Optional) If using AWS Cloud9
-If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the solution from you will need the following before proceeding:
-- at least `m5.large` as Instance type.
-- increase instance EBS volume size to at least `100GB`
-  - Read how you can increase the EBS volume size [here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize)
-- Run the following commands from C9 terminal
-```
-sudo growpart /dev/nvme0n1 1
-sudo xfs_growfs -d /
-```
 
 
 ### 3. Prepare CDK
