@@ -11,6 +11,7 @@
   - [Amazon Bedrock](#amazon-bedrock-preview)
   - [Self-hosted models on SageMaker](#self-hosted-models-on-sagemaker)
   - [3P models providers](#3p-models-providers)
+- [RAG Sources](#retrieval-augmented-generation-rag-cdk-constructs)
 - [Deploy](#deploy)
 - [Clean up](#clean-up)
 - [Authors](#authors)
@@ -227,7 +228,7 @@ const bedrockRegion = 'region';
 const bedrockEndpointUrl = 'https://endpoint-url';
 ```
 
-After this you can jump to the next step: [Enviroment](#environment-setup).
+After this you can jump to the next step: [Enviroment](#2-environment-setup).
 
 ### WITHOUT Amazon Bedrock
 If you don't have access to Amazon Bedrock you can choose to:
