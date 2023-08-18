@@ -18,6 +18,7 @@ export interface DocumentIndexingProps extends cdk.NestedStackProps {
   dbCluster: rds.DatabaseInstance | rds.DatabaseCluster;
   embeddingsEndpoint: sagemaker.CfnEndpoint;
   dataBucket: s3.Bucket;
+  architecture: lambda.Architecture;
 }
 
 export class DocumentIndexing extends Construct {
@@ -26,7 +27,7 @@ export class DocumentIndexing extends Construct {
   constructor(scope: Construct, id: string, props: DocumentIndexingProps) {
     super(scope, id);
 
-    const { vpc, dbCluster, embeddingsEndpoint, dataBucket } = props;
+    const { vpc, dbCluster, embeddingsEndpoint, dataBucket, architecture } = props;
 
     const dataQueue = new sqs.Queue(this, 'DataQueue', {
       visibilityTimeout: cdk.Duration.seconds(600),
@@ -34,7 +35,7 @@ export class DocumentIndexing extends Construct {
 
     const documentIndexing = new lambda.DockerImageFunction(this, 'DocumentIndexing', {
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, './functions/document-indexing')),
-      architecture: lambda.Architecture.ARM_64,
+      architecture,
       vpc,
       vpcSubnets: vpc.selectSubnets({
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,

@@ -13,7 +13,7 @@ interface UserInterfaceProps extends cdk.NestedStackProps {
   identityPoolId: string;
   webSocketApiUrl: string;
   architecture: lambda.Architecture;
-  storageBucket?: s3.Bucket;
+  dataBucket?: s3.Bucket;
 }
 
 export class UserInterface extends Construct {
@@ -22,7 +22,7 @@ export class UserInterface extends Construct {
   constructor(scope: Construct, id: string, props: UserInterfaceProps) {
     super(scope, id);
 
-    const { userPoolId, userPoolClientId, identityPoolId, webSocketApiUrl, storageBucket, architecture } = props;
+    const { userPoolId, userPoolClientId, identityPoolId, webSocketApiUrl, dataBucket, architecture } = props;
     const appPath = path.join(__dirname, '.', 'react');
 
     const websiteBucket = new s3.Bucket(this, 'Bucket', {
@@ -85,12 +85,12 @@ export class UserInterface extends Construct {
       },
     };
 
-    if (storageBucket) {
+    if (dataBucket) {
       awsExports = {
         ...awsExports,
         Storage: {
           AWSS3: {
-            bucket: storageBucket.bucketName,
+            bucket: dataBucket.bucketName,
             region: cdk.Aws.REGION,
           },
         },
