@@ -2,6 +2,9 @@
 
 You can find examples of model adapters in [functions/request-handler/adapters/](./functions/request-handler/adapters/)
 
+
+1. Create your own adapter under [functions/request-handler/adapters/](./functions/request-handler/adapters/).
+
 ```python
 import os
 
@@ -17,13 +20,15 @@ class GPTAdapter(ModelAdapter):
 
         super().__init__(*args, **kwargs)
 
+    # 2. Define your langchain LLM based on the target model.
     def get_llm(self, model_kwargs={}):
         if not os.environ.get("OPENAI_API_KEY"):
             raise Exception("OPENAI_API_KEY must be set in the environment")
 
         return ChatOpenAI(model_name=self.model_id, temperature=0, **model_kwargs)
 
-    # 2. If you want to override the default prompt, override the get_prompt method
+    # (OPTIONAL) 3.If you need to override the default prompt, override the get_prompt method.
+    # If not you can remove this and leverage the get_prompt from the base adapater.
     # must return a PromptTemplate
     def get_prompt(self):
         template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
@@ -43,8 +48,17 @@ class GPTAdapter(ModelAdapter):
         return prompt_template
     ...
 
-# 3. Finally, Register the adapter to match the model id coming from the select UI
+# 4. Finally, Register the adapter to match the model id coming from the select UI
 # RegEx expression will allow you to use the same adapter for a different models matching your regex.
 # For example `^openai*` will match all model IDs starting with `openai` such `openai.gpt-4`
 registry.register(r"^openai*", GPTAdapter)
 ```
+
+2. Make sure the `__init__.py` files are updated so that your adapter is correctly imported.
+   - Example model adapter [__init__.py](./functions/request-handler/adapters/openai/gpt.py)
+   - Adapters [__init__.py](./functions/request-handler/adapters/__init__.py)
+
+
+3. Update the [models.py](./functions/request-handler/models.py) in order to return your model ID(s). 
+
+These models IDs must match the above regex so [your adapter is picked up](./functions/request-handler/index.py#L177) with your new model ID(s)
