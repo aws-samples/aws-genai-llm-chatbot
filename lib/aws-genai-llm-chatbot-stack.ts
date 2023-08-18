@@ -87,7 +87,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     );
 
     /* --- OPTIONAL: SELF HOSTED MODELS ON SAGEMAKER --- */
-    
+    /*
     // Falcon Lite example from HuggingFace
     const falconLite = new SageMakerModel(this, 'FalconLite', {
       vpc: vpc.vpc,
@@ -144,7 +144,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     */
 
     /* --- OPTIONAL: RAG SECTION --- */
-    
+    /*
     // Create a topic for the data bucket this will act as a message bus only for uploaded/deleted documents
     const dataTopic = new sns.Topic(this, 'DataTopic');
 
@@ -186,7 +186,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     const openSearchVectorSearch = new OpenSearchVectorSearch(this, 'OpenSearchVectorSearch', {
       vpc: vpc.vpc,
       dataBucket: dataBucket,
-      collectionName: 'genai-chatbot-2',
+      collectionName: 'genai-chatbot',
       indexName: 'docs',
       dimension: 4096, // 4096 is the default dimension for Amazon Titan Embeddings
       architecture,
@@ -245,7 +245,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       type: 'aurorapgvector',
       api: auroraPgVector.api,
     });
-
+    
     /* --- USER INTERFACE --- */
     // User Interface Construct
     // This is the web interface for the chatbot
@@ -260,7 +260,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
 
     // Enable cors for the data bucket to allow uploads from the user interface
     // ref: https://docs.amplify.aws/lib/storage/getting-started/q/platform/js/#amazon-s3-bucket-cors-policy-setup
-        
+    /*  
     dataBucket.addCorsRule({
       allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
       allowedOrigins: [`https://${userInterface.distributionDomainName}`],
@@ -269,5 +269,6 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       exposedHeaders: ['x-amz-server-side-encryption', 'x-amz-request-id', 'x-amz-id-2', 'ETag'],
       maxAge: 3000,
     });
+    */
   }
 }
