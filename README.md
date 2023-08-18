@@ -344,8 +344,13 @@ AwsGenaiLllmChatbotStack1.LangchainInterfaceKeysSecretsNameXXXX = LangchainInter
 ...
 ```
 
-5. Finally, add a user to the generated **Cognito User Pool** in order to be able to access the user interface.
+5. Open the generated **Cognito User Pool** Link from outputs above i.e. `https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx`
 
+6. Add a user that will be used to login into the web interface.
+
+7. Open the `User Interface` Url frin the outputs above i.e. `dxxxxxxxxxxxxx.cloudfront.net`
+
+8. Login with the user created in .6, you will be asked to change the password and you'll be logged in in the main page.
 
 # Clean up
 You can remove the stacks and all the associated resources created in your AWS account by running the following command:
