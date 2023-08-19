@@ -1,4 +1,7 @@
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { ExecSyncOptionsWithBufferEncoding, execSync } from 'node:child_process';
+
 
 import * as cdk from 'aws-cdk-lib';
 import * as cf from 'aws-cdk-lib/aws-cloudfront';
@@ -24,6 +27,7 @@ export class UserInterface extends Construct {
 
     const { userPoolId, userPoolClientId, identityPoolId, webSocketApiUrl, dataBucket, architecture } = props;
     const appPath = path.join(__dirname, '.', 'react');
+    const distPath = path.join(appPath, 'dist');
 
     const websiteBucket = new s3.Bucket(this, 'Bucket', {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -69,6 +73,27 @@ export class UserInterface extends Construct {
         image: lambda.Runtime.NODEJS_18_X.bundlingImage,
         platform: architecture.dockerPlatform,
         command: ['sh', '-c', ['npm --cache /tmp/.npm install', `npm --cache /tmp/.npm run build`, 'cp -aur /asset-input/dist/* /asset-output/'].join(' && ')],
+        local: {
+          tryBundle(outputDir: string) {
+            try {
+              const options: ExecSyncOptionsWithBufferEncoding = {
+                stdio: 'inherit',
+                env: {
+                  ...process.env,
+                },
+              };
+
+              execSync(`npm --silent --prefix "${appPath}" ci`, options);
+              execSync(`npm --silent --prefix "${appPath}" run build`, options);
+              copyDirRecursive(distPath, outputDir);
+            } catch (e) {
+              console.error(e);
+              return false;
+            }
+
+            return true;
+          },
+        },
       },
     });
 
@@ -109,5 +134,25 @@ export class UserInterface extends Construct {
     new cdk.CfnOutput(this, 'UserInterfaceUrl', {
       value: `https://${distribution.distributionDomainName}`,
     });
+  }
+}
+
+function copyDirRecursive(sourceDir: string, targetDir: string): void {
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir);
+  }
+
+  const files = fs.readdirSync(sourceDir);
+
+  for (const file of files) {
+    const sourceFilePath = path.join(sourceDir, file);
+    const targetFilePath = path.join(targetDir, file);
+    const stats = fs.statSync(sourceFilePath);
+
+    if (stats.isDirectory()) {
+      copyDirRecursive(sourceFilePath, targetFilePath);
+    } else {
+      fs.copyFileSync(sourceFilePath, targetFilePath);
+    }
   }
 }
