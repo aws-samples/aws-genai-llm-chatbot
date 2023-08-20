@@ -22,6 +22,8 @@ export class Layer extends Construct {
     if (autoUpgrade) {
       args.push('--upgrade');
     }
+    console.log(`Bundling ${runtime.name} ${architecture.name} layer with ${args.join(' ')}`);
+    console.log(`DOCKER_DEFAULT_PLATFORM=${process.env.DOCKER_DEFAULT_PLATFORM}`)
 
     const layerAsset = new s3assets.Asset(this, 'LayerAsset', {
       path,
