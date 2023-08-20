@@ -277,7 +277,8 @@ You have:
 6. [Typescript 3.8+](https://www.typescriptlang.org/download) installed
 7. [AWS CDK CLI](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed
 8. [Docker](https://docs.docker.com/get-docker/) installed
-9. [Python 3+](https://www.python.org/downloads/) installed
+   - N.B. [`buildx`](https://github.com/docker/buildx) is also required. For Windows and macOS `buildx` [is inclided in](https://github.com/docker/buildx#windows-and-macos) is included in [Docker Desktop](https://docs.docker.com/desktop/)
+10. [Python 3+](https://www.python.org/downloads/) installed
 
 
 
