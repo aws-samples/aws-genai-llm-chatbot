@@ -20,6 +20,9 @@ import { WebSocketInterface } from './websocket-interface';
 const architecture = lambda.Architecture.X86_64;
 const runtime = lambda.Runtime.PYTHON_3_11;
 
+// Docker: Set default platform for commands that take the --platform flag
+process.env.DOCKER_DEFAULT_PLATFORM=architecture.dockerPlatform
+
 
 export class AwsGenaiLllmChatbotStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
