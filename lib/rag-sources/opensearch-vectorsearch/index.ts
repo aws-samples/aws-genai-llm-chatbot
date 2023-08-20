@@ -163,7 +163,7 @@ export class OpenSearchVectorSearch extends Construct {
       tracing: lambda.Tracing.ACTIVE,
       timeout: cdk.Duration.minutes(5),
       role: indexDocumentRole,
-      memorySize: 3072,
+      memorySize: 3008,
       vpc,
       securityGroups: [ec2.SecurityGroup.fromSecurityGroupId(this, 'IndexDocumentSG', sg.securityGroupId)],
       vpcSubnets: vpc.selectSubnets({

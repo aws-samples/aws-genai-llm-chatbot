@@ -41,7 +41,7 @@ export class DocumentIndexing extends Construct {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       }),
       timeout: cdk.Duration.minutes(10),
-      memorySize: 3072,
+      memorySize: 3008,
       logRetention: logs.RetentionDays.ONE_DAY,
       environment: {
         REGION_NAME: cdk.Aws.REGION,
