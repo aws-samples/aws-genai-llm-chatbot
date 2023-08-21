@@ -1,3 +1,4 @@
 aws_lambda_powertools
 aws_xray_sdk
+pydantic
 langchain
