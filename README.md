@@ -224,7 +224,7 @@ make sure that the environment variable matches what is expected by the framewor
 ### WITH Amazon Bedrock
 If you want to use Amazon Bedrock you must sign up for preview access from the AWS console. 
 
-If access is granted you need to add the `region` and `endpoint_url` provided as part of the preview access in [lib/aws-genai-llm-chatbot-stack.ts](./lib/aws-genai-llm-chatbot-stack.ts##L36)
+If access is granted you need to add the `region` and `endpoint_url` provided as part of the preview access in [lib/aws-genai-llm-chatbot-stack.ts](./lib/aws-genai-llm-chatbot-stack.ts#L36)
 
 ```
 const bedrockRegion = 'region';
