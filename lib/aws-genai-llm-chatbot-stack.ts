@@ -92,6 +92,40 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
       }),
     );
 
+
+    /* --- OPTIONAL: SELF HOSTED MODELS ON SAGEMAKER --- */
+    /*
+    // Falcon Lite example from HuggingFace
+    const falconLite = new SageMakerModel(this, 'FalconLite', {
+      vpc: vpc.vpc,
+      region: this.region,
+      model: {
+        type: DeploymentType.Container,
+        modelId: 'amazon/FalconLite',
+        container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
+        instanceType: 'ml.g5.12xlarge',
+        // https://github.com/awslabs/extending-the-context-length-of-open-source-llms/blob/main/custom-tgi-ecr/deploy.ipynb
+        containerStartupHealthCheckTimeoutInSeconds: 600,
+        env: {
+          SM_NUM_GPUS: JSON.stringify(4),
+          MAX_INPUT_LENGTH: JSON.stringify(12000),
+          MAX_TOTAL_TOKENS: JSON.stringify(12001),
+          HF_MODEL_QUANTIZE: 'gptq',
+          TRUST_REMOTE_CODE: JSON.stringify(true),
+          MAX_BATCH_PREFILL_TOKENS: JSON.stringify(12001),
+          MAX_BATCH_TOTAL_TOKENS: JSON.stringify(12001),
+          GPTQ_BITS: JSON.stringify(4),
+          GPTQ_GROUPSIZE: JSON.stringify(128),
+          DNTK_ALPHA_SCALER: JSON.stringify(0.25),
+        },
+      },
+    });
+    // Make model interface aware of the sagemaker endpoint and add the necessary permissions to the lambda function
+    langchainInterface.addSageMakerEndpoint({
+      name: 'FalconLite',
+      endpoint: falconLite.endpoint,
+    });
+    /*
     // LLAMA V2 example from Jumpstart
     /*
     const llama2base = new SageMakerModel(this, 'LLamaV2Base', {
@@ -136,63 +170,6 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
     langchainInterface.addSageMakerEndpoint({
       name: 'LLama2-13b-chat',
       endpoint: llama2chat.endpoint,
-    });
-    */
-    
-    /* --- OPTIONAL: SELF HOSTED MODELS ON SAGEMAKER --- */
-    /*
-    // Falcon Lite example from HuggingFace
-    const falconLite = new SageMakerModel(this, 'FalconLite', {
-      vpc: vpc.vpc,
-      region: this.region,
-      model: {
-        type: DeploymentType.Container,
-        modelId: 'amazon/FalconLite',
-        container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
-        instanceType: 'ml.g5.12xlarge',
-        // https://github.com/awslabs/extending-the-context-length-of-open-source-llms/blob/main/custom-tgi-ecr/deploy.ipynb
-        containerStartupHealthCheckTimeoutInSeconds: 600,
-        env: {
-          SM_NUM_GPUS: JSON.stringify(4),
-          MAX_INPUT_LENGTH: JSON.stringify(12000),
-          MAX_TOTAL_TOKENS: JSON.stringify(12001),
-          HF_MODEL_QUANTIZE: 'gptq',
-          TRUST_REMOTE_CODE: JSON.stringify(true),
-          MAX_BATCH_PREFILL_TOKENS: JSON.stringify(12001),
-          MAX_BATCH_TOTAL_TOKENS: JSON.stringify(12001),
-          GPTQ_BITS: JSON.stringify(4),
-          GPTQ_GROUPSIZE: JSON.stringify(128),
-          DNTK_ALPHA_SCALER: JSON.stringify(0.25),
-        },
-      },
-    });
-    // Make model interface aware of the sagemaker endpoint and add the necessary permissions to the lambda function
-    langchainInterface.addSageMakerEndpoint({
-      name: 'FalconLite',
-      endpoint: falconLite.endpoint,
-    });
-    /*
-    // LLAMA V2 example from Jumpstart
-    const llamav2 = new SageMakerModel(this, 'LLamaV2', {
-      vpc: vpc.vpc,
-      region: this.region,
-      model: {
-        type: DeploymentType.ModelPackage,
-        modelId: 'meta-Llama2',
-        instanceType: 'ml.g5.12xlarge',
-        packages: (scope) =>
-          new cdk.CfnMapping(scope, 'LlamaV2PackageMapping', {
-            lazy: true,
-            mapping: {
-              'eu-west-1': { arn: 'arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-v3-8f4d5693a64a320ab0e8207af3551ae4' },
-            },
-          }),
-      },
-    });
-    // Make model interface aware of the sagemaker endpoint and add the necessary permissions to the lambda function
-    langchainInterface.addSageMakerEndpoint({
-      name: 'LLamaV2',
-      endpoint: llamav2.endpoint,
     });
     */
 
