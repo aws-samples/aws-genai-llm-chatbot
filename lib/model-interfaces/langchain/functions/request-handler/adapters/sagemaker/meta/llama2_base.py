@@ -7,7 +7,7 @@ from ...base import ModelAdapter
 from ...registry import registry
 
 
-class Llama2ContentHandler(LLMContentHandler):
+class Llama2BaseContentHandler(LLMContentHandler):
     content_type = "application/json"
     accepts = "application/json"
 
@@ -25,10 +25,10 @@ class Llama2ContentHandler(LLMContentHandler):
         return response_json[0]["generation"]
 
 
-content_handler = Llama2ContentHandler()
+content_handler = Llama2BaseContentHandler()
 
 
-class SMLlama2Adapter(ModelAdapter):
+class SMLlama2BaseAdapter(ModelAdapter):
     def __init__(self, model_id, **kwargs):
         self.model_id = model_id
 
@@ -45,4 +45,4 @@ class SMLlama2Adapter(ModelAdapter):
 
 
 # Register the adapter
-registry.register(r"^SageMaker.meta-Llama*", SMLlama2Adapter)
+registry.register(r"(?i)^(?!.*chat.*)(SageMaker\.meta-LLama.*\d+b)$", SMLlama2BaseAdapter)
