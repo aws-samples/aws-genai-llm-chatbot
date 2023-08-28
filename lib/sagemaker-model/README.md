@@ -1,6 +1,6 @@
 ## SageMaker Model Construct
 
-A prupose-built CDK Construct, [SageMakerModel](./lib/sagemaker-model/index.ts), which helps facilitate the deployment of model to SageMaker, you can use this layer to deploy:
+A prupose-built CDK Construct, [SageMakerModel](./index.ts), which helps facilitate the deployment of model to SageMaker, you can use this layer to deploy:
 - Models from SageMaker Foundation Models
 - Models from SageMaker Jumpstart.
 - Model supported by [HuggingFace LLM Inference container](https://huggingface.co/blog/sagemaker-huggingface-llm).
