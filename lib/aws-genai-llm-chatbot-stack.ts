@@ -35,6 +35,7 @@ export class AwsGenaiLllmChatbotStack extends cdk.Stack {
 
     // If you have access to bedrock, set up here the region and endpoint url
     const bedrockRegion = 'region';
+    // For example https://bedrock.us-east-1.amazonaws.com
     const bedrockEndpointUrl = 'https://endpoint-url';
 
     // VPC Construct
