@@ -268,9 +268,13 @@ You have:
 1. An [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 2. `AdministratorAccess` policy granted to your AWS account (for production, we recommend restricting access as needed)
 3. Both console and programmatic access
-4. [NodeJS 18](https://nodejs.org/en/download/) installed
+4. [NodeJS 16 or 18](https://nodejs.org/en/download/) installed
     - If you are using [`nvm`](https://github.com/nvm-sh/nvm) you can run the following before proceeding
     - ```
+      nvm install 16 && nvm use 16
+
+      or
+
       nvm install 18 && nvm use 18
       ```
 5. [AWS CLI](https://aws.amazon.com/cli/) installed and configured to use with your AWS account
