@@ -1,6 +1,6 @@
 aws_lambda_powertools
 aws_xray_sdk
-langchain
+langchain==0.0.288
 psycopg2-binary
 pgvector
-unstructured[all-docs]
+unstructured[all-docs]==0.10.14
