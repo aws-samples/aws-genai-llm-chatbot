@@ -1,0 +1,76 @@
+
+import os
+import uuid
+import boto3
+import genai_core.types
+import genai_core.documents
+import genai_core.embeddings
+import genai_core.aurora.chunks
+from typing import List, Optional
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
+s3 = boto3.resource("s3")
+
+
+def add_chunks(replace: bool, workspace: dict, document: dict, document_sub_id: Optional[str],
+               chunks: List[str], chunk_complements: List[str], path: Optional[str] = None):
+    workspace_id = workspace["workspace_id"]
+    engine = workspace["engine"]
+    embeddings_model_provider = workspace["embeddings_model_provider"]
+    embeddings_model_name = workspace["embeddings_model_name"]
+    document_id = document["document_id"]
+    document_type = document["document_type"]
+    document_sub_type = document["document_sub_type"]
+    path = path if path else document["path"]
+    title = document["title"]
+
+    embeddings_model = genai_core.embeddings.get_embeddings_model(
+        embeddings_model_provider, embeddings_model_name)
+
+    if embeddings_model is None:
+        raise genai_core.types.CommonError("Embeddings model not found")
+
+    chunk_embeddings = genai_core.embeddings.generate_embeddings(
+        embeddings_model, chunks)
+    chunk_ids = [uuid.uuid4() for _ in chunks]
+
+    store_chunks_on_s3(workspace_id, document_id, chunk_ids, chunks)
+
+    if engine == "aurora":
+        result = genai_core.aurora.chunks.add_chunks_aurora(workspace_id=workspace_id,
+                                                            document_id=document_id, document_sub_id=document_sub_id,
+                                                            document_type=document_type, document_sub_type=document_sub_type,
+                                                            path=path, title=title,
+                                                            chunk_ids=chunk_ids, chunk_embeddings=chunk_embeddings,
+                                                            chunks=chunks, chunk_complements=chunk_complements,
+                                                            replace=replace)
+    else:
+        raise genai_core.types.CommonError("Engine not supported")
+
+    added_vectors = result["added_vectors"]
+    genai_core.documents.set_document_vectors(
+        workspace_id, document_id, added_vectors, replace=replace)
+
+
+def split_content(workspace: dict, content: str):
+    chunking_strategy = workspace["chunking_strategy"]
+    chunk_size = workspace["chunk_size"]
+    chunk_overlap = workspace["chunk_overlap"]
+
+    if chunking_strategy == "recursive":
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len
+        )
+
+        text_data = text_splitter.split_text(content)
+
+        return text_data
+
+    raise genai_core.types.CommonError("Chunking strategy not supported")
+
+
+def store_chunks_on_s3(workspace_id: str, document_id: str, chunk_ids: List[str], chunks: List[str]):
+    for chunk_id, chunk in zip(chunk_ids, chunks):
+        s3.Object(PROCESSING_BUCKET_NAME,
+                  f"{workspace_id}/{document_id}/chunks/{chunk_id}.txt").put(Body=chunk)

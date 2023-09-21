@@ -1,8 +1,0 @@
-aws_lambda_powertools
-aws_xray_sdk
-aws_requests_auth
-boto3-1.28.21-py3-none-any.whl
-botocore-1.31.21-py3-none-any.whl
-langchain
-pydantic
-openai

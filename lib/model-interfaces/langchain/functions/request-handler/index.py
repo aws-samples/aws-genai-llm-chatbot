@@ -1,41 +1,39 @@
-import json
 import os
+import boto3
+import json
 import uuid
 from datetime import datetime
-
-import boto3
 from adapters.registry import registry
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.batch import SqsFifoPartialProcessor
+from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from models import list_models
-from rag_sources import list_rag_sources
-from sessions import (
-    list_sessions_by_user_id,
-    get_session,
-    delete_session,
-    delete_user_sessions,
-)
 
-processor = SqsFifoPartialProcessor()
+processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
 logger = Logger()
 
-sns = boto3.client("sns", region_name=os.environ["AWS_REGION"])
+AWS_REGION = os.environ["AWS_REGION"]
+MESSAGES_TOPIC_ARN = os.environ["MESSAGES_TOPIC_ARN"]
+API_KEYS_SECRETS_ARN = os.environ["API_KEYS_SECRETS_ARN"]
+
+sns = boto3.client("sns", region_name=AWS_REGION)
+sequence_number = 0
 
 
 def send_to_client(detail):
     sns.publish(
-        TopicArn=os.environ["MESSAGES_TOPIC_ARN"],
-        MessageGroupId=detail["userId"],
+        TopicArn=MESSAGES_TOPIC_ARN,
         Message=json.dumps(detail),
     )
 
 
 def on_llm_new_token(connection_id, user_id, session_id, self, token, *args, **kwargs):
+    global sequence_number
+    sequence_number += 1
+
     send_to_client(
         {
             "type": "text",
@@ -46,109 +44,11 @@ def on_llm_new_token(connection_id, user_id, session_id, self, token, *args, **k
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "data": {
                 "sessionId": session_id,
-                "token": token,
+                "token": {
+                    "sequenceNumber": sequence_number,
+                    "value": token,
+                },
             },
-        }
-    )
-
-
-def handle_list_models(record):
-    connection_id = record["connectionId"]
-    user_id = record["userId"]
-    send_to_client(
-        {
-            "type": "text",
-            "action": "listModels",
-            "direction": "OUT",
-            "connectionId": connection_id,
-            "userId": user_id,
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "data": list_models(),
-        }
-    )
-
-
-def handle_list_rag_sources(record):
-    connection_id = record["connectionId"]
-    user_id = record["userId"]
-    send_to_client(
-        {
-            "type": "text",
-            "action": "listRagSources",
-            "direction": "OUT",
-            "connectionId": connection_id,
-            "userId": user_id,
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "data": list_rag_sources(),
-        }
-    )
-
-
-def handle_list_sessions(record):
-    connection_id = record["connectionId"]
-    user_id = record["userId"]
-    send_to_client(
-        {
-            "type": "text",
-            "action": "listSessions",
-            "direction": "OUT",
-            "connectionId": connection_id,
-            "userId": user_id,
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "data": list_sessions_by_user_id(user_id),
-        }
-    )
-
-
-def handle_get_session(record):
-    connection_id = record["connectionId"]
-    user_id = record["userId"]
-    data = record.get("data", {})
-    session_id = data.get("sessionId", "")
-    send_to_client(
-        {
-            "type": "text",
-            "action": "getSession",
-            "direction": "OUT",
-            "connectionId": connection_id,
-            "userId": user_id,
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "data": get_session(session_id, user_id),
-        }
-    )
-
-
-def handle_delete_session(record):
-    connection_id = record["connectionId"]
-    user_id = record["userId"]
-    data = record.get("data", {})
-    session_id = data.get("sessionId", "")
-    send_to_client(
-        {
-            "type": "text",
-            "action": "deleteSession",
-            "direction": "OUT",
-            "connectionId": connection_id,
-            "userId": user_id,
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "data": delete_session(session_id, user_id),
-        }
-    )
-
-
-def handle_delete_user_sessions(record):
-    connection_id = record["connectionId"]
-    user_id = record["userId"]
-    record.get("data", {})
-    send_to_client(
-        {
-            "type": "text",
-            "action": "deleteUserSessions",
-            "direction": "OUT",
-            "connectionId": connection_id,
-            "userId": user_id,
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "data": delete_user_sessions(user_id),
         }
     )
 
@@ -158,11 +58,10 @@ def handle_run(record):
     user_id = record["userId"]
     data = record["data"]
     provider = data["provider"]
-    model_id = data["modelId"]
+    model_id = data["modelName"]
     mode = data["mode"]
     prompt = data["text"]
-    rag_source = data.get("ragSource", None)
-
+    workspace_id = data.get("workspaceId", None)
     session_id = data.get("sessionId")
 
     if not session_id:
@@ -184,7 +83,7 @@ def handle_run(record):
 
     response = model.run(
         prompt=prompt,
-        rag_source=rag_source,
+        workspace_id=workspace_id,
         tools=[],
     )
     logger.info(response)
@@ -211,18 +110,6 @@ def record_handler(record: SQSRecord):
 
     if detail["action"] == "run":
         handle_run(detail)
-    if detail["action"] == "listModels":
-        handle_list_models(detail)
-    if detail["action"] == "listRagSources":
-        handle_list_rag_sources(detail)
-    if detail["action"] == "listSessions":
-        handle_list_sessions(detail)
-    if detail["action"] == "getSession":
-        handle_get_session(detail)
-    if detail["action"] == "deleteSession":
-        handle_delete_session(detail)
-    if detail["action"] == "deleteUserSessions":
-        handle_delete_user_sessions(detail)
 
 
 def handle_failed_records(records):
@@ -259,9 +146,8 @@ def handle_failed_records(records):
 def handler(event, context: LambdaContext):
     batch = event["Records"]
 
-    api_keys = parameters.get_secret(
-        os.environ["API_KEYS_SECRETS_ARN"], transform="json"
-    )
+    api_keys = parameters.get_secret(API_KEYS_SECRETS_ARN, transform="json"
+                                     )
     for key in api_keys:
         os.environ[key] = api_keys[key]
 

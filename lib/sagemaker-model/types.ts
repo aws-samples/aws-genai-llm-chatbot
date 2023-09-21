@@ -1,8 +1,7 @@
-import * as cdk from 'aws-cdk-lib';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as codebuild from 'aws-cdk-lib/aws-codebuild';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import { Construct } from 'constructs';
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { Construct } from "constructs";
 
 export interface SageMakerModelProps extends cdk.NestedStackProps {
   vpc: ec2.Vpc;
@@ -11,12 +10,15 @@ export interface SageMakerModelProps extends cdk.NestedStackProps {
 }
 
 export enum DeploymentType {
-  Container = 'container',
-  ModelPackage = 'model-package',
-  CustomInferenceScript = 'custom-inference-script',
+  Container = "container",
+  ModelPackage = "model-package",
+  CustomInferenceScript = "custom-inference-script",
 }
 
-export type ModelConfig = ModelContainerConfig | ModelPackageConfig | ModelCustomScriptConfig;
+export type ModelConfig =
+  | ModelContainerConfig
+  | ModelPackageConfig
+  | ModelCustomScriptConfig;
 
 export interface ModelConfigBase {
   modelId: string;
@@ -36,7 +38,8 @@ export interface ModelPackageConfig extends ModelConfigBase {
   containerStartupHealthCheckTimeoutInSeconds?: number;
 }
 
-export interface ModelCustomScriptConfig extends Omit<ModelConfigBase, 'modelId'> {
+export interface ModelCustomScriptConfig
+  extends Omit<ModelConfigBase, "modelId"> {
   type: DeploymentType.CustomInferenceScript;
   modelId: string | string[];
   codeFolder: string;

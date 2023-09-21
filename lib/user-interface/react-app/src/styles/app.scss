@@ -1,0 +1,56 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --app-color-scheme: light;
+  color-scheme: var(--app-color-scheme);
+}
+
+html,
+body,
+#root,
+div[data-amplify-authenticator],
+div[data-amplify-theme] {
+  height: 100%;
+}
+
+body {
+  background-color: #ffffff;
+  overflow-y: scroll;
+}
+
+body.awsui-dark-mode {
+  background-color: #0e1b2a;
+}
+
+.matrix-table {
+  border: 1px solid #d6d6d6;
+  border-radius: 2px;
+  border-collapse: collapse;
+  font-size: 1.1rem;
+
+  th {
+    border: 1px solid #d6d6d6;
+  }
+
+  td {
+    border: 1px solid #d6d6d6;
+    padding: 10px;
+  }
+}
+
+.awsui-dark-mode {
+  .matrix-table {
+    border: 1px solid rgb(95, 107, 122);
+
+    th {
+      border: 1px solid rgb(95, 107, 122);
+    }
+
+    td {
+      border: 1px solid rgb(95, 107, 122);
+      padding: 12px;
+    }
+  }
+}

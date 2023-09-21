@@ -1,19 +1,11 @@
 import os
 from enum import Enum
-from urllib.parse import urlparse
-
-import boto3
-
-from aws_lambda_powertools import Logger, Tracer
-from aws_requests_auth.aws_auth import AWSRequestsAuth
+from aws_lambda_powertools import Logger
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
-
-
-from .chat_message_histories import DynamoDBChatMessageHistory
-from .remote_retriever import RemoteRetriever
+from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 
 logger = Logger()
 
@@ -36,7 +28,8 @@ class ModelAdapter:
         self.__bind_callbacks()
 
     def __bind_callbacks(self):
-        callback_methods = [method for method in dir(self) if method.startswith("on_")]
+        callback_methods = [method for method in dir(
+            self) if method.startswith("on_")]
         valid_callback_names = [
             attr for attr in dir(self.callback_handler) if attr.startswith("on_")
         ]
@@ -83,42 +76,14 @@ class ModelAdapter:
 
         return prompt_template
 
-    def get_retriever(self, source):
-        session = boto3.Session()
-        credentials = session.get_credentials()
-        rag_source_env_var = f"RAG_SOURCE_{source.upper()}"
-
-        if not rag_source_env_var in os.environ:
-            raise ValueError(
-                f"unsupported RAG source {source} or API endpoint is not defined in LAMBDA ENV Vars"
-            )
-
-        url = os.environ[rag_source_env_var]
-        host = urlparse(url).hostname
-        logger.info(host)
-        auth = AWSRequestsAuth(
-            aws_access_key=credentials.access_key,
-            aws_secret_access_key=credentials.secret_key,
-            aws_token=credentials.token,
-            aws_host=host,
-            aws_region=os.environ["AWS_REGION"],
-            aws_service="execute-api",
-        )
-
-        logger.info(auth)
-        return RemoteRetriever(
-            url=url,
-            auth=auth,
-        )
-
-    def run_with_chain(self, user_prompt, rag_source=None):
+    def run_with_chain(self, user_prompt, workspace_id=None):
         if not self.llm:
             raise ValueError("llm must be set")
 
-        if rag_source:
+        if workspace_id:
             conversation = ConversationalRetrievalChain.from_llm(
                 self.llm,
-                self.get_retriever(rag_source.lower()),
+                WorkspaceRetriever(workspace_id=workspace_id),
                 return_source_documents=True,
                 memory=self.get_memory(output_key="answer"),
                 verbose=True,
@@ -139,8 +104,8 @@ class ModelAdapter:
                 "mode": self._mode,
                 "sessionId": self.session_id,
                 "userId": self.user_id,
-                "rag_source": rag_source,
-                "source_documents": documents,
+                "workspaceId": workspace_id,
+                "sourceDocuments": documents,
             }
 
             self.chat_history.add_metadata(metadata)
@@ -178,12 +143,12 @@ class ModelAdapter:
             "metadata": metadata,
         }
 
-    def run(self, prompt, rag_source=None, *args, **kwargs):
+    def run(self, prompt, workspace_id=None, *args, **kwargs):
         logger.debug(f"run with {kwargs}")
-        logger.debug(f"rag_source {rag_source}")
+        logger.debug(f"workspace_id {workspace_id}")
         logger.debug(f"mode: {self._mode}")
 
         if self._mode == "chain":
-            return self.run_with_chain(prompt, rag_source)
+            return self.run_with_chain(prompt, workspace_id)
 
         raise ValueError(f"unknown mode {self._mode}")

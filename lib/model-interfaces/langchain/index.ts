@@ -1,104 +1,125 @@
-import * as path from 'path';
+import * as path from "path";
+import * as cdk from "aws-cdk-lib";
+import { CfnEndpoint } from "aws-cdk-lib/aws-sagemaker";
+import { Construct } from "constructs";
+import { Shared } from "../../shared";
+import { SystemConfig } from "../../shared/types";
+import { RagEngines } from "../../rag-engines";
+import * as sns from "aws-cdk-lib/aws-sns";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
-import * as python from '@aws-cdk/aws-lambda-python-alpha';
-import * as cdk from 'aws-cdk-lib';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-
-import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
-import { CfnEndpoint } from 'aws-cdk-lib/aws-sagemaker';
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
-import { Construct } from 'constructs';
-
-import { Layer } from '../../layer';
-
-interface LangChainInterfaceProps extends cdk.NestedStackProps {
-  messagesTopic: sns.Topic;
-  bedrockRegion?: string;
-  bedrockEndpointUrl?: string;
-  architecture: lambda.Architecture;
-  runtime: lambda.Runtime;
+interface LangChainInterfaceProps {
+  readonly shared: Shared;
+  readonly config: SystemConfig;
+  readonly ragEngines?: RagEngines;
+  readonly messagesTopic: sns.Topic;
+  readonly sessionsTable: dynamodb.Table;
+  readonly byUserIdIndex: string;
 }
 
 export class LangChainInterface extends Construct {
   public readonly ingestionQueue: sqs.Queue;
-  public readonly requestHandler: python.PythonFunction;
+  public readonly requestHandler: lambda.Function;
 
   constructor(scope: Construct, id: string, props: LangChainInterfaceProps) {
     super(scope, id);
 
-    const { messagesTopic, bedrockRegion, bedrockEndpointUrl, architecture, runtime } = props;
-
-    // create secret for 3P models keys
-    const keysSecrets = new secretsmanager.Secret(this, 'KeySecrets', {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      secretObjectValue: {},
-    });
-
-    const commonLayer = new Layer(this, 'CommonLayer', {
-      runtime,
-      architecture,
-      path: path.join(__dirname, './layers/common'),
-    });
-
-    const sessionsTable = new dynamodb.Table(this, 'SessionsTable', {
-      partitionKey: {
-        name: 'SessionId',
-        type: dynamodb.AttributeType.STRING,
-      },
-      sortKey: {
-        name: 'UserId',
-        type: dynamodb.AttributeType.STRING,
-      },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-    const byUserIdIndex = 'byUserId';
-    sessionsTable.addGlobalSecondaryIndex({
-      indexName: byUserIdIndex,
-      partitionKey: { name: 'UserId', type: dynamodb.AttributeType.STRING },
-    });
-
-    const requestHandler = new python.PythonFunction(this, 'RequestHandler', {
-      entry: path.join(__dirname, './functions/request-handler'),
-      runtime,
-      architecture,
+    const requestHandler = new lambda.Function(this, "RequestHandler", {
+      vpc: props.shared.vpc,
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "./functions/request-handler")
+      ),
+      handler: "index.handler",
+      runtime: props.shared.pythonRuntime,
+      architecture: props.shared.lambdaArchitecture,
       tracing: lambda.Tracing.ACTIVE,
       timeout: cdk.Duration.minutes(15),
       memorySize: 1024,
-      layers: [commonLayer.layer],
+      layers: [
+        props.shared.powerToolsLayer,
+        props.shared.commonLayer.layer,
+        props.shared.pythonSDKLayer,
+      ],
       environment: {
-        SESSIONS_TABLE_NAME: sessionsTable.tableName,
-        SESSIONS_BY_USER_ID_INDEX_NAME: byUserIdIndex,
-        API_KEYS_SECRETS_ARN: keysSecrets.secretArn,
-        MESSAGES_TOPIC_ARN: messagesTopic.topicArn,
-        BEDROCK_REGION: bedrockRegion || '',
-        BEDROCK_ENDPOINT_URL: bedrockEndpointUrl || '',
+        ...props.shared.defaultEnvironmentVariables,
+        CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
+        SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
+        SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
+        API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
+        MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
+        WORKSPACES_TABLE_NAME:
+          props.ragEngines?.workspacesTable.tableName ?? "",
+        WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
+          props.ragEngines?.workspacesByObjectTypeIndexName ?? "",
+        AURORA_DB_SECRET_ID: props.ragEngines?.auroraDatabase?.secret
+          ?.secretArn as string,
+        SAGEMAKER_RAG_MODELS_ENDPOINT:
+          props.ragEngines?.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
       },
     });
 
-    messagesTopic.grantPublish(requestHandler);
-    sessionsTable.grantReadWriteData(requestHandler);
-    keysSecrets.grantRead(requestHandler);
+    if (props.config.bedrock?.roleArn) {
+      requestHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["sts:AssumeRole"],
+          resources: [props.config.bedrock.roleArn],
+        })
+      );
+    }
+
+    if (props.ragEngines?.auroraDatabase) {
+      props.ragEngines?.auroraDatabase.secret?.grantRead(requestHandler);
+      props.ragEngines?.auroraDatabase.connections.allowDefaultPortFrom(
+        requestHandler
+      );
+    }
+
+    if (props.ragEngines?.workspacesTable) {
+      props.ragEngines?.workspacesTable.grantReadWriteData(requestHandler);
+    }
+
+    if (props.ragEngines?.documentsTable) {
+      props.ragEngines?.documentsTable.grantReadWriteData(requestHandler);
+    }
+
+    if (props.ragEngines?.sageMakerRagModelsEndpoint) {
+      requestHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["sagemaker:InvokeEndpoint"],
+          resources: [props.ragEngines?.sageMakerRagModelsEndpoint.ref],
+        })
+      );
+    }
+
+    props.sessionsTable.grantReadWriteData(requestHandler);
+    props.messagesTopic.grantPublish(requestHandler);
+    props.shared.apiKeysSecret.grantRead(requestHandler);
+    props.shared.configParameter.grantRead(requestHandler);
 
     // Add Amazon Bedrock permissions to the IAM role for the Lambda function
     requestHandler.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ['bedrock:*'],
-        resources: ['*'],
-      }),
+        actions: ["bedrock:*"],
+        resources: ["*"],
+      })
     );
 
-    const deadLetterQueue = new sqs.Queue(this, 'GenericModelDLQ.fifo', {
-      fifo: true,
-    });
-    const queue = new sqs.Queue(this, 'GenericModelQueue.fifo', {
-      fifo: true,
+    requestHandler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          "comprehend:DetectDominantLanguage",
+          "comprehend:DetectSentiment",
+        ],
+        resources: ["*"],
+      })
+    );
+
+    const deadLetterQueue = new sqs.Queue(this, "GenericModelDLQ");
+    const queue = new sqs.Queue(this, "GenericModelQueue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(15 * 6),
@@ -107,45 +128,41 @@ export class LangChainInterface extends Construct {
         maxReceiveCount: 3,
       },
     });
+
     queue.addToResourcePolicy(
       new iam.PolicyStatement({
-        actions: ['sqs:SendMessage'],
+        actions: ["sqs:SendMessage"],
         resources: [queue.queueArn],
-        principals: [new iam.ServicePrincipal('events.amazonaws.com'), new iam.ServicePrincipal('sqs.amazonaws.com')],
-      }),
+        principals: [
+          new iam.ServicePrincipal("events.amazonaws.com"),
+          new iam.ServicePrincipal("sqs.amazonaws.com"),
+        ],
+      })
     );
+
     requestHandler.addEventSource(new lambdaEventSources.SqsEventSource(queue));
 
     this.ingestionQueue = queue;
     this.requestHandler = requestHandler;
-
-    new cdk.CfnOutput(this, 'KeysSecretsName', {
-      value: keysSecrets.secretName,
-    });
   }
 
-  public addRagSource({ api, type }: { api: apigateway.LambdaRestApi; type: string }) {
-    // grant permission to invoke the api from the lambda function
+  public addSageMakerEndpoint({
+    endpoint,
+    name,
+  }: {
+    endpoint: CfnEndpoint;
+    name: string;
+  }) {
     this.requestHandler.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ['execute-api:Invoke'],
-        resources: [`${api.arnForExecuteApi()}`],
-      }),
-    );
-    // clean type string from special characters spaces, dashes, underscores and dots
-    const cleanType = type.replace(/[\s\.\-_]/g, '').toUpperCase();
-    // add rag source to environment variables
-    this.requestHandler.addEnvironment(`RAG_SOURCE_${cleanType}`, api.url);
-  }
-
-  public addSageMakerEndpoint({ endpoint, name }: { endpoint: CfnEndpoint; name: string }) {
-    this.requestHandler.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ['sagemaker:InvokeEndpoint'],
+        actions: ["sagemaker:InvokeEndpoint"],
         resources: [endpoint.ref],
-      }),
+      })
     );
-    const cleanName = name.replace(/[\s\.\-_]/g, '').toUpperCase();
-    this.requestHandler.addEnvironment(`SAGEMAKER_ENDPOINT_${cleanName}`, endpoint.attrEndpointName);
+    const cleanName = name.replace(/[\s.\-_]/g, "").toUpperCase();
+    this.requestHandler.addEnvironment(
+      `SAGEMAKER_ENDPOINT_${cleanName}`,
+      endpoint.attrEndpointName
+    );
   }
 }

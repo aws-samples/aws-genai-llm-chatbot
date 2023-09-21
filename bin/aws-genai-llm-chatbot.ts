@@ -1,8 +1,11 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-
-import { AwsGenaiLllmChatbotStack } from '../lib/aws-genai-llm-chatbot-stack';
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { AwsGenAILLMChatbotStack } from "../lib/aws-genai-llm-chatbot-stack";
+import { config } from "../config";
 
 const app = new cdk.App();
-new AwsGenaiLllmChatbotStack(app, 'AwsGenaiLllmChatbotStack');
+
+new AwsGenAILLMChatbotStack(app, `${config.prefix}GenAIChatBotStack`, {
+  config,
+});

@@ -49,4 +49,4 @@ class SMLlama2ChatAdapter(ModelAdapter):
 
 
 # Register the adapter
-registry.register(r"(?i)SageMaker\.meta-LLama.*\d+b.*chat.*", SMLlama2ChatAdapter)
+registry.register(r"(?i)sagemaker\.meta-LLama.*\d+b.*chat.*", SMLlama2ChatAdapter)

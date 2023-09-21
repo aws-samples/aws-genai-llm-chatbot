@@ -1,7 +1,5 @@
 import os
-
 from langchain.chat_models import ChatOpenAI
-
 from ..base import ModelAdapter
 from ..registry import registry
 
@@ -16,7 +14,15 @@ class GPTAdapter(ModelAdapter):
         if not os.environ.get("OPENAI_API_KEY"):
             raise Exception("OPENAI_API_KEY must be set in the environment")
 
-        return ChatOpenAI(model_name=self.model_id, temperature=0, **model_kwargs)
+        params = {}
+        if "streaming" in model_kwargs:
+            params["streaming"] = model_kwargs["streaming"]
+        if "temperature" in model_kwargs:
+            params["temperature"] = model_kwargs["temperature"]
+        if "maxTokens" in model_kwargs:
+            params["max_tokens"] = model_kwargs["maxTokens"]
+
+        return ChatOpenAI(model_name=self.model_id, **params)
 
 
 # Register the adapter

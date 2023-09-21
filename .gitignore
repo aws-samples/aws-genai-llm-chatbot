@@ -1,14 +1,3 @@
-bin/*.js
-!jest.config.js
-*.d.ts
-node_modules
-
-aws-exports.json
-.cdk.staging
-cdk.context.json
-cdk.out
-venv
-
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows,linux,amplify,node,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,linux,amplify,node,python
 
@@ -408,9 +397,43 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 test-endpoint
 benchmark-prompts
 misc
 deploy-models
 
-chatbot-ui/public/aws-exports.json
+bin/*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+aws-exports.json
+.cdk.staging
+cdk.context.json
+cdk.out
+venv
+
+lib/user-interface/react-app/public/aws-exports.json

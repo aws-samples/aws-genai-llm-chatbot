@@ -1,13 +1,11 @@
-export * from './container-images';
-export * from './types';
-
-import * as sagemaker from 'aws-cdk-lib/aws-sagemaker';
-import { Construct } from 'constructs';
-
-import { deployContainerModel } from './deploy-container-model';
-import { deployCustomScriptModel } from './deploy-custom-script-model';
-import { deployPackageModel } from './deploy-package-model';
-import { SageMakerModelProps, DeploymentType } from './types';
+export * from "./container-images";
+export * from "./types";
+import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
+import { Construct } from "constructs";
+import { deployContainerModel } from "./deploy-container-model";
+import { deployCustomScriptModel } from "./deploy-custom-script-model";
+import { deployPackageModel } from "./deploy-package-model";
+import { SageMakerModelProps, DeploymentType } from "./types";
 
 export class SageMakerModel extends Construct {
   public readonly endpoint: sagemaker.CfnEndpoint;

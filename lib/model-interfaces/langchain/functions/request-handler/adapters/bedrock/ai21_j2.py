@@ -1,7 +1,4 @@
-import os
-
-import boto3
-from langchain.agents import ZeroShotAgent
+import genai_core.clients
 from langchain.llms import Bedrock
 from langchain.prompts.prompt import PromptTemplate
 
@@ -16,20 +13,20 @@ class AI21J2Adapter(ModelAdapter):
         super().__init__(*args, **kwargs)
 
     def get_llm(self, model_kwargs={}):
-        region_name = os.environ["BEDROCK_REGION"]
-        endpoint_url = os.environ["BEDROCK_ENDPOINT_URL"]
-        client = boto3.client(
-            "bedrock",
-            region_name=region_name,
-            endpoint_url=endpoint_url,
-        )
+        bedrock = genai_core.clients.get_bedrock_client()
 
-        parameters = {"temperature": 0.6}
+        params = {}
+        if "temperature" in model_kwargs:
+            params["temperature"] = model_kwargs["temperature"]
+        if "topP" in model_kwargs:
+            params["topP"] = model_kwargs["topP"]
+        if "maxTokens" in model_kwargs:
+            params["maxTokens"] = model_kwargs["maxTokens"]
 
         return Bedrock(
-            client=client,
+            client=bedrock,
             model_id=self.model_id,
-            model_kwargs=parameters,
+            model_kwargs=params,
         )
 
     def get_prompt(self):

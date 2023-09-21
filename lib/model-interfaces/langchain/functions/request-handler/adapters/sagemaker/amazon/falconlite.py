@@ -67,4 +67,4 @@ class SMFalconLiteAdapter(ModelAdapter):
 
 
 # Register the adapter
-registry.register(r"^SageMaker.amazon-FalconLite*", SMFalconLiteAdapter)
+registry.register(r"(?i)sagemaker\.amazon-FalconLite*", SMFalconLiteAdapter)

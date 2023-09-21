@@ -1,0 +1,10 @@
+.vscode
+.webpack
+node_modules
+native_modules
+tsconfig.json
+coverage
+build
+public
+out
+cdk.out

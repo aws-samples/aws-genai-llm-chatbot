@@ -1,0 +1,113 @@
+@use "@cloudscape-design/design-tokens/index" as awsui;
+
+.chat_container {
+  margin-bottom: -40px;
+  min-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@media (min-width: 466px) {
+  .chat_container {
+    min-height: calc(100vh - 104px);
+  }
+}
+
+@media (min-width: 689px) {
+  .chat_container {
+    min-height: calc(100vh - 60px);
+  }
+}
+
+@media (min-width: 913px) {
+  .chat_container {
+    min-height: calc(100vh - 68px);
+  }
+}
+
+.welcome_text {
+  color: awsui.$color-text-body-default;
+  font-size: 3rem;
+  font-weight: bolder;
+}
+
+.input_container {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: awsui.$space-scaled-l;
+  padding-top: awsui.$space-scaled-xxl;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    awsui.$color-background-container-content 20%
+  );
+  margin-left: -8px;
+  margin-right: -8px;
+  container-type: inline-size;
+  container-name: input_container;
+}
+
+.input_textarea_container {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.input_textarea {
+  resize: none;
+  border: none;
+  padding: 12px 12px 12px 4px;
+  background-color: transparent;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
+}
+
+.input_controls {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(300px, 800px) minmax(180px, auto);
+  gap: awsui.$space-scaled-xs;
+  align-items: center;
+
+  .input_controls_selects_2 {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: awsui.$space-scaled-xs;
+  }
+
+  .input_controls_selects_1 {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: awsui.$space-scaled-xs;
+  }
+
+  .input_controls_right {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 689px) {
+  .input_controls {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr;
+    gap: awsui.$space-scaled-xs;
+  }
+}
+
+@container (max-width: 689px) {
+  .input_controls {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr;
+    gap: awsui.$space-scaled-xs;
+  }
+}

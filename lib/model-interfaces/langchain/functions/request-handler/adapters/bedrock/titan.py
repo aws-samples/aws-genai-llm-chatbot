@@ -1,9 +1,7 @@
-import os
-
-import boto3
-from langchain.agents import ZeroShotAgent
-from langchain.llms import Bedrock
+import genai_core.clients
 from langchain.prompts.prompt import PromptTemplate
+
+from .client import BedrockChat
 
 from ..base import ModelAdapter
 from ..registry import registry
@@ -16,20 +14,21 @@ class BedrockTitanAdapter(ModelAdapter):
         super().__init__(*args, **kwargs)
 
     def get_llm(self, model_kwargs={}):
-        region_name = os.environ["BEDROCK_REGION"]
-        endpoint_url = os.environ["BEDROCK_ENDPOINT_URL"]
-        client = boto3.client(
-            "bedrock",
-            region_name=region_name,
-            endpoint_url=endpoint_url,
-        )
+        bedrock = genai_core.clients.get_bedrock_client()
 
-        parameters = {"temperature": 0.6}
+        params = {}
+        if "temperature" in model_kwargs:
+            params["temperature"] = model_kwargs["temperature"]
+        if "topP" in model_kwargs:
+            params["topP"] = model_kwargs["topP"]
+        if "maxTokens" in model_kwargs:
+            params["maxTokenCount"] = model_kwargs["maxTokens"]
 
-        return Bedrock(
-            client=client,
+        return BedrockChat(
+            client=bedrock,
             model_id=self.model_id,
-            model_kwargs=parameters,
+            model_kwargs=params,
+            streaming=model_kwargs.get("streaming", False),
         )
 
     def get_prompt(self):
