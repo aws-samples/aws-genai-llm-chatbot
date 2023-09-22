@@ -8,7 +8,7 @@ import {
 } from "../sagemaker-model";
 import {
   SageMakerLLMEndpoint,
-  SupportedLLM,
+  SupportedSageMakerLLM,
   SystemConfig,
 } from "../shared/types";
 import * as ssm from "aws-cdk-lib/aws-ssm";
@@ -27,7 +27,9 @@ export class LargeLanguageModels extends Construct {
 
     const llms: SageMakerLLMEndpoint[] = [];
 
-    if (props.config.llms.includes(SupportedLLM.FalconLite)) {
+    if (
+      props.config.llms?.sagemaker.includes(SupportedSageMakerLLM.FalconLite)
+    ) {
       const falconLite = new SageMakerModel(this, "FalconLite", {
         vpc: props.shared.vpc,
         region: cdk.Aws.REGION,
@@ -59,7 +61,11 @@ export class LargeLanguageModels extends Construct {
       });
     }
 
-    if (props.config.llms.includes(SupportedLLM.Llama2_13b_Base)) {
+    if (
+      props.config.llms?.sagemaker.includes(
+        SupportedSageMakerLLM.Llama2_13b_Base
+      )
+    ) {
       const llama2base = new SageMakerModel(this, "LLamaV2_13B_Base", {
         vpc: props.shared.vpc,
         region: cdk.Aws.REGION,
@@ -85,7 +91,11 @@ export class LargeLanguageModels extends Construct {
       });
     }
 
-    if (props.config.llms.includes(SupportedLLM.Llama2_13b_Chat)) {
+    if (
+      props.config.llms.sagemaker.includes(
+        SupportedSageMakerLLM.Llama2_13b_Chat
+      )
+    ) {
       const llama2chat = new SageMakerModel(this, "LLamaV2_13B_Chat", {
         vpc: props.shared.vpc,
         region: cdk.Aws.REGION,

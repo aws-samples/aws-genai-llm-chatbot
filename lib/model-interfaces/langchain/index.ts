@@ -55,7 +55,7 @@ export class LangChainInterface extends Construct {
           props.ragEngines?.workspacesTable.tableName ?? "",
         WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
           props.ragEngines?.workspacesByObjectTypeIndexName ?? "",
-        AURORA_DB_SECRET_ID: props.ragEngines?.auroraDatabase?.secret
+        AURORA_DB_SECRET_ID: props.ragEngines?.auroraPgVector?.database?.secret
           ?.secretArn as string,
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.ragEngines?.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
@@ -71,22 +71,27 @@ export class LangChainInterface extends Construct {
       );
     }
 
-    if (props.ragEngines?.auroraDatabase) {
-      props.ragEngines?.auroraDatabase.secret?.grantRead(requestHandler);
-      props.ragEngines?.auroraDatabase.connections.allowDefaultPortFrom(
+    if (props.ragEngines?.auroraPgVector) {
+      props.ragEngines?.auroraPgVector.database.secret?.grantRead(
+        requestHandler
+      );
+      props.ragEngines?.auroraPgVector.database.connections.allowDefaultPortFrom(
         requestHandler
       );
     }
 
-    if (props.ragEngines?.workspacesTable) {
-      props.ragEngines?.workspacesTable.grantReadWriteData(requestHandler);
+    if (props.ragEngines?.openSearchVector) {
+      props.ragEngines.openSearchVector.addToAccessPolicy(
+        "request-handler-langchain",
+        [requestHandler.role?.roleArn],
+        ["aoss:ReadDocument", "aoss:WriteDocument"]
+      );
     }
 
-    if (props.ragEngines?.documentsTable) {
-      props.ragEngines?.documentsTable.grantReadWriteData(requestHandler);
-    }
+    if (props.ragEngines) {
+      props.ragEngines.workspacesTable.grantReadWriteData(requestHandler);
+      props.ragEngines.documentsTable.grantReadWriteData(requestHandler);
 
-    if (props.ragEngines?.sageMakerRagModelsEndpoint) {
       requestHandler.addToRolePolicy(
         new iam.PolicyStatement({
           actions: ["sagemaker:InvokeEndpoint"],

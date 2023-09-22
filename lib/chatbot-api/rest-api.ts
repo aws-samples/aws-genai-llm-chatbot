@@ -66,7 +66,7 @@ export class RestApi extends Construct {
         UPLOAD_BUCKET_NAME: props.ragEngines?.uploadBucket?.bucketName ?? "",
         PROCESSING_BUCKET_NAME:
           props.ragEngines?.processingBucket?.bucketName ?? "",
-        AURORA_DB_SECRET_ID: props.ragEngines?.auroraDatabase?.secret
+        AURORA_DB_SECRET_ID: props.ragEngines?.auroraPgVector?.database?.secret
           ?.secretArn as string,
         WORKSPACES_TABLE_NAME:
           props.ragEngines?.workspacesTable.tableName ?? "",
@@ -78,8 +78,11 @@ export class RestApi extends Construct {
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.ragEngines?.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
         CREATE_AURORA_WORKSPACE_WORKFLOW_ARN:
-          props.ragEngines?.createAuroraWorkspaceWorkflow?.stateMachineArn ??
-          "",
+          props.ragEngines?.auroraPgVector?.createAuroraWorkspaceWorkflow
+            ?.stateMachineArn ?? "",
+        CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN:
+          props.ragEngines?.openSearchVector?.createOpenSearchWorkspaceWorkflow
+            ?.stateMachineArn ?? "",
         FILE_IMPORT_WORKFLOW_ARN:
           props.ragEngines?.fileImportWorkflow?.stateMachineArn ?? "",
         WEBSITE_CRAWLING_WORKFLOW_ARN:
@@ -95,15 +98,25 @@ export class RestApi extends Construct {
       props.ragEngines.documentsTable.grantReadWriteData(apiHandler);
     }
 
-    if (props.ragEngines?.auroraDatabase) {
-      props.ragEngines.auroraDatabase.secret?.grantRead(apiHandler);
-      props.ragEngines.auroraDatabase.connections.allowDefaultPortFrom(
+    if (props.ragEngines?.auroraPgVector) {
+      props.ragEngines.auroraPgVector.database.secret?.grantRead(apiHandler);
+      props.ragEngines.auroraPgVector.database.connections.allowDefaultPortFrom(
+        apiHandler
+      );
+
+      props.ragEngines.auroraPgVector.createAuroraWorkspaceWorkflow.grantStartExecution(
         apiHandler
       );
     }
 
-    if (props.ragEngines?.createAuroraWorkspaceWorkflow) {
-      props.ragEngines.createAuroraWorkspaceWorkflow.grantStartExecution(
+    if (props.ragEngines?.openSearchVector) {
+      props.ragEngines.openSearchVector.addToAccessPolicy(
+        "rest-api",
+        [apiHandler.role?.roleArn],
+        ["aoss:ReadDocument", "aoss:WriteDocument"]
+      );
+
+      props.ragEngines.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
         apiHandler
       );
     }

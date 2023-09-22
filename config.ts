@@ -5,7 +5,9 @@ export const config: SystemConfig = {
   bedrock: {
     enabled: true,
   },
-  llms: [],
+  llms: {
+    sagemaker: [],
+  },
   rag: {
     enabled: true,
     engines: {
@@ -16,7 +18,8 @@ export const config: SystemConfig = {
         enabled: true,
       },
       kendra: {
-        enabled: false,
+        enabled: true,
+        createIndex: false,
       },
     },
     embeddingsModels: [

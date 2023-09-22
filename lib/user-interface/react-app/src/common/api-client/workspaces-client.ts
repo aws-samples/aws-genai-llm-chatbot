@@ -60,4 +60,52 @@ export class WorkspacesClient extends ApiClientBase {
       return this.error(error);
     }
   }
+
+  async createOpenSearchWorkspace(params: {
+    name: string;
+    embeddingsModelProvider: string;
+    embeddingsModelName: string;
+    crossEncoderModelProvider: string;
+    crossEncoderModelName: string;
+    languages: string[];
+    chunking_strategy: string;
+    chunkSize: number;
+    chunkOverlap: number;
+  }): Promise<ApiResult<{ id: string }>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(this.getApiUrl("/workspaces"), {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({
+          ...params,
+          kind: "opensearch",
+        }),
+      });
+
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async createKendraWorkspace(params: {
+    name: string;
+  }): Promise<ApiResult<{ id: string }>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(this.getApiUrl("/workspaces"), {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({
+          ...params,
+          kind: "kendra",
+        }),
+      });
+
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
 }

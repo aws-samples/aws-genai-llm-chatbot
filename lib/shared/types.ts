@@ -2,7 +2,7 @@ import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 
 export type ModelProvider = "sagemaker" | "bedrock" | "openai";
 
-export enum SupportedLLM {
+export enum SupportedSageMakerLLM {
   FalconLite = "FalconLite",
   Llama2_13b_Base = "Llama2_13b_Base",
   Llama2_13b_Chat = "Llama2_13b_Chat",
@@ -47,7 +47,9 @@ export interface SystemConfig {
     endpointUrl?: string;
     roleArn?: string;
   };
-  llms: SupportedLLM[];
+  llms: {
+    sagemaker: SupportedSageMakerLLM[];
+  };
   rag: {
     enabled: boolean;
     engines: {
@@ -59,6 +61,7 @@ export interface SystemConfig {
       };
       kendra: {
         enabled: boolean;
+        createIndex: boolean;
         external?: {
           name: string;
           roleArn: string;

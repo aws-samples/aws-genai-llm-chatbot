@@ -42,7 +42,7 @@ class BedrockChat(BaseChatModel, BedrockBase):
 
     class Config:
         """Configuration for this pydantic object."""
-    
+
         allow_population_by_field_name = True
 
     def _stream(
@@ -53,13 +53,14 @@ class BedrockChat(BaseChatModel, BedrockBase):
         **kwargs: Any,
     ) -> Iterator[ChatGenerationChunk]:
         for chunk in self._prepare_input_and_invoke_with_streaming(
-            prompt=messages[-1].content, stop=stop, run_manager=run_manager, **kwargs):
+                prompt=messages[-1].content, stop=stop, run_manager=run_manager, **kwargs):
             finish_reason = chunk.get("finish_reason")
             generation_info = (
                 dict(finish_reason=finish_reason) if finish_reason is not None else None
             )
             print("chunk: ", chunk)
-            chat_chunk = ChatGenerationChunk(message=AIMessageChunk(content=chunk.get("message"), generation_info=generation_info))
+            chat_chunk = ChatGenerationChunk(message=AIMessageChunk(
+                content=chunk.get("message"), generation_info=generation_info))
             print("chat_chunk: ", chat_chunk)
             yield chat_chunk
             if run_manager:
@@ -116,7 +117,6 @@ class BedrockChat(BaseChatModel, BedrockBase):
 
         message = AIMessage(content=completion)
         return ChatResult(generations=[ChatGeneration(message=message)])
-
 
     async def _agenerate(
         self,
