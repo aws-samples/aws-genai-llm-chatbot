@@ -15,6 +15,8 @@ CREATE_AURORA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN")
 CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN")
+CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
+    "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -208,6 +210,15 @@ def create_workspace_kendra(workspace_name: str):
     }
 
     response = table.put_item(Item=item)
+    logger.info(response)
+
+    response = sfn_client.start_execution(
+        stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
+        input=json.dumps({
+            "workspace_id": workspace_id,
+        })
+    )
+
     logger.info(response)
 
     return {

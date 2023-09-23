@@ -83,6 +83,9 @@ export class RestApi extends Construct {
         CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN:
           props.ragEngines?.openSearchVector?.createOpenSearchWorkspaceWorkflow
             ?.stateMachineArn ?? "",
+        CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN:
+          props.ragEngines?.kendraRetrieval?.createKendraWorkspaceWorkflow
+            ?.stateMachineArn ?? "",
         FILE_IMPORT_WORKFLOW_ARN:
           props.ragEngines?.fileImportWorkflow?.stateMachineArn ?? "",
         WEBSITE_CRAWLING_WORKFLOW_ARN:
@@ -117,6 +120,12 @@ export class RestApi extends Construct {
       );
 
       props.ragEngines.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
+        apiHandler
+      );
+    }
+
+    if (props.ragEngines?.kendraRetrieval) {
+      props.ragEngines.kendraRetrieval.createKendraWorkspaceWorkflow.grantStartExecution(
         apiHandler
       );
     }
