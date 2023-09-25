@@ -2,7 +2,7 @@ import genai_core.clients
 
 from langchain.prompts.prompt import PromptTemplate
 
-from .client import BedrockChat
+from langchain.chat_models import BedrockChat
 
 from ..base import ModelAdapter
 from ..registry import registry
