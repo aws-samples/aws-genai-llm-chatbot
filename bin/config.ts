@@ -12,7 +12,9 @@ export function getConfig(): SystemConfig {
       enabled: true,
     },
     //llms: [SupportedLLM.FalconLite],
-    llms: [],
+    llms: {
+      sagemaker: [],
+    },
     rag: {
       enabled: true,
       engines: {
@@ -24,6 +26,7 @@ export function getConfig(): SystemConfig {
         },
         kendra: {
           enabled: false,
+          createIndex: false,
         },
       },
       embeddingsModels: [
