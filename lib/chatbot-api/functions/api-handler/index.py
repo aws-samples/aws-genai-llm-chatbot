@@ -7,7 +7,11 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler.api_gateway import Response
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver, CORSConfig, content_types
+from aws_lambda_powertools.event_handler import (
+    APIGatewayRestResolver,
+    CORSConfig,
+    content_types,
+)
 from routes.health import router as health_router
 from routes.embeddings import router as embeddings_router
 from routes.cross_encoders import router as cross_encoders_router
@@ -23,9 +27,11 @@ logger = Logger()
 
 
 cors_config = CORSConfig(allow_origin="*", max_age=0)
-app = APIGatewayRestResolver(cors=cors_config,
-                             strip_prefixes=["/v1"],
-                             serializer=lambda obj: json.dumps(obj, cls=genai_core.utils.json.CustomEncoder))
+app = APIGatewayRestResolver(
+    cors=cors_config,
+    strip_prefixes=["/v1"],
+    serializer=lambda obj: json.dumps(obj, cls=genai_core.utils.json.CustomEncoder),
+)
 
 app.include_router(health_router)
 app.include_router(rag_router)
@@ -45,10 +51,9 @@ def handle_value_error(e: genai_core.types.CommonError):
     return Response(
         status_code=200,
         content_type=content_types.APPLICATION_JSON,
-        body=json.dumps({
-            "error": True,
-            "message": str(e)
-        }, cls=genai_core.utils.json.CustomEncoder),
+        body=json.dumps(
+            {"error": True, "message": str(e)}, cls=genai_core.utils.json.CustomEncoder
+        ),
     )
 
 
@@ -59,10 +64,10 @@ def handle_value_error(e: ValidationError):
     return Response(
         status_code=200,
         content_type=content_types.APPLICATION_JSON,
-        body=json.dumps({
-            "error": True,
-            "message": [str(error) for error in e.errors()]
-        }, cls=genai_core.utils.json.CustomEncoder),
+        body=json.dumps(
+            {"error": True, "message": [str(error) for error in e.errors()]},
+            cls=genai_core.utils.json.CustomEncoder,
+        ),
     )
 
 
@@ -75,7 +80,4 @@ def handler(event: dict, context: LambdaContext) -> dict:
     if event["headers"]["X-Origin-Verify"] == origin_verify_header_value:
         return app.resolve(event, context)
 
-    return {
-        "statusCode": 403,
-        "body": "Forbidden"
-    }
+    return {"statusCode": 403, "body": "Forbidden"}

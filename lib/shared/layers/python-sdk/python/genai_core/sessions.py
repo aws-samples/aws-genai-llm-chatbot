@@ -17,8 +17,7 @@ table = dynamodb.Table(SESSIONS_TABLE_NAME)
 def get_session(session_id, user_id):
     response = {}
     try:
-        response = table.get_item(
-            Key={"SessionId": session_id, "UserId": user_id})
+        response = table.get_item(Key={"SessionId": session_id, "UserId": user_id})
     except ClientError as error:
         if error.response["Error"]["Code"] == "ResourceNotFoundException":
             logger.warning("No record found with session id: %s", session_id)
@@ -65,7 +64,6 @@ def delete_user_sessions(user_id):
 
     for session in sessions:
         result = delete_session(session["SessionId"], user_id)
-        ret_value.append(
-            {"id": session["SessionId"], "deleted": result["deleted"]})
+        ret_value.append({"id": session["SessionId"], "deleted": result["deleted"]})
 
     return ret_value

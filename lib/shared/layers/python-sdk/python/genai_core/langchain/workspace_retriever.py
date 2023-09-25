@@ -11,12 +11,10 @@ class WorkspaceRetriever(BaseRetriever):
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
     ) -> List[Document]:
         result = genai_core.semantic_search.semantic_search(
-            self.workspace_id, query, limit=3, full_response=False)
+            self.workspace_id, query, limit=3, full_response=False
+        )
 
-        return [
-            self._get_document(item)
-            for item in result.get("items", [])
-        ]
+        return [self._get_document(item) for item in result.get("items", [])]
 
     def _get_document(self, item):
         content = item["content"]

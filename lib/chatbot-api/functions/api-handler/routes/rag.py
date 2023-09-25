@@ -13,18 +13,22 @@ def engines():
     config = genai_core.parameters.get_config()
 
     engines = config["rag"]["engines"]
-    ret_value = [{
-        "id": "aurora",
-        "name": "Amazon Aurora",
-        "enabled": engines.get("aurora", {}).get("enabled", False) == True
-    }, {
-        "id": "opensearch",
-        "name": "Amazon OpenSearch",
-        "enabled": engines.get("opensearch", {}).get("enabled", False) == True
-    }, {
-        "id": "kendra",
-        "name": "Amazon Kendra",
-        "enabled": engines.get("kendra", {}).get("enabled", False) == True
-    }]
+    ret_value = [
+        {
+            "id": "aurora",
+            "name": "Amazon Aurora",
+            "enabled": engines.get("aurora", {}).get("enabled", False) == True,
+        },
+        {
+            "id": "opensearch",
+            "name": "Amazon OpenSearch",
+            "enabled": engines.get("opensearch", {}).get("enabled", False) == True,
+        },
+        {
+            "id": "kendra",
+            "name": "Amazon Kendra",
+            "enabled": engines.get("kendra", {}).get("enabled", False) == True,
+        },
+    ]
 
     return {"ok": True, "data": ret_value}

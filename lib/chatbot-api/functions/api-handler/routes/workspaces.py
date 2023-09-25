@@ -10,7 +10,7 @@ tracer = Tracer()
 router = Router()
 logger = Logger()
 
-name_regex = re.compile(r'^[\w+_-]+$')
+name_regex = re.compile(r"^[\w+_-]+$")
 
 
 class GenericCreateWorkspaceRequest(BaseModel):
@@ -104,12 +104,18 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
     embeddings_model = None
     cross_encoder_model = None
     for model in embedding_models:
-        if model["provider"] == request.embeddingsModelProvider and model["name"] == request.embeddingsModelName:
+        if (
+            model["provider"] == request.embeddingsModelProvider
+            and model["name"] == request.embeddingsModelName
+        ):
             embeddings_model = model
             break
 
     for model in cross_encoder_models:
-        if model["provider"] == request.crossEncoderModelProvider and model["name"] == request.crossEncoderModelName:
+        if (
+            model["provider"] == request.crossEncoderModelProvider
+            and model["name"] == request.crossEncoderModelName
+        ):
             cross_encoder_model = model
             break
 
@@ -123,7 +129,11 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
 
     workspace_name_match = name_regex.match(workspace_name)
     workspace_name_is_match = bool(workspace_name_match)
-    if len(workspace_name) == 0 or len(workspace_name) > 100 or not workspace_name_is_match:
+    if (
+        len(workspace_name) == 0
+        or len(workspace_name) > 100
+        or not workspace_name_is_match
+    ):
         raise genai_core.types.CommonError("Invalid workspace name")
 
     if len(request.languages) == 0 or len(request.languages) > 3:
@@ -141,22 +151,26 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
     if request.chunkOverlap < 0 or request.chunkOverlap >= request.chunkSize:
         raise genai_core.types.CommonError("Invalid chunk overlap")
 
-    return genai_core.workspaces.create_workspace_aurora(workspace_name=workspace_name,
-                                                         embeddings_model_provider=request.embeddingsModelProvider,
-                                                         embeddings_model_name=request.embeddingsModelName,
-                                                         embeddings_model_dimensions=embeddings_model_dimensions,
-                                                         cross_encoder_model_provider=request.crossEncoderModelProvider,
-                                                         cross_encoder_model_name=request.crossEncoderModelName,
-                                                         languages=request.languages,
-                                                         metric=request.metric,
-                                                         has_index=request.index,
-                                                         hybrid_search=request.hybridSearch,
-                                                         chunking_strategy=request.chunking_strategy,
-                                                         chunk_size=request.chunkSize,
-                                                         chunk_overlap=request.chunkOverlap)
+    return genai_core.workspaces.create_workspace_aurora(
+        workspace_name=workspace_name,
+        embeddings_model_provider=request.embeddingsModelProvider,
+        embeddings_model_name=request.embeddingsModelName,
+        embeddings_model_dimensions=embeddings_model_dimensions,
+        cross_encoder_model_provider=request.crossEncoderModelProvider,
+        cross_encoder_model_name=request.crossEncoderModelName,
+        languages=request.languages,
+        metric=request.metric,
+        has_index=request.index,
+        hybrid_search=request.hybridSearch,
+        chunking_strategy=request.chunking_strategy,
+        chunk_size=request.chunkSize,
+        chunk_overlap=request.chunkOverlap,
+    )
 
 
-def _create_workspace_open_search(request: CreateWorkspaceOpenSearchRequest, config: dict):
+def _create_workspace_open_search(
+    request: CreateWorkspaceOpenSearchRequest, config: dict
+):
     workspace_name = request.name.strip()
     embedding_models = config["rag"]["embeddingsModels"]
     cross_encoder_models = config["rag"]["crossEncoderModels"]
@@ -164,12 +178,18 @@ def _create_workspace_open_search(request: CreateWorkspaceOpenSearchRequest, con
     embeddings_model = None
     cross_encoder_model = None
     for model in embedding_models:
-        if model["provider"] == request.embeddingsModelProvider and model["name"] == request.embeddingsModelName:
+        if (
+            model["provider"] == request.embeddingsModelProvider
+            and model["name"] == request.embeddingsModelName
+        ):
             embeddings_model = model
             break
 
     for model in cross_encoder_models:
-        if model["provider"] == request.crossEncoderModelProvider and model["name"] == request.crossEncoderModelName:
+        if (
+            model["provider"] == request.crossEncoderModelProvider
+            and model["name"] == request.crossEncoderModelName
+        ):
             cross_encoder_model = model
             break
 
@@ -183,7 +203,11 @@ def _create_workspace_open_search(request: CreateWorkspaceOpenSearchRequest, con
 
     workspace_name_match = name_regex.match(workspace_name)
     workspace_name_is_match = bool(workspace_name_match)
-    if len(workspace_name) == 0 or len(workspace_name) > 100 or not workspace_name_is_match:
+    if (
+        len(workspace_name) == 0
+        or len(workspace_name) > 100
+        or not workspace_name_is_match
+    ):
         raise genai_core.types.CommonError("Invalid workspace name")
 
     if len(request.languages) == 0 or len(request.languages) > 3:
@@ -198,16 +222,18 @@ def _create_workspace_open_search(request: CreateWorkspaceOpenSearchRequest, con
     if request.chunkOverlap < 0 or request.chunkOverlap >= request.chunkSize:
         raise genai_core.types.CommonError("Invalid chunk overlap")
 
-    return genai_core.workspaces.create_workspace_open_search(workspace_name=workspace_name,
-                                                              embeddings_model_provider=request.embeddingsModelProvider,
-                                                              embeddings_model_name=request.embeddingsModelName,
-                                                              embeddings_model_dimensions=embeddings_model_dimensions,
-                                                              cross_encoder_model_provider=request.crossEncoderModelProvider,
-                                                              cross_encoder_model_name=request.crossEncoderModelName,
-                                                              languages=request.languages,
-                                                              chunking_strategy=request.chunking_strategy,
-                                                              chunk_size=request.chunkSize,
-                                                              chunk_overlap=request.chunkOverlap)
+    return genai_core.workspaces.create_workspace_open_search(
+        workspace_name=workspace_name,
+        embeddings_model_provider=request.embeddingsModelProvider,
+        embeddings_model_name=request.embeddingsModelName,
+        embeddings_model_dimensions=embeddings_model_dimensions,
+        cross_encoder_model_provider=request.crossEncoderModelProvider,
+        cross_encoder_model_name=request.crossEncoderModelName,
+        languages=request.languages,
+        chunking_strategy=request.chunking_strategy,
+        chunk_size=request.chunkSize,
+        chunk_overlap=request.chunkOverlap,
+    )
 
 
 def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict):
@@ -215,7 +241,11 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
 
     workspace_name_match = name_regex.match(workspace_name)
     workspace_name_is_match = bool(workspace_name_match)
-    if len(workspace_name) == 0 or len(workspace_name) > 100 or not workspace_name_is_match:
+    if (
+        len(workspace_name) == 0
+        or len(workspace_name) > 100
+        or not workspace_name_is_match
+    ):
         raise genai_core.types.CommonError("Invalid workspace name")
 
     return genai_core.workspaces.create_workspace_kendra(workspace_name=workspace_name)

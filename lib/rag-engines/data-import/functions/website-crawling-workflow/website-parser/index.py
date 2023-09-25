@@ -19,8 +19,7 @@ def lambda_handler(event, context: LambdaContext):
     urls_to_crawl = event["urls_to_crawl"]
     processed_urls = event["processed_urls"]
 
-    logger.info(
-        f"Processing document {document_id} in workspace {workspace_id}")
+    logger.info(f"Processing document {document_id} in workspace {workspace_id}")
     logger.info(f"Workspace: {workspace}")
     logger.info(f"Document: {document}")
     logger.info(f"Limit: {limit}")
@@ -28,10 +27,12 @@ def lambda_handler(event, context: LambdaContext):
     logger.info(f"Urls to crawl: {urls_to_crawl}")
     logger.info(f"Processed urls: {processed_urls}")
 
-    genai_core.websites.crawler.crawl_urls(workspace=workspace,
-                                           document=document,
-                                           urls_to_crawl=urls_to_crawl,
-                                           limit=limit,
-                                           follow_links=follow_links)
+    genai_core.websites.crawler.crawl_urls(
+        workspace=workspace,
+        document=document,
+        urls_to_crawl=urls_to_crawl,
+        limit=limit,
+        follow_links=follow_links,
+    )
 
     return {"ok": True}

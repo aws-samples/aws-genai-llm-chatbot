@@ -26,8 +26,9 @@ def main():
     docs = loader.load()
 
     page_content = docs[0].page_content
-    s3.put_object(Bucket=PROCESSING_BUCKET_NAME,
-                  Key=PROCESSING_OBJECT_KEY, Body=page_content)
+    s3.put_object(
+        Bucket=PROCESSING_BUCKET_NAME, Key=PROCESSING_OBJECT_KEY, Body=page_content
+    )
 
 
 if __name__ == "__main__":

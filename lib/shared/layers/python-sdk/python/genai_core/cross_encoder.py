@@ -9,7 +9,9 @@ from typing import List, Optional
 SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
 
 
-def rank_passages(model: genai_core.types.CrossEncoderModel, input: str, passages: List[str]):
+def rank_passages(
+    model: genai_core.types.CrossEncoderModel, input: str, passages: List[str]
+):
     input = input[:10000]
     passages = passages[:1000]
     passages = list(map(lambda x: x[:10000], passages))
@@ -20,7 +22,9 @@ def rank_passages(model: genai_core.types.CrossEncoderModel, input: str, passage
     raise genai_core.typesCommonError(f"Unknown provider")
 
 
-def get_cross_encoder_model(provider: str, name: str) -> Optional[genai_core.types.CrossEncoderModel]:
+def get_cross_encoder_model(
+    provider: str, name: str
+) -> Optional[genai_core.types.CrossEncoderModel]:
     config = genai_core.parameters.get_config()
     models = config["rag"]["crossEncoderModels"]
 
@@ -31,16 +35,22 @@ def get_cross_encoder_model(provider: str, name: str) -> Optional[genai_core.typ
     return None
 
 
-def _rank_passages_sagemaker(model: genai_core.types.CrossEncoderModel, input: str, passages: List[str]):
+def _rank_passages_sagemaker(
+    model: genai_core.types.CrossEncoderModel, input: str, passages: List[str]
+):
     client = genai_core.clients.get_sagemaker_client()
 
     response = client.invoke_endpoint(
         EndpointName=SAGEMAKER_RAG_MODELS_ENDPOINT,
         ContentType="application/json",
         Body=json.dumps(
-            {"type": "cross-encoder", "model": model.name,
-                "input": input, "passages": passages}
-        )
+            {
+                "type": "cross-encoder",
+                "model": model.name,
+                "input": input,
+                "passages": passages,
+            }
+        ),
     )
 
     ret_value = json.loads(response["Body"].read().decode())

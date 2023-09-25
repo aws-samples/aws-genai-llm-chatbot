@@ -12,7 +12,8 @@ AURORA_DB_SECRET_ID = os.environ.get("AURORA_DB_SECRET_ID")
 class AuroraConnection(object):
     def __init__(self, autocommit=True):
         secret_response = secretsmanager_client.get_secret_value(
-            SecretId=AURORA_DB_SECRET_ID)
+            SecretId=AURORA_DB_SECRET_ID
+        )
         database_secrets = json.loads(secret_response["SecretString"])
         self.autocommit = autocommit
 
@@ -27,7 +28,7 @@ class AuroraConnection(object):
             user=self.dbuser,
             password=self.dbpass,
             port=self.dbport,
-            connect_timeout=10
+            connect_timeout=10,
         )
 
         connection.set_session(autocommit=self.autocommit)

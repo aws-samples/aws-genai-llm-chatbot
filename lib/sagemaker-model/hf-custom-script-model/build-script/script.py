@@ -26,8 +26,7 @@ print(f"Creating new code folder: {out_folder}/code", flush=True)
 model_code_folder = Path(os.path.join(out_folder, "code"))
 model_code_folder.mkdir(exist_ok=True)
 
-print(
-    f"Copying contents from {local_model_folder} to {model_code_folder}", flush=True)
+print(f"Copying contents from {local_model_folder} to {model_code_folder}", flush=True)
 shutil.copytree(local_model_folder, str(model_code_folder), dirs_exist_ok=True)
 
 for model_id in models_list:
@@ -67,8 +66,7 @@ print(f"Moving back to: {current_folder}")
 os.chdir(current_folder)
 
 print(f"Uploading the model to S3 bucket: {bucket}")
-s3_client.upload_file(out_folder.joinpath(
-    "model.tar.gz"), bucket, f"out/model.tar.gz")
+s3_client.upload_file(out_folder.joinpath("model.tar.gz"), bucket, f"out/model.tar.gz")
 model_data = f"s3://{bucket}/out/model.tar.gz"
 
 print(f"Model archive uploaded to: {model_data}")

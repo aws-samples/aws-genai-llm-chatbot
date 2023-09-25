@@ -16,7 +16,8 @@ PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
 WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
 DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME = os.environ.get(
-    "DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME")
+    "DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME"
+)
 FILE_IMPORT_WORKFLOW_ARN = os.environ.get("FILE_IMPORT_WORKFLOW_ARN")
 WEBSITE_CRAWLING_WORKFLOW_ARN = os.environ.get("WEBSITE_CRAWLING_WORKFLOW_ARN")
 
@@ -32,7 +33,12 @@ documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
 workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
 
 
-def list_documents(workspace_id: str, document_type: str, last_document_id: str = None, page_size: int = 100):
+def list_documents(
+    workspace_id: str,
+    document_type: str,
+    last_document_id: str = None,
+    page_size: int = 100,
+):
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
         raise genai_core.types.CommonError("Workspace not found")
@@ -49,29 +55,29 @@ def list_documents(workspace_id: str, document_type: str, last_document_id: str 
 
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression='workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)',
+            KeyConditionExpression="workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)",
             ExclusiveStartKey={
                 "workspace_id": workspace_id,
                 "document_id": last_document_id,
-                "compound_sort_key": last_document_compound_sort_key
+                "compound_sort_key": last_document_compound_sort_key,
             },
             ExpressionAttributeValues={
-                ':workspace_id': workspace_id,
-                ':sort_key_prefix': f"{document_type}/"
+                ":workspace_id": workspace_id,
+                ":sort_key_prefix": f"{document_type}/",
             },
             Limit=page_size,
-            ScanIndexForward=scan_index_forward
+            ScanIndexForward=scan_index_forward,
         )
     else:
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression='workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)',
+            KeyConditionExpression="workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)",
             ExpressionAttributeValues={
-                ':workspace_id': workspace_id,
-                ':sort_key_prefix': f"{document_type}/"
+                ":workspace_id": workspace_id,
+                ":sort_key_prefix": f"{document_type}/",
             },
             Limit=page_size,
-            ScanIndexForward=scan_index_forward
+            ScanIndexForward=scan_index_forward,
         )
 
     items = response["Items"]
@@ -84,7 +90,9 @@ def list_documents(workspace_id: str, document_type: str, last_document_id: str 
     }
 
 
-def set_document_vectors(workspace_id: str, document_id: str, vectors: int, replace: bool):
+def set_document_vectors(
+    workspace_id: str, document_id: str, vectors: int, replace: bool
+):
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     response = workspaces_table.update_item(
@@ -141,7 +149,8 @@ def set_sub_documents(workspace_id: str, document_id: str, sub_documents: int):
 
 def get_document(workspace_id: str, document_id: str):
     response = documents_table.get_item(
-        Key={"workspace_id": workspace_id, "document_id": document_id})
+        Key={"workspace_id": workspace_id, "document_id": document_id}
+    )
     document = response.get("Item")
 
     return document
@@ -157,18 +166,16 @@ def get_document_content(workspace_id: str, document_id: str):
     content = response["Body"].read().decode("utf-8")
 
     content_complement = None
-    if genai_core.utils.files.file_exists(PROCESSING_BUCKET_NAME, content_complement_key):
-        response = s3.Object(PROCESSING_BUCKET_NAME,
-                             content_complement_key).get()
+    if genai_core.utils.files.file_exists(
+        PROCESSING_BUCKET_NAME, content_complement_key
+    ):
+        response = s3.Object(PROCESSING_BUCKET_NAME, content_complement_key).get()
         content_complement = response["Body"].read().decode("utf-8")
 
-    return {
-        "content": content,
-        "content_complement": content_complement
-    }
+    return {"content": content, "content_complement": content_complement}
 
 
-def set_status(workspace_id: str,  document_id: str, status: str):
+def set_status(workspace_id: str, document_id: str, status: str):
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     response = documents_table.update_item(
@@ -186,10 +193,17 @@ def set_status(workspace_id: str,  document_id: str, status: str):
     return response
 
 
-def create_document(workspace_id: str, document_type: str, document_sub_type: Optional[str] = None,
-                    title: Optional[str] = None, path: Optional[str] = None,
-                    size_in_bytes: int = 0, sub_documents: int = 0,
-                    content: Optional[str] = None, content_complement: Optional[str] = None):
+def create_document(
+    workspace_id: str,
+    document_type: str,
+    document_sub_type: Optional[str] = None,
+    title: Optional[str] = None,
+    path: Optional[str] = None,
+    size_in_bytes: int = 0,
+    sub_documents: int = 0,
+    content: Optional[str] = None,
+    content_complement: Optional[str] = None,
+):
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
@@ -204,7 +218,7 @@ def create_document(workspace_id: str, document_type: str, document_sub_type: Op
             ExpressionAttributeValues={
                 ":workspaceValue": workspace_id,
                 ":compoundKeyValue": f"{document_type}/{path}",
-            }
+            },
         )
 
         items = response["Items"]
@@ -225,9 +239,7 @@ def create_document(workspace_id: str, document_type: str, document_sub_type: Op
                 "document_id": document_id,
             },
             UpdateExpression="SET compound_sort_key=:compoundKeyValue, #status=:statusValue, size_in_bytes=:sizeValue, vectors=:vectorsValue, updated_at=:timestampValue",
-            ExpressionAttributeNames={
-                "#status": "status"
-            },
+            ExpressionAttributeNames={"#status": "status"},
             ExpressionAttributeValues={
                 ":compoundKeyValue": f"{document_type}/{path}",
                 ":statusValue": "submitted",
@@ -235,7 +247,7 @@ def create_document(workspace_id: str, document_type: str, document_sub_type: Op
                 ":vectorsValue": 0,
                 ":timestampValue": timestamp,
             },
-            ReturnValues="ALL_NEW"
+            ReturnValues="ALL_NEW",
         )
 
         document = response["Attributes"]
@@ -270,10 +282,7 @@ def create_document(workspace_id: str, document_type: str, document_sub_type: Op
 
     size_diff = size_in_bytes - current_size_in_bytes
     response = workspaces_table.update_item(
-        Key={
-            "workspace_id": workspace_id,
-            "object_type": WORKSPACE_OBJECT_TYPE
-        },
+        Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
         UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
         ExpressionAttributeValues={
             ":incrementValue": size_diff,
@@ -281,15 +290,21 @@ def create_document(workspace_id: str, document_type: str, document_sub_type: Op
             ":vectorsIncrementValue": -current_vectors,
             ":timestampValue": timestamp,
         },
-        ReturnValues="UPDATED_NEW"
+        ReturnValues="UPDATED_NEW",
     )
 
     logger.info(response)
 
-    _upload_document_content(workspace_id, document_id, document_type,
-                             content=content, content_complement=content_complement)
-    _process_document(workspace, document, content=content,
-                      content_complement=content_complement)
+    _upload_document_content(
+        workspace_id,
+        document_id,
+        document_type,
+        content=content,
+        content_complement=content_complement,
+    )
+    _process_document(
+        workspace, document, content=content, content_complement=content_complement
+    )
 
     return {
         "workspace_id": workspace_id,
@@ -297,8 +312,12 @@ def create_document(workspace_id: str, document_type: str, document_sub_type: Op
     }
 
 
-def _process_document(workspace: dict, document: dict,
-                      content: Optional[str] = None, content_complement: Optional[str] = None):
+def _process_document(
+    workspace: dict,
+    document: dict,
+    content: Optional[str] = None,
+    content_complement: Optional[str] = None,
+):
     workspace_id = workspace["workspace_id"]
     document_id = document["document_id"]
     document_type = document["document_type"]
@@ -306,13 +325,15 @@ def _process_document(workspace: dict, document: dict,
     if document_type == "text":
         response = sfn_client.start_execution(
             stateMachineArn=FILE_IMPORT_WORKFLOW_ARN,
-            input=json.dumps({
-                "convert_to_text": False,
-                "workspace_id": workspace_id,
-                "document_id": document_id,
-                "processing_bucket_name": PROCESSING_BUCKET_NAME,
-                "processing_object_key": f"{workspace_id}/{document_id}/content.txt"
-            })
+            input=json.dumps(
+                {
+                    "convert_to_text": False,
+                    "workspace_id": workspace_id,
+                    "document_id": document_id,
+                    "processing_bucket_name": PROCESSING_BUCKET_NAME,
+                    "processing_object_key": f"{workspace_id}/{document_id}/content.txt",
+                }
+            ),
         )
 
         logger.info(response)
@@ -321,11 +342,14 @@ def _process_document(workspace: dict, document: dict,
         if content_complement is not None:
             chunk_complements = [content_complement]
 
-        genai_core.chunks.add_chunks(workspace=workspace,
-                                     document=document, document_sub_id=None,
-                                     chunks=[content],
-                                     chunk_complements=chunk_complements,
-                                     replace=True)
+        genai_core.chunks.add_chunks(
+            workspace=workspace,
+            document=document,
+            document_sub_id=None,
+            chunks=[content],
+            chunk_complements=chunk_complements,
+            replace=True,
+        )
 
         set_status(workspace_id, document_id, "processed")
     elif document_type == "website":
@@ -337,43 +361,52 @@ def _process_document(workspace: dict, document: dict,
             follow_links = False
 
             try:
-                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(
-                    path)
+                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(path)
 
                 if len(urls_to_crawl) == 0:
                     set_status(workspace_id, document_id, "error")
-                    raise genai_core.types.CommonError(
-                        "No urls found in sitemap")
+                    raise genai_core.types.CommonError("No urls found in sitemap")
             except Exception as e:
                 logger.error(e)
                 set_status(workspace_id, document_id, "error")
-                raise genai_core.types.CommonError(
-                    "Error extracting urls from sitemap")
+                raise genai_core.types.CommonError("Error extracting urls from sitemap")
 
         response = sfn_client.start_execution(
             stateMachineArn=WEBSITE_CRAWLING_WORKFLOW_ARN,
-            input=json.dumps({
-                "workspace_id": workspace_id,
-                "document_id": document_id,
-                "workspace": workspace,
-                "document": document,
-                "limit": 200,
-                "follow_links": follow_links,
-                "urls_to_crawl": urls_to_crawl,
-                "processed_urls": [],
-            }, cls=genai_core.utils.json.CustomEncoder)
+            input=json.dumps(
+                {
+                    "workspace_id": workspace_id,
+                    "document_id": document_id,
+                    "workspace": workspace,
+                    "document": document,
+                    "limit": 200,
+                    "follow_links": follow_links,
+                    "urls_to_crawl": urls_to_crawl,
+                    "processed_urls": [],
+                },
+                cls=genai_core.utils.json.CustomEncoder,
+            ),
         )
 
         logger.info(response)
 
 
-def _upload_document_content(workspace_id: str, document_id: str, document_type: str,
-                             content: Optional[str] = None, content_complement: Optional[str] = None):
+def _upload_document_content(
+    workspace_id: str,
+    document_id: str,
+    document_type: str,
+    content: Optional[str] = None,
+    content_complement: Optional[str] = None,
+):
     if document_type == "text":
-        s3.Object(PROCESSING_BUCKET_NAME,
-                  f"{workspace_id}/{document_id}/content.txt").put(Body=content)
+        s3.Object(
+            PROCESSING_BUCKET_NAME, f"{workspace_id}/{document_id}/content.txt"
+        ).put(Body=content)
     elif document_type == "qna":
-        s3.Object(PROCESSING_BUCKET_NAME,
-                  f"{workspace_id}/{document_id}/content.txt").put(Body=content)
-        s3.Object(PROCESSING_BUCKET_NAME,
-                  f"{workspace_id}/{document_id}/content_complement.txt").put(Body=content_complement)
+        s3.Object(
+            PROCESSING_BUCKET_NAME, f"{workspace_id}/{document_id}/content.txt"
+        ).put(Body=content)
+        s3.Object(
+            PROCESSING_BUCKET_NAME,
+            f"{workspace_id}/{document_id}/content_complement.txt",
+        ).put(Body=content_complement)

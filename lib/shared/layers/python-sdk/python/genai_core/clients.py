@@ -50,6 +50,4 @@ def get_bedrock_client():
         bedrock_config_data["aws_secret_access_key"] = credentials["SecretAccessKey"]
         bedrock_config_data["aws_session_token"] = credentials["SessionToken"]
 
-    return boto3.client(
-        **bedrock_config_data
-    )
+    return boto3.client(**bedrock_config_data)

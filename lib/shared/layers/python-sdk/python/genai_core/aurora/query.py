@@ -11,7 +11,9 @@ from genai_core.aurora.utils import convert_types
 logger = Logger()
 
 
-def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit: int, full_response: bool):
+def query_workspace_aurora(
+    workspace_id: str, workspace: dict, query: str, limit: int, full_response: bool
+):
     table_name = sql.Identifier(workspace_id.replace("-", ""))
     embeddings_model_provider = workspace["embeddings_model_provider"]
     embeddings_model_name = workspace["embeddings_model_name"]
@@ -24,28 +26,33 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
     keyword_search_limit = 25
 
     selected_model = genai_core.embeddings.get_embeddings_model(
-        embeddings_model_provider, embeddings_model_name)
+        embeddings_model_provider, embeddings_model_name
+    )
 
     if selected_model is None:
         raise genai_core.types.CommonError("Embeddings model not found")
 
     cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
-        cross_encoder_model_provider, cross_encoder_model_name)
+        cross_encoder_model_provider, cross_encoder_model_name
+    )
 
     if cross_encoder_model is None:
         raise genai_core.types.CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
-        selected_model, [query])[0]
+        selected_model, [query]
+    )[0]
 
     language_name, detected_languages = genai_core.utils.comprehend.get_query_language(
-        query, languages)
+        query, languages
+    )
 
     items = []
     with AuroraConnection() as cursor:
         if metric == "cosine":
             cursor.execute(
-                sql.SQL("""SELECT chunk_id, 
+                sql.SQL(
+                    """SELECT chunk_id, 
                         workspace_id,
                         document_id, 
                         document_sub_id, 
@@ -58,12 +65,14 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
                         content_complement,
                         metadata,
                         content_embeddings <=> %s AS vector_search_score 
-                FROM {table} ORDER BY vector_search_score LIMIT %s;""").format(table=table_name),
+                FROM {table} ORDER BY vector_search_score LIMIT %s;"""
+                ).format(table=table_name),
                 [np.array(query_embeddings), vector_search_limit],
             )
         elif metric == "l2":
             cursor.execute(
-                sql.SQL("""SELECT chunk_id, 
+                sql.SQL(
+                    """SELECT chunk_id, 
                         workspace_id,
                         document_id, 
                         document_sub_id, 
@@ -76,12 +85,14 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
                         content_complement,
                         metadata,
                         content_embeddings <-> %s AS vector_search_score 
-                FROM {table} ORDER BY vector_search_score LIMIT %s;""").format(table=table_name),
+                FROM {table} ORDER BY vector_search_score LIMIT %s;"""
+                ).format(table=table_name),
                 [np.array(query_embeddings), vector_search_limit],
             )
         elif metric == "inner":
             cursor.execute(
-                sql.SQL("""SELECT chunk_id, 
+                sql.SQL(
+                    """SELECT chunk_id, 
                         workspace_id,
                         document_id, 
                         document_sub_id, 
@@ -94,15 +105,15 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
                         content_complement,
                         metadata,
                         content_embeddings <#> %s AS vector_search_score 
-                FROM {table} ORDER BY vector_search_score LIMIT %s;""").format(table=table_name),
+                FROM {table} ORDER BY vector_search_score LIMIT %s;"""
+                ).format(table=table_name),
                 [np.array(query_embeddings), vector_search_limit],
             )
         else:
             raise Exception("Unknown metric")
 
         vector_search_records = cursor.fetchall()
-        vector_search_records = _convert_records(
-            "vector_search", vector_search_records)
+        vector_search_records = _convert_records("vector_search", vector_search_records)
         items.extend(vector_search_records)
 
         if hybrid_search:
@@ -127,14 +138,15 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
                             plainto_tsquery('{language}', %s) query 
                             WHERE to_tsvector('{language}', content) @@ query 
                             ORDER BY keyword_search_score DESC 
-                            LIMIT %s;""")
-                .format(table=table_name, language=language),
+                            LIMIT %s;"""
+                ).format(table=table_name, language=language),
                 [query, keyword_search_limit],
             )
 
             keyword_search_records = cursor.fetchall()
             keyword_search_records = _convert_records(
-                "keyword_search", keyword_search_records)
+                "keyword_search", keyword_search_records
+            )
             items.extend(keyword_search_records)
 
     unique_items = dict({})
@@ -165,7 +177,8 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
     if len(unique_items) > 0:
         passages = [record["content"] for record in unique_items]
         passage_scores = genai_core.cross_encoder.rank_passages(
-            cross_encoder_model, query, passages)
+            cross_encoder_model, query, passages
+        )
 
         for i in range(len(unique_items)):
             unique_items[i]["score"] = passage_scores[i]
@@ -196,7 +209,9 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
             "query_language": language_name,
             "supported_languages": languages,
             "detected_languages": detected_languages,
-            "items": convert_types(list(filter(lambda val: val["score"] > 0, unique_items)))
+            "items": convert_types(
+                list(filter(lambda val: val["score"] > 0, unique_items))
+            ),
         }
 
     logger.info(ret_value)

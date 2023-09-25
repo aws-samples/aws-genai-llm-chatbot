@@ -16,17 +16,21 @@ PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
 s3 = boto3.resource("s3")
 
 
-def crawl_urls(workspace: dict, document: dict, urls_to_crawl: List[str], limit: int, follow_links: bool):
-    priority_queue = [{"url": url, "priority": 1}
-                      for url in set(urls_to_crawl)]
+def crawl_urls(
+    workspace: dict,
+    document: dict,
+    urls_to_crawl: List[str],
+    limit: int,
+    follow_links: bool,
+):
+    priority_queue = [{"url": url, "priority": 1} for url in set(urls_to_crawl)]
     processed_urls = set({})
 
     for _ in range(limit):
         if len(priority_queue) == 0:
             break
 
-        priority_queue = sorted(
-            priority_queue, key=lambda val: val["priority"])
+        priority_queue = sorted(priority_queue, key=lambda val: val["priority"])
         current = priority_queue.pop(0)
         current_url = current["url"]
         current_priority = current["priority"]
@@ -44,21 +48,33 @@ def crawl_urls(workspace: dict, document: dict, urls_to_crawl: List[str], limit:
             continue
 
         _store_content_on_s3(
-            workspace["workspace_id"], document["document_id"], document_sub_id, current_url, content)
+            workspace["workspace_id"],
+            document["document_id"],
+            document_sub_id,
+            current_url,
+            content,
+        )
         chunks = genai_core.chunks.split_content(workspace, content)
-        genai_core.chunks.add_chunks(replace=False, workspace=workspace,
-                                     document=document, document_sub_id=document_sub_id,
-                                     chunks=chunks, chunk_complements=None,
-                                     path=current_url)
+        genai_core.chunks.add_chunks(
+            replace=False,
+            workspace=workspace,
+            document=document,
+            document_sub_id=document_sub_id,
+            chunks=chunks,
+            chunk_complements=None,
+            path=current_url,
+        )
         if follow_links:
             for link in local_links:
                 if link not in processed_urls:
                     priority_queue.append(
-                        {"url": link, "priority": current_priority+1})
+                        {"url": link, "priority": current_priority + 1}
+                    )
 
     sub_documents = len(processed_urls)
     genai_core.documents.set_sub_documents(
-        workspace["workspace_id"], document["document_id"], sub_documents)
+        workspace["workspace_id"], document["document_id"], sub_documents
+    )
 
 
 def parse_url(url: str):
@@ -91,9 +107,15 @@ def parse_url(url: str):
     return content, local_links, external_links
 
 
-def _store_content_on_s3(workspace_id: str, document_id: str, document_sub_id: str, path: str, content: str):
-    s3.Object(PROCESSING_BUCKET_NAME,
-              f"{workspace_id}/{document_id}/{document_sub_id}/path.txt").put(Body=path)
+def _store_content_on_s3(
+    workspace_id: str, document_id: str, document_sub_id: str, path: str, content: str
+):
+    s3.Object(
+        PROCESSING_BUCKET_NAME,
+        f"{workspace_id}/{document_id}/{document_sub_id}/path.txt",
+    ).put(Body=path)
 
-    s3.Object(PROCESSING_BUCKET_NAME,
-              f"{workspace_id}/{document_id}/{document_sub_id}/content.txt").put(Body=content)
+    s3.Object(
+        PROCESSING_BUCKET_NAME,
+        f"{workspace_id}/{document_id}/{document_sub_id}/content.txt",
+    ).put(Body=content)

@@ -40,7 +40,8 @@ def list_openai_models():
             "type": "text-generation",
         }
         for model in models.data
-        if model["id"].startswith("gpt")]
+        if model["id"].startswith("gpt")
+    ]
 
 
 def list_bedrock_models():
@@ -53,7 +54,8 @@ def list_bedrock_models():
             {
                 "provider": "bedrock",
                 "name": model["modelId"],
-                "streaming": model["modelId"].startswith("amazon") or model["modelId"].startswith("anthropic"),
+                "streaming": model["modelId"].startswith("amazon")
+                or model["modelId"].startswith("anthropic"),
                 "type": "text-generation",
             }
             for model in bedrock_models

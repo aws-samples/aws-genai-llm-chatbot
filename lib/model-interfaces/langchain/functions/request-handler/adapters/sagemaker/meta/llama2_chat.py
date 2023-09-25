@@ -16,9 +16,9 @@ class Llama2ChatContentHandler(LLMContentHandler):
             {
                 "inputs": [
                     [
-                      {"role": "user", "content": prompt},
+                        {"role": "user", "content": prompt},
                     ],
-                 ],
+                ],
                 "parameters": model_kwargs,
             }
         )

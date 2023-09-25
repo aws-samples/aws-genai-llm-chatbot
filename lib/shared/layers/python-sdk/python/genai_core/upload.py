@@ -21,14 +21,13 @@ def generate_presigned_post(workspace_id: str, file_name: str, expiration=3600):
         ["content-length-range", 0, MAX_FILE_SIZE],
     ]
 
-    response = s3_client.generate_presigned_post(UPLOAD_BUCKET_NAME,
-                                                 object_name,
-                                                 Conditions=conditions,
-                                                 ExpiresIn=expiration)
+    response = s3_client.generate_presigned_post(
+        UPLOAD_BUCKET_NAME, object_name, Conditions=conditions, ExpiresIn=expiration
+    )
 
     if not response:
         return None
 
-    response["url"] = f"https://{UPLOAD_BUCKET_NAME}.s3-accelerate.amazonaws.com",
+    response["url"] = (f"https://{UPLOAD_BUCKET_NAME}.s3-accelerate.amazonaws.com",)
 
     return response

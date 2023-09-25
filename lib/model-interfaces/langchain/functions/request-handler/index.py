@@ -147,8 +147,7 @@ def handle_failed_records(records):
 def handler(event, context: LambdaContext):
     batch = event["Records"]
 
-    api_keys = parameters.get_secret(API_KEYS_SECRETS_ARN, transform="json"
-                                     )
+    api_keys = parameters.get_secret(API_KEYS_SECRETS_ARN, transform="json")
     for key in api_keys:
         os.environ[key] = api_keys[key]
 

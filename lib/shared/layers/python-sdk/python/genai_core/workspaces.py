@@ -10,13 +10,18 @@ dynamodb = boto3.resource("dynamodb")
 sfn_client = boto3.client("stepfunctions")
 
 WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
-WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ["WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME"]
+WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ[
+    "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME"
+]
 CREATE_AURORA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
-    "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN")
+    "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN"
+)
 CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN = os.environ.get(
-    "CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN")
+    "CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN"
+)
 CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
-    "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN")
+    "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN"
+)
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -31,17 +36,19 @@ def list_workspaces():
         if last_evaluated_key:
             response = table.query(
                 IndexName=WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME,
-                KeyConditionExpression=boto3.dynamodb.conditions.Key(
-                    "object_type").eq(WORKSPACE_OBJECT_TYPE),
+                KeyConditionExpression=boto3.dynamodb.conditions.Key("object_type").eq(
+                    WORKSPACE_OBJECT_TYPE
+                ),
                 ExclusiveStartKey=last_evaluated_key,
-                ScanIndexForward=False
+                ScanIndexForward=False,
             )
         else:
             response = table.query(
                 IndexName=WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME,
-                KeyConditionExpression=boto3.dynamodb.conditions.Key(
-                    "object_type").eq(WORKSPACE_OBJECT_TYPE),
-                ScanIndexForward=False
+                KeyConditionExpression=boto3.dynamodb.conditions.Key("object_type").eq(
+                    WORKSPACE_OBJECT_TYPE
+                ),
+                ScanIndexForward=False,
             )
 
         all_items.extend(response["Items"])
@@ -55,7 +62,8 @@ def list_workspaces():
 
 def get_workspace(workspace_id: str):
     response = table.get_item(
-        Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE})
+        Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}
+    )
     item = response.get("Item")
 
     return item
@@ -79,19 +87,21 @@ def set_status(workspace_id: str, status: str):
     return response
 
 
-def create_workspace_aurora(workspace_name: str,
-                            embeddings_model_provider: str,
-                            embeddings_model_name: str,
-                            embeddings_model_dimensions: int,
-                            cross_encoder_model_provider: str,
-                            cross_encoder_model_name: str,
-                            languages: list[str],
-                            metric: str,
-                            has_index: bool,
-                            hybrid_search: bool,
-                            chunking_strategy: str,
-                            chunk_size: int,
-                            chunk_overlap: int):
+def create_workspace_aurora(
+    workspace_name: str,
+    embeddings_model_provider: str,
+    embeddings_model_name: str,
+    embeddings_model_dimensions: int,
+    cross_encoder_model_provider: str,
+    cross_encoder_model_name: str,
+    languages: list[str],
+    metric: str,
+    has_index: bool,
+    hybrid_search: bool,
+    chunking_strategy: str,
+    chunk_size: int,
+    chunk_overlap: int,
+):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -126,9 +136,11 @@ def create_workspace_aurora(workspace_name: str,
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,
-        input=json.dumps({
-            "workspace_id": workspace_id,
-        })
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+            }
+        ),
     )
 
     logger.info(response)
@@ -138,16 +150,18 @@ def create_workspace_aurora(workspace_name: str,
     }
 
 
-def create_workspace_open_search(workspace_name: str,
-                                 embeddings_model_provider: str,
-                                 embeddings_model_name: str,
-                                 embeddings_model_dimensions: int,
-                                 cross_encoder_model_provider: str,
-                                 cross_encoder_model_name: str,
-                                 languages: list[str],
-                                 chunking_strategy: str,
-                                 chunk_size: int,
-                                 chunk_overlap: int):
+def create_workspace_open_search(
+    workspace_name: str,
+    embeddings_model_provider: str,
+    embeddings_model_name: str,
+    embeddings_model_dimensions: int,
+    cross_encoder_model_provider: str,
+    cross_encoder_model_name: str,
+    languages: list[str],
+    chunking_strategy: str,
+    chunk_size: int,
+    chunk_overlap: int,
+):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -179,9 +193,11 @@ def create_workspace_open_search(workspace_name: str,
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,
-        input=json.dumps({
-            "workspace_id": workspace_id,
-        })
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+            }
+        ),
     )
 
     logger.info(response)
@@ -214,9 +230,11 @@ def create_workspace_kendra(workspace_name: str):
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
-        input=json.dumps({
-            "workspace_id": workspace_id,
-        })
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+            }
+        ),
     )
 
     logger.info(response)

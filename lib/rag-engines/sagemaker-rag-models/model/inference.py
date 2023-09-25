@@ -23,8 +23,10 @@ logger.setLevel(logging.INFO)
 
 """
 
-embeddings_models = ["intfloat/multilingual-e5-large",
-                     "sentence-transformers/all-MiniLM-L6-v2"]
+embeddings_models = [
+    "intfloat/multilingual-e5-large",
+    "sentence-transformers/all-MiniLM-L6-v2",
+]
 cross_encoder_models = ["cross-encoder/ms-marco-MiniLM-L-12-v2"]
 
 
@@ -51,8 +53,7 @@ def model_fn(model_dir):
     config = {}
     for model_id in process_model_list(embeddings_models):
         embeddings_model_dir = f"{model_dir}/{model_id}"
-        embeddings_tokenizer = AutoTokenizer.from_pretrained(
-            embeddings_model_dir)
+        embeddings_tokenizer = AutoTokenizer.from_pretrained(embeddings_model_dir)
         embeddings_model = AutoModel.from_pretrained(embeddings_model_dir)
         embeddings_model.eval()
         embeddings_model.to(device)
@@ -67,9 +68,9 @@ def model_fn(model_dir):
     for model_id in process_model_list(cross_encoder_models):
         cross_encoder_model_dir = os.path.join(model_dir, model_id)
         cross_encoder_model = AutoModelForSequenceClassification.from_pretrained(
-            cross_encoder_model_dir)
-        cross_encoder_tokenizer = AutoTokenizer.from_pretrained(
-            cross_encoder_model_dir)
+            cross_encoder_model_dir
+        )
+        cross_encoder_tokenizer = AutoTokenizer.from_pretrained(cross_encoder_model_dir)
 
         cross_encoder_model.eval()
         cross_encoder_model.to(device)
@@ -100,8 +101,7 @@ def predict_fn(input_object, config):
         current_input = input_object["input"]
         if current_model_id == "multilingual-e5-large":
             if isinstance(current_input, list):
-                current_input = list(
-                    map(lambda val: "query: " + val, current_input))
+                current_input = list(map(lambda val: "query: " + val, current_input))
             else:
                 current_input = "query: " + current_input
 
@@ -117,9 +117,7 @@ def predict_fn(input_object, config):
         with torch.no_grad():
             model_output = current_model(**encoded_input)
 
-        input_embeddings = mean_pooling(
-            model_output, encoded_input["attention_mask"]
-        )
+        input_embeddings = mean_pooling(model_output, encoded_input["attention_mask"])
 
         input_embeddings = F.normalize(input_embeddings, p=2, dim=1)
         response = input_embeddings.cpu().numpy()
@@ -139,8 +137,12 @@ def predict_fn(input_object, config):
 
         with torch.no_grad():
             scores = current_model(**features).logits.cpu().numpy()
-            ret_value = list(map(
-                lambda val: val[-1] if isinstance(val, list) else val, scores.tolist()))
+            ret_value = list(
+                map(
+                    lambda val: val[-1] if isinstance(val, list) else val,
+                    scores.tolist(),
+                )
+            )
 
             return ret_value
 

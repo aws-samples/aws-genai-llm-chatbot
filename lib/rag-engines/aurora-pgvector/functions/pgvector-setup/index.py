@@ -17,7 +17,8 @@ def lambda_handler(event, context: LambdaContext):
     AURORA_DB_SECRET_ID = resource_properties["AURORA_DB_SECRET_ID"]
 
     secret_response = secretsmanager_client.get_secret_value(
-        SecretId=AURORA_DB_SECRET_ID)
+        SecretId=AURORA_DB_SECRET_ID
+    )
     database_secrets = json.loads(secret_response["SecretString"])
     dbhost = database_secrets["host"]
     dbport = database_secrets["port"]

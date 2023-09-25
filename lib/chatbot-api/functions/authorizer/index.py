@@ -8,8 +8,7 @@ from botocore.exceptions import ClientError
 tracer = Tracer()
 logger = Logger(log_uncaught_exceptions=True)
 
-cognito_client = boto3.client(
-    "cognito-idp", region_name=os.environ["AWS_REGION"])
+cognito_client = boto3.client("cognito-idp", region_name=os.environ["AWS_REGION"])
 
 
 @tracer.capture_lambda_handler
@@ -42,8 +41,7 @@ def generate_policy(effect, resource, username="username"):
         "policyDocument": {
             "Version": "2012-10-17",
             "Statement": [
-                {"Action": "execute-api:Invoke",
-                    "Effect": effect, "Resource": resource}
+                {"Action": "execute-api:Invoke", "Effect": effect, "Resource": resource}
             ],
         },
     }

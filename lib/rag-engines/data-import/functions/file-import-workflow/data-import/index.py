@@ -21,19 +21,19 @@ def lambda_handler(event, context: LambdaContext):
 
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
-        raise genai_core.types.CommonError(
-            f"Workspace {workspace_id} does not exist")
+        raise genai_core.types.CommonError(f"Workspace {workspace_id} does not exist")
 
     document = genai_core.documents.get_document(workspace_id, document_id)
     if not document:
         raise genai_core.types.CommonError(
-            f"Document {workspace_id}/{document_id} does not exist")
+            f"Document {workspace_id}/{document_id} does not exist"
+        )
 
-    result = genai_core.documents.get_document_content(
-        workspace_id, document_id)
+    result = genai_core.documents.get_document_content(workspace_id, document_id)
     if not result:
         raise genai_core.types.CommonError(
-            f"Document {workspace_id}/{document_id} has no content")
+            f"Document {workspace_id}/{document_id} has no content"
+        )
 
     content = result["content"]
     logger.info(f"Document {workspace_id}/{document_id} content: {content}")
@@ -41,7 +41,13 @@ def lambda_handler(event, context: LambdaContext):
     chunks = genai_core.chunks.split_content(workspace, content)
     logger.info(f"Document {workspace_id}/{document_id} chunks: {chunks}")
 
-    genai_core.chunks.add_chunks(workspace=workspace, document=document, document_sub_id=None,
-                                 chunks=chunks, chunk_complements=None, replace=True)
+    genai_core.chunks.add_chunks(
+        workspace=workspace,
+        document=document,
+        document_sub_id=None,
+        chunks=chunks,
+        chunk_complements=None,
+        replace=True,
+    )
 
     return {"ok": True}

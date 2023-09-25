@@ -28,8 +28,7 @@ class ModelAdapter:
         self.__bind_callbacks()
 
     def __bind_callbacks(self):
-        callback_methods = [method for method in dir(
-            self) if method.startswith("on_")]
+        callback_methods = [method for method in dir(self) if method.startswith("on_")]
         valid_callback_names = [
             attr for attr in dir(self.callback_handler) if attr.startswith("on_")
         ]

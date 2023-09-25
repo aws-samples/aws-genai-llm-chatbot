@@ -21,10 +21,15 @@ def semantic_search():
 
     if len(request.query) == 0 or len(request.query) > 1000:
         raise genai_core.types.CommonError(
-            "Query must be between 1 and 1000 characters")
+            "Query must be between 1 and 1000 characters"
+        )
 
     result = genai_core.semantic_search.semantic_search(
-        workspace_id=request.workspaceId, query=request.query, limit=25, full_response=True)
+        workspace_id=request.workspaceId,
+        query=request.query,
+        limit=25,
+        full_response=True,
+    )
     result = _convert_semantic_search_result(request.workspaceId, result)
 
     return {"ok": True, "data": result}
@@ -35,12 +40,14 @@ def _convert_semantic_search_result(workspace_id: str, result: dict):
     keyword_search_items = result.get("keyword_search_items")
 
     if vector_search_items:
-        vector_search_items = [_convert_semantic_search_item(item)
-                               for item in vector_search_items]
+        vector_search_items = [
+            _convert_semantic_search_item(item) for item in vector_search_items
+        ]
 
     if keyword_search_items:
-        keyword_search_items = [_convert_semantic_search_item(item)
-                                for item in keyword_search_items]
+        keyword_search_items = [
+            _convert_semantic_search_item(item) for item in keyword_search_items
+        ]
 
     items = [_convert_semantic_search_item(item) for item in result["items"]]
 

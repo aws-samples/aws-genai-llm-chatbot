@@ -32,12 +32,12 @@ def embeddings():
     data: dict = router.current_event.json_body
     request = EmbeddingsRequest(**data)
     selected_model = genai_core.embeddings.get_embeddings_model(
-        request.provider, request.model)
+        request.provider, request.model
+    )
 
     if selected_model is None:
         raise genai_core.types.CommonError("Model not found")
 
-    ret_value = genai_core.embeddings.generate_embeddings(
-        selected_model, request.input)
+    ret_value = genai_core.embeddings.generate_embeddings(selected_model, request.input)
 
     return {"ok": True, "data": ret_value}

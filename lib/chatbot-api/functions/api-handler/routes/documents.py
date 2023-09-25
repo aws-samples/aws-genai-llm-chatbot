@@ -1,4 +1,3 @@
-
 import os
 import genai_core.types
 import genai_core.upload
@@ -31,8 +30,29 @@ class WebsiteDocumentRequest(BaseModel):
     address: str
 
 
-allowed_extensions = set(["csv", ".doc", ".docx", ".epub", ".odt", ".pdf", ".ppt", ".pptx",
-                         ".tsv", ".xlsx", ".eml", ".html", ".json", ".md", ".msg", ".rst", ".rtf", ".txt", ".xml",])
+allowed_extensions = set(
+    [
+        "csv",
+        ".doc",
+        ".docx",
+        ".epub",
+        ".odt",
+        ".pdf",
+        ".ppt",
+        ".pptx",
+        ".tsv",
+        ".xlsx",
+        ".eml",
+        ".html",
+        ".json",
+        ".md",
+        ".msg",
+        ".rst",
+        ".rtf",
+        ".txt",
+        ".xml",
+    ]
+)
 
 
 @router.post("/workspaces/<workspace_id>/documents/file-upload")
@@ -45,8 +65,7 @@ def file_upload(workspace_id: str):
     if extension not in allowed_extensions:
         raise genai_core.types.CommonError("Invalid file extension")
 
-    result = genai_core.upload.generate_presigned_post(
-        workspace_id, request.fileName)
+    result = genai_core.upload.generate_presigned_post(workspace_id, request.fileName)
 
     return {"ok": True, "data": result}
 
@@ -58,12 +77,16 @@ def get_documents(workspace_id: str, document_type: str):
     last_document_id = query_string.get("lastDocumentId", None)
 
     result = genai_core.documents.list_documents(
-        workspace_id, document_type, last_document_id)
+        workspace_id, document_type, last_document_id
+    )
 
-    return {"ok": True, "data": {
-        "items": [_convert_document(item) for item in result["items"]],
-        "lastDocumentId": result["last_document_id"]
-    }}
+    return {
+        "ok": True,
+        "data": {
+            "items": [_convert_document(item) for item in result["items"]],
+            "lastDocumentId": result["last_document_id"],
+        },
+    }
 
 
 @router.post("/workspaces/<workspace_id>/documents/<document_type>")
@@ -75,40 +98,57 @@ def add_document(workspace_id: str, document_type: str):
         request = TextDocumentRequest(**data)
         request.title = request.title.strip()[:1000]
         result = genai_core.documents.create_document(
-            workspace_id=workspace_id, document_type=document_type, title=request.title, content=request.content)
+            workspace_id=workspace_id,
+            document_type=document_type,
+            title=request.title,
+            content=request.content,
+        )
 
-        return {"ok": True, "data": {
-            "workspaceId": result["workspace_id"],
-            "documentId": result["document_id"],
-
-        }}
+        return {
+            "ok": True,
+            "data": {
+                "workspaceId": result["workspace_id"],
+                "documentId": result["document_id"],
+            },
+        }
     elif document_type == "qna":
         request = QnADocumentRequest(**data)
         request.question = request.question.strip()[:1000]
         request.answer = request.answer.strip()[:1000]
         result = genai_core.documents.create_document(
-            workspace_id=workspace_id, document_type=document_type, title=request.question,
-            content=request.question, content_complement=request.answer)
+            workspace_id=workspace_id,
+            document_type=document_type,
+            title=request.question,
+            content=request.question,
+            content_complement=request.answer,
+        )
 
-        return {"ok": True, "data": {
-            "workspaceId": result["workspace_id"],
-            "documentId": result["document_id"],
-
-        }}
+        return {
+            "ok": True,
+            "data": {
+                "workspaceId": result["workspace_id"],
+                "documentId": result["document_id"],
+            },
+        }
     elif document_type == "website":
         request = WebsiteDocumentRequest(**data)
         request.address = request.address.strip()[:10000]
         document_sub_type = "sitemap" if request.sitemap else None
 
         result = genai_core.documents.create_document(
-            workspace_id=workspace_id, document_type=document_type,
-            document_sub_type=document_sub_type, path=request.address)
+            workspace_id=workspace_id,
+            document_type=document_type,
+            document_sub_type=document_sub_type,
+            path=request.address,
+        )
 
-        return {"ok": True, "data": {
-            "workspaceId": result["workspace_id"],
-            "documentId": result["document_id"],
-
-        }}
+        return {
+            "ok": True,
+            "data": {
+                "workspaceId": result["workspace_id"],
+                "documentId": result["document_id"],
+            },
+        }
 
 
 def _convert_document(document: dict):
