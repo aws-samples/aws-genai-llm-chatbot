@@ -35,7 +35,8 @@ def add_chunks(replace: bool, workspace: dict, document: dict, document_sub_id: 
         embeddings_model, chunks)
     chunk_ids = [uuid.uuid4() for _ in chunks]
 
-    store_chunks_on_s3(workspace_id, document_id, chunk_ids, chunks)
+    store_chunks_on_s3(workspace_id, document_id,
+                       document_sub_id, chunk_ids, chunks)
 
     if engine == "aurora":
         result = genai_core.aurora.chunks.add_chunks_aurora(workspace_id=workspace_id,
@@ -70,7 +71,10 @@ def split_content(workspace: dict, content: str):
     raise genai_core.types.CommonError("Chunking strategy not supported")
 
 
-def store_chunks_on_s3(workspace_id: str, document_id: str, chunk_ids: List[str], chunks: List[str]):
+def store_chunks_on_s3(workspace_id: str, document_id: str, document_sub_id: Optional[str], chunk_ids: List[str], chunks: List[str]):
     for chunk_id, chunk in zip(chunk_ids, chunks):
-        s3.Object(PROCESSING_BUCKET_NAME,
-                  f"{workspace_id}/{document_id}/chunks/{chunk_id}.txt").put(Body=chunk)
+        path = f"{workspace_id}/{document_id}/chunks/{chunk_id}.txt"
+        if document_sub_id:
+            path = f"{workspace_id}/{document_id}/{document_sub_id}/chunks/{chunk_id}.txt"
+
+        s3.Object(PROCESSING_BUCKET_NAME, path).put(Body=chunk)
