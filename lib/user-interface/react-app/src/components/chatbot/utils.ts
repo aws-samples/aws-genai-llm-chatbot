@@ -14,8 +14,6 @@ export function updateMessageHistory(
   response: ChatBotMessageResponse,
   setState: Dispatch<SetStateAction<ChatInputState>>
 ) {
-  console.log(response);
-
   if (response.data?.sessionId !== sessionId) return;
 
   if (
@@ -30,10 +28,11 @@ export function updateMessageHistory(
     response.action === ChatBotAction.Error
   ) {
     const content = response.data?.content;
-    const metadata = response.data?.metadata;
+    let metadata = response.data?.metadata;
     const token = response.data?.token;
     const hasContent = typeof content !== "undefined";
     const hasToken = typeof token !== "undefined";
+    const hasMetadata = typeof metadata !== "undefined";
 
     if (
       messageHistory.length > 0 &&
@@ -47,6 +46,9 @@ export function updateMessageHistory(
       }
 
       lastMessage.tokens.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+      if (!hasMetadata) {
+        metadata = lastMessage.metadata;
+      }
 
       if (hasContent) {
         setMessageHistory((history) => [

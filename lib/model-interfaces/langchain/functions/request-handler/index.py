@@ -86,6 +86,7 @@ def handle_run(record):
         workspace_id=workspace_id,
         tools=[],
     )
+
     logger.info(response)
 
     send_to_client(

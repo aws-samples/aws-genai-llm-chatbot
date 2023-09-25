@@ -196,7 +196,7 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
             "query_language": language_name,
             "supported_languages": languages,
             "detected_languages": detected_languages,
-            "items": convert_types(unique_items)
+            "items": convert_types(list(filter(lambda val: val["score"] > 0, unique_items)))
         }
 
     logger.info(ret_value)

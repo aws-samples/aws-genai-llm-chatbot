@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from aws_lambda_powertools import Logger
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain
+from langchain.chains import ConversationalRetrievalChain, ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
 from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
@@ -101,9 +101,6 @@ class ModelAdapter:
             metadata = {
                 "modelId": self.model_id,
                 "modelKwargs": self.model_kwargs,
-                "mode": self._mode,
-                "sessionId": self.session_id,
-                "userId": self.user_id,
                 "workspaceId": workspace_id,
                 "documents": documents,
             }
@@ -130,9 +127,6 @@ class ModelAdapter:
         metadata = {
             "modelId": self.model_id,
             "modelKwargs": self.model_kwargs,
-            "mode": self._mode,
-            "sessionId": self.session_id,
-            "userId": self.user_id,
             "documents": [],
         }
 

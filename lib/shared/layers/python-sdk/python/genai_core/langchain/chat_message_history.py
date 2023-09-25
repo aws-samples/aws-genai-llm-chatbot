@@ -1,9 +1,9 @@
 import json
 import boto3
 import logging
-import genai_core.utils.json
+from typing import List
+from decimal import Decimal
 from datetime import datetime
-from typing import List, Optional
 from botocore.exceptions import ClientError
 
 from langchain.schema import BaseChatMessageHistory
@@ -15,6 +15,7 @@ from langchain.schema.messages import (
 )
 
 logger = logging.getLogger(__name__)
+client = boto3.resource("dynamodb")
 
 
 class DynamoDBChatMessageHistory(BaseChatMessageHistory):
@@ -23,12 +24,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
         table_name: str,
         session_id: str,
         user_id: str,
-        endpoint_url: Optional[str] = None,
     ):
-        if endpoint_url:
-            client = boto3.resource("dynamodb", endpoint_url=endpoint_url)
-        else:
-            client = boto3.resource("dynamodb")
         self.table = client.Table(table_name)
         self.session_id = session_id
         self.user_id = user_id
@@ -58,9 +54,6 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
 
     def add_message(self, message: BaseMessage) -> None:
         """Append the message to the record in DynamoDB"""
-        print("add_message")
-        print(message)
-        print(dir(message))
         messages = messages_to_dict(self.messages)
         _message = _message_to_dict(message)
         messages.append(_message)
@@ -77,15 +70,16 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
         except ClientError as err:
             logger.error(err)
 
-    def add_metadata(self, metadata: dict, metadata_key="metadata") -> None:
+    def add_metadata(self, metadata: dict) -> None:
         """Add additional metadata to the last message"""
         messages = messages_to_dict(self.messages)
         if not messages:
             return
 
+        metadata = json.loads(json.dumps(metadata), parse_float=Decimal)
+        messages[-1]["data"]["additional_kwargs"] = metadata
+
         try:
-            messages[-1][metadata_key] = json.dumps(metadata,
-                                                    cls=genai_core.utils.json.CustomEncoder)
             self.table.put_item(
                 Item={
                     "SessionId": self.session_id,
@@ -94,6 +88,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                     "History": messages,
                 }
             )
+
         except Exception as err:
             logger.error(err)
 

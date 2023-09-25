@@ -1,5 +1,5 @@
-from typing import List
 import genai_core.semantic_search
+from typing import List
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from langchain.schema import BaseRetriever, Document
 
@@ -26,4 +26,16 @@ class WorkspaceRetriever(BaseRetriever):
         if content_complement:
             page_content = content_complement
 
-        return Document(page_content=page_content, metadata=item)
+        metadata = {
+            "chunk_id": item["chunk_id"],
+            "workspace_id": item["workspace_id"],
+            "document_id": item["document_id"],
+            "document_sub_id": item["document_sub_id"],
+            "document_type": item["document_type"],
+            "document_sub_type": item["document_sub_type"],
+            "path": item["path"],
+            "title": item["title"],
+            "score": item["score"],
+        }
+
+        return Document(page_content=page_content, metadata=metadata)

@@ -43,7 +43,7 @@ def get_session(session_id: str):
         "history": [{
             "type": item.get("type"),
             "content": item.get("data", {}).get("content"),
-            "metadata": item.get("data", {}).get("metadata")
+            "metadata": item.get("data", {}).get("additional_kwargs")
         } for item in session.get("History")],
     }}
 

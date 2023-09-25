@@ -20,13 +20,13 @@ export function getConfig(): SystemConfig {
       sagemaker: [],
     },
     rag: {
-      enabled: true,
+      enabled: false,
       engines: {
         aurora: {
           enabled: true,
         },
         opensearch: {
-          enabled: true,
+          enabled: false,
         },
         kendra: {
           enabled: false,
