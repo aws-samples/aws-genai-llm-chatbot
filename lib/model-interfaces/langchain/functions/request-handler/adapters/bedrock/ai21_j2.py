@@ -27,6 +27,7 @@ class AI21J2Adapter(ModelAdapter):
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,
+            callbacks=[self.callback_handler],
         )
 
     def get_prompt(self):

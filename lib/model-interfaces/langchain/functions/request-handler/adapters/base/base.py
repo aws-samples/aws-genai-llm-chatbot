@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from aws_lambda_powertools import Logger
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain.chains import ConversationalRetrievalChain, ConversationChain
+from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
 from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
@@ -21,11 +21,11 @@ class ModelAdapter:
         self._mode = mode
         self.model_kwargs = model_kwargs
 
-        self.llm = self.get_llm(model_kwargs)
-        self.chat_history = self.get_chat_history()
-
         self.callback_handler = BaseCallbackHandler()
         self.__bind_callbacks()
+
+        self.chat_history = self.get_chat_history()
+        self.llm = self.get_llm(model_kwargs)
 
     def __bind_callbacks(self):
         callback_methods = [method for method in dir(self) if method.startswith("on_")]
@@ -86,6 +86,7 @@ class ModelAdapter:
                 return_source_documents=True,
                 memory=self.get_memory(output_key="answer"),
                 verbose=True,
+                callbacks=[self.callback_handler],
             )
             result = conversation({"question": user_prompt})
             logger.info(result["source_documents"])
@@ -100,6 +101,9 @@ class ModelAdapter:
             metadata = {
                 "modelId": self.model_id,
                 "modelKwargs": self.model_kwargs,
+                "mode": self._mode,
+                "sessionId": self.session_id,
+                "userId": self.user_id,
                 "workspaceId": workspace_id,
                 "documents": documents,
             }
@@ -126,6 +130,9 @@ class ModelAdapter:
         metadata = {
             "modelId": self.model_id,
             "modelKwargs": self.model_kwargs,
+            "mode": self._mode,
+            "sessionId": self.session_id,
+            "userId": self.user_id,
             "documents": [],
         }
 

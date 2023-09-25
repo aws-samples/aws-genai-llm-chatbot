@@ -29,6 +29,7 @@ class BedrockTitanAdapter(ModelAdapter):
             model_id=self.model_id,
             model_kwargs=params,
             streaming=model_kwargs.get("streaming", False),
+            callbacks=[self.callback_handler],
         )
 
     def get_prompt(self):

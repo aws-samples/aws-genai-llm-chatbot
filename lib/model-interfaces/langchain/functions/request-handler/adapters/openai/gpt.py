@@ -22,7 +22,9 @@ class GPTAdapter(ModelAdapter):
         if "maxTokens" in model_kwargs:
             params["max_tokens"] = model_kwargs["maxTokens"]
 
-        return ChatOpenAI(model_name=self.model_id, **params)
+        return ChatOpenAI(
+            model_name=self.model_id, callbacks=[self.callback_handler], **params
+        )
 
 
 # Register the adapter
