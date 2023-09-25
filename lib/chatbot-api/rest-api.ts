@@ -174,13 +174,21 @@ export class RestApi extends Construct {
     props.ragEngines?.uploadBucket.grantReadWrite(apiHandler);
     props.ragEngines?.processingBucket.grantReadWrite(apiHandler);
 
-    if (props.config.bedrock?.roleArn) {
+    if (props.config.bedrock?.enabled) {
       apiHandler.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["sts:AssumeRole"],
-          resources: [props.config.bedrock.roleArn],
+          actions: ["bedrock:ListFoundationModels"],
+          resources: ["*"],
         })
-      );
+      )
+      if (props.config.bedrock?.roleArn) {
+        apiHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["sts:AssumeRole"],
+            resources: [props.config.bedrock.roleArn],
+          })
+        );
+      }
     }
 
     const chatBotApi = new apigateway.RestApi(this, "ChatBotApi", {

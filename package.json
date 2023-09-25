@@ -9,11 +9,13 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
+    "create": "node ./cli/magic.js create",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json|css)\"",
     "deploy": "npm run formatjs && npm run formatpy && cdk deploy --all"
   },
   "devDependencies": {
+"@types/commander": "^2.12.2",
     "@types/jest": "^29.5.1",
     "@types/node": "20.1.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
@@ -32,6 +34,8 @@
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.97.0-alpha.0",
     "aws-cdk-lib": "2.97.0",
     "constructs": "^10.0.0",
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "commander": "^11.0.0",
+		"enquirer": "^2.4.1"
   }
 }

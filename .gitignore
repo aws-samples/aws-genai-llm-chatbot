@@ -426,6 +426,7 @@ misc
 deploy-models
 
 bin/*.js
+lib/**/*.js
 !jest.config.js
 *.d.ts
 node_modules
