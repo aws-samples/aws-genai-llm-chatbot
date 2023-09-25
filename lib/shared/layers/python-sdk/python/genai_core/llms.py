@@ -10,6 +10,10 @@ def list_models():
     if bedrock_models:
         models.extend(bedrock_models)
 
+    fine_tuned_models = list_bedrock_finetuned_models()
+    if fine_tuned_models:
+        models.extend(fine_tuned_models)
+
     sagemaker_models = list_sagemaker_models()
     if sagemaker_models:
         models.extend(sagemaker_models)
@@ -58,6 +62,28 @@ def list_bedrock_models():
                 model["modelId"].startswith("stability")
                 or "titan-e" in model["modelId"]
             )
+        ]
+
+        return models
+    except Exception as e:
+        print(f"Error listing Bedrock models, likely still in preview: {e}")
+        return None
+
+
+def list_bedrock_finetuned_models():
+    try:
+        bedrock = genai_core.clients.get_bedrock_client()
+        response = bedrock.list_custom_models()
+        bedrock_custom_models = response.get("modelSummaries", [])
+
+        models = [
+            {
+                "provider": "bedrock",
+                "name": f"{model['modelName']} (base model: {model['baseModelName']})",
+                "streaming": False,
+                "type": "text-generation",
+            }
+            for model in bedrock_custom_models
         ]
 
         return models
