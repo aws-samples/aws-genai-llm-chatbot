@@ -101,6 +101,13 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         response,
         setState
       );
+
+      if (
+        response.action === ChatBotAction.FinalResponse ||
+        response.action === ChatBotAction.Error
+      ) {
+        props.setRunning(false);
+      }
     },
   });
 
@@ -209,7 +216,6 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     );
 
     const value = state.value.trim();
-
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
       data: {
@@ -230,9 +236,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     setState((state) => ({
       ...state,
-      running: true,
       value: "",
     }));
+
+    props.setRunning(true);
 
     props.setMessageHistory((prev) =>
       prev.concat(
@@ -307,9 +314,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             value={state.value}
             placeholder={listening ? "Listening..." : "Send a message"}
           />
-          <div
-            style={{ marginLeft: "4px", width: "120px", textAlign: "right" }}
-          >
+          <div style={{ marginLeft: "8px" }}>
             <Button
               disabled={
                 readyState !== ReadyState.OPEN ||
