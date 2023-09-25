@@ -1,5 +1,9 @@
-import { SupportedRegion, SystemConfig } from "../lib/shared/types";
-import { existsSync, readFileSync}  from 'fs';
+import {
+  SupportedRegion,
+  SupportedSageMakerLLM,
+  SystemConfig,
+} from "../lib/shared/types";
+import { existsSync, readFileSync } from "fs";
 
 export function getConfig(): SystemConfig {
   if (existsSync("./bin/config.json")) {
@@ -11,8 +15,10 @@ export function getConfig(): SystemConfig {
     bedrock: {
       enabled: true,
     },
-    //llms: [SupportedLLM.FalconLite],
-    llms: [],
+    llms: {
+      // sagemaker: [SupportedSageMakerLLM.FalconLite]
+      sagemaker: [],
+    },
     rag: {
       enabled: true,
       engines: {
@@ -24,6 +30,7 @@ export function getConfig(): SystemConfig {
         },
         kendra: {
           enabled: false,
+          createIndex: false,
         },
       },
       embeddingsModels: [
@@ -58,7 +65,6 @@ export function getConfig(): SystemConfig {
       ],
     },
   };
-  
 }
 
-export const config: SystemConfig = getConfig()
+export const config: SystemConfig = getConfig();
