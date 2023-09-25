@@ -5,7 +5,7 @@
 
 import { Command } from 'commander';
 import * as enquirer from 'enquirer';
-import { SupportedRegion, SupportedLLM} from '../lib/shared/types';
+import { SupportedRegion, SupportedLLM, SystemConfig} from '../lib/shared/types';
 import { LIB_VERSION } from './version.js';
 import * as fs from 'fs';
 
@@ -47,17 +47,17 @@ const embeddingModels = [
         .option('-p, --prefix <prefix>', 'The prefix for the stack')
 
     program.action(async (options)=> { 
-        if (fs.existsSync("config.json")) {
-            const config = JSON.parse(fs.readFileSync("config.json").toString("utf8"));
+        if (fs.existsSync("./bin/config.json")) {
+            const config: SystemConfig = JSON.parse(fs.readFileSync("./bin/config.json").toString("utf8"));
             options.prefix = config.prefix;
-            options.bedrockEnable = !!config.bedrock
-            options.bedrockRegion = config.bedrock.region;
-            options.bedrockEndpoint = config.bedrock.endpointUrl;
-            options.bedrockRoleArn = config.bedrock.roleArn;
+            options.bedrockEnable = config.bedrock?.enabled;
+            options.bedrockRegion = config.bedrock?.region;
+            options.bedrockEndpoint = config.bedrock?.endpointUrl;
+            options.bedrockRoleArn = config.bedrock?.roleArn;
             options.llms = config.llms;
-            options.ragsToEnable = Object.keys(config.rag.engines).filter(v => config.rag.engines[v].enabled)
-            options.embeddings = config.embeddingModels.map((m:any) => m.name);
-            options.defaultEmbedding = config.embeddingModels.filter((m: any) => m.default)[0].name;
+            options.ragsToEnable = Object.keys(config.rag.engines).filter((v:string) => (config.rag.engines as any)[v].enabled)
+            options.embeddings = config.rag.embeddingsModels.map((m:any) => m.name);
+            options.defaultEmbedding = config.rag.embeddingsModels.filter((m: any) => m.default)[0].name;
             options.kendraExternal = config.rag.engines.kendra.external;
         }
         try {
@@ -73,8 +73,8 @@ const embeddingModels = [
 } )();
 
 function createConfig(config: any): void {
-    fs.writeFileSync("config.json", JSON.stringify(config, undefined, 2));
-    console.log("New config written to config.json")
+    fs.writeFileSync("./bin/config.json", JSON.stringify(config, undefined, 2));
+    console.log("New config written to ./bin/config.json")
 }
 
 /**
@@ -103,7 +103,7 @@ async function processCreateOptions(options: any): Promise<void> {
             name: 'bedrockRegion',
             message: 'Region where Bedrock is available',
             choices: [SupportedRegion.US_EAST_1 , SupportedRegion.US_WEST_2, SupportedRegion.EU_CENTRAL_1, SupportedRegion.AP_SOUTHEAST_1 ],
-            initial: 'us-east-1',
+            initial: options.bedrockRegion ?? 'us-east-1',
             skip() {
                 return !(this as any).state.answers.bedrockEnable
             }
@@ -112,7 +112,7 @@ async function processCreateOptions(options: any): Promise<void> {
             type: 'input',
             name: 'bedrockEndpoint',
             message: 'Bedrock endpoint - leave as is for standard endpoint',
-            initial() { return  options.bedrockEndpoint || `https://bedrock.${(this as any).state.answers.bedrockRegion}.amazonaws.com`}
+            initial() { return  `https://bedrock.${(this as any).state.answers.bedrockRegion}.amazonaws.com`}
         },
         {
             type: 'input',
@@ -237,6 +237,7 @@ async function processCreateOptions(options: any): Promise<void> {
     const config = { 
         prefix: answers.prefix, 
         bedrock: (answers.bedrockEnable ? {
+            enabled: answers.bedrockEnable,
             region: answers.bedrockRegion,
             roleArn: answers.bedrockRoleArn === '' ? undefined : answers.bedrockRoleArn,
             endpointUrl: answers.bedrockEndpoint
@@ -253,22 +254,24 @@ async function processCreateOptions(options: any): Promise<void> {
                 },
                 kendra: { enabled: false, external: [{}] },
 
-            }
+            },
+            embeddingsModels: [ {} ],
+            crossEncoderModels: [
+                {
+                    provider: "sagemaker",
+                    name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+                    default: true,
+                }
+            ]
         },
         
-        embeddingModels: [ {} ],
-        crossEncoderModels: [
-            {
-                provider: "sagemaker",
-                name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-                default: true,
-            }
-        ]
+        
+        
     }
     config.rag.engines.kendra.enabled = answers.ragsToEnable.includes('kendra');
     config.rag.engines.kendra.external = [ ...kendraExternal];
-    config.embeddingModels = embeddingModels;
-    config.embeddingModels.forEach((m: any) => { if (m.name === models.defaultEmbedding) { m.default = true } })
+    config.rag.embeddingsModels = embeddingModels;
+    config.rag.embeddingsModels.forEach((m: any) => { if (m.name === models.defaultEmbedding) { m.default = true } })
     console.log("\n✨ This is the chosen configuration:\n")
     console.log(JSON.stringify(config, undefined, 2));
     ((await enquirer.prompt([{

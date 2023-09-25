@@ -59,6 +59,16 @@ export class LargeLanguageModels extends Construct {
       });
     }
 
+    // To get Jumpstart model ARNs do the following
+    // 1. Identify the modelId via https://sagemaker.readthedocs.io/en/stable/doc_utils/pretrainedmodels.html
+    // 2. Run the following code
+    //
+    //      from sagemaker.jumpstart.model import JumpStartModel
+    //      region = 'us-east-1'
+    //      model_id = 'meta-textgeneration-llama-2-13b'
+    //      model = JumpStartModel(model_id=model_id, region=region)
+    //      print(model.model_package_arn)
+
     if (props.config.llms.includes(SupportedLLM.Llama2_13b_Base)) {
       const llama2base = new SageMakerModel(this, "LLamaV2_13B_Base", {
         vpc: props.shared.vpc,
@@ -73,6 +83,9 @@ export class LargeLanguageModels extends Construct {
               mapping: {
                 "eu-west-1": {
                   arn: "arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-v3-8f4d5693a64a320ab0e8207af3551ae4",
+                },
+                "us-east-1": {
+                  arn: "arn:aws:sagemaker:us-east-1:865070037744:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811",
                 },
               },
             }),

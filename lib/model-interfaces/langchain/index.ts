@@ -62,13 +62,22 @@ export class LangChainInterface extends Construct {
       },
     });
 
-    if (props.config.bedrock?.roleArn) {
+    if (props.config.bedrock?.enabled) {
       requestHandler.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["sts:AssumeRole"],
-          resources: [props.config.bedrock.roleArn],
+          actions: ["bedrock:InvokeModel"],
+          resources: ["*"],
         })
       );
+    
+      if (props.config.bedrock?.roleArn) {
+        requestHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["sts:AssumeRole"],
+            resources: [props.config.bedrock.roleArn],
+          })
+        );
+      }
     }
 
     if (props.ragEngines?.auroraDatabase) {

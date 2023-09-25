@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "create": "node ./cli/magic.js",
+    "create": "node ./cli/magic.js create",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json|css)\"",
     "deploy": "npm run formatjs && npm run formatpy && cdk deploy --all"
