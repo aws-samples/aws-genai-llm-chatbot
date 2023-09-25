@@ -1,7 +1,7 @@
 import genai_core.clients
 from langchain.prompts.prompt import PromptTemplate
 
-from .client import BedrockChat
+from langchain.llms import Bedrock
 
 from ..base import ModelAdapter
 from ..registry import registry
@@ -24,7 +24,7 @@ class BedrockTitanAdapter(ModelAdapter):
         if "maxTokens" in model_kwargs:
             params["maxTokenCount"] = model_kwargs["maxTokens"]
 
-        return BedrockChat(
+        return Bedrock(
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,

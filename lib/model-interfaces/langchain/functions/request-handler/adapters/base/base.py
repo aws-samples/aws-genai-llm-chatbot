@@ -105,7 +105,7 @@ class ModelAdapter:
                 "sessionId": self.session_id,
                 "userId": self.user_id,
                 "workspaceId": workspace_id,
-                "sourceDocuments": documents,
+                "documents": documents,
             }
 
             self.chat_history.add_metadata(metadata)
@@ -133,9 +133,11 @@ class ModelAdapter:
             "mode": self._mode,
             "sessionId": self.session_id,
             "userId": self.user_id,
+            "documents": [],
         }
 
         self.chat_history.add_metadata(metadata)
+
         return {
             "sessionId": self.session_id,
             "type": "text",
