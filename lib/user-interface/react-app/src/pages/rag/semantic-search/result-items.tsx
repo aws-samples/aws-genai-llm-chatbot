@@ -85,7 +85,7 @@ function ItemDetails(props: {
       <SpaceBetween size="xs">
         {item.score != null && (
           <div>
-            <Box variant="awsui-key-label">Score</Box>
+            <Box variant="awsui-key-label">Ranking score (cross-encoder)</Box>
             <div>{item.score}</div>
           </div>
         )}

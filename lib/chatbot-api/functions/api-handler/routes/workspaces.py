@@ -33,6 +33,24 @@ class CreateWorkspaceAuroraRequest(BaseModel):
     chunkOverlap: int
 
 
+class CreateWorkspaceOpenSearchRequest(BaseModel):
+    kind: str
+    name: str
+    embeddingsModelProvider: str
+    embeddingsModelName: str
+    crossEncoderModelProvider: str
+    crossEncoderModelName: str
+    languages: list[str]
+    chunking_strategy: str
+    chunkSize: int
+    chunkOverlap: int
+
+
+class CreateWorkspaceKendraRequest(BaseModel):
+    kind: str
+    name: str
+
+
 @router.get("/workspaces")
 @tracer.capture_method
 def workspaces():
@@ -67,9 +85,11 @@ def create_workspace():
         request = CreateWorkspaceAuroraRequest(**data)
         ret_value = _create_workspace_aurora(request, config)
     elif generic_request.kind == "opensearch":
-        ret_value = genai_core.workspaces.create_workspace_opensearch(data)
+        request = CreateWorkspaceOpenSearchRequest(**data)
+        ret_value = _create_workspace_open_search(request, config)
     elif generic_request.kind == "kendra":
-        ret_value = genai_core.workspaces.create_workspace_kendra(data)
+        request = CreateWorkspaceKendraRequest(**data)
+        ret_value = _create_workspace_kendra(request, config)
     else:
         raise genai_core.types.CommonError("Invalid engine")
 
@@ -136,27 +156,92 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
                                                          chunk_overlap=request.chunkOverlap)
 
 
+def _create_workspace_open_search(request: CreateWorkspaceOpenSearchRequest, config: dict):
+    workspace_name = request.name.strip()
+    embedding_models = config["rag"]["embeddingsModels"]
+    cross_encoder_models = config["rag"]["crossEncoderModels"]
+
+    embeddings_model = None
+    cross_encoder_model = None
+    for model in embedding_models:
+        if model["provider"] == request.embeddingsModelProvider and model["name"] == request.embeddingsModelName:
+            embeddings_model = model
+            break
+
+    for model in cross_encoder_models:
+        if model["provider"] == request.crossEncoderModelProvider and model["name"] == request.crossEncoderModelName:
+            cross_encoder_model = model
+            break
+
+    if embeddings_model is None:
+        raise genai_core.types.CommonError("Embeddings model not found")
+
+    if cross_encoder_model is None:
+        raise genai_core.types.CommonError("Cross encoder model not found")
+
+    embeddings_model_dimensions = embeddings_model["dimensions"]
+
+    workspace_name_match = name_regex.match(workspace_name)
+    workspace_name_is_match = bool(workspace_name_match)
+    if len(workspace_name) == 0 or len(workspace_name) > 100 or not workspace_name_is_match:
+        raise genai_core.types.CommonError("Invalid workspace name")
+
+    if len(request.languages) == 0 or len(request.languages) > 3:
+        raise genai_core.types.CommonError("Invalid languages")
+
+    if request.chunking_strategy not in ["recursive"]:
+        raise genai_core.types.CommonError("Invalid chunking strategy")
+
+    if request.chunkSize < 100 or request.chunkSize > 10000:
+        raise genai_core.types.CommonError("Invalid chunk size")
+
+    if request.chunkOverlap < 0 or request.chunkOverlap >= request.chunkSize:
+        raise genai_core.types.CommonError("Invalid chunk overlap")
+
+    return genai_core.workspaces.create_workspace_open_search(workspace_name=workspace_name,
+                                                              embeddings_model_provider=request.embeddingsModelProvider,
+                                                              embeddings_model_name=request.embeddingsModelName,
+                                                              embeddings_model_dimensions=embeddings_model_dimensions,
+                                                              cross_encoder_model_provider=request.crossEncoderModelProvider,
+                                                              cross_encoder_model_name=request.crossEncoderModelName,
+                                                              languages=request.languages,
+                                                              chunking_strategy=request.chunking_strategy,
+                                                              chunk_size=request.chunkSize,
+                                                              chunk_overlap=request.chunkOverlap)
+
+
+def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict):
+    workspace_name = request.name.strip()
+
+    workspace_name_match = name_regex.match(workspace_name)
+    workspace_name_is_match = bool(workspace_name_match)
+    if len(workspace_name) == 0 or len(workspace_name) > 100 or not workspace_name_is_match:
+        raise genai_core.types.CommonError("Invalid workspace name")
+
+    return genai_core.workspaces.create_workspace_kendra(workspace_name=workspace_name)
+
+
 def _convert_workspace(workspace: dict):
     return {
         "id": workspace["workspace_id"],
         "name": workspace["name"],
         "engine": workspace["engine"],
         "status": workspace["status"],
-        "languages": workspace["languages"],
-        "embeddingsModelProvider": workspace["embeddings_model_provider"],
-        "embeddingsModelName": workspace["embeddings_model_name"],
-        "embeddingsModelDimensions": workspace["embeddings_model_dimensions"],
-        "crossEncoderModelProvider": workspace["cross_encoder_model_provider"],
-        "crossEncoderModelName": workspace["cross_encoder_model_name"],
-        "metric": workspace["metric"],
-        "index": workspace["has_index"],
-        "hybridSearch": workspace["hybrid_search"],
-        "chunkingStrategy": workspace["chunking_strategy"],
-        "chunkSize": workspace["chunk_size"],
-        "chunkOverlap": workspace["chunk_overlap"],
-        "vectors": workspace["vectors"],
-        "documents": workspace["documents"],
-        "sizeInBytes": workspace["size_in_bytes"],
-        "createdAt": workspace["created_at"],
-        "updatedAt": workspace["updated_at"],
+        "languages": workspace.get("languages"),
+        "embeddingsModelProvider": workspace.get("embeddings_model_provider"),
+        "embeddingsModelName": workspace.get("embeddings_model_name"),
+        "embeddingsModelDimensions": workspace.get("embeddings_model_dimensions"),
+        "crossEncoderModelProvider": workspace.get("cross_encoder_model_provider"),
+        "crossEncoderModelName": workspace.get("cross_encoder_model_name"),
+        "metric": workspace.get("metric"),
+        "index": workspace.get("has_index"),
+        "hybridSearch": workspace.get("hybrid_search"),
+        "chunkingStrategy": workspace.get("chunking_strategy"),
+        "chunkSize": workspace.get("chunk_size"),
+        "chunkOverlap": workspace.get("chunk_overlap"),
+        "vectors": workspace.get("vectors"),
+        "documents": workspace.get("documents"),
+        "sizeInBytes": workspace.get("size_in_bytes"),
+        "createdAt": workspace.get("created_at"),
+        "updatedAt": workspace.get("updated_at"),
     }

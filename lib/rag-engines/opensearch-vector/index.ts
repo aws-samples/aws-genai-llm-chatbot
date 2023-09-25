@@ -1,0 +1,179 @@
+import { Construct } from "constructs";
+import { Shared } from "../../shared";
+import { SystemConfig } from "../../shared/types";
+import { RagDynamoDBTables } from "../rag-dynamodb-tables";
+import { CreateOpenSearchWorkspace } from "./create-opensearch-workspace";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as oss from "aws-cdk-lib/aws-opensearchserverless";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+
+export interface OpenSearchVectorProps {
+  readonly config: SystemConfig;
+  readonly shared: Shared;
+  readonly ragDynamoDBTables: RagDynamoDBTables;
+}
+
+export class OpenSearchVector extends Construct {
+  public readonly openSearchCollectionName: string;
+  public readonly openSearchCollectionEndpoint: string;
+  public readonly createOpenSearchWorkspaceWorkflow: sfn.StateMachine;
+  public addToAccessPolicy: (
+    name: string,
+    principal: (string | undefined)[],
+    permission: string[]
+  ) => void;
+
+  constructor(scope: Construct, id: string, props: OpenSearchVectorProps) {
+    super(scope, id);
+
+    let collectionName = this.getName(props.config, "genaichatbot-workspaces");
+    props.config.prefix && props.config.prefix.length > 0
+      ? `${props.config.prefix}-genaichatbot-workspaces`
+      : "genaichatbot-workspaces";
+    collectionName = collectionName.slice(0, 32); // maxLength: 32
+
+    const sg = new ec2.SecurityGroup(this, "SecurityGroup", {
+      vpc: props.shared.vpc,
+    });
+
+    sg.addIngressRule(
+      ec2.Peer.ipv4(props.shared.vpc.vpcCidrBlock),
+      ec2.Port.tcp(443)
+    );
+
+    const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
+      name: this.getName(props.config, "genaichatbot-vpce"),
+      subnetIds: props.shared.vpc.selectSubnets({
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      }).subnetIds,
+      vpcId: props.shared.vpc.vpcId,
+      securityGroupIds: [sg.securityGroupId],
+    });
+
+    const cfnNetworkSecurityPolicy = new oss.CfnSecurityPolicy(
+      this,
+      "NetworkSecurityPolicy",
+      {
+        name: this.getName(props.config, "genaichatbot-network-policy"),
+        type: "network",
+        policy: JSON.stringify([
+          {
+            Rules: [
+              {
+                ResourceType: "collection",
+                Resource: [`collection/${collectionName}`],
+              },
+            ],
+            AllowFromPublic: false,
+            SourceVPCEs: [cfnVpcEndpoint.attrId],
+          },
+        ]).replace(/(\r\n|\n|\r)/gm, ""),
+      }
+    );
+
+    cfnNetworkSecurityPolicy.node.addDependency(cfnVpcEndpoint);
+
+    const cfnEncryptionSecurityPolicy = new oss.CfnSecurityPolicy(
+      this,
+      "EncryptionSecurityPolicy",
+      {
+        name: this.getName(props.config, "genaichatbot-encryption-policy"),
+        type: "encryption",
+        policy: JSON.stringify({
+          Rules: [
+            {
+              ResourceType: "collection",
+              Resource: [`collection/${collectionName}`],
+            },
+          ],
+          AWSOwnedKey: true,
+        }).replace(/(\r\n|\n|\r)/gm, ""),
+      }
+    );
+
+    cfnEncryptionSecurityPolicy.node.addDependency(cfnNetworkSecurityPolicy);
+
+    const cfnCollection = new oss.CfnCollection(this, "OpenSearchCollection", {
+      name: collectionName,
+      type: "VECTORSEARCH",
+    });
+
+    const createWorkflow = new CreateOpenSearchWorkspace(
+      this,
+      "CreateAuroraWorkspace",
+      {
+        config: props.config,
+        shared: props.shared,
+        ragDynamoDBTables: props.ragDynamoDBTables,
+        openSearchCollectionName: collectionName,
+        collectionEndpoint: cfnCollection.attrCollectionEndpoint,
+      }
+    );
+
+    cfnCollection.node.addDependency(cfnNetworkSecurityPolicy);
+    cfnCollection.node.addDependency(cfnEncryptionSecurityPolicy);
+
+    this.addToAccessPolicyIntl(
+      props.config,
+      collectionName,
+      "create-workflow",
+      [createWorkflow.createWorkspaceRole?.roleArn],
+      [
+        "aoss:CreateIndex",
+        "aoss:DeleteIndex",
+        "aoss:UpdateIndex",
+        "aoss:DescribeIndex",
+      ]
+    );
+
+    this.addToAccessPolicy = (
+      name: string,
+      principal: (string | undefined)[],
+      permission: string[]
+    ) => {
+      this.addToAccessPolicyIntl(
+        props.config,
+        collectionName,
+        name,
+        principal,
+        permission
+      );
+    };
+
+    this.createOpenSearchWorkspaceWorkflow = createWorkflow.stateMachine;
+    this.openSearchCollectionEndpoint = cfnCollection.attrCollectionEndpoint;
+  }
+
+  getName(config: SystemConfig, value: string) {
+    const prefix = config.prefix;
+    let name = prefix && prefix.length > 0 ? `${prefix}-${value}` : value;
+    name = name.slice(0, 32); // maxLength: 32
+
+    return name;
+  }
+
+  private addToAccessPolicyIntl(
+    config: SystemConfig,
+    collectionName: string,
+    name: string,
+    principal: (string | undefined)[],
+    permission: string[]
+  ) {
+    new oss.CfnAccessPolicy(this, `AccessPolicy-${name}`, {
+      name: this.getName(config, `access-policy-${name}`),
+      type: "data",
+      policy: JSON.stringify([
+        {
+          Rules: [
+            {
+              ResourceType: "index",
+              Resource: [`index/${collectionName}/*`],
+              Permission: permission,
+            },
+          ],
+          Principal: principal,
+        },
+      ]).replace(/(\r\n|\n|\r)/gm, ""),
+    });
+  }
+}

@@ -13,6 +13,10 @@ WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
 WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ["WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME"]
 CREATE_AURORA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN")
+CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN = os.environ.get(
+    "CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN")
+CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
+    "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -134,13 +138,89 @@ def create_workspace_aurora(workspace_name: str,
     }
 
 
-def create_workspace_opensearch(data: dict):
+def create_workspace_open_search(workspace_name: str,
+                                 embeddings_model_provider: str,
+                                 embeddings_model_name: str,
+                                 embeddings_model_dimensions: int,
+                                 cross_encoder_model_provider: str,
+                                 cross_encoder_model_name: str,
+                                 languages: list[str],
+                                 chunking_strategy: str,
+                                 chunk_size: int,
+                                 chunk_overlap: int):
+    workspace_id = str(uuid.uuid4())
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    item = {
+        "workspace_id": workspace_id,
+        "object_type": WORKSPACE_OBJECT_TYPE,
+        "format_version": 1,
+        "name": workspace_name,
+        "engine": "opensearch",
+        "status": "submitted",
+        "embeddings_model_provider": embeddings_model_provider,
+        "embeddings_model_name": embeddings_model_name,
+        "embeddings_model_dimensions": embeddings_model_dimensions,
+        "cross_encoder_model_provider": cross_encoder_model_provider,
+        "cross_encoder_model_name": cross_encoder_model_name,
+        "languages": languages,
+        "chunking_strategy": chunking_strategy,
+        "chunk_size": chunk_size,
+        "chunk_overlap": chunk_overlap,
+        "documents": 0,
+        "vectors": 0,
+        "size_in_bytes": 0,
+        "created_at": timestamp,
+        "updated_at": timestamp,
+    }
+
+    response = table.put_item(Item=item)
+    logger.info(response)
+
+    response = sfn_client.start_execution(
+        stateMachineArn=CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,
+        input=json.dumps({
+            "workspace_id": workspace_id,
+        })
+    )
+
+    logger.info(response)
+
     return {
-        "id": "",
+        "id": workspace_id,
     }
 
 
-def create_workspace_kendra(data: dict):
+def create_workspace_kendra(workspace_name: str):
+    workspace_id = str(uuid.uuid4())
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    item = {
+        "workspace_id": workspace_id,
+        "object_type": WORKSPACE_OBJECT_TYPE,
+        "format_version": 1,
+        "name": workspace_name,
+        "engine": "kendra",
+        "status": "submitted",
+        "documents": 0,
+        "vectors": 0,
+        "size_in_bytes": 0,
+        "created_at": timestamp,
+        "updated_at": timestamp,
+    }
+
+    response = table.put_item(Item=item)
+    logger.info(response)
+
+    response = sfn_client.start_execution(
+        stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
+        input=json.dumps({
+            "workspace_id": workspace_id,
+        })
+    )
+
+    logger.info(response)
+
     return {
-        "id": "",
+        "id": workspace_id,
     }

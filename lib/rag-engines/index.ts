@@ -5,10 +5,11 @@ import { Shared } from "../shared";
 import { AuroraPgVector } from "./aurora-pgvector";
 import { DataImport } from "./data-import";
 import { RagDynamoDBTables } from "./rag-dynamodb-tables";
+import { OpenSearchVector } from "./opensearch-vector";
+import { KendraRetrieval } from "./kendra-retrieval";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as rds from "aws-cdk-lib/aws-rds";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 
 export interface RagEnginesProps {
@@ -17,6 +18,9 @@ export interface RagEnginesProps {
 }
 
 export class RagEngines extends Construct {
+  public readonly auroraPgVector: AuroraPgVector | null;
+  public readonly openSearchVector: OpenSearchVector | null;
+  public readonly kendraRetrieval: KendraRetrieval | null;
   public readonly uploadBucket: s3.Bucket;
   public readonly processingBucket: s3.Bucket;
   public readonly documentsTable: dynamodb.Table;
@@ -24,8 +28,6 @@ export class RagEngines extends Construct {
   public readonly workspacesByObjectTypeIndexName: string;
   public readonly documentsByCompountKeyIndexName: string;
   public readonly sageMakerRagModelsEndpoint: sagemaker.CfnEndpoint;
-  public readonly auroraDatabase?: rds.DatabaseCluster;
-  public readonly createAuroraWorkspaceWorkflow?: sfn.StateMachine;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
 
@@ -52,6 +54,24 @@ export class RagEngines extends Construct {
       });
     }
 
+    let openSearchVector: OpenSearchVector | null = null;
+    if (props.config.rag.engines.opensearch.enabled) {
+      openSearchVector = new OpenSearchVector(this, "OpenSearchVector", {
+        shared: props.shared,
+        config: props.config,
+        ragDynamoDBTables: tables,
+      });
+    }
+
+    let kendraRetrieval: KendraRetrieval | null = null;
+    if (props.config.rag.engines.kendra.enabled) {
+      kendraRetrieval = new KendraRetrieval(this, "KendraRetrieval", {
+        shared: props.shared,
+        config: props.config,
+        ragDynamoDBTables: tables,
+      });
+    }
+
     const dataImport = new DataImport(this, "DataImport", {
       shared: props.shared,
       config: props.config,
@@ -64,6 +84,9 @@ export class RagEngines extends Construct {
       documentsByCompountKeyIndexName: tables.documentsByCompountKeyIndexName,
     });
 
+    this.auroraPgVector = auroraPgVector;
+    this.openSearchVector = openSearchVector;
+    this.kendraRetrieval = kendraRetrieval;
     this.sageMakerRagModelsEndpoint = sageMakerRagModels.model.endpoint;
     this.uploadBucket = dataImport.uploadBucket;
     this.processingBucket = dataImport.processingBucket;
@@ -73,9 +96,6 @@ export class RagEngines extends Construct {
       tables.workspacesByObjectTypeIndexName;
     this.documentsByCompountKeyIndexName =
       tables.documentsByCompountKeyIndexName;
-    this.auroraDatabase = auroraPgVector?.database;
-    this.createAuroraWorkspaceWorkflow =
-      auroraPgVector?.createAuroraWorkspaceWorkflow;
     this.fileImportWorkflow = dataImport.fileImportWorkflow;
     this.websiteCrawlingWorkflow = dataImport.websiteCrawlingWorkflow;
   }

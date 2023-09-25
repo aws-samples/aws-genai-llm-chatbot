@@ -1,41 +1,36 @@
+import { useContext, useEffect, useState } from "react";
 import {
-  ColumnLayout,
-  Container,
-  ExpandableSection,
-  FormField,
-  Header,
-  Input,
-  Multiselect,
-  RadioGroup,
-  RadioGroupProps,
-  Select,
-  SpaceBetween,
-  Toggle,
-} from "@cloudscape-design/components";
-
-import { languageList } from "../../../common/constants";
-import {
-  AuroraWorkspaceCreateInput,
   CrossEncoderModelItem,
   EmbeddingsModelItem,
   LoadingStatus,
+  OpenSearchWorkspaceCreateInput,
   ResultValue,
 } from "../../../common/types";
-import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { EmbeddingsModelHelper } from "../../../common/helpers/embeddings-model-helper";
+import {
+  Container,
+  Header,
+  SpaceBetween,
+  FormField,
+  Input,
+  Select,
+  Multiselect,
+  ColumnLayout,
+  ExpandableSection,
+} from "@cloudscape-design/components";
+import { languageList } from "../../../common/constants";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 
-export interface AuroraFormProps {
-  data: AuroraWorkspaceCreateInput;
-  onChange: (data: Partial<AuroraWorkspaceCreateInput>) => void;
+export interface OpenSearchFormProps {
+  data: OpenSearchWorkspaceCreateInput;
+  onChange: (data: Partial<OpenSearchWorkspaceCreateInput>) => void;
   errors: Record<string, string | string[]>;
   submitting: boolean;
-  metrics: RadioGroupProps.RadioButtonDefinition[];
 }
 
-export default function AuroraForm(props: AuroraFormProps) {
+export default function OpenSearchForm(props: OpenSearchFormProps) {
   const appContext = useContext(AppContext);
   const [embeddingsModelsStatus, setEmbeddingsModelsStatus] =
     useState<LoadingStatus>("loading");
@@ -64,14 +59,13 @@ export default function AuroraForm(props: AuroraFormProps) {
 
   return (
     <Container
-      header={<Header variant="h2">Aurora Workspace Configuration</Header>}
+      header={<Header variant="h2">OpenSearch Workspace Configuration</Header>}
       footer={
-        <AuroraFooter
+        <OpenSearchFoother
           data={props.data}
           onChange={props.onChange}
           errors={props.errors}
           submitting={props.submitting}
-          metrics={props.metrics}
         />
       }
     >
@@ -121,12 +115,11 @@ export default function AuroraForm(props: AuroraFormProps) {
   );
 }
 
-function AuroraFooter(props: {
-  data: AuroraWorkspaceCreateInput;
-  onChange: (data: Partial<AuroraWorkspaceCreateInput>) => void;
+function OpenSearchFoother(props: {
+  data: OpenSearchWorkspaceCreateInput;
+  onChange: (data: Partial<OpenSearchWorkspaceCreateInput>) => void;
   errors: Record<string, string | string[]>;
   submitting: boolean;
-  metrics: RadioGroupProps.RadioButtonDefinition[];
 }) {
   const appContext = useContext(AppContext);
   const [crossEncoderModelsStatus, setCrossEncoderModelsStatus] =
@@ -153,60 +146,10 @@ function AuroraFooter(props: {
 
   const crossEncoderModelOptions =
     OptionsHelper.getSelectOptionGroups(crossEncoderModels);
-  const { dimentions: embeddingsModelDimentions } =
-    EmbeddingsModelHelper.parseValue(props.data.embeddingsModel?.value);
 
   return (
     <ExpandableSection headerText="Additional settings" variant="footer">
       <SpaceBetween size="l">
-        <FormField
-          label="Metric (Distance Function)"
-          stretch={true}
-          errorText={props.errors.metric}
-        >
-          <RadioGroup
-            items={props.metrics.map((item) => {
-              return {
-                ...item,
-                disabled: props.submitting,
-              };
-            })}
-            value={props.data.metric}
-            onChange={({ detail: { value } }) =>
-              props.onChange({ metric: value })
-            }
-          />
-        </FormField>
-        <FormField
-          label="Indexing"
-          description="By default, pgvector performs exact nearest neighbor search, which provides perfect recall. You can add an index to use approximate nearest neighbor search, which trades some recall for performance. Unlike typical indexes, you will see different results for queries after adding an approximate index."
-          errorText={props.errors.index}
-        >
-          <Toggle
-            disabled={props.submitting || embeddingsModelDimentions > 2000}
-            checked={props.data.index}
-            onChange={({ detail: { checked } }) =>
-              props.onChange({ index: checked })
-            }
-          >
-            Create an index
-          </Toggle>
-        </FormField>
-        <FormField
-          label="Hybrid Search"
-          description="Use vector similarity together with Postgres full-text search for hybrid search."
-          errorText={props.errors.hybridSearch}
-        >
-          <Toggle
-            disabled={props.submitting}
-            checked={props.data.hybridSearch}
-            onChange={({ detail: { checked } }) =>
-              props.onChange({ hybridSearch: checked })
-            }
-          >
-            Use hybrid search
-          </Toggle>
-        </FormField>
         <FormField
           label="Cross-Encoder Model"
           errorText={props.errors.embeddingsModel}
