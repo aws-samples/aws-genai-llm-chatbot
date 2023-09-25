@@ -71,7 +71,11 @@ export class LargeLanguageModels extends Construct {
     //      model = JumpStartModel(model_id=model_id, region=region)
     //      print(model.model_package_arn)
 
-    if (props.config.llms?.sagemaker.includes(SupportedSageMakerLLM.Llama2_13b_Base)) {
+    if (
+      props.config.llms?.sagemaker.includes(
+        SupportedSageMakerLLM.Llama2_13b_Base
+      )
+    ) {
       const llama2base = new SageMakerModel(this, "LLamaV2_13B_Base", {
         vpc: props.shared.vpc,
         region: cdk.Aws.REGION,

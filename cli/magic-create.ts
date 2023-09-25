@@ -5,7 +5,7 @@
 
 import { Command } from 'commander';
 import * as enquirer from 'enquirer';
-import { SupportedRegion, SupportedLLM, SystemConfig} from '../lib/shared/types';
+import { SupportedRegion, SupportedSageMakerLLM, SystemConfig} from '../lib/shared/types';
 import { LIB_VERSION } from './version.js';
 import * as fs from 'fs';
 
@@ -54,7 +54,7 @@ const embeddingModels = [
             options.bedrockRegion = config.bedrock?.region;
             options.bedrockEndpoint = config.bedrock?.endpointUrl;
             options.bedrockRoleArn = config.bedrock?.roleArn;
-            options.llms = config.llms;
+            options.sagemakerLLMs = config.llms.sagemaker;
             options.ragsToEnable = Object.keys(config.rag.engines).filter((v:string) => (config.rag.engines as any)[v].enabled)
             options.embeddings = config.rag.embeddingsModels.map((m:any) => m.name);
             options.defaultEmbedding = config.rag.embeddingsModels.filter((m: any) => m.default)[0].name;
@@ -126,10 +126,10 @@ async function processCreateOptions(options: any): Promise<void> {
         },
         {
             type: 'multiselect',
-            name: 'llms',
-            message: 'Which other LLMs do you want to enable',
-            choices: Object.values(SupportedLLM),
-            initial: options.llms || []
+            name: 'sagemakerLLMs',
+            message: 'Which Sagemaker LLMs do you want to enable',
+            choices: Object.values(SupportedSageMakerLLM),
+            initial: options.sagemakerLLMs || []
         },
         {
             type: 'confirm',
@@ -242,7 +242,9 @@ async function processCreateOptions(options: any): Promise<void> {
             roleArn: answers.bedrockRoleArn === '' ? undefined : answers.bedrockRoleArn,
             endpointUrl: answers.bedrockEndpoint
         } : undefined),
-        llms: answers.llms,
+        llms: {
+            sagemaker: answers.sagemakerLLMs,
+        }, 
         rag: {
             enabled: answers.enableRag,
             engines: {
@@ -263,10 +265,7 @@ async function processCreateOptions(options: any): Promise<void> {
                     default: true,
                 }
             ]
-        },
-        
-        
-        
+        },    
     }
     config.rag.engines.kendra.enabled = answers.ragsToEnable.includes('kendra');
     config.rag.engines.kendra.external = [ ...kendraExternal];
