@@ -19,6 +19,8 @@ import RouterButton from "../../../components/wrappers/router-button";
 import RouterButtonDropdown from "../../../components/wrappers/router-button-dropdown";
 import AuroraWorkspaceSettings from "./aurora-workspace-settings";
 import DocumentsTab from "./documents-tab";
+import OpenSearchWorkspaceSettings from "./open-search-workspace-settings copy";
+import KendraWorkspaceSettings from "./kendra-workspace-settings";
 
 export default function Workspace() {
   const appContext = useContext(AppContext);
@@ -133,59 +135,69 @@ export default function Workspace() {
               {workspace && workspace.engine === "aurora" && (
                 <AuroraWorkspaceSettings workspace={workspace} />
               )}
+              {workspace && workspace.engine === "opensearch" && (
+                <OpenSearchWorkspaceSettings workspace={workspace} />
+              )}
+              {workspace && workspace.engine === "kendra" && (
+                <KendraWorkspaceSettings workspace={workspace} />
+              )}
             </Container>
-            <Tabs
-              tabs={[
-                {
-                  label: "Files",
-                  id: "file",
-                  content: (
-                    <DocumentsTab
-                      workspaceId={workspaceId}
-                      documentType="file"
-                    />
-                  ),
-                },
-                {
-                  label: "Texts",
-                  id: "text",
-                  content: (
-                    <DocumentsTab
-                      workspaceId={workspaceId}
-                      documentType="text"
-                    />
-                  ),
-                },
-                {
-                  label: "Q&A",
-                  id: "qna",
-                  content: (
-                    <DocumentsTab
-                      workspaceId={workspaceId}
-                      documentType="qna"
-                    />
-                  ),
-                },
-                {
-                  label: "Websites",
-                  id: "website",
-                  content: (
-                    <DocumentsTab
-                      workspaceId={workspaceId}
-                      documentType="website"
-                    />
-                  ),
-                },
-              ]}
-              activeTabId={activeTab}
-              onChange={({ detail: { activeTabId } }) => {
-                setActiveTab(activeTabId);
-                setSearchParams((current) => ({
-                  ...Utils.urlSearchParamsToRecord(current),
-                  tab: activeTabId,
-                }));
-              }}
-            />
+            {workspace &&
+              (workspace.engine === "aurora" ||
+                workspace.engine === "opensearch") && (
+                <Tabs
+                  tabs={[
+                    {
+                      label: "Files",
+                      id: "file",
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="file"
+                        />
+                      ),
+                    },
+                    {
+                      label: "Texts",
+                      id: "text",
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="text"
+                        />
+                      ),
+                    },
+                    {
+                      label: "Q&A",
+                      id: "qna",
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="qna"
+                        />
+                      ),
+                    },
+                    {
+                      label: "Websites",
+                      id: "website",
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="website"
+                        />
+                      ),
+                    },
+                  ]}
+                  activeTabId={activeTab}
+                  onChange={({ detail: { activeTabId } }) => {
+                    setActiveTab(activeTabId);
+                    setSearchParams((current) => ({
+                      ...Utils.urlSearchParamsToRecord(current),
+                      tab: activeTabId,
+                    }));
+                  }}
+                />
+              )}
           </SpaceBetween>
         </ContentLayout>
       }

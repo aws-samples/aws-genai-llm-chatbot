@@ -51,28 +51,12 @@ class LLMInputOutputAdapter:
 class BedrockBase(BaseModel, ABC):
     client: Any  #: :meta private:
 
-    region_name: Optional[str] = None
-    """The aws region e.g., `us-west-2`. Fallsback to AWS_DEFAULT_REGION env variable
-    or region specified in ~/.aws/config in case it is not provided here.
-    """
-
-    credentials_profile_name: Optional[str] = None
-    """The name of the profile in the ~/.aws/credentials or ~/.aws/config files, which
-    has either access keys or role information specified.
-    If not specified, the default credential profile or, if on an EC2 instance,
-    credentials from IMDS will be used.
-    See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
-    """
-
     model_id: str
     """Id of the model to call, e.g., amazon.titan-tg1-large, this is
     equivalent to the modelId property in the list-foundation-models api"""
 
     model_kwargs: Optional[Dict] = None
     """Key word arguments to pass to the model."""
-
-    endpoint_url: Optional[str] = None
-    """Needed if you don't want to default to us-east-1 endpoint"""
 
     streaming: bool = False
     """Whether streaming the response or not."""
@@ -84,35 +68,6 @@ class BedrockBase(BaseModel, ABC):
         # Skip creating new client if passed in constructor
         if values["client"] is not None:
             return values
-
-        try:
-            import boto3
-
-            if values["credentials_profile_name"] is not None:
-                session = boto3.Session(profile_name=values["credentials_profile_name"])
-            else:
-                # use default credentials
-                session = boto3.Session()
-
-            client_params = {}
-            if values["region_name"]:
-                client_params["region_name"] = values["region_name"]
-            if values["endpoint_url"]:
-                client_params["endpoint_url"] = values["endpoint_url"]
-
-            values["client"] = session.client("bedrock", **client_params)
-
-        except ImportError:
-            raise ModuleNotFoundError(
-                "Could not import boto3 python package. "
-                "Please install it with `pip install boto3`."
-            )
-        except Exception as e:
-            raise ValueError(
-                "Could not load credentials to authenticate with AWS client. "
-                "Please check that credentials in the specified "
-                "profile name are valid."
-            ) from e
 
         return values
 
@@ -138,19 +93,20 @@ class BedrockBase(BaseModel, ABC):
 
         provider = self._get_provider()
         params = {**_model_kwargs, **kwargs}
-        input_body = LLMInputOutputAdapter.prepare_input(provider, prompt, params)
+        input_body = LLMInputOutputAdapter.prepare_input(
+            provider, prompt, params)
         body = json.dumps(input_body)
         accept = "application/json"
         contentType = "application/json"
 
         try:
-            response_stream =  self.client.invoke_model_with_response_stream(
+            response_stream = self.client.invoke_model_with_response_stream(
                 body=body, modelId=self.model_id, accept=accept, contentType=contentType
             )
 
             stream = response_stream.get('body')
             if stream:
-                for event in stream: 
+                for event in stream:
                     chunk = event.get('chunk')
                     if chunk:
                         json_response = json.loads(chunk.get('bytes').decode())
@@ -164,7 +120,6 @@ class BedrockBase(BaseModel, ABC):
         except Exception as e:
             raise ValueError(f"Error raised by bedrock service: {e}")
 
-
     def _prepare_input_and_invoke(
         self,
         prompt: str,
@@ -176,7 +131,8 @@ class BedrockBase(BaseModel, ABC):
 
         provider = self._get_provider()
         params = {**_model_kwargs, **kwargs}
-        input_body = LLMInputOutputAdapter.prepare_input(provider, prompt, params)
+        input_body = LLMInputOutputAdapter.prepare_input(
+            provider, prompt, params)
         body = json.dumps(input_body)
         accept = "application/json"
         contentType = "application/json"
@@ -255,6 +211,7 @@ class Bedrock(LLM, BedrockBase):
                 response = se("Tell me a joke.")
         """
 
-        text = self._prepare_input_and_invoke(prompt=prompt, stop=stop, **kwargs)
+        text = self._prepare_input_and_invoke(
+            prompt=prompt, stop=stop, **kwargs)
 
         return text

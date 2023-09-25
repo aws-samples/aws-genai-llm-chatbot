@@ -168,10 +168,6 @@ export interface SemanticSearchResult {
   keywordSearchItems: SemanticSearchResultItem[];
 }
 
-export interface OpenSearchWorkspaceCreateInput {
-  kind: "opensearch";
-}
-
 export interface AuroraWorkspaceCreateInput {
   name: string;
   embeddingsModel: SelectProps.Option | null;
@@ -182,4 +178,17 @@ export interface AuroraWorkspaceCreateInput {
   hybridSearch: boolean;
   chunkSize: number;
   chunkOverlap: number;
+}
+
+export interface OpenSearchWorkspaceCreateInput {
+  name: string;
+  embeddingsModel: SelectProps.Option | null;
+  languages: readonly SelectProps.Option[];
+  crossEncoderModel: SelectProps.Option | null;
+  chunkSize: number;
+  chunkOverlap: number;
+}
+
+export interface KendraWorkspaceCreateInput {
+  name: string;
 }

@@ -155,6 +155,11 @@ def query_workspace_aurora(workspace_id: str, workspace: dict, query: str, limit
             if current["keyword_search_score"] is None:
                 current["keyword_search_score"] = item["keyword_search_score"]
 
+            if item["vector_search_score"] is None:
+                item["vector_search_score"] = current["vector_search_score"]
+            if item["keyword_search_score"] is None:
+                item["keyword_search_score"] = current["keyword_search_score"]
+
     unique_items = list(unique_items.values())
     score_dict = dict({})
     if len(unique_items) > 0:
