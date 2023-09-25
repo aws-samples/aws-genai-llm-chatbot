@@ -7,5 +7,5 @@ import { config } from "../config";
 const app = new cdk.App();
 
 new AwsGenAILLMChatbotStack(app, `${config.prefix}GenAIChatBotStack`, {
-  config,
+  config, 
 });
