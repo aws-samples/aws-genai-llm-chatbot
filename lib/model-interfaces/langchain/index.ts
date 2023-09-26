@@ -59,6 +59,9 @@ export class LangChainInterface extends Construct {
           ?.secretArn as string,
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.ragEngines?.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+        OPEN_SEARCH_COLLECTION_ENDPOINT:
+          props.ragEngines?.openSearchVector?.openSearchCollectionEndpoint ??
+          "",
       },
     });
 
@@ -69,7 +72,7 @@ export class LangChainInterface extends Construct {
           resources: ["*"],
         })
       );
-    
+
       if (props.config.bedrock?.roleArn) {
         requestHandler.addToRolePolicy(
           new iam.PolicyStatement({

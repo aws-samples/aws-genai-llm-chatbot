@@ -90,6 +90,9 @@ export class RestApi extends Construct {
           props.ragEngines?.fileImportWorkflow?.stateMachineArn ?? "",
         WEBSITE_CRAWLING_WORKFLOW_ARN:
           props.ragEngines?.websiteCrawlingWorkflow?.stateMachineArn ?? "",
+        OPEN_SEARCH_COLLECTION_ENDPOINT:
+          props.ragEngines?.openSearchVector?.openSearchCollectionEndpoint ??
+          "",
       },
     });
 
@@ -180,7 +183,7 @@ export class RestApi extends Construct {
           actions: ["bedrock:ListFoundationModels"],
           resources: ["*"],
         })
-      )
+      );
       if (props.config.bedrock?.roleArn) {
         apiHandler.addToRolePolicy(
           new iam.PolicyStatement({
@@ -193,6 +196,7 @@ export class RestApi extends Construct {
 
     const chatBotApi = new apigateway.RestApi(this, "ChatBotApi", {
       endpointTypes: [apigateway.EndpointType.REGIONAL],
+      cloudWatchRole: true,
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
