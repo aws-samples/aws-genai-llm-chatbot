@@ -17,9 +17,9 @@ class FalconLiteContentHandler(LLMContentHandler):
             {
                 "inputs": prompt,
                 "parameters": {
-                    "max_new_tokens": 10000,
+                    "max_new_tokens": model_kwargs.get("max_new_tokens", 512),
                     "do_sample": True,
-                    "temperature": None,
+                    "temperature": model_kwargs.get("temperature", 0.6),
                     "return_full_text": False,
                     "typical_p": 0.2,
                     "use_cache": True,
@@ -43,11 +43,19 @@ class SMFalconLiteAdapter(ModelAdapter):
 
         super().__init__(**kwargs)
 
-    def get_llm(self, *args, **kwargs):
+    def get_llm(self, model_kwargs={}):
+        params = {}
+        if "temperature" in model_kwargs:
+            params["temperature"] = model_kwargs["temperature"]
+        if "maxTokens" in model_kwargs:
+            params["max_new_tokens"] = model_kwargs["maxTokens"]
+
         return SagemakerEndpoint(
             endpoint_name=self.model_id,
             region_name=os.environ["AWS_REGION"],
             content_handler=content_handler,
+            model_kwargs=params,
+            callbacks=[self.callback_handler],
         )
 
     def get_prompt(self):

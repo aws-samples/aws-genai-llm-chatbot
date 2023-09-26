@@ -34,13 +34,22 @@ class SMLlama2BaseAdapter(ModelAdapter):
 
         super().__init__(**kwargs)
 
-    def get_llm(self, *args, **kwargs):
+    def get_llm(self, model_kwargs={}):
+        params = {}
+        if "temperature" in model_kwargs:
+            params["temperature"] = model_kwargs["temperature"]
+        if "topP" in model_kwargs:
+            params["top_p"] = model_kwargs["topP"]
+        if "maxTokens" in model_kwargs:
+            params["max_new_tokens"] = model_kwargs["maxTokens"]
+
         return SagemakerEndpoint(
             endpoint_name=self.model_id,
             region_name=os.environ.get("AWS_REGION"),
-            model_kwargs={"max_new_tokens": 256, "top_p": 0.9, "temperature": 0.6},
+            model_kwargs=params,
             endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
             content_handler=content_handler,
+            callbacks=[self.callback_handler],
         )
 
 
