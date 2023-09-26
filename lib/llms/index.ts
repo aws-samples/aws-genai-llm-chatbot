@@ -87,11 +87,23 @@ export class LargeLanguageModels extends Construct {
             new cdk.CfnMapping(scope, "Llama2BasePackageMapping", {
               lazy: true,
               mapping: {
+                "ap-southeast-1": {
+                  arn: "arn:aws:sagemaker:ap-southeast-1:192199979996:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811",
+                },
+                "ap-southeast-2": {
+                  arn: "arn:aws:sagemaker:ap-southeast-2:666831318237:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811",
+                },
                 "eu-west-1": {
-                  arn: "arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-v3-8f4d5693a64a320ab0e8207af3551ae4",
+                  arn: "arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811",
                 },
                 "us-east-1": {
                   arn: "arn:aws:sagemaker:us-east-1:865070037744:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811",
+                },
+                "us-east-2": {
+                  arn: "arn:aws:sagemaker:us-east-2:057799348421:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811",
+                },
+                "us-west-2": {
+                  arn: "arn:aws:sagemaker:us-west-2:594846645681:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811",
                 },
               },
             }),
@@ -104,6 +116,15 @@ export class LargeLanguageModels extends Construct {
       });
     }
 
+    // To get Jumpstart model ARNs do the following
+    // 1. Identify the modelId via https://sagemaker.readthedocs.io/en/stable/doc_utils/pretrainedmodels.html
+    // 2. Run the following code
+    //
+    //      from sagemaker.jumpstart.model import JumpStartModel
+    //      region = 'us-east-1'
+    //      model_id = 'meta-textgeneration-llama-2-13b-f'
+    //      model = JumpStartModel(model_id=model_id, region=region)
+    //      print(model.model_package_arn)
     if (
       props.config.llms.sagemaker.includes(
         SupportedSageMakerLLM.Llama2_13b_Chat
@@ -120,8 +141,23 @@ export class LargeLanguageModels extends Construct {
             new cdk.CfnMapping(scope, "Llama2ChatPackageMapping", {
               lazy: true,
               mapping: {
+                "ap-southeast-1": {
+                  arn: "arn:aws:sagemaker:ap-southeast-1:192199979996:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b",
+                },
+                "ap-southeast-2": {
+                  arn: "arn:aws:sagemaker:ap-southeast-2:666831318237:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b",
+                },
                 "eu-west-1": {
-                  arn: "arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-f-v3-626aff9802aa3ed3ae74f5e2f1da8e77",
+                  arn: "arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b",
+                },
+                "us-east-1": {
+                  arn: "arn:aws:sagemaker:us-east-1:865070037744:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b",
+                },
+                "us-east-2": {
+                  arn: "arn:aws:sagemaker:us-east-2:057799348421:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b",
+                },
+                "us-west-2": {
+                  arn: "arn:aws:sagemaker:us-west-2:594846645681:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b",
                 },
               },
             }),
