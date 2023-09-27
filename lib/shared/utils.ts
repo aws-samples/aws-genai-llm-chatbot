@@ -46,4 +46,12 @@ export abstract class Utils {
 
     return `${defaultModel.provider}::${defaultModel.name}`;
   }
+
+  static getName(config: SystemConfig, value: string) {
+    const prefix = config.prefix;
+    let name = prefix && prefix.length > 0 ? `${prefix}-${value}` : value;
+    name = name.slice(0, 32); // maxLength: 32
+
+    return name;
+  }
 }

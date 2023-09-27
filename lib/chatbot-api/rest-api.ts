@@ -140,6 +140,15 @@ export class RestApi extends Construct {
       props.ragEngines.kendraRetrieval.createKendraWorkspaceWorkflow.grantStartExecution(
         apiHandler
       );
+
+      if (props.ragEngines.kendraRetrieval.kendraIndex) {
+        apiHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["kendra:Retrieve", "kendra:Query"],
+            resources: [props.ragEngines.kendraRetrieval.kendraIndex.attrArn],
+          })
+        );
+      }
     }
 
     if (props.ragEngines?.fileImportWorkflow) {

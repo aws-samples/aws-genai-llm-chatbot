@@ -121,6 +121,17 @@ export class LangChainInterface extends Construct {
       );
     }
 
+    if (props.ragEngines?.kendraRetrieval) {
+      if (props.ragEngines.kendraRetrieval.kendraIndex) {
+        requestHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["kendra:Retrieve", "kendra:Query"],
+            resources: [props.ragEngines.kendraRetrieval.kendraIndex.attrArn],
+          })
+        );
+      }
+    }
+
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
     props.shared.apiKeysSecret.grantRead(requestHandler);
