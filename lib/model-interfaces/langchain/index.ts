@@ -93,6 +93,15 @@ export class LangChainInterface extends Construct {
     }
 
     if (props.ragEngines?.openSearchVector) {
+      requestHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["aoss:APIAccessAll"],
+          resources: [
+            props.ragEngines?.openSearchVector.openSearchCollection.attrArn,
+          ],
+        })
+      );
+
       props.ragEngines.openSearchVector.addToAccessPolicy(
         "request-handler-langchain",
         [requestHandler.role?.roleArn],

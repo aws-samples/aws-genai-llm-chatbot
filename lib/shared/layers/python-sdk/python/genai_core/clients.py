@@ -2,6 +2,8 @@ import boto3
 import openai
 import genai_core.types
 import genai_core.parameters
+from botocore.config import Config
+
 
 sts_client = boto3.client("sts")
 
@@ -17,7 +19,14 @@ def get_openai_client():
 
 
 def get_sagemaker_client():
-    client = boto3.client("sagemaker-runtime")
+    config = Config(
+        retries={
+            "max_attempts": 15,
+            "mode": "adaptive"
+        }
+    )
+
+    client = boto3.client("sagemaker-runtime", config=config)
 
     return client
 

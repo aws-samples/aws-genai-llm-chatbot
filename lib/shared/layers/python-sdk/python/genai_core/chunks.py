@@ -5,6 +5,7 @@ import genai_core.types
 import genai_core.documents
 import genai_core.embeddings
 import genai_core.aurora.chunks
+import genai_core.opensearch.chunks
 from typing import List, Optional
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
@@ -43,10 +44,26 @@ def add_chunks(
     )
     chunk_ids = [uuid.uuid4() for _ in chunks]
 
-    store_chunks_on_s3(workspace_id, document_id, document_sub_id, chunk_ids, chunks)
+    store_chunks_on_s3(workspace_id, document_id,
+                       document_sub_id, chunk_ids, chunks)
 
     if engine == "aurora":
         result = genai_core.aurora.chunks.add_chunks_aurora(
+            workspace_id=workspace_id,
+            document_id=document_id,
+            document_sub_id=document_sub_id,
+            document_type=document_type,
+            document_sub_type=document_sub_type,
+            path=path,
+            title=title,
+            chunk_ids=chunk_ids,
+            chunk_embeddings=chunk_embeddings,
+            chunks=chunks,
+            chunk_complements=chunk_complements,
+            replace=replace,
+        )
+    elif engine == "opensearch":
+        result = genai_core.opensearch.chunks.add_chunks_open_search(
             workspace_id=workspace_id,
             document_id=document_id,
             document_sub_id=document_sub_id,

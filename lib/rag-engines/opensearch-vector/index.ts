@@ -16,6 +16,7 @@ export interface OpenSearchVectorProps {
 export class OpenSearchVector extends Construct {
   public readonly openSearchCollectionName: string;
   public readonly openSearchCollectionEndpoint: string;
+  public readonly openSearchCollection: oss.CfnCollection;
   public readonly createOpenSearchWorkspaceWorkflow: sfn.StateMachine;
   public addToAccessPolicy: (
     name: string,
@@ -106,6 +107,7 @@ export class OpenSearchVector extends Construct {
         shared: props.shared,
         ragDynamoDBTables: props.ragDynamoDBTables,
         openSearchCollectionName: collectionName,
+        openSearchCollection: cfnCollection,
         collectionEndpoint: cfnCollection.attrCollectionEndpoint,
       }
     );
@@ -142,6 +144,7 @@ export class OpenSearchVector extends Construct {
 
     this.createOpenSearchWorkspaceWorkflow = createWorkflow.stateMachine;
     this.openSearchCollectionEndpoint = cfnCollection.attrCollectionEndpoint;
+    this.openSearchCollection = cfnCollection;
   }
 
   getName(config: SystemConfig, value: string) {

@@ -169,7 +169,8 @@ def get_document_content(workspace_id: str, document_id: str):
     if genai_core.utils.files.file_exists(
         PROCESSING_BUCKET_NAME, content_complement_key
     ):
-        response = s3.Object(PROCESSING_BUCKET_NAME, content_complement_key).get()
+        response = s3.Object(PROCESSING_BUCKET_NAME,
+                             content_complement_key).get()
         content_complement = response["Body"].read().decode("utf-8")
 
     return {"content": content, "content_complement": content_complement}
@@ -361,15 +362,18 @@ def _process_document(
             follow_links = False
 
             try:
-                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(path)
+                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(
+                    path)
 
                 if len(urls_to_crawl) == 0:
                     set_status(workspace_id, document_id, "error")
-                    raise genai_core.types.CommonError("No urls found in sitemap")
+                    raise genai_core.types.CommonError(
+                        "No urls found in sitemap")
             except Exception as e:
                 logger.error(e)
                 set_status(workspace_id, document_id, "error")
-                raise genai_core.types.CommonError("Error extracting urls from sitemap")
+                raise genai_core.types.CommonError(
+                    "Error extracting urls from sitemap")
 
         response = sfn_client.start_execution(
             stateMachineArn=WEBSITE_CRAWLING_WORKFLOW_ARN,
@@ -379,7 +383,7 @@ def _process_document(
                     "document_id": document_id,
                     "workspace": workspace,
                     "document": document,
-                    "limit": 200,
+                    "limit": 100,
                     "follow_links": follow_links,
                     "urls_to_crawl": urls_to_crawl,
                     "processed_urls": [],

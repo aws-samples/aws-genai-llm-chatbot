@@ -68,6 +68,7 @@ export class WorkspacesClient extends ApiClientBase {
     crossEncoderModelProvider: string;
     crossEncoderModelName: string;
     languages: string[];
+    hybridSearch: boolean;
     chunking_strategy: string;
     chunkSize: number;
     chunkOverlap: number;

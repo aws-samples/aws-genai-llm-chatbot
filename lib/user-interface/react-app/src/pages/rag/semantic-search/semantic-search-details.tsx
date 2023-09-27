@@ -70,7 +70,7 @@ export default function SemanticSearchDetails(
               </div>
             </div>
           )}
-          {props.searchResults.supportedLanguages && (
+          {props.searchResults.detectedLanguages && (
             <div>
               <Box variant="awsui-key-label">Detected languages</Box>
               <div>

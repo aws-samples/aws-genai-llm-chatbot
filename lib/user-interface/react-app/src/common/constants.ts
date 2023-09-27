@@ -59,9 +59,9 @@ export abstract class Labels {
   };
 
   static distainceFunctionMap: Record<string, string> = {
-    inner: "Negative inner product (<#>)",
-    cosine: "Cosine distance (<=>)",
-    l2: "Euclidean distance (L2 norm) (<->)",
+    inner: "Negative inner product",
+    cosine: "Cosine distance",
+    l2: "Euclidean distance / L2 norm",
   };
 
   static sourceTypeMap: Record<string, string> = {

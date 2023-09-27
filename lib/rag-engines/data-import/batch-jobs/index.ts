@@ -29,7 +29,7 @@ export class BatchJobs extends Construct {
       "FargateComputeEnvironment",
       {
         vpc: props.shared.vpc,
-        maxvCpus: 8192,
+        maxvCpus: 2,
         spot: true,
         replaceComputeEnvironment: true,
         updateTimeout: cdk.Duration.minutes(30),

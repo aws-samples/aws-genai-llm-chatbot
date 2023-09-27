@@ -5,6 +5,7 @@ import { SystemConfig } from "../../shared/types";
 import { Shared } from "../../shared";
 import { BatchJobs } from "./batch-jobs";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
+import { OpenSearchVector } from "../opensearch-vector";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
@@ -22,6 +23,7 @@ export interface FileImportWorkflowProps {
   readonly auroraDatabase?: rds.DatabaseCluster;
   readonly processingBucket: s3.Bucket;
   readonly sageMakerRagModelsEndpoint?: sagemaker.CfnEndpoint;
+  readonly openSearchVector?: OpenSearchVector;
 }
 
 export class FileImportWorkflow extends Construct {
@@ -62,6 +64,8 @@ export class FileImportWorkflow extends Construct {
           props.ragDynamoDBTables.documentsByCompountKeyIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+        OPEN_SEARCH_COLLECTION_ENDPOINT:
+          props.openSearchVector?.openSearchCollectionEndpoint ?? "",
       },
     });
 
@@ -78,6 +82,25 @@ export class FileImportWorkflow extends Construct {
     if (props.auroraDatabase) {
       props.auroraDatabase.secret?.grantRead(dataImportFunction);
       props.auroraDatabase.connections.allowDefaultPortFrom(dataImportFunction);
+    }
+
+    if (props.openSearchVector) {
+      dataImportFunction.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["aoss:APIAccessAll"],
+          resources: [props.openSearchVector.openSearchCollection.attrArn],
+        })
+      );
+
+      props.openSearchVector.addToAccessPolicy(
+        "file-import-workflow",
+        [dataImportFunction.role?.roleArn],
+        ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
+      );
+
+      props.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
+        dataImportFunction
+      );
     }
 
     if (props.sageMakerRagModelsEndpoint) {

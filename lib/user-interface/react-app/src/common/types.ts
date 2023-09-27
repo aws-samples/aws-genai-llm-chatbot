@@ -156,9 +156,9 @@ export interface SemanticSearchResultItem {
 export interface SemanticSearchResult {
   engine: string;
   workspaceId: string;
-  queryLanguage: string;
-  supportedLanguages: string[];
-  detectedLanguages: {
+  queryLanguage?: string;
+  supportedLanguages?: string[];
+  detectedLanguages?: {
     code: string;
     score: number;
   }[];
@@ -185,6 +185,7 @@ export interface OpenSearchWorkspaceCreateInput {
   embeddingsModel: SelectProps.Option | null;
   languages: readonly SelectProps.Option[];
   crossEncoderModel: SelectProps.Option | null;
+  hybridSearch: boolean;
   chunkSize: number;
   chunkOverlap: number;
 }

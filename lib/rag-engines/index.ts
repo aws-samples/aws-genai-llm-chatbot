@@ -82,6 +82,7 @@ export class RagEngines extends Construct {
       ragDynamoDBTables: tables,
       workspacesByObjectTypeIndexName: tables.workspacesByObjectTypeIndexName,
       documentsByCompountKeyIndexName: tables.documentsByCompountKeyIndexName,
+      openSearchVector: openSearchVector ?? undefined,
     });
 
     this.auroraPgVector = auroraPgVector;

@@ -41,6 +41,7 @@ class CreateWorkspaceOpenSearchRequest(BaseModel):
     crossEncoderModelProvider: str
     crossEncoderModelName: str
     languages: list[str]
+    hybridSearch: bool
     chunking_strategy: str
     chunkSize: int
     chunkOverlap: int
@@ -230,6 +231,7 @@ def _create_workspace_open_search(
         cross_encoder_model_provider=request.crossEncoderModelProvider,
         cross_encoder_model_name=request.crossEncoderModelName,
         languages=request.languages,
+        hybrid_search=request.hybridSearch,
         chunking_strategy=request.chunking_strategy,
         chunk_size=request.chunkSize,
         chunk_overlap=request.chunkOverlap,

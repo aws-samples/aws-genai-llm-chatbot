@@ -116,10 +116,19 @@ export class RestApi extends Construct {
     }
 
     if (props.ragEngines?.openSearchVector) {
+      apiHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["aoss:APIAccessAll"],
+          resources: [
+            props.ragEngines?.openSearchVector.openSearchCollection.attrArn,
+          ],
+        })
+      );
+
       props.ragEngines.openSearchVector.addToAccessPolicy(
         "rest-api",
         [apiHandler.role?.roleArn],
-        ["aoss:ReadDocument", "aoss:WriteDocument"]
+        ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
       );
 
       props.ragEngines.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(

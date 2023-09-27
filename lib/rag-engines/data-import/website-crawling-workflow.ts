@@ -4,6 +4,7 @@ import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
 import { Shared } from "../../shared";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
+import { OpenSearchVector } from "../opensearch-vector";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
@@ -20,6 +21,7 @@ export interface WebsiteCrawlingWorkflowProps {
   readonly auroraDatabase?: rds.DatabaseCluster;
   readonly processingBucket: s3.Bucket;
   readonly sageMakerRagModelsEndpoint?: sagemaker.CfnEndpoint;
+  readonly openSearchVector?: OpenSearchVector;
 }
 
 export class WebsiteCrawlingWorkflow extends Construct {
@@ -71,6 +73,8 @@ export class WebsiteCrawlingWorkflow extends Construct {
             props.ragDynamoDBTables.documentsByCompountKeyIndexName ?? "",
           SAGEMAKER_RAG_MODELS_ENDPOINT:
             props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+          OPEN_SEARCH_COLLECTION_ENDPOINT:
+            props.openSearchVector?.openSearchCollectionEndpoint ?? "",
         },
       }
     );
@@ -88,6 +92,25 @@ export class WebsiteCrawlingWorkflow extends Construct {
     if (props.auroraDatabase) {
       props.auroraDatabase.secret?.grantRead(websiteParserFunction);
       props.auroraDatabase.connections.allowDefaultPortFrom(
+        websiteParserFunction
+      );
+    }
+
+    if (props.openSearchVector) {
+      websiteParserFunction.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["aoss:APIAccessAll"],
+          resources: [props.openSearchVector.openSearchCollection.attrArn],
+        })
+      );
+
+      props.openSearchVector.addToAccessPolicy(
+        "website-crawling-workflow",
+        [websiteParserFunction.role?.roleArn],
+        ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
+      );
+
+      props.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
         websiteParserFunction
       );
     }

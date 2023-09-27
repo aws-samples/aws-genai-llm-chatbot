@@ -9,12 +9,14 @@ import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as oss from "aws-cdk-lib/aws-opensearchserverless";
 
 export interface CreateOpenSearchWorkspaceProps {
   readonly config: SystemConfig;
   readonly shared: Shared;
   readonly ragDynamoDBTables: RagDynamoDBTables;
   readonly openSearchCollectionName: string;
+  readonly openSearchCollection: oss.CfnCollection;
   readonly collectionEndpoint: string;
 }
 
@@ -61,6 +63,16 @@ export class CreateOpenSearchWorkspace extends Construct {
     );
 
     props.ragDynamoDBTables.workspacesTable.grantReadWriteData(createFunction);
+    createFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          "aoss:APIAccessAll",
+          "aoss:DescribeIndex",
+          "aoss:CreateIndex",
+        ],
+        resources: [props.openSearchCollection.attrArn],
+      })
+    );
 
     const handleError = new tasks.DynamoUpdateItem(this, "HandleError", {
       table: props.ragDynamoDBTables.workspacesTable,
