@@ -414,3 +414,5 @@ misc
 deploy-models
 
 chatbot-ui/public/aws-exports.json
+
+**/*.js
