@@ -67,9 +67,6 @@ class ModelAdapter:
             output_key=output_key,
         )
 
-    def get_qa_prompt(self):
-        return QA_PROMPT
-
     def get_prompt(self):
         template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
 
@@ -127,8 +124,6 @@ class ModelAdapter:
                 memory=self.get_memory(output_key="answer"),
                 verbose=True,
             )
-            conversation.question_generator = LLMChain(llm=self.llm, prompt=self.get_qa_prompt())
-            conversation.combine_docs_chain = LLMChain(llm=self.llm, prompt=self.get_prompt())
             result = conversation({"question": user_prompt})
             logger.info(result["source_documents"])
             documents = [

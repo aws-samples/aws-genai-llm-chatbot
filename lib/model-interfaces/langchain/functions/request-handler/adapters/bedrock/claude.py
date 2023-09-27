@@ -2,7 +2,7 @@ import os
 
 import boto3
 from langchain.agents import ZeroShotAgent
-from langchain.llms import Bedrock
+from langchain.chat_models import BedrockChat
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
@@ -26,26 +26,11 @@ class BedrockClaudeAdapter(ModelAdapter):
 
         parameters = {"temperature": 0.6, "max_tokens_to_sample": 1024}
 
-        return Bedrock(
+        return BedrockChat(
             client=client,
             model_id=self.model_id,
             model_kwargs=parameters,
         )
-
-    def get_qa_prompt(self):
-        template = """
-        
-Human: Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-{context}
-
-Question: {question}
-
-Assistant:"""
-
-        return PromptTemplate(
-                template=template, input_variables=["context", "question"]
-                )
 
     def get_prompt(self):
         template = """Human: The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
