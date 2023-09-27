@@ -2,7 +2,7 @@ import os
 
 import boto3
 from langchain.agents import ZeroShotAgent
-from langchain.chat_models import Bedrock
+from langchain.llms import Bedrock
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
