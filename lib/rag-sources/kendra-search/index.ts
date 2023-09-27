@@ -106,6 +106,7 @@ export class KendraSearch extends Construct {
       layers: [commonLayer.layer],
       environment: {
         KENDRA_INDEX_ID: index.ref,
+        KENDRA_LANGUAGE_CODE: 'en',
       },
     });
 

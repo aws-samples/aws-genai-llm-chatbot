@@ -17,7 +17,18 @@ def get_relevant_documents():
     query: dict = app.current_event.json_body.get("query")
     logger.info(query)
 
-    retriever = AmazonKendraRetriever(index_id=os.environ["KENDRA_INDEX_ID"], top_k=3)
+    retriever = AmazonKendraRetriever(
+        index_id=os.environ["KENDRA_INDEX_ID"], 
+        top_k=3, 
+        attribute_filter={
+            "EqualsTo": {      
+                "Key": "_language_code",
+                "Value": {
+                    "StringValue": os.environ["KENDRA_LANGUAGE_CODE"]
+                }
+            }
+        }
+    )
     docs = retriever.get_relevant_documents(query)
     logger.info(docs)
 
