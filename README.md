@@ -62,3 +62,36 @@ Futhermore, make sure which regions are currently supported for SageMaker founda
 
 
 # Deploy
+
+We are providing a tool that guides you in the configuration of the solution.
+
+* Pre-requisites: you need to setup [authentication with AWS](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_auth)
+
+Run the following instructions to clone the repository and build the project.
+
+```bash
+git clone https://github.com/aws-samples/aws-genai-llm-chatbot
+cd aws-genai-llm-chatbot
+npm install
+npm run build
+```
+
+Once done, run:
+
+```bash
+npm run create
+```
+
+You'll be prompted to configure the different aspects of the solution: the LLMs to enable (we support all models provided by Bedrock, FalconLite and LLama 2, more to come) and the setup of the RAG system (we support Aurora, more to come).
+
+When at done, answer `Y` to create a new configuration file and run:
+
+```bash
+cdk deploy
+```
+
+If this is the first time you run `cdk deploy` in the configured account and region, you'll need to bootstrap `cdk` following the instructions on screen. Once done, rerun the previous command.
+
+## Migration from v2
+
+We do not support migrating a V2 chatbot to V3, but you can have both solution running.
