@@ -133,7 +133,7 @@ You'll be prompted to configure the different aspects of the solution such as:
 - The LLMs to enable (we support all models provided by Bedrock, FalconLite, LLama 2 and more to come)
 - Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra..) embeddings selection and more to come.
 
-When at done, answer `Y` to create a new configuration.
+When done, answer `Y` to create a new configuration.
 
 ![sample](assets/magic-create-sample.gif "CLI sample")
 
