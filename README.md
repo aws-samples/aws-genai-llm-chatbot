@@ -67,8 +67,6 @@ Before you begin using the solution, there are certain precautions you must take
 
 # Deploy
 
-We are providing a tool that guides you in the configuration of the solution.
-
 ### Environment setup
 
 #### (Optional) If using AWS Cloud9
