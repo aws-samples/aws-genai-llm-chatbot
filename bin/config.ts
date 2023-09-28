@@ -52,7 +52,7 @@ export function getConfig(): SystemConfig {
         },
         {
           provider: "bedrock",
-          name: "amazon.amazon.titan-embed-text-v1",
+          name: "amazon.titan-embed-text-v1",
           dimensions: 1536,
         },
         {
