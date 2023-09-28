@@ -12,6 +12,7 @@ import KendraForm from "./kendra-form";
 const nameRegex = /^[\w+_-]+$/;
 const defaults: KendraWorkspaceCreateInput = {
   name: "",
+  kendraIndex: null,
 };
 
 export default function CreateWorkspaceKendra() {
@@ -40,6 +41,10 @@ export default function CreateWorkspaceKendra() {
           "Workspace name can only contain letters, numbers, underscores, and dashes";
       }
 
+      if (!form.kendraIndex) {
+        errors.kendraIndex = "Kendra index is required";
+      }
+
       return errors;
     },
   });
@@ -54,6 +59,7 @@ export default function CreateWorkspaceKendra() {
     const apiClient = new ApiClient(appContext);
     const result = await apiClient.workspaces.createKendraWorkspace({
       name: data.name.trim(),
+      kendraIndexId: data.kendraIndex?.value ?? "",
     });
 
     if (ResultValue.ok(result)) {

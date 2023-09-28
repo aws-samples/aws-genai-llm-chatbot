@@ -211,9 +211,11 @@ def create_workspace_open_search(
     }
 
 
-def create_workspace_kendra(workspace_name: str):
+def create_workspace_kendra(workspace_name: str, kendra_index: dict):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    kendra_index_id = kendra_index["id"]
+    kendra_index_external = kendra_index["external"]
 
     item = {
         "workspace_id": workspace_id,
@@ -222,6 +224,8 @@ def create_workspace_kendra(workspace_name: str):
         "name": workspace_name,
         "engine": "kendra",
         "status": "submitted",
+        "kendra_index_id": kendra_index_id,
+        "kendra_index_external": kendra_index_external,
         "documents": 0,
         "vectors": 0,
         "size_in_bytes": 0,

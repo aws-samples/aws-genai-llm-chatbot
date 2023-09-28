@@ -59,6 +59,17 @@ export class KendraRetrieval extends Construct {
         edition: "DEVELOPER_EDITION",
         name: indexName,
         roleArn: kendraRole.roleArn,
+        documentMetadataConfigurations: [
+          {
+            name: "workspace_id",
+            type: "STRING_VALUE",
+            search: {
+              displayable: true,
+              facetable: true,
+              searchable: true,
+            },
+          },
+        ],
       });
 
       const s3DataSource = new kendra.CfnDataSource(

@@ -1,5 +1,6 @@
 import re
 import genai_core.types
+import genai_core.kendra
 import genai_core.parameters
 import genai_core.workspaces
 from pydantic import BaseModel
@@ -50,6 +51,7 @@ class CreateWorkspaceOpenSearchRequest(BaseModel):
 class CreateWorkspaceKendraRequest(BaseModel):
     kind: str
     name: str
+    kendraIndexId: str
 
 
 @router.get("/workspaces")
@@ -240,6 +242,7 @@ def _create_workspace_open_search(
 
 def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict):
     workspace_name = request.name.strip()
+    kendra_indexes = genai_core.kendra.get_kendra_indexes()
 
     workspace_name_match = name_regex.match(workspace_name)
     workspace_name_is_match = bool(workspace_name_match)
@@ -250,7 +253,16 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
     ):
         raise genai_core.types.CommonError("Invalid workspace name")
 
-    return genai_core.workspaces.create_workspace_kendra(workspace_name=workspace_name)
+    kendra_index = None
+    for current in kendra_indexes:
+        if current["id"] == request.kendraIndexId:
+            kendra_index = current
+            break
+
+    if kendra_index is None:
+        raise genai_core.types.CommonError("Kendra index not found")
+
+    return genai_core.workspaces.create_workspace_kendra(workspace_name=workspace_name, kendra_index=kendra_index)
 
 
 def _convert_workspace(workspace: dict):
@@ -274,6 +286,8 @@ def _convert_workspace(workspace: dict):
         "vectors": workspace.get("vectors"),
         "documents": workspace.get("documents"),
         "sizeInBytes": workspace.get("size_in_bytes"),
+        "kendraIndexId": workspace.get("kendra_index_id"),
+        "kendraIndexExternal": workspace.get("kendra_index_external"),
         "createdAt": workspace.get("created_at"),
         "updatedAt": workspace.get("updated_at"),
     }

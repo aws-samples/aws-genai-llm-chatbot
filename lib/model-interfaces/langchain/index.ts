@@ -62,6 +62,10 @@ export class LangChainInterface extends Construct {
         OPEN_SEARCH_COLLECTION_ENDPOINT:
           props.ragEngines?.openSearchVector?.openSearchCollectionEndpoint ??
           "",
+        DEFAULT_KENDRA_INDEX_ID:
+          props.ragEngines?.kendraRetrieval?.kendraIndex?.attrId ?? "",
+        DEFAULT_KENDRA_INDEX_NAME:
+          props.ragEngines?.kendraRetrieval?.kendraIndex?.name ?? "",
       },
     });
 

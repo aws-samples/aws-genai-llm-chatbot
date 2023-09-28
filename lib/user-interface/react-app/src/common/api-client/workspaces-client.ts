@@ -92,6 +92,7 @@ export class WorkspacesClient extends ApiClientBase {
 
   async createKendraWorkspace(params: {
     name: string;
+    kendraIndexId: string;
   }): Promise<ApiResult<{ id: string }>> {
     try {
       const headers = await this.getHeaders();

@@ -69,6 +69,8 @@ export interface WorkspaceItem {
   chunkOverlap: number;
   vectors: number;
   documents: number;
+  kendraIndexId?: string;
+  kendraIndexExternal?: boolean;
   sizeInBytes: number;
   createdAt: string;
 }
@@ -192,4 +194,11 @@ export interface OpenSearchWorkspaceCreateInput {
 
 export interface KendraWorkspaceCreateInput {
   name: string;
+  kendraIndex: SelectProps.Option | null;
+}
+
+export interface KendraIndexItem {
+  id: string;
+  name: string;
+  external: boolean;
 }
