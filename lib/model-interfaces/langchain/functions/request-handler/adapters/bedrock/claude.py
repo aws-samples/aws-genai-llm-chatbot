@@ -25,7 +25,7 @@ class BedrockClaudeAdapter(ModelAdapter):
             params["max_tokens_to_sample"] = model_kwargs["maxTokens"]
 
         return Bedrock(
-            client=client,
+            client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,
             streaming=model_kwargs.get("streaming", False),
