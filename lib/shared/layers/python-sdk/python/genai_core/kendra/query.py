@@ -1,4 +1,6 @@
+import os
 import genai_core.types
+from typing import List
 from .client import get_kendra_client_for_index
 
 
@@ -36,10 +38,41 @@ def query_workspace_kendra(
         )
 
     items = result["ResultItems"]
+    items = _convert_records("kendra", workspace_id, items)
 
     ret_value = {
         "engine": "kendra",
-        "items": [],
+        "items": items,
     }
 
     return ret_value
+
+
+def _convert_records(source: str, workspace_id: str, records: List[dict]):
+    converted_records = []
+    for record in records:
+        document_uri = record["DocumentURI"]
+        path = os.path.basename(document_uri)
+        title = record.get("DocumentTitle")
+        content = record.get("Content")
+
+        converted = {
+            "chunk_id": record.get("Id"),
+            "workspace_id": workspace_id,
+            "document_id": record.get("DocumentId"),
+            "document_sub_id": None,
+            "document_type": "file",
+            "document_sub_type": None,
+            "path": path,
+            "language": None,
+            "title": title,
+            "content": content,
+            "content_complement": None,
+            "metadata": None,
+            "sources": [source],
+            "score": None,
+        }
+
+        converted_records.append(converted)
+
+    return converted_records
