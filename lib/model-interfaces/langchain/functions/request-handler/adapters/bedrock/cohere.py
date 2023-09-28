@@ -1,13 +1,13 @@
 import genai_core.clients
-from langchain.prompts.prompt import PromptTemplate
 
 from langchain.llms import Bedrock
+from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
 from ..registry import registry
 
 
-class BedrockTitanAdapter(ModelAdapter):
+class BedrockCohereCommandAdapter(ModelAdapter):
     def __init__(self, model_id, *args, **kwargs):
         self.model_id = model_id
 
@@ -19,10 +19,9 @@ class BedrockTitanAdapter(ModelAdapter):
         params = {}
         if "temperature" in model_kwargs:
             params["temperature"] = model_kwargs["temperature"]
-        if "topP" in model_kwargs:
-            params["topP"] = model_kwargs["topP"]
         if "maxTokens" in model_kwargs:
-            params["maxTokenCount"] = model_kwargs["maxTokens"]
+            params["max_tokens"] = model_kwargs["maxTokens"]
+        params["return_likelihood"] = "GENERATION"
 
         return Bedrock(
             client=bedrock,
@@ -33,7 +32,9 @@ class BedrockTitanAdapter(ModelAdapter):
         )
 
     def get_prompt(self):
-        template = """Human: The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
+        template = """
+
+Human: The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
 
 Current conversation:
 {chat_history}
@@ -52,6 +53,5 @@ Assistant:"""
 
         return prompt_template
 
-
 # Register the adapter
-registry.register(r"^bedrock.amazon.titan-t*", BedrockTitanAdapter)
+registry.register(r"^bedrock.cohere.command-text*", BedrockCohereCommandAdapter)
