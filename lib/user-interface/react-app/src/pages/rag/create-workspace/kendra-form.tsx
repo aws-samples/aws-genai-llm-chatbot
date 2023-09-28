@@ -12,10 +12,10 @@ import {
   FormField,
   Input,
   Select,
+  SelectProps,
 } from "@cloudscape-design/components";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { OptionsHelper } from "../../../common/helpers/options-helper";
 
 export interface KendraFormProps {
   data: KendraWorkspaceCreateInput;
@@ -38,8 +38,8 @@ export default function KendraForm(props: KendraFormProps) {
       const result = await apiClient.ragEngines.getKendraIndexes();
 
       if (ResultValue.ok(result)) {
-        result.data?.sort((a, b) => a.name.localeCompare(b.name));
-        setKendraIndexes(result.data);
+        const data = result.data?.sort((a, b) => a.name.localeCompare(b.name));
+        setKendraIndexes(data);
         setKendraIndexStatus("finished");
       } else {
         setKendraIndexStatus("error");
@@ -47,7 +47,13 @@ export default function KendraForm(props: KendraFormProps) {
     })();
   }, [appContext]);
 
-  const kendraIndexOptions = OptionsHelper.getSelectOptions(kendraIndexes);
+  const kendraIndexOptions: SelectProps.Option[] = kendraIndexes.map((item) => {
+    return {
+      label: item.name,
+      value: item.id,
+      description: item.id,
+    };
+  });
 
   return (
     <Container

@@ -65,7 +65,7 @@ export interface SystemConfig {
         external?: {
           name: string;
           kendraId: string;
-          region: SupportedRegion;
+          region?: SupportedRegion;
           roleArn?: string;
         }[];
       };

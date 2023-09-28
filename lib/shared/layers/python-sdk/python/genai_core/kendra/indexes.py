@@ -7,7 +7,6 @@ DEFAULT_KENDRA_INDEX_NAME = os.environ.get("DEFAULT_KENDRA_INDEX_NAME", "")
 
 def get_kendra_indexes():
     config = genai_core.parameters.get_config()
-
     kendra_config = config.get("rag", {}).get("engines", {}).get("kendra", {})
     external = kendra_config.get("external", {})
 
@@ -22,16 +21,16 @@ def get_kendra_indexes():
         )
 
     for kendraIndex in external:
-        currentId = kendraIndex.get("kendraId", "")
-        currentName = kendraIndex.get("name", "")
+        current_id = kendraIndex.get("kendraId", "")
+        current_name = kendraIndex.get("name", "")
 
-        if not currentId or not currentName:
+        if not current_id or not current_name:
             continue
 
         ret_value.append(
             {
-                "id": currentId,
-                "name": currentName,
+                "id": current_id,
+                "name": current_name,
                 "external": True,
             }
         )

@@ -134,6 +134,17 @@ export class LangChainInterface extends Construct {
           })
         );
       }
+
+      for (const item of props.config.rag.engines.kendra.external || []) {
+        if (!item.roleArn) continue;
+
+        requestHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["sts:AssumeRole"],
+            resources: [item.roleArn],
+          })
+        );
+      }
     }
 
     props.sessionsTable.grantReadWriteData(requestHandler);

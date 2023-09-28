@@ -153,6 +153,17 @@ export class RestApi extends Construct {
           })
         );
       }
+
+      for (const item of props.config.rag.engines.kendra.external || []) {
+        if (!item.roleArn) continue;
+
+        apiHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["sts:AssumeRole"],
+            resources: [item.roleArn],
+          })
+        );
+      }
     }
 
     if (props.ragEngines?.fileImportWorkflow) {
@@ -206,6 +217,7 @@ export class RestApi extends Construct {
           resources: ["*"],
         })
       );
+
       if (props.config.bedrock?.roleArn) {
         apiHandler.addToRolePolicy(
           new iam.PolicyStatement({
