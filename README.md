@@ -87,11 +87,11 @@ If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the 
 - at least `m5.large` as Instance type.
 - use `Ubuntu` as the platform.
 - increase the instance's EBS volume size to at least 100GB. 
-To do this, run the following commands from the Cloud9 terminal:
+To do this, run the following command from the Cloud9 terminal:
 ```
 sh ./scripts/cloud9-resize.sh 100
 ```
- See the documentation for more details [on enviroment resize here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
+ See the documentation for more details [on environment resize here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
 
 ### Deployment
 
