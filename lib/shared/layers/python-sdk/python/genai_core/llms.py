@@ -46,7 +46,7 @@ def list_openai_models():
 
 def list_bedrock_models():
     try:
-        bedrock = genai_core.clients.get_bedrock_client()
+        bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock")
         response = bedrock.list_foundation_models()
         bedrock_models = response.get("modelSummaries", [])
 
@@ -74,7 +74,7 @@ def list_bedrock_models():
 
 def list_bedrock_finetuned_models():
     try:
-        bedrock = genai_core.clients.get_bedrock_client()
+        bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock")
         response = bedrock.list_custom_models()
         bedrock_custom_models = response.get("modelSummaries", [])
 
