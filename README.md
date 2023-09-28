@@ -58,6 +58,18 @@ We are providing a tool that guides you in the configuration of the solution.
 
 ### Environment setup
 
+#### (Optional) If using AWS Cloud9
+If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the solution from, you will need the following before proceeding:
+- at least `m5.large` as Instance type.
+- use `Ubuntu` as the platform.
+- increase the instance's EBS volume size to at least 100GB. 
+To do this, run the following command from the Cloud9 terminal:
+```
+sh ./scripts/cloud9-resize.sh 100
+```
+ See the documentation for more details [on environment resize here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
+
+
 Verify that your environment satisfies the following prerequisites:
 
 You have:
@@ -80,18 +92,6 @@ You have:
 8. [Docker](https://docs.docker.com/get-docker/) installed
    - N.B. [`buildx`](https://github.com/docker/buildx) is also required. For Windows and macOS `buildx` [is included](https://github.com/docker/buildx#windows-and-macos) in [Docker Desktop](https://docs.docker.com/desktop/)
 10. [Python 3+](https://www.python.org/downloads/) installed
-
-
-### (Optional) If using AWS Cloud9
-If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the solution from you will need the following before proceeding:
-- at least `m5.large` as Instance type.
-- use `Ubuntu` as the platform.
-- increase the instance's EBS volume size to at least 100GB. 
-To do this, run the following command from the Cloud9 terminal:
-```
-sh ./scripts/cloud9-resize.sh 100
-```
- See the documentation for more details [on environment resize here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
 
 ### Deployment
 
