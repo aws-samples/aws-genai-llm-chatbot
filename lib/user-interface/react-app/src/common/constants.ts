@@ -67,6 +67,7 @@ export abstract class Labels {
   static sourceTypeMap: Record<string, string> = {
     vector_search: "Vector search",
     keyword_search: "Keyword search",
+    kendra: "Kendra",
   };
 
   static documentTypeMap: Record<string, string> = {
