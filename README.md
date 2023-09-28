@@ -83,8 +83,6 @@ You have:
 
 ### Deployment
 
-Run the following instructions to clone the repository and build the project.
-
 1. Clone the repository
 ```bash
 git clone https://github.com/aws-samples/aws-genai-llm-chatbot
