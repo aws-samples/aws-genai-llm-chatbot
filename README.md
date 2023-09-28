@@ -81,6 +81,7 @@ You have:
    - N.B. [`buildx`](https://github.com/docker/buildx) is also required. For Windows and macOS `buildx` [is included](https://github.com/docker/buildx#windows-and-macos) in [Docker Desktop](https://docs.docker.com/desktop/)
 10. [Python 3+](https://www.python.org/downloads/) installed
 
+### Deployment
 
 Run the following instructions to clone the repository and build the project.
 
