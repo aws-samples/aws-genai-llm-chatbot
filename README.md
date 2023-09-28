@@ -1,4 +1,4 @@
-# [WIP] Deploying a Multi-LLM and Multi-RAG Powered Chatbot Using AWS CDK on AWS
+# Deploying a Multi-LLM and Multi-RAG Powered Chatbot Using AWS CDK on AWS
 [![Release Notes](https://img.shields.io/github/v/release/aws-samples/aws-genai-llm-chatbot)](https://github.com/aws-samples/aws-genai-llm-chatbot/releases)
 [![GitHub star chart](https://img.shields.io/github/stars/aws-samples/aws-genai-llm-chatbot?style=social)](https://star-history.com/#aws-samples/aws-genai-llm-chatbot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
