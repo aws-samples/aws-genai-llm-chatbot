@@ -1,4 +1,4 @@
-# [WIP] Deploying a Multi-LLM and Multi-RAG Powered Chatbot Using AWS CDK on AWS
+# Deploying a Multi-LLM and Multi-RAG Powered Chatbot Using AWS CDK on AWS
 [![Release Notes](https://img.shields.io/github/v/release/aws-samples/aws-genai-llm-chatbot)](https://github.com/aws-samples/aws-genai-llm-chatbot/releases)
 [![GitHub star chart](https://img.shields.io/github/stars/aws-samples/aws-genai-llm-chatbot?style=social)](https://star-history.com/#aws-samples/aws-genai-llm-chatbot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,7 +8,6 @@
 ## Table of content
 - [Features](#features)
 - [Precautions](#precautions)
-- [Preview Access and Service Quotas](#preview-access-and-service-quotas)
 - [Deploy](#deploy)
 - [Clean up](#clean-up)
 - [Authors](#authors)
@@ -67,8 +66,6 @@ Before you begin using the solution, there are certain precautions you must take
 
 
 # Deploy
-
-We are providing a tool that guides you in the configuration of the solution.
 
 ### Environment setup
 
@@ -133,7 +130,7 @@ You'll be prompted to configure the different aspects of the solution such as:
 - The LLMs to enable (we support all models provided by Bedrock, FalconLite, LLama 2 and more to come)
 - Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra..) embeddings selection and more to come.
 
-When at done, answer `Y` to create a new configuration.
+When done, answer `Y` to create a new configuration.
 
 ![sample](assets/magic-create-sample.gif "CLI sample")
 
