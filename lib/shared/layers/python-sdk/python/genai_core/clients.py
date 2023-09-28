@@ -19,12 +19,7 @@ def get_openai_client():
 
 
 def get_sagemaker_client():
-    config = Config(
-        retries={
-            "max_attempts": 15,
-            "mode": "adaptive"
-        }
-    )
+    config = Config(retries={"max_attempts": 15, "mode": "adaptive"})
 
     client = boto3.client("sagemaker-runtime", config=config)
 

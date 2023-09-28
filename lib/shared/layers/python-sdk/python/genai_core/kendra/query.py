@@ -17,10 +17,8 @@ def query_workspace_kendra(
 
     if kendra_index_external:
         result = kendra.retrieve(
-            IndexId=kendra_index_id,
-            QueryText=query,
-            PageSize=limit,
-            PageNumber=1)
+            IndexId=kendra_index_id, QueryText=query, PageSize=limit, PageNumber=1
+        )
     else:
         result = kendra.retrieve(
             IndexId=kendra_index_id,
@@ -32,7 +30,7 @@ def query_workspace_kendra(
                     "Key": "workspace_id",
                     "Value": {
                         "StringValue": workspace_id,
-                    }
+                    },
                 }
             },
         )

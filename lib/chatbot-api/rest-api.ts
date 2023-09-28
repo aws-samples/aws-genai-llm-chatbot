@@ -97,6 +97,11 @@ export class RestApi extends Construct {
           props.ragEngines?.kendraRetrieval?.kendraIndex?.attrId ?? "",
         DEFAULT_KENDRA_INDEX_NAME:
           props.ragEngines?.kendraRetrieval?.kendraIndex?.name ?? "",
+        DEFAULT_KENDRA_S3_DATA_SOURCE_ID:
+          props.ragEngines?.kendraRetrieval?.kendraS3DataSource?.attrId ?? "",
+        DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
+          props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket
+            ?.bucketName ?? "",
       },
     });
 
@@ -145,11 +150,29 @@ export class RestApi extends Construct {
         apiHandler
       );
 
+      props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket?.grantReadWrite(
+        apiHandler
+      );
+
       if (props.ragEngines.kendraRetrieval.kendraIndex) {
         apiHandler.addToRolePolicy(
           new iam.PolicyStatement({
-            actions: ["kendra:Retrieve", "kendra:Query"],
-            resources: [props.ragEngines.kendraRetrieval.kendraIndex.attrArn],
+            actions: [
+              "kendra:Retrieve",
+              "kendra:Query",
+              "kendra:BatchDeleteDocument",
+              "kendra:BatchPutDocument",
+              "kendra:StartDataSourceSyncJob",
+              "kendra:DescribeDataSourceSyncJob",
+              "kendra:StopDataSourceSyncJob",
+              "kendra:ListDataSourceSyncJobs",
+              "kendra:ListDataSources",
+              "kendra:DescribeIndex",
+            ],
+            resources: [
+              props.ragEngines.kendraRetrieval.kendraIndex.attrArn,
+              `${props.ragEngines.kendraRetrieval.kendraIndex.attrArn}/*`,
+            ],
           })
         );
       }

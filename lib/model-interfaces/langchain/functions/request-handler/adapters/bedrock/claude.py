@@ -44,8 +44,8 @@ Question: {question}
 Assistant:"""
 
         return PromptTemplate(
-                template=template, input_variables=["context", "question"]
-                )
+            template=template, input_variables=["context", "question"]
+        )
 
     def get_prompt(self):
         template = """
@@ -79,10 +79,11 @@ Follow Up Input: {question}
 
 Assistant:"""
 
-        return PromptTemplate(input_variables=["chat_history", "question"],
-                            chat_history="{chat_history}",
-                            template=template)
-
+        return PromptTemplate(
+            input_variables=["chat_history", "question"],
+            chat_history="{chat_history}",
+            template=template,
+        )
 
 
 # Register the adapter

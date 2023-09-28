@@ -5,8 +5,7 @@ from opensearchpy import OpenSearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
 
-OPEN_SEARCH_COLLECTION_ENDPOINT = os.environ.get(
-    "OPEN_SEARCH_COLLECTION_ENDPOINT")
+OPEN_SEARCH_COLLECTION_ENDPOINT = os.environ.get("OPEN_SEARCH_COLLECTION_ENDPOINT")
 
 port = 443
 timeout = 300

@@ -1,6 +1,5 @@
 import {
   BreadcrumbGroup,
-  Container,
   ContentLayout,
   Flashbar,
   Header,
@@ -133,19 +132,15 @@ export default function Workspace() {
           }
         >
           <SpaceBetween size="l">
-            <Container
-              header={<Header variant="h2">Workspace Settings</Header>}
-            >
-              {workspace && workspace.engine === "aurora" && (
-                <AuroraWorkspaceSettings workspace={workspace} />
-              )}
-              {workspace && workspace.engine === "opensearch" && (
-                <OpenSearchWorkspaceSettings workspace={workspace} />
-              )}
-              {workspace && workspace.engine === "kendra" && (
-                <KendraWorkspaceSettings workspace={workspace} />
-              )}
-            </Container>
+            {workspace && workspace.engine === "aurora" && (
+              <AuroraWorkspaceSettings workspace={workspace} />
+            )}
+            {workspace && workspace.engine === "opensearch" && (
+              <OpenSearchWorkspaceSettings workspace={workspace} />
+            )}
+            {workspace && workspace.engine === "kendra" && (
+              <KendraWorkspaceSettings workspace={workspace} />
+            )}
             {workspace?.kendraIndexExternal && (
               <Flashbar
                 items={[

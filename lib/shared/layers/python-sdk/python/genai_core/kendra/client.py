@@ -42,12 +42,13 @@ def get_kendra_client_for_index(kendra_index_id: str):
 
                 credentials = assumed_role_object["Credentials"]
                 kendra_config_data["aws_access_key_id"] = credentials["AccessKeyId"]
-                kendra_config_data["aws_secret_access_key"] = credentials["SecretAccessKey"]
+                kendra_config_data["aws_secret_access_key"] = credentials[
+                    "SecretAccessKey"
+                ]
                 kendra_config_data["aws_session_token"] = credentials["SessionToken"]
 
             kendra = boto3.client(**kendra_config_data)
 
             return kendra
 
-    raise genai_core.types.CommonError(
-        f"Could not find kendra index {kendra_index_id}")
+    raise genai_core.types.CommonError(f"Could not find kendra index {kendra_index_id}")

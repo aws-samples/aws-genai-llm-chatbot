@@ -30,4 +30,22 @@ export class RagEnginesClient extends ApiClientBase {
       return this.error(error);
     }
   }
+
+  async startKendraDataSync(workspaceId: string): Promise<ApiResult<void>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(
+        this.getApiUrl("/rag/engines/kendra/data-sync"),
+        {
+          headers,
+          method: "POST",
+          body: JSON.stringify({ workspaceId }),
+        }
+      );
+
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
 }

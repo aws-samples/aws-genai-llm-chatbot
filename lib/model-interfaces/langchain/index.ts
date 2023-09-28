@@ -66,6 +66,11 @@ export class LangChainInterface extends Construct {
           props.ragEngines?.kendraRetrieval?.kendraIndex?.attrId ?? "",
         DEFAULT_KENDRA_INDEX_NAME:
           props.ragEngines?.kendraRetrieval?.kendraIndex?.name ?? "",
+        DEFAULT_KENDRA_S3_DATA_SOURCE_ID:
+          props.ragEngines?.kendraRetrieval?.kendraS3DataSource?.attrId ?? "",
+        DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
+          props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket
+            ?.bucketName ?? "",
       },
     });
 
@@ -126,6 +131,10 @@ export class LangChainInterface extends Construct {
     }
 
     if (props.ragEngines?.kendraRetrieval) {
+      props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket?.grantRead(
+        requestHandler
+      );
+
       if (props.ragEngines.kendraRetrieval.kendraIndex) {
         requestHandler.addToRolePolicy(
           new iam.PolicyStatement({

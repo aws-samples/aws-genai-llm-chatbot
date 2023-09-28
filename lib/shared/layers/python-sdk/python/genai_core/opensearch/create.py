@@ -31,48 +31,24 @@ def create_workspace_index(workspace: dict):
                         "parameters": {"ef_construction": 512, "m": 16},
                     },
                 },
-                "chunk_id": {
-                    "type": "keyword"
-                },
-                "workspace_id": {
-                    "type": "keyword"
-                },
-                "document_id": {
-                    "type": "keyword"
-                },
-                "document_sub_id": {
-                    "type": "keyword"
-                },
-                "document_type": {
-                    "type": "keyword"
-                },
-                "document_sub_type": {
-                    "type": "keyword"
-                },
-                "path": {
-                    "type": "text"
-                },
-                "language": {
-                    "type": "keyword"
-                },
-                "title": {
-                    "type": "text"
-                },
-                "content": {
-                    "type": "text"
-                },
-                "content_complement": {
-                    "type": "text"
-                },
-                "metadata": {
-                    "type": "object"
-                },
+                "chunk_id": {"type": "keyword"},
+                "workspace_id": {"type": "keyword"},
+                "document_id": {"type": "keyword"},
+                "document_sub_id": {"type": "keyword"},
+                "document_type": {"type": "keyword"},
+                "document_sub_type": {"type": "keyword"},
+                "path": {"type": "text"},
+                "language": {"type": "keyword"},
+                "title": {"type": "text"},
+                "content": {"type": "text"},
+                "content_complement": {"type": "text"},
+                "metadata": {"type": "object"},
                 "created_at": {
                     "type": "date",
-                    "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-                }
+                    "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis",
+                },
             }
-        }
+        },
     }
 
     response = client.indices.create(index_name, body=index_body)

@@ -19,6 +19,8 @@ export interface KendraRetrievalProps {
 export class KendraRetrieval extends Construct {
   public readonly createKendraWorkspaceWorkflow: sfn.StateMachine;
   public readonly kendraIndex?: kendra.CfnIndex;
+  public readonly kendraS3DataSource?: kendra.CfnDataSource;
+  public readonly kendraS3DataSourceBucket?: s3.Bucket;
 
   constructor(scope: Construct, id: string, props: KendraRetrievalProps) {
     super(scope, id);
@@ -101,6 +103,8 @@ export class KendraRetrieval extends Construct {
       );
 
       this.kendraIndex = kendraIndex;
+      this.kendraS3DataSource = s3DataSource;
+      this.kendraS3DataSourceBucket = dataBucket;
     }
 
     this.createKendraWorkspaceWorkflow = createWorkflow.stateMachine;

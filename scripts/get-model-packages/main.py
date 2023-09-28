@@ -15,9 +15,7 @@ def get_model_packages(model_id):
         try:
             model = JumpStartModel(model_id=model_id, region=region)
 
-            ret_value[region] = {
-                "arn":  model.model_package_arn
-            }
+            ret_value[region] = {"arn": model.model_package_arn}
         except:
             print(f"Model not found in {region}")
 

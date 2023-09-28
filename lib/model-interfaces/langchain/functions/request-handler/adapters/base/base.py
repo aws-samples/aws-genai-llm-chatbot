@@ -6,7 +6,10 @@ from langchain.chains import ConversationalRetrievalChain, ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
 from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
-from langchain.chains.conversational_retrieval.prompts import QA_PROMPT, CONDENSE_QUESTION_PROMPT
+from langchain.chains.conversational_retrieval.prompts import (
+    QA_PROMPT,
+    CONDENSE_QUESTION_PROMPT,
+)
 
 logger = Logger()
 
@@ -75,7 +78,7 @@ class ModelAdapter:
         prompt_template = PromptTemplate(**prompt_template_args)
 
         return prompt_template
-    
+
     def get_condense_question_prompt(self):
         return CONDENSE_QUESTION_PROMPT
 

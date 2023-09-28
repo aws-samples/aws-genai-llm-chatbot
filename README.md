@@ -87,10 +87,10 @@ You'll be prompted to configure the different aspects of the solution: the LLMs 
 When at done, answer `Y` to create a new configuration file and run:
 
 ```bash
-cdk deploy
+npx cdk deploy
 ```
 
-If this is the first time you run `cdk deploy` in the configured account and region, you'll need to bootstrap `cdk` following the instructions on screen. Once done, rerun the previous command.
+If this is the first time you run `npx cdk deploy` in the configured account and region, you'll need to bootstrap `cdk` following the instructions on screen. Once done, rerun the previous command.
 
 ## Migration from v2
 

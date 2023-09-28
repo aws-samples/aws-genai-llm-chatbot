@@ -28,9 +28,7 @@ def add_chunks_open_search(
     for idx in range(len(chunk_ids)):
         chunk_id = chunk_ids[idx]
         content = chunks[idx]
-        content_complement = (
-            chunk_complements[idx] if idx < complements_len else None
-        )
+        content_complement = chunk_complements[idx] if idx < complements_len else None
 
         add_body = {
             "chunk_id": chunk_id,
@@ -60,7 +58,7 @@ def clean_chunks_open_search(workspace_id: str, document_id: str):
             "bool": {
                 "must": [
                     {"term": {"workspace_id": workspace_id}},
-                    {"term": {"document_id": document_id}}
+                    {"term": {"document_id": document_id}},
                 ]
             }
         }

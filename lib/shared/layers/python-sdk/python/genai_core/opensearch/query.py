@@ -43,17 +43,19 @@ def query_workspace_open_search(
 
     client = get_open_search_client()
     vector_search_records = vector_query(
-        client, index_name, query_embeddings, vector_search_limit)
-    vector_search_records = _convert_records(
-        "vector_search", vector_search_records)
+        client, index_name, query_embeddings, vector_search_limit
+    )
+    vector_search_records = _convert_records("vector_search", vector_search_records)
     items.extend(vector_search_records)
 
     if hybrid_search:
         keyword_search_records = keyword_query(
-            client, index_name, query, keyword_search_limit)
+            client, index_name, query, keyword_search_limit
+        )
 
         keyword_search_records = _convert_records(
-            "keyword_search", keyword_search_records)
+            "keyword_search", keyword_search_records
+        )
         items.extend(keyword_search_records)
 
     unique_items = dict({})
@@ -159,39 +161,16 @@ def _convert_records(source: str, records: List[dict]):
 
 
 def vector_query(client, index_name: str, vector: List[float], size: int = 25):
-    query = {
-        "query": {
-            "knn": {
-                "content_embeddings": {
-                    "vector": vector,
-                    "k": 5
-                }
-            }
-        }
-    }
+    query = {"query": {"knn": {"content_embeddings": {"vector": vector, "k": 5}}}}
 
-    response = client.search(
-        index=index_name,
-        body=query,
-        size=size
-    )
+    response = client.search(index=index_name, body=query, size=size)
 
     return response["hits"]["hits"]
 
 
 def keyword_query(client, index_name: str, text: str, size: int = 25):
-    query = {
-        "query": {
-            "match": {
-                "content": text
-            }
-        }
-    }
+    query = {"query": {"match": {"content": text}}}
 
-    response = client.search(
-        index=index_name,
-        body=query,
-        size=size
-    )
+    response = client.search(index=index_name, body=query, size=size)
 
     return response["hits"]["hits"]
