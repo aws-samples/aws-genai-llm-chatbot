@@ -60,6 +60,7 @@ const embeddingModels = [
             options.bedrockEndpoint = config.bedrock?.endpointUrl;
             options.bedrockRoleArn = config.bedrock?.roleArn;
             options.sagemakerLLMs = config.llms.sagemaker;
+            options.enableRag = config.rag.enabled;
             options.ragsToEnable = Object.keys(config.rag.engines).filter((v:string) => (config.rag.engines as any)[v].enabled)
             options.embeddings = config.rag.embeddingsModels.map((m:any) => m.name);
             options.defaultEmbedding = config.rag.embeddingsModels.filter((m: any) => m.default)[0].name;
@@ -132,7 +133,7 @@ async function processCreateOptions(options: any): Promise<void> {
         {
             type: 'multiselect',
             name: 'sagemakerLLMs',
-            message: 'Which Sagemaker LLMs do you want to enable',
+            message: 'Which Sagemaker LLMs do you want to enable (enter for None, space to select)',
             choices: Object.values(SupportedSageMakerLLM),
             initial: options.sagemakerLLMs || []
         },
@@ -163,7 +164,7 @@ async function processCreateOptions(options: any): Promise<void> {
             type: "confirm",
             name: "kendra",
             message: "Do you want to add existing Kendra indexes",
-            initial: !!options.kendraExternal || false,
+            initial: (options.kendraExternal !== undefined && options.kendraExternal.length > 0) || false,
             skip: function ():boolean { 
                 // workaround for https://github.com/enquirer/enquirer/issues/298
                 (this as any).state._choices = (this as any).state.choices;
@@ -259,7 +260,10 @@ async function processCreateOptions(options: any): Promise<void> {
                 opensearch: {
                     enabled: answers.ragsToEnable.includes('opensearch')
                 },
-                kendra: { enabled: false, external: [{}] },
+                kendra: { 
+                    enabled: false, 
+                    external: [{}],
+                },
 
             },
             embeddingsModels: [ {} ],

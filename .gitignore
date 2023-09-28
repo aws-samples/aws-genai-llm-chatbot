@@ -425,6 +425,7 @@ benchmark-prompts
 misc
 deploy-models
 
+cli/*.js
 bin/*.js
 lib/**/*.js
 !jest.config.js
