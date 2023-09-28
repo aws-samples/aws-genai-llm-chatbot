@@ -71,6 +71,15 @@ export class KendraRetrieval extends Construct {
               searchable: true,
             },
           },
+          {
+            name: "document_type",
+            type: "STRING_VALUE",
+            search: {
+              displayable: true,
+              facetable: true,
+              searchable: true,
+            },
+          },
         ],
       });
 

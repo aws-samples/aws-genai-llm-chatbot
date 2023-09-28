@@ -67,6 +67,7 @@ def process_record(record):
             "DocumentId": document_id,
             "Attributes": {
                 "workspace_id": workspace_id,
+                "document_type": "file",
             }
         }
 

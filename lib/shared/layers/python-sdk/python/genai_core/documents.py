@@ -342,6 +342,7 @@ def _process_document_kendra(
             "DocumentId": document_id,
             "Attributes": {
                 "workspace_id": workspace_id,
+                "document_type": document_type
             }
         }
 

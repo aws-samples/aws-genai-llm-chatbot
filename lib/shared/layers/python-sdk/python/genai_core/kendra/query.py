@@ -56,12 +56,18 @@ def _convert_records(source: str, workspace_id: str, records: List[dict]):
         title = record.get("DocumentTitle")
         content = record.get("Content")
 
+        document_attributes = record.get("DocumentAttributes", [])
+        document_type = None
+        for attribute in document_attributes:
+            if attribute["Key"] == "document_type":
+                document_type = attribute["Value"]["StringValue"]
+
         converted = {
             "chunk_id": record.get("Id"),
             "workspace_id": workspace_id,
             "document_id": record.get("DocumentId"),
             "document_sub_id": None,
-            "document_type": "file",
+            "document_type": document_type,
             "document_sub_type": None,
             "path": path,
             "language": None,
