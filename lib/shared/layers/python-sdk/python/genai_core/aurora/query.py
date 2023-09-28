@@ -113,7 +113,8 @@ def query_workspace_aurora(
             raise Exception("Unknown metric")
 
         vector_search_records = cursor.fetchall()
-        vector_search_records = _convert_records("vector_search", vector_search_records)
+        vector_search_records = _convert_records(
+            "vector_search", vector_search_records)
         items.extend(vector_search_records)
 
         if hybrid_search:

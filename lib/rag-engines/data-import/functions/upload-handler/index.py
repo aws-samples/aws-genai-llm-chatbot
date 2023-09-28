@@ -17,7 +17,8 @@ s3 = boto3.client("s3")
 FILE_IMPORT_WORKFLOW_ARN = os.environ.get("FILE_IMPORT_WORKFLOW_ARN")
 PROCESSING_BUCKET_NAME = os.environ.get("PROCESSING_BUCKET_NAME")
 DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
-    "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME")
+    "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME"
+)
 
 
 @tracer.capture_lambda_handler
@@ -68,7 +69,7 @@ def process_record(record):
             "Attributes": {
                 "workspace_id": workspace_id,
                 "document_type": "file",
-            }
+            },
         }
 
         title = workspace.get("title")
@@ -81,11 +82,16 @@ def process_record(record):
             Key=kendra_object_key,
         )
 
-        s3.put_object(Body=json.dumps(metadata), Bucket=DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME,
-                      Key=kendra_metadata_key, ContentType="application/json")
+        s3.put_object(
+            Body=json.dumps(metadata),
+            Bucket=DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME,
+            Key=kendra_metadata_key,
+            ContentType="application/json",
+        )
 
         genai_core.documents.set_status(
-            workspace_id=workspace_id, document_id=document_id, status="processed")
+            workspace_id=workspace_id, document_id=document_id, status="processed"
+        )
     else:
         processing_object_key = f"{workspace_id}/{document_id}/content.txt"
         extension = os.path.splitext(file_name)[-1].lower()

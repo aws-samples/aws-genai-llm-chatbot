@@ -21,7 +21,8 @@ DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME = os.environ.get(
 FILE_IMPORT_WORKFLOW_ARN = os.environ.get("FILE_IMPORT_WORKFLOW_ARN")
 WEBSITE_CRAWLING_WORKFLOW_ARN = os.environ.get("WEBSITE_CRAWLING_WORKFLOW_ARN")
 DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
-    "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME")
+    "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME"
+)
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -172,8 +173,7 @@ def get_document_content(workspace_id: str, document_id: str):
     if genai_core.utils.files.file_exists(
         PROCESSING_BUCKET_NAME, content_complement_key
     ):
-        response = s3.Object(PROCESSING_BUCKET_NAME,
-                             content_complement_key).get()
+        response = s3.Object(PROCESSING_BUCKET_NAME, content_complement_key).get()
         content_complement = response["Body"].read().decode("utf-8")
 
     return {"content": content, "content_complement": content_complement}
@@ -336,14 +336,16 @@ def _process_document_kendra(
     if document_type == "text":
         processing_object_key = f"{workspace_id}/{document_id}/content.txt"
         kendra_object_key = f"documents/{processing_object_key}"
-        kendra_metadata_key = f"metadata/documents/{processing_object_key}.metadata.json"
+        kendra_metadata_key = (
+            f"metadata/documents/{processing_object_key}.metadata.json"
+        )
 
         metadata = {
             "DocumentId": document_id,
             "Attributes": {
                 "workspace_id": workspace_id,
-                "document_type": document_type
-            }
+                "document_type": document_type,
+            },
         }
 
         title = workspace.get("title")
@@ -351,14 +353,17 @@ def _process_document_kendra(
             metadata["Title"] = title
 
         s3_client.copy_object(
-            CopySource={"Bucket": PROCESSING_BUCKET_NAME,
-                        "Key": processing_object_key},
+            CopySource={"Bucket": PROCESSING_BUCKET_NAME, "Key": processing_object_key},
             Bucket=DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME,
             Key=kendra_object_key,
         )
 
-        s3_client.put_object(Body=json.dumps(metadata), Bucket=DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME,
-                             Key=kendra_metadata_key, ContentType="application/json")
+        s3_client.put_object(
+            Body=json.dumps(metadata),
+            Bucket=DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME,
+            Key=kendra_metadata_key,
+            ContentType="application/json",
+        )
 
         set_status(workspace_id, document_id, "processed")
 
@@ -412,18 +417,15 @@ def _process_document(
             follow_links = False
 
             try:
-                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(
-                    path)
+                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(path)
 
                 if len(urls_to_crawl) == 0:
                     set_status(workspace_id, document_id, "error")
-                    raise genai_core.types.CommonError(
-                        "No urls found in sitemap")
+                    raise genai_core.types.CommonError("No urls found in sitemap")
             except Exception as e:
                 logger.error(e)
                 set_status(workspace_id, document_id, "error")
-                raise genai_core.types.CommonError(
-                    "Error extracting urls from sitemap")
+                raise genai_core.types.CommonError("Error extracting urls from sitemap")
 
         response = sfn_client.start_execution(
             stateMachineArn=WEBSITE_CRAWLING_WORKFLOW_ARN,
