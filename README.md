@@ -10,6 +10,11 @@
 - [Precautions](#precautions)
 - [Preview Access and Service Quotas](#preview-access-and-service-quotas)
 - [Deploy](#deploy)
+- [Clean up](#clean-up)
+- [Authors](#authors)
+- [Credits](#credits)
+- [License](#license)
+
 
 # Features
 ## Modular, comprehensive and ready to use
@@ -46,53 +51,128 @@ Before you begin using the solution, there are certain precautions you must take
 
 - **This is a sample**: the code provided as part of this repository shouldn't be used for production workloads without further reviews and adaptation.
 
-# Preview Access and Service Quotas
-- **Amazon Bedrock**
-If you are looking to interact with models from Amazon Bedrock FMs, you need to request preview access from the AWS console.
-Futhermore, make sure which regions are currently supported for Amazon Bedrock.
-
-
-- **Instance type quota increase**
-You might consider requesting an increase in service quota for specific SageMaker instance types such as the `ml.g5` instance type. This will give access to latest generation of GPU/Multi-GPU instances types. You can do this from the AWS console.
-
-- **Foundation Models Preview Access**
-If you are looking to deploy models from SageMaker foundation models, you need to request preview access from the AWS console.
-Futhermore, make sure which regions are currently supported for SageMaker foundation models.
-
-
 
 # Deploy
 
 We are providing a tool that guides you in the configuration of the solution.
 
-* Pre-requisites: you need to setup [authentication with AWS](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_auth)
+### Environment setup
+
+Verify that your environment satisfies the following prerequisites:
+
+You have:
+
+1. An [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
+2. `AdministratorAccess` policy granted to your AWS account (for production, we recommend restricting access as needed)
+3. Both console and programmatic access
+4. [NodeJS 16 or 18](https://nodejs.org/en/download/) installed
+    - If you are using [`nvm`](https://github.com/nvm-sh/nvm) you can run the following before proceeding
+    - ```
+      nvm install 16 && nvm use 16
+
+      or
+
+      nvm install 18 && nvm use 18
+      ```
+5. [AWS CLI](https://aws.amazon.com/cli/) installed and configured to use with your AWS account
+6. [Typescript 3.8+](https://www.typescriptlang.org/download) installed
+7. [AWS CDK CLI](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed
+8. [Docker](https://docs.docker.com/get-docker/) installed
+   - N.B. [`buildx`](https://github.com/docker/buildx) is also required. For Windows and macOS `buildx` [is included](https://github.com/docker/buildx#windows-and-macos) in [Docker Desktop](https://docs.docker.com/desktop/)
+10. [Python 3+](https://www.python.org/downloads/) installed
+
 
 Run the following instructions to clone the repository and build the project.
 
+1. Clone the repository
 ```bash
 git clone https://github.com/aws-samples/aws-genai-llm-chatbot
+```
+2. Move into the cloned repository
+```bash
 cd aws-genai-llm-chatbot
+```
+```bash
 git checkout v3-dev
-npm install
-npm run build
+```
+3. Install the project dependencies and build the project by running this command
+```bash
+npm install && npm run build
 ```
 
-Once done, run:
-
+4. Once done, run the magic-create CLI to help you set up the solution with the features you care most:
 ```bash
 npm run create
 ```
-
 You'll be prompted to configure the different aspects of the solution: the LLMs to enable (we support all models provided by Bedrock, FalconLite and LLama 2, more to come) and the setup of the RAG system (we support Aurora, more to come).
 
-When at done, answer `Y` to create a new configuration file and run:
+When at done, answer `Y` to create a new configuration.
+
+![sample](assets/magic-create-sample.gif "CLI sample")
+
+You're configuration is now stored under `bin/config.json`, you can re-run the magic-create command to as needed to update your `config.json`
+
+5. (Optional) Bootstrap AWS CDK on the target account and regioon
+
+> **Note**: This is required if you have never used AWS CDK before on this account and region combination. ([More information on CDK bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/cli.html#cli-bootstrap)).
+
+```bash
+npx cdk bootstrap aws://{targetAccountId}/{targetRegion}
+```
+
+You can now deploy by running:
 
 ```bash
 npx cdk deploy
 ```
+> **Note**: This step duration can vary a lot, depending on the Constructs you are deploying.
 
-If this is the first time you run `npx cdk deploy` in the configured account and region, you'll need to bootstrap `cdk` following the instructions on screen. Once done, rerun the previous command.
+You can view the progress of your CDK deployment in the [CloudFormation console](https://console.aws.amazon.com/cloudformation/home) in the selected region.
 
-## Migration from v2
+6. Once deployed, take note of the `User Interface`, `User Pool` and, if you want to interact with [3P models providers](#3p-models-providers) the `Secret` that will, eventually, hold the various `API_KEYS` should you want to experiment with 3P providers.  
 
-We do not support migrating a V2 chatbot to V3, but you can have both solution running.
+```bash
+...
+Outputs:
+GenAIChatBotStack.UserInterfaceUserInterfaceDomanNameXXXXXXXX = dxxxxxxxxxxxxx.cloudfront.net
+GenAIChatBotStack.AuthenticationUserPoolLinkXXXXX = https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx
+GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
+...
+```
+
+7. Open the generated **Cognito User Pool** Link from outputs above i.e. `https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx`
+
+8. Add a user that will be used to login into the web interface.
+
+9. Open the `User Interface` Url frin the outputs above i.e. `dxxxxxxxxxxxxx.cloudfront.net`
+
+10. Login with the user created in .6, you will be asked to change the password and you'll be logged in in the main page.
+
+
+# Clean up
+You can remove the stacks and all the associated resources created in your AWS account by running the following command:
+
+```bash
+npx cdk destroy
+```
+
+# Authors
+- [Bigad Soleiman](https://www.linkedin.com/in/bigadsoleiman/)
+- [Sergey Pugachev](https://www.linkedin.com/in/spugachev/)
+
+
+# Credits
+
+This sample was made possible thanks to the following libraries:
+- [langchain](https://python.langchain.com/docs/get_started/introduction.html) from [LangChain AI](https://github.com/langchain-ai)
+- [unstructured](https://github.com/Unstructured-IO/unstructured) from [Unstructured-IO](https://github.com/Unstructured-IO/unstructured)
+- [pgvector](https://github.com/pgvector/pgvector) from [Andrew Kane](https://github.com/ankane)
+
+# License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.
+
+- [Changelog](CHANGELOG.md) of the project.
+- [License](LICENSE) of the project.
+- [Code of Conduct](CODE_OF_CONDUCT.md) of the project.
+- [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
