@@ -133,7 +133,7 @@ async function processCreateOptions(options: any): Promise<void> {
         {
             type: 'multiselect',
             name: 'sagemakerLLMs',
-            message: 'Which Sagemaker LLMs do you want to enable',
+            message: 'Which Sagemaker LLMs do you want to enable (enter for None, space to select)',
             choices: Object.values(SupportedSageMakerLLM),
             initial: options.sagemakerLLMs || []
         },
