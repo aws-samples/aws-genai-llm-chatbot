@@ -54,4 +54,4 @@ Assistant:"""
 
 
 # Register the adapter
-registry.register(r"^bedrock.amazon.titan-tg*", BedrockTitanAdapter)
+registry.register(r"^bedrock.amazon.titan-t*", BedrockTitanAdapter)
