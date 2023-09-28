@@ -1,4 +1,5 @@
 import genai_core.parameters
+import genai_core.kendra
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.api_gateway import Router
 
@@ -32,3 +33,11 @@ def engines():
     ]
 
     return {"ok": True, "data": ret_value}
+
+
+@router.get("/rag/engines/kendra/indexes")
+@tracer.capture_method
+def kendra_indexes():
+    indexes = genai_core.kendra.get_kendra_indexes()
+
+    return {"ok": True, "data": indexes}

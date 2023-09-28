@@ -2,6 +2,7 @@ import {
   BreadcrumbGroup,
   Container,
   ContentLayout,
+  Flashbar,
   Header,
   SpaceBetween,
   StatusIndicator,
@@ -52,6 +53,9 @@ export default function Workspace() {
   useEffect(() => {
     getWorkspace();
   }, [getWorkspace]);
+
+  const showTabs = !workspace?.kendraIndexExternal;
+  const disabledTabs = workspace?.engine === "kendra" ? ["qna", "website"] : [];
 
   return (
     <BaseAppLayout
@@ -142,62 +146,76 @@ export default function Workspace() {
                 <KendraWorkspaceSettings workspace={workspace} />
               )}
             </Container>
-            {workspace &&
-              (workspace.engine === "aurora" ||
-                workspace.engine === "opensearch") && (
-                <Tabs
-                  tabs={[
-                    {
-                      label: "Files",
-                      id: "file",
-                      content: (
-                        <DocumentsTab
-                          workspaceId={workspaceId}
-                          documentType="file"
-                        />
-                      ),
-                    },
-                    {
-                      label: "Texts",
-                      id: "text",
-                      content: (
-                        <DocumentsTab
-                          workspaceId={workspaceId}
-                          documentType="text"
-                        />
-                      ),
-                    },
-                    {
-                      label: "Q&A",
-                      id: "qna",
-                      content: (
-                        <DocumentsTab
-                          workspaceId={workspaceId}
-                          documentType="qna"
-                        />
-                      ),
-                    },
-                    {
-                      label: "Websites",
-                      id: "website",
-                      content: (
-                        <DocumentsTab
-                          workspaceId={workspaceId}
-                          documentType="website"
-                        />
-                      ),
-                    },
-                  ]}
-                  activeTabId={activeTab}
-                  onChange={({ detail: { activeTabId } }) => {
-                    setActiveTab(activeTabId);
-                    setSearchParams((current) => ({
-                      ...Utils.urlSearchParamsToRecord(current),
-                      tab: activeTabId,
-                    }));
-                  }}
-                />
-              )}
+            {workspace?.kendraIndexExternal && (
+              <Flashbar
+                items={[
+                  {
+                    type: "info",
+                    content: (
+                      <>
+                        Data upload is not available for external Kendra indexes
+                      </>
+                    ),
+                  },
+                ]}
+              />
+            )}
+            {workspace && showTabs && (
+              <Tabs
+                tabs={[
+                  {
+                    label: "Files",
+                    id: "file",
+                    content: (
+                      <DocumentsTab
+                        workspaceId={workspaceId}
+                        documentType="file"
+                      />
+                    ),
+                  },
+                  {
+                    label: "Texts",
+                    id: "text",
+                    content: (
+                      <DocumentsTab
+                        workspaceId={workspaceId}
+                        documentType="text"
+                      />
+                    ),
+                  },
+                  {
+                    label: "Q&A",
+                    id: "qna",
+                    disabled: disabledTabs.includes("qna"),
+                    content: (
+                      <DocumentsTab
+                        workspaceId={workspaceId}
+                        documentType="qna"
+                      />
+                    ),
+                  },
+                  {
+                    label: "Websites",
+                    id: "website",
+                    disabled: disabledTabs.includes("website"),
+                    content: (
+                      <DocumentsTab
+                        workspaceId={workspaceId}
+                        documentType="website"
+                      />
+                    ),
+                  },
+                ]}
+                activeTabId={activeTab}
+                onChange={({ detail: { activeTabId } }) => {
+                  setActiveTab(activeTabId);
+                  setSearchParams((current) => ({
+                    ...Utils.urlSearchParamsToRecord(current),
+                    tab: activeTabId,
+                  }));
+                }}
+              />
+            )}
           </SpaceBetween>
         </ContentLayout>
       }

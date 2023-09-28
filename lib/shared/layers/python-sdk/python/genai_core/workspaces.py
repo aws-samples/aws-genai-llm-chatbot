@@ -158,6 +158,7 @@ def create_workspace_open_search(
     cross_encoder_model_provider: str,
     cross_encoder_model_name: str,
     languages: list[str],
+    hybrid_search: bool,
     chunking_strategy: str,
     chunk_size: int,
     chunk_overlap: int,
@@ -178,6 +179,9 @@ def create_workspace_open_search(
         "cross_encoder_model_provider": cross_encoder_model_provider,
         "cross_encoder_model_name": cross_encoder_model_name,
         "languages": languages,
+        "metric": "l2",
+        "aoss_engine": "nmslib",
+        "hybrid_search": hybrid_search,
         "chunking_strategy": chunking_strategy,
         "chunk_size": chunk_size,
         "chunk_overlap": chunk_overlap,
@@ -207,9 +211,11 @@ def create_workspace_open_search(
     }
 
 
-def create_workspace_kendra(workspace_name: str):
+def create_workspace_kendra(workspace_name: str, kendra_index: dict):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    kendra_index_id = kendra_index["id"]
+    kendra_index_external = kendra_index["external"]
 
     item = {
         "workspace_id": workspace_id,
@@ -218,6 +224,8 @@ def create_workspace_kendra(workspace_name: str):
         "name": workspace_name,
         "engine": "kendra",
         "status": "submitted",
+        "kendra_index_id": kendra_index_id,
+        "kendra_index_external": kendra_index_external,
         "documents": 0,
         "vectors": 0,
         "size_in_bytes": 0,

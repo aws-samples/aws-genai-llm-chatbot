@@ -19,6 +19,7 @@ import {
   Multiselect,
   ColumnLayout,
   ExpandableSection,
+  Toggle,
 } from "@cloudscape-design/components";
 import { languageList } from "../../../common/constants";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
@@ -150,6 +151,21 @@ function OpenSearchFoother(props: {
   return (
     <ExpandableSection headerText="Additional settings" variant="footer">
       <SpaceBetween size="l">
+        <FormField
+          label="Hybrid Search"
+          description="Use vector similarity together with Open Search full-text queries for hybrid search."
+          errorText={props.errors.hybridSearch}
+        >
+          <Toggle
+            disabled={props.submitting}
+            checked={props.data.hybridSearch}
+            onChange={({ detail: { checked } }) =>
+              props.onChange({ hybridSearch: checked })
+            }
+          >
+            Use hybrid search
+          </Toggle>
+        </FormField>
         <FormField
           label="Cross-Encoder Model"
           errorText={props.errors.embeddingsModel}

@@ -64,9 +64,9 @@ export interface SystemConfig {
         createIndex: boolean;
         external?: {
           name: string;
-          roleArn: string;
-          region: SupportedRegion;
           kendraId: string;
+          region?: SupportedRegion;
+          roleArn?: string;
         }[];
       };
     };

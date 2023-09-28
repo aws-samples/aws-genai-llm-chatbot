@@ -90,6 +90,13 @@ export class RestApi extends Construct {
           props.ragEngines?.fileImportWorkflow?.stateMachineArn ?? "",
         WEBSITE_CRAWLING_WORKFLOW_ARN:
           props.ragEngines?.websiteCrawlingWorkflow?.stateMachineArn ?? "",
+        OPEN_SEARCH_COLLECTION_ENDPOINT:
+          props.ragEngines?.openSearchVector?.openSearchCollectionEndpoint ??
+          "",
+        DEFAULT_KENDRA_INDEX_ID:
+          props.ragEngines?.kendraRetrieval?.kendraIndex?.attrId ?? "",
+        DEFAULT_KENDRA_INDEX_NAME:
+          props.ragEngines?.kendraRetrieval?.kendraIndex?.name ?? "",
       },
     });
 
@@ -113,10 +120,19 @@ export class RestApi extends Construct {
     }
 
     if (props.ragEngines?.openSearchVector) {
+      apiHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["aoss:APIAccessAll"],
+          resources: [
+            props.ragEngines?.openSearchVector.openSearchCollection.attrArn,
+          ],
+        })
+      );
+
       props.ragEngines.openSearchVector.addToAccessPolicy(
         "rest-api",
         [apiHandler.role?.roleArn],
-        ["aoss:ReadDocument", "aoss:WriteDocument"]
+        ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
       );
 
       props.ragEngines.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
@@ -128,6 +144,26 @@ export class RestApi extends Construct {
       props.ragEngines.kendraRetrieval.createKendraWorkspaceWorkflow.grantStartExecution(
         apiHandler
       );
+
+      if (props.ragEngines.kendraRetrieval.kendraIndex) {
+        apiHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["kendra:Retrieve", "kendra:Query"],
+            resources: [props.ragEngines.kendraRetrieval.kendraIndex.attrArn],
+          })
+        );
+      }
+
+      for (const item of props.config.rag.engines.kendra.external || []) {
+        if (!item.roleArn) continue;
+
+        apiHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["sts:AssumeRole"],
+            resources: [item.roleArn],
+          })
+        );
+      }
     }
 
     if (props.ragEngines?.fileImportWorkflow) {
@@ -180,7 +216,8 @@ export class RestApi extends Construct {
           actions: ["bedrock:ListFoundationModels"],
           resources: ["*"],
         })
-      )
+      );
+
       if (props.config.bedrock?.roleArn) {
         apiHandler.addToRolePolicy(
           new iam.PolicyStatement({
@@ -193,6 +230,7 @@ export class RestApi extends Construct {
 
     const chatBotApi = new apigateway.RestApi(this, "ChatBotApi", {
       endpointTypes: [apigateway.EndpointType.REGIONAL],
+      cloudWatchRole: true,
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,

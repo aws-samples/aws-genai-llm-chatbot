@@ -68,6 +68,7 @@ export class WorkspacesClient extends ApiClientBase {
     crossEncoderModelProvider: string;
     crossEncoderModelName: string;
     languages: string[];
+    hybridSearch: boolean;
     chunking_strategy: string;
     chunkSize: number;
     chunkOverlap: number;
@@ -91,6 +92,7 @@ export class WorkspacesClient extends ApiClientBase {
 
   async createKendraWorkspace(params: {
     name: string;
+    kendraIndexId: string;
   }): Promise<ApiResult<{ id: string }>> {
     try {
       const headers = await this.getHeaders();

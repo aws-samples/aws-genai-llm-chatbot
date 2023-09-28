@@ -7,6 +7,7 @@ import { BatchJobs } from "./batch-jobs";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { FileImportWorkflow } from "./file-import-workflow";
 import { WebsiteCrawlingWorkflow } from "./website-crawling-workflow";
+import { OpenSearchVector } from "../opensearch-vector";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -30,6 +31,7 @@ export interface DataImportProps {
   readonly documentsTable: dynamodb.Table;
   readonly workspacesByObjectTypeIndexName: string;
   readonly documentsByCompountKeyIndexName: string;
+  readonly openSearchVector?: OpenSearchVector;
 }
 
 export class DataImport extends Construct {
@@ -113,6 +115,7 @@ export class DataImport extends Construct {
         auroraDatabase: props.auroraDatabase,
         ragDynamoDBTables: props.ragDynamoDBTables,
         sageMakerRagModelsEndpoint: props.sageMakerRagModelsEndpoint,
+        openSearchVector: props.openSearchVector,
       }
     );
 
@@ -126,6 +129,7 @@ export class DataImport extends Construct {
         auroraDatabase: props.auroraDatabase,
         ragDynamoDBTables: props.ragDynamoDBTables,
         sageMakerRagModelsEndpoint: props.sageMakerRagModelsEndpoint,
+        openSearchVector: props.openSearchVector,
       }
     );
 

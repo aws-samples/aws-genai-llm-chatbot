@@ -3,6 +3,7 @@ import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { CreateOpenSearchWorkspace } from "./create-opensearch-workspace";
+import { Utils } from "../../shared/utils";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as oss from "aws-cdk-lib/aws-opensearchserverless";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
@@ -16,6 +17,7 @@ export interface OpenSearchVectorProps {
 export class OpenSearchVector extends Construct {
   public readonly openSearchCollectionName: string;
   public readonly openSearchCollectionEndpoint: string;
+  public readonly openSearchCollection: oss.CfnCollection;
   public readonly createOpenSearchWorkspaceWorkflow: sfn.StateMachine;
   public addToAccessPolicy: (
     name: string,
@@ -26,11 +28,10 @@ export class OpenSearchVector extends Construct {
   constructor(scope: Construct, id: string, props: OpenSearchVectorProps) {
     super(scope, id);
 
-    let collectionName = this.getName(props.config, "genaichatbot-workspaces");
-    props.config.prefix && props.config.prefix.length > 0
-      ? `${props.config.prefix}-genaichatbot-workspaces`
-      : "genaichatbot-workspaces";
-    collectionName = collectionName.slice(0, 32); // maxLength: 32
+    const collectionName = Utils.getName(
+      props.config,
+      "genaichatbot-workspaces"
+    );
 
     const sg = new ec2.SecurityGroup(this, "SecurityGroup", {
       vpc: props.shared.vpc,
@@ -42,7 +43,7 @@ export class OpenSearchVector extends Construct {
     );
 
     const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
-      name: this.getName(props.config, "genaichatbot-vpce"),
+      name: Utils.getName(props.config, "genaichatbot-vpce"),
       subnetIds: props.shared.vpc.selectSubnets({
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       }).subnetIds,
@@ -54,7 +55,7 @@ export class OpenSearchVector extends Construct {
       this,
       "NetworkSecurityPolicy",
       {
-        name: this.getName(props.config, "genaichatbot-network-policy"),
+        name: Utils.getName(props.config, "genaichatbot-network-policy"),
         type: "network",
         policy: JSON.stringify([
           {
@@ -77,7 +78,7 @@ export class OpenSearchVector extends Construct {
       this,
       "EncryptionSecurityPolicy",
       {
-        name: this.getName(props.config, "genaichatbot-encryption-policy"),
+        name: Utils.getName(props.config, "genaichatbot-encryption-policy"),
         type: "encryption",
         policy: JSON.stringify({
           Rules: [
@@ -106,6 +107,7 @@ export class OpenSearchVector extends Construct {
         shared: props.shared,
         ragDynamoDBTables: props.ragDynamoDBTables,
         openSearchCollectionName: collectionName,
+        openSearchCollection: cfnCollection,
         collectionEndpoint: cfnCollection.attrCollectionEndpoint,
       }
     );
@@ -142,14 +144,7 @@ export class OpenSearchVector extends Construct {
 
     this.createOpenSearchWorkspaceWorkflow = createWorkflow.stateMachine;
     this.openSearchCollectionEndpoint = cfnCollection.attrCollectionEndpoint;
-  }
-
-  getName(config: SystemConfig, value: string) {
-    const prefix = config.prefix;
-    let name = prefix && prefix.length > 0 ? `${prefix}-${value}` : value;
-    name = name.slice(0, 32); // maxLength: 32
-
-    return name;
+    this.openSearchCollection = cfnCollection;
   }
 
   private addToAccessPolicyIntl(
@@ -160,7 +155,7 @@ export class OpenSearchVector extends Construct {
     permission: string[]
   ) {
     new oss.CfnAccessPolicy(this, `AccessPolicy-${name}`, {
-      name: this.getName(config, `access-policy-${name}`),
+      name: Utils.getName(config, `access-policy-${name}`),
       type: "data",
       policy: JSON.stringify([
         {

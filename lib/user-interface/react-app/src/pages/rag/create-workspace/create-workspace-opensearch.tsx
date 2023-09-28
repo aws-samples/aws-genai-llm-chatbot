@@ -20,6 +20,7 @@ const defaults: OpenSearchWorkspaceCreateInput = {
   embeddingsModel: null,
   crossEncoderModel: null,
   languages: [{ value: "english", label: "English" }],
+  hybridSearch: true,
   chunkSize: 1000,
   chunkOverlap: 200,
 };
@@ -114,6 +115,7 @@ export default function CreateWorkspaceOpenSearch() {
       crossEncoderModelProvider: crossEncoderModel.provider,
       crossEncoderModelName: crossEncoderModel.name,
       languages: data.languages.map((x) => x.value ?? ""),
+      hybridSearch: data.hybridSearch,
       chunking_strategy: "recursive",
       chunkSize: data.chunkSize,
       chunkOverlap: data.chunkOverlap,

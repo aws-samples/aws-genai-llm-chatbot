@@ -69,6 +69,8 @@ export interface WorkspaceItem {
   chunkOverlap: number;
   vectors: number;
   documents: number;
+  kendraIndexId?: string;
+  kendraIndexExternal?: boolean;
   sizeInBytes: number;
   createdAt: string;
 }
@@ -156,9 +158,9 @@ export interface SemanticSearchResultItem {
 export interface SemanticSearchResult {
   engine: string;
   workspaceId: string;
-  queryLanguage: string;
-  supportedLanguages: string[];
-  detectedLanguages: {
+  queryLanguage?: string;
+  supportedLanguages?: string[];
+  detectedLanguages?: {
     code: string;
     score: number;
   }[];
@@ -185,10 +187,18 @@ export interface OpenSearchWorkspaceCreateInput {
   embeddingsModel: SelectProps.Option | null;
   languages: readonly SelectProps.Option[];
   crossEncoderModel: SelectProps.Option | null;
+  hybridSearch: boolean;
   chunkSize: number;
   chunkOverlap: number;
 }
 
 export interface KendraWorkspaceCreateInput {
   name: string;
+  kendraIndex: SelectProps.Option | null;
+}
+
+export interface KendraIndexItem {
+  id: string;
+  name: string;
+  external: boolean;
 }

@@ -51,6 +51,11 @@ export function getConfig(): SystemConfig {
           dimensions: 4096,
         },
         {
+          provider: "bedrock",
+          name: "amazon.amazon.titan-embed-text-v1",
+          dimensions: 1536,
+        },
+        {
           provider: "openai",
           name: "text-embedding-ada-002",
           dimensions: 1536,

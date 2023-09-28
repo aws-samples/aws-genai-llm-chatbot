@@ -2,6 +2,7 @@ import {
   BreadcrumbGroup,
   Container,
   ContentLayout,
+  Flashbar,
   FormField,
   Header,
   Select,
@@ -93,6 +94,10 @@ export default function AddData() {
     console.log("re-render");
   }
 
+  const workspace = workspaces.find((c) => c.id === data.workspace?.value);
+  const showTabs = !workspace?.kendraIndexExternal;
+  const disabledTabs = workspace?.engine === "kendra" ? ["qna", "website"] : [];
+
   return (
     <BaseAppLayout
       contentType="cards"
@@ -152,68 +157,86 @@ export default function AddData() {
                 </FormField>
               </SpaceBetween>
             </Container>
-            <Tabs
-              tabs={[
-                {
-                  label: "Upload Files",
-                  id: "file",
-                  content: (
-                    <DataFileUpload
-                      data={data}
-                      validate={validate}
-                      selectedWorkspace={selectedWorkspace}
-                    />
-                  ),
-                },
-                {
-                  label: "Add Text",
-                  id: "text",
-                  content: (
-                    <AddText
-                      data={data}
-                      validate={validate}
-                      submitting={submitting}
-                      setSubmitting={setSubmitting}
-                      selectedWorkspace={selectedWorkspace}
-                    />
-                  ),
-                },
-                {
-                  label: "Add Q&A",
-                  id: "qna",
-                  content: (
-                    <AddQnA
-                      data={data}
-                      validate={validate}
-                      submitting={submitting}
-                      setSubmitting={setSubmitting}
-                      selectedWorkspace={selectedWorkspace}
-                    />
-                  ),
-                },
-                {
-                  label: "Crawl Website",
-                  id: "website",
-                  content: (
-                    <CrawlWebsite
-                      data={data}
-                      validate={validate}
-                      submitting={submitting}
-                      setSubmitting={setSubmitting}
-                      selectedWorkspace={selectedWorkspace}
-                    />
-                  ),
-                },
-              ]}
-              activeTabId={activeTab}
-              onChange={({ detail: { activeTabId } }) => {
-                setActiveTab(activeTabId);
-                setSearchParams((current) => ({
-                  ...Utils.urlSearchParamsToRecord(current),
-                  tab: activeTabId,
-                }));
-              }}
-            />
+            {workspace?.kendraIndexExternal && (
+              <Flashbar
+                items={[
+                  {
+                    type: "info",
+                    content: (
+                      <>
+                        Data upload is not available for external Kendra indexes
+                      </>
+                    ),
+                  },
+                ]}
+              />
+            )}
+            {showTabs && (
+              <Tabs
+                tabs={[
+                  {
+                    label: "Upload Files",
+                    id: "file",
+                    content: (
+                      <DataFileUpload
+                        data={data}
+                        validate={validate}
+                        selectedWorkspace={selectedWorkspace}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Add Text",
+                    id: "text",
+                    content: (
+                      <AddText
+                        data={data}
+                        validate={validate}
+                        submitting={submitting}
+                        setSubmitting={setSubmitting}
+                        selectedWorkspace={selectedWorkspace}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Add Q&A",
+                    id: "qna",
+                    disabled: disabledTabs.includes("qna"),
+                    content: (
+                      <AddQnA
+                        data={data}
+                        validate={validate}
+                        submitting={submitting}
+                        setSubmitting={setSubmitting}
+                        selectedWorkspace={selectedWorkspace}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Crawl Website",
+                    id: "website",
+                    disabled: disabledTabs.includes("website"),
+                    content: (
+                      <CrawlWebsite
+                        data={data}
+                        validate={validate}
+                        submitting={submitting}
+                        setSubmitting={setSubmitting}
+                        selectedWorkspace={selectedWorkspace}
+                      />
+                    ),
+                  },
+                ]}
+                activeTabId={activeTab}
+                onChange={({ detail: { activeTabId } }) => {
+                  setActiveTab(activeTabId);
+                  setSearchParams((current) => ({
+                    ...Utils.urlSearchParamsToRecord(current),
+                    tab: activeTabId,
+                  }));
+                }}
+              />
+            )}
           </SpaceBetween>
         </ContentLayout>
       }
