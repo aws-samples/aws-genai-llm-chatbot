@@ -114,9 +114,6 @@ git clone https://github.com/aws-samples/aws-genai-llm-chatbot
 ```bash
 cd aws-genai-llm-chatbot
 ```
-```bash
-git checkout v3-dev
-```
 3. Install the project dependencies and build the project by running this command
 ```bash
 npm install && npm run build
