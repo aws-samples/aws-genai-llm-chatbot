@@ -81,6 +81,18 @@ You have:
    - N.B. [`buildx`](https://github.com/docker/buildx) is also required. For Windows and macOS `buildx` [is included](https://github.com/docker/buildx#windows-and-macos) in [Docker Desktop](https://docs.docker.com/desktop/)
 10. [Python 3+](https://www.python.org/downloads/) installed
 
+
+### (Optional) If using AWS Cloud9
+If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the solution from you will need the following before proceeding:
+- at least `m5.large` as Instance type.
+- use `Ubuntu` as the platform.
+- increase the instance's EBS volume size to at least 100GB. 
+To do this, run the following commands from the Cloud9 terminal:
+```
+sh ./scripts/cloud9-resize.sh 100
+```
+ See the documentation for more details [on enviroment resize here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
+
 ### Deployment
 
 1. Clone the repository
@@ -103,7 +115,9 @@ npm install && npm run build
 ```bash
 npm run create
 ```
-You'll be prompted to configure the different aspects of the solution: the LLMs to enable (we support all models provided by Bedrock, FalconLite and LLama 2, more to come) and the setup of the RAG system (we support Aurora, more to come).
+You'll be prompted to configure the different aspects of the solution such as: 
+- The LLMs to enable (we support all models provided by Bedrock, FalconLite, LLama 2 and more to come)
+- Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra..) embeddings selection and more to come.
 
 When at done, answer `Y` to create a new configuration.
 
