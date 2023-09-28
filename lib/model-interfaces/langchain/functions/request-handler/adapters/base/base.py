@@ -10,7 +10,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
-from langchain.chains.conversational_retrieval.prompts import QA_PROMPT
+from langchain.chains.conversational_retrieval.prompts import QA_PROMPT, CONDENSE_QUESTION_PROMPT
 
 
 from .chat_message_histories import DynamoDBChatMessageHistory
@@ -83,6 +83,12 @@ class ModelAdapter:
         prompt_template = PromptTemplate(**prompt_template_args)
 
         return prompt_template
+    
+    def get_condense_question_prompt(self):
+        return CONDENSE_QUESTION_PROMPT
+
+    def get_qa_prompt(self):
+        return QA_PROMPT
 
     def get_retriever(self, source):
         session = boto3.Session()
@@ -120,6 +126,8 @@ class ModelAdapter:
             conversation = ConversationalRetrievalChain.from_llm(
                 self.llm,
                 self.get_retriever(rag_source.lower()),
+                condense_question_prompt=self.get_condense_question_prompt(),
+                combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
                 return_source_documents=True,
                 memory=self.get_memory(output_key="answer"),
                 verbose=True,
