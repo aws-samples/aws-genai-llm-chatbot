@@ -27,18 +27,32 @@ Supported models providers:
 
 
 ## Experiment multiple RAG options with Workspaces
+A workspace is a logical namespace where you can upload files for indexing and storage in one of the vector databases. You can select the embeddings model and text-splitting configuration of your choice.
+
+
 ![sample](assets/create-workspace-sample.gif "AWS GenAI Chatbot")
 
 ## Unlock RAG potentials with Workspaces Debugging Tools
+The solutions comes with several debugging tools to help you debug RAG scenarios:
+- Run RAG queries without chatbot and analyize results, scores etc.
+- Test different embeddings models directly in the UI
+- Test cross encoders and analize distances from different functions between sentences.
+
+
 ![sample](assets/workspace-debug-sample.gif "AWS GenAI Chatbot")
 
 
 ## Full-fledged User Interface
-The repository includes a CDK construct to deploy  a **full-fledged UI** built with [React](https://react.dev/) to interact with the deployed LLMs as chatbots. Hosted on [Amazon S3](https://aws.amazon.com/s3/) and distributed with [Amazon CloudFront](https://aws.amazon.com/cloudfront/). Protected with [Amazon Cognito Authentication](https://aws.amazon.com/cognito/) to help you interact and experiment with multiple LLMs, multiple RAG sources, conversational history support and documents upload.
-The interface layer between the UI and backend is built with [Amazon API Gateway WebSocket APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html).
+The repository includes a CDK construct to deploy  a **full-fledged UI** built with [React](https://react.dev/) to interact with the deployed LLMs as chatbots. Hosted on [Amazon S3](https://aws.amazon.com/s3/) and distributed with [Amazon CloudFront](https://aws.amazon.com/cloudfront/). 
 
 
-Build on top of [AWS Cloudscape Design System](https://cloudscape.design/).
+Protected with [Amazon Cognito Authentication](https://aws.amazon.com/cognito/) to help you interact and experiment with multiple LLMs, multiple RAG engines, conversational history support and documents upload/progress.
+
+
+The interface layer between the UI and backend is built with [API Gateway REST API](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-rest-api.html) for management requests and [Amazon API Gateway WebSocket APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html) for chatbot messages and responses.
+
+
+Design system provided by [AWS Cloudscape Design System](https://cloudscape.design/).
 
 
 # Precautions
