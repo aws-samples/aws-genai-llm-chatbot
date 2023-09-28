@@ -26,14 +26,14 @@ def get_sagemaker_client():
     return client
 
 
-def get_bedrock_client():
+def get_bedrock_client(service_name="bedrock-runtime"):
     config = genai_core.parameters.get_config()
     bedrock_config = config.get("bedrock", {})
     bedrock_enabled = bedrock_config.get("enabled", False)
     if not bedrock_enabled:
         return None
 
-    bedrock_config_data = {"service_name": "bedrock"}
+    bedrock_config_data = {"service_name": service_name}
     region_name = bedrock_config.get("region")
     endpoint_url = bedrock_config.get("endpointUrl")
     role_arn = bedrock_config.get("roleArn")
