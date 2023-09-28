@@ -117,7 +117,7 @@ async function processCreateOptions(options: any): Promise<void> {
             type: 'input',
             name: 'bedrockEndpoint',
             message: 'Bedrock endpoint - leave as is for standard endpoint',
-            initial() { return  `https://bedrock.${(this as any).state.answers.bedrockRegion}.amazonaws.com`}
+            initial() { return  `https://bedrock-runtime.${(this as any).state.answers.bedrockRegion}.amazonaws.com`}
         },
         {
             type: 'input',
