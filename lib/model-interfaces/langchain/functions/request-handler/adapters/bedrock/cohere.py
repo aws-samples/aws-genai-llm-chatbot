@@ -53,5 +53,6 @@ Assistant:"""
 
         return prompt_template
 
+
 # Register the adapter
 registry.register(r"^bedrock.cohere.command-text*", BedrockCohereCommandAdapter)
