@@ -54,7 +54,7 @@ The interface layer between the UI and backend is built with [API Gateway REST A
 Design system provided by [AWS Cloudscape Design System](https://cloudscape.design/).
 
 
-# Precautions
+# ⚠️ Precautions ⚠️
 
 Before you begin using the solution, there are certain precautions you must take into account:
 
