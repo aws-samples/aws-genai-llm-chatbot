@@ -171,7 +171,7 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 9. Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`
 
-10. Login with the user created in .6; you will be asked to change the password.
+10. Login with the user created in .8; you will be asked to change the password.
 
 
 # Clean up
