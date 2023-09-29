@@ -1,3 +1,5 @@
+# This version is now deprecated. Checkout the [latest version here](https://github.com/aws-samples/aws-genai-llm-chatbot).
+
 # Deploy a multi LLM powered chatbot using AWS CDK on AWS
 
 ![sample](assets/sample.gif "AWS GenAI Chatbot")
