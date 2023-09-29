@@ -32,7 +32,7 @@ A workspace is a logical namespace where you can upload files for indexing and s
 ![sample](assets/create-workspace-sample.gif "AWS GenAI Chatbot")
 
 ## Unlock RAG potentials with Workspaces Debugging Tools
-The solutions comes with several debugging tools to help you debug RAG scenarios:
+The solution comes with several debugging tools to help you debug RAG scenarios:
 - Run RAG queries without chatbot and analyize results, scores etc.
 - Test different embeddings models directly in the UI
 - Test cross encoders and analize distances from different functions between sentences.
