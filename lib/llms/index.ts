@@ -36,7 +36,7 @@ export class LargeLanguageModels extends Construct {
         model: {
           type: DeploymentType.Container,
           modelId: "amazon/FalconLite",
-          container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_LATEST,
+          container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_0_9_3,
           instanceType: "ml.g5.12xlarge",
           // https://github.com/awslabs/extending-the-context-length-of-open-source-llms/blob/main/custom-tgi-ecr/deploy.ipynb
           containerStartupHealthCheckTimeoutInSeconds: 600,
