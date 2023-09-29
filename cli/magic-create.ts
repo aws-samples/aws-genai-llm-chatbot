@@ -293,6 +293,7 @@ async function processCreateOptions(options: any): Promise<void> {
         },
         kendra: {
           enabled: false,
+          createIndex: false,
           external: [{}],
         },
       },
@@ -307,6 +308,7 @@ async function processCreateOptions(options: any): Promise<void> {
     },
   };
   config.rag.engines.kendra.enabled = answers.ragsToEnable.includes("kendra");
+  config.rag.engines.kendra.createIndex = config.rag.engines.kendra.enabled;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.embeddingsModels = embeddingModels;
   config.rag.embeddingsModels.forEach((m: any) => {
