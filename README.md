@@ -71,7 +71,7 @@ Before you begin using the solution, there are certain precautions you must take
 
 #### Deploy with AWS Cloud9
 We recommend deploying with [AWS Cloud9](https://aws.amazon.com/cloud9/). 
-If you'd like to use [AWS Cloud9](https://aws.amazon.com/cloud9/) to deploy the solution, you will need the following before proceeding:
+If you'd like to use Cloud9 to deploy the solution, you will need the following before proceeding:
 - select at least `m5.large` as Instance type.
 - use `Ubuntu Server 22.04 LTS` as the platform.
 
@@ -109,13 +109,14 @@ git clone https://github.com/aws-samples/aws-genai-llm-chatbot
 ```bash
 cd aws-genai-llm-chatbot
 ```
-If you are using Cloud9
-- increase the instance's EBS volume size to at least 100GB. 
+
+#### (Optional) Only for Cloud9
+If you are using Cloud9, increase the instance's EBS volume size to at least 100GB. 
 To do this, run the following command from the Cloud9 terminal:
 ```
 ./scripts/cloud9-resize.sh
 ```
- See the documentation for more details [on environment resize here](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
+See the documentation for more details [on environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
 
 3. Install the project dependencies and build the project by running this command
 ```bash
