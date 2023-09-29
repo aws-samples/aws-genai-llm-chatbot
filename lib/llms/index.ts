@@ -81,7 +81,7 @@ export class LargeLanguageModels extends Construct {
         region: cdk.Aws.REGION,
         model: {
           type: DeploymentType.ModelPackage,
-          modelId: "meta-LLama2-13b",
+          modelId: "meta-LLama2-13b-base",
           instanceType: "ml.g5.12xlarge",
           packages: (scope) =>
             new cdk.CfnMapping(scope, "Llama2BasePackageMapping", {

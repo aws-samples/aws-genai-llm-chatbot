@@ -1,6 +1,7 @@
 aws_xray_sdk==2.12.0
 boto3==1.28.57
 attr==0.3.2
+numpy==1.26.0
 cfnresponse==1.1.2
 aws_requests_auth==0.4.3
 requests-aws4auth==1.2.3

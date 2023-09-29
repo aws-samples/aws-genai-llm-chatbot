@@ -3,6 +3,7 @@ import genai_core.types
 import genai_core.parameters
 import genai_core.utils.json
 from pydantic import ValidationError
+from botocore.exceptions import ClientError
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -30,7 +31,8 @@ cors_config = CORSConfig(allow_origin="*", max_age=0)
 app = APIGatewayRestResolver(
     cors=cors_config,
     strip_prefixes=["/v1"],
-    serializer=lambda obj: json.dumps(obj, cls=genai_core.utils.json.CustomEncoder),
+    serializer=lambda obj: json.dumps(
+        obj, cls=genai_core.utils.json.CustomEncoder),
 )
 
 app.include_router(health_router)
@@ -53,6 +55,20 @@ def handle_value_error(e: genai_core.types.CommonError):
         content_type=content_types.APPLICATION_JSON,
         body=json.dumps(
             {"error": True, "message": str(e)}, cls=genai_core.utils.json.CustomEncoder
+        ),
+    )
+
+
+@app.exception_handler(ClientError)
+def handle_value_error(e: ClientError):
+    logger.exception(e)
+
+    return Response(
+        status_code=200,
+        content_type=content_types.APPLICATION_JSON,
+        body=json.dumps(
+            {"error": True, "message": str(e)},
+            cls=genai_core.utils.json.CustomEncoder,
         ),
     )
 

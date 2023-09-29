@@ -54,4 +54,4 @@ class SMLlama2BaseAdapter(ModelAdapter):
 
 
 # Register the adapter
-registry.register(r"(?i)sagemaker\.meta-LLama.*\d+b$", SMLlama2BaseAdapter)
+registry.register(r"(?i)sagemaker\.meta-LLama.*base.*", SMLlama2BaseAdapter)

@@ -4,8 +4,8 @@ export type ModelProvider = "sagemaker" | "bedrock" | "openai";
 
 export enum SupportedSageMakerLLM {
   FalconLite = "FalconLite",
-  Llama2_13b_Base = "Llama2_13b_Base",
   Llama2_13b_Chat = "Llama2_13b_Chat",
+  Llama2_13b_Base = "Llama2_13b_Base",
 }
 
 export enum SupportedRegion {
