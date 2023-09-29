@@ -356,9 +356,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             placeholder="Select a model"
             empty={
               <div>
-                No models available. Please make sure you have access to Bedrock
-                or alternatevly deploy a self hosted model on Sagamker or add
-                API KEY to secrets manager
+                No models available. Please make sure you have access to Amazon
+                Bedrock or alternatively deploy a self hosted model on SageMaker
+                or add API_KEY to Secrets Manager
               </div>
             }
             filteringType="auto"
