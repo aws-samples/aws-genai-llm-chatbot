@@ -255,7 +255,7 @@ export class FileImportWorkflow extends Construct {
 
     const stateMachine = new sfn.StateMachine(this, "FileImport", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),
-      timeout: cdk.Duration.minutes(30),
+      timeout: cdk.Duration.hours(4),
       comment: "File import workflow",
     });
 
