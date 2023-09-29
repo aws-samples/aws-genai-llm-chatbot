@@ -70,6 +70,9 @@ const embeddingModels = [
       options.ragsToEnable = Object.keys(config.rag.engines).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
       );
+      if (options.ragsToEnable.includes("kendra") && !config.rag.engines.kendra.createIndex) {
+        options.ragsToEnable.pop("kendra")
+      }
       options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
       options.defaultEmbedding = config.rag.embeddingsModels.filter(
         (m: any) => m.default
@@ -199,9 +202,6 @@ async function processCreateOptions(options: any): Promise<void> {
   const kendraExternal = [];
   let newKendra = answers.enableRag && answers.kendra;
 
-  // if (options.kendraExternal) {
-  //     options.kendraExternal.forEach((v: any) => console.log(v))
-  // }
   while (newKendra === true) {
     const kendraQ = [
       {
@@ -252,7 +252,7 @@ async function processCreateOptions(options: any): Promise<void> {
     if (ext.roleArn === "") ext.roleArn = undefined;
     kendraExternal.push({
       enabled: true,
-      external: ext,
+      ...ext,
     });
     newKendra = kendraInstance.newKendra;
   }
@@ -307,8 +307,9 @@ async function processCreateOptions(options: any): Promise<void> {
       ],
     },
   };
-  config.rag.engines.kendra.enabled = answers.ragsToEnable.includes("kendra");
-  config.rag.engines.kendra.createIndex = config.rag.engines.kendra.enabled;
+  
+  config.rag.engines.kendra.createIndex = answers.ragsToEnable.includes("kendra");
+  config.rag.engines.kendra.enabled = config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.embeddingsModels = embeddingModels;
   config.rag.embeddingsModels.forEach((m: any) => {
