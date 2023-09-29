@@ -46,7 +46,7 @@ export class FileImportWorkflow extends Construct {
         props.shared.commonLayer.layer,
         props.shared.pythonSDKLayer,
       ],
-      timeout: cdk.Duration.minutes(10),
+      timeout: cdk.Duration.minutes(15),
       logRetention: logs.RetentionDays.ONE_WEEK,
       environment: {
         ...props.shared.defaultEnvironmentVariables,
@@ -110,6 +110,15 @@ export class FileImportWorkflow extends Construct {
           resources: [props.sageMakerRagModelsEndpoint.ref],
         })
       );
+    }
+    
+    if(props.config.bedrock?.enabled === true) {
+      dataImportFunction.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["bedrock:InvokeModel"],
+          resources: ["*"],
+        })
+      );      
     }
 
     if (props.config.bedrock?.roleArn) {
