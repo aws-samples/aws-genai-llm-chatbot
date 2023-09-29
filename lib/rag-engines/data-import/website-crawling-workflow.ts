@@ -124,13 +124,22 @@ export class WebsiteCrawlingWorkflow extends Construct {
       );
     }
 
-    if (props.config.bedrock?.roleArn) {
+    if (props.config.bedrock?.enabled) {
       websiteParserFunction.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["sts:AssumeRole"],
-          resources: [props.config.bedrock.roleArn],
+          actions: ["bedrock:InvokeModel"],
+          resources: ["*"],
         })
       );
+
+      if (props.config.bedrock?.roleArn) {
+        websiteParserFunction.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["sts:AssumeRole"],
+            resources: [props.config.bedrock.roleArn],
+          })
+        );
+      }
     }
 
     const handleError = new tasks.DynamoUpdateItem(this, "HandleError", {

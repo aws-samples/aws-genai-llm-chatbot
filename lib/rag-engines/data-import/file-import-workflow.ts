@@ -46,7 +46,7 @@ export class FileImportWorkflow extends Construct {
         props.shared.commonLayer.layer,
         props.shared.pythonSDKLayer,
       ],
-      timeout: cdk.Duration.minutes(10),
+      timeout: cdk.Duration.minutes(15),
       logRetention: logs.RetentionDays.ONE_WEEK,
       environment: {
         ...props.shared.defaultEnvironmentVariables,
@@ -112,13 +112,22 @@ export class FileImportWorkflow extends Construct {
       );
     }
 
-    if (props.config.bedrock?.roleArn) {
+    if (props.config.bedrock?.enabled) {
       dataImportFunction.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["sts:AssumeRole"],
-          resources: [props.config.bedrock.roleArn],
+          actions: ["bedrock:InvokeModel"],
+          resources: ["*"],
         })
       );
+
+      if (props.config.bedrock?.roleArn) {
+        dataImportFunction.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["sts:AssumeRole"],
+            resources: [props.config.bedrock.roleArn],
+          })
+        );
+      }
     }
 
     const handleError = new tasks.DynamoUpdateItem(this, "HandleError", {
