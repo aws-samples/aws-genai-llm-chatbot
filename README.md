@@ -8,6 +8,8 @@
 ## Table of content
 - [Features](#features)
 - [Precautions](#precautions)
+- [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
+- [Amazon Bedrock requirements](#amazon-bedrock-requirements)
 - [Deploy](#deploy)
 - [Clean up](#clean-up)
 - [Authors](#authors)
@@ -66,16 +68,16 @@ Before you begin using the solution, there are certain precautions you must take
 
 
 # Amazon SageMaker requirements (for self-hosted models only)
-- **Instance type quota increase**
-You'll likely need to request an increase in service quota for specific SageMaker instance types such as the `ml.g5` instance type. This will give access to latest generation of GPU/Multi-GPU instances types. You can do this from the AWS console.
+**Instance type quota increase**
 
-- **Foundation Models Preview Access**
-If you are looking to deploy models from SageMaker foundation models, you need to request preview access from the AWS console.
-Futhermore, make sure which regions are currently supported for SageMaker foundation models.
-
+You'll likely need to request an increase in service quota for specific SageMaker instance types such as the `ml.g5` instance type. This will give access to latest generation of GPU/Multi-GPU instances types. [You can do this from the AWS console](console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
 
 # Amazon Bedrock requirements
-If you are looking to interact with models from Amazon Bedrock, you need to access to the base models first.
+**Base Model Access**
+
+If you are looking to interact with models from Amazon Bedrock, you need to [request access to the base models in the target region first](https://console.aws.amazon.com/bedrock/home?#/modelaccess). 
+
+Make sure to request access in the region you plan to deploy this solution to.
 
 
 __Note that while the approval is instant, it might take several minutes to get access and see the list of models in the UI.__
