@@ -73,7 +73,7 @@ Before you begin using the solution, there are certain precautions you must take
 If you are looking to self host models on Amazon SageMaker You'll likely need to request an increase in service quota for specific SageMaker instance types such as the `ml.g5` instance type. This will give access to latest generation of GPU/Multi-GPU instances types. [You can do this from the AWS console](console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
 
 # Amazon Bedrock requirements
-**Base Model Access**
+**Base Models Access**
 
 If you are looking to interact with models from Amazon Bedrock, you need to [request access to the base models in the target region first](https://console.aws.amazon.com/bedrock/home?#/modelaccess). 
 
