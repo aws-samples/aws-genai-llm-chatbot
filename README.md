@@ -65,6 +65,24 @@ Before you begin using the solution, there are certain precautions you must take
 - **This is a sample**: the code provided in this repository shouldn't be used for production workloads without further reviews and adaptation.
 
 
+# Amazon SageMaker requirements (for self-hosted models only)
+- **Instance type quota increase**
+You'll likely need to request an increase in service quota for specific SageMaker instance types such as the `ml.g5` instance type. This will give access to latest generation of GPU/Multi-GPU instances types. You can do this from the AWS console.
+
+- **Foundation Models Preview Access**
+If you are looking to deploy models from SageMaker foundation models, you need to request preview access from the AWS console.
+Futhermore, make sure which regions are currently supported for SageMaker foundation models.
+
+
+# Amazon Bedrock requirements
+If you are looking to interact with models from Amazon Bedrock, you need to access to the base models first.
+
+
+__Note that while the approval is instant, it might take several minutes to get access and see the list of models in the UI.__
+
+![sample](assets/enable-models.gif "AWS GenAI Chatbot")
+
+
 # Deploy
 
 ### Environment setup
