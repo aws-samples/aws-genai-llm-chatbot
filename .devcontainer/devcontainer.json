@@ -11,7 +11,7 @@
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {
 			"nodeGypDependencies": true,
-			"version": "16",
+			"version": "18",
 			"nvmVersion": "latest"
 		},
 		"ghcr.io/devcontainers-contrib/features/aws-cdk:2": {
