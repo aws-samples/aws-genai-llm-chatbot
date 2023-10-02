@@ -1,8 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "AWS GenAI Chatbot",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"name": "aws-genai-chatbot-v3",
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
 	"hostRequirements": {
 		"cpus": 4,
@@ -30,11 +29,5 @@
 			"version": "latest",
 			"dockerDashComposeVersion": "v1"
 		}
-	},
-	"postStartCommand": [
-		"npm install"
-	]
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	}
 }

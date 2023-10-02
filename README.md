@@ -123,6 +123,33 @@ If you'd like to use Cloud9 to deploy the solution, you will need the following 
 - select at least `m5.large` as Instance type.
 - use `Ubuntu Server 22.04 LTS` as the platform.
 
+#### Deploy with Github Codespaces
+Another option is to deploy via [GitHub Codespaces](https://github.com/features/codespaces).
+If you'd like to use GitHub Codespaces to deploy the solution, you will need the following before proceeding:
+1. An [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
+2. An [IAM User](https://console.aws.amazon.com/iamv2/home?#/users/create) with:
+  - `AdministratorAccess` policy granted to your user (for production, we recommend restricting access as needed)
+  - Take note of `Access key` and `Secret access key`.
+
+To get started click on the button below
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/aws-samples/aws-genai-llm-chatbot/tree/codespaces)
+
+Once in the Codespaces terminal, set up the AWS Credentials by running
+
+```shell
+aws configure
+```
+
+```shell
+AWS Access Key ID [None]: <the access key from the IAM user generated above>
+AWS Secret Access Key [None]: <the secret access key from the IAM user generated above>
+Default region name: <the region you plan to deploy the solution to>
+Default output format: json
+```
+
+You are all set for deployment, you can now jump to [.3 of the deploymen section below.](#dependencies-installation)
+
 #### Local deployment
 If you have decided not to use Cloud9, verify that your environment satisfies the following prerequisites:
 
@@ -166,6 +193,7 @@ To do this, run the following command from the Cloud9 terminal:
 ```
 See the documentation for more details [on environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
 
+<a id="dependencies-installation"></a>
 3. Install the project dependencies and build the project by running this command
 ```bash
 npm install && npm run build
