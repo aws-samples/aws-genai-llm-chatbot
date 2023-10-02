@@ -77,7 +77,10 @@ export class LangChainInterface extends Construct {
     if (props.config.bedrock?.enabled) {
       requestHandler.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["bedrock:InvokeModel"],
+          actions: [
+            "bedrock:InvokeModel",
+            "bedrock:InvokeModelWithResponseStream",
+          ],
           resources: ["*"],
         })
       );
@@ -164,7 +167,7 @@ export class LangChainInterface extends Construct {
     // Add Amazon Bedrock permissions to the IAM role for the Lambda function
     requestHandler.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ["bedrock:*"],
+        actions: ["bedrock:*", "bedrock:InvokeModelWithResponseStream"],
         resources: ["*"],
       })
     );

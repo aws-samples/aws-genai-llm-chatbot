@@ -115,7 +115,10 @@ export class FileImportWorkflow extends Construct {
     if (props.config.bedrock?.enabled) {
       dataImportFunction.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["bedrock:InvokeModel"],
+          actions: [
+            "bedrock:InvokeModel",
+            "bedrock:InvokeModelWithResponseStream",
+          ],
           resources: ["*"],
         })
       );

@@ -236,7 +236,11 @@ export class RestApi extends Construct {
     if (props.config.bedrock?.enabled) {
       apiHandler.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["bedrock:ListFoundationModels", "bedrock:InvokeModel"],
+          actions: [
+            "bedrock:ListFoundationModels",
+            "bedrock:InvokeModel",
+            "bedrock:InvokeModelWithResponseStream",
+          ],
           resources: ["*"],
         })
       );

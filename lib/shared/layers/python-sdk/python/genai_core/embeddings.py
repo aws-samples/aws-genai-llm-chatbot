@@ -15,7 +15,8 @@ def generate_embeddings(
     input = list(map(lambda x: x[:10000], input))
 
     ret_value = []
-    batch_split = [input[i : i + batch_size] for i in range(0, len(input), batch_size)]
+    batch_split = [input[i: i + batch_size]
+                   for i in range(0, len(input), batch_size)]
 
     for batch in batch_split:
         if model.provider == "openai":
@@ -96,7 +97,8 @@ def _generate_embeddings_sagemaker(
     response = client.invoke_endpoint(
         EndpointName=SAGEMAKER_RAG_MODELS_ENDPOINT,
         ContentType="application/json",
-        Body=json.dumps({"type": "embeddings", "model": model.name, "input": input}),
+        Body=json.dumps(
+            {"type": "embeddings", "model": model.name, "input": input}),
     )
 
     ret_value = json.loads(response["Body"].read().decode())

@@ -127,7 +127,10 @@ export class WebsiteCrawlingWorkflow extends Construct {
     if (props.config.bedrock?.enabled) {
       websiteParserFunction.addToRolePolicy(
         new iam.PolicyStatement({
-          actions: ["bedrock:InvokeModel"],
+          actions: [
+            "bedrock:InvokeModel",
+            "bedrock:InvokeModelWithResponseStream",
+          ],
           resources: ["*"],
         })
       );
