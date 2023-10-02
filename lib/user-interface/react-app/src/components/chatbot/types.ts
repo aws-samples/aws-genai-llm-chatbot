@@ -48,6 +48,7 @@ export interface ChatBotRunRequest
 
 export interface ChatBotToken {
   sequenceNumber: number;
+  runId?: string;
   value: string;
 }
 

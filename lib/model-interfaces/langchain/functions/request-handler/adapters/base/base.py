@@ -32,7 +32,8 @@ class ModelAdapter:
         self.llm = self.get_llm(model_kwargs)
 
     def __bind_callbacks(self):
-        callback_methods = [method for method in dir(self) if method.startswith("on_")]
+        callback_methods = [method for method in dir(
+            self) if method.startswith("on_")]
         valid_callback_names = [
             attr for attr in dir(self.callback_handler) if attr.startswith("on_")
         ]

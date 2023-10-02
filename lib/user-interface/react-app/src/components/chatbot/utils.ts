@@ -46,6 +46,16 @@ export function updateMessageHistory(
       }
 
       lastMessage.tokens.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+      if (lastMessage.tokens.length > 0) {
+        const lastRunId =
+          lastMessage.tokens[lastMessage.tokens.length - 1].runId;
+        if (lastRunId) {
+          lastMessage.tokens = lastMessage.tokens.filter(
+            (c) => c.runId === lastRunId
+          );
+        }
+      }
+
       if (!hasMetadata) {
         metadata = lastMessage.metadata;
       }

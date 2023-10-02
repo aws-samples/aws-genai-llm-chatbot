@@ -30,9 +30,10 @@ def send_to_client(detail):
     )
 
 
-def on_llm_new_token(connection_id, user_id, session_id, self, token, *args, **kwargs):
+def on_llm_new_token(connection_id, user_id, session_id, self, token, run_id, *args, **kwargs):
     global sequence_number
     sequence_number += 1
+    run_id = str(run_id)
 
     send_to_client(
         {
@@ -45,6 +46,7 @@ def on_llm_new_token(connection_id, user_id, session_id, self, token, *args, **k
             "data": {
                 "sessionId": session_id,
                 "token": {
+                    "runId": run_id,
                     "sequenceNumber": sequence_number,
                     "value": token,
                 },
