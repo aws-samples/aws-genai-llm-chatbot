@@ -87,7 +87,7 @@ If you are looking to interact with models from Amazon Bedrock, you need to [req
 
 Note:
 - You can deploy the soluton to a different region from the one where you requested Base Model access.
-- While the Base Model access approval is instant, it might take several minutes to get access and see the list of models in the UI.__
+- **While the Base Model access approval is instant, it might take several minutes to get access and see the list of models in the UI.**
 
 ![sample](assets/enable-models.gif "AWS GenAI Chatbot")
 
