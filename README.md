@@ -150,7 +150,7 @@ Default region name: <the region you plan to deploy the solution to>
 Default output format: json
 ```
 
-You are all set for deployment, you can now jump to [.3 of the deployment section below].(#deployment-dependencies-installation)
+You are all set for deployment, you can now jump to [.3 of the deployment section below](#deployment-dependencies-installation).
 
 #### Local deployment
 If you have decided not to use AWS Cloud9 or GitHub Codespaces, verify that your environment satisfies the following prerequisites:
