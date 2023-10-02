@@ -147,7 +147,7 @@ Default region name: <the region you plan to deploy the solution to>
 Default output format: json
 ```
 
-You are all set for deployment, you can now jump to [.3 of the deploymen section below.](#dependencies-installation)
+You are all set for deployment, you can now jump to [.3 of the deployment section below].(#deployment-dependencies-installation)
 
 #### Local deployment
 If you have decided not to use Cloud9, verify that your environment satisfies the following prerequisites:
@@ -192,7 +192,7 @@ To do this, run the following command from the Cloud9 terminal:
 ```
 See the documentation for more details [on environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize). 
 
-<a id="dependencies-installation"></a>
+<a id="deployment-dependencies-installation"></a>
 3. Install the project dependencies and build the project by running this command
 ```bash
 npm install && npm run build
