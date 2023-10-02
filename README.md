@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/aws-samples/aws-genai-llm-chatbot/tree/codespaces)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](#deploy-with-github-codespaces)
 
 ![sample](assets/chabot-sample.gif "AWS GenAI Chatbot")
 
