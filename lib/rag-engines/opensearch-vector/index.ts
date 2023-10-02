@@ -78,7 +78,7 @@ export class OpenSearchVector extends Construct {
       this,
       "EncryptionSecurityPolicy",
       {
-        name: Utils.getName(props.config, "genaichatbot-encryption-policy"),
+        name: Utils.getName(props.config, "genaichatbot-encryption-policy", 32),
         type: "encryption",
         policy: JSON.stringify({
           Rules: [
@@ -155,7 +155,7 @@ export class OpenSearchVector extends Construct {
     permission: string[]
   ) {
     new oss.CfnAccessPolicy(this, `AccessPolicy-${name}`, {
-      name: Utils.getName(config, `access-policy-${name}`),
+      name: Utils.getName(config, `access-policy-${name}`, 32),
       type: "data",
       policy: JSON.stringify([
         {
