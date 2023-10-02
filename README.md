@@ -124,8 +124,7 @@ If you'd like to use Cloud9 to deploy the solution, you will need the following 
 - use `Ubuntu Server 22.04 LTS` as the platform.
 
 #### Deploy with Github Codespaces
-Another option is to deploy via [GitHub Codespaces](https://github.com/features/codespaces).
-If you'd like to use GitHub Codespaces to deploy the solution, you will need the following before proceeding:
+If you'd like to use [GitHub Codespaces](https://github.com/features/codespaces) to deploy the solution, you will need the following before proceeding:
 1. An [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 2. An [IAM User](https://console.aws.amazon.com/iamv2/home?#/users/create) with:
   - `AdministratorAccess` policy granted to your user (for production, we recommend restricting access as needed)
