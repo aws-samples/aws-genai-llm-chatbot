@@ -153,7 +153,7 @@ Default output format: json
 You are all set for deployment, you can now jump to [.3 of the deployment section below].(#deployment-dependencies-installation)
 
 #### Local deployment
-If you have decided not to use Cloud9, verify that your environment satisfies the following prerequisites:
+If you have decided not to use AWS Cloud9 or GitHub Codespaces, verify that your environment satisfies the following prerequisites:
 
 You have:
 
