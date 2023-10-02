@@ -83,9 +83,9 @@ If you are looking to self host models on Amazon SageMaker You'll likely need to
 # Amazon Bedrock requirements
 **Base Models Access**
 
-If you are looking to interact with models from Amazon Bedrock, you need to [request access to the base models in the target region first](https://console.aws.amazon.com/bedrock/home?#/modelaccess). 
+If you are looking to interact with models from Amazon Bedrock, you need to [request access to the base models in one of the regions where Amazon Bedrock is available](https://console.aws.amazon.com/bedrock/home?#/modelaccess). Make sure to read and accept models end-user license agreements or EULA.
 
-Make sure to request access in the region you plan to deploy this solution to and to read and accept models end-user license agreements or EULA.
+Note: you can deploy the soluton to a different region from the one where you requested Base Model access.
 
 
 __Note that while the approval is instant, it might take several minutes to get access and see the list of models in the UI.__
