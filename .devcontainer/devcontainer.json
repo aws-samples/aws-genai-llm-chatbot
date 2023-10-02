@@ -16,8 +16,7 @@
 		},
 		"ghcr.io/devcontainers-contrib/features/aws-cdk:2": {
 			"version": "latest"
-		},
-		"ghcr.io/saml-to/devcontainer-features/assume-aws-role:1": {}
+		}
 	},
 	"onCreateCommand": [
 		"npm install",
