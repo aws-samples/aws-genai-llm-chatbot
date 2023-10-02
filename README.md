@@ -11,9 +11,10 @@
 ## Table of content
 - [Features](#features)
 - [Precautions](#precautions)
-- [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
-- [Amazon Bedrock requirements](#amazon-bedrock-requirements)
-- [Third party models requirements](#third-party-models-requirements)
+- [Prequirements](#requirements)
+  - [Self hosted models on Amazon SageMaker](#amazon-sagemaker-requirements-for-self-hosted-models-only)
+  - [Amazon Bedrock](#amazon-bedrock-requirements)
+  - [Third party models](#third-party-models-requirements)
 - [Deploy](#deploy)
   - [With AWS Cloud9](#deploy-with-aws-cloud9)
   - [With GitHub Codespaces](#deploy-with-github-codespaces)
