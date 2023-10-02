@@ -133,7 +133,7 @@ function ItemDetails(props: {
             <div>
               <Box variant="awsui-key-label">
                 Vector search score (
-                {Labels.distainceFunctionMap[result.vectorSearchMetric]})
+                {Labels.getDistanceFunctionScoreName(result)})
               </Box>
               <div>{item.vectorSearchScore}</div>
             </div>

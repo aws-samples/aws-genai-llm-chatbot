@@ -77,6 +77,16 @@ export default function OpenSearchWorkspaceSettings(
         </SpaceBetween>
         <SpaceBetween size="l">
           <div>
+            <Box variant="awsui-key-label">Metric (scoring function)</Box>
+            <div>
+              {
+                Labels.distainceFunctionScoreMapOpenSearch[
+                  props.workspace.metric ?? ""
+                ]
+              }
+            </div>
+          </div>
+          <div>
             <Box variant="awsui-key-label">Chunk size</Box>
             <div>{props.workspace.chunkSize}</div>
           </div>

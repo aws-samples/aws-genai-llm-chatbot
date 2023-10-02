@@ -75,9 +75,13 @@ export default function AuroraWorkspaceSettings(
         </SpaceBetween>
         <SpaceBetween size="l">
           <div>
-            <Box variant="awsui-key-label">Metric (distance function)</Box>
+            <Box variant="awsui-key-label">Metric (scoring function)</Box>
             <div>
-              {Labels.distainceFunctionMap[props.workspace.metric ?? ""]}
+              {
+                Labels.distainceFunctionScoreMapAurora[
+                  props.workspace.metric ?? ""
+                ]
+              }
             </div>
           </div>
           <div>

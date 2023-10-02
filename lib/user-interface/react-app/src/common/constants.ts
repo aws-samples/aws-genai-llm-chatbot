@@ -1,4 +1,5 @@
 import { StatusIndicatorProps } from "@cloudscape-design/components";
+import { SemanticSearchResult } from "./types";
 
 export const languageList = [
   { value: "simple", label: "Simple" },
@@ -58,10 +59,14 @@ export abstract class Labels {
     error: "Error",
   };
 
-  static distainceFunctionMap: Record<string, string> = {
+  static distainceFunctionScoreMapAurora: Record<string, string> = {
     inner: "Negative inner product",
     cosine: "Cosine distance",
     l2: "Euclidean distance / L2 norm",
+  };
+
+  static distainceFunctionScoreMapOpenSearch: Record<string, string> = {
+    l2: "1 divided by 1 + L2 norm",
   };
 
   static sourceTypeMap: Record<string, string> = {
@@ -76,4 +81,16 @@ export abstract class Labels {
     website: "Website",
     qna: "Q&A",
   };
+
+  static getDistanceFunctionScoreName(result: SemanticSearchResult) {
+    if (result.engine === "aurora") {
+      return Labels.distainceFunctionScoreMapAurora[result.vectorSearchMetric];
+    } else if (result.engine === "opensearch") {
+      return Labels.distainceFunctionScoreMapOpenSearch[
+        result.vectorSearchMetric
+      ];
+    }
+
+    return null;
+  }
 }

@@ -50,11 +50,7 @@ export default function SemanticSearchDetails(
             <div>
               <Box variant="awsui-key-label">Vector search metric</Box>
               <div>
-                {
-                  Labels.distainceFunctionMap[
-                    props.searchResults.vectorSearchMetric
-                  ]
-                }
+                {Labels.getDistanceFunctionScoreName(props.searchResults)}
               </div>
             </div>
           )}
