@@ -3,6 +3,9 @@
 [![GitHub star chart](https://img.shields.io/github/stars/aws-samples/aws-genai-llm-chatbot?style=social)](https://star-history.com/#aws-samples/aws-genai-llm-chatbot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/aws-samples/aws-genai-llm-chatbot/tree/codespaces?machine=standardLinux32gb)
+
 ![sample](assets/chabot-sample.gif "AWS GenAI Chatbot")
 
 ## Table of content
