@@ -32,9 +32,9 @@
     "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.99.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.99.0-alpha.0",
     "aws-cdk-lib": "2.99.0",
-    "constructs": "^10.0.0",
-    "source-map-support": "^0.5.21",
     "commander": "^11.0.0",
-    "enquirer": "^2.4.1"
+    "constructs": "^10.0.0",
+    "enquirer": "^2.4.1",
+    "source-map-support": "^0.5.21"
   }
 }
