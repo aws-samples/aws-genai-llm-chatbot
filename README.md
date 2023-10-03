@@ -135,7 +135,7 @@ If you'd like to use [GitHub Codespaces](https://github.com/features/codespaces)
 
 To get started click on the button below
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/aws-samples/aws-genai-llm-chatbot/tree/codespaces)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/aws-samples/aws-genai-llm-chatbot)
 
 Once in the Codespaces terminal, set up the AWS Credentials by running
 
