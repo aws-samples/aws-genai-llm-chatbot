@@ -238,6 +238,7 @@ export class RestApi extends Construct {
         new iam.PolicyStatement({
           actions: [
             "bedrock:ListFoundationModels",
+            "bedrock:ListCustomModels",
             "bedrock:InvokeModel",
             "bedrock:InvokeModelWithResponseStream",
           ],
