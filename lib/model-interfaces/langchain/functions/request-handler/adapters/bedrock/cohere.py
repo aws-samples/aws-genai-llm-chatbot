@@ -21,7 +21,7 @@ class BedrockCohereCommandAdapter(ModelAdapter):
             params["temperature"] = model_kwargs["temperature"]
         if "maxTokens" in model_kwargs:
             params["max_tokens"] = model_kwargs["maxTokens"]
-        params["return_likelihood"] = "GENERATION"
+        params["return_likelihoods"] = "GENERATION"
 
         return Bedrock(
             client=bedrock,
