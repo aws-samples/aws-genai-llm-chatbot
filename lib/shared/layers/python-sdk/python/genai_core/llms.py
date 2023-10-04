@@ -47,6 +47,9 @@ def list_openai_models():
 def list_bedrock_models():
     try:
         bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock")
+        if not bedrock:
+            return None
+
         response = bedrock.list_foundation_models()
         bedrock_models = response.get("modelSummaries", [])
 
@@ -68,13 +71,16 @@ def list_bedrock_models():
 
         return models
     except Exception as e:
-        print(f"Error listing Bedrock models, likely still in preview: {e}")
+        print(f"Error listing Bedrock models: {e}")
         return None
 
 
 def list_bedrock_finetuned_models():
     try:
         bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock")
+        if not bedrock:
+            return None
+
         response = bedrock.list_custom_models()
         bedrock_custom_models = response.get("modelSummaries", [])
 
@@ -90,7 +96,7 @@ def list_bedrock_finetuned_models():
 
         return models
     except Exception as e:
-        print(f"Error listing Bedrock models, likely still in preview: {e}")
+        print(f"Error listing Bedrock models: {e}")
         return None
 
 

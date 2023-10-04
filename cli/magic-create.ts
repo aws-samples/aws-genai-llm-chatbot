@@ -28,11 +28,6 @@ const embeddingModels = [
   },
   {
     provider: "bedrock",
-    name: "amazon.titan-e1t-medium",
-    dimensions: 4096,
-  },
-  {
-    provider: "bedrock",
     name: "amazon.titan-embed-text-v1",
     dimensions: 1536,
   },
@@ -70,8 +65,11 @@ const embeddingModels = [
       options.ragsToEnable = Object.keys(config.rag.engines).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
       );
-      if (options.ragsToEnable.includes("kendra") && !config.rag.engines.kendra.createIndex) {
-        options.ragsToEnable.pop("kendra")
+      if (
+        options.ragsToEnable.includes("kendra") &&
+        !config.rag.engines.kendra.createIndex
+      ) {
+        options.ragsToEnable.pop("kendra");
       }
       options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
       options.defaultEmbedding = config.rag.embeddingsModels.filter(
@@ -307,9 +305,11 @@ async function processCreateOptions(options: any): Promise<void> {
       ],
     },
   };
-  
-  config.rag.engines.kendra.createIndex = answers.ragsToEnable.includes("kendra");
-  config.rag.engines.kendra.enabled = config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
+
+  config.rag.engines.kendra.createIndex =
+    answers.ragsToEnable.includes("kendra");
+  config.rag.engines.kendra.enabled =
+    config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.embeddingsModels = embeddingModels;
   config.rag.embeddingsModels.forEach((m: any) => {
