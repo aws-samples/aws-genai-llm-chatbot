@@ -1,8 +1,5 @@
 from psycopg2 import sql
-from aws_lambda_powertools import Logger
 from genai_core.aurora.connection import AuroraConnection
-
-logger = Logger()
 
 
 def create_workspace_table(workspace: dict):
@@ -77,4 +74,4 @@ def create_workspace_table(workspace: dict):
                 )
 
         cursor.connection.commit()
-        logger.info("Created workspace table")
+        print("Created workspace table")

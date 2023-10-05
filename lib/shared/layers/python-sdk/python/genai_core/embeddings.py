@@ -1,17 +1,15 @@
 import os
 import json
 import time
+import random
 import botocore
 import numpy as np
 import genai_core.types
 import genai_core.clients
 import genai_core.parameters
 from typing import List, Optional
-from aws_lambda_powertools import Logger
 
 SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
-
-logger = Logger()
 
 
 def generate_embeddings(
@@ -20,8 +18,7 @@ def generate_embeddings(
     input = list(map(lambda x: x[:10000], input))
 
     ret_value = []
-    batch_split = [input[i: i + batch_size]
-                   for i in range(0, len(input), batch_size)]
+    batch_split = [input[i : i + batch_size] for i in range(0, len(input), batch_size)]
 
     for batch in batch_split:
         if model.provider == "openai":
@@ -99,15 +96,15 @@ def _generate_embeddings_sagemaker(
 ):
     client = genai_core.clients.get_sagemaker_client()
 
-    max_retries = 3
-    retry_delay = 1  # Time in seconds
+    max_retries = 5
     for attempt in range(max_retries):
         try:
             response = client.invoke_endpoint(
                 EndpointName=SAGEMAKER_RAG_MODELS_ENDPOINT,
                 ContentType="application/json",
                 Body=json.dumps(
-                    {"type": "embeddings", "model": model.name, "input": input}),
+                    {"type": "embeddings", "model": model.name, "input": input}
+                ),
             )
 
             ret_value = json.loads(response["Body"].read().decode())
@@ -116,10 +113,12 @@ def _generate_embeddings_sagemaker(
         except botocore.exceptions.ClientError as error:
             # Check if the error is due to a 500 server error
             error_code = error.response.get("Error", {}).get("Code")
-            if error_code == "ServiceUnavailableException" or error_code == "InternalServerError":
-                logger.info(
-                    f"Attempt {attempt + 1} failed with a 500 error. Retrying after {retry_delay} seconds.")
-                time.sleep(retry_delay)
+            if (
+                error_code == "ServiceUnavailableException"
+                or error_code == "InternalServerError"
+            ):
+                print(f"Attempt {attempt + 1} failed with a 500 error.")
+                time.sleep(random.uniform(0.3, 1.5))
                 continue
             else:
                 # If the exception was due to another reason, raise it.

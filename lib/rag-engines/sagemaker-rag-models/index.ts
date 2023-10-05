@@ -24,7 +24,7 @@ export class SageMakerRagModels extends Construct {
       .filter((c) => c.provider === "sagemaker")
       .map((c) => c.name);
 
-    const model = new SageMakerModel(this, "Models", {
+    const model = new SageMakerModel(this, "Model", {
       vpc: props.shared.vpc,
       region: cdk.Aws.REGION,
       model: {

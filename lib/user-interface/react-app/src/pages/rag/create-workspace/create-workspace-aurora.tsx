@@ -33,7 +33,7 @@ const defaults: AuroraWorkspaceCreateInput = {
   crossEncoderModel: null,
   languages: [{ value: "english", label: "English" }],
   metric: metrics[0].value,
-  index: false,
+  index: true,
   hybridSearch: true,
   chunkSize: 1000,
   chunkOverlap: 200,
@@ -100,6 +100,17 @@ export default function CreateWorkspaceAurora() {
         errors.chunkOverlap = "Chunk overlap must be zero or greater";
       } else if (form.chunkOverlap >= form.chunkSize) {
         errors.chunkOverlap = "Chunk overlap must be less than chunk size";
+      }
+
+      if (form.index && form.embeddingsModel) {
+        const { dimentions } = EmbeddingsModelHelper.parseValue(
+          form.embeddingsModel.value
+        );
+
+        if (dimentions > 2000) {
+          errors.index =
+            "Indexing is not supported for models with more than 2000 dimentions";
+        }
       }
 
       return errors;

@@ -153,8 +153,6 @@ function AuroraFooter(props: {
 
   const crossEncoderModelOptions =
     OptionsHelper.getSelectOptionGroups(crossEncoderModels);
-  const { dimentions: embeddingsModelDimentions } =
-    EmbeddingsModelHelper.parseValue(props.data.embeddingsModel?.value);
 
   return (
     <ExpandableSection headerText="Additional settings" variant="footer">
@@ -183,7 +181,7 @@ function AuroraFooter(props: {
           errorText={props.errors.index}
         >
           <Toggle
-            disabled={props.submitting || embeddingsModelDimentions > 2000}
+            disabled={props.submitting}
             checked={props.data.index}
             onChange={({ detail: { checked } }) =>
               props.onChange({ index: checked })

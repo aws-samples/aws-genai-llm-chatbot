@@ -95,7 +95,8 @@ const WEBSITES_COLUMN_DEFINITIONS = [
   {
     id: "name",
     header: "Name",
-    cell: (item: DocumentItem) => item.path,
+    cell: (item: DocumentItem) =>
+      item.path.length > 100 ? item.path.substring(0, 100) + "..." : item.path,
     isRowHeader: true,
   },
   {

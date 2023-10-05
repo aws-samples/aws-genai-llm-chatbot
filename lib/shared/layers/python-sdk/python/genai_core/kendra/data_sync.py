@@ -1,10 +1,7 @@
 import os
 import genai_core.types
 import genai_core.workspaces
-from aws_lambda_powertools import Logger
 from .client import get_kendra_client_for_index
-
-logger = Logger()
 
 DEFAULT_KENDRA_S3_DATA_SOURCE_ID = os.environ.get("DEFAULT_KENDRA_S3_DATA_SOURCE_ID")
 
@@ -32,4 +29,4 @@ def start_kendra_data_sync(workspace_id: str):
         Id=DEFAULT_KENDRA_S3_DATA_SOURCE_ID, IndexId=kendra_index_id
     )
 
-    logger.info(response)
+    print(response)

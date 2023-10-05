@@ -3,7 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
 import { Shared } from "../../shared";
-import { BatchJobs } from "./batch-jobs";
+import { FileImportBatchJob } from "./file-import-batch-job";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { FileImportWorkflow } from "./file-import-workflow";
 import { WebsiteCrawlingWorkflow } from "./website-crawling-workflow";
@@ -99,12 +99,20 @@ export class DataImport extends Construct {
       new s3Notifications.SqsDestination(ingestionQueue)
     );
 
-    const batchJobs = new BatchJobs(this, "BatchJobs", {
-      shared: props.shared,
-      config: props.config,
-      uploadBucket,
-      processingBucket,
-    });
+    const fileImportBatchJob = new FileImportBatchJob(
+      this,
+      "FileImportBatchJob",
+      {
+        shared: props.shared,
+        config: props.config,
+        uploadBucket,
+        processingBucket,
+        auroraDatabase: props.auroraDatabase,
+        ragDynamoDBTables: props.ragDynamoDBTables,
+        sageMakerRagModelsEndpoint: props.sageMakerRagModelsEndpoint,
+        openSearchVector: props.openSearchVector,
+      }
+    );
 
     const fileImportWorkflow = new FileImportWorkflow(
       this,
@@ -112,12 +120,8 @@ export class DataImport extends Construct {
       {
         shared: props.shared,
         config: props.config,
-        batchJobs,
-        processingBucket,
-        auroraDatabase: props.auroraDatabase,
+        fileImportBatchJob,
         ragDynamoDBTables: props.ragDynamoDBTables,
-        sageMakerRagModelsEndpoint: props.sageMakerRagModelsEndpoint,
-        openSearchVector: props.openSearchVector,
       }
     );
 

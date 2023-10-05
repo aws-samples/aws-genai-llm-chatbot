@@ -1,10 +1,7 @@
 import genai_core.embeddings
 import genai_core.cross_encoder
 from typing import List
-from aws_lambda_powertools import Logger
 from .client import get_open_search_client
-
-logger = Logger()
 
 
 def query_workspace_open_search(
@@ -71,6 +68,11 @@ def query_workspace_open_search(
                     current["sources"].append(source)
             current["sources"] = sorted(current["sources"])
 
+            for source in current["sources"]:
+                if source not in item["sources"]:
+                    item["sources"].append(source)
+            item["sources"] = sorted(item["sources"])
+
             if current["vector_search_score"] is None:
                 current["vector_search_score"] = item["vector_search_score"]
             if current["keyword_search_score"] is None:
@@ -117,7 +119,7 @@ def query_workspace_open_search(
             "items": list(filter(lambda val: val["score"] > 0, unique_items)),
         }
 
-    logger.info(ret_value)
+    print(ret_value)
 
     return ret_value
 

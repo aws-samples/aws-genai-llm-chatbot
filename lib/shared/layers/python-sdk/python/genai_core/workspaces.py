@@ -3,9 +3,7 @@ import json
 import uuid
 import boto3
 from datetime import datetime
-from aws_lambda_powertools import Logger
 
-logger = Logger()
 dynamodb = boto3.resource("dynamodb")
 sfn_client = boto3.client("stepfunctions")
 
@@ -132,7 +130,7 @@ def create_workspace_aurora(
     }
 
     response = table.put_item(Item=item)
-    logger.info(response)
+    print(response)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,
@@ -143,7 +141,7 @@ def create_workspace_aurora(
         ),
     )
 
-    logger.info(response)
+    print(response)
 
     return {
         "id": workspace_id,
@@ -193,7 +191,7 @@ def create_workspace_open_search(
     }
 
     response = table.put_item(Item=item)
-    logger.info(response)
+    print(response)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,
@@ -204,7 +202,7 @@ def create_workspace_open_search(
         ),
     )
 
-    logger.info(response)
+    print(response)
 
     return {
         "id": workspace_id,
@@ -234,7 +232,7 @@ def create_workspace_kendra(workspace_name: str, kendra_index: dict):
     }
 
     response = table.put_item(Item=item)
-    logger.info(response)
+    print(response)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
@@ -245,7 +243,7 @@ def create_workspace_kendra(workspace_name: str, kendra_index: dict):
         ),
     )
 
-    logger.info(response)
+    print(response)
 
     return {
         "id": workspace_id,

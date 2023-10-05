@@ -19,7 +19,7 @@ import RouterButton from "../../../components/wrappers/router-button";
 import RouterButtonDropdown from "../../../components/wrappers/router-button-dropdown";
 import AuroraWorkspaceSettings from "./aurora-workspace-settings";
 import DocumentsTab from "./documents-tab";
-import OpenSearchWorkspaceSettings from "./open-search-workspace-settings copy";
+import OpenSearchWorkspaceSettings from "./open-search-workspace-settings";
 import KendraWorkspaceSettings from "./kendra-workspace-settings";
 
 export default function Workspace() {

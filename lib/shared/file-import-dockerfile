@@ -1,0 +1,10 @@
+FROM quay.io/unstructured-io/unstructured:0.10.19
+
+WORKDIR /app
+COPY file-import-batch-job/requirements.txt requirements.txt
+RUN pip install -r requirements.txt 
+
+COPY layers/python-sdk/python/ .
+COPY file-import-batch-job/main.py ./main.py
+
+CMD ["python3", "main.py"]

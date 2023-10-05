@@ -68,9 +68,9 @@ export default function DataFileUpload(props: DataFileUploadProps) {
     const filesToUpload: File[] = [];
     setUploadError(undefined);
 
-    if (files.length > 50) {
-      setUploadError("Max 50 files allowed");
-      files = files.slice(0, 50);
+    if (files.length > 100) {
+      setUploadError("Max 100 files allowed");
+      files = files.slice(0, 100);
     }
 
     for (let i = 0; i < files.length; i++) {

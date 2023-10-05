@@ -4,11 +4,8 @@ import genai_core.cross_encoder
 import genai_core.utils.comprehend
 from typing import List
 from psycopg2 import sql
-from aws_lambda_powertools import Logger
 from genai_core.aurora.connection import AuroraConnection
 from genai_core.aurora.utils import convert_types
-
-logger = Logger()
 
 
 def query_workspace_aurora(
@@ -113,8 +110,7 @@ def query_workspace_aurora(
             raise Exception("Unknown metric")
 
         vector_search_records = cursor.fetchall()
-        vector_search_records = _convert_records(
-            "vector_search", vector_search_records)
+        vector_search_records = _convert_records("vector_search", vector_search_records)
         items.extend(vector_search_records)
 
         if hybrid_search:
@@ -162,6 +158,11 @@ def query_workspace_aurora(
                 if source not in current["sources"]:
                     current["sources"].append(source)
             current["sources"] = sorted(current["sources"])
+
+            for source in current["sources"]:
+                if source not in item["sources"]:
+                    item["sources"].append(source)
+            item["sources"] = sorted(item["sources"])
 
             if current["vector_search_score"] is None:
                 current["vector_search_score"] = item["vector_search_score"]
@@ -215,7 +216,7 @@ def query_workspace_aurora(
             ),
         }
 
-    logger.info(ret_value)
+    print(ret_value)
 
     return ret_value
 

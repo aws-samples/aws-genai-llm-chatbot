@@ -10,7 +10,6 @@ import genai_core.workspaces
 import genai_core.utils.files
 from typing import Optional
 from datetime import datetime
-from aws_lambda_powertools import Logger
 
 PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
 WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
@@ -25,8 +24,6 @@ DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
 )
 
 WORKSPACE_OBJECT_TYPE = "workspace"
-
-logger = Logger()
 
 s3 = boto3.resource("s3")
 s3_client = boto3.client("s3")
@@ -108,7 +105,7 @@ def set_document_vectors(
         },
     )
 
-    logger.info(response)
+    print(response)
 
     if replace:
         response = documents_table.update_item(
@@ -129,7 +126,7 @@ def set_document_vectors(
             },
         )
 
-    logger.info(response)
+    print(response)
 
     return response
 
@@ -146,7 +143,7 @@ def set_sub_documents(workspace_id: str, document_id: str, sub_documents: int):
         },
     )
 
-    logger.info(response)
+    print(response)
 
     return response
 
@@ -282,7 +279,7 @@ def create_document(
         }
 
         response = documents_table.put_item(Item=document)
-        logger.info(response)
+        print(response)
 
     size_diff = size_in_bytes - current_size_in_bytes
     response = workspaces_table.update_item(
@@ -297,7 +294,7 @@ def create_document(
         ReturnValues="UPDATED_NEW",
     )
 
-    logger.info(response)
+    print(response)
 
     _upload_document_content(
         workspace_id,
@@ -379,20 +376,22 @@ def _process_document(
     document_type = document["document_type"]
 
     if document_type == "text":
+        object_key = f"{workspace_id}/{document_id}/content.txt"
         response = sfn_client.start_execution(
             stateMachineArn=FILE_IMPORT_WORKFLOW_ARN,
             input=json.dumps(
                 {
-                    "convert_to_text": False,
                     "workspace_id": workspace_id,
                     "document_id": document_id,
+                    "input_bucket_name": PROCESSING_BUCKET_NAME,
+                    "input_object_key": object_key,
                     "processing_bucket_name": PROCESSING_BUCKET_NAME,
-                    "processing_object_key": f"{workspace_id}/{document_id}/content.txt",
+                    "processing_object_key": object_key,
                 }
             ),
         )
 
-        logger.info(response)
+        print(response)
     elif document_type == "qna":
         chunk_complements = None
         if content_complement is not None:
@@ -423,7 +422,7 @@ def _process_document(
                     set_status(workspace_id, document_id, "error")
                     raise genai_core.types.CommonError("No urls found in sitemap")
             except Exception as e:
-                logger.error(e)
+                print(e)
                 set_status(workspace_id, document_id, "error")
                 raise genai_core.types.CommonError("Error extracting urls from sitemap")
 
@@ -444,7 +443,7 @@ def _process_document(
             ),
         )
 
-        logger.info(response)
+        print(response)
 
 
 def _upload_document_content(

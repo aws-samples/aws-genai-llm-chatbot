@@ -8,9 +8,7 @@ import genai_core.documents
 from typing import List
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-from aws_lambda_powertools import Logger
 
-logger = Logger()
 
 PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
 s3 = boto3.resource("s3")
@@ -39,12 +37,12 @@ def crawl_urls(
 
         document_sub_id = str(uuid.uuid4())
         processed_urls.add(current_url)
-        logger.info(f"Processing url {document_sub_id}: {current_url}")
+        print(f"Processing url {document_sub_id}: {current_url}")
 
         try:
             content, local_links, _ = parse_url(current_url)
         except:
-            logger.error(f"Failed to parse url: {current_url}")
+            print(f"Failed to parse url: {current_url}")
             continue
 
         _store_content_on_s3(

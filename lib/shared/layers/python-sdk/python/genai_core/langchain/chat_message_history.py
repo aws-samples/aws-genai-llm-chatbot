@@ -14,7 +14,6 @@ from langchain.schema.messages import (
     messages_to_dict,
 )
 
-logger = logging.getLogger(__name__)
 client = boto3.resource("dynamodb")
 
 
@@ -39,9 +38,9 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             )
         except ClientError as error:
             if error.response["Error"]["Code"] == "ResourceNotFoundException":
-                logger.warning("No record found with session id: %s", self.session_id)
+                print("No record found with session id: %s", self.session_id)
             else:
-                logger.error(error)
+                print(error)
 
         if response and "Item" in response:
             items = response["Item"]["History"]
@@ -67,7 +66,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 }
             )
         except ClientError as err:
-            logger.error(err)
+            print(err)
 
     def add_metadata(self, metadata: dict) -> None:
         """Add additional metadata to the last message"""
@@ -89,7 +88,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             )
 
         except Exception as err:
-            logger.error(err)
+            print(err)
 
     def clear(self) -> None:
         """Clear session memory from DynamoDB"""
@@ -98,4 +97,4 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 Key={"SessionId": self.session_id, "UserId": self.user_id}
             )
         except ClientError as err:
-            logger.error(err)
+            print(err)

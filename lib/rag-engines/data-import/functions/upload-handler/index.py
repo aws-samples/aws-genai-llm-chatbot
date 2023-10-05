@@ -94,48 +94,21 @@ def process_record(record):
         )
     else:
         processing_object_key = f"{workspace_id}/{document_id}/content.txt"
-        extension = os.path.splitext(file_name)[-1].lower()
+        response = sfn_client.start_execution(
+            stateMachineArn=FILE_IMPORT_WORKFLOW_ARN,
+            input=json.dumps(
+                {
+                    "workspace_id": workspace_id,
+                    "document_id": document_id,
+                    "input_bucket_name": bucket_name,
+                    "input_object_key": object_key,
+                    "processing_bucket_name": PROCESSING_BUCKET_NAME,
+                    "processing_object_key": processing_object_key,
+                }
+            ),
+        )
 
-        if extension == ".txt":
-            s3.copy_object(
-                CopySource={"Bucket": bucket_name, "Key": object_key},
-                Bucket=PROCESSING_BUCKET_NAME,
-                Key=processing_object_key,
-            )
-
-            response = sfn_client.start_execution(
-                stateMachineArn=FILE_IMPORT_WORKFLOW_ARN,
-                input=json.dumps(
-                    {
-                        "convert_to_text": False,
-                        "workspace_id": workspace_id,
-                        "document_id": document_id,
-                        "input_bucket_name": bucket_name,
-                        "input_object_key": object_key,
-                        "processing_bucket_name": PROCESSING_BUCKET_NAME,
-                        "processing_object_key": processing_object_key,
-                    }
-                ),
-            )
-
-            logger.info(response)
-        else:
-            response = sfn_client.start_execution(
-                stateMachineArn=FILE_IMPORT_WORKFLOW_ARN,
-                input=json.dumps(
-                    {
-                        "convert_to_text": True,
-                        "workspace_id": workspace_id,
-                        "document_id": document_id,
-                        "input_bucket_name": bucket_name,
-                        "input_object_key": object_key,
-                        "processing_bucket_name": PROCESSING_BUCKET_NAME,
-                        "processing_object_key": processing_object_key,
-                    }
-                ),
-            )
-
-            logger.info(response)
+        logger.info(response)
 
 
 def get_records_from_sqs_record(record):

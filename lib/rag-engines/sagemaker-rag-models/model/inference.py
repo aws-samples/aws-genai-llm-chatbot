@@ -105,37 +105,38 @@ def predict_fn(input_object, config):
             else:
                 current_input = "query: " + current_input
 
-        encoded_input = current_tokenizer(
-            current_input,
-            padding=True,
-            truncation=True,
-            return_tensors="pt",
-        )
+        with torch.inference_mode():
+            encoded_input = current_tokenizer(
+                current_input,
+                padding=True,
+                truncation=True,
+                return_tensors="pt",
+            )
 
-        encoded_input = encoded_input.to(device)
-
-        with torch.no_grad():
+            encoded_input = encoded_input.to(device)
             model_output = current_model(**encoded_input)
 
-        input_embeddings = mean_pooling(model_output, encoded_input["attention_mask"])
+            input_embeddings = mean_pooling(
+                model_output, encoded_input["attention_mask"]
+            )
 
-        input_embeddings = F.normalize(input_embeddings, p=2, dim=1)
-        response = input_embeddings.cpu().numpy()
-        ret_value = response.tolist()
+            input_embeddings = F.normalize(input_embeddings, p=2, dim=1)
+            response = input_embeddings.cpu().numpy()
+            ret_value = response.tolist()
 
-        return ret_value
+            return ret_value
     elif input_object["type"] == "cross-encoder":
         current_input = input_object["input"]
         passages = input_object["passages"]
         data = [[current_input, passage] for passage in passages]
 
-        features = current_tokenizer(
-            data, padding=True, truncation=True, return_tensors="pt"
-        )
+        with torch.inference_mode():
+            features = current_tokenizer(
+                data, padding=True, truncation=True, return_tensors="pt"
+            )
 
-        features = features.to(device)
+            features = features.to(device)
 
-        with torch.no_grad():
             scores = current_model(**features).logits.cpu().numpy()
             ret_value = list(
                 map(

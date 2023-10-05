@@ -31,8 +31,7 @@ cors_config = CORSConfig(allow_origin="*", max_age=0)
 app = APIGatewayRestResolver(
     cors=cors_config,
     strip_prefixes=["/v1"],
-    serializer=lambda obj: json.dumps(
-        obj, cls=genai_core.utils.json.CustomEncoder),
+    serializer=lambda obj: json.dumps(obj, cls=genai_core.utils.json.CustomEncoder),
 )
 
 app.include_router(health_router)
