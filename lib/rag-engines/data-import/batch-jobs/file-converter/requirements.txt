@@ -1,2 +1,2 @@
 boto3==1.28.50
-langchain==0.0.295
+langchain==0.0.308
