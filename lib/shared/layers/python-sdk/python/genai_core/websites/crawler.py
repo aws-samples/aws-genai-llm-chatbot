@@ -59,7 +59,9 @@ def crawl_urls(
             current_url,
             content,
         )
+
         chunks = genai_core.chunks.split_content(workspace, content)
+
         genai_core.chunks.add_chunks(
             replace=False,
             workspace=workspace,

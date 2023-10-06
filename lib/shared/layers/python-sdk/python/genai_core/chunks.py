@@ -44,7 +44,8 @@ def add_chunks(
     )
     chunk_ids = [uuid.uuid4() for _ in chunks]
 
-    store_chunks_on_s3(workspace_id, document_id, document_sub_id, chunk_ids, chunks)
+    store_chunks_on_s3(workspace_id, document_id,
+                       document_sub_id, chunk_ids, chunks)
 
     if engine == "aurora":
         result = genai_core.aurora.chunks.add_chunks_aurora(
@@ -96,6 +97,7 @@ def split_content(workspace: dict, content: str):
         )
 
         text_data = text_splitter.split_text(content)
+        text_data = [text.replace("\x00", "\uFFFD") for text in text_data]
 
         return text_data
 
