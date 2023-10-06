@@ -102,7 +102,9 @@ export class DocumentsClient extends ApiClientBase {
   async addWebsiteDocument(
     workspaceId: string,
     sitemap: boolean,
-    address: string
+    address: string,
+    followLinks: boolean,
+    limit: number
   ): Promise<ApiResult<AddDocumentResult>> {
     try {
       const headers = await this.getHeaders();
@@ -111,7 +113,7 @@ export class DocumentsClient extends ApiClientBase {
         {
           method: "POST",
           headers,
-          body: JSON.stringify({ sitemap, address }),
+          body: JSON.stringify({ sitemap, address, followLinks, limit }),
         }
       );
 

@@ -170,7 +170,8 @@ def get_document_content(workspace_id: str, document_id: str):
     if genai_core.utils.files.file_exists(
         PROCESSING_BUCKET_NAME, content_complement_key
     ):
-        response = s3.Object(PROCESSING_BUCKET_NAME, content_complement_key).get()
+        response = s3.Object(PROCESSING_BUCKET_NAME,
+                             content_complement_key).get()
         content_complement = response["Body"].read().decode("utf-8")
 
     return {"content": content, "content_complement": content_complement}
@@ -204,6 +205,7 @@ def create_document(
     sub_documents: int = 0,
     content: Optional[str] = None,
     content_complement: Optional[str] = None,
+    **kwargs,
 ):
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     workspace = genai_core.workspaces.get_workspace(workspace_id)
@@ -311,7 +313,7 @@ def create_document(
         )
     else:
         _process_document(
-            workspace, document, content=content, content_complement=content_complement
+            workspace, document, content=content, content_complement=content_complement, **kwargs
         )
 
     return {
@@ -350,7 +352,8 @@ def _process_document_kendra(
             metadata["Title"] = title
 
         s3_client.copy_object(
-            CopySource={"Bucket": PROCESSING_BUCKET_NAME, "Key": processing_object_key},
+            CopySource={"Bucket": PROCESSING_BUCKET_NAME,
+                        "Key": processing_object_key},
             Bucket=DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME,
             Key=kendra_object_key,
         )
@@ -370,6 +373,7 @@ def _process_document(
     document: dict,
     content: Optional[str] = None,
     content_complement: Optional[str] = None,
+    **kwargs,
 ):
     workspace_id = workspace["workspace_id"]
     document_id = document["document_id"]
@@ -411,36 +415,61 @@ def _process_document(
         document_sub_type = document["document_sub_type"]
         path = document["path"]
         urls_to_crawl = [path]
-        follow_links = True
+
+        crawler_properties = kwargs["crawler_properties"]
+        follow_links = crawler_properties["follow_links"]
+        limit = crawler_properties["limit"]
+
         if document_sub_type == "sitemap":
             follow_links = False
 
             try:
-                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(path)
+                urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(
+                    path)
 
                 if len(urls_to_crawl) == 0:
                     set_status(workspace_id, document_id, "error")
-                    raise genai_core.types.CommonError("No urls found in sitemap")
+                    raise genai_core.types.CommonError(
+                        "No urls found in sitemap")
             except Exception as e:
                 print(e)
                 set_status(workspace_id, document_id, "error")
-                raise genai_core.types.CommonError("Error extracting urls from sitemap")
+                raise genai_core.types.CommonError(
+                    "Error extracting urls from sitemap")
+
+        iteration = 1
+        crawler_job_id = str(uuid.uuid4())
+        iteration_object_key = f"{workspace_id}/{document_id}/crawler/{crawler_job_id}/{iteration}.json"
+        priority_queue = [{"url": url, "priority": 1}
+                          for url in set(urls_to_crawl)]
+        s3_client.put_object(
+            Body=json.dumps({
+                "iteration": iteration,
+                "crawler_job_id": crawler_job_id,
+                "workspace_id": workspace_id,
+                "document_id": document_id,
+                "workspace": workspace,
+                "document": document,
+                "priority_queue": priority_queue,
+                "processed_urls": [],
+                "follow_links": follow_links,
+                "limit": limit,
+                "done": False,
+            }, cls=genai_core.utils.json.CustomEncoder),
+            Bucket=PROCESSING_BUCKET_NAME,
+            Key=iteration_object_key,
+            ContentType="application/json",
+        )
 
         response = sfn_client.start_execution(
             stateMachineArn=WEBSITE_CRAWLING_WORKFLOW_ARN,
-            input=json.dumps(
-                {
-                    "workspace_id": workspace_id,
-                    "document_id": document_id,
-                    "workspace": workspace,
-                    "document": document,
-                    "limit": 100,
-                    "follow_links": follow_links,
-                    "urls_to_crawl": urls_to_crawl,
-                    "processed_urls": [],
-                },
-                cls=genai_core.utils.json.CustomEncoder,
-            ),
+            input=json.dumps({
+                "workspace_id": workspace_id,
+                "document_id": document_id,
+                "bucket_name": PROCESSING_BUCKET_NAME,
+                "object_key": iteration_object_key,
+                "done": False,
+            }, cls=genai_core.utils.json.CustomEncoder),
         )
 
         print(response)

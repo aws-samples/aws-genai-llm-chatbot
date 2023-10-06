@@ -28,6 +28,8 @@ class QnADocumentRequest(BaseModel):
 class WebsiteDocumentRequest(BaseModel):
     sitemap: bool
     address: str
+    followLinks: bool
+    limit: int
 
 
 allowed_extensions = set(
@@ -65,7 +67,8 @@ def file_upload(workspace_id: str):
     if extension not in allowed_extensions:
         raise genai_core.types.CommonError("Invalid file extension")
 
-    result = genai_core.upload.generate_presigned_post(workspace_id, request.fileName)
+    result = genai_core.upload.generate_presigned_post(
+        workspace_id, request.fileName)
 
     return {"ok": True, "data": result}
 
@@ -134,12 +137,17 @@ def add_document(workspace_id: str, document_type: str):
         request = WebsiteDocumentRequest(**data)
         request.address = request.address.strip()[:10000]
         document_sub_type = "sitemap" if request.sitemap else None
+        request.limit = min(max(request.limit, 1), 1000)
 
         result = genai_core.documents.create_document(
             workspace_id=workspace_id,
             document_type=document_type,
             document_sub_type=document_sub_type,
             path=request.address,
+            crawler_properties={
+                "follow_links": request.followLinks,
+                "limit": request.limit,
+            }
         )
 
         return {

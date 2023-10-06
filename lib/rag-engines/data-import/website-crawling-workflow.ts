@@ -210,17 +210,21 @@ export class WebsiteCrawlingWorkflow extends Construct {
       resultPath: sfn.JsonPath.DISCARD,
     }).next(new sfn.Succeed(this, "Success"));
 
-    const workflow = setProcessing
-      .next(
-        new tasks.LambdaInvoke(this, "WebsiteParser", {
-          lambdaFunction: websiteParserFunction,
-          resultPath: "$.parsingResult",
-        }).addCatch(handleError, {
-          errors: ["States.ALL"],
-          resultPath: "$.parsingResult",
-        })
-      )
-      .next(setProcessed);
+    const checkDoneCondition = new sfn.Choice(this, "Done?");
+    const parserStep = new tasks.LambdaInvoke(this, "WebsiteParser", {
+      lambdaFunction: websiteParserFunction,
+      outputPath: "$.Payload",
+    })
+      .addCatch(handleError, {
+        errors: ["States.ALL"],
+        resultPath: "$.parsingResult",
+      })
+      .next(checkDoneCondition);
+
+    const workflow = setProcessing.next(checkDoneCondition);
+    checkDoneCondition
+      .when(sfn.Condition.booleanEquals("$.done", false), parserStep)
+      .otherwise(setProcessed);
 
     const stateMachine = new sfn.StateMachine(this, "WebsiteCrawling", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),

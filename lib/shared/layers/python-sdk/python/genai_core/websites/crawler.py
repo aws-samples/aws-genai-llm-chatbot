@@ -17,23 +17,30 @@ s3 = boto3.resource("s3")
 def crawl_urls(
     workspace: dict,
     document: dict,
-    urls_to_crawl: List[str],
-    limit: int,
+    priority_queue: List[dict],
+    processed_urls: List[str],
     follow_links: bool,
+    limit: int,
 ):
-    priority_queue = [{"url": url, "priority": 1} for url in set(urls_to_crawl)]
-    processed_urls = set({})
+    workspace_id = workspace["workspace_id"]
+    document_id = document["document_id"]
+    processed_urls = set(processed_urls)
 
-    for _ in range(limit):
+    current_limit = min(limit, 20)
+    idx = 0
+    while idx < current_limit:
         if len(priority_queue) == 0:
             break
 
-        priority_queue = sorted(priority_queue, key=lambda val: val["priority"])
+        priority_queue = sorted(
+            priority_queue, key=lambda val: val["priority"])
         current = priority_queue.pop(0)
         current_url = current["url"]
         current_priority = current["priority"]
         if current_url in processed_urls:
             continue
+
+        idx += 1
 
         document_sub_id = str(uuid.uuid4())
         processed_urls.add(current_url)
@@ -73,6 +80,19 @@ def crawl_urls(
     genai_core.documents.set_sub_documents(
         workspace["workspace_id"], document["document_id"], sub_documents
     )
+
+    limit = max(limit - idx, 0)
+    return {
+        "workspace_id": workspace_id,
+        "document_id": document_id,
+        "workspace": workspace,
+        "document": document,
+        "priority_queue": priority_queue,
+        "processed_urls": list(processed_urls),
+        "follow_links": follow_links,
+        "limit": limit,
+        "done": len(priority_queue) == 0 or limit == 0,
+    }
 
 
 def parse_url(url: str):

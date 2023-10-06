@@ -8,6 +8,7 @@ import {
   Input,
   SegmentedControl,
   SpaceBetween,
+  Toggle,
 } from "@cloudscape-design/components";
 import { AddDataData } from "./types";
 import { useForm } from "../../../common/hooks/use-form";
@@ -30,6 +31,8 @@ interface CrawlWebisteData {
   urlType: "website" | "sitemap" | string;
   websiteUrl: string;
   sitemapUrl: string;
+  followLinks: boolean;
+  limit: number;
 }
 
 export default function CrawlWebsite(props: CrawlWebsiteProps) {
@@ -44,6 +47,8 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
         urlType: "website",
         websiteUrl: "",
         sitemapUrl: "",
+        followLinks: true,
+        limit: 250,
       };
     },
     validate: (form) => {
@@ -63,6 +68,10 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
         } else if (Utils.isValidURL(form.sitemapUrl) === false) {
           errors.sitemapUrl = "Sitemap address is not valid.";
         }
+      }
+
+      if (form.limit < 1 || form.limit > 500) {
+        errors.limit = "Page limit should be between 1 and 1000";
       }
 
       return errors;
@@ -85,7 +94,9 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
     const result = await apiClient.documents.addWebsiteDocument(
       props.data.workspace.value,
       isSitemap,
-      isSitemap ? data.sitemapUrl : data.websiteUrl
+      isSitemap ? data.sitemapUrl : data.websiteUrl,
+      data.followLinks,
+      data.limit
     );
 
     if (ResultValue.ok(result)) {
@@ -179,6 +190,35 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
                 />
               </FormField>
             )}
+            <FormField
+              label="Follow Links"
+              description="Follow links on the website to crawl more pages"
+              errorText={errors.followLinks}
+            >
+              <Toggle
+                disabled={props.submitting}
+                checked={data.followLinks}
+                onChange={({ detail: { checked } }) =>
+                  onChange({ followLinks: checked })
+                }
+              >
+                Follow
+              </Toggle>
+            </FormField>
+            <FormField
+              label="Page Limit"
+              errorText={errors.limit}
+              description="Maximum number of pages to crawl"
+            >
+              <Input
+                type="number"
+                disabled={props.submitting}
+                value={data.limit.toString()}
+                onChange={({ detail: { value } }) =>
+                  onChange({ limit: parseInt(value) })
+                }
+              />
+            </FormField>
           </SpaceBetween>
         </Container>
         {flashbarItem !== null && <Flashbar items={[flashbarItem]} />}
