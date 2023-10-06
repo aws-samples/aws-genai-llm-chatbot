@@ -2,6 +2,7 @@ import os
 import json
 import uuid
 import boto3
+import genai_core.embeddings
 from datetime import datetime
 
 dynamodb = boto3.resource("dynamodb")
@@ -103,6 +104,13 @@ def create_workspace_aurora(
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
+    embeddings_model = genai_core.embeddings.get_embeddings_model(
+        embeddings_model_provider, embeddings_model_name)
+    if not embeddings_model:
+        raise genai_core.types.CommonError("Invalid embeddings model")
+    # Verify that the embeddings model
+    genai_core.embeddings.generate_embeddings(embeddings_model, ["test"])
+
     item = {
         "workspace_id": workspace_id,
         "object_type": WORKSPACE_OBJECT_TYPE,
@@ -163,6 +171,13 @@ def create_workspace_open_search(
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    embeddings_model = genai_core.embeddings.get_embeddings_model(
+        embeddings_model_provider, embeddings_model_name)
+    if not embeddings_model:
+        raise genai_core.types.CommonError("Invalid embeddings model")
+    # Verify that the embeddings model
+    genai_core.embeddings.generate_embeddings(embeddings_model, ["test"])
 
     item = {
         "workspace_id": workspace_id,
