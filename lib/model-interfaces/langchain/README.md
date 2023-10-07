@@ -64,4 +64,4 @@ Ensure the registry regex
 registry.register(r"^openai*", GPTAdapter)
 ```
 
-is correct so that [your adapter is picked up](./functions/request-handler/index.py#L177) correctly from the model ID sent from the UI
+is correct so that [your adapter is picked up](./functions/request-handler/index.py#L74) correctly from the model ID sent from the UI
