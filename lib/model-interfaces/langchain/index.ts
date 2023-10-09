@@ -148,14 +148,23 @@ export class LangChainInterface extends Construct {
       }
 
       for (const item of props.config.rag.engines.kendra.external || []) {
-        if (!item.roleArn) continue;
-
-        requestHandler.addToRolePolicy(
-          new iam.PolicyStatement({
-            actions: ["sts:AssumeRole"],
-            resources: [item.roleArn],
-          })
-        );
+        if (item.roleArn) {
+          requestHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["sts:AssumeRole"],
+              resources: [item.roleArn],
+            })
+          );
+        } else {
+          requestHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["kendra:Retrieve", "kendra:Query"],
+              resources: [
+                `arn:aws:kendra:${item.region}:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
+              ],
+            })
+          );
+        }
       }
     }
 
