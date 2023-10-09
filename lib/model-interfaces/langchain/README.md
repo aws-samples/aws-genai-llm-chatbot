@@ -58,7 +58,10 @@ registry.register(r"^openai*", GPTAdapter)
    - Example model adapter [__init__.py](./functions/request-handler/adapters/openai/gpt.py)
    - Adapters [__init__.py](./functions/request-handler/adapters/__init__.py)
 
+Ensure the registry regex
 
-3. Update the [models.py](./functions/request-handler/models.py) in order to return your model ID(s). 
+```
+registry.register(r"^openai*", GPTAdapter)
+```
 
-These models IDs must match the above regex so [your adapter is picked up](./functions/request-handler/index.py#L177) with your new model ID(s)
+is correct so that [your adapter is picked up](./functions/request-handler/index.py#L74) correctly from the model ID sent from the UI
