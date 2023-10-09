@@ -178,14 +178,23 @@ export class RestApi extends Construct {
       }
 
       for (const item of props.config.rag.engines.kendra.external || []) {
-        if (!item.roleArn) continue;
-
-        apiHandler.addToRolePolicy(
-          new iam.PolicyStatement({
-            actions: ["sts:AssumeRole"],
-            resources: [item.roleArn],
-          })
-        );
+        if (item.roleArn) {
+          apiHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["sts:AssumeRole"],
+              resources: [item.roleArn],
+            })
+          );
+        } else {
+          apiHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["kendra:Retrieve", "kendra:Query"],
+              resources: [
+                `arn:aws:kendra:${item.region}:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
+              ],
+            })
+          );
+        }
       }
     }
 
