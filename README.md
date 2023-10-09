@@ -259,6 +259,13 @@ You can remove the stacks and all the associated resources created in your AWS a
 npx cdk destroy
 ```
 
+# Architecture
+This repository comes with several reusable CDK constructs. Giving you freedom to decide what the deploy and what not. 
+
+Here's an overview: 
+
+![sample](assets/architecture.png "Architecture Diagram")
+
 # Authors
 - [Bigad Soleiman](https://www.linkedin.com/in/bigadsoleiman/)
 - [Sergey Pugachev](https://www.linkedin.com/in/spugachev/)
