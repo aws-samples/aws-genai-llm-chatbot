@@ -106,7 +106,8 @@ def create_workspace_aurora(
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     embeddings_model = genai_core.embeddings.get_embeddings_model(
-        embeddings_model_provider, embeddings_model_name)
+        embeddings_model_provider, embeddings_model_name
+    )
     if not embeddings_model:
         raise genai_core.types.CommonError("Invalid embeddings model")
     # Verify that the embeddings model
@@ -174,7 +175,8 @@ def create_workspace_open_search(
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     embeddings_model = genai_core.embeddings.get_embeddings_model(
-        embeddings_model_provider, embeddings_model_name)
+        embeddings_model_provider, embeddings_model_name
+    )
     if not embeddings_model:
         raise genai_core.types.CommonError("Invalid embeddings model")
     # Verify that the embeddings model
@@ -276,8 +278,8 @@ def delete_workspace(workspace_id: str):
     if not item:
         raise genai_core.types.CommonError("Workspace not found")
 
-    if item["status"] != "ready":
-        raise genai_core.types.CommonError("Workspace not ready")
+    if item["status"] != "ready" and item["status"] != "error":
+        raise genai_core.types.CommonError("Workspace not ready for deletion")
 
     response = sfn_client.start_execution(
         stateMachineArn=DELETE_WORKSPACE_WORKFLOW_ARN,
