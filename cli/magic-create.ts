@@ -200,7 +200,7 @@ async function processCreateOptions(options: any): Promise<void> {
   const answers: any = await enquirer.prompt(questions);
   const kendraExternal = [];
   let newKendra = answers.enableRag && answers.kendra;
-  const existingKendraIndices = Array.from(options.kendraExternal);
+  const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
     let existingIndex: any = existingKendraIndices.pop();
     console.log(
