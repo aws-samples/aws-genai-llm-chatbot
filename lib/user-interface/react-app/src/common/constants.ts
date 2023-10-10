@@ -46,6 +46,7 @@ export abstract class Labels {
     created: "success",
     processing: "in-progress",
     processed: "success",
+    deleting: "in-progress",
     error: "error",
   };
 
@@ -56,6 +57,7 @@ export abstract class Labels {
     created: "Created",
     processing: "Processing",
     processed: "Processed",
+    deleting: "Deleting",
     error: "Error",
   };
 

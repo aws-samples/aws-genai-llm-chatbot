@@ -30,6 +30,22 @@ export class WorkspacesClient extends ApiClientBase {
     }
   }
 
+  async deleteWorkspace(
+    workspaceId: string
+  ): Promise<ApiResult<WorkspaceItem | null>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(this.getApiUrl(`/workspaces/${workspaceId}`), {
+        headers,
+        method: "DELETE",
+      });
+
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
   async createAuroraWorkspace(params: {
     name: string;
     embeddingsModelProvider: string;
