@@ -21,6 +21,7 @@ CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN = os.environ.get(
 CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN"
 )
+DELETE_WORKSPACE_WORKFLOW_ARN = os.environ.get("DELETE_WORKSPACE_WORKFLOW_ARN")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -263,3 +264,28 @@ def create_workspace_kendra(workspace_name: str, kendra_index: dict):
     return {
         "id": workspace_id,
     }
+
+
+def delete_workspace(workspace_id: str):
+    response = table.get_item(
+        Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}
+    )
+
+    item = response.get("Item")
+
+    if not item:
+        raise genai_core.types.CommonError("Workspace not found")
+
+    if item["status"] != "ready":
+        raise genai_core.types.CommonError("Workspace not ready")
+
+    response = sfn_client.start_execution(
+        stateMachineArn=DELETE_WORKSPACE_WORKFLOW_ARN,
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+            }
+        ),
+    )
+
+    print(response)
