@@ -29,7 +29,8 @@ export function WorkspacesPageHeader({
   const isOnlyOneSelected = props.selectedWorkspaces.length === 1;
   const canDeleteWorkspace =
     props.selectedWorkspaces.length === 1 &&
-    props.selectedWorkspaces[0].status == "ready";
+    (props.selectedWorkspaces[0].status == "ready" ||
+      props.selectedWorkspaces[0].status == "error");
 
   const onRefreshClick = async () => {
     await props.getWorkspaces();
@@ -58,7 +59,7 @@ export function WorkspacesPageHeader({
     if (ResultValue.ok(result)) {
       setTimeout(async () => {
         await props.getWorkspaces();
-      }, 1000);
+      }, 2500);
     }
   };
 

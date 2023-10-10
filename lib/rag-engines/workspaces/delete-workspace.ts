@@ -3,21 +3,24 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
 import { Shared } from "../../shared";
-import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { OpenSearchVector } from "../opensearch-vector";
 import { KendraRetrieval } from "../kendra-retrieval";
 import { AuroraPgVector } from "../aurora-pgvector";
+import { DataImport } from "../data-import";
+import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export interface DeleteWorkspaceProps {
   readonly config: SystemConfig;
   readonly shared: Shared;
+  readonly dataImport: DataImport;
   readonly ragDynamoDBTables: RagDynamoDBTables;
   readonly auroraPgVector?: AuroraPgVector;
-  readonly openSearch?: OpenSearchVector;
+  readonly openSearchVector?: OpenSearchVector;
   readonly kendraRetrieval?: KendraRetrieval;
 }
 
@@ -43,16 +46,26 @@ export class DeleteWorkspace extends Construct {
           props.shared.commonLayer.layer,
           props.shared.pythonSDKLayer,
         ],
-        timeout: cdk.Duration.minutes(5),
+        timeout: cdk.Duration.minutes(15),
         logRetention: logs.RetentionDays.ONE_WEEK,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
           AURORA_DB_SECRET_ID: props.auroraPgVector?.database.secret
             ?.secretArn as string,
+          UPLOAD_BUCKET_NAME: props.dataImport.uploadBucket.bucketName,
+          PROCESSING_BUCKET_NAME: props.dataImport.processingBucket.bucketName,
           WORKSPACES_TABLE_NAME:
             props.ragDynamoDBTables.workspacesTable.tableName,
           WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
             props.ragDynamoDBTables.workspacesByObjectTypeIndexName,
+          DOCUMENTS_TABLE_NAME:
+            props.ragDynamoDBTables?.documentsTable.tableName ?? "",
+          DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
+            props.ragDynamoDBTables?.documentsByCompountKeyIndexName ?? "",
+          DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
+            props.kendraRetrieval?.kendraS3DataSourceBucket?.bucketName ?? "",
+          OPEN_SEARCH_COLLECTION_ENDPOINT:
+            props.openSearchVector?.openSearchCollectionEndpoint ?? "",
         },
       }
     );
@@ -64,7 +77,37 @@ export class DeleteWorkspace extends Construct {
       );
     }
 
+    if (props.openSearchVector) {
+      deleteFunction.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: [
+            "aoss:APIAccessAll",
+            "aoss:DescribeIndex",
+            "aoss:DeleteIndex",
+          ],
+          resources: [props.openSearchVector.openSearchCollection.attrArn],
+        })
+      );
+
+      props.openSearchVector.addToAccessPolicy(
+        "delete-workspace",
+        [deleteFunction.role?.roleArn],
+        [
+          "aoss:DeleteIndex",
+          "aoss:DescribeIndex",
+          "aoss:ReadDocument",
+          "aoss:WriteDocument",
+        ]
+      );
+    }
+
+    props.dataImport.uploadBucket.grantReadWrite(deleteFunction);
+    props.dataImport.processingBucket.grantReadWrite(deleteFunction);
+    props.kendraRetrieval?.kendraS3DataSourceBucket?.grantReadWrite(
+      deleteFunction
+    );
     props.ragDynamoDBTables.workspacesTable.grantReadWriteData(deleteFunction);
+    props.ragDynamoDBTables.documentsTable.grantReadWriteData(deleteFunction);
 
     const handleError = new tasks.DynamoUpdateItem(this, "HandleError", {
       table: props.ragDynamoDBTables.workspacesTable,
