@@ -77,6 +77,14 @@ def workspace(workspace_id: str):
     return {"ok": True, "data": ret_value}
 
 
+@router.delete("/workspaces/<workspace_id>")
+@tracer.capture_method
+def workspace(workspace_id: str):
+    genai_core.workspaces.delete_workspace(workspace_id)
+
+    return {"ok": True}
+
+
 @router.put("/workspaces")
 @tracer.capture_method
 def create_workspace():
