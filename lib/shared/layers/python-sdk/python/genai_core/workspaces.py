@@ -21,6 +21,7 @@ CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN = os.environ.get(
 CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN"
 )
+DELETE_WORKSPACE_WORKFLOW_ARN = os.environ.get("DELETE_WORKSPACE_WORKFLOW_ARN")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -105,7 +106,8 @@ def create_workspace_aurora(
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     embeddings_model = genai_core.embeddings.get_embeddings_model(
-        embeddings_model_provider, embeddings_model_name)
+        embeddings_model_provider, embeddings_model_name
+    )
     if not embeddings_model:
         raise genai_core.types.CommonError("Invalid embeddings model")
     # Verify that the embeddings model
@@ -173,7 +175,8 @@ def create_workspace_open_search(
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     embeddings_model = genai_core.embeddings.get_embeddings_model(
-        embeddings_model_provider, embeddings_model_name)
+        embeddings_model_provider, embeddings_model_name
+    )
     if not embeddings_model:
         raise genai_core.types.CommonError("Invalid embeddings model")
     # Verify that the embeddings model
@@ -263,3 +266,28 @@ def create_workspace_kendra(workspace_name: str, kendra_index: dict):
     return {
         "id": workspace_id,
     }
+
+
+def delete_workspace(workspace_id: str):
+    response = table.get_item(
+        Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}
+    )
+
+    item = response.get("Item")
+
+    if not item:
+        raise genai_core.types.CommonError("Workspace not found")
+
+    if item["status"] != "ready" and item["status"] != "error":
+        raise genai_core.types.CommonError("Workspace not ready for deletion")
+
+    response = sfn_client.start_execution(
+        stateMachineArn=DELETE_WORKSPACE_WORKFLOW_ARN,
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+            }
+        ),
+    )
+
+    print(response)

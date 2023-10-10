@@ -19,7 +19,7 @@ def lambda_handler(event, context: LambdaContext):
     workspace_id = event["workspace_id"]
     document_id = event["document_id"]
     response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-    file_content = response['Body'].read().decode('utf-8')
+    file_content = response["Body"].read().decode("utf-8")
     data = json.loads(file_content)
 
     iteration = data["iteration"]
@@ -31,8 +31,7 @@ def lambda_handler(event, context: LambdaContext):
     follow_links = data["follow_links"]
     limit = data["limit"]
 
-    logger.info(
-        f"Processing document {document_id} in workspace {workspace_id}")
+    logger.info(f"Processing document {document_id} in workspace {workspace_id}")
     logger.info(f"Workspace: {workspace}")
     logger.info(f"Document: {document}")
     logger.info(f"Limit: {limit}")
@@ -55,7 +54,9 @@ def lambda_handler(event, context: LambdaContext):
     result["iteration"] = iteration
     result["crawler_job_id"] = crawler_job_id
 
-    iteration_object_key = f"{workspace_id}/{document_id}/crawler/{crawler_job_id}/{iteration}.json"
+    iteration_object_key = (
+        f"{workspace_id}/{document_id}/crawler/{crawler_job_id}/{iteration}.json"
+    )
     s3_client.put_object(
         Bucket=PROCESSING_BUCKET_NAME,
         Key=iteration_object_key,

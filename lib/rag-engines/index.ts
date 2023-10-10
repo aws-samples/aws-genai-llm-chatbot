@@ -7,6 +7,7 @@ import { DataImport } from "./data-import";
 import { RagDynamoDBTables } from "./rag-dynamodb-tables";
 import { OpenSearchVector } from "./opensearch-vector";
 import { KendraRetrieval } from "./kendra-retrieval";
+import { Workspaces } from "./workspaces";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
@@ -30,6 +31,7 @@ export class RagEngines extends Construct {
   public readonly sageMakerRagModelsEndpoint: sagemaker.CfnEndpoint;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
+  public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
 
   constructor(scope: Construct, id: string, props: RagEnginesProps) {
     super(scope, id);
@@ -86,6 +88,16 @@ export class RagEngines extends Construct {
       kendraRetrieval: kendraRetrieval ?? undefined,
     });
 
+    const workspaces = new Workspaces(this, "Workspaces", {
+      shared: props.shared,
+      config: props.config,
+      dataImport,
+      ragDynamoDBTables: tables,
+      auroraPgVector: auroraPgVector ?? undefined,
+      openSearchVector: openSearchVector ?? undefined,
+      kendraRetrieval: kendraRetrieval ?? undefined,
+    });
+
     this.auroraPgVector = auroraPgVector;
     this.openSearchVector = openSearchVector;
     this.kendraRetrieval = kendraRetrieval;
@@ -100,5 +112,6 @@ export class RagEngines extends Construct {
       tables.documentsByCompountKeyIndexName;
     this.fileImportWorkflow = dataImport.fileImportWorkflow;
     this.websiteCrawlingWorkflow = dataImport.websiteCrawlingWorkflow;
+    this.deleteWorkspaceWorkflow = workspaces.deleteWorkspaceWorkflow;
   }
 }
