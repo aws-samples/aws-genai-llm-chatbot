@@ -32,8 +32,7 @@ def crawl_urls(
         if len(priority_queue) == 0:
             break
 
-        priority_queue = sorted(
-            priority_queue, key=lambda val: val["priority"])
+        priority_queue = sorted(priority_queue, key=lambda val: val["priority"])
         current = priority_queue.pop(0)
         current_url = current["url"]
         current_priority = current["priority"]

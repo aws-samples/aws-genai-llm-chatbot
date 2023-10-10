@@ -91,9 +91,10 @@ export class RagEngines extends Construct {
     const workspaces = new Workspaces(this, "Workspaces", {
       shared: props.shared,
       config: props.config,
+      dataImport,
       ragDynamoDBTables: tables,
       auroraPgVector: auroraPgVector ?? undefined,
-      openSearch: openSearchVector ?? undefined,
+      openSearchVector: openSearchVector ?? undefined,
       kendraRetrieval: kendraRetrieval ?? undefined,
     });
 
