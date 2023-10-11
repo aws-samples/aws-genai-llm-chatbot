@@ -1,7 +1,10 @@
 import os
+import re
 import genai_core.types
 from typing import List
 from .client import get_kendra_client_for_index
+
+s3_pattern = re.compile(r"(s3-|s3\.)?(.*)\.amazonaws\.com")
 
 
 def query_workspace_kendra(
@@ -9,6 +12,8 @@ def query_workspace_kendra(
 ):
     kendra_index_id = workspace.get("kendra_index_id")
     kendra_index_external = workspace.get("kendra_index_external", True)
+    kendra_use_all_data = workspace.get("kendra_use_all_data", False)
+
     if not kendra_index_id:
         raise genai_core.types.CommonError(
             f"Could not find kendra index for workspace {workspace_id}"
@@ -17,7 +22,7 @@ def query_workspace_kendra(
     kendra = get_kendra_client_for_index(kendra_index_id)
     limit = max(1, min(100, limit))
 
-    if kendra_index_external:
+    if kendra_index_external or kendra_use_all_data:
         result = kendra.retrieve(
             IndexId=kendra_index_id, QueryText=query, PageSize=limit, PageNumber=1
         )
@@ -52,7 +57,12 @@ def _convert_records(source: str, workspace_id: str, records: List[dict]):
     converted_records = []
     for record in records:
         document_uri = record["DocumentURI"]
-        path = os.path.basename(document_uri)
+        is_s3 = s3_pattern.match(document_uri)
+        if is_s3:
+            path = os.path.basename(document_uri)
+        else:
+            path = document_uri
+
         title = record.get("DocumentTitle")
         content = record.get("Content")
 
@@ -61,6 +71,10 @@ def _convert_records(source: str, workspace_id: str, records: List[dict]):
         for attribute in document_attributes:
             if attribute["Key"] == "document_type":
                 document_type = attribute["Value"]["StringValue"]
+                break
+
+        if not document_type:
+            document_type = "file" if is_s3 else "website"
 
         converted = {
             "chunk_id": record.get("Id"),
