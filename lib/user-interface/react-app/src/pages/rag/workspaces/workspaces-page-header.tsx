@@ -66,7 +66,7 @@ export function WorkspacesPageHeader({
   return (
     <>
       <WorkspaceDeleteModal
-        visible={showDeleteModal}
+        visible={showDeleteModal && canDeleteWorkspace}
         onDiscard={() => setShowDeleteModal(false)}
         onDelete={onDeleteWorksapce}
         workspace={props.selectedWorkspaces[0]}

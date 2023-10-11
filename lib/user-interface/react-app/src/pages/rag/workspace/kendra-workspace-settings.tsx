@@ -11,7 +11,7 @@ import {
 } from "@cloudscape-design/components";
 import { Labels } from "../../../common/constants";
 import { ResultValue, WorkspaceItem } from "../../../common/types";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { Utils } from "../../../common/utils";
@@ -24,29 +24,47 @@ export default function KendraWorkspaceSettings(
   props: KendraWorkspaceSettingsProps
 ) {
   const appContext = useContext(AppContext);
-  const [syncing, setSyncing] = useState(false);
-  const [showSyncSuccessMessage, setShowSyncSuccessMessage] = useState(false);
+  const [kendraIndexSyncing, setKendraIndexSyncing] = useState(false);
+  const [sendingRequest, setSendingRequest] = useState(false);
   const [globalError, setGlobalError] = useState("");
+
+  useEffect(() => {
+    if (!appContext) return;
+    const apiClient = new ApiClient(appContext);
+
+    const getStatus = async () => {
+      const result = await apiClient.kendra.kendraIsSyncing(props.workspace.id);
+
+      if (ResultValue.ok(result)) {
+        setKendraIndexSyncing(result.data === true);
+      }
+    };
+
+    const interval = setInterval(getStatus, 5000);
+    getStatus();
+
+    return () => clearInterval(interval);
+  });
 
   const onStartKendraDataSync = async () => {
     if (!appContext) return;
+    if (kendraIndexSyncing) return;
 
-    setSyncing(true);
-    setShowSyncSuccessMessage(false);
+    setSendingRequest(true);
     setGlobalError("");
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.ragEngines.startKendraDataSync(
+    const result = await apiClient.kendra.startKendraDataSync(
       props.workspace.id
     );
 
     if (ResultValue.ok(result)) {
-      setShowSyncSuccessMessage(true);
+      setKendraIndexSyncing(true);
     } else {
       setGlobalError(Utils.getErrorMessage(result));
     }
 
-    setSyncing(false);
+    setSendingRequest(false);
   };
 
   return (
@@ -57,7 +75,7 @@ export default function KendraWorkspaceSettings(
             <Button
               data-testid="create"
               variant="primary"
-              disabled={syncing}
+              disabled={sendingRequest || kendraIndexSyncing}
               onClick={onStartKendraDataSync}
             >
               Start Kendra Data Sync
@@ -78,6 +96,10 @@ export default function KendraWorkspaceSettings(
                 <div>{props.workspace.id}</div>
               </div>
               <div>
+                <Box variant="awsui-key-label">Engine</Box>
+                <div>{Labels.engineMap[props.workspace.engine]}</div>
+              </div>
+              <div>
                 <Box variant="awsui-key-label">Workspace Name</Box>
                 <div>{props.workspace.name}</div>
               </div>
@@ -93,10 +115,6 @@ export default function KendraWorkspaceSettings(
               </div>
             </SpaceBetween>
             <SpaceBetween size="l">
-              <div>
-                <Box variant="awsui-key-label">Engine</Box>
-                <div>{Labels.engineMap[props.workspace.engine]}</div>
-              </div>
               {typeof props.workspace.kendraIndexId !== "undefined" && (
                 <div>
                   <Box variant="awsui-key-label">Kendra Index Id</Box>
@@ -113,17 +131,26 @@ export default function KendraWorkspaceSettings(
                   </div>
                 </div>
               )}
+              {typeof props.workspace.kendraUseAllData !== "undefined" && (
+                <div>
+                  <Box variant="awsui-key-label">Use All Data</Box>
+                  <div>
+                    {props.workspace.kendraUseAllData === true ? "Yes" : "No"}
+                  </div>
+                </div>
+              )}
             </SpaceBetween>
           </ColumnLayout>
         </Container>
-        {showSyncSuccessMessage && (
+        {kendraIndexSyncing && (
           <Flashbar
             items={[
               {
-                type: "success",
-                dismissible: true,
-                content: <>Sync has been started. It can take some time.</>,
-                onDismiss: () => setShowSyncSuccessMessage(false),
+                type: "in-progress",
+                dismissible: false,
+                content: (
+                  <>Syncing. Please wait while the data is being updated.</>
+                ),
               },
             ]}
           />

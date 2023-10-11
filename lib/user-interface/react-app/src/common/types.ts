@@ -71,6 +71,7 @@ export interface WorkspaceItem {
   documents: number;
   kendraIndexId?: string;
   kendraIndexExternal?: boolean;
+  kendraUseAllData?: boolean;
   sizeInBytes: number;
   createdAt: string;
 }
@@ -195,6 +196,7 @@ export interface OpenSearchWorkspaceCreateInput {
 export interface KendraWorkspaceCreateInput {
   name: string;
   kendraIndex: SelectProps.Option | null;
+  useAllData: boolean;
 }
 
 export interface KendraIndexItem {

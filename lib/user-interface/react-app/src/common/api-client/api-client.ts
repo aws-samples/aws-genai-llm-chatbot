@@ -8,6 +8,7 @@ import { WorkspacesClient } from "./workspaces-client";
 import { SessionsClient } from "./sessions-client";
 import { SemanticSearchClient } from "./semantic-search-client";
 import { DocumentsClient } from "./documents-client";
+import { KendraClient } from "./kendra-client";
 
 export class ApiClient {
   private _healthClient: HealthClient | undefined;
@@ -19,6 +20,7 @@ export class ApiClient {
   private _sessionsClient: SessionsClient | undefined;
   private _semanticSearchClient: SemanticSearchClient | undefined;
   private _documentsClient: DocumentsClient | undefined;
+  private _kendraClient: KendraClient | undefined;
 
   public get health() {
     if (!this._healthClient) {
@@ -90,6 +92,14 @@ export class ApiClient {
     }
 
     return this._documentsClient;
+  }
+
+  public get kendra() {
+    if (!this._kendraClient) {
+      this._kendraClient = new KendraClient(this._appConfig);
+    }
+
+    return this._kendraClient;
   }
 
   constructor(protected _appConfig: AppConfig) {}
