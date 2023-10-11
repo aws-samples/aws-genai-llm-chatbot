@@ -13,6 +13,7 @@ const nameRegex = /^[\w+_-]+$/;
 const defaults: KendraWorkspaceCreateInput = {
   name: "",
   kendraIndex: null,
+  useAllData: false,
 };
 
 export default function CreateWorkspaceKendra() {
@@ -60,6 +61,7 @@ export default function CreateWorkspaceKendra() {
     const result = await apiClient.workspaces.createKendraWorkspace({
       name: data.name.trim(),
       kendraIndexId: data.kendraIndex?.value ?? "",
+      useAllData: data.useAllData,
     });
 
     if (ResultValue.ok(result)) {
