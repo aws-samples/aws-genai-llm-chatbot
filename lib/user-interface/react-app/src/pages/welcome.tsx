@@ -132,7 +132,7 @@ export default function Welcome() {
                 Full-fledged user interface
               </Header>
               <p>
-                The webcapp is hosted on{" "}
+                The web app is hosted on{" "}
                 <Link external href="https://aws.amazon.com/s3/">
                   Amazon S3
                 </Link>{" "}
