@@ -34,6 +34,10 @@ export class Authentication extends Construct {
       value: userPool.userPoolId,
     });
 
+    new cdk.CfnOutput(this, "UserPoolWebClientId", {
+      value: userPoolClient.userPoolClientId,
+    })
+
     new cdk.CfnOutput(this, 'UserPoolLink', {
       value: `https://${cdk.Stack.of(this).region}.console.aws.amazon.com/cognito/v2/idp/user-pools/${userPool.userPoolId}/users?region=${cdk.Stack.of(this).region}`,
     });

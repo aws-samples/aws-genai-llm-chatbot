@@ -188,7 +188,7 @@ export class UserInterface extends Construct {
     // ###################################################
     // Outputs
     // ###################################################
-    new cdk.CfnOutput(this, "UserInterfaceDomanName", {
+    new cdk.CfnOutput(this, "UserInterfaceDomainName", {
       value: `https://${distribution.distributionDomainName}`,
     });
   }
