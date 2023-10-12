@@ -251,6 +251,9 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 10. Login with the user created in .8; you will be asked to change the password.
 
+# Run user interface locally
+
+See instructions in the README file of the `lib/user-interface/react-app` folder.
 
 # Clean up
 You can remove the stacks and all the associated resources created in your AWS account by running the following command:
