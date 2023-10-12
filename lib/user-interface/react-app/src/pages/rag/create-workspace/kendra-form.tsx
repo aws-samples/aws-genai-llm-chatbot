@@ -13,6 +13,7 @@ import {
   Input,
   Select,
   SelectProps,
+  Toggle,
 } from "@cloudscape-design/components";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
@@ -35,7 +36,7 @@ export default function KendraForm(props: KendraFormProps) {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.ragEngines.getKendraIndexes();
+      const result = await apiClient.kendra.getKendraIndexes();
 
       if (ResultValue.ok(result)) {
         const data = result.data?.sort((a, b) => a.name.localeCompare(b.name));
@@ -54,6 +55,10 @@ export default function KendraForm(props: KendraFormProps) {
       description: item.id,
     };
   });
+
+  const externalSelected =
+    kendraIndexes.find((c) => c.id === props.data.kendraIndex?.value)
+      ?.external === true;
 
   return (
     <Container
@@ -83,6 +88,21 @@ export default function KendraForm(props: KendraFormProps) {
               props.onChange({ kendraIndex: selectedOption })
             }
           />
+        </FormField>
+        <FormField
+          label="Use all data in the Kendra index"
+          description="By default, only data uploaded to the Workspace is used. This approach allows us to isolate workspaces that utilize the same Kendra index. However, if desired, you can choose to use all the data in the index. This option is particularly useful when you have other Kendra data sources."
+          errorText={props.errors.index}
+        >
+          <Toggle
+            disabled={props.submitting || externalSelected}
+            checked={props.data.useAllData || externalSelected}
+            onChange={({ detail: { checked } }) =>
+              props.onChange({ useAllData: checked })
+            }
+          >
+            Use all data
+          </Toggle>
         </FormField>
       </SpaceBetween>
     </Container>

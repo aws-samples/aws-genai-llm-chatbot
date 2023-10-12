@@ -203,6 +203,10 @@ async function processCreateOptions(options: any): Promise<void> {
   const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
     let existingIndex: any = existingKendraIndices.pop();
+    console.log(
+      existingIndex?.region,
+      Object.values(SupportedRegion).indexOf(existingIndex?.region)
+    );
     const kendraQ = [
       {
         type: "input",

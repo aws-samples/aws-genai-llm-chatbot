@@ -38,22 +38,3 @@ def engines():
     ]
 
     return {"ok": True, "data": ret_value}
-
-
-@router.get("/rag/engines/kendra/indexes")
-@tracer.capture_method
-def kendra_indexes():
-    indexes = genai_core.kendra.get_kendra_indexes()
-
-    return {"ok": True, "data": indexes}
-
-
-@router.post("/rag/engines/kendra/data-sync")
-@tracer.capture_method
-def kendra_data_sync():
-    data: dict = router.current_event.json_body
-    request = KendraDataSynchRequest(**data)
-
-    genai_core.kendra.start_kendra_data_sync(workspace_id=request.workspaceId)
-
-    return {"ok": True, "data": True}

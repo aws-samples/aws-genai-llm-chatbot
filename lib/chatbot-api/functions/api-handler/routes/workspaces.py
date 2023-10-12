@@ -52,6 +52,7 @@ class CreateWorkspaceKendraRequest(BaseModel):
     kind: str
     name: str
     kendraIndexId: str
+    useAllData: bool
 
 
 @router.get("/workspaces")
@@ -271,11 +272,15 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
         raise genai_core.types.CommonError("Kendra index not found")
 
     return genai_core.workspaces.create_workspace_kendra(
-        workspace_name=workspace_name, kendra_index=kendra_index
+        workspace_name=workspace_name,
+        kendra_index=kendra_index,
+        use_all_data=request.useAllData,
     )
 
 
 def _convert_workspace(workspace: dict):
+    kendra_index_external = workspace.get("kendra_index_external")
+
     return {
         "id": workspace["workspace_id"],
         "name": workspace["name"],
@@ -297,7 +302,8 @@ def _convert_workspace(workspace: dict):
         "documents": workspace.get("documents"),
         "sizeInBytes": workspace.get("size_in_bytes"),
         "kendraIndexId": workspace.get("kendra_index_id"),
-        "kendraIndexExternal": workspace.get("kendra_index_external"),
+        "kendraIndexExternal": kendra_index_external,
+        "kendraUseAllData": workspace.get("kendra_use_all_data", kendra_index_external),
         "createdAt": workspace.get("created_at"),
         "updatedAt": workspace.get("updated_at"),
     }

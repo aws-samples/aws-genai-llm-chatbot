@@ -18,6 +18,9 @@ def query_workspace_open_search(
     vector_search_limit = 25
     keyword_search_limit = 25
 
+    vector_search_records = []
+    keyword_search_records = []
+
     selected_model = genai_core.embeddings.get_embeddings_model(
         embeddings_model_provider, embeddings_model_name
     )
@@ -42,7 +45,8 @@ def query_workspace_open_search(
     vector_search_records = vector_query(
         client, index_name, query_embeddings, vector_search_limit
     )
-    vector_search_records = _convert_records("vector_search", vector_search_records)
+    vector_search_records = _convert_records(
+        "vector_search", vector_search_records)
     items.extend(vector_search_records)
 
     if hybrid_search:
@@ -167,7 +171,10 @@ def vector_query(client, index_name: str, vector: List[float], size: int = 25):
 
     response = client.search(index=index_name, body=query, size=size)
 
-    return response["hits"]["hits"]
+    ret_value = response["hits"]["hits"]
+    ret_value = ret_value if ret_value is not None else []
+
+    return ret_value
 
 
 def keyword_query(client, index_name: str, text: str, size: int = 25):
@@ -175,4 +182,7 @@ def keyword_query(client, index_name: str, text: str, size: int = 25):
 
     response = client.search(index=index_name, body=query, size=size)
 
-    return response["hits"]["hits"]
+    ret_value = response["hits"]["hits"]
+    ret_value = ret_value if ret_value is not None else []
+
+    return ret_value
