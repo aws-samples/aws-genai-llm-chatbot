@@ -12,6 +12,10 @@ export function getConfig(): SystemConfig {
   // Default config
   return {
     prefix: "",
+    /*vpc: {
+      vpcId: "vpc-00000000000000000",
+      createVpcEndpoints: true,
+    },*/
     bedrock: {
       enabled: true,
       region: SupportedRegion.US_EAST_1,
