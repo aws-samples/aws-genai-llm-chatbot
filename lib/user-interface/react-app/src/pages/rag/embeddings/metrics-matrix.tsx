@@ -58,8 +58,8 @@ export function MetricsMatrix(props: {
                   {rowIndex + 1}
                 </td>
                 {row.map((col, colIndex) => {
-                  if (props.pinFirstInput && colIndex == 0 ||
-                    rowIndex > colIndex) return (<td></td>);
+                  if (props.pinFirstInput && colIndex == 0) return;
+                  if (!props.pinFirstInput && rowIndex > colIndex) return (<td></td>);
                   
                   let fgColor = "black";
                   const v = col.toFixed(3);
