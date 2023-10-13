@@ -1,10 +1,10 @@
 export abstract class MetricsHelper {
-  static normalized(vector: number[]): boolean {
+  static magnitude(vector: number[]): number {
     const magnitude = Math.sqrt(
       vector.reduce((sum, val) => sum + val * val, 0)
     );
 
-    return Math.abs(magnitude - 1) < 0.001;
+    return magnitude;
   }
 
   static cosineSimilarity(vecA: number[], vecB: number[]) {
@@ -58,7 +58,7 @@ export abstract class MetricsHelper {
   }
 
   static matrices(vectors: number[][]) {
-    const cosineSimularity = vectors.map((vecA) => {
+    const cosineSimilarity = vectors.map((vecA) => {
       return vectors.map((vecB) => {
         return this.cosineSimilarity(vecA, vecB);
       });
@@ -83,7 +83,7 @@ export abstract class MetricsHelper {
     });
 
     return {
-      cosineSimularity,
+      cosineSimilarity,
       cosineDistance,
       innerProduct,
       l2,
