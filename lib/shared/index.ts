@@ -17,7 +17,7 @@ export interface SharedProps {
 }
 
 export class Shared extends Construct {
-  readonly vpc: ec2.Vpc;
+  readonly vpc: ec2.IVpc;
   readonly defaultEnvironmentVariables: Record<string, string>;
   readonly configParameter: ssm.StringParameter;
   readonly pythonRuntime: lambda.Runtime = pythonRuntime;
@@ -38,52 +38,64 @@ export class Shared extends Construct {
       POWERTOOLS_SERVICE_NAME: "chatbot",
     };
 
-    const vpc = new ec2.Vpc(this, "VPC", {
-      natGateways: 1,
-      subnetConfiguration: [
-        {
-          name: "public",
-          subnetType: ec2.SubnetType.PUBLIC,
-        },
-        {
-          name: "private",
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        },
-        {
-          name: "isolated",
-          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-        },
-      ],
-    });
+    let vpc: ec2.IVpc;
+    if (!props.config.vpc?.vpcId) {
+      vpc = new ec2.Vpc(this, "VPC", {
+        natGateways: 1,
+        subnetConfiguration: [
+          {
+            name: "public",
+            subnetType: ec2.SubnetType.PUBLIC,
+          },
+          {
+            name: "private",
+            subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+          },
+          {
+            name: "isolated",
+            subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+          },
+        ],
+      });
+    } else {
+      vpc = ec2.Vpc.fromLookup(this, "VPC", {
+        vpcId: props.config.vpc.vpcId,
+      });
+    }
 
-    // Create a VPC endpoint for S3.
-    const s3GatewayEndpoint = vpc.addGatewayEndpoint("S3GatewayEndpoint", {
-      service: ec2.GatewayVpcEndpointAwsService.S3,
-    });
+    if (
+      typeof props.config.vpc?.createVpcEndpoints === "undefined" ||
+      props.config.vpc?.createVpcEndpoints === true
+    ) {
+      // Create a VPC endpoint for S3.
+      const s3GatewayEndpoint = vpc.addGatewayEndpoint("S3GatewayEndpoint", {
+        service: ec2.GatewayVpcEndpointAwsService.S3,
+      });
 
-    const s3vpcEndpoint = vpc.addInterfaceEndpoint("S3InterfaceEndpoint", {
-      service: ec2.InterfaceVpcEndpointAwsService.S3,
-      open: true,
-    });
+      const s3vpcEndpoint = vpc.addInterfaceEndpoint("S3InterfaceEndpoint", {
+        service: ec2.InterfaceVpcEndpointAwsService.S3,
+        open: true,
+      });
 
-    s3vpcEndpoint.node.addDependency(s3GatewayEndpoint);
+      s3vpcEndpoint.node.addDependency(s3GatewayEndpoint);
 
-    // Create a VPC endpoint for DynamoDB.
-    vpc.addGatewayEndpoint("DynamoDBEndpoint", {
-      service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
-    });
+      // Create a VPC endpoint for DynamoDB.
+      vpc.addGatewayEndpoint("DynamoDBEndpoint", {
+        service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
+      });
 
-    // Create VPC Endpoint for Secrets Manager
-    vpc.addInterfaceEndpoint("SecretsManagerEndpoint", {
-      service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
-      open: true,
-    });
+      // Create VPC Endpoint for Secrets Manager
+      vpc.addInterfaceEndpoint("SecretsManagerEndpoint", {
+        service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+        open: true,
+      });
 
-    // Create VPC Endpoint for SageMaker Runtime
-    vpc.addInterfaceEndpoint("SageMakerRuntimeEndpoint", {
-      service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
-      open: true,
-    });
+      // Create VPC Endpoint for SageMaker Runtime
+      vpc.addInterfaceEndpoint("SageMakerRuntimeEndpoint", {
+        service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
+        open: true,
+      });
+    }
 
     const configParameter = new ssm.StringParameter(this, "Config", {
       stringValue: JSON.stringify(props.config),

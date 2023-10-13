@@ -9,5 +9,9 @@ const app = new cdk.App();
 const config = getConfig();
 
 new AwsGenAILLMChatbotStack(app, `${config.prefix}GenAIChatBotStack`, {
-  config, 
+  config,
+  env: {
+    region: process.env.CDK_DEFAULT_REGION,
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+  },
 });

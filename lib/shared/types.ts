@@ -41,6 +41,10 @@ export enum SupportedRegion {
 
 export interface SystemConfig {
   prefix: string;
+  vpc?: {
+    vpcId?: string;
+    createVpcEndpoints?: boolean;
+  };
   bedrock?: {
     enabled?: boolean;
     region?: SupportedRegion;

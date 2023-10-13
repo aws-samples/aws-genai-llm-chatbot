@@ -14,7 +14,7 @@ import { ContainerImages } from "../container-images";
 import { ImageRepositoryMapping } from "../image-repository-mapping";
 
 export interface HuggingFaceCustomScriptModelProps {
-  vpc: ec2.Vpc;
+  vpc: ec2.IVpc;
   region: string;
   instanceType: string;
   modelId: string | string[];
