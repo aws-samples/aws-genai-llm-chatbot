@@ -38,7 +38,8 @@ export default function Embeddings() {
   const [globalError, setGlobalError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [pinFirstInput, setPinFirstInput] = useState(false);
-  const [, setEmbeddingsModelsStatus] = useState<LoadingStatus>("loading");
+  const [embeddingsModelStatus, setEmbeddingsModelsStatus] =
+    useState<LoadingStatus>("loading");
   const [embeddingsModelsResults, setEmbeddingsModelsResults] = useState<
     EmbeddingsModelItem[]
   >([]);
@@ -249,6 +250,7 @@ export default function Embeddings() {
                     >
                       <Multiselect
                         disabled={submitting}
+                        statusType={embeddingsModelStatus}
                         selectedOptions={embeddingModels.map((em) => ({
                           label: EmbeddingsModelHelper.parseValue(em).name,
                           value: em,

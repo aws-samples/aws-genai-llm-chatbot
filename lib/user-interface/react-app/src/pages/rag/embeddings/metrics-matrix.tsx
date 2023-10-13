@@ -30,13 +30,14 @@ export function MetricsMatrix(props: {
     //fontFamily: "courier",
     color: "darkgrey",
     textAlign: "center",
-    fontWeight: "bold"
+    fontWeight: "bold",
   };
+
   return (
     <table className="matrix-table">
       <tbody>
         {props.values.map((row, rowIndex) => {
-          if (props.pinFirstInput && rowIndex > 0) return;
+          if (props.pinFirstInput && rowIndex > 0) return null;
           return (
             <React.Fragment key={rowIndex}>
               {rowIndex === 0 && (
@@ -44,7 +45,7 @@ export function MetricsMatrix(props: {
                   <td>&nbsp;</td>
                   {row.map((_, colIndex) => {
                     if (props.pinFirstInput && colIndex == 0) return;
-                    
+
                     return (
                       <td key={colIndex} style={headerStyle}>
                         {colIndex + 1}
@@ -58,9 +59,10 @@ export function MetricsMatrix(props: {
                   {rowIndex + 1}
                 </td>
                 {row.map((col, colIndex) => {
-                  if (props.pinFirstInput && colIndex == 0) return;
-                  if (!props.pinFirstInput && rowIndex > colIndex) return (<td></td>);
-                  
+                  if (props.pinFirstInput && colIndex == 0) return null;
+                  if (!props.pinFirstInput && rowIndex > colIndex)
+                    return <td key={colIndex}></td>;
+
                   let fgColor = "black";
                   const v = col.toFixed(3);
                   const intensity = mapToIntensity(col, props.min, props.max);
@@ -76,7 +78,18 @@ export function MetricsMatrix(props: {
                       }}
                     >
                       {v.replace(/^-([.0]*)$/, "$1")}
-                      <div style={{width:`${100-intensity}%`, backgroundColor: fgColor, marginTop: "6px", height: '3px', position:"relative", zIndex:"10"}}>&nbsp;</div>
+                      <div
+                        style={{
+                          width: `${100 - intensity}%`,
+                          backgroundColor: fgColor,
+                          marginTop: "6px",
+                          height: "3px",
+                          position: "relative",
+                          zIndex: "10",
+                        }}
+                      >
+                        &nbsp;
+                      </div>
                     </td>
                   );
                 })}
