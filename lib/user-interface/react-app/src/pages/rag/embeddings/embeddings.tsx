@@ -38,8 +38,7 @@ export default function Embeddings() {
   const [globalError, setGlobalError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [pinFirstInput, setPinFirstInput] = useState(false);
-  const [embeddingsModelsStatus, setEmbeddingsModelsStatus] =
-    useState<LoadingStatus>("loading");
+  const [, setEmbeddingsModelsStatus] = useState<LoadingStatus>("loading");
   const [embeddingsModelsResults, setEmbeddingsModelsResults] = useState<
     EmbeddingsModelItem[]
   >([]);
@@ -335,73 +334,80 @@ export default function Embeddings() {
                         </Header>
                       }
                     >
-                      <SpaceBetween size ="xl">
-                      <SpaceBetween
-                        size="xl"
-                        direction="horizontal"
-                      >
-                        {/* <FormField label="Cosine Distance">
+                      <SpaceBetween size="xl">
+                        <SpaceBetween size="xl" direction="horizontal">
+                          {/* <FormField label="Cosine Distance">
                           <MetricsMatrix
                             values={m.cosineDistance}
                             min={1}
                             max={0}
                           />
                         </FormField> */}
-                        <FormField label="Cosine Similarity">
-                          <MetricsMatrix
-                            values={m.cosineSimilarity}
-                            min={0}
-                            max={1}
-                            pinFirstInput={pinFirstInput}
-                          />
-                        </FormField>
-                        {/* <FormField label="Inner Product">
+                          <FormField label="Cosine Similarity">
+                            <MetricsMatrix
+                              values={m.cosineSimilarity}
+                              min={0}
+                              max={1}
+                              pinFirstInput={pinFirstInput}
+                            />
+                          </FormField>
+                          {/* <FormField label="Inner Product">
                           <MetricsMatrix values={m.innerProduct} min={0} max={1} pinFirstInput={pinFirstInput} />
                         </FormField> */}
-                        <FormField label="Euclidean Distance (L2 Norm)">
-                          <MetricsMatrix
-                            values={m.l2}
-                            min={1.3}
-                            max={0}
-                            pinFirstInput={pinFirstInput}
-                          />
-                        </FormField>
-                      </SpaceBetween>
-                      <ExpandableSection headerText="Embeddings vector">
-                        <SpaceBetween size="xl">
-                          {m.embeddingsVector?.map((embedding, index) => (
-                            <FormField
-                            key={index}
-                              label={(<><Popover 
-                                size="medium"
-                                position="top"
-                                triggerType="custom"
-                                dismissButton={false}
-                                content={<StatusIndicator type="success">Vector copied to clipboard</StatusIndicator>}>
-                                <Button
-                                  variant="inline-icon"
-                                  iconName="copy"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(
-                                      JSON.stringify(embedding)
-                                    );
-                                  }}
-                                /></Popover>{`Input ${index + 1} [dimensions: ${
-                                embedding.length
-                              }, magnitude ${MetricsHelper.magnitude(
-                                embedding
-                              ).toFixed(2)}]`}</>)}
-                              >
-                              <Textarea
-                                rows={5}
-                                value={JSON.stringify(embedding)}
-                                readOnly={true}
-
-                              />
-                            </FormField>
-                          ))}
+                          <FormField label="Euclidean Distance (L2 Norm)">
+                            <MetricsMatrix
+                              values={m.l2}
+                              min={1.3}
+                              max={0}
+                              pinFirstInput={pinFirstInput}
+                            />
+                          </FormField>
                         </SpaceBetween>
-                      </ExpandableSection>
+                        <ExpandableSection headerText="Embeddings vector">
+                          <SpaceBetween size="xl">
+                            {m.embeddingsVector?.map((embedding, index) => (
+                              <FormField
+                                key={index}
+                                label={
+                                  <>
+                                    <Popover
+                                      size="medium"
+                                      position="top"
+                                      triggerType="custom"
+                                      dismissButton={false}
+                                      content={
+                                        <StatusIndicator type="success">
+                                          Vector copied to clipboard
+                                        </StatusIndicator>
+                                      }
+                                    >
+                                      <Button
+                                        variant="inline-icon"
+                                        iconName="copy"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(
+                                            JSON.stringify(embedding)
+                                          );
+                                        }}
+                                      />
+                                    </Popover>
+                                    {`Input ${index + 1} [dimensions: ${
+                                      embedding.length
+                                    }, magnitude ${MetricsHelper.magnitude(
+                                      embedding
+                                    ).toFixed(2)}]`}
+                                  </>
+                                }
+                              >
+                                <Textarea
+                                  rows={5}
+                                  value={JSON.stringify(embedding)}
+                                  readOnly={true}
+                                />
+                              </FormField>
+                            ))}
+                          </SpaceBetween>
+                        </ExpandableSection>
                       </SpaceBetween>
                     </Container>
                   ))}
