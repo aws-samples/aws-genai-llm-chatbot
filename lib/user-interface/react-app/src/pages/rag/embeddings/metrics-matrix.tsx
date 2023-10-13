@@ -1,5 +1,4 @@
 import { Properties } from "csstype";
-import { relative } from "path";
 import React from "react";
 
 const MIN_INTENSITY = 25;
@@ -59,7 +58,9 @@ export function MetricsMatrix(props: {
                   {rowIndex + 1}
                 </td>
                 {row.map((col, colIndex) => {
-                  if (props.pinFirstInput && colIndex == 0) return;
+                  if (props.pinFirstInput && colIndex == 0 ||
+                    rowIndex > colIndex) return (<td></td>);
+                  
                   let fgColor = "black";
                   const v = col.toFixed(3);
                   const intensity = mapToIntensity(col, props.min, props.max);
