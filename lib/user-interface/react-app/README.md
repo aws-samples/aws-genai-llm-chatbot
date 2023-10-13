@@ -1,0 +1,22 @@
+# User Interface
+
+## Running locally
+
+You can run this vite react app locally following these steps.
+
+### Deploy infrastructure to AWS
+
+Follow instructions on the root folder README to deploy the cdk app. 
+
+You will need the CloudFormation Output values displayed after completion in the following step.
+
+### Define environment variables
+
+See `.env.template` for the variables, and replace with the Output values from the previous step.
+
+### Build and run local dev server
+
+```
+npm run build:dev
+npm run dev
+```
