@@ -230,7 +230,7 @@ export default function Embeddings() {
                   )}
                   <Button
                     data-testid="create"
-                    disabled={submitting}
+                    disabled={submitting || embeddingModels.length === 0}
                     variant="primary"
                     onClick={submitForm}
                   >
@@ -243,27 +243,26 @@ export default function Embeddings() {
               <SpaceBetween size="l">
                 <Container header={<Header variant="h1">Model</Header>}>
                   <SpaceBetween size="l">
-                    <SpaceBetween size="l" direction="horizontal">
-                      <FormField
-                        label="Embeddings Model"
-                        errorText={errors.embeddingsModel}
-                      >
-                        <Multiselect
-                          disabled={submitting}
-                          selectedOptions={embeddingModels.map((em) => ({
-                            label: EmbeddingsModelHelper.parseValue(em).name,
-                            value: em,
-                          }))}
-                          loadingText="Loading embeddings models (might take few seconds)..."
-                          options={embeddingsModelOptions}
-                          onChange={({ detail }) => {
-                            setEmbeddingModels(
-                              detail.selectedOptions.map((s) => s.value!)
-                            );
-                          }}
-                        />
-                      </FormField>
-                    </SpaceBetween>
+                    <FormField
+                      label="Embeddings Models"
+                      errorText={errors.embeddingsModel}
+                    >
+                      <Multiselect
+                        disabled={submitting}
+                        selectedOptions={embeddingModels.map((em) => ({
+                          label: EmbeddingsModelHelper.parseValue(em).name,
+                          value: em,
+                        }))}
+                        loadingText="Loading embeddings models (might take few seconds)..."
+                        placeholder="Choose embeddings models"
+                        options={embeddingsModelOptions}
+                        onChange={({ detail }) => {
+                          setEmbeddingModels(
+                            detail.selectedOptions.map((s) => s.value!)
+                          );
+                        }}
+                      />
+                    </FormField>
                   </SpaceBetween>
                 </Container>
                 <Container header={<Header variant="h1">Inputs</Header>}>
@@ -319,7 +318,7 @@ export default function Embeddings() {
                     checked={pinFirstInput}
                     onChange={({ detail }) => setPinFirstInput(detail.checked)}
                   >
-                    Relative to first input
+                    Relative to the first input
                   </Toggle>
 
                   {metricsMatrices.map((m) => (
