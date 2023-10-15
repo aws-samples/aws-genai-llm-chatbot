@@ -155,7 +155,7 @@ export default function ConfigDialog(props: ConfigDialogProps) {
           >
             <Input
               type="number"
-              step={0.9}
+              step={0.1}
               value={data.topP.toString()}
               onChange={({ detail: { value } }) => {
                 let floatVal = parseFloat(value);
