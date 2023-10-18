@@ -14,6 +14,7 @@ import Workspace from "./pages/rag/workspace/workspace";
 import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
 import AddData from "./pages/rag/add-data/add-data";
 import "./styles/app.scss";
+import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/chatbot" element={<Outlet />}>
               <Route path="playground" element={<Playground />} />
               <Route path="playground/:sessionId" element={<Playground />} />
+              <Route path="multichat" element={<MultiChatPlayground />} />
               <Route path="models" element={<Models />} />
             </Route>
             <Route path="/rag" element={<Outlet />}>

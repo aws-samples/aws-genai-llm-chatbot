@@ -24,6 +24,7 @@ export default function NavigationPanel() {
         text: "Chatbot",
         items: [
           { type: "link", text: "Playground", href: "/chatbot/playground" },
+          { type: "link", text: "Multi-chat playground", href: "/chatbot/multichat" },
           {
             type: "link",
             text: "Large Language Models (LLMs)",

@@ -13,13 +13,12 @@ import {
 } from "./types";
 import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
-import { Dispatch } from "react";
 import "react-json-view-lite/dist/index.css";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
   configuration: ChatBotConfiguration;
-  setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
+  showMetadata?: boolean;
 }
 
 export default function ChatMessage(props: ChatMessageProps) {
@@ -28,8 +27,8 @@ export default function ChatMessage(props: ChatMessageProps) {
       {props.message?.type === ChatBotMessageType.AI && (
         <Container
           footer={
-            props.message.metadata &&
-            props.configuration.showMetadata && (
+            ((props.showMetadata && props.message.metadata) ||
+              (props.message.metadata && props.configuration.showMetadata)) && (
               <ExpandableSection variant="footer" headerText="Metadata">
                 <JsonView data={props.message.metadata} style={darkStyles} />
               </ExpandableSection>
@@ -42,7 +41,29 @@ export default function ChatMessage(props: ChatMessageProps) {
                 <Spinner />
               </Box>
             ) : null}
-            <ReactMarkdown children={props.message.content} />
+            <ReactMarkdown
+              children={props.message.content}
+              components={{
+                pre(props) {
+                  const { children, className, node, ...rest } = props;
+                  return (
+                    <pre
+                      {...rest}
+                      className={className}
+                      style={{
+                        overflow: "scroll",
+                        backgroundColor: "rgb(240,240,240)",
+                        color: "black",
+                        borderRadius: "5px",
+                        padding: "5px",
+                      }}
+                    >
+                      {children}
+                    </pre>
+                  );
+                },
+              }}
+            />
           </SpaceBetween>
         </Container>
       )}
