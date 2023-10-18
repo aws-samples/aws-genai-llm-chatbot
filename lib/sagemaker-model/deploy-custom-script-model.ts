@@ -13,7 +13,7 @@ export function deployCustomScriptModel(
 
   const endpointName = (Array.isArray(modelId) ? modelId.join(",") : modelId)
     .replace(/[^a-zA-Z0-9]/g, "")
-    .slice(-20);
+    .slice(-10);
   const llmModel = new HuggingFaceCustomScriptModel(scope, endpointName, {
     vpc,
     region,
