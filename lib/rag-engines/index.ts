@@ -40,7 +40,7 @@ export class RagEngines extends Construct {
 
     const sageMakerRagModels = new SageMakerRagModels(
       this,
-      "SageMakerRagModels",
+      "SageMaker",
       {
         shared: props.shared,
         config: props.config,
