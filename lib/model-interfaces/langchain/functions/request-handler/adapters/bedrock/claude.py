@@ -34,7 +34,7 @@ class BedrockClaudeAdapter(ModelAdapter):
 
     def get_qa_prompt(self, model_kwargs={}):
         return PromptTemplate(
-            template=model_kwargs["personaPromptTemplate"], input_variables=["context", "question"]
+            template=model_kwargs["ragPromptTemplate"], input_variables=["context", "question"]
         )
 
     def get_prompt(self, model_kwargs={}):
@@ -52,7 +52,7 @@ class BedrockClaudeAdapter(ModelAdapter):
         return PromptTemplate(
             input_variables=["chat_history", "question"],
             chat_history="{chat_history}",
-            template=model_kwargs["questionPromptTemplate"],
+            template=model_kwargs["ragSqPromptTemplate"],
         )
 
 
