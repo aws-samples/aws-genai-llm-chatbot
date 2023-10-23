@@ -101,12 +101,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     // IDEFICS Interface Construct
     // This is the model interface recieving messages from the websocket interface via the message topic
     // and interacting with IDEFICS visual language models
-    // const ideficsModels = models.models.filter(
-    //   (model) => model.interface === ModelInterface.Idefics
-    // );
+    const ideficsModels = models.models.filter(
+      (model) => model.interface === ModelInterface.Idefics
+    );
 
-    // // check if any deployed model requires idefics interface
-    // if (ideficsModels.length > 0) {
+    // check if any deployed model requires idefics interface
+    if (ideficsModels.length > 0) {
       const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
         shared,
         config: props.config,
@@ -140,7 +140,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           ideficsInterface.addSageMakerEndpoint(model);
         }
       }
-    // }
+    }
 
     new UserInterface(this, "UserInterface", {
       shared,

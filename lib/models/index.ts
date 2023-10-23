@@ -105,66 +105,6 @@ export class Models extends Construct {
     //
     //      from sagemaker.jumpstart.model import JumpStartModel
     //      region = 'us-east-1'
-    //      model_id = 'meta-textgeneration-llama-2-13b'
-    //      model = JumpStartModel(model_id=model_id, region=region)
-    //      print(model.model_package_arn)
-
-    if (
-      props.config.llms?.sagemaker.includes(
-        SupportedSageMakerModels.Llama2_13b_Base
-      )
-    ) {
-      const llama2base = new SageMakerModel(this, "LLamaV2_13B_Base", {
-        vpc: props.shared.vpc,
-        region: cdk.Aws.REGION,
-        model: {
-          type: DeploymentType.ModelPackage,
-          modelId: "meta-LLama2-13b-base",
-          instanceType: "ml.g5.12xlarge",
-          packages: (scope) =>
-            new cdk.CfnMapping(scope, "Llama2BasePackageMapping", {
-              lazy: true,
-              mapping: {
-                "ap-southeast-1": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:ap-southeast-1:192199979996:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811`,
-                },
-                "ap-southeast-2": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:ap-southeast-2:666831318237:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811`,
-                },
-                "eu-west-1": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811`,
-                },
-                "us-east-1": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:us-east-1:865070037744:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811`,
-                },
-                "us-east-2": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:us-east-2:057799348421:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811`,
-                },
-                "us-west-2": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:us-west-2:594846645681:model-package/llama2-13b-v4-c4de6690de6132cb962827bec6ef6811`,
-                },
-              },
-            }),
-        },
-      });
-
-      models.push({
-        name: llama2base.endpoint.endpointName!,
-        endpoint: llama2base.endpoint,
-        responseStreamingSupported: false,
-        inputModalities: [Modality.Text],
-        outputModalities: [Modality.Text],
-        interface: ModelInterface.LangChain,
-        ragSupported: true,
-      });
-    }
-
-    // To get Jumpstart model ARNs do the following
-    // 1. Identify the modelId via https://sagemaker.readthedocs.io/en/stable/doc_utils/pretrainedmodels.html
-    // 2. Run the following code
-    //
-    //      from sagemaker.jumpstart.model import JumpStartModel
-    //      region = 'us-east-1'
     //      model_id = 'meta-textgeneration-llama-2-13b-f'
     //      model = JumpStartModel(model_id=model_id, region=region)
     //      print(model.model_package_arn)
@@ -251,7 +191,9 @@ export class Models extends Construct {
     }
 
     if (
-      props.config.llms?.sagemaker.includes(SupportedSageMakerModels.Idefics_80b)
+      props.config.llms?.sagemaker.includes(
+        SupportedSageMakerModels.Idefics_80b
+      )
     ) {
       const idefics80b = new SageMakerModel(this, "IDEFICS80B", {
         vpc: props.shared.vpc,
@@ -269,7 +211,7 @@ export class Models extends Construct {
             MAX_BATCH_TOTAL_TOKENS: JSON.stringify(8192),
             // quantization required to work with ml.g5.48xlarge
             // comment if deploying with ml.p4d or ml.p4e instances
-            HF_MODEL_QUANTIZE: "bitsandbytes", 
+            HF_MODEL_QUANTIZE: "bitsandbytes",
           },
         },
       });
