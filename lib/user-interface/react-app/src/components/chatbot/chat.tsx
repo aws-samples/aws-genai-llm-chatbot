@@ -8,6 +8,16 @@ import { ResultValue } from "../../common/types";
 import ChatMessage from "./chat-message";
 import ChatInputPanel, { ChatScrollState } from "./chat-input-panel";
 import styles from "../../styles/chat.module.scss";
+import {
+  STREAMING,
+  SHOW_METADATA,
+  MAX_TOKENS,
+  TEMPERATURE,
+  TOP_P,
+  PROMPT_TEMPLATE, 
+  RAG_PROMPT_TEMPLATE, 
+  RAG_SQ_PROMPT_TEMPLATE,
+} from "./constants"
 
 export default function Chat(props: { sessionId?: string }) {
   const appContext = useContext(AppContext);
@@ -16,13 +26,17 @@ export default function Chat(props: { sessionId?: string }) {
     id: props.sessionId ?? uuidv4(),
     loading: typeof props.sessionId !== "undefined",
   });
+
   const [configuration, setConfiguration] = useState<ChatBotConfiguration>(
     () => ({
-      streaming: true,
-      showMetadata: false,
-      maxTokens: 512,
-      temperature: 0.1,
-      topP: 1.0,
+      streaming: STREAMING,
+      showMetadata: SHOW_METADATA,
+      maxTokens: MAX_TOKENS,
+      temperature: TEMPERATURE,
+      topP: TOP_P,
+      promptTemplate: PROMPT_TEMPLATE,
+      ragPromptTemplate: RAG_PROMPT_TEMPLATE,
+      ragSqPromptTemplate: RAG_SQ_PROMPT_TEMPLATE,
     })
   );
 

@@ -32,56 +32,27 @@ class BedrockClaudeAdapter(ModelAdapter):
             callbacks=[self.callback_handler],
         )
 
-    def get_qa_prompt(self):
-        template = """
-
-Human: Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-{context}
-
-Question: {question}
-
-Assistant:"""
-
+    def get_qa_prompt(self, model_kwargs={}):
         return PromptTemplate(
-            template=template, input_variables=["context", "question"]
+            template=model_kwargs["personaPromptTemplate"], input_variables=["context", "question"]
         )
 
-    def get_prompt(self):
-        template = """
-
-Human: The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
-
-Current conversation:
-{chat_history}
-
-Question: {input}
-
-Assistant:"""
-
+    def get_prompt(self, model_kwargs={}):
         input_variables = ["input", "chat_history"]
         prompt_template_args = {
             "chat_history": "{chat_history}",
             "input_variables": input_variables,
-            "template": template,
+            "template": model_kwargs["promptTemplate"],
         }
         prompt_template = PromptTemplate(**prompt_template_args)
 
         return prompt_template
 
-    def get_condense_question_prompt(self):
-        template = """
-{chat_history}
-
-Human: Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
-Follow Up Input: {question}
-
-Assistant:"""
-
+    def get_condense_question_prompt(self, model_kwargs={}):
         return PromptTemplate(
             input_variables=["chat_history", "question"],
             chat_history="{chat_history}",
-            template=template,
+            template=model_kwargs["questionPromptTemplate"],
         )
 
 

@@ -8,6 +8,9 @@ export interface ChatBotConfiguration {
   maxTokens: number;
   temperature: number;
   topP: number;
+  promptTemplate: string;
+  ragPromptTemplate: string;
+  ragSqPromptTemplate: string;
 }
 
 export interface ChatInputState {

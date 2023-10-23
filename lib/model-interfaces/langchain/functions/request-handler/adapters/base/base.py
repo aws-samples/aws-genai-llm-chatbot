@@ -30,6 +30,9 @@ class ModelAdapter:
 
         self.chat_history = self.get_chat_history()
         self.llm = self.get_llm(model_kwargs)
+        self.condense_question_prompt = self.get_condense_question_prompt(model_kwargs)
+        self.qa_prompt = self.get_qa_prompt(model_kwargs)
+        self.prompt = self.get_prompt(model_kwargs)
 
     def __bind_callbacks(self):
         callback_methods = [method for method in dir(self) if method.startswith("on_")]
@@ -62,7 +65,7 @@ class ModelAdapter:
             output_key=output_key,
         )
 
-    def get_prompt(self):
+    def get_prompt(self, model_kwargs={}):
         template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
 
         Current conversation:
@@ -79,10 +82,10 @@ class ModelAdapter:
 
         return prompt_template
 
-    def get_condense_question_prompt(self):
+    def get_condense_question_prompt(self, model_kwargs={}):
         return CONDENSE_QUESTION_PROMPT
 
-    def get_qa_prompt(self):
+    def get_qa_prompt(self, model_kwargs={}):
         return QA_PROMPT
 
     def run_with_chain(self, user_prompt, workspace_id=None):
@@ -93,8 +96,8 @@ class ModelAdapter:
             conversation = ConversationalRetrievalChain.from_llm(
                 self.llm,
                 WorkspaceRetriever(workspace_id=workspace_id),
-                condense_question_prompt=self.get_condense_question_prompt(),
-                combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
+                condense_question_prompt=self.condense_question_prompt,
+                combine_docs_chain_kwargs={"prompt": self.qa_prompt},
                 return_source_documents=True,
                 memory=self.get_memory(output_key="answer"),
                 verbose=True,
@@ -131,7 +134,7 @@ class ModelAdapter:
 
         conversation = ConversationChain(
             llm=self.llm,
-            prompt=self.get_prompt(),
+            prompt=self.prompt(),
             memory=self.get_memory(),
             verbose=True,
         )
