@@ -67,9 +67,15 @@ body.awsui-dark-mode {
 }
 
 .jsonNumbers {
-  color: rgb(255, 223, 60)
+  color: rgb(255, 223, 60);
 }
 
 .jsonBool {
-  color: rgb(247, 157, 244)
+  color: rgb(252, 178, 250);
+  font-weight: 600;
+}
+
+.jsonNull {
+  color:rgb(74, 205, 234);
+  font-weight: 600;
 }

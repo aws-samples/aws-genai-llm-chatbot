@@ -39,6 +39,7 @@ export default function ChatMessage(props: ChatMessageProps) {
                     stringValue: "jsonStrings",
                     numberValue: "jsonNumbers",
                     booleanValue: "jsonBool",
+                    nullValue: "jsonNull",
                     container: "jsonContainer",
                   }}
                 />
