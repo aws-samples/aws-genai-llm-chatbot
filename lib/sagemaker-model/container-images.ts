@@ -22,8 +22,10 @@ export class ContainerImages {
     "huggingface-pytorch-tgi-inference:2.0.1-tgi0.9.3-gpu-py39-cu118-ubuntu20.04";
   static readonly HF_PYTORCH_LLM_TGI_INFERENCE_1_0_3 =
     "huggingface-pytorch-tgi-inference:2.0.1-tgi1.0.3-gpu-py39-cu118-ubuntu20.04";
+  static readonly HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0 =
+    "huggingface-pytorch-tgi-inference:2.0.1-tgi1.1.0-gpu-py39-cu118-ubuntu20.04";
   static readonly HF_PYTORCH_LLM_TGI_INFERENCE_LATEST =
-    ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_0_3;
+    ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0;
   /*
   DJL_INFERENCE_DEEPSPEED
   https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/image_uri_config/djl-deepspeed.json

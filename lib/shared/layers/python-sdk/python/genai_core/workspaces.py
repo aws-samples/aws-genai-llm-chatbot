@@ -8,10 +8,10 @@ from datetime import datetime
 dynamodb = boto3.resource("dynamodb")
 sfn_client = boto3.client("stepfunctions")
 
-WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
-WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ[
+WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME")
+WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ.get(
     "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME"
-]
+)
 CREATE_AURORA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN"
 )
@@ -25,7 +25,8 @@ DELETE_WORKSPACE_WORKFLOW_ARN = os.environ.get("DELETE_WORKSPACE_WORKFLOW_ARN")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
-table = dynamodb.Table(WORKSPACES_TABLE_NAME)
+if WORKSPACES_TABLE_NAME:
+    table = dynamodb.Table(WORKSPACES_TABLE_NAME)
 
 
 def list_workspaces():

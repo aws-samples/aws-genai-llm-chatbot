@@ -152,7 +152,7 @@ export class DataImport extends Construct {
       logRetention: logs.RetentionDays.ONE_WEEK,
       layers: [
         props.shared.powerToolsLayer,
-        props.shared.commonLayer.layer,
+        props.shared.commonLayer,
         props.shared.pythonSDKLayer,
       ],
       vpc: props.shared.vpc,

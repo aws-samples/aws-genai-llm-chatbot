@@ -1,17 +1,18 @@
-import * as path from "path";
-import { Construct } from "constructs";
-import { Shared } from "../shared";
+import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
 import { WebSocketLambdaAuthorizer } from "@aws-cdk/aws-apigatewayv2-authorizers-alpha";
 import { WebSocketLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
-import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
 import * as cdk from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as sns from "aws-cdk-lib/aws-sns";
-import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
+import * as sns from "aws-cdk-lib/aws-sns";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import { Construct } from "constructs";
+import * as path from "path";
+import { Shared } from "../shared";
+import { Direction } from "../shared/types";
 
 interface WebSocketApiProps {
   readonly shared: Shared;
@@ -130,7 +131,7 @@ export class WebSocketApi extends Construct {
       new iam.PolicyStatement({
         actions: ["events:PutEvents"],
         resources: [
-          `arn:aws:events:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:event-bus/default`,
+          `arn:${cdk.Aws.PARTITION}:events:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:event-bus/default`,
         ],
       })
     );
@@ -139,7 +140,7 @@ export class WebSocketApi extends Construct {
       new iam.PolicyStatement({
         actions: ["execute-api:ManageConnections"],
         resources: [
-          `arn:aws:execute-api:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:${webSocketApi.apiId}/${stage.stageName}/*/*`,
+          `arn:${cdk.Aws.PARTITION}:execute-api:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:${webSocketApi.apiId}/${stage.stageName}/*/*`,
         ],
       })
     );
@@ -176,7 +177,7 @@ export class WebSocketApi extends Construct {
       new iam.PolicyStatement({
         actions: ["execute-api:ManageConnections"],
         resources: [
-          `arn:aws:execute-api:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:${webSocketApi.apiId}/${stage.stageName}/*/*`,
+          `arn:${cdk.Aws.PARTITION}:execute-api:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:${webSocketApi.apiId}/${stage.stageName}/*/*`,
         ],
       })
     );
@@ -213,7 +214,7 @@ export class WebSocketApi extends Construct {
         filterPolicyWithMessageBody: {
           direction: sns.FilterOrPolicy.filter(
             sns.SubscriptionFilter.stringFilter({
-              allowlist: ["OUT"],
+              allowlist: [Direction.Out],
             })
           ),
         },

@@ -1,13 +1,14 @@
 import {
   Button,
-  Select,
-  SpaceBetween,
-  StatusIndicator,
-  SelectProps,
   Container,
-  Spinner,
   Icon,
+  Select,
+  SelectProps,
+  SpaceBetween,
+  Spinner,
+  StatusIndicator,
 } from "@cloudscape-design/components";
+import { Auth } from "aws-amplify";
 import {
   Dispatch,
   SetStateAction,
@@ -16,35 +17,38 @@ import {
   useLayoutEffect,
   useState,
 } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import { useNavigate } from "react-router-dom";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { Auth } from "aws-amplify";
-import { AppContext } from "../../common/app-context";
-import {
-  ChatBotConfiguration,
-  ChatBotAction,
-  ChatBotHistoryItem,
-  ChatBotMessageResponse,
-  ChatBotMessageType,
-  ChatBotRunRequest,
-  ChatInputState,
-} from "./types";
 import TextareaAutosize from "react-textarea-autosize";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ApiClient } from "../../common/api-client/api-client";
+import { AppContext } from "../../common/app-context";
+import { OptionsHelper } from "../../common/helpers/options-helper";
+import { StorageHelper } from "../../common/helpers/storage-helper";
 import {
   ApiResult,
-  LLMItem,
+  ModelItem,
   ResultValue,
   WorkspaceItem,
 } from "../../common/types";
-import { OptionsHelper } from "../../common/helpers/options-helper";
-import { useNavigate } from "react-router-dom";
-import ConfigDialog from "./config-dialog";
-import { StorageHelper } from "../../common/helpers/storage-helper";
 import styles from "../../styles/chat.module.scss";
-import { updateMessageHistory } from "./utils";
+import ConfigDialog from "./config-dialog";
+import ImageDialog from "./image-dialog";
+import {
+  ChabotInputModality,
+  ChatBotAction,
+  ChatBotConfiguration,
+  ChatBotHistoryItem,
+  ChatBotMessageResponse,
+  ChatBotMessageType,
+  ChatBotMode,
+  ChatBotRunRequest,
+  ChatInputState,
+  ImageFile,
+} from "./types";
+import { getSignedUrl, updateMessageHistory } from "./utils";
 
 export interface ChatInputPanelProps {
   running: boolean;
@@ -83,11 +87,14 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   const [state, setState] = useState<ChatInputState>({
     value: "",
     selectedModel: null,
+    selectedModelMetadata: null,
     selectedWorkspace: workspaceDefaultOptions[0],
     modelsStatus: "loading",
     workspacesStatus: "loading",
   });
   const [configDialogVisible, setConfigDialogVisible] = useState(false);
+  const [imageDialogVisible, setImageDialogVisible] = useState(false);
+  const [files, setFiles] = useState<ImageFile[]>([]);
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
   const { sendJsonMessage, readyState } = useWebSocket(socketUrl, {
     share: true,
@@ -122,12 +129,15 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const [session, llmsResult, workspacesResult] = await Promise.all([
+      const [session, modelsResult, workspacesResult] = await Promise.all([
         Auth.currentSession(),
-        apiClient.llms.getModels(),
+        apiClient.models.getModels(),
         appContext?.config.rag_enabled
           ? apiClient.workspaces.getWorkspaces()
-          : Promise.resolve<ApiResult<WorkspaceItem[]>>({ ok: true, data: [] }),
+          : Promise.resolve<ApiResult<WorkspaceItem[]>>({
+              ok: true,
+              data: [],
+            }),
       ]);
 
       const jwtToken = session.getAccessToken().getJwtToken();
@@ -138,12 +148,16 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         );
       }
 
-      const models = ResultValue.ok(llmsResult) ? llmsResult.data : [];
+      const models = ResultValue.ok(modelsResult) ? modelsResult.data : [];
       const workspaces = ResultValue.ok(workspacesResult)
         ? workspacesResult.data
         : [];
 
       const selectedModelOption = getSelectedModelOption(models);
+      const selectedModelMetadata = getSelectedModelMetadata(
+        models,
+        selectedModelOption
+      );
       const selectedWorkspaceOption = appContext?.config.rag_enabled
         ? getSelectedWorkspaceOption(workspaces)
         : workspaceDefaultOptions[0];
@@ -153,8 +167,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         models,
         workspaces,
         selectedModel: selectedModelOption,
+        selectedModelMetadata,
         selectedWorkspace: selectedWorkspaceOption,
-        modelsStatus: ResultValue.ok(llmsResult) ? "finished" : "error",
+        modelsStatus: ResultValue.ok(modelsResult) ? "finished" : "error",
         workspacesStatus: ResultValue.ok(workspacesResult)
           ? "finished"
           : "error",
@@ -205,6 +220,27 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     }
   }, [props.messageHistory]);
 
+  useEffect(() => {
+    const getSignedUrls = async () => {
+      if (props.configuration?.files as ImageFile[]) {
+        const files: ImageFile[] = [];
+        for await (const file of props.configuration!.files as ImageFile[]) {
+          const signedUrl = await getSignedUrl(file.key);
+          files.push({
+            ...file,
+            url: signedUrl as string,
+          });
+        }
+
+        setFiles(files);
+      }
+    };
+
+    if (props.configuration.files?.length) {
+      getSignedUrls();
+    }
+  }, [props.configuration]);
+
   const handleSendMessage = () => {
     if (!state.selectedModel) return;
     if (props.running) return;
@@ -218,7 +254,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const value = state.value.trim();
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
+      modelInterface: state.selectedModelMetadata!.interface,
       data: {
+        mode: ChatBotMode.Chain,
+        text: value,
+        files: props.configuration.files || [],
         modelName: name,
         provider: provider,
         sessionId: props.session.id,
@@ -229,8 +269,6 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
           temperature: props.configuration.temperature,
           topP: props.configuration.topP,
         },
-        text: value,
-        mode: "chain",
       },
     };
 
@@ -238,6 +276,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       ...state,
       value: "",
     }));
+    setFiles([]);
+
+    props.setConfiguration({
+      ...props.configuration,
+      files: [],
+    });
 
     props.setRunning(true);
 
@@ -246,7 +290,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         {
           type: ChatBotMessageType.Human,
           content: value,
-          metadata: {},
+          metadata: {
+            ...props.configuration,
+          },
         },
         {
           type: ChatBotMessageType.AI,
@@ -267,7 +313,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
-  const llmsOptions = OptionsHelper.getSelectOptionGroups(state.models || []);
+  const modelsOptions = OptionsHelper.getSelectOptionGroups(state.models || []);
 
   const workspaceOptions = [
     ...workspaceDefaultOptions,
@@ -292,14 +338,47 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             ) : (
               <Icon name="microphone-off" variant="disabled" />
             )}
+            <ImageDialog
+              sessionId={props.session.id}
+              visible={imageDialogVisible}
+              setVisible={setImageDialogVisible}
+              configuration={props.configuration}
+              setConfiguration={props.setConfiguration}
+            />
+            {state.selectedModelMetadata?.inputModalities.includes(
+              ChabotInputModality.Image
+            ) && (
+              <span
+                style={{ cursor: "pointer" }}
+                onClick={() => setImageDialogVisible(true)}
+              >
+                <Icon
+                  svg={
+                    <svg
+                      viewBox="0 0 22 22"
+                      style={{ marginTop: "5px" }}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect
+                        x="3"
+                        y="3"
+                        width="18"
+                        height="18"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                  }
+                />
+              </span>
+            )}
           </span>
-
           <TextareaAutosize
             className={styles.input_textarea}
-            style={{ width: "100%" }}
             maxRows={6}
             minRows={1}
-            maxLength={10000}
             spellCheck={true}
             autoFocus
             onChange={(e) =>
@@ -315,6 +394,24 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             placeholder={listening ? "Listening..." : "Send a message"}
           />
           <div style={{ marginLeft: "8px" }}>
+            {state.selectedModelMetadata?.inputModalities.includes(
+              ChabotInputModality.Image
+            ) &&
+              files.length > 0 &&
+              files.map((file, idx) => (
+                <img
+                  key={idx}
+                  onClick={() => setImageDialogVisible(true)}
+                  src={file.url}
+                  style={{
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    maxHeight: "30px",
+                    float: "left",
+                    marginRight: "8px",
+                  }}
+                />
+              ))}
             <Button
               disabled={
                 readyState !== ReadyState.OPEN ||
@@ -367,39 +464,44 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               setState((state) => ({
                 ...state,
                 selectedModel: detail.selectedOption,
+                selectedModelMetadata: getSelectedModelMetadata(
+                  state.models,
+                  detail.selectedOption
+                ),
               }));
               if (detail.selectedOption?.value) {
                 StorageHelper.setSelectedLLM(detail.selectedOption.value);
               }
             }}
-            options={llmsOptions}
+            options={modelsOptions}
           />
-          {appContext?.config.rag_enabled && true && (
-            <Select
-              disabled={props.running}
-              loadingText="Loading workspaces (might take few seconds)..."
-              statusType={state.workspacesStatus}
-              placeholder="Select a workspace (RAG data source)"
-              filteringType="auto"
-              selectedOption={state.selectedWorkspace}
-              options={workspaceOptions}
-              onChange={({ detail }) => {
-                if (detail.selectedOption?.value === "__create__") {
-                  navigate("/rag/workspaces/create");
-                } else {
-                  setState((state) => ({
-                    ...state,
-                    selectedWorkspace: detail.selectedOption,
-                  }));
+          {appContext?.config.rag_enabled &&
+            state.selectedModelMetadata?.ragSupported && (
+              <Select
+                disabled={props.running}
+                loadingText="Loading workspaces (might take few seconds)..."
+                statusType={state.workspacesStatus}
+                placeholder="Select a workspace (RAG data source)"
+                filteringType="auto"
+                selectedOption={state.selectedWorkspace}
+                options={workspaceOptions}
+                onChange={({ detail }) => {
+                  if (detail.selectedOption?.value === "__create__") {
+                    navigate("/rag/workspaces/create");
+                  } else {
+                    setState((state) => ({
+                      ...state,
+                      selectedWorkspace: detail.selectedOption,
+                    }));
 
-                  StorageHelper.setSelectedWorkspaceId(
-                    detail.selectedOption?.value ?? ""
-                  );
-                }
-              }}
-              empty={"No Workspaces available"}
-            />
-          )}
+                    StorageHelper.setSelectedWorkspaceId(
+                      detail.selectedOption?.value ?? ""
+                    );
+                  }
+                }}
+                empty={"No Workspaces available"}
+              />
+            )}
         </div>
         <div className={styles.input_controls_right}>
           <SpaceBetween direction="horizontal" size="xxs" alignItems="center">
@@ -459,7 +561,9 @@ function getSelectedWorkspaceOption(
   return selectedWorkspaceOption;
 }
 
-function getSelectedModelOption(models: LLMItem[]): SelectProps.Option | null {
+function getSelectedModelOption(
+  models: ModelItem[]
+): SelectProps.Option | null {
   let selectedModelOption: SelectProps.Option | null = null;
   const savedModel = StorageHelper.getSelectedLLM();
 
@@ -478,7 +582,7 @@ function getSelectedModelOption(models: LLMItem[]): SelectProps.Option | null {
     }
   }
 
-  let candidate: LLMItem | undefined = undefined;
+  let candidate: ModelItem | undefined = undefined;
   if (!selectedModelOption) {
     const bedrockModels = models.filter((m) => m.provider === "bedrock");
     const sageMakerModels = models.filter((m) => m.provider === "sagemaker");
@@ -524,4 +628,26 @@ function getSelectedModelOption(models: LLMItem[]): SelectProps.Option | null {
   }
 
   return selectedModelOption;
+}
+
+function getSelectedModelMetadata(
+  models: ModelItem[] | undefined,
+  selectedModelOption: SelectProps.Option | null
+): ModelItem | null {
+  let selectedModelMetadata: ModelItem | null = null;
+
+  if (selectedModelOption) {
+    const { name, provider } = OptionsHelper.parseValue(
+      selectedModelOption.value
+    );
+    const targetModel = models?.find(
+      (m) => m.name === name && m.provider === provider
+    );
+
+    if (targetModel) {
+      selectedModelMetadata = targetModel;
+    }
+  }
+
+  return selectedModelMetadata;
 }

@@ -13,7 +13,7 @@ import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
 import { TextHelper } from "../../../common/helpers/text-helper";
 import { PropertyFilterI18nStrings } from "../../../common/i18n/property-filter-i18n-strings";
-import { LLMItem, ResultValue } from "../../../common/types";
+import { ModelItem, ResultValue } from "../../../common/types";
 import { TableEmptyState } from "../../../components/table-empty-state";
 import { TableNoMatchState } from "../../../components/table-no-match-state";
 import {
@@ -24,7 +24,7 @@ import {
 export default function Models() {
   const onFollow = useOnFollow();
   const appContext = useContext(AppContext);
-  const [models, setModels] = useState<LLMItem[]>([]);
+  const [models, setModels] = useState<ModelItem[]>([]);
   const [loading, setLoading] = useState(true);
   const {
     items,
@@ -36,7 +36,7 @@ export default function Models() {
   } = useCollection(models, {
     propertyFiltering: {
       filteringProperties: ModelsColumnFilteringProperties,
-      empty: <TableEmptyState resourceName="LLM" />,
+      empty: <TableEmptyState resourceName="model" />,
       noMatch: (
         <TableNoMatchState
           onClearFilter={() => {
@@ -49,7 +49,7 @@ export default function Models() {
     sorting: {
       defaultState: {
         sortingColumn: ModelsColumnDefinitions[0],
-        isDescending: true,
+        isDescending: false,
       },
     },
     selection: {},
@@ -59,7 +59,7 @@ export default function Models() {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.llms.getModels();
+    const result = await apiClient.models.getModels();
     if (ResultValue.ok(result)) {
       setModels(result.data);
     }
@@ -85,7 +85,7 @@ export default function Models() {
               href: "/",
             },
             {
-              text: "Large Language Models (LLMs)",
+              text: "Models",
               href: "/chatbot/models",
             },
           ]}
@@ -99,18 +99,14 @@ export default function Models() {
           variant="full-page"
           stickyHeader={true}
           resizableColumns={true}
-          header={
-            <Header variant="awsui-h1-sticky">
-              Large Language Models (LLMs)
-            </Header>
-          }
+          header={<Header variant="awsui-h1-sticky">Models</Header>}
           loading={loading}
-          loadingText="Loading Large Language Models (LLMs)"
+          loadingText="Loading Models"
           filter={
             <PropertyFilter
               {...propertyFilterProps}
               i18nStrings={PropertyFilterI18nStrings}
-              filteringPlaceholder={"Filter Large Language Models (LLMs)"}
+              filteringPlaceholder={"Filter Models"}
               countText={TextHelper.getTextFilterCounterText(
                 filteredItemsCount
               )}

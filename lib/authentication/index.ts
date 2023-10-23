@@ -1,3 +1,4 @@
+import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
@@ -5,6 +6,7 @@ import { Construct } from "constructs";
 export class Authentication extends Construct {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
+  public readonly identityPool: cognitoIdentityPool.IdentityPool;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -27,8 +29,24 @@ export class Authentication extends Construct {
       },
     });
 
+    const identityPool = new cognitoIdentityPool.IdentityPool(
+      this,
+      "IdentityPool",
+      {
+        authenticationProviders: {
+          userPools: [
+            new cognitoIdentityPool.UserPoolAuthenticationProvider({
+              userPool,
+              userPoolClient,
+            }),
+          ],
+        },
+      }
+    );
+
     this.userPool = userPool;
     this.userPoolClient = userPoolClient;
+    this.identityPool = identityPool;
 
     new cdk.CfnOutput(this, "UserPoolId", {
       value: userPool.userPoolId,
@@ -36,11 +54,14 @@ export class Authentication extends Construct {
 
     new cdk.CfnOutput(this, "UserPoolWebClientId", {
       value: userPoolClient.userPoolClientId,
-    })
-
-    new cdk.CfnOutput(this, 'UserPoolLink', {
-      value: `https://${cdk.Stack.of(this).region}.console.aws.amazon.com/cognito/v2/idp/user-pools/${userPool.userPoolId}/users?region=${cdk.Stack.of(this).region}`,
     });
 
+    new cdk.CfnOutput(this, "UserPoolLink", {
+      value: `https://${
+        cdk.Stack.of(this).region
+      }.console.aws.amazon.com/cognito/v2/idp/user-pools/${
+        userPool.userPoolId
+      }/users?region=${cdk.Stack.of(this).region}`,
+    });
   }
 }
