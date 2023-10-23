@@ -52,9 +52,7 @@ export class RestApi extends Construct {
       ],
       vpc: props.shared.vpc,
       securityGroups: [apiSecurityGroup],
-      vpcSubnets: props.shared.vpc.selectSubnets({
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      }),
+      vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,

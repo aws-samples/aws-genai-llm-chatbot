@@ -55,9 +55,7 @@ export function deployContainerModel(
     ...modelProps,
     vpcConfig: {
       securityGroupIds: [props.vpc.vpcDefaultSecurityGroup],
-      subnets: props.vpc.selectSubnets({
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      }).subnetIds,
+      subnets: props.vpc.privateSubnets.map((subnet) => subnet.subnetId),
     },
   });
 
