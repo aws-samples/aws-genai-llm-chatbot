@@ -15,6 +15,7 @@ import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
 import { Dispatch } from "react";
 import "react-json-view-lite/dist/index.css";
+import "../../styles/app.scss";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
@@ -31,7 +32,16 @@ export default function ChatMessage(props: ChatMessageProps) {
             props.message.metadata &&
             props.configuration.showMetadata && (
               <ExpandableSection variant="footer" headerText="Metadata">
-                <JsonView data={props.message.metadata} style={darkStyles} />
+                <JsonView
+                  data={props.message.metadata}
+                  style={{
+                    ...darkStyles,
+                    stringValue: "jsonStrings",
+                    numberValue: "jsonNumbers",
+                    booleanValue: "jsonBool",
+                    container: "jsonContainer",
+                  }}
+                />
               </ExpandableSection>
             )
           }
