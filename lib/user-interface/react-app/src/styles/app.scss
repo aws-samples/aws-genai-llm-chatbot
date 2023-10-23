@@ -54,3 +54,28 @@ body.awsui-dark-mode {
     }
   }
 }
+
+.jsonContainer {
+  font-family: "Open Sans", sans-serif;
+  font-size: 1em;
+  background-color: #0e1b2ac3;
+}
+
+.jsonStrings {
+  color: rgb(74, 234, 167);
+  
+}
+
+.jsonNumbers {
+  color: rgb(255, 223, 60);
+}
+
+.jsonBool {
+  color: rgb(252, 178, 250);
+  font-weight: 600;
+}
+
+.jsonNull {
+  color:rgb(74, 205, 234);
+  font-weight: 600;
+}
