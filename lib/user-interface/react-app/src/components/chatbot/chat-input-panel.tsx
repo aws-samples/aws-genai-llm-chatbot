@@ -475,33 +475,34 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             }}
             options={modelsOptions}
           />
-          {appContext?.config.rag_enabled &&
-            state.selectedModelMetadata?.ragSupported && (
-              <Select
-                disabled={props.running}
-                loadingText="Loading workspaces (might take few seconds)..."
-                statusType={state.workspacesStatus}
-                placeholder="Select a workspace (RAG data source)"
-                filteringType="auto"
-                selectedOption={state.selectedWorkspace}
-                options={workspaceOptions}
-                onChange={({ detail }) => {
-                  if (detail.selectedOption?.value === "__create__") {
-                    navigate("/rag/workspaces/create");
-                  } else {
-                    setState((state) => ({
-                      ...state,
-                      selectedWorkspace: detail.selectedOption,
-                    }));
+          {appContext?.config.rag_enabled && (
+            <Select
+              disabled={
+                props.running || !state.selectedModelMetadata?.ragSupported
+              }
+              loadingText="Loading workspaces (might take few seconds)..."
+              statusType={state.workspacesStatus}
+              placeholder="Select a workspace (RAG data source)"
+              filteringType="auto"
+              selectedOption={state.selectedWorkspace}
+              options={workspaceOptions}
+              onChange={({ detail }) => {
+                if (detail.selectedOption?.value === "__create__") {
+                  navigate("/rag/workspaces/create");
+                } else {
+                  setState((state) => ({
+                    ...state,
+                    selectedWorkspace: detail.selectedOption,
+                  }));
 
-                    StorageHelper.setSelectedWorkspaceId(
-                      detail.selectedOption?.value ?? ""
-                    );
-                  }
-                }}
-                empty={"No Workspaces available"}
-              />
-            )}
+                  StorageHelper.setSelectedWorkspaceId(
+                    detail.selectedOption?.value ?? ""
+                  );
+                }
+              }}
+              empty={"No Workspaces available"}
+            />
+          )}
         </div>
         <div className={styles.input_controls_right}>
           <SpaceBetween direction="horizontal" size="xxs" alignItems="center">
