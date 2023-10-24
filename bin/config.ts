@@ -7,7 +7,7 @@ export function getConfig(): SystemConfig {
   }
   // Default config
   return {
-    prefix: "X",
+    prefix: "",
     /*vpc: {
       vpcId: "vpc-00000000000000000",
       createVpcEndpoints: true,
@@ -22,17 +22,17 @@ export function getConfig(): SystemConfig {
       sagemaker: [],
     },
     rag: {
-      enabled: true,
+      enabled: false,
       engines: {
         aurora: {
-          enabled: true,
+          enabled: false,
         },
         opensearch: {
-          enabled: true,
+          enabled: false,
         },
         kendra: {
-          enabled: true,
-          createIndex: true,
+          enabled: false,
+          createIndex: false,
         },
       },
       embeddingsModels: [
