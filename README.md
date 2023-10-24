@@ -270,6 +270,7 @@ Currently the following multimodal models supported are:
 
 In order to have the right instance types and how to request them read [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
 
+> NOTE: Make sure to review [IDEFICS models license sections](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct#license).
 
 To deploy a multimodal model simply follow the [deploy instructions](#deploy)
 and select one ot the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as [instructed in the above section]((#deployment-dependencies-installation)).
