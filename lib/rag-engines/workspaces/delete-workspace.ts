@@ -1,18 +1,18 @@
-import * as path from "path";
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
-import { SystemConfig } from "../../shared/types";
-import { Shared } from "../../shared";
-import { OpenSearchVector } from "../opensearch-vector";
-import { KendraRetrieval } from "../kendra-retrieval";
-import { AuroraPgVector } from "../aurora-pgvector";
-import { DataImport } from "../data-import";
-import { RagDynamoDBTables } from "../rag-dynamodb-tables";
-import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
-import * as iam from "aws-cdk-lib/aws-iam";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import { Construct } from "constructs";
+import * as path from "path";
+import { Shared } from "../../shared";
+import { SystemConfig } from "../../shared/types";
+import { AuroraPgVector } from "../aurora-pgvector";
+import { DataImport } from "../data-import";
+import { KendraRetrieval } from "../kendra-retrieval";
+import { OpenSearchVector } from "../opensearch-vector";
+import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 
 export interface DeleteWorkspaceProps {
   readonly config: SystemConfig;
@@ -43,7 +43,7 @@ export class DeleteWorkspace extends Construct {
         handler: "index.lambda_handler",
         layers: [
           props.shared.powerToolsLayer,
-          props.shared.commonLayer.layer,
+          props.shared.commonLayer,
           props.shared.pythonSDKLayer,
         ],
         timeout: cdk.Duration.minutes(15),

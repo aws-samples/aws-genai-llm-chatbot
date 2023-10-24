@@ -5,11 +5,13 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import ConversationalRetrievalChain, ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
-from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 from langchain.chains.conversational_retrieval.prompts import (
     QA_PROMPT,
     CONDENSE_QUESTION_PROMPT,
 )
+
+from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
+from genai_core.types import ChatbotMode
 
 logger = Logger()
 
@@ -19,7 +21,9 @@ class Mode(Enum):
 
 
 class ModelAdapter:
-    def __init__(self, session_id, user_id, mode="chain", model_kwargs={}):
+    def __init__(
+        self, session_id, user_id, mode=ChatbotMode.CHAIN.value, model_kwargs={}
+    ):
         self.session_id = session_id
         self.user_id = user_id
         self._mode = mode
@@ -162,7 +166,7 @@ class ModelAdapter:
         logger.debug(f"workspace_id {workspace_id}")
         logger.debug(f"mode: {self._mode}")
 
-        if self._mode == "chain":
+        if self._mode == ChatbotMode.CHAIN.value:
             return self.run_with_chain(prompt, workspace_id)
 
         raise ValueError(f"unknown mode {self._mode}")

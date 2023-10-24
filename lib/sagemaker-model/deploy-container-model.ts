@@ -1,3 +1,4 @@
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import { Construct } from "constructs";
@@ -52,6 +53,10 @@ export function deployContainerModel(
   const model = new sagemaker.CfnModel(scope, "Model", {
     executionRoleArn: executionRole.roleArn,
     ...modelProps,
+    vpcConfig: {
+      securityGroupIds: [props.vpc.vpcDefaultSecurityGroup],
+      subnets: props.vpc.privateSubnets.map((subnet) => subnet.subnetId),
+    },
   });
 
   const endpointConfig = new sagemaker.CfnEndpointConfig(
@@ -75,7 +80,7 @@ export function deployContainerModel(
 
   const endpoint = new sagemaker.CfnEndpoint(scope, modelId, {
     endpointConfigName: endpointConfig.getAtt("EndpointConfigName").toString(),
-    endpointName: modelId.split("/").join("-"),
+    endpointName: modelId.split("/").join("-").split(".").join("-"),
   });
 
   endpoint.addDependency(endpointConfig);

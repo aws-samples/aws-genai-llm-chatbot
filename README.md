@@ -1,4 +1,4 @@
-# Deploying a Multi-LLM and Multi-RAG Powered Chatbot Using AWS CDK on AWS
+# Deploying a Multi-Model and Multi-RAG Powered Chatbot Using AWS CDK on AWS
 [![Release Notes](https://img.shields.io/github/v/release/aws-samples/aws-genai-llm-chatbot)](https://github.com/aws-samples/aws-genai-llm-chatbot/releases)
 [![GitHub star chart](https://img.shields.io/github/stars/aws-samples/aws-genai-llm-chatbot?style=social)](https://star-history.com/#aws-samples/aws-genai-llm-chatbot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -27,12 +27,21 @@
 
 # Features
 ## Modular, comprehensive and ready to use
-This solution provides ready-to-use code so you can start **experimenting with a variety of Large Language Models, settings and prompts** in your own AWS account.
+This solution provides ready-to-use code so you can start **experimenting with a variety of Large Language Models and Multimodal Language Models, settings and prompts** in your own AWS account.
 
 Supported model providers:
 - [Amazon Bedrock](https://aws.amazon.com/bedrock/) 
 - [Amazon SageMaker](https://aws.amazon.com/sagemaker/) self-hosted models from Foundation, Jumpstart and HuggingFace.
 - Third-party providers via API such as Anthropic, Cohere, AI21 Labs, OpenAI, etc. [See available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list.
+
+
+## Experiment with multimodal models
+Deploy [IDEFICS](https://huggingface.co/blog/idefics) models on [Amazon SageMaker](https://aws.amazon.com/sagemaker/) and see how the chatbot can answer questions about images, describe visual content, generate text grounded in multiple images.
+
+
+![sample](assets/multimodal-sample.gif "AWS GenAI Chatbot")
+
+Read more how to deploy multimodal IDEFICS on Amazon SageMaker [here](#multimodal-models).
 
 
 ## Experiment with multiple RAG options with Workspaces
@@ -52,10 +61,10 @@ The solution comes with several debugging tools to help you debug RAG scenarios:
 
 
 ## Full-fledged User Interface
-The repository includes a CDK construct to deploy  a **full-fledged UI** built with [React](https://react.dev/) to interact with the deployed LLMs as chatbots. Hosted on [Amazon S3](https://aws.amazon.com/s3/) and distributed with [Amazon CloudFront](https://aws.amazon.com/cloudfront/). 
+The repository includes a CDK construct to deploy  a **full-fledged UI** built with [React](https://react.dev/) to interact with the deployed LLMs/MLMs as chatbots. Hosted on [Amazon S3](https://aws.amazon.com/s3/) and distributed with [Amazon CloudFront](https://aws.amazon.com/cloudfront/). 
 
 
-Protected with [Amazon Cognito Authentication](https://aws.amazon.com/cognito/) to help you interact and experiment with multiple LLMs, multiple RAG engines, conversational history support and document upload/progress.
+Protected with [Amazon Cognito Authentication](https://aws.amazon.com/cognito/) to help you interact and experiment with multiple LLMs/MLMs, multiple RAG engines, conversational history support and document upload/progress.
 
 
 The interface layer between the UI and backend is built with [API Gateway REST API](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-rest-api.html) for management requests and [Amazon API Gateway WebSocket APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html) for chatbot messages and responses.
@@ -68,7 +77,7 @@ Design system provided by [AWS Cloudscape Design System](https://cloudscape.desi
 
 Before you begin using the solution, there are certain precautions you must take into account:
 
-- **Cost Management with self-hosted models on SageMaker**: Be mindful of the costs associated with AWS resources, especially with SageMaker models billed by the hour. While the sample is designed to be cost-effective, leaving serverful resources running for extended periods or deploying numerous LLMs can quickly lead to increased costs.
+- **Cost Management with self-hosted models on SageMaker**: Be mindful of the costs associated with AWS resources, especially with SageMaker models billed by the hour. While the sample is designed to be cost-effective, leaving serverful resources running for extended periods or deploying numerous LLMs/MLMs can quickly lead to increased costs.
 
 - **Licensing obligations**: If you choose to use any datasets or models alongside the provided samples, ensure you check the LLM code and comply with all licensing obligations attached to them.
 
@@ -206,7 +215,7 @@ npm install && npm run build
 npm run create
 ```
 You'll be prompted to configure the different aspects of the solution, such as: 
-- The LLMs to enable (we support all models provided by Bedrock, FalconLite, LLama 2 and more to come)
+- The LLMs or MLMs to enable (we support all models provided by Bedrock along with SageMaker hosted Idefics, FalconLite, Mistral and more to come)
 - Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra..) embeddings selection and more to come.
 
 When done, answer `Y` to create a new configuration.
@@ -251,9 +260,33 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 10. Login with the user created in .8; you will be asked to change the password.
 
+
+# Multimodal models
+Currently the following multimodal models supported are:
+- [IDEFICS 9b Instruct](https://huggingface.co/HuggingFaceM4/idefics-9b)
+  - Requires `ml.g5.12xlarge` instance.
+- [IDEFICS 80b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
+  - Requires `ml.g5.48xlarge` instance.
+
+In order to have the right instance types and how to request them read [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
+
+> NOTE: Make sure to review [IDEFICS models license sections](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct#license).
+
+To deploy a multimodal model simply follow the [deploy instructions](#deploy)
+and select one ot the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as [instructed in the above section]((#deployment-dependencies-installation)).
+
+![sample](assets/select-multimodal.gif "AWS GenAI Chatbot")
+
+
+> ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware not letting this models running unused to avoid unncesseray costs. 
+
+
+
 # Run user interface locally
 
 See instructions in the README file of the [`lib/user-interface/react-app`](./lib/user-interface/react-app) folder.
+
+
 
 # Clean up
 You can remove the stacks and all the associated resources created in your AWS account by running the following command:
@@ -261,6 +294,8 @@ You can remove the stacks and all the associated resources created in your AWS a
 ```bash
 npx cdk destroy
 ```
+> **Note**: Depending on which resources have been deployed. Destroying the stack might take a while up to 45m. If deletion fails multipe times please manually delete the remaining stack's ENIs, you can filter ENIs by VPC/Subnet/etc using the search bar [here](https://console.aws.amazon.com/ec2/home#NIC) in the AWS console) and re-attempt a stack deletion.
+
 
 # Architecture
 This repository comes with several reusable CDK constructs. Giving you freedom to decide what the deploy and what not. 

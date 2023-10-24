@@ -1,4 +1,4 @@
-import genai_core.llms
+import genai_core.models
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.api_gateway import Router
 
@@ -7,9 +7,9 @@ router = Router()
 logger = Logger()
 
 
-@router.get("/llms")
+@router.get("/models")
 @tracer.capture_method
-def llms():
-    models = genai_core.llms.list_models()
+def models():
+    models = genai_core.models.list_models()
 
     return {"ok": True, "data": models}

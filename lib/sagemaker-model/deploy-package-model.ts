@@ -55,7 +55,7 @@ export function deployPackageModel(
 
   const endpoint = new sagemaker.CfnEndpoint(scope, modelId, {
     endpointConfigName: endpointConfig.getAtt("EndpointConfigName").toString(),
-    endpointName: modelId,
+    endpointName: modelId.split("/").join("-").split(".").join("-"),
   });
 
   endpoint.addDependency(endpointConfig);

@@ -36,7 +36,7 @@ export class CreateAuroraWorkspace extends Construct {
         handler: "index.lambda_handler",
         layers: [
           props.shared.powerToolsLayer,
-          props.shared.commonLayer.layer,
+          props.shared.commonLayer,
           props.shared.pythonSDKLayer,
         ],
         timeout: cdk.Duration.minutes(5),

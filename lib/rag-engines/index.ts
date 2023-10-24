@@ -1,17 +1,17 @@
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { Construct } from "constructs";
-import { SageMakerRagModels } from "./sagemaker-rag-models";
-import { SystemConfig } from "../shared/types";
 import { Shared } from "../shared";
+import { SystemConfig } from "../shared/types";
 import { AuroraPgVector } from "./aurora-pgvector";
 import { DataImport } from "./data-import";
-import { RagDynamoDBTables } from "./rag-dynamodb-tables";
-import { OpenSearchVector } from "./opensearch-vector";
 import { KendraRetrieval } from "./kendra-retrieval";
+import { OpenSearchVector } from "./opensearch-vector";
+import { RagDynamoDBTables } from "./rag-dynamodb-tables";
+import { SageMakerRagModels } from "./sagemaker-rag-models";
 import { Workspaces } from "./workspaces";
-import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
-import * as s3 from "aws-cdk-lib/aws-s3";
-import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 
 export interface RagEnginesProps {
   readonly config: SystemConfig;

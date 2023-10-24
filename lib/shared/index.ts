@@ -1,12 +1,12 @@
-import * as path from "path";
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
-import { Layer } from "../layer";
-import { SystemConfig } from "./types";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import { Construct } from "constructs";
+import * as path from "path";
+import { Layer } from "../layer";
+import { SystemConfig } from "./types";
 
 const pythonRuntime = lambda.Runtime.PYTHON_3_11;
 const lambdaArchitecture = lambda.Architecture.X86_64;
@@ -17,19 +17,21 @@ export interface SharedProps {
 }
 
 export class Shared extends Construct {
-  readonly vpc: ec2.IVpc;
+  readonly vpc: ec2.Vpc;
   readonly defaultEnvironmentVariables: Record<string, string>;
   readonly configParameter: ssm.StringParameter;
   readonly pythonRuntime: lambda.Runtime = pythonRuntime;
   readonly lambdaArchitecture: lambda.Architecture = lambdaArchitecture;
   readonly xOriginVerifySecret: secretsmanager.Secret;
   readonly apiKeysSecret: secretsmanager.Secret;
-  readonly commonLayer: Layer;
+  readonly commonLayer: lambda.ILayerVersion;
   readonly powerToolsLayer: lambda.ILayerVersion;
   readonly pythonSDKLayer: lambda.ILayerVersion;
 
   constructor(scope: Construct, id: string, props: SharedProps) {
     super(scope, id);
+
+    const powerToolsLayerVersion = "46";
 
     this.defaultEnvironmentVariables = {
       POWERTOOLS_DEV: "true",
@@ -38,10 +40,11 @@ export class Shared extends Construct {
       POWERTOOLS_SERVICE_NAME: "chatbot",
     };
 
-    let vpc: ec2.IVpc;
+    let vpc: ec2.Vpc;
     if (!props.config.vpc?.vpcId) {
       vpc = new ec2.Vpc(this, "VPC", {
         natGateways: 1,
+        restrictDefaultSecurityGroup: false,
         subnetConfiguration: [
           {
             name: "public",
@@ -60,7 +63,7 @@ export class Shared extends Construct {
     } else {
       vpc = ec2.Vpc.fromLookup(this, "VPC", {
         vpcId: props.config.vpc.vpcId,
-      });
+      }) as ec2.Vpc;
     }
 
     if (
@@ -70,10 +73,12 @@ export class Shared extends Construct {
       // Create a VPC endpoint for S3.
       const s3GatewayEndpoint = vpc.addGatewayEndpoint("S3GatewayEndpoint", {
         service: ec2.GatewayVpcEndpointAwsService.S3,
+        
       });
 
       const s3vpcEndpoint = vpc.addInterfaceEndpoint("S3InterfaceEndpoint", {
         service: ec2.InterfaceVpcEndpointAwsService.S3,
+        privateDnsEnabled: true,
         open: true,
       });
 
@@ -95,6 +100,7 @@ export class Shared extends Construct {
         service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
         open: true,
       });
+
     }
 
     const configParameter = new ssm.StringParameter(this, "Config", {
@@ -103,8 +109,8 @@ export class Shared extends Construct {
 
     const powerToolsArn =
       lambdaArchitecture === lambda.Architecture.X86_64
-        ? `arn:aws:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2:42`
-        : `arn:aws:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:42`;
+        ? `arn:${cdk.Aws.PARTITION}:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2:${powerToolsLayerVersion}`
+        : `arn:${cdk.Aws.PARTITION}:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:${powerToolsLayerVersion}`;
 
     const powerToolsLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
@@ -145,11 +151,11 @@ export class Shared extends Construct {
 
     this.vpc = vpc;
     this.configParameter = configParameter;
-    this.commonLayer = commonLayer;
     this.xOriginVerifySecret = xOriginVerifySecret;
     this.apiKeysSecret = apiKeysSecret;
-    this.pythonSDKLayer = pythonSDKLayer;
     this.powerToolsLayer = powerToolsLayer;
+    this.commonLayer = commonLayer.layer;
+    this.pythonSDKLayer = pythonSDKLayer;
 
     new cdk.CfnOutput(this, "ApiKeysSecretName", {
       value: apiKeysSecret.secretName,
