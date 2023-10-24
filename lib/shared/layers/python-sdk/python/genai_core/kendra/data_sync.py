@@ -3,16 +3,14 @@ import genai_core.types
 import genai_core.workspaces
 from .client import get_kendra_client_for_index
 
-DEFAULT_KENDRA_S3_DATA_SOURCE_ID = os.environ.get(
-    "DEFAULT_KENDRA_S3_DATA_SOURCE_ID")
+DEFAULT_KENDRA_S3_DATA_SOURCE_ID = os.environ.get("DEFAULT_KENDRA_S3_DATA_SOURCE_ID")
 
 
 def start_kendra_data_sync(workspace_id: str):
     workspace = genai_core.workspaces.get_workspace(workspace_id=workspace_id)
 
     if not workspace:
-        raise genai_core.types.CommonError(
-            f"Workspace {workspace_id} not found")
+        raise genai_core.types.CommonError(f"Workspace {workspace_id} not found")
 
     if workspace["engine"] != "kendra":
         raise genai_core.types.CommonError(
@@ -38,8 +36,7 @@ def kendra_is_syncing(workspace_id: str):
     workspace = genai_core.workspaces.get_workspace(workspace_id=workspace_id)
 
     if not workspace:
-        raise genai_core.types.CommonError(
-            f"Workspace {workspace_id} not found")
+        raise genai_core.types.CommonError(f"Workspace {workspace_id} not found")
 
     if workspace["engine"] != "kendra":
         raise genai_core.types.CommonError(

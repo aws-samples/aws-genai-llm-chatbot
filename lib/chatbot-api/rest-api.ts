@@ -1,17 +1,17 @@
-import * as path from "path";
-import { Construct } from "constructs";
-import { Shared } from "../shared";
-import { SystemConfig, SageMakerLLMEndpoint } from "../shared/types";
-import { RagEngines } from "../rag-engines";
 import * as cdk from "aws-cdk-lib";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as iam from "aws-cdk-lib/aws-iam";
-import * as logs from "aws-cdk-lib/aws-logs";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import { Construct } from "constructs";
+import * as path from "path";
+import { RagEngines } from "../rag-engines";
+import { Shared } from "../shared";
+import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
 
 export interface RestApiProps {
   readonly shared: Shared;
@@ -20,8 +20,8 @@ export interface RestApiProps {
   readonly userPool: cognito.UserPool;
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
-  readonly llmsParameter: ssm.StringParameter;
-  readonly llms: SageMakerLLMEndpoint[];
+  readonly modelsParameter: ssm.StringParameter;
+  readonly models: SageMakerModelEndpoint[];
 }
 
 export class RestApi extends Construct {
@@ -47,18 +47,16 @@ export class RestApi extends Construct {
       logRetention: logs.RetentionDays.ONE_WEEK,
       layers: [
         props.shared.powerToolsLayer,
-        props.shared.commonLayer.layer,
+        props.shared.commonLayer,
         props.shared.pythonSDKLayer,
       ],
       vpc: props.shared.vpc,
       securityGroups: [apiSecurityGroup],
-      vpcSubnets: props.shared.vpc.selectSubnets({
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      }),
+      vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
-        LARGE_LANGUAGE_MODELS_PARAMETER_NAME: props.llmsParameter.parameterName,
+        MODELS_PARAMETER_NAME: props.modelsParameter.parameterName,
         X_ORIGIN_VERIFY_SECRET_ARN: props.shared.xOriginVerifySecret.secretArn,
         API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
         SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
@@ -192,7 +190,7 @@ export class RestApi extends Construct {
             new iam.PolicyStatement({
               actions: ["kendra:Retrieve", "kendra:Query"],
               resources: [
-                `arn:aws:kendra:${item.region}:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
+                `arn:${cdk.Aws.PARTITION}:kendra:${item.region}:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
               ],
             })
           );
@@ -221,7 +219,7 @@ export class RestApi extends Construct {
       );
     }
 
-    for (const model of props.llms) {
+    for (const model of props.models) {
       apiHandler.addToRolePolicy(
         new iam.PolicyStatement({
           actions: ["sagemaker:InvokeEndpoint"],
@@ -243,7 +241,7 @@ export class RestApi extends Construct {
     props.shared.xOriginVerifySecret.grantRead(apiHandler);
     props.shared.apiKeysSecret.grantRead(apiHandler);
     props.shared.configParameter.grantRead(apiHandler);
-    props.llmsParameter.grantRead(apiHandler);
+    props.modelsParameter.grantRead(apiHandler);
     props.sessionsTable.grantReadWriteData(apiHandler);
     props.ragEngines?.uploadBucket.grantReadWrite(apiHandler);
     props.ragEngines?.processingBucket.grantReadWrite(apiHandler);

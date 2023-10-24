@@ -1,12 +1,12 @@
-import { Construct } from "constructs";
-import { Shared } from "../../shared";
-import { SystemConfig } from "../../shared/types";
-import { RagDynamoDBTables } from "../rag-dynamodb-tables";
-import { CreateOpenSearchWorkspace } from "./create-opensearch-workspace";
-import { Utils } from "../../shared/utils";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as oss from "aws-cdk-lib/aws-opensearchserverless";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { Construct } from "constructs";
+import { Shared } from "../../shared";
+import { SystemConfig } from "../../shared/types";
+import { Utils } from "../../shared/utils";
+import { RagDynamoDBTables } from "../rag-dynamodb-tables";
+import { CreateOpenSearchWorkspace } from "./create-opensearch-workspace";
 
 export interface OpenSearchVectorProps {
   readonly config: SystemConfig;
@@ -44,9 +44,7 @@ export class OpenSearchVector extends Construct {
 
     const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
       name: Utils.getName(props.config, "genaichatbot-vpce"),
-      subnetIds: props.shared.vpc.selectSubnets({
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      }).subnetIds,
+      subnetIds: props.shared.vpc.privateSubnets.map((subnet) => subnet.subnetId),
       vpcId: props.shared.vpc.vpcId,
       securityGroupIds: [sg.securityGroupId],
     });

@@ -32,7 +32,7 @@ export default function Welcome() {
           header={
             <Header
               variant="h1"
-              description="An opensource, modular and comprehensive solution to deploy a multi LLM powered chatbot using AWS CDK on AWS."
+              description="An opensource, modular and comprehensive solution to deploy a multi-model and multi-RAG powered chatbot using AWS CDK on AWS."
               actions={
                 <RouterButton
                   iconAlign="right"
@@ -40,7 +40,7 @@ export default function Welcome() {
                   variant="primary"
                   href="/chatbot/playground"
                 >
-                  Start chatting
+                  Getting Started
                 </RouterButton>
               }
             >
@@ -145,7 +145,7 @@ export default function Welcome() {
                   Cognito Authentication
                 </Link>{" "}
                 to help you interact and experiment with{" "}
-                <strong>multiple LLMs</strong>,{" "}
+                <strong>multiple Models</strong>,{" "}
                 <strong>multiple RAG sources</strong>,{" "}
                 <strong>conversational history support</strong> and{" "}
                 <strong>documents upload</strong>.
@@ -223,48 +223,6 @@ export default function Welcome() {
                 },
               ]}
             />
-            <div style={{ marginTop: "-20px" }}>
-              <SpaceBetween size="l">
-                <Header
-                  variant="h1"
-                  description="Prebuilt CDK constructs to interact with your underlying models and data source"
-                >
-                  Models Interface
-                </Header>
-                <Cards
-                  cardDefinition={{
-                    header: (item) => (
-                      <Link
-                        href={item.href}
-                        external={item.external}
-                        fontSize="heading-m"
-                      >
-                        {item.name}
-                      </Link>
-                    ),
-                    sections: [
-                      {
-                        content: (item) => (
-                          <div>
-                            <div>{item.description}</div>
-                          </div>
-                        ),
-                      },
-                    ],
-                  }}
-                  cardsPerRow={[{ cards: 1 }]}
-                  items={[
-                    {
-                      name: "LangChain",
-                      external: true,
-                      href: "https://python.langchain.com/",
-                      description:
-                        "LangChain is a framework designed to simplify the creation of applications using large language models.",
-                    },
-                  ]}
-                />
-              </SpaceBetween>
-            </div>
           </SpaceBetween>
         </ContentLayout>
       }

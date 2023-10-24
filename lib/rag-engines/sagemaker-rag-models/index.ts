@@ -1,9 +1,9 @@
-import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { SystemConfig } from "../../shared/types";
-import { Shared } from "../../shared";
+import * as path from "path";
 import { DeploymentType, SageMakerModel } from "../../sagemaker-model";
+import { Shared } from "../../shared";
+import { SystemConfig } from "../../shared/types";
 
 export interface SageMakerRagModelsProps {
   readonly config: SystemConfig;

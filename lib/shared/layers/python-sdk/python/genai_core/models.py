@@ -2,6 +2,8 @@ import genai_core.types
 import genai_core.clients
 import genai_core.parameters
 
+from genai_core.types import Modality, Provider, ModelInterface
+
 
 def list_models():
     models = []
@@ -34,10 +36,13 @@ def list_openai_models():
 
     return [
         {
-            "provider": "openai",
+            "provider": Provider.OPENAI.value,
             "name": model["id"],
             "streaming": True,
-            "type": "text-generation",
+            "inputModalities": [Modality.TEXT.value],
+            "outputModalities": [Modality.TEXT.value],
+            "interface": ModelInterface.LANGCHIAN.value,
+            "ragSupported": True,
         }
         for model in models.data
         if model["id"].startswith("gpt")
@@ -55,18 +60,18 @@ def list_bedrock_models():
 
         models = [
             {
-                "provider": "bedrock",
+                "provider": Provider.BEDROCK.value,
                 "name": model["modelId"],
-                "streaming": model["modelId"].startswith("amazon")
-                or model["modelId"].startswith("anthropic"),
-                "type": "text-generation",
+                "streaming": model.get("responseStreamingSupported", False),
+                "inputModalities": model["inputModalities"],
+                "outputModalities": model["outputModalities"],
+                "interface": ModelInterface.LANGCHIAN.value,
+                "ragSupported": True,
             }
             for model in bedrock_models
-            # Exclude text-to-image models and Titan-Embeddings models
-            if not (
-                model["modelId"].startswith("stability")
-                or "titan-e" in model["modelId"]
-            )
+            # Exclude embeddings and stable diffusion models
+            if Modality.EMBEDDING.value not in model["outputModalities"]
+            and Modality.IMAGE.value not in model["outputModalities"]
         ]
 
         return models
@@ -86,12 +91,18 @@ def list_bedrock_finetuned_models():
 
         models = [
             {
-                "provider": "bedrock",
+                "provider": Provider.BEDROCK.value,
                 "name": f"{model['modelName']} (base model: {model['baseModelName']})",
-                "streaming": False,
-                "type": "text-generation",
+                "streaming": model.get("responseStreamingSupported", False),
+                "inputModalities": model["inputModalities"],
+                "outputModalities": model["outputModalities"],
+                "interface": ModelInterface.LANGCHIAN.value,
+                "ragSupported": True,
             }
             for model in bedrock_custom_models
+            # Exclude embeddings and stable diffusion models
+            if Modality.EMBEDDING.value not in model["outputModalities"]
+            and Modality.IMAGE.value not in model["outputModalities"]
         ]
 
         return models
@@ -101,13 +112,17 @@ def list_bedrock_finetuned_models():
 
 
 def list_sagemaker_models():
-    models = genai_core.parameters.get_sagemaker_llms()
+    models = genai_core.parameters.get_sagemaker_models()
 
     return [
         {
-            "provider": "sagemaker",
+            "provider": Provider.SAGEMAKER.value,
             "name": model["name"],
-            "streaming": False,
+            "streaming": model.get("responseStreamingSupported", False),
+            "inputModalities": model["inputModalities"],
+            "outputModalities": model["outputModalities"],
+            "interface": model["interface"],
+            "ragSupported": model["ragSupported"],
         }
         for model in models
     ]

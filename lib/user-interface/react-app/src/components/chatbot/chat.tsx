@@ -34,6 +34,7 @@ export default function Chat(props: { sessionId?: string }) {
       maxTokens: MAX_TOKENS,
       temperature: TEMPERATURE,
       topP: TOP_P,
+      files: null,
       promptTemplate: PROMPT_TEMPLATE,
       ragPromptTemplate: RAG_PROMPT_TEMPLATE,
       ragSqPromptTemplate: RAG_SQ_PROMPT_TEMPLATE,

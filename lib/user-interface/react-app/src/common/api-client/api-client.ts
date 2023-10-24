@@ -3,7 +3,7 @@ import { CrossEncodersClient } from "./cross-encoders-client";
 import { EmbeddingsClient } from "./embeddings-client";
 import { RagEnginesClient } from "./rag-engines-client";
 import { HealthClient } from "./health-client";
-import { LLMsClient } from "./llms-client";
+import { ModelsClient } from "./models-client";
 import { WorkspacesClient } from "./workspaces-client";
 import { SessionsClient } from "./sessions-client";
 import { SemanticSearchClient } from "./semantic-search-client";
@@ -15,7 +15,7 @@ export class ApiClient {
   private _ragEnginesClient: RagEnginesClient | undefined;
   private _embeddingsClient: EmbeddingsClient | undefined;
   private _crossEncodersClient: CrossEncodersClient | undefined;
-  private _llmsClient: LLMsClient | undefined;
+  private _modelsClient: ModelsClient | undefined;
   private _workspacesClient: WorkspacesClient | undefined;
   private _sessionsClient: SessionsClient | undefined;
   private _semanticSearchClient: SemanticSearchClient | undefined;
@@ -54,12 +54,12 @@ export class ApiClient {
     return this._crossEncodersClient;
   }
 
-  public get llms() {
-    if (!this._llmsClient) {
-      this._llmsClient = new LLMsClient(this._appConfig);
+  public get models() {
+    if (!this._modelsClient) {
+      this._modelsClient = new ModelsClient(this._appConfig);
     }
 
-    return this._llmsClient;
+    return this._modelsClient;
   }
 
   public get workspaces() {

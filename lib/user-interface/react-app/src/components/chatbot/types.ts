@@ -1,13 +1,13 @@
-import { JsonPrimitive, JsonValue } from "react-use-websocket/dist/lib/types";
-import { LLMItem, LoadingStatus, WorkspaceItem } from "../../common/types";
+import { ModelItem, LoadingStatus, WorkspaceItem } from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
-
+import { ModelInterface } from "../../common/types";
 export interface ChatBotConfiguration {
   streaming: boolean;
   showMetadata: boolean;
   maxTokens: number;
   temperature: number;
   topP: number;
+  files: ImageFile[] | null;
   promptTemplate: string;
   ragPromptTemplate: string;
   ragSqPromptTemplate: string;
@@ -16,8 +16,9 @@ export interface ChatBotConfiguration {
 export interface ChatInputState {
   value: string;
   workspaces?: WorkspaceItem[];
-  models?: LLMItem[];
+  models?: ModelItem[];
   selectedModel: SelectProps.Option | null;
+  selectedModelMetadata: ModelItem | null;
   selectedWorkspace: SelectProps.Option | null;
   modelsStatus: LoadingStatus;
   workspacesStatus: LoadingStatus;
@@ -35,13 +36,33 @@ export enum ChatBotAction {
   Error = "error",
 }
 
-export interface ChatBotRunRequest
-  extends Record<string, JsonValue | JsonPrimitive> {
+export enum ChatBotModelInterface {
+  Langchain = "langchain",
+  Idefics = "idefics",
+}
+
+export enum ChatBotMode {
+  Chain = "chain",
+}
+
+export enum FileStorageProvider {
+  S3 = "s3",
+}
+
+export interface ImageFile {
+  provider: FileStorageProvider;
+  key: string;
+  url: string;
+}
+
+export interface ChatBotRunRequest {
   action: ChatBotAction.Run;
+  modelInterface: ModelInterface;
   data: {
     modelName: string;
     provider: string;
     sessionId?: string;
+    files: ImageFile[] | null;
     text: string;
     mode: string;
     workspaceId?: string;
@@ -58,7 +79,7 @@ export interface ChatBotToken {
 export interface ChatBotHistoryItem {
   type: ChatBotMessageType;
   content: string;
-  metadata: Record<string, string | boolean | number>;
+  metadata: Record<string, string | boolean | number | null | undefined | ImageFile[]>;
   tokens?: ChatBotToken[];
 }
 
@@ -68,6 +89,17 @@ export interface ChatBotMessageResponse {
     sessionId: string;
     token?: ChatBotToken;
     content?: string;
-    metadata: Record<string, string | boolean | number>;
+    metadata: Record<string, string | boolean | number | null | undefined| ImageFile[]>;
   };
+}
+
+export enum ChabotInputModality {
+  Text = "TEXT",
+  Image = "IMAGE",
+}
+
+export enum ChabotOutputModality {
+  Text = "TEXT",
+  Image = "IMAGE",
+  Embedding = "EMBEDDING",
 }

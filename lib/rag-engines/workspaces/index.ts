@@ -1,13 +1,13 @@
-import { Construct } from "constructs";
-import { SystemConfig } from "../../shared/types";
-import { Shared } from "../../shared";
-import { DeleteWorkspace } from "./delete-workspace";
-import { AuroraPgVector } from "../aurora-pgvector";
-import { OpenSearchVector } from "../opensearch-vector";
-import { KendraRetrieval } from "../kendra-retrieval";
-import { DataImport } from "../data-import";
-import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { Construct } from "constructs";
+import { Shared } from "../../shared";
+import { SystemConfig } from "../../shared/types";
+import { AuroraPgVector } from "../aurora-pgvector";
+import { DataImport } from "../data-import";
+import { KendraRetrieval } from "../kendra-retrieval";
+import { OpenSearchVector } from "../opensearch-vector";
+import { RagDynamoDBTables } from "../rag-dynamodb-tables";
+import { DeleteWorkspace } from "./delete-workspace";
 
 export interface WorkkspacesProps {
   readonly config: SystemConfig;
