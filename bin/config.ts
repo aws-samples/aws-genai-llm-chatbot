@@ -1,7 +1,4 @@
-import {
-  SupportedRegion,
-  SystemConfig,
-} from "../lib/shared/types";
+import { SupportedRegion, SystemConfig } from "../lib/shared/types";
 import { existsSync, readFileSync } from "fs";
 
 export function getConfig(): SystemConfig {
@@ -10,7 +7,7 @@ export function getConfig(): SystemConfig {
   }
   // Default config
   return {
-    prefix: "",
+    prefix: "X",
     /*vpc: {
       vpcId: "vpc-00000000000000000",
       createVpcEndpoints: true,
@@ -25,17 +22,17 @@ export function getConfig(): SystemConfig {
       sagemaker: [],
     },
     rag: {
-      enabled: false,
+      enabled: true,
       engines: {
         aurora: {
-          enabled: false,
+          enabled: true,
         },
         opensearch: {
-          enabled: false,
+          enabled: true,
         },
         kendra: {
-          enabled: false,
-          createIndex: false,
+          enabled: true,
+          createIndex: true,
         },
       },
       embeddingsModels: [
