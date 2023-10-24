@@ -11,17 +11,23 @@ from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingErro
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-from genai_core.utils.websocket import send_to_client
-from genai_core.types import ChatbotAction
-
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
 logger = Logger()
 
 AWS_REGION = os.environ["AWS_REGION"]
+MESSAGES_TOPIC_ARN = os.environ["MESSAGES_TOPIC_ARN"]
 API_KEYS_SECRETS_ARN = os.environ["API_KEYS_SECRETS_ARN"]
 
+sns = boto3.client("sns", region_name=AWS_REGION)
 sequence_number = 0
+
+
+def send_to_client(detail):
+    sns.publish(
+        TopicArn=MESSAGES_TOPIC_ARN,
+        Message=json.dumps(detail),
+    )
 
 
 def on_llm_new_token(
@@ -34,7 +40,8 @@ def on_llm_new_token(
     send_to_client(
         {
             "type": "text",
-            "action": ChatbotAction.LLM_NEW_TOKEN.value,
+            "action": "llm_new_token",
+            "direction": "OUT",
             "connectionId": connection_id,
             "userId": user_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
@@ -71,6 +78,7 @@ def handle_run(record):
     )
 
     model = adapter(
+        workspace_id=workspace_id,
         model_id=model_id,
         mode=mode,
         session_id=session_id,
@@ -80,7 +88,7 @@ def handle_run(record):
 
     response = model.run(
         prompt=prompt,
-        workspace_id=workspace_id,
+        tools=[],
     )
 
     logger.info(response)
@@ -88,7 +96,8 @@ def handle_run(record):
     send_to_client(
         {
             "type": "text",
-            "action": ChatbotAction.FINAL_RESPONSE.value,
+            "action": "final_response",
+            "direction": "OUT",
             "connectionId": connection_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "userId": user_id,
@@ -104,7 +113,7 @@ def record_handler(record: SQSRecord):
     detail: dict = json.loads(message["Message"])
     logger.info(detail)
 
-    if detail["action"] == ChatbotAction.RUN.value:
+    if detail["action"] == "run":
         handle_run(detail)
 
 

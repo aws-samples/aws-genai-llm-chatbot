@@ -32,12 +32,12 @@ class BedrockTitanAdapter(ModelAdapter):
             callbacks=[self.callback_handler],
         )
 
-    def get_prompt(self, model_kwargs={}):
+    def get_prompt(self, template=None):
         input_variables = ["input", "chat_history"]
         prompt_template_args = {
             "chat_history": "{chat_history}",
             "input_variables": input_variables,
-            "template": model_kwargs["promptTemplate"],
+            "template": template,
         }
         prompt_template = PromptTemplate(**prompt_template_args)
 

@@ -5,13 +5,11 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import ConversationalRetrievalChain, ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.prompt import PromptTemplate
+from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 from langchain.chains.conversational_retrieval.prompts import (
     QA_PROMPT,
     CONDENSE_QUESTION_PROMPT,
 )
-
-from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
-from genai_core.types import ChatbotMode
 
 logger = Logger()
 
@@ -21,9 +19,8 @@ class Mode(Enum):
 
 
 class ModelAdapter:
-    def __init__(
-        self, session_id, user_id, mode=ChatbotMode.CHAIN.value, model_kwargs={}
-    ):
+    def __init__(self, session_id, user_id, workspace_id=None, mode="chain", model_kwargs={}):
+        self.workspace_id = workspace_id
         self.session_id = session_id
         self.user_id = user_id
         self._mode = mode
@@ -34,9 +31,9 @@ class ModelAdapter:
 
         self.chat_history = self.get_chat_history()
         self.llm = self.get_llm(model_kwargs)
-        self.condense_question_prompt = self.get_condense_question_prompt(model_kwargs)
-        self.qa_prompt = self.get_qa_prompt(model_kwargs)
-        self.prompt = self.get_prompt(model_kwargs)
+        self.condense_question_prompt = self.get_condense_question_prompt(model_kwargs["ragSqPromptTemplate"])
+        self.qa_prompt = self.get_qa_prompt(model_kwargs["ragPromptTemplate"])
+        self.prompt = self.get_prompt(model_kwargs["promptTemplate"])
 
     def __bind_callbacks(self):
         callback_methods = [method for method in dir(self) if method.startswith("on_")]
@@ -69,8 +66,8 @@ class ModelAdapter:
             output_key=output_key,
         )
 
-    def get_prompt(self, model_kwargs={}):
-        template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
+    def get_prompt(self, template=None):
+        default_template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
 
         Current conversation:
         {chat_history}
@@ -80,26 +77,26 @@ class ModelAdapter:
         prompt_template_args = {
             "chat_history": "{chat_history}",
             "input_variables": input_variables,
-            "template": template,
+            "template": default_template,
         }
         prompt_template = PromptTemplate(**prompt_template_args)
 
         return prompt_template
 
-    def get_condense_question_prompt(self, model_kwargs={}):
+    def get_condense_question_prompt(self, template=None):
         return CONDENSE_QUESTION_PROMPT
 
-    def get_qa_prompt(self, model_kwargs={}):
+    def get_qa_prompt(self, template=None):
         return QA_PROMPT
 
-    def run_with_chain(self, user_prompt, workspace_id=None):
+    def run_with_chain(self, user_prompt):
         if not self.llm:
             raise ValueError("llm must be set")
 
-        if workspace_id:
+        if self.workspace_id:
             conversation = ConversationalRetrievalChain.from_llm(
                 self.llm,
-                WorkspaceRetriever(workspace_id=workspace_id),
+                WorkspaceRetriever(workspace_id=self.workspace_id),
                 condense_question_prompt=self.condense_question_prompt,
                 combine_docs_chain_kwargs={"prompt": self.qa_prompt},
                 return_source_documents=True,
@@ -123,7 +120,7 @@ class ModelAdapter:
                 "mode": self._mode,
                 "sessionId": self.session_id,
                 "userId": self.user_id,
-                "workspaceId": workspace_id,
+                "workspaceId": self.workspace_id,
                 "documents": documents,
             }
 
@@ -164,12 +161,12 @@ class ModelAdapter:
             "metadata": metadata,
         }
 
-    def run(self, prompt, workspace_id=None, *args, **kwargs):
+    def run(self, prompt, *args, **kwargs):
         logger.debug(f"run with {kwargs}")
-        logger.debug(f"workspace_id {workspace_id}")
+        logger.debug(f"workspace_id {self.workspace_id}")
         logger.debug(f"mode: {self._mode}")
 
-        if self._mode == ChatbotMode.CHAIN.value:
-            return self.run_with_chain(prompt, workspace_id)
+        if self._mode == "chain":
+            return self.run_with_chain(prompt)
 
         raise ValueError(f"unknown mode {self._mode}")
