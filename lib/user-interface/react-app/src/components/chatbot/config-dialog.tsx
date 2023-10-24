@@ -7,10 +7,19 @@ import {
   Modal,
   SpaceBetween,
   Toggle,
+  Textarea
 } from "@cloudscape-design/components";
 import { useForm } from "../../common/hooks/use-form";
 import { ChatBotConfiguration } from "./types";
 import { Dispatch } from "react";
+import {
+  PROMPT_DESC,
+  RAG_PROMPT_DESC,
+  RAG_SQ_PROMPT_DESC,
+  PROMPT_TEMPLATE, 
+  RAG_PROMPT_TEMPLATE, 
+  RAG_SQ_PROMPT_TEMPLATE,
+} from "./constants"
 
 export interface ConfigDialogProps {
   sessionId: string;
@@ -26,6 +35,9 @@ interface ChatConfigDialogData {
   maxTokens: number;
   temperature: number;
   topP: number;
+  promptTemplate: string;
+  ragPromptTemplate: string;
+  ragSqPromptTemplate: string;
 }
 
 export default function ConfigDialog(props: ConfigDialogProps) {
@@ -37,15 +49,89 @@ export default function ConfigDialog(props: ConfigDialogProps) {
         maxTokens: props.configuration.maxTokens,
         temperature: props.configuration.temperature,
         topP: props.configuration.topP,
+        promptTemplate: props.configuration.promptTemplate,
+        ragPromptTemplate: props.configuration.ragPromptTemplate,
+        ragSqPromptTemplate: props.configuration.ragSqPromptTemplate,
       };
 
       return retValue;
     },
     validate: (form) => {
+      console.log("errors")
+
       const errors: Record<string, string | string[]> = {};
 
       if (form.temperature < 0 || form.temperature > 1.0) {
         errors.temperature = "Temperature must be between 0 and 1.0";
+      }
+    
+      const requiredPromptPlaceholders =  ['input', 'chat_history'];
+
+      for (const requiredPlaceholder of requiredPromptPlaceholders) {
+          const formattedPlaceholder = `{${requiredPlaceholder}}`;
+          let start = 0;
+          let found = false;
+          let counter = 0;
+          while (start < form.promptTemplate.length && counter < 1) {
+              start = form.promptTemplate.indexOf(formattedPlaceholder, start);
+              if (start === -1 && found) {
+                  break;
+              } else if (start === -1) {
+                  errors.promptTemplate = `The Prompt Template does not contain the required placeholder: ${formattedPlaceholder}. \n`;
+                  break;
+              } 
+              else {
+                  found = true;
+                  start += formattedPlaceholder.length;
+              }
+              counter += 1;
+          }
+      }
+
+      const requiredRAGPromptPlaceholders =  ['question', 'context'];
+
+      for (const requiredPlaceholder of requiredRAGPromptPlaceholders) {
+          const formattedPlaceholder = `{${requiredPlaceholder}}`;
+          let start = 0;
+          let found = false;
+          let counter = 0;
+          while (start < form.ragPromptTemplate.length && counter < 1) {
+              start = form.ragPromptTemplate.indexOf(formattedPlaceholder, start);
+              if (start === -1 && found) {
+                  break;
+              } else if (start === -1) {
+                  errors.ragPromptTemplate = `The RAG Prompt Template does not contain the required placeholder: ${formattedPlaceholder}. \n`;
+                  break;
+              } 
+              else {
+                  found = true;
+                  start += formattedPlaceholder.length;
+              }
+              counter += 1;
+          }
+      }
+
+      const requiredRAGSQPromptPlaceholders =  ['question', 'chat_history'];
+
+      for (const requiredPlaceholder of requiredRAGSQPromptPlaceholders) {
+          const formattedPlaceholder = `{${requiredPlaceholder}}`;
+          let start = 0;
+          let found = false;
+          let counter = 0;
+          while (start < form.ragSqPromptTemplate.length && counter < 1) {
+              start = form.ragSqPromptTemplate.indexOf(formattedPlaceholder, start);
+              if (start === -1 && found) {
+                  break;
+              } else if (start === -1) {
+                  errors.ragSqPromptTemplate = `The RAG Standalone Prompt Template does not contain the required placeholder: ${formattedPlaceholder}. \n`;
+                  break;
+              } 
+              else {
+                  found = true;
+                  start += formattedPlaceholder.length;
+              }
+              counter += 1;
+          }
       }
 
       return errors;
@@ -71,10 +157,14 @@ export default function ConfigDialog(props: ConfigDialogProps) {
       temperature: props.configuration.temperature,
       maxTokens: props.configuration.maxTokens,
       topP: props.configuration.topP,
+      promptTemplate: props.configuration.promptTemplate,
+      ragPromptTemplate: props.configuration.ragPromptTemplate,
+      ragSqPromptTemplate: props.configuration.ragSqPromptTemplate,
     });
 
     props.setVisible(false);
   };
+
 
   return (
     <Modal
@@ -163,6 +253,51 @@ export default function ConfigDialog(props: ConfigDialogProps) {
 
                 onChange({ topP: floatVal });
               }}
+            />
+          </FormField>
+          <FormField
+            label="Prompt Template"
+            errorText={errors.promptTemplate}
+            description={PROMPT_DESC}
+          >
+            <Textarea
+                data-testid="prompt-template-textarea"
+                placeholder={PROMPT_TEMPLATE}
+                value={data.promptTemplate.trim()}
+                rows={7}
+                onChange={({ detail: { value } }) => {
+                  onChange({ promptTemplate: value.trim() });
+                }}
+            />
+          </FormField>
+          <FormField
+            label="RAG Prompt Template (Only Claude)"
+            errorText={errors.ragPromptTemplate}
+            description={RAG_PROMPT_DESC}
+          >
+            <Textarea
+                data-testid="prompt-template-textarea"
+                placeholder={RAG_PROMPT_TEMPLATE}
+                value={data.ragPromptTemplate.trim()}
+                rows={7}
+                onChange={({ detail: { value } }) => {
+                  onChange({ ragPromptTemplate: value.trim() });
+                }}
+            />
+          </FormField>
+          <FormField
+            label="RAG Standalone Question Prompt Template (Only Claude)"
+            errorText={errors.ragSqPromptTemplate}
+            description={RAG_SQ_PROMPT_DESC}
+          >
+            <Textarea
+                data-testid="prompt-template-textarea"
+                placeholder={RAG_SQ_PROMPT_TEMPLATE}
+                value={data.ragSqPromptTemplate.trim()}
+                rows={7}
+                onChange={({ detail: { value } }) => {
+                  onChange({ ragSqPromptTemplate: value.trim() });
+                }}
             />
           </FormField>
         </SpaceBetween>

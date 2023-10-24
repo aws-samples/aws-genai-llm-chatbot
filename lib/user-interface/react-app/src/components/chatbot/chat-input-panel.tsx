@@ -268,6 +268,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
           maxTokens: props.configuration.maxTokens,
           temperature: props.configuration.temperature,
           topP: props.configuration.topP,
+          promptTemplate: props.configuration.promptTemplate,
+          ragPromptTemplate: props.configuration.ragPromptTemplate,
+          ragSqPromptTemplate: props.configuration.ragSqPromptTemplate,
         },
       },
     };

@@ -32,21 +32,12 @@ class BedrockTitanAdapter(ModelAdapter):
             callbacks=[self.callback_handler],
         )
 
-    def get_prompt(self):
-        template = """Human: The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
-
-Current conversation:
-{chat_history}
-
-Question: {input}
-
-Assistant:"""
-
+    def get_prompt(self, model_kwargs={}):
         input_variables = ["input", "chat_history"]
         prompt_template_args = {
             "chat_history": "{chat_history}",
             "input_variables": input_variables,
-            "template": template,
+            "template": model_kwargs["promptTemplate"],
         }
         prompt_template = PromptTemplate(**prompt_template_args)
 

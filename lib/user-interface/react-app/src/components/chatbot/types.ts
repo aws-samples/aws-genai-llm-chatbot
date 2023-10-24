@@ -8,6 +8,9 @@ export interface ChatBotConfiguration {
   temperature: number;
   topP: number;
   files: ImageFile[] | null;
+  promptTemplate: string;
+  ragPromptTemplate: string;
+  ragSqPromptTemplate: string;
 }
 
 export interface ChatInputState {
