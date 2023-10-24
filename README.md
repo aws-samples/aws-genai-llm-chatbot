@@ -294,7 +294,7 @@ You can remove the stacks and all the associated resources created in your AWS a
 ```bash
 npx cdk destroy
 ```
-> **Note**: Depending on which resources have been deployed. Destroying the stack might take a while up to 45m. If deletion fails multipe times please [manually delete ENIs](https://repost.aws/knowledge-center/lambda-eni-find-delete) and re-attempt a stack deletion.
+> **Note**: Depending on which resources have been deployed. Destroying the stack might take a while up to 45m. If deletion fails multipe times please manually delete the remaining stack's ENIs, you can filter ENIs by VPC/Subnet/etc using the search bar [here](https://console.aws.amazon.com/ec2/home#NIC) in the AWS console) and re-attempt a stack deletion.
 
 
 # Architecture
