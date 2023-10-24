@@ -1,8 +1,9 @@
 export const STREAMING = true
 export const SHOW_METADATA = false
-export const MAX_TOKENS = 3000
-export const TEMPERATURE = 0.5
-export const TOP_P = 1.0
+export const MAX_TOKENS = 512
+export const TEMPERATURE = 0.6
+export const TOP_P = 0.9
+export const FILES = null
 
 export const PROMPT_TEMPLATE: string = `Human: The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
 
