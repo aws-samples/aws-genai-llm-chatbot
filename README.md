@@ -263,7 +263,7 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 # Multimodal models
 Currently the following multimodal models supported are:
-- [IDEFICS 9b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
+- [IDEFICS 9b Instruct](https://huggingface.co/HuggingFaceM4/idefics-9b)
   - Requires `ml.g5.12xlarge` instance.
 - [IDEFICS 80b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
   - Requires `ml.g5.48xlarge` instance.
