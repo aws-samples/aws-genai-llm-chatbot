@@ -35,6 +35,15 @@ Supported model providers:
 - Third-party providers via API such as Anthropic, Cohere, AI21 Labs, OpenAI, etc. [See available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list.
 
 
+## Experiment with multimodal models
+Deploy [IDEFICS](https://huggingface.co/blog/idefics) models on [Amazon SageMaker](https://aws.amazon.com/sagemaker/) and see how the chatbot can answer questions about images, describe visual content, generate text grounded in multiple images.
+
+
+![sample](assets/multimodal-sample.gif "AWS GenAI Chatbot")
+
+Read more how to deploy multimodal IDEFICS on Amazon SageMaker [here]().
+
+
 ## Experiment with multiple RAG options with Workspaces
 A workspace is a logical namespace where you can upload files for indexing and storage in one of the vector databases. You can select the embeddings model and text-splitting configuration of your choice.
 
@@ -251,9 +260,32 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 10. Login with the user created in .8; you will be asked to change the password.
 
+
+# Multimodal models
+Currently the following multimodal models supported are:
+- [IDEFICS 9b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
+  - Requires `ml.g5.12xlarge` instance.
+- [IDEFICS 80b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
+  - Requires `ml.g5.48xlarge` instance.
+
+In order to have the right instance types and how to request them read [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
+
+
+To deploy a multimodal model simply follow the [deploy instructions](#deploy)
+and select one ot the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as [instructed in the above section]((#deployment-dependencies-installation)).
+
+![sample](assets/select-multimodal.gif "AWS GenAI Chatbot")
+
+
+> ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware not letting this models running unused to avoid unncesseray costs. 
+
+
+
 # Run user interface locally
 
 See instructions in the README file of the [`lib/user-interface/react-app`](./lib/user-interface/react-app) folder.
+
+
 
 # Clean up
 You can remove the stacks and all the associated resources created in your AWS account by running the following command:
@@ -261,6 +293,8 @@ You can remove the stacks and all the associated resources created in your AWS a
 ```bash
 npx cdk destroy
 ```
+> **Note**: Depending on which resources have been deployed. Destroying the stack might take a while up to 45m. If deletion fails multipe times please [manually delete ENIs](https://repost.aws/knowledge-center/lambda-eni-find-delete) and re-attempt a stack deletion.
+
 
 # Architecture
 This repository comes with several reusable CDK constructs. Giving you freedom to decide what the deploy and what not. 

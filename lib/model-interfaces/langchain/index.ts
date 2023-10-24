@@ -193,8 +193,8 @@ export class LangChainInterface extends Construct {
       })
     );
 
-    const deadLetterQueue = new sqs.Queue(this, "LangchainModelInterfaceDLQ");
-    const queue = new sqs.Queue(this, "LangchainModelInterfaceQueue", {
+    const deadLetterQueue = new sqs.Queue(this, "DLQ");
+    const queue = new sqs.Queue(this, "Queue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(15 * 6),
