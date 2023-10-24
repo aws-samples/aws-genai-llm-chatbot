@@ -41,7 +41,7 @@ Deploy [IDEFICS](https://huggingface.co/blog/idefics) models on [Amazon SageMake
 
 ![sample](assets/multimodal-sample.gif "AWS GenAI Chatbot")
 
-Read more how to deploy multimodal IDEFICS on Amazon SageMaker [here]().
+Read more how to deploy multimodal IDEFICS on Amazon SageMaker [here](#multimodal-models).
 
 
 ## Experiment with multiple RAG options with Workspaces
