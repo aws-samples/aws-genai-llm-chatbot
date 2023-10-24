@@ -159,7 +159,12 @@ async function processCreateOptions(options: any): Promise<void> {
       message:
         "Which SageMaker Models do you want to enable (enter for None, space to select)",
       choices: Object.values(SupportedSageMakerModels),
-      initial: options.sagemakerModels || [],
+      initial:
+        options.sagemakerModels.filter((m: string) =>
+          Object.values(SupportedSageMakerModels)
+            .map((x) => x.toString())
+            .includes(m)
+        ) || [],
     },
     {
       type: "confirm",
@@ -205,10 +210,6 @@ async function processCreateOptions(options: any): Promise<void> {
   const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
     let existingIndex: any = existingKendraIndices.pop();
-    console.log(
-      existingIndex?.region,
-      Object.values(SupportedRegion).indexOf(existingIndex?.region)
-    );
     const kendraQ = [
       {
         type: "input",
