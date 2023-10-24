@@ -41,7 +41,7 @@ Deploy [IDEFICS](https://huggingface.co/blog/idefics) models on [Amazon SageMake
 
 ![sample](assets/multimodal-sample.gif "AWS GenAI Chatbot")
 
-Read more how to deploy multimodal IDEFICS on Amazon SageMaker [here](#multimodal-models).
+Read more about deploying multimodal IDEFICS on Amazon SageMaker [here](#multimodal-models).
 
 
 ## Experiment with multiple RAG options with Workspaces
@@ -87,31 +87,31 @@ Before you begin using the solution, there are certain precautions you must take
 # Amazon SageMaker requirements (for self-hosted models only)
 **Instance type quota increase**
 
-If you are looking to self host models on Amazon SageMaker You'll likely need to request an increase in service quota for specific SageMaker instance types such as the `ml.g5` instance type. This will give access to latest generation of GPU/Multi-GPU instances types. [You can do this from the AWS console](console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
+If you are looking to self-host models on Amazon SageMaker, you'll likely need to request an increase in service quota for specific SageMaker instance types, such as the `ml.g5` instance type. This will give access to the latest generation of GPU/Multi-GPU instance types. [You can do this from the AWS console](console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
 
 # Amazon Bedrock requirements
 **Base Models Access**
 
-If you are looking to interact with models from Amazon Bedrock, you need to [request access to the base models in one of the regions where Amazon Bedrock is available](https://console.aws.amazon.com/bedrock/home?#/modelaccess). Make sure to read and accept models end-user license agreements or EULA.
+If you are looking to interact with models from Amazon Bedrock, you need to [request access to the base models in one of the regions where Amazon Bedrock is available](https://console.aws.amazon.com/bedrock/home?#/modelaccess). Make sure to read and accept models' end-user license agreements or EULA.
 
 Note:
-- You can deploy the soluton to a different region from the one where you requested Base Model access.
+- You can deploy the solution to a different region from where you requested Base Model access.
 - **While the Base Model access approval is instant, it might take several minutes to get access and see the list of models in the UI.**
 
 ![sample](assets/enable-models.gif "AWS GenAI Chatbot")
 
 
-# Third party models requirements
-You can also interact with external providers via their API such as AI21 Labs, Cohere, OpenAI, etc. 
+# Third-party models requirements
+You can also interact with external providers via their API, such as AI21 Labs, Cohere, OpenAI, etc. 
 
 The provider must be supported in the [Model Interface](./lib/model-interfaces/langchain/functions/request-handler/index.py), [see available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list of providers.
 
-Usually an `API_KEY` is required to integrated with 3P models. To do so, the [Model Interface](./lib/model-interfaces/langchain/index.ts) deployes a Secrets in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), intially with an empty JSON `{}`, where you can add your API KEYS for one or more providers. 
+Usually, an `API_KEY` is required to integrate with 3P models. To do so, the [Model Interface](./lib/model-interfaces/langchain/index.ts) deployes a Secrets in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), intially with an empty JSON `{}`, where you can add your API KEYS for one or more providers. 
 
-These keys will be injected at runtime into the Lambda function Environment Variables, they won't be visibile in the AWS Lambda Console.
+These keys will be injected at runtime into the Lambda function Environment Variables; they won't be visible in the AWS Lambda Console.
 
-For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Cohere endponts:
-- Open the [Model Interface Keys Secret](./lib/model-interfaces/langchain/index.ts#L38) in Secrets Manager. You can find the secret name in the stack output too.
+For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Cohere endpoints:
+- Open the [Model Interface Keys Secret](./lib/model-interfaces/langchain/index.ts#L38) in Secrets Manager. You can find the secret name in the stack output, too.
 - Update the Secrets by adding a key to the JSON 
 ```json
 {
@@ -142,7 +142,7 @@ If you'd like to use [GitHub Codespaces](https://github.com/features/codespaces)
   - `AdministratorAccess` policy granted to your user (for production, we recommend restricting access as needed)
   - Take note of `Access key` and `Secret access key`.
 
-To get started click on the button below
+To get started, click on the button below.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/aws-samples/aws-genai-llm-chatbot)
 
@@ -159,7 +159,7 @@ Default region name: <the region you plan to deploy the solution to>
 Default output format: json
 ```
 
-You are all set for deployment, you can now jump to [.3 of the deployment section below](#deployment-dependencies-installation).
+You are all set for deployment; you can now jump to [.3 of the deployment section below](#deployment-dependencies-installation).
 
 #### Local deployment
 If you have decided not to use AWS Cloud9 or GitHub Codespaces, verify that your environment satisfies the following prerequisites:
@@ -226,7 +226,7 @@ Your configuration is now stored under `bin/config.json`. You can re-run the mag
 
 5. (Optional) Bootstrap AWS CDK on the target account and region
 
-> **Note**: This is required if you have never used AWS CDK before on this account and region combination. ([More information on CDK bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/cli.html#cli-bootstrap)).
+> **Note**: This is required if you have never used AWS CDK on this account and region combination. ([More information on CDK bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/cli.html#cli-bootstrap)).
 
 ```bash
 npx cdk bootstrap aws://{targetAccountId}/{targetRegion}
@@ -262,23 +262,23 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 
 # Multimodal models
-Currently the following multimodal models supported are:
+Currently, the following multimodal models are supported:
 - [IDEFICS 9b Instruct](https://huggingface.co/HuggingFaceM4/idefics-9b)
   - Requires `ml.g5.12xlarge` instance.
 - [IDEFICS 80b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
   - Requires `ml.g5.48xlarge` instance.
 
-In order to have the right instance types and how to request them read [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
+To have the right instance types and how to request them, read [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
 
 > NOTE: Make sure to review [IDEFICS models license sections](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct#license).
 
-To deploy a multimodal model simply follow the [deploy instructions](#deploy)
-and select one ot the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as [instructed in the above section]((#deployment-dependencies-installation)).
+To deploy a multimodal model, follow the [deploy instructions](#deploy)
+and select one of the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as [instructed in the above section]((#deployment-dependencies-installation)).
 
 ![sample](assets/select-multimodal.gif "AWS GenAI Chatbot")
 
 
-> ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware not letting this models running unused to avoid unncesseray costs. 
+> ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware of not letting this model run unused to avoid unnecessary costs. 
 
 
 
@@ -294,11 +294,11 @@ You can remove the stacks and all the associated resources created in your AWS a
 ```bash
 npx cdk destroy
 ```
-> **Note**: Depending on which resources have been deployed. Destroying the stack might take a while up to 45m. If deletion fails multipe times please manually delete the remaining stack's ENIs, you can filter ENIs by VPC/Subnet/etc using the search bar [here](https://console.aws.amazon.com/ec2/home#NIC) in the AWS console) and re-attempt a stack deletion.
+> **Note**: Depending on which resources have been deployed. Destroying the stack might take a while, up to 45m. If the deletion fails multiple times, please manually delete the remaining stack's ENIs; you can filter ENIs by VPC/Subnet/etc using the search bar [here](https://console.aws.amazon.com/ec2/home#NIC) in the AWS console) and re-attempt a stack deletion.
 
 
 # Architecture
-This repository comes with several reusable CDK constructs. Giving you freedom to decide what the deploy and what not. 
+This repository comes with several reusable CDK constructs. Giving you the freedom to decide what to deploy and what not. 
 
 Here's an overview: 
 
