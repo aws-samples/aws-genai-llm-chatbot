@@ -61,9 +61,9 @@ const embeddingModels = [
       options.bedrockRegion = config.bedrock?.region;
       options.bedrockEndpoint = config.bedrock?.endpointUrl;
       options.bedrockRoleArn = config.bedrock?.roleArn;
-      options.sagemakerModels = config.llms?.sagemaker;
+      options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableRag = config.rag.enabled;
-      options.ragsToEnable = Object.keys(config.rag.engines).filter(
+      options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
       );
       if (
@@ -73,7 +73,7 @@ const embeddingModels = [
         options.ragsToEnable.pop("kendra");
       }
       options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
-      options.defaultEmbedding = config.rag.embeddingsModels.filter(
+      options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
         (m: any) => m.default
       )[0].name;
       options.kendraExternal = config.rag.engines.kendra.external;
@@ -160,7 +160,7 @@ async function processCreateOptions(options: any): Promise<void> {
         "Which SageMaker Models do you want to enable (enter for None, space to select)",
       choices: Object.values(SupportedSageMakerModels),
       initial:
-        options.sagemakerModels.filter((m: string) =>
+        (options.sagemakerModels ?? []).filter((m: string) =>
           Object.values(SupportedSageMakerModels)
             .map((x) => x.toString())
             .includes(m)
