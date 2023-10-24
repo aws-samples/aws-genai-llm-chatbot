@@ -125,22 +125,22 @@ export class Models extends Construct {
               lazy: true,
               mapping: {
                 "ap-southeast-1": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:ap-southeast-1:192199979996:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                  arn: `arn:aws:sagemaker:ap-southeast-1:192199979996:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
                 },
                 "ap-southeast-2": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:ap-southeast-2:666831318237:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                  arn: `arn:aws:sagemaker:ap-southeast-2:666831318237:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
                 },
                 "eu-west-1": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                  arn: `arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
                 },
                 "us-east-1": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:us-east-1:865070037744:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                  arn: `arn:aws:sagemaker:us-east-1:865070037744:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
                 },
                 "us-east-2": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:us-east-2:057799348421:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                  arn: `arn:aws:sagemaker:us-east-2:057799348421:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
                 },
                 "us-west-2": {
-                  arn: `arn:${cdk.Aws.PARTITION}:sagemaker:us-west-2:594846645681:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                  arn: `arn:aws:sagemaker:us-west-2:594846645681:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
                 },
               },
             }),
