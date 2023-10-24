@@ -1,7 +1,4 @@
-import {
-  SupportedRegion,
-  SystemConfig,
-} from "../lib/shared/types";
+import { SupportedRegion, SystemConfig } from "../lib/shared/types";
 import { existsSync, readFileSync } from "fs";
 
 export function getConfig(): SystemConfig {
