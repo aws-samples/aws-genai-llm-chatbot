@@ -111,7 +111,6 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     onMessage: (payload: { data: string }) => {
       const response: ChatBotMessageResponse = JSON.parse(payload.data);
       if (response.action === ChatBotAction.Heartbeat) {
-        console.log("Heartbeat received");
         return;
       }
 
