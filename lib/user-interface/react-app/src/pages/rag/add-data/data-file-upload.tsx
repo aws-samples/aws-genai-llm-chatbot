@@ -26,7 +26,7 @@ export interface DataFileUploadProps {
 }
 
 const fileExtensions = new Set([
-  "csv",
+  ".csv",
   ".doc",
   ".docx",
   ".epub",
@@ -200,7 +200,7 @@ export default function DataFileUpload(props: DataFileUploadProps) {
                 showFileSize
                 showFileThumbnail
                 tokenLimit={3}
-                constraintText="Text documents up to 100MB supported (.pdf, .docx, .txt, etc.)"
+                constraintText={`Text documents up to 100MB supported (${Array.from(fileExtensions.values()).join(", ")})`}
                 fileErrors={fileErrors}
                 errorText={uploadError}
               />

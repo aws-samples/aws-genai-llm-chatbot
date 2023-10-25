@@ -1,3 +1,4 @@
+import { Storage } from "aws-amplify";
 import { Dispatch, SetStateAction } from "react";
 import {
   ChatBotAction,
@@ -214,4 +215,7 @@ export function updateChatSessions(
       }
     }
   }
+export async function getSignedUrl(key: string) {
+  const signedUrl = await Storage.get(key as string);
+  return signedUrl;
 }

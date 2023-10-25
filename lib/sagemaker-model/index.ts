@@ -5,7 +5,7 @@ import { Construct } from "constructs";
 import { deployContainerModel } from "./deploy-container-model";
 import { deployCustomScriptModel } from "./deploy-custom-script-model";
 import { deployPackageModel } from "./deploy-package-model";
-import { SageMakerModelProps, DeploymentType } from "./types";
+import { DeploymentType, SageMakerModelProps } from "./types";
 
 export class SageMakerModel extends Construct {
   public readonly endpoint: sagemaker.CfnEndpoint;

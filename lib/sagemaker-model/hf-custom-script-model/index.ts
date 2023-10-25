@@ -14,7 +14,7 @@ import { ContainerImages } from "../container-images";
 import { ImageRepositoryMapping } from "../image-repository-mapping";
 
 export interface HuggingFaceCustomScriptModelProps {
-  vpc: ec2.IVpc;
+  vpc: ec2.Vpc;
   region: string;
   instanceType: string;
   modelId: string | string[];
@@ -49,14 +49,14 @@ export class HuggingFaceCustomScriptModel extends Construct {
       ? props.modelId.join(",")
       : props.modelId;
 
-    const buildBucket = new s3.Bucket(this, "BuildBucket", {
+    const buildBucket = new s3.Bucket(this, "Bucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
     // Upload build code to S3
-    new s3deploy.BucketDeployment(this, "BuildScriptDeployment", {
+    new s3deploy.BucketDeployment(this, "Script", {
       sources: [s3deploy.Source.asset(path.join(__dirname, "./build-script"))],
       retainOnDelete: false,
       destinationBucket: buildBucket,
@@ -66,7 +66,7 @@ export class HuggingFaceCustomScriptModel extends Construct {
     let deployment;
     // Upload model folder to S3
     if (codeFolder) {
-      deployment = new s3deploy.BucketDeployment(this, "ModelCodeDeployment", {
+      deployment = new s3deploy.BucketDeployment(this, "ModelCode", {
         sources: [s3deploy.Source.asset(codeFolder)],
         retainOnDelete: false,
         destinationBucket: buildBucket,

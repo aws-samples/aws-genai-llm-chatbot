@@ -45,8 +45,7 @@ def query_workspace_open_search(
     vector_search_records = vector_query(
         client, index_name, query_embeddings, vector_search_limit
     )
-    vector_search_records = _convert_records(
-        "vector_search", vector_search_records)
+    vector_search_records = _convert_records("vector_search", vector_search_records)
     items.extend(vector_search_records)
 
     if hybrid_search:

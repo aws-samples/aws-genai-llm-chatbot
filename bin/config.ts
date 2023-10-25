@@ -1,8 +1,4 @@
-import {
-  SupportedRegion,
-  SupportedSageMakerLLM,
-  SystemConfig,
-} from "../lib/shared/types";
+import { SupportedRegion, SystemConfig } from "../lib/shared/types";
 import { existsSync, readFileSync } from "fs";
 
 export function getConfig(): SystemConfig {
@@ -22,7 +18,7 @@ export function getConfig(): SystemConfig {
       endpointUrl: "https://bedrock-runtime.us-east-1.amazonaws.com",
     },
     llms: {
-      // sagemaker: [SupportedSageMakerLLM.FalconLite]
+      // sagemaker: [SupportedSageMakerModels.FalconLite]
       sagemaker: [],
     },
     rag: {

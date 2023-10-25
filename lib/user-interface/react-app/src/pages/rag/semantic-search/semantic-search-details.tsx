@@ -33,7 +33,7 @@ export default function SemanticSearchDetails(
       <ColumnLayout columns={2} variant="text-grid">
         <SpaceBetween size="l">
           <div>
-            <Box variant="awsui-key-label">Worskapce Id</Box>
+            <Box variant="awsui-key-label">Workspace Id</Box>
             <div>
               <RouterLink
                 href={`/rag/workspaces/${props.searchResults.workspaceId}`}

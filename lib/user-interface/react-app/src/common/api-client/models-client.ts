@@ -1,11 +1,11 @@
-import { ApiResult, LLMItem } from "../types";
+import { ApiResult, ModelItem } from "../types";
 import { ApiClientBase } from "./api-client-base";
 
-export class LLMsClient extends ApiClientBase {
-  async getModels(): Promise<ApiResult<LLMItem[]>> {
+export class ModelsClient extends ApiClientBase {
+  async getModels(): Promise<ApiResult<ModelItem[]>> {
     try {
       const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/llms"), {
+      const result = await fetch(this.getApiUrl("/models"), {
         headers,
       });
 

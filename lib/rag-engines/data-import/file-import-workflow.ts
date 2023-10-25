@@ -64,7 +64,7 @@ export class FileImportWorkflow extends Construct {
     const fileImportJob = new sfn.CustomState(this, "FileImportJob", {
       stateJson: {
         Type: "Task",
-        Resource: "arn:aws:states:::batch:submitJob.sync",
+        Resource: `arn:${cdk.Aws.PARTITION}:states:::batch:submitJob.sync`,
         Parameters: {
           JobDefinition:
             props.fileImportBatchJob.fileImportJob.jobDefinitionArn,

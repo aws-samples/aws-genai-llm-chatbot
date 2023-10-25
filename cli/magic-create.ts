@@ -7,7 +7,7 @@ import { Command } from "commander";
 import * as enquirer from "enquirer";
 import {
   SupportedRegion,
-  SupportedSageMakerLLM,
+  SupportedSageMakerModels,
   SystemConfig,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
@@ -61,9 +61,9 @@ const embeddingModels = [
       options.bedrockRegion = config.bedrock?.region;
       options.bedrockEndpoint = config.bedrock?.endpointUrl;
       options.bedrockRoleArn = config.bedrock?.roleArn;
-      options.sagemakerLLMs = config.llms.sagemaker;
+      options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableRag = config.rag.enabled;
-      options.ragsToEnable = Object.keys(config.rag.engines).filter(
+      options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
       );
       if (
@@ -73,7 +73,7 @@ const embeddingModels = [
         options.ragsToEnable.pop("kendra");
       }
       options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
-      options.defaultEmbedding = config.rag.embeddingsModels.filter(
+      options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
         (m: any) => m.default
       )[0].name;
       options.kendraExternal = config.rag.engines.kendra.external;
@@ -125,6 +125,7 @@ async function processCreateOptions(options: any): Promise<void> {
         SupportedRegion.US_WEST_2,
         SupportedRegion.EU_CENTRAL_1,
         SupportedRegion.AP_SOUTHEAST_1,
+        SupportedRegion.AP_NORTHEAST_1,
       ],
       initial: options.bedrockRegion ?? "us-east-1",
       skip() {
@@ -154,22 +155,28 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "multiselect",
-      name: "sagemakerLLMs",
+      name: "sagemakerModels",
       message:
-        "Which Sagemaker LLMs do you want to enable (enter for None, space to select)",
-      choices: Object.values(SupportedSageMakerLLM),
-      initial: options.sagemakerLLMs || [],
+        "Which SageMaker Models do you want to enable (enter for None, space to select)",
+      choices: Object.values(SupportedSageMakerModels),
+      initial:
+        (options.sagemakerModels ?? []).filter((m: string) =>
+          Object.values(SupportedSageMakerModels)
+            .map((x) => x.toString())
+            .includes(m)
+        ) || [],
     },
     {
       type: "confirm",
       name: "enableRag",
       message: "Do you want to enable RAG",
-      initial: options.enableRag || true,
+      initial: options.enableRag || false,
     },
     {
       type: "multiselect",
       name: "ragsToEnable",
-      message: "Which datastores do you want to enable for RAG",
+      message:
+        "Which datastores do you want to enable for RAG (enter for None, space to select)",
       choices: [
         { message: "Aurora", name: "aurora" },
         { message: "OpenSearch", name: "opensearch" },
@@ -203,10 +210,6 @@ async function processCreateOptions(options: any): Promise<void> {
   const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
     let existingIndex: any = existingKendraIndices.pop();
-    console.log(
-      existingIndex?.region,
-      Object.values(SupportedRegion).indexOf(existingIndex?.region)
-    );
     const kendraQ = [
       {
         type: "input",
@@ -301,7 +304,7 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     llms: {
-      sagemaker: answers.sagemakerLLMs,
+      sagemaker: answers.sagemakerModels,
     },
     rag: {
       enabled: answers.enableRag,
@@ -354,7 +357,7 @@ async function processCreateOptions(options: any): Promise<void> {
         type: "confirm",
         name: "create",
         message: "Do you want to create a new config based on the above",
-        initial: false,
+        initial: true,
       },
     ])) as any
   ).create

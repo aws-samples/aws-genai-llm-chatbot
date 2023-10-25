@@ -17,7 +17,7 @@ from routes.health import router as health_router
 from routes.embeddings import router as embeddings_router
 from routes.cross_encoders import router as cross_encoders_router
 from routes.rag import router as rag_router
-from routes.llms import router as llms_router
+from routes.models import router as models_router
 from routes.workspaces import router as workspaces_router
 from routes.sessions import router as sessions_router
 from routes.semantic_search import router as semantic_search_router
@@ -39,7 +39,7 @@ app.include_router(health_router)
 app.include_router(rag_router)
 app.include_router(embeddings_router)
 app.include_router(cross_encoders_router)
-app.include_router(llms_router)
+app.include_router(models_router)
 app.include_router(workspaces_router)
 app.include_router(sessions_router)
 app.include_router(semantic_search_router)

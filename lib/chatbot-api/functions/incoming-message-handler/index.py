@@ -17,15 +17,16 @@ api_gateway_management_api = boto3.client(
 
 def handle_message(connection_id, user_id, body):
     action = body["action"]
+    model_interface = body.get("modelInterface", "langchain")
     data = body.get("data", {})
 
-    return handle_request(connection_id, user_id, action, data)
+    return handle_request(connection_id, user_id, action, model_interface, data)
 
 
-def handle_request(connection_id, user_id, action, data):
+def handle_request(connection_id, user_id, action, model_interface, data):
     message = {
-        "type": "text",
         "action": action,
+        "modelInterface": model_interface,
         "direction": "IN",
         "connectionId": connection_id,
         "timestamp": str(int(round(datetime.now().timestamp()))),

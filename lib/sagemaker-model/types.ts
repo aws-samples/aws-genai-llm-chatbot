@@ -4,7 +4,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 
 export interface SageMakerModelProps extends cdk.NestedStackProps {
-  vpc: ec2.IVpc;
+  vpc: ec2.Vpc;
   region: string;
   model: ModelConfig;
 }
