@@ -23,6 +23,11 @@ import {
 } from "@cloudscape-design/components";
 import { languageList } from "../../../common/constants";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
+import EmbeddingSelector from "./embeddings-selector-field";
+import { CrossEncoderSelectorField } from "./cross-encoder-selector-field";
+import { ChunkSelectorField } from "./chunks-selector";
+import { HybridSearchField } from "./hybrid-search-field";
+import { LanguageSelectorField } from "./language-selector-field";
 
 export interface OpenSearchFormProps {
   data: OpenSearchWorkspaceCreateInput;
@@ -31,38 +36,12 @@ export interface OpenSearchFormProps {
   submitting: boolean;
 }
 
-export default function OpenSearchForm(props: OpenSearchFormProps) {
-  const appContext = useContext(AppContext);
-  const [embeddingsModelsStatus, setEmbeddingsModelsStatus] =
-    useState<LoadingStatus>("loading");
-  const [embeddingsModels, setEmbeddingsModels] = useState<
-    EmbeddingsModelItem[]
-  >([]);
-
-  useEffect(() => {
-    if (!appContext?.config) return;
-
-    (async () => {
-      const apiClient = new ApiClient(appContext);
-      const result = await apiClient.embeddings.getModels();
-
-      if (ResultValue.ok(result)) {
-        setEmbeddingsModels(result.data);
-        setEmbeddingsModelsStatus("finished");
-      } else {
-        setEmbeddingsModelsStatus("error");
-      }
-    })();
-  }, [appContext]);
-
-  const embeddingsModelOptions =
-    EmbeddingsModelHelper.getSelectOptions(embeddingsModels);
-
+export function OpenSearchForm(props: OpenSearchFormProps) {
   return (
     <Container
       header={<Header variant="h2">OpenSearch Workspace Configuration</Header>}
       footer={
-        <OpenSearchFoother
+        <OpenSearchFooter
           data={props.data}
           onChange={props.onChange}
           errors={props.errors}
@@ -81,139 +60,50 @@ export default function OpenSearchForm(props: OpenSearchFormProps) {
             }
           />
         </FormField>
-        <FormField
-          label="Embeddings Model"
-          errorText={props.errors.embeddingsModel}
-        >
-          <Select
-            disabled={props.submitting}
-            selectedAriaLabel="Selected"
-            placeholder="Choose an embeddings model"
-            statusType={embeddingsModelsStatus}
-            loadingText="Loading embeddings models (might take few seconds)..."
-            selectedOption={props.data.embeddingsModel}
-            options={embeddingsModelOptions}
-            onChange={({ detail: { selectedOption } }) =>
-              props.onChange({ embeddingsModel: selectedOption })
-            }
-          />
-        </FormField>
-        <FormField label="Data Languages" errorText={props.errors.languages}>
-          <Multiselect
-            disabled={props.submitting}
-            options={languageList}
-            selectedOptions={props.data.languages}
-            placeholder="Choose data languages"
-            empty={"We can't find a match"}
-            filteringType="auto"
-            onChange={({ detail: { selectedOptions } }) =>
-              props.onChange({ languages: selectedOptions })
-            }
-          />
-        </FormField>
+        <EmbeddingSelector
+          submitting={props.submitting}
+          selectedModel={props.data.embeddingsModel}
+          onChange={props.onChange}
+          errors={props.errors}
+        />
+        <LanguageSelectorField
+          errors={props.errors}
+          onChange={props.onChange}
+          submitting={props.submitting}
+          selectedLanguages={props.data.languages}
+        />
       </SpaceBetween>
     </Container>
   );
 }
 
-function OpenSearchFoother(props: {
+function OpenSearchFooter(props: {
   data: OpenSearchWorkspaceCreateInput;
   onChange: (data: Partial<OpenSearchWorkspaceCreateInput>) => void;
   errors: Record<string, string | string[]>;
   submitting: boolean;
 }) {
-  const appContext = useContext(AppContext);
-  const [crossEncoderModelsStatus, setCrossEncoderModelsStatus] =
-    useState<LoadingStatus>("loading");
-  const [crossEncoderModels, setCrossEncoderModels] = useState<
-    CrossEncoderModelItem[]
-  >([]);
-
-  useEffect(() => {
-    if (!appContext) return;
-
-    (async () => {
-      const apiClient = new ApiClient(appContext);
-      const result = await apiClient.crossEncoders.getModels();
-
-      if (ResultValue.ok(result)) {
-        setCrossEncoderModels(result.data);
-        setCrossEncoderModelsStatus("finished");
-      } else {
-        setCrossEncoderModelsStatus("error");
-      }
-    })();
-  }, [appContext]);
-
-  const crossEncoderModelOptions =
-    OptionsHelper.getSelectOptionGroups(crossEncoderModels);
-
   return (
     <ExpandableSection headerText="Additional settings" variant="footer">
       <SpaceBetween size="l">
-        <FormField
-          label="Hybrid Search"
-          description="Use vector similarity together with Open Search full-text queries for hybrid search."
-          errorText={props.errors.hybridSearch}
-        >
-          <Toggle
-            disabled={props.submitting}
-            checked={props.data.hybridSearch}
-            onChange={({ detail: { checked } }) =>
-              props.onChange({ hybridSearch: checked })
-            }
-          >
-            Use hybrid search
-          </Toggle>
-        </FormField>
-        <FormField
-          label="Cross-Encoder Model"
-          errorText={props.errors.embeddingsModel}
-        >
-          <Select
-            disabled={props.submitting}
-            selectedAriaLabel="Selected"
-            placeholder="Choose a cross-encoder model"
-            statusType={crossEncoderModelsStatus}
-            loadingText="Loading cross-encoder models (might take few seconds)..."
-            selectedOption={props.data.crossEncoderModel}
-            options={crossEncoderModelOptions}
-            onChange={({ detail: { selectedOption } }) =>
-              props.onChange({ crossEncoderModel: selectedOption })
-            }
-          />
-        </FormField>
-        <FormField
-          label="Text Splitter"
-          stretch={true}
-          description="Chunk size is the character limit of each chunk, which is then vectorized."
-        >
-          <ColumnLayout columns={2}>
-            <FormField label="Chunk Size" errorText={props.errors.chunkSize}>
-              <Input
-                type="number"
-                disabled={props.submitting}
-                value={props.data.chunkSize.toString()}
-                onChange={({ detail: { value } }) =>
-                  props.onChange({ chunkSize: parseInt(value) })
-                }
-              />
-            </FormField>
-            <FormField
-              label="Chunk Overlap"
-              errorText={props.errors.chunkOverlap}
-            >
-              <Input
-                type="number"
-                disabled={props.submitting}
-                value={props.data.chunkOverlap.toString()}
-                onChange={({ detail: { value } }) =>
-                  props.onChange({ chunkOverlap: parseInt(value) })
-                }
-              />
-            </FormField>
-          </ColumnLayout>
-        </FormField>
+        <HybridSearchField
+          submitting={props.submitting}
+          errors={props.errors}
+          checked={props.data.hybridSearch}
+          onChange={props.onChange}
+        />
+        <CrossEncoderSelectorField
+          errors={props.errors}
+          submitting={props.submitting}
+          selectedModel={props.data.crossEncoderModel}
+          onChange={props.onChange}
+        />
+        <ChunkSelectorField
+          submitting={props.submitting}
+          onChange={props.onChange}
+          data={props.data}
+          errors={props.errors}
+        />
       </SpaceBetween>
     </ExpandableSection>
   );

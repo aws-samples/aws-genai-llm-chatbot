@@ -12,7 +12,7 @@ import { AppContext } from "../../../common/app-context";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { ApiClient } from "../../../common/api-client/api-client";
 import RouterButton from "../../../components/wrappers/router-button";
-import OpenSearchForm from "./opensearch-form";
+import { OpenSearchForm } from "./opensearch-form";
 
 const nameRegex = /^[\w+_-]+$/;
 const defaults: OpenSearchWorkspaceCreateInput = {

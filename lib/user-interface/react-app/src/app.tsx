@@ -8,7 +8,7 @@ import CreateWorkspace from "./pages/rag/create-workspace/create-workspace";
 import Embeddings from "./pages/rag/embeddings/embeddings";
 import CrossEncoders from "./pages/rag/cross-encoders/cross-encoders";
 import Welcome from "./pages/welcome";
-import Playground from "./pages/chatbot/playground/palyground";
+import Playground from "./pages/chatbot/playground/playground";
 import Models from "./pages/chatbot/models/models";
 import Workspace from "./pages/rag/workspace/workspace";
 import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
