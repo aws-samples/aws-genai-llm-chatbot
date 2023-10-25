@@ -5,10 +5,11 @@ import {
   ExpandableSection,
   Popover,
   Spinner,
+  SpaceBetween,
   StatusIndicator,
   TextContent,
 } from "@cloudscape-design/components";
-import { Dispatch, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
 import styles from "../../styles/chat.module.scss";
@@ -20,9 +21,6 @@ import {
 } from "./types";
 
 import { getSignedUrl } from "./utils";
-
-import { JsonView, darkStyles } from "react-json-view-lite";
-import ReactMarkdown from "react-markdown";
 import "react-json-view-lite/dist/index.css";
 import "../../styles/app.scss";
 
@@ -83,13 +81,12 @@ export default function ChatMessage(props: ChatMessageProps) {
             )
           }
         >
-          <SpaceBetween size="s" direction="vertical">
-            {props.message.content.length === 0 ? (
-              <Box>
-                <Spinner />
-              </Box>
-            ) : null}
-            {props.message.content.length > 0 ? (
+          {props.message.content.length === 0 ? (
+            <Box>
+              <Spinner />
+            </Box>
+          ) : null}
+          {props.message.content.length > 0 ? (
             <div className={styles.btn_chabot_message_copy}>
               <Popover
                 size="medium"
@@ -112,8 +109,7 @@ export default function ChatMessage(props: ChatMessageProps) {
               </Popover>
             </div>
           ) : null}
-            <ReactMarkdown children={props.message.content} />
-          </SpaceBetween>
+          <ReactMarkdown children={props.message.content} />
         </Container>
       )}
       {loading && (

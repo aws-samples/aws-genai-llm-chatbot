@@ -24,9 +24,11 @@ import {
   ChatBotMessageResponse,
   ChatBotMessageType,
   ChatBotRunRequest,
+  ChatBotMode,
+  ChatBotModelInterface,
 } from "./types";
 
-import { ApiResult, LLMItem, WorkspaceItem } from "../../common/types";
+import { ApiResult, ModelItem, WorkspaceItem } from "../../common/types";
 import ConfigDialog from "./config-dialog";
 import { updateChatSessions } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
@@ -44,7 +46,7 @@ export default function MultiChat() {
   const appContext = useContext(AppContext);
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [models, setModels] = useState<LLMItem[]>([]);
+  const [models, setModels] = useState<ModelItem[]>([]);
   const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
   const [enableAddModels, setEnableAddModels] = useState(true);
   const [llmToConfig, setLlmToConfig] = useState<ChatSession | undefined>(
@@ -59,7 +61,7 @@ export default function MultiChat() {
       // Check the session id for the response and update the corresponding session
       const response: ChatBotMessageResponse = JSON.parse(payload.data);
       const sessionId = response.data.sessionId;
-      let session = chatSessions.filter((c) => c.id === sessionId)[0];
+      const session = chatSessions.filter((c) => c.id === sessionId)[0];
       if (session !== undefined) {
         updateChatSessions(session, response);
         setChatSessions([...chatSessions]);
@@ -73,9 +75,9 @@ export default function MultiChat() {
     setEnableAddModels(true);
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const [session, llmsResult, workspacesResult] = await Promise.all([
+      const [session, modelsResult, workspacesResult] = await Promise.all([
         Auth.currentSession(),
-        apiClient.llms.getModels(),
+        apiClient.models.getModels(),
         appContext?.config.rag_enabled
           ? apiClient.workspaces.getWorkspaces()
           : Promise.resolve<ApiResult<WorkspaceItem[]>>({ ok: true, data: [] }),
@@ -89,7 +91,7 @@ export default function MultiChat() {
         );
       }
 
-      const models = ResultValue.ok(llmsResult) ? llmsResult.data : [];
+      const models = ResultValue.ok(modelsResult) ? modelsResult.data.filter(m => m.interface === ChatBotModelInterface.Langchain) : [];
       setModels(models);
       const workspaces = ResultValue.ok(workspacesResult)
         ? workspacesResult.data
@@ -131,10 +133,12 @@ export default function MultiChat() {
       const value = message.trim();
       const request: ChatBotRunRequest = {
         action: ChatBotAction.Run,
+        modelInterface: ChatBotModelInterface.Langchain,
         data: {
           modelName: name,
           provider: provider,
           sessionId: chatSession.id,
+          files: [],
           workspaceId: undefined, // state.selectedWorkspace?.value, // need to move this to the chat
           modelKwargs: {
             streaming: chatSession.configuration.streaming,
@@ -143,7 +147,7 @@ export default function MultiChat() {
             topP: chatSession.configuration.topP,
           },
           text: value,
-          mode: "chain",
+          mode: ChatBotMode.Chain,
         },
       };
 
@@ -177,6 +181,7 @@ export default function MultiChat() {
       running: false,
       messageHistory: [],
       configuration: {
+        files: [],
         streaming: true,
         showMetadata: false,
         maxTokens: 512,
