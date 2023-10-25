@@ -40,6 +40,7 @@ import {
   ChabotInputModality,
   ChatBotAction,
   ChatBotConfiguration,
+  ChatBotHeartbitRequest,
   ChatBotHistoryItem,
   ChatBotMessageResponse,
   ChatBotMessageType,
@@ -99,8 +100,20 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   const { sendJsonMessage, readyState } = useWebSocket(socketUrl, {
     share: true,
     shouldReconnect: () => true,
+    onOpen: () => {
+      const request: ChatBotHeartbitRequest = {
+        action: ChatBotAction.Heartbit,
+        modelInterface: "langchain",
+      };
+
+      sendJsonMessage(request);
+    },
     onMessage: (payload) => {
       const response: ChatBotMessageResponse = JSON.parse(payload.data);
+      if (response.action === ChatBotAction.Heartbit) {
+        return;
+      }
+
       updateMessageHistory(
         props.session.id,
         props.messageHistory,
