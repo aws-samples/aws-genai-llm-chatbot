@@ -54,6 +54,7 @@ class ChatbotMode(Enum):
 
 
 class ChatbotAction(Enum):
+    HEARTBIT = "heartbit"
     RUN = "run"
     LLM_NEW_TOKEN = "llm_new_token"
     FINAL_RESPONSE = "final_response"
