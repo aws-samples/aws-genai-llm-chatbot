@@ -49,14 +49,14 @@ def on_llm_new_token(
     )
 
 
-def handle_heartbit(record):
+def handle_heartbeat(record):
     connection_id = record["connectionId"]
     user_id = record["userId"]
 
     send_to_client(
         {
             "type": "text",
-            "action": ChatbotAction.HEARTBIT.value,
+            "action": ChatbotAction.HEARTBEAT.value,
             "connectionId": connection_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "userId": user_id
@@ -120,8 +120,8 @@ def record_handler(record: SQSRecord):
 
     if detail["action"] == ChatbotAction.RUN.value:
         handle_run(detail)
-    elif detail["action"] == ChatbotAction.HEARTBIT.value:
-        handle_heartbit(detail)
+    elif detail["action"] == ChatbotAction.HEARTBEAT.value:
+        handle_heartbeat(detail)
 
 
 def handle_failed_records(records):

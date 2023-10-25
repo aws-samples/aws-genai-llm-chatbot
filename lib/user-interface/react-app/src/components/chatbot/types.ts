@@ -28,7 +28,7 @@ export enum ChatBotMessageType {
 }
 
 export enum ChatBotAction {
-  Heartbit = "heartbit",
+  Heartbeat = "heartbeat",
   Run = "run",
   FinalResponse = "final_response",
   LLMNewToken = "llm_new_token",
@@ -54,8 +54,8 @@ export interface ImageFile {
   url: string;
 }
 
-export interface ChatBotHeartbitRequest {
-  action: ChatBotAction.Heartbit;
+export interface ChatBotHeartbeatRequest {
+  action: ChatBotAction.Heartbeat;
   modelInterface: ModelInterface;
 }
 
