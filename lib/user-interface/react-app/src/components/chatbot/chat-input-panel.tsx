@@ -45,6 +45,7 @@ import {
   ChatBotMessageResponse,
   ChatBotMessageType,
   ChatBotMode,
+  ChatBotModelInterface,
   ChatBotRunRequest,
   ChatInputState,
   ImageFile,
@@ -103,7 +104,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     onOpen: () => {
       const request: ChatBotHeartbeatRequest = {
         action: ChatBotAction.Heartbeat,
-        modelInterface: "langchain",
+        modelInterface: ChatBotModelInterface.Langchain,
       };
 
       sendJsonMessage(request);
