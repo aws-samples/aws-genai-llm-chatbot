@@ -1,6 +1,7 @@
 import { ModelItem, LoadingStatus, WorkspaceItem } from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
 import { ModelInterface } from "../../common/types";
+
 export interface ChatBotConfiguration {
   streaming: boolean;
   showMetadata: boolean;
@@ -30,6 +31,7 @@ export enum ChatBotMessageType {
 }
 
 export enum ChatBotAction {
+  Heartbeat = "heartbeat",
   Run = "run",
   FinalResponse = "final_response",
   LLMNewToken = "llm_new_token",
@@ -53,6 +55,11 @@ export interface ImageFile {
   provider: FileStorageProvider;
   key: string;
   url: string;
+}
+
+export interface ChatBotHeartbeatRequest {
+  action: ChatBotAction.Heartbeat;
+  modelInterface: ModelInterface;
 }
 
 export interface ChatBotRunRequest {
@@ -79,7 +86,10 @@ export interface ChatBotToken {
 export interface ChatBotHistoryItem {
   type: ChatBotMessageType;
   content: string;
-  metadata: Record<string, string | boolean | number | null | undefined | ImageFile[]>;
+  metadata: Record<
+    string,
+    string | boolean | number | null | undefined | ImageFile[]
+  >;
   tokens?: ChatBotToken[];
 }
 
@@ -89,7 +99,10 @@ export interface ChatBotMessageResponse {
     sessionId: string;
     token?: ChatBotToken;
     content?: string;
-    metadata: Record<string, string | boolean | number | null | undefined| ImageFile[]>;
+    metadata: Record<
+      string,
+      string | boolean | number | null | undefined | ImageFile[]
+    >;
   };
 }
 
