@@ -34,7 +34,7 @@ class WebsiteDocumentRequest(BaseModel):
 
 allowed_extensions = set(
     [
-        "csv",
+        ".csv",
         ".doc",
         ".docx",
         ".epub",
