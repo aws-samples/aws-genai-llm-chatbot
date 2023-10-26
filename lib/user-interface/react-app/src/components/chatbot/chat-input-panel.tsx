@@ -48,7 +48,7 @@ import {
   ChatInputState,
   ImageFile,
 } from "./types";
-import { getSignedUrl, updateMessageHistory } from "./utils";
+import { getSelectedModelMetadata, getSignedUrl, updateMessageHistory } from "./utils";
 
 export interface ChatInputPanelProps {
   running: boolean;
@@ -631,24 +631,3 @@ function getSelectedModelOption(
   return selectedModelOption;
 }
 
-function getSelectedModelMetadata(
-  models: ModelItem[] | undefined,
-  selectedModelOption: SelectProps.Option | null
-): ModelItem | null {
-  let selectedModelMetadata: ModelItem | null = null;
-
-  if (selectedModelOption) {
-    const { name, provider } = OptionsHelper.parseValue(
-      selectedModelOption.value
-    );
-    const targetModel = models?.find(
-      (m) => m.name === name && m.provider === provider
-    );
-
-    if (targetModel) {
-      selectedModelMetadata = targetModel;
-    }
-  }
-
-  return selectedModelMetadata;
-}

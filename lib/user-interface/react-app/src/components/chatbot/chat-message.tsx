@@ -5,7 +5,6 @@ import {
   ExpandableSection,
   Popover,
   Spinner,
-  SpaceBetween,
   StatusIndicator,
   TextContent,
 } from "@cloudscape-design/components";

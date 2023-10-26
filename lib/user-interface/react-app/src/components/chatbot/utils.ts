@@ -8,6 +8,9 @@ import {
   ChatInputState,
 } from "./types";
 import { ChatSession } from "./multi-chat";
+import { ModelItem } from "../../common/types";
+import { SelectProps } from "@cloudscape-design/components";
+import { OptionsHelper } from "../../common/helpers/options-helper";
 
 export function updateMessageHistory(
   sessionId: string,
@@ -221,3 +224,26 @@ export async function getSignedUrl(key: string) {
   const signedUrl = await Storage.get(key as string);
   return signedUrl;
 }
+
+export function getSelectedModelMetadata(
+  models: ModelItem[] | undefined,
+  selectedModelOption: SelectProps.Option | null
+): ModelItem | null {
+  let selectedModelMetadata: ModelItem | null = null;
+
+  if (selectedModelOption) {
+    const { name, provider } = OptionsHelper.parseValue(
+      selectedModelOption.value
+    );
+    const targetModel = models?.find(
+      (m) => m.name === name && m.provider === provider
+    );
+
+    if (targetModel) {
+      selectedModelMetadata = targetModel;
+    }
+  }
+
+  return selectedModelMetadata;
+}
+
