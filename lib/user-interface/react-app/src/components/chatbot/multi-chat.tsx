@@ -11,7 +11,6 @@ import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
 import ChatMessage from "./chat-message";
 import MultiChatInputPanel, { ChatScrollState } from "./multi-chat-input-panel";
-import styles from "../../styles/chat.module.scss";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { Auth } from "aws-amplify";
@@ -38,6 +37,7 @@ import {
 } from "../../common/types";
 import { getSelectedModelMetadata, updateChatSessions } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
+import styles from "../../styles/chat.module.scss";
 
 export interface ChatSession {
   configuration: ChatBotConfiguration;
@@ -348,21 +348,6 @@ export default function MultiChat() {
         {messages.map((val, idx) => {
           if (val.length === 0) {
             return null;
-          }
-
-          if (val[0].type === ChatBotMessageType.Human) {
-            return (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                key={idx}
-              >
-                <ChatMessage message={val[0]} />
-              </div>
-            );
           }
 
           return (
