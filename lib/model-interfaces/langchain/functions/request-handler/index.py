@@ -1,5 +1,4 @@
 import os
-import boto3
 import json
 import uuid
 from datetime import datetime
@@ -46,6 +45,21 @@ def on_llm_new_token(
                     "value": token,
                 },
             },
+        }
+    )
+
+
+def handle_heartbeat(record):
+    connection_id = record["connectionId"]
+    user_id = record["userId"]
+
+    send_to_client(
+        {
+            "type": "text",
+            "action": ChatbotAction.HEARTBEAT.value,
+            "connectionId": connection_id,
+            "timestamp": str(int(round(datetime.now().timestamp()))),
+            "userId": user_id
         }
     )
 
@@ -106,6 +120,8 @@ def record_handler(record: SQSRecord):
 
     if detail["action"] == ChatbotAction.RUN.value:
         handle_run(detail)
+    elif detail["action"] == ChatbotAction.HEARTBEAT.value:
+        handle_heartbeat(detail)
 
 
 def handle_failed_records(records):
