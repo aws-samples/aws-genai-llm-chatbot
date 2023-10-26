@@ -287,8 +287,8 @@ export default function MultiChat() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr auto",
-                  gap: "20px",
+                  gridTemplateColumns: "1fr min-content",
+                  gap: "8px",
                 }}
               >
                 <Select
@@ -314,7 +314,7 @@ export default function MultiChat() {
                   }}
                   options={OptionsHelper.getSelectOptionGroups(models)}
                 />
-                <SpaceBetween size="xxs" direction="horizontal">
+                <div style={{ display: "flex", gap: "4px" }}>
                   <Button
                     iconName="settings"
                     variant="icon"
@@ -323,14 +323,14 @@ export default function MultiChat() {
                   <Button
                     iconName="remove"
                     variant="icon"
-                    disabled={chatSessions.length <= 2}
+                    disabled={chatSessions.length <= 2 || messages.length > 0}
                     onClick={() => {
                       setChatSessions([
                         ...chatSessions.filter((c) => c.id !== chatSession.id),
                       ]);
                     }}
                   />
-                </SpaceBetween>
+                </div>
               </div>
               {llmToConfig && (
                 <LLMConfigDialog
