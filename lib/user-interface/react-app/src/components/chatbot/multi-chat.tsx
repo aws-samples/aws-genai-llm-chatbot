@@ -26,6 +26,8 @@ import {
   ChatBotMode,
   ChabotInputModality,
   ChabotOutputModality,
+  ChatBotHeartbeatRequest,
+  ChatBotModelInterface,
 } from "./types";
 
 import { ApiResult, ModelItem, WorkspaceItem, ResultValue } from "../../common/types";
@@ -65,6 +67,7 @@ export default function MultiChat() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [models, setModels] = useState<ModelItem[]>([]);
   const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<SelectProps.Option | null>(null);
   const [enableAddModels, setEnableAddModels] = useState(true);
   const [llmToConfig, setLlmToConfig] = useState<ChatSession | undefined>(
     undefined
@@ -74,9 +77,19 @@ export default function MultiChat() {
   const { sendJsonMessage, readyState } = useWebSocket(socketUrl, {
     share: true,
     shouldReconnect: () => true,
+    onOpen: () => {
+      const request: ChatBotHeartbeatRequest = {
+        action: ChatBotAction.Heartbeat,
+        modelInterface: ChatBotModelInterface.Langchain,
+      };
+
+      sendJsonMessage(request);
+    },
     onMessage: (payload) => {
-      // Check the session id for the response and update the corresponding session
       const response: ChatBotMessageResponse = JSON.parse(payload.data);
+      if (response.action === ChatBotAction.Heartbeat) {
+        return;
+      }
       const sessionId = response.data.sessionId;
       const session = chatSessions.filter((c) => c.id === sessionId)[0];
       if (session !== undefined) {
@@ -142,7 +155,7 @@ export default function MultiChat() {
           provider: provider,
           sessionId: chatSession.id,
           files: [],
-          workspaceId: undefined, // state.selectedWorkspace?.value, // need to move this to the chat
+          workspaceId: selectedWorkspace?.value,
           modelKwargs: {
             streaming: chatSession.configuration.streaming,
             maxTokens: chatSession.configuration.maxTokens,
@@ -277,7 +290,8 @@ export default function MultiChat() {
           onSendMessage={handleSendMessage}
           readyState={readyState}
           showMetadata={showMetadata}
-          onChange={(v) => setShowMetadata(v)}
+          selectedWorkspace={selectedWorkspace ?? undefined}
+          onChange={(showMetadata, workspace) => {setShowMetadata(showMetadata); setSelectedWorkspace(workspace)}}
           enabled={
             readyState === ReadyState.OPEN &&
             chatSessions.length > 0 &&

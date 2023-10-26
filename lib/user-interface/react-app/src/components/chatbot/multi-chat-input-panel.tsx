@@ -19,7 +19,6 @@ import { AppContext } from "../../common/app-context";
 import TextareaAutosize from "react-textarea-autosize";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { useNavigate } from "react-router-dom";
-import { StorageHelper } from "../../common/helpers/storage-helper";
 import styles from "../../styles/chat.module.scss";
 import { WorkspaceItem } from "../../common/types";
 import { ChatInputState } from "./types";
@@ -30,8 +29,9 @@ export interface MultiChatInputPanelProps {
   onSendMessage: (msg: string) => void;
   enabled: boolean;
   workspaces: WorkspaceItem[];
+  selectedWorkspace?: SelectProps.Option;
   showMetadata?: boolean;
-  onChange: (value: boolean) => void;
+  onChange: (showMetadata: boolean, workspace: SelectProps.Option | null) => void;
 }
 
 export abstract class ChatScrollState {
@@ -61,6 +61,7 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
   const [state, setState] = useState<ChatInputState>({
     value: "",
     selectedModel: null,
+    selectedModelMetadata: null,
     selectedWorkspace: workspaceDefaultOptions[0],
     modelsStatus: "loading",
     workspacesStatus: "loading",
@@ -103,21 +104,6 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
       window.removeEventListener("scroll", onWindowScroll);
     };
   }, []);
-
-  //   useLayoutEffect(() => {
-  //     if (ChatScrollState.skipNextHistoryUpdate) {
-  //       ChatScrollState.skipNextHistoryUpdate = false;
-  //       return;
-  //     }
-
-  //     if (!ChatScrollState.userHasScrolled && props.messageHistory.length > 0) {
-  //       ChatScrollState.skipNextScrollEvent = true;
-  //       window.scrollTo({
-  //         top: document.documentElement.scrollHeight + 1000,
-  //         behavior: "instant",
-  //       });
-  //     }
-  //   }, [props.messageHistory]);
 
   const connectionStatus = {
     [ReadyState.CONNECTING]: "Connecting",
@@ -211,20 +197,13 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
               statusType={state.workspacesStatus}
               placeholder="Select a workspace (RAG data source)"
               filteringType="auto"
-              selectedOption={state.selectedWorkspace}
+              selectedOption={props.selectedWorkspace ?? null}
               options={workspaceOptions}
               onChange={({ detail }) => {
                 if (detail.selectedOption?.value === "__create__") {
                   navigate("/rag/workspaces/create");
                 } else {
-                  setState((state) => ({
-                    ...state,
-                    selectedWorkspace: detail.selectedOption,
-                  }));
-
-                  StorageHelper.setSelectedWorkspaceId(
-                    detail.selectedOption?.value ?? ""
-                  );
+                  props.onChange(props.showMetadata ?? false, detail.selectedOption);
                 }
               }}
               empty={"No Workspaces available"}
@@ -235,7 +214,7 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
           <SpaceBetween direction="horizontal" size="xxs" alignItems="center">
             <Toggle
               checked={props.showMetadata ?? false}
-              onChange={({ detail }) => props.onChange(detail.checked)}
+              onChange={({ detail }) => props.onChange(detail.checked, state.selectedWorkspace)}
             >
               Show Metadata
             </Toggle>
