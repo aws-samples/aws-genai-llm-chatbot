@@ -1,0 +1,59 @@
+import {
+  Modal,
+  Box,
+  SpaceBetween,
+  Button,
+  Alert,
+} from "@cloudscape-design/components";
+import { WorkspaceItem } from "../../../common/types";
+
+export interface ChatbotDeleteModalProps {
+  visible: boolean;
+  workspace?: WorkspaceItem;
+  onDelete: () => void;
+  onDiscard: () => void;
+}
+
+export default function ChatbotDeleteModal(props: ChatbotDeleteModalProps) {
+  return (
+    <Modal
+      visible={props.visible}
+      onDismiss={props.onDiscard}
+      header="Delete Workspace"
+      closeAriaLabel="Close dialog"
+      footer={
+        <Box float="right">
+          <SpaceBetween direction="horizontal" size="xs">
+            <Button variant="link" onClick={props.onDiscard}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={props.onDelete}
+              data-testid="submit"
+            >
+              Delete
+            </Button>
+          </SpaceBetween>
+        </Box>
+      }
+    >
+      {props.workspace && (
+        <SpaceBetween size="m">
+          <Box variant="span">
+            Permanently delete workspace{" "}
+            <Box variant="span" fontWeight="bold">
+              {props.workspace.name}
+            </Box>
+            ? You can't undo this action.
+          </Box>
+          <Box variant="span">Worksapce Id: {props.workspace.id}</Box>
+          <Alert statusIconAriaLabel="Info">
+            Proceeding with this action will delete the workspace with all its
+            content.
+          </Alert>
+        </SpaceBetween>
+      )}
+    </Modal>
+  );
+}

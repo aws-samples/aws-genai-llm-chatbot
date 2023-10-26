@@ -27,7 +27,6 @@ export interface AppConfig {
       region: string;
     };
   };
-
 }
 
 export interface NavigationPanelState {
@@ -218,4 +217,9 @@ export interface KendraIndexItem {
   id: string;
   name: string;
   external: boolean;
+}
+
+export interface ChatbotCreateEditInput {
+  name: string;
+  title: string;
 }

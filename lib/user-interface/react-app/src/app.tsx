@@ -13,6 +13,8 @@ import Models from "./pages/chatbot/models/models";
 import Workspace from "./pages/rag/workspace/workspace";
 import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
 import AddData from "./pages/rag/add-data/add-data";
+import Chatbots from "./pages/chatbot/chatbots/chatbots";
+import CreateEditChatbot from "./pages/chatbot/chatbots/create-edit-chatbot";
 import "./styles/app.scss";
 
 function App() {
@@ -28,7 +30,12 @@ function App() {
               <Route path="playground" element={<Playground />} />
               <Route path="playground/:sessionId" element={<Playground />} />
               <Route path="models" element={<Models />} />
+              <Route path="chatbots" element={<Outlet />}>
+                <Route path="" element={<Chatbots />} />
+                <Route path="create" element={<CreateEditChatbot />} />
+              </Route>
             </Route>
+
             <Route path="/rag" element={<Outlet />}>
               <Route path="" element={<Dashboard />} />
               <Route path="engines" element={<Engines />} />

@@ -24,10 +24,16 @@ export default function NavigationPanel() {
         text: "Chatbot",
         items: [
           { type: "link", text: "Playground", href: "/chatbot/playground" },
+
           {
             type: "link",
             text: "Models",
             href: "/chatbot/models",
+          },
+          {
+            type: "link",
+            text: "Chatbots",
+            href: "/chatbot/chatbots",
           },
         ],
       },
