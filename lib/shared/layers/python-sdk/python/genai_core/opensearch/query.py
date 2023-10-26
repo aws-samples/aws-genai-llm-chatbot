@@ -2,10 +2,18 @@ import genai_core.embeddings
 import genai_core.cross_encoder
 from typing import List
 from .client import get_open_search_client
+from aws_lambda_powertools import Logger
+
+logger = Logger()
 
 
 def query_workspace_open_search(
-    workspace_id: str, workspace: dict, query: str, limit: int, full_response: bool
+    workspace_id: str,
+    workspace: dict,
+    query: str,
+    limit: int,
+    full_response: bool,
+    threshold: float = 0.0,
 ):
     index_name = workspace_id.replace("-", "")
 
@@ -95,9 +103,9 @@ def query_workspace_open_search(
         )
 
         for i in range(len(unique_items)):
-            unique_items[i]["score"] = passage_scores[i]
-            score_dict[unique_items[i]["chunk_id"]] = passage_scores[i]
-
+            score = passage_scores[i]
+            unique_items[i]["score"] = score
+            score_dict[unique_items[i]["chunk_id"]] = score
     unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
     unique_items = unique_items[:limit]
 
@@ -116,13 +124,24 @@ def query_workspace_open_search(
             "keyword_search_items": keyword_search_records,
         }
     else:
+        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))
+        if len(ret_items) < limit:
+            unique_items = sorted(
+                unique_items, key=lambda x: x["vector_search_score"], reverse=True
+            )
+            ret_items = ret_items + (
+                list(
+                    filter(lambda val: val["vector_search_score"] > 0.5, unique_items)
+                )[: (limit - len(ret_items))]
+            )
+
         ret_value = {
             "engine": "opensearch",
             "supported_languages": languages,
-            "items": list(filter(lambda val: val["score"] > 0, unique_items)),
+            "items": ret_items,
         }
 
-    print(ret_value)
+    logger.info(ret_value)
 
     return ret_value
 
