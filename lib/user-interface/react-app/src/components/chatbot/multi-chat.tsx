@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import {
   SelectProps,
   SpaceBetween,
@@ -235,6 +235,25 @@ export default function MultiChat() {
     setChatSessions([...chatSessions, session]);
   };
 
+  useLayoutEffect(() => {
+    if (ChatScrollState.skipNextHistoryUpdate) {
+      ChatScrollState.skipNextHistoryUpdate = false;
+      return;
+    }
+
+    const count = Math.max(...chatSessions.map((s) => s.messageHistory.length));
+
+    if (!ChatScrollState.userHasScrolled && count > 0) {
+      ChatScrollState.skipNextScrollEvent = true;
+      window.scrollTo({
+        top: document.documentElement.scrollHeight + 1000,
+        behavior: "instant",
+      });
+    }
+  }, [chatSessions]);
+
+  const messages = transformMessages(chatSessions);
+
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
@@ -323,25 +342,42 @@ export default function MultiChat() {
                   }}
                 />
               )}
-              {chatSession.messageHistory.map((message, idx) => (
-                <ChatMessage
-                  key={idx}
-                  message={message}
-                  configuration={chatSession.configuration}
-                  showMetadata={showMetadata}
-                />
-              ))}
             </SpaceBetween>
           ))}
         </ColumnLayout>
+        {messages.map((val, idx) => {
+          if (val.length === 0) {
+            return null;
+          }
 
-        {
-          <div className={styles.welcome_text}>
-            {chatSessions.length == 0 && (
-              <center style={{ color: "lightgray" }}>AWS GenAI Chatbot</center>
-            )}
-          </div>
-        }
+          if (val[0].type === ChatBotMessageType.Human) {
+            return (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                key={idx}
+              >
+                <ChatMessage message={val[0]} />
+              </div>
+            );
+          }
+
+          return (
+            <ColumnLayout columns={chatSessions.length} key={idx}>
+              {val.map((message, idx) => (
+                <ChatMessage
+                  key={idx}
+                  message={message}
+                  configuration={chatSessions[idx].configuration}
+                  showMetadata={showMetadata}
+                />
+              ))}
+            </ColumnLayout>
+          );
+        })}
       </SpaceBetween>
       <div className={styles.input_container}>
         <MultiChatInputPanel
@@ -360,4 +396,30 @@ export default function MultiChat() {
       </div>
     </div>
   );
+}
+
+function transformMessages(sessions: ChatSession[]) {
+  const count = Math.max(...sessions.map((s) => s.messageHistory.length));
+
+  const retValue: ChatBotHistoryItem[][] = [];
+  for (let i = 0; i < count; i++) {
+    const current = [];
+
+    for (const session of sessions) {
+      const currentMessage = session.messageHistory[i];
+      if (currentMessage) {
+        current.push(currentMessage);
+      } else {
+        current.push({
+          type: ChatBotMessageType.AI,
+          content: "",
+          metadata: {},
+        });
+      }
+    }
+
+    retValue.push(current);
+  }
+
+  return retValue;
 }

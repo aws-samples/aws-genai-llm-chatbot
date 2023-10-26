@@ -25,7 +25,7 @@ import "../../styles/app.scss";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
-  configuration: ChatBotConfiguration;
+  configuration?: ChatBotConfiguration;
   showMetadata?: boolean;
 }
 
@@ -63,7 +63,8 @@ export default function ChatMessage(props: ChatMessageProps) {
         <Container
           footer={
             ((props.showMetadata && props.message.metadata) ||
-              (props.message.metadata && props.configuration.showMetadata)) && (
+              (props.message.metadata &&
+                props.configuration?.showMetadata)) && (
               <ExpandableSection variant="footer" headerText="Metadata">
                 <JsonView
                   data={props.message.metadata}
