@@ -10,17 +10,16 @@ import {
 } from "@cloudscape-design/components";
 import { useForm } from "../../common/hooks/use-form";
 import { ChatBotConfiguration } from "./types";
-import { Dispatch } from "react";
+import { ChatSession } from "./multi-chat";
 
-export interface ConfigDialogProps {
-  sessionId: string;
-  visible: boolean;
+export interface LLMConfigDialogProps {
+  session: ChatSession;
+  //visible: boolean;
   setVisible: (visible: boolean) => void;
-  configuration: ChatBotConfiguration;
-  setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
+  onConfigurationChange: (config: ChatBotConfiguration) => void;
 }
 
-interface ChatConfigDialogData {
+interface LLMConfigDialogData {
   streaming: boolean;
   showMetadata: boolean;
   maxTokens: number;
@@ -28,15 +27,15 @@ interface ChatConfigDialogData {
   topP: number;
 }
 
-export default function ConfigDialog(props: ConfigDialogProps) {
-  const { data, onChange, errors, validate } = useForm<ChatConfigDialogData>({
+export default function LLMConfigDialog(props: LLMConfigDialogProps) {
+  const { data, onChange, errors, validate } = useForm<LLMConfigDialogData>({
     initialValue: () => {
       const retValue = {
-        streaming: props.configuration.streaming,
-        showMetadata: props.configuration.showMetadata,
-        maxTokens: props.configuration.maxTokens,
-        temperature: props.configuration.temperature,
-        topP: props.configuration.topP,
+        streaming: props.session.configuration.streaming,
+        showMetadata: props.session.configuration.showMetadata,
+        maxTokens: props.session.configuration.maxTokens,
+        temperature: props.session.configuration.temperature,
+        topP: props.session.configuration.topP,
       };
 
       return retValue;
@@ -55,8 +54,8 @@ export default function ConfigDialog(props: ConfigDialogProps) {
   const saveConfig = () => {
     if (!validate()) return;
 
-    props.setConfiguration({
-      ...props.configuration,
+    props.onConfigurationChange({
+      ...props.session.configuration,
       ...data,
     });
 
@@ -64,14 +63,14 @@ export default function ConfigDialog(props: ConfigDialogProps) {
   };
 
   const cancelChanges = () => {
-    onChange({
-      ...props.configuration,
-      streaming: props.configuration.streaming,
-      showMetadata: props.configuration.showMetadata,
-      temperature: props.configuration.temperature,
-      maxTokens: props.configuration.maxTokens,
-      topP: props.configuration.topP,
-    });
+    // onChange({
+    //   ...props.configuration,
+    //   streaming: props.configuration.streaming,
+    //   showMetadata: props.configuration.showMetadata,
+    //   temperature: props.configuration.temperature,
+    //   maxTokens: props.configuration.maxTokens,
+    //   topP: props.configuration.topP,
+    // });
 
     props.setVisible(false);
   };
@@ -79,7 +78,7 @@ export default function ConfigDialog(props: ConfigDialogProps) {
   return (
     <Modal
       onDismiss={() => props.setVisible(false)}
-      visible={props.visible}
+      visible={true}
       footer={
         <Box float="right">
           <SpaceBetween direction="horizontal" size="xs" alignItems="center">
@@ -96,7 +95,7 @@ export default function ConfigDialog(props: ConfigDialogProps) {
     >
       <Form>
         <SpaceBetween size="m">
-          <FormField label="Session Id">{props.sessionId}</FormField>
+          <FormField label="Session Id">{props.session.id}</FormField>
           <FormField label="Streaming" errorText={errors.streaming}>
             <Toggle
               checked={data.streaming}

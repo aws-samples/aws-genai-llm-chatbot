@@ -8,12 +8,13 @@ import CreateWorkspace from "./pages/rag/create-workspace/create-workspace";
 import Embeddings from "./pages/rag/embeddings/embeddings";
 import CrossEncoders from "./pages/rag/cross-encoders/cross-encoders";
 import Welcome from "./pages/welcome";
-import Playground from "./pages/chatbot/playground/palyground";
+import Playground from "./pages/chatbot/playground/playground";
 import Models from "./pages/chatbot/models/models";
 import Workspace from "./pages/rag/workspace/workspace";
 import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
 import AddData from "./pages/rag/add-data/add-data";
 import "./styles/app.scss";
+import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/chatbot" element={<Outlet />}>
               <Route path="playground" element={<Playground />} />
               <Route path="playground/:sessionId" element={<Playground />} />
+              <Route path="multichat" element={<MultiChatPlayground />} />
               <Route path="models" element={<Models />} />
             </Route>
             <Route path="/rag" element={<Outlet />}>

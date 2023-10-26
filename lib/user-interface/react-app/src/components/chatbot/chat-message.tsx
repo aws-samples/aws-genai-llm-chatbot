@@ -8,7 +8,7 @@ import {
   StatusIndicator,
   TextContent,
 } from "@cloudscape-design/components";
-import { Dispatch, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
 import styles from "../../styles/chat.module.scss";
@@ -20,14 +20,13 @@ import {
 } from "./types";
 
 import { getSignedUrl } from "./utils";
-
 import "react-json-view-lite/dist/index.css";
 import "../../styles/app.scss";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
   configuration: ChatBotConfiguration;
-  setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
+  showMetadata?: boolean;
 }
 
 export default function ChatMessage(props: ChatMessageProps) {
@@ -63,8 +62,8 @@ export default function ChatMessage(props: ChatMessageProps) {
       {props.message?.type === ChatBotMessageType.AI && (
         <Container
           footer={
-            props.message.metadata &&
-            props.configuration.showMetadata && (
+            ((props.showMetadata && props.message.metadata) ||
+              (props.message.metadata && props.configuration.showMetadata)) && (
               <ExpandableSection variant="footer" headerText="Metadata">
                 <JsonView
                   data={props.message.metadata}
