@@ -192,7 +192,9 @@ export default function MultiChat() {
           </Button>
           <Button
             onClick={() => {
-              setChatSessions(chatSessions.slice(0, chatSessions.length - 1));
+              if (chatSessions.length > 2) {
+                setChatSessions([...chatSessions.slice(0, chatSessions.length - 1)]);
+              }
             }}
             disabled={!enableAddModels}
           >
@@ -200,7 +202,7 @@ export default function MultiChat() {
           </Button>
           <Button
             onClick={() => {
-              chatSessions.forEach((s) => (s.messageHistory = []));
+              chatSessions.forEach((s) => {s.messageHistory = []; s.id = uuidv4()});
               setEnableAddModels(true);
               setChatSessions([...chatSessions]);
             }}
