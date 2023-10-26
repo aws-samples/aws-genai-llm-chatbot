@@ -121,12 +121,11 @@ export function updateMessageHistory(
 
 export function updateChatSessions(
   chatSession: ChatSession,
-  response: ChatBotMessageResponse,
+  response: ChatBotMessageResponse
 ): void {
   if (response.data?.sessionId !== chatSession.id) return;
 
   const messageHistory = chatSession.messageHistory;
-  console.log(messageHistory)
   if (
     response.action === ChatBotAction.FinalResponse ||
     response.action === ChatBotAction.Error
@@ -172,7 +171,8 @@ export function updateChatSessions(
       }
 
       if (hasContent) {
-        chatSession.messageHistory = [...messageHistory.slice(0, messageHistory.length-1), 
+        chatSession.messageHistory = [
+          ...messageHistory.slice(0, messageHistory.length - 1),
           {
             ...lastMessage,
             type: ChatBotMessageType.AI,
@@ -180,41 +180,44 @@ export function updateChatSessions(
             metadata,
             tokens: lastMessage.tokens,
           },
-        ]
+        ];
       } else {
         const contentFromTokens = lastMessage.tokens
           .map((c) => c.value)
           .join("");
-          chatSession.messageHistory = [...messageHistory.slice(0, messageHistory.length-1), 
-            {
-              ...lastMessage,
-              type: ChatBotMessageType.AI,
-              content: contentFromTokens,
-              metadata,
-              tokens: lastMessage.tokens,
-            },
-          ]
+        chatSession.messageHistory = [
+          ...messageHistory.slice(0, messageHistory.length - 1),
+          {
+            ...lastMessage,
+            type: ChatBotMessageType.AI,
+            content: contentFromTokens,
+            metadata,
+            tokens: lastMessage.tokens,
+          },
+        ];
       }
     } else {
       if (hasContent) {
         const tokens = hasToken ? [token] : [];
-        chatSession.messageHistory = [...messageHistory, 
+        chatSession.messageHistory = [
+          ...messageHistory,
           {
             type: ChatBotMessageType.AI,
             content,
             metadata,
             tokens,
           },
-        ]
+        ];
       } else if (typeof token !== "undefined") {
-        chatSession.messageHistory = [...messageHistory, 
+        chatSession.messageHistory = [
+          ...messageHistory,
           {
             type: ChatBotMessageType.AI,
             content: token.value,
             metadata,
             tokens: [token],
           },
-        ]
+        ];
       }
     }
   }
@@ -246,4 +249,3 @@ export function getSelectedModelMetadata(
 
   return selectedModelMetadata;
 }
-

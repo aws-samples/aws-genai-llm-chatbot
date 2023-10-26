@@ -5,7 +5,6 @@ import {
   Button,
   Select,
   ColumnLayout,
-  Grid,
 } from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
 import { AppContext } from "../../common/app-context";
@@ -30,7 +29,13 @@ import {
   ChatBotModelInterface,
 } from "./types";
 
-import { ApiResult, ModelItem, WorkspaceItem, ResultValue } from "../../common/types";
+import {
+  ApiResult,
+  ModelItem,
+  WorkspaceItem,
+  ResultValue,
+  LoadingStatus,
+} from "../../common/types";
 import { getSelectedModelMetadata, updateChatSessions } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
 
@@ -58,8 +63,21 @@ function createNewSession(): ChatSession {
       temperature: 0.1,
       topP: 0.9,
     },
-  }
+  };
 }
+
+const workspaceDefaultOptions: SelectProps.Option[] = [
+  {
+    label: "No workspace (RAG data source)",
+    value: "",
+    iconName: "close",
+  },
+  {
+    label: "Create new workspace",
+    value: "__create__",
+    iconName: "add-plus",
+  },
+];
 
 export default function MultiChat() {
   const appContext = useContext(AppContext);
@@ -67,7 +85,11 @@ export default function MultiChat() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [models, setModels] = useState<ModelItem[]>([]);
   const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<SelectProps.Option | null>(null);
+  const [selectedWorkspace, setSelectedWorkspace] =
+    useState<SelectProps.Option | null>(workspaceDefaultOptions[0]);
+  const [modelsStatus, setModelsStatus] = useState<LoadingStatus>("loading");
+  const [workspacesStatus, setWorkspacesStatus] =
+    useState<LoadingStatus>("loading");
   const [enableAddModels, setEnableAddModels] = useState(true);
   const [llmToConfig, setLlmToConfig] = useState<ChatSession | undefined>(
     undefined
@@ -101,7 +123,7 @@ export default function MultiChat() {
 
   useEffect(() => {
     if (!appContext) return;
-    
+
     setChatSessions([createNewSession(), createNewSession()]); // reset all chats
     setEnableAddModels(true);
     (async () => {
@@ -124,17 +146,34 @@ export default function MultiChat() {
 
       const models = ResultValue.ok(modelsResult)
         ? modelsResult.data.filter(
-            (m) => m.inputModalities.includes(ChabotInputModality.Text) && m.outputModalities.includes(ChabotOutputModality.Text))
+            (m) =>
+              m.inputModalities.includes(ChabotInputModality.Text) &&
+              m.outputModalities.includes(ChabotOutputModality.Text)
+          )
         : [];
-      setModels(models);
+
       const workspaces = ResultValue.ok(workspacesResult)
         ? workspacesResult.data
         : [];
+
+      setModels(models);
       setWorkspaces(workspaces);
+      setModelsStatus(ResultValue.ok(modelsResult) ? "finished" : "error");
+      setWorkspacesStatus(
+        ResultValue.ok(workspacesResult) ? "finished" : "error"
+      );
     })();
   }, [appContext]);
 
+  const enabled =
+    readyState === ReadyState.OPEN &&
+    chatSessions.length > 0 &&
+    !chatSessions.some((c) => c.running) &&
+    !chatSessions.some((c) => c.loading) &&
+    !chatSessions.some((c) => !c.model);
+
   const handleSendMessage = (message: string): void => {
+    if (!enabled) return;
     // send message to each chat session
     setEnableAddModels(false);
     chatSessions.forEach((chatSession) => {
@@ -199,37 +238,44 @@ export default function MultiChat() {
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
-        <SpaceBetween size="m" direction="horizontal">
-          <Button onClick={() => addSession()} disabled={!enableAddModels}>
-            Create Chat Session
-          </Button>
-          <Button
-            onClick={() => {
-              if (chatSessions.length > 2) {
-                setChatSessions([...chatSessions.slice(0, chatSessions.length - 1)]);
-              }
-            }}
-            disabled={!enableAddModels}
-          >
-            Remove Chat Session
-          </Button>
-          <Button
-            onClick={() => {
-              chatSessions.forEach((s) => {s.messageHistory = []; s.id = uuidv4()});
-              setEnableAddModels(true);
-              setChatSessions([...chatSessions]);
-            }}
-          >
-            Clear messages
-          </Button>
+        <SpaceBetween size="m" alignItems="end">
+          <SpaceBetween size="m" direction="horizontal">
+            <Button
+              onClick={() => addSession()}
+              disabled={!enableAddModels || chatSessions.length >= 4}
+              iconName="add-plus"
+            >
+              Add model
+            </Button>
+            <Button
+              onClick={() => {
+                chatSessions.forEach((s) => {
+                  s.messageHistory = [];
+                  s.id = uuidv4();
+                });
+                setEnableAddModels(true);
+                setChatSessions([...chatSessions]);
+              }}
+              iconName="remove"
+            >
+              Clear messages
+            </Button>
+          </SpaceBetween>
         </SpaceBetween>
         <ColumnLayout columns={chatSessions.length}>
           {chatSessions.map((chatSession) => (
             <SpaceBetween key={chatSession.id} direction="vertical" size="m">
-              <Grid gridDefinition={[{ colspan: 11 }, { colspan: 1 }]}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto",
+                  gap: "20px",
+                }}
+              >
                 <Select
                   disabled={!enableAddModels}
                   loadingText="Loading models (might take few seconds)..."
+                  statusType={modelsStatus}
                   placeholder="Select a model"
                   empty={
                     <div>
@@ -242,17 +288,31 @@ export default function MultiChat() {
                   selectedOption={chatSession.model ?? null}
                   onChange={({ detail }) => {
                     chatSession.model = detail.selectedOption;
-                    chatSession.modelMetadata = getSelectedModelMetadata(models, detail.selectedOption) ?? undefined;
+                    chatSession.modelMetadata =
+                      getSelectedModelMetadata(models, detail.selectedOption) ??
+                      undefined;
                     setChatSessions([...chatSessions]);
                   }}
                   options={OptionsHelper.getSelectOptionGroups(models)}
                 />
-                <Button
-                  iconName="settings"
-                  variant="icon"
-                  onClick={() => setLlmToConfig(chatSession)}
-                ></Button>
-              </Grid>
+                <SpaceBetween size="xxs" direction="horizontal">
+                  <Button
+                    iconName="settings"
+                    variant="icon"
+                    onClick={() => setLlmToConfig(chatSession)}
+                  />
+                  <Button
+                    iconName="remove"
+                    variant="icon"
+                    disabled={chatSessions.length <= 2}
+                    onClick={() => {
+                      setChatSessions([
+                        ...chatSessions.filter((c) => c.id !== chatSession.id),
+                      ]);
+                    }}
+                  />
+                </SpaceBetween>
+              </div>
               {llmToConfig && (
                 <LLMConfigDialog
                   session={llmToConfig}
@@ -291,14 +351,11 @@ export default function MultiChat() {
           readyState={readyState}
           showMetadata={showMetadata}
           selectedWorkspace={selectedWorkspace ?? undefined}
-          onChange={(showMetadata, workspace) => {setShowMetadata(showMetadata); setSelectedWorkspace(workspace)}}
-          enabled={
-            readyState === ReadyState.OPEN &&
-            chatSessions.length > 0 &&
-            !chatSessions.some((c) => c.running) &&
-            !chatSessions.some((c) => c.loading) &&
-            !chatSessions.some((c) => !c.model)
-          }
+          workspacesStatus={workspacesStatus}
+          workspaceDefaultOptions={workspaceDefaultOptions}
+          onShowMetadataChange={(showMetadata) => setShowMetadata(showMetadata)}
+          onWorkspaceChange={(workspace) => setSelectedWorkspace(workspace)}
+          enabled={enabled}
         />
       </div>
     </div>

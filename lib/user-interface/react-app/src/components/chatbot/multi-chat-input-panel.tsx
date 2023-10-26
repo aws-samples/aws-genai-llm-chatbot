@@ -14,14 +14,12 @@ import { ReadyState } from "react-use-websocket";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-
 import { AppContext } from "../../common/app-context";
 import TextareaAutosize from "react-textarea-autosize";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { useNavigate } from "react-router-dom";
 import styles from "../../styles/chat.module.scss";
-import { WorkspaceItem } from "../../common/types";
-import { ChatInputState } from "./types";
+import { LoadingStatus, WorkspaceItem } from "../../common/types";
 
 export interface MultiChatInputPanelProps {
   running: boolean;
@@ -30,8 +28,11 @@ export interface MultiChatInputPanelProps {
   enabled: boolean;
   workspaces: WorkspaceItem[];
   selectedWorkspace?: SelectProps.Option;
+  workspacesStatus: LoadingStatus;
+  workspaceDefaultOptions: SelectProps.Option[];
   showMetadata?: boolean;
-  onChange: (showMetadata: boolean, workspace: SelectProps.Option | null) => void;
+  onShowMetadataChange: (showMetadata: boolean) => void;
+  onWorkspaceChange: (workspace: SelectProps.Option | null) => void;
 }
 
 export abstract class ChatScrollState {
@@ -40,42 +41,18 @@ export abstract class ChatScrollState {
   static skipNextHistoryUpdate = false;
 }
 
-const workspaceDefaultOptions: SelectProps.Option[] = [
-  {
-    label: "No workspace (RAG data source)",
-    value: "",
-    iconName: "close",
-  },
-  {
-    label: "Create new workspace",
-    value: "__create__",
-    iconName: "add-plus",
-  },
-];
-
 export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
   const appContext = useContext(AppContext);
   const navigate = useNavigate();
   const { transcript, listening, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
-  const [state, setState] = useState<ChatInputState>({
-    value: "",
-    selectedModel: null,
-    selectedModelMetadata: null,
-    selectedWorkspace: workspaceDefaultOptions[0],
-    modelsStatus: "loading",
-    workspacesStatus: "loading",
-  });
+  const [value, setValue] = useState<string>("");
 
   useEffect(() => {
     if (transcript) {
-      setState((state) => ({ ...state, value: transcript }));
+      setValue(transcript);
     }
   }, [transcript]);
-
-  useEffect(() => {
-    if (!appContext) return;
-  }, [appContext, state.modelsStatus]);
 
   useEffect(() => {
     const onWindowScroll = () => {
@@ -114,7 +91,7 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
   }[props.readyState];
 
   const workspaceOptions = [
-    ...workspaceDefaultOptions,
+    ...props.workspaceDefaultOptions,
     ...OptionsHelper.getSelectOptions(props.workspaces || []),
   ];
 
@@ -146,25 +123,24 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
             maxLength={10000}
             spellCheck={true}
             autoFocus
-            onChange={(e) =>
-              setState((state) => ({ ...state, value: e.target.value }))
-            }
+            onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
+              if (!props.enabled) return;
               if (e.key == "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                props.onSendMessage(state.value);
-                setState((state) => ({ ...state, value: "" }));
+                props.onSendMessage(value);
+                setValue("");
               }
             }}
-            value={state.value}
+            value={value}
             placeholder={listening ? "Listening..." : "Send a message"}
           />
           <div style={{ marginLeft: "8px" }}>
             <Button
-              disabled={!props.enabled || state.value.trim().length === 0}
+              disabled={!props.enabled || value.trim().length === 0}
               onClick={() => {
-                props.onSendMessage(state.value);
-                setState((state) => ({ ...state, value: "" }));
+                props.onSendMessage(value);
+                setValue("");
               }}
               iconAlign="right"
               iconName={!props.running ? "angle-right-double" : undefined}
@@ -194,7 +170,7 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
             <Select
               disabled={props.running}
               loadingText="Loading workspaces (might take few seconds)..."
-              statusType={state.workspacesStatus}
+              statusType={props.workspacesStatus}
               placeholder="Select a workspace (RAG data source)"
               filteringType="auto"
               selectedOption={props.selectedWorkspace ?? null}
@@ -203,7 +179,7 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
                 if (detail.selectedOption?.value === "__create__") {
                   navigate("/rag/workspaces/create");
                 } else {
-                  props.onChange(props.showMetadata ?? false, detail.selectedOption);
+                  props.onWorkspaceChange(detail.selectedOption);
                 }
               }}
               empty={"No Workspaces available"}
@@ -211,10 +187,12 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
           )}
         </div>
         <div className={styles.input_controls_right}>
-          <SpaceBetween direction="horizontal" size="xxs" alignItems="center">
+          <SpaceBetween direction="horizontal" size="s" alignItems="center">
             <Toggle
               checked={props.showMetadata ?? false}
-              onChange={({ detail }) => props.onChange(detail.checked, state.selectedWorkspace)}
+              onChange={({ detail }) =>
+                props.onShowMetadataChange(detail.checked)
+              }
             >
               Show Metadata
             </Toggle>
