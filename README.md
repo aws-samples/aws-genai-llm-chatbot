@@ -57,10 +57,9 @@ and select one of the supported models (press Space to select/deselect) from the
 > ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware of not letting this model run unused to avoid unnecessary costs. 
 
 ## Multi-Session Chat: evaluate multiple models at once
-Send the same query to 2 to 4 separate models at once and see how each one responds based on its own learned history and context.
+Send the same query to 2 to 4 separate models at once and see how each one responds based on its own learned history, context and access to the same powerful document retriever, so all requests can pull from the same up-to-date knowledge.
 
 ![sample](assets/multichat-sample.gif "AWS GenAI Chatbot")
-
 
 
 ## Experiment with multiple RAG options with Workspaces
