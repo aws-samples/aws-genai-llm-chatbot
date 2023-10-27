@@ -5,6 +5,9 @@ import {
   Button,
   Select,
   ColumnLayout,
+  Toggle,
+  StatusIndicator,
+  Container,
 } from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
 import { AppContext } from "../../common/app-context";
@@ -27,7 +30,6 @@ import {
   ChatBotHeartbeatRequest,
   ChatBotModelInterface,
 } from "./types";
-
 import {
   ApiResult,
   ModelItem,
@@ -38,11 +40,13 @@ import {
 import { getSelectedModelMetadata, updateChatSessions } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
 import styles from "../../styles/chat.module.scss";
+import { useNavigate } from "react-router-dom";
 
 export interface ChatSession {
   configuration: ChatBotConfiguration;
   model?: SelectProps.Option;
   modelMetadata?: ModelItem;
+  workspace?: SelectProps.Option;
   id: string;
   loading: boolean;
   running: boolean;
@@ -80,13 +84,12 @@ const workspaceDefaultOptions: SelectProps.Option[] = [
 ];
 
 export default function MultiChat() {
+  const navigate = useNavigate();
   const appContext = useContext(AppContext);
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [models, setModels] = useState<ModelItem[]>([]);
   const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
-  const [selectedWorkspace, setSelectedWorkspace] =
-    useState<SelectProps.Option | null>(workspaceDefaultOptions[0]);
   const [modelsStatus, setModelsStatus] = useState<LoadingStatus>("loading");
   const [workspacesStatus, setWorkspacesStatus] =
     useState<LoadingStatus>("loading");
@@ -95,7 +98,6 @@ export default function MultiChat() {
     undefined
   );
   const [showMetadata, setShowMetadata] = useState(false);
-
   const { sendJsonMessage, readyState } = useWebSocket(socketUrl, {
     share: true,
     shouldReconnect: () => true,
@@ -194,7 +196,7 @@ export default function MultiChat() {
           provider: provider,
           sessionId: chatSession.id,
           files: [],
-          workspaceId: selectedWorkspace?.value,
+          workspaceId: chatSession.workspace?.value,
           modelKwargs: {
             streaming: chatSession.configuration.streaming,
             maxTokens: chatSession.configuration.maxTokens,
@@ -253,12 +255,42 @@ export default function MultiChat() {
   }, [chatSessions]);
 
   const messages = transformMessages(chatSessions);
+  const workspaceOptions = [
+    ...workspaceDefaultOptions,
+    ...OptionsHelper.getSelectOptions(workspaces || []),
+  ];
+
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Closed",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
 
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
         <SpaceBetween size="m" alignItems="end">
-          <SpaceBetween size="m" direction="horizontal">
+          <SpaceBetween size="m" direction="horizontal" alignItems="center">
+            <StatusIndicator
+              type={
+                readyState === ReadyState.OPEN
+                  ? "success"
+                  : readyState === ReadyState.CONNECTING ||
+                    readyState === ReadyState.UNINSTANTIATED
+                  ? "in-progress"
+                  : "error"
+              }
+            >
+              {readyState === ReadyState.OPEN ? "Connected" : connectionStatus}
+            </StatusIndicator>
+            <Toggle
+              checked={showMetadata ?? false}
+              onChange={({ detail }) => setShowMetadata(detail.checked)}
+            >
+              Show Metadata
+            </Toggle>
             <Button
               onClick={() => addSession()}
               disabled={!enableAddModels || chatSessions.length >= 4}
@@ -283,66 +315,94 @@ export default function MultiChat() {
         </SpaceBetween>
         <ColumnLayout columns={chatSessions.length}>
           {chatSessions.map((chatSession) => (
-            <SpaceBetween key={chatSession.id} direction="vertical" size="m">
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr min-content",
-                  gap: "8px",
-                }}
-              >
-                <Select
-                  disabled={!enableAddModels}
-                  loadingText="Loading models (might take few seconds)..."
-                  statusType={modelsStatus}
-                  placeholder="Select a model"
-                  empty={
-                    <div>
-                      No models available. Please make sure you have access to
-                      Amazon Bedrock or alternatively deploy a self hosted model
-                      on SageMaker or add API_KEY to Secrets Manager
-                    </div>
-                  }
-                  filteringType="auto"
-                  selectedOption={chatSession.model ?? null}
-                  onChange={({ detail }) => {
-                    chatSession.model = detail.selectedOption;
-                    chatSession.modelMetadata =
-                      getSelectedModelMetadata(models, detail.selectedOption) ??
-                      undefined;
-                    setChatSessions([...chatSessions]);
+            <Container key={chatSession.id}>
+              <SpaceBetween direction="vertical" size="m">
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr min-content",
+                    gap: "8px",
                   }}
-                  options={OptionsHelper.getSelectOptionGroups(models)}
-                />
-                <div style={{ display: "flex", gap: "4px" }}>
-                  <Button
-                    iconName="settings"
-                    variant="icon"
-                    onClick={() => setLlmToConfig(chatSession)}
+                >
+                  <Select
+                    disabled={!enableAddModels}
+                    loadingText="Loading models (might take few seconds)..."
+                    statusType={modelsStatus}
+                    placeholder="Select a model"
+                    empty={
+                      <div>
+                        No models available. Please make sure you have access to
+                        Amazon Bedrock or alternatively deploy a self hosted
+                        model on SageMaker or add API_KEY to Secrets Manager
+                      </div>
+                    }
+                    filteringType="auto"
+                    selectedOption={chatSession.model ?? null}
+                    onChange={({ detail }) => {
+                      chatSession.model = detail.selectedOption;
+                      chatSession.modelMetadata =
+                        getSelectedModelMetadata(
+                          models,
+                          detail.selectedOption
+                        ) ?? undefined;
+                      setChatSessions([...chatSessions]);
+                    }}
+                    options={OptionsHelper.getSelectOptionGroups(models)}
                   />
-                  <Button
-                    iconName="remove"
-                    variant="icon"
-                    disabled={chatSessions.length <= 2 || messages.length > 0}
-                    onClick={() => {
-                      setChatSessions([
-                        ...chatSessions.filter((c) => c.id !== chatSession.id),
-                      ]);
+                  <div style={{ display: "flex", gap: "2px" }}>
+                    <Button
+                      iconName="settings"
+                      variant="icon"
+                      onClick={() => setLlmToConfig(chatSession)}
+                    />
+                    <Button
+                      iconName="remove"
+                      variant="icon"
+                      disabled={chatSessions.length <= 2 || messages.length > 0}
+                      onClick={() => {
+                        setChatSessions([
+                          ...chatSessions.filter(
+                            (c) => c.id !== chatSession.id
+                          ),
+                        ]);
+                      }}
+                    />
+                  </div>
+                </div>
+                {llmToConfig && (
+                  <LLMConfigDialog
+                    session={llmToConfig}
+                    setVisible={() => setLlmToConfig(undefined)}
+                    onConfigurationChange={(configuration) => {
+                      llmToConfig.configuration = configuration;
+                      setChatSessions([...chatSessions]);
                     }}
                   />
-                </div>
-              </div>
-              {llmToConfig && (
-                <LLMConfigDialog
-                  session={llmToConfig}
-                  setVisible={() => setLlmToConfig(undefined)}
-                  onConfigurationChange={(configuration) => {
-                    llmToConfig.configuration = configuration;
-                    setChatSessions([...chatSessions]);
-                  }}
-                />
-              )}
-            </SpaceBetween>
+                )}
+                {appContext?.config.rag_enabled && true && (
+                  <Select
+                    disabled={!enableAddModels}
+                    loadingText="Loading workspaces (might take few seconds)..."
+                    statusType={workspacesStatus}
+                    placeholder="Select a workspace (RAG data source)"
+                    filteringType="auto"
+                    selectedOption={
+                      chatSession.workspace ?? workspaceDefaultOptions[0]
+                    }
+                    options={workspaceOptions}
+                    onChange={({ detail }) => {
+                      if (detail.selectedOption?.value === "__create__") {
+                        navigate("/rag/workspaces/create");
+                      } else {
+                        chatSession.workspace = detail.selectedOption;
+                        setChatSessions([...chatSessions]);
+                      }
+                    }}
+                    empty={"No Workspaces available"}
+                  />
+                )}
+              </SpaceBetween>
+            </Container>
           ))}
         </ColumnLayout>
         {messages.map((val, idx) => {
@@ -366,17 +426,9 @@ export default function MultiChat() {
       </SpaceBetween>
       <div className={styles.input_container}>
         <MultiChatInputPanel
-          running={false}
-          workspaces={workspaces}
-          onSendMessage={handleSendMessage}
-          readyState={readyState}
-          showMetadata={showMetadata}
-          selectedWorkspace={selectedWorkspace ?? undefined}
-          workspacesStatus={workspacesStatus}
-          workspaceDefaultOptions={workspaceDefaultOptions}
-          onShowMetadataChange={(showMetadata) => setShowMetadata(showMetadata)}
-          onWorkspaceChange={(workspace) => setSelectedWorkspace(workspace)}
+          running={chatSessions.some((c) => c.running)}
           enabled={enabled}
+          onSendMessage={handleSendMessage}
         />
       </div>
     </div>
