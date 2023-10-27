@@ -40,15 +40,17 @@ import {
   ChabotInputModality,
   ChatBotAction,
   ChatBotConfiguration,
+  ChatBotHeartbeatRequest,
   ChatBotHistoryItem,
   ChatBotMessageResponse,
   ChatBotMessageType,
   ChatBotMode,
+  ChatBotModelInterface,
   ChatBotRunRequest,
   ChatInputState,
   ImageFile,
 } from "./types";
-import { getSignedUrl, updateMessageHistory } from "./utils";
+import { getSelectedModelMetadata, getSignedUrl, updateMessageHistory } from "./utils";
 
 export interface ChatInputPanelProps {
   running: boolean;
@@ -99,8 +101,20 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   const { sendJsonMessage, readyState } = useWebSocket(socketUrl, {
     share: true,
     shouldReconnect: () => true,
-    onMessage: (payload) => {
+    onOpen: () => {
+      const request: ChatBotHeartbeatRequest = {
+        action: ChatBotAction.Heartbeat,
+        modelInterface: ChatBotModelInterface.Langchain,
+      };
+
+      sendJsonMessage(request);
+    },
+    onMessage: (payload: { data: string }) => {
       const response: ChatBotMessageResponse = JSON.parse(payload.data);
+      if (response.action === ChatBotAction.Heartbeat) {
+        return;
+      }
+
       updateMessageHistory(
         props.session.id,
         props.messageHistory,
@@ -324,7 +338,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     <SpaceBetween direction="vertical" size="l">
       <Container>
         <div className={styles.input_textarea_container}>
-          <span>
+          <SpaceBetween size="xs" direction="horizontal">
             {browserSupportsSpeechRecognition ? (
               <Button
                 iconName={listening ? "microphone-off" : "microphone"}
@@ -338,17 +352,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             ) : (
               <Icon name="microphone-off" variant="disabled" />
             )}
-            <ImageDialog
-              sessionId={props.session.id}
-              visible={imageDialogVisible}
-              setVisible={setImageDialogVisible}
-              configuration={props.configuration}
-              setConfiguration={props.setConfiguration}
-            />
+            
             {state.selectedModelMetadata?.inputModalities.includes(
               ChabotInputModality.Image
             ) && (
-              <span
+              <div
                 style={{ cursor: "pointer" }}
                 onClick={() => setImageDialogVisible(true)}
               >
@@ -356,14 +364,13 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                   svg={
                     <svg
                       viewBox="0 0 22 22"
-                      style={{ marginTop: "5px" }}
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <rect
-                        x="3"
-                        y="3"
-                        width="18"
-                        height="18"
+                        x="2"
+                        y="2"
+                        width="19"
+                        height="19"
                         rx="2"
                         ry="2"
                       ></rect>
@@ -372,9 +379,16 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                     </svg>
                   }
                 />
-              </span>
+              </div>
             )}
-          </span>
+          </SpaceBetween>
+          <ImageDialog
+              sessionId={props.session.id}
+              visible={imageDialogVisible}
+              setVisible={setImageDialogVisible}
+              configuration={props.configuration}
+              setConfiguration={props.setConfiguration}
+            />
           <TextareaAutosize
             className={styles.input_textarea}
             maxRows={6}
@@ -631,24 +645,3 @@ function getSelectedModelOption(
   return selectedModelOption;
 }
 
-function getSelectedModelMetadata(
-  models: ModelItem[] | undefined,
-  selectedModelOption: SelectProps.Option | null
-): ModelItem | null {
-  let selectedModelMetadata: ModelItem | null = null;
-
-  if (selectedModelOption) {
-    const { name, provider } = OptionsHelper.parseValue(
-      selectedModelOption.value
-    );
-    const targetModel = models?.find(
-      (m) => m.name === name && m.provider === provider
-    );
-
-    if (targetModel) {
-      selectedModelMetadata = targetModel;
-    }
-  }
-
-  return selectedModelMetadata;
-}

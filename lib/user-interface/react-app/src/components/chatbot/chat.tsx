@@ -71,7 +71,6 @@ export default function Chat(props: { sessionId?: string }) {
             key={idx}
             message={message}
             configuration={configuration}
-            setConfiguration={setConfiguration}
           />
         ))}
       </SpaceBetween>
