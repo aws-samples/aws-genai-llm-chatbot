@@ -109,7 +109,29 @@ export default function ChatMessage(props: ChatMessageProps) {
               </Popover>
             </div>
           ) : null}
-          <ReactMarkdown children={props.message.content} />
+          <ReactMarkdown
+            children={props.message.content}
+            components={{
+              pre(props) {
+                const { children, className, node, ...rest } = props;
+                return (
+                  <pre
+                    {...rest}
+                    className={className}
+                    style={{
+                      textOverflow: "ellipsis",
+                      overflow: "scroll",
+                      backgroundColor: "rgb(240,240,240)",
+                      borderRadius: "5px",
+                      padding: "5px",
+                    }}
+                  >
+                    {children}
+                  </pre>
+                );
+              },
+            }}
+          />
         </Container>
       )}
       {loading && (
