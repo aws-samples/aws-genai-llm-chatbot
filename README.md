@@ -41,7 +41,25 @@ Deploy [IDEFICS](https://huggingface.co/blog/idefics) models on [Amazon SageMake
 
 ![sample](assets/multimodal-sample.gif "AWS GenAI Chatbot")
 
-Read more about deploying multimodal IDEFICS on Amazon SageMaker [here](#multimodal-models).
+Currently, the following multimodal models are supported:
+- [IDEFICS 9b Instruct](https://huggingface.co/HuggingFaceM4/idefics-9b)
+  - Requires `ml.g5.12xlarge` instance.
+- [IDEFICS 80b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
+  - Requires `ml.g5.48xlarge` instance.
+
+To have the right instance types and how to request them, read [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
+
+> NOTE: Make sure to review [IDEFICS models license sections](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct#license).
+
+To deploy a multimodal model, follow the [deploy instructions](#deploy)
+and select one of the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as [instructed in the above section]((#deployment-dependencies-installation)).
+
+> ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware of not letting this model run unused to avoid unnecessary costs. 
+
+## Multi-Session Chat: evaluate multiple models at once
+Send the same query to 2 to 4 separate models at once and see how each one responds based on its own learned history, context and access to the same powerful document retriever, so all requests can pull from the same up-to-date knowledge.
+
+![sample](assets/multichat-sample.gif "AWS GenAI Chatbot")
 
 
 ## Experiment with multiple RAG options with Workspaces
@@ -259,26 +277,6 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 9. Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`
 
 10. Login with the user created in .8; you will be asked to change the password.
-
-
-# Multimodal models
-Currently, the following multimodal models are supported:
-- [IDEFICS 9b Instruct](https://huggingface.co/HuggingFaceM4/idefics-9b)
-  - Requires `ml.g5.12xlarge` instance.
-- [IDEFICS 80b Instruct](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct)
-  - Requires `ml.g5.48xlarge` instance.
-
-To have the right instance types and how to request them, read [Amazon SageMaker requirements](#amazon-sagemaker-requirements-for-self-hosted-models-only)
-
-> NOTE: Make sure to review [IDEFICS models license sections](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct#license).
-
-To deploy a multimodal model, follow the [deploy instructions](#deploy)
-and select one of the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as [instructed in the above section]((#deployment-dependencies-installation)).
-
-![sample](assets/select-multimodal.gif "AWS GenAI Chatbot")
-
-
-> ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware of not letting this model run unused to avoid unnecessary costs. 
 
 
 
