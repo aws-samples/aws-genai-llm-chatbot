@@ -117,14 +117,7 @@ export default function ChatMessage(props: ChatMessageProps) {
                 return (
                   <pre
                     {...rest}
-                    className={className}
-                    style={{
-                      textOverflow: "ellipsis",
-                      overflow: "scroll",
-                      backgroundColor: "rgb(240,240,240)",
-                      borderRadius: "5px",
-                      padding: "5px",
-                    }}
+                    className={styles.codeMarkdown}
                   >
                     {children}
                   </pre>
