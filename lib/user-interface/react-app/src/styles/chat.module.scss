@@ -121,3 +121,11 @@
     gap: awsui.$space-scaled-xs;
   }
 }
+
+.codeMarkdown {
+  background-color: awsui.$color-charts-line-grid;
+  text-overflow: ellipsis;
+  overflow: scroll;
+  border-radius: 5px;
+  padding: 5px;
+}
