@@ -50,7 +50,11 @@ import {
   ChatInputState,
   ImageFile,
 } from "./types";
-import { getSelectedModelMetadata, getSignedUrl, updateMessageHistory } from "./utils";
+import {
+  getSelectedModelMetadata,
+  getSignedUrl,
+  updateMessageHistory,
+} from "./utils";
 
 export interface ChatInputPanelProps {
   running: boolean;
@@ -338,7 +342,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     <SpaceBetween direction="vertical" size="l">
       <Container>
         <div className={styles.input_textarea_container}>
-          <SpaceBetween size="xs" direction="horizontal">
+          <SpaceBetween size="xxs" direction="horizontal" alignItems="center">
             {browserSupportsSpeechRecognition ? (
               <Button
                 iconName={listening ? "microphone-off" : "microphone"}
@@ -352,43 +356,36 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             ) : (
               <Icon name="microphone-off" variant="disabled" />
             )}
-            
             {state.selectedModelMetadata?.inputModalities.includes(
               ChabotInputModality.Image
             ) && (
-              <div
-                style={{ cursor: "pointer" }}
+              <Button
+                variant="icon"
                 onClick={() => setImageDialogVisible(true)}
-              >
-                <Icon
-                  svg={
-                    <svg
-                      viewBox="0 0 22 22"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <rect
-                        x="2"
-                        y="2"
-                        width="19"
-                        height="19"
-                        rx="2"
-                        ry="2"
-                      ></rect>
-                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                      <polyline points="21 15 16 10 5 21"></polyline>
-                    </svg>
-                  }
-                />
-              </div>
+                iconSvg={
+                  <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                    <rect
+                      x="2"
+                      y="2"
+                      width="19"
+                      height="19"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                }
+              ></Button>
             )}
           </SpaceBetween>
           <ImageDialog
-              sessionId={props.session.id}
-              visible={imageDialogVisible}
-              setVisible={setImageDialogVisible}
-              configuration={props.configuration}
-              setConfiguration={props.setConfiguration}
-            />
+            sessionId={props.session.id}
+            visible={imageDialogVisible}
+            setVisible={setImageDialogVisible}
+            configuration={props.configuration}
+            setConfiguration={props.setConfiguration}
+          />
           <TextareaAutosize
             className={styles.input_textarea}
             maxRows={6}
@@ -644,4 +641,3 @@ function getSelectedModelOption(
 
   return selectedModelOption;
 }
-
