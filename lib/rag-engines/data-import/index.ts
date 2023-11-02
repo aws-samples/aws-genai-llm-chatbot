@@ -9,13 +9,13 @@ import { FileImportWorkflow } from "./file-import-workflow";
 import { WebsiteCrawlingWorkflow } from "./website-crawling-workflow";
 import { OpenSearchVector } from "../opensearch-vector";
 import { KendraRetrieval } from "../kendra-retrieval";
+import { SageMakerRagModels } from "../sagemaker-rag-models";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3Notifications from "aws-cdk-lib/aws-s3-notifications";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
@@ -29,7 +29,7 @@ export interface DataImportProps {
   readonly ragDynamoDBTables: RagDynamoDBTables;
   readonly openSearchVector?: OpenSearchVector;
   readonly kendraRetrieval?: KendraRetrieval;
-  readonly sageMakerRagModelsEndpoint?: sagemaker.CfnEndpoint;
+  readonly sageMakerRagModels?: SageMakerRagModels;
   readonly workspacesTable: dynamodb.Table;
   readonly documentsTable: dynamodb.Table;
   readonly workspacesByObjectTypeIndexName: string;
@@ -109,7 +109,7 @@ export class DataImport extends Construct {
         processingBucket,
         auroraDatabase: props.auroraDatabase,
         ragDynamoDBTables: props.ragDynamoDBTables,
-        sageMakerRagModelsEndpoint: props.sageMakerRagModelsEndpoint,
+        sageMakerRagModelsEndpoint: props.sageMakerRagModels?.model.endpoint,
         openSearchVector: props.openSearchVector,
       }
     );
@@ -134,7 +134,7 @@ export class DataImport extends Construct {
         processingBucket,
         auroraDatabase: props.auroraDatabase,
         ragDynamoDBTables: props.ragDynamoDBTables,
-        sageMakerRagModelsEndpoint: props.sageMakerRagModelsEndpoint,
+        sageMakerRagModelsEndpoint: props.sageMakerRagModels?.model.endpoint,
         openSearchVector: props.openSearchVector,
       }
     );
@@ -170,7 +170,7 @@ export class DataImport extends Construct {
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
           props.documentsByCompountKeyIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
-          props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+          props.sageMakerRagModels?.model.endpoint.attrEndpointName ?? "",
         FILE_IMPORT_WORKFLOW_ARN:
           fileImportWorkflow?.stateMachine.stateMachineArn ?? "",
         DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:

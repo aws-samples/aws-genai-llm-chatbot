@@ -24,7 +24,11 @@ export default function NavigationPanel() {
         text: "Chatbot",
         items: [
           { type: "link", text: "Playground", href: "/chatbot/playground" },
-          { type: "link", text: "Multi-chat playground", href: "/chatbot/multichat" },
+          {
+            type: "link",
+            text: "Multi-chat playground",
+            href: "/chatbot/multichat",
+          },
           {
             type: "link",
             text: "Models",
@@ -35,6 +39,17 @@ export default function NavigationPanel() {
     ];
 
     if (appContext?.config.rag_enabled) {
+      const crossEncodersItems: SideNavigationProps.Item[] = appContext?.config
+        .cross_encoders_enabled
+        ? [
+            {
+              type: "link",
+              text: "Cross-encoders",
+              href: "/rag/cross-encoders",
+            },
+          ]
+        : [];
+
       items.push({
         type: "section",
         text: "Retrieval-Augmented Generation (RAG)",
@@ -51,11 +66,7 @@ export default function NavigationPanel() {
             text: "Embeddings",
             href: "/rag/embeddings",
           },
-          {
-            type: "link",
-            text: "Cross-encoders",
-            href: "/rag/cross-encoders",
-          },
+          ...crossEncodersItems,
           { type: "link", text: "Engines", href: "/rag/engines" },
         ],
       });

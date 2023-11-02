@@ -1,6 +1,5 @@
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { Construct } from "constructs";
 import { Shared } from "../shared";
@@ -22,13 +21,13 @@ export class RagEngines extends Construct {
   public readonly auroraPgVector: AuroraPgVector | null;
   public readonly openSearchVector: OpenSearchVector | null;
   public readonly kendraRetrieval: KendraRetrieval | null;
+  public readonly sageMakerRagModels: SageMakerRagModels | null;
   public readonly uploadBucket: s3.Bucket;
   public readonly processingBucket: s3.Bucket;
   public readonly documentsTable: dynamodb.Table;
   public readonly workspacesTable: dynamodb.Table;
   public readonly workspacesByObjectTypeIndexName: string;
   public readonly documentsByCompountKeyIndexName: string;
-  public readonly sageMakerRagModelsEndpoint: sagemaker.CfnEndpoint;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
   public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
@@ -38,14 +37,16 @@ export class RagEngines extends Construct {
 
     const tables = new RagDynamoDBTables(this, "RagDynamoDBTables");
 
-    const sageMakerRagModels = new SageMakerRagModels(
-      this,
-      "SageMaker",
-      {
+    let sageMakerRagModels: SageMakerRagModels | null = null;
+    if (
+      props.config.rag.engines.aurora.enabled ||
+      props.config.rag.engines.opensearch.enabled
+    ) {
+      sageMakerRagModels = new SageMakerRagModels(this, "SageMaker", {
         shared: props.shared,
         config: props.config,
-      }
-    );
+      });
+    }
 
     let auroraPgVector: AuroraPgVector | null = null;
     if (props.config.rag.engines.aurora.enabled) {
@@ -78,7 +79,7 @@ export class RagEngines extends Construct {
       shared: props.shared,
       config: props.config,
       auroraDatabase: auroraPgVector?.database,
-      sageMakerRagModelsEndpoint: sageMakerRagModels.model.endpoint,
+      sageMakerRagModels: sageMakerRagModels ?? undefined,
       workspacesTable: tables.workspacesTable,
       documentsTable: tables.documentsTable,
       ragDynamoDBTables: tables,
@@ -101,7 +102,7 @@ export class RagEngines extends Construct {
     this.auroraPgVector = auroraPgVector;
     this.openSearchVector = openSearchVector;
     this.kendraRetrieval = kendraRetrieval;
-    this.sageMakerRagModelsEndpoint = sageMakerRagModels.model.endpoint;
+    this.sageMakerRagModels = sageMakerRagModels;
     this.uploadBucket = dataImport.uploadBucket;
     this.processingBucket = dataImport.processingBucket;
     this.workspacesTable = tables.workspacesTable;

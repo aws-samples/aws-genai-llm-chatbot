@@ -1,4 +1,9 @@
+import * as path from "path";
 import * as cdk from "aws-cdk-lib";
+import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
+import { Construct } from "constructs";
+import { RagEngines } from "../rag-engines";
+import { Shared } from "../shared";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
@@ -7,11 +12,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import { Construct } from "constructs";
-import * as path from "path";
-import { RagEngines } from "../rag-engines";
-import { Shared } from "../shared";
-import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
 
 export interface RestApiProps {
   readonly shared: Shared;
@@ -74,7 +74,8 @@ export class RestApi extends Construct {
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
           props.ragEngines?.documentsByCompountKeyIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
-          props.ragEngines?.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+          props.ragEngines?.sageMakerRagModels?.model.endpoint
+            ?.attrEndpointName ?? "",
         DELETE_WORKSPACE_WORKFLOW_ARN:
           props.ragEngines?.deleteWorkspaceWorkflow?.stateMachineArn ?? "",
         CREATE_AURORA_WORKSPACE_WORKFLOW_ARN:
@@ -190,7 +191,9 @@ export class RestApi extends Construct {
             new iam.PolicyStatement({
               actions: ["kendra:Retrieve", "kendra:Query"],
               resources: [
-                `arn:${cdk.Aws.PARTITION}:kendra:${item.region}:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
+                `arn:${cdk.Aws.PARTITION}:kendra:${
+                  item.region ?? cdk.Aws.REGION
+                }:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
               ],
             })
           );
@@ -210,11 +213,11 @@ export class RestApi extends Construct {
       props.ragEngines.deleteWorkspaceWorkflow.grantStartExecution(apiHandler);
     }
 
-    if (props.ragEngines?.sageMakerRagModelsEndpoint) {
+    if (props.ragEngines?.sageMakerRagModels) {
       apiHandler.addToRolePolicy(
         new iam.PolicyStatement({
           actions: ["sagemaker:InvokeEndpoint"],
-          resources: [props.ragEngines?.sageMakerRagModelsEndpoint.ref],
+          resources: [props.ragEngines.sageMakerRagModels.model.endpoint.ref],
         })
       );
     }
