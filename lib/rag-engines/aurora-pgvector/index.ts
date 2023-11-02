@@ -11,6 +11,10 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as cr from "aws-cdk-lib/custom-resources";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as kms from "aws-cdk-lib/aws-kms";
+import { NagSuppressions } from "cdk-nag";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 export interface AuroraPgVectorProps {
   readonly config: SystemConfig;
@@ -25,6 +29,10 @@ export class AuroraPgVector extends Construct {
   constructor(scope: Construct, id: string, props: AuroraPgVectorProps) {
     super(scope, id);
 
+    const storageKey = new kms.Key(this, "StorageKey", {
+      enableKeyRotation: true,
+    });
+
     const dbCluster = new rds.DatabaseCluster(this, "AuroraDatabase", {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_15_3,
@@ -33,6 +41,9 @@ export class AuroraPgVector extends Construct {
       writer: rds.ClusterInstance.serverlessV2("ServerlessInstance"),
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      storageEncrypted: true,
+      storageEncryptionKey: storageKey,
+      iamAuthentication: true
     });
 
     const databaseSetupFunction = new lambda.Function(
@@ -94,5 +105,11 @@ export class AuroraPgVector extends Construct {
 
     this.database = dbCluster;
     this.createAuroraWorkspaceWorkflow = createWorkflow.stateMachine;
+
+    NagSuppressions.addResourceSuppressions(dbCluster,
+      [
+        {id: "AwsSolutions-RDS10", reason: "Deletion protection disabled to allow deletion as part of the CloudFormation stack."}
+      ]
+    );
   }
 }
