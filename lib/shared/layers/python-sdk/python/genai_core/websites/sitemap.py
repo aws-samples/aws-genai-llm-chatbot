@@ -1,9 +1,9 @@
 import requests
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 
 def extract_urls_from_sitemap(sitemap_url: str):
-    response = requests.get(sitemap_url)
+    response = requests.get(sitemap_url, timeout=30)
     sitemap = response.content
 
     root = ET.fromstring(sitemap)
