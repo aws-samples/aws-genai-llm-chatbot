@@ -22,6 +22,7 @@ import * as s3Notifications from "aws-cdk-lib/aws-s3-notifications";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { NagSuppressions } from "cdk-nag";
 
 export interface DataImportProps {
   readonly config: SystemConfig;
@@ -47,27 +48,32 @@ export class DataImport extends Construct {
   constructor(scope: Construct, id: string, props: DataImportProps) {
     super(scope, id);
 
-    const ingestionDealLetterQueue = new sqs.Queue(
+    const ingestionDeadLetterQueue = new sqs.Queue(
       this,
       "IngestionDeadLetterQueue",
       {
         visibilityTimeout: cdk.Duration.seconds(900),
-      }
+        enforceSSL: true
+      },
     );
 
     const ingestionQueue = new sqs.Queue(this, "IngestionQueue", {
       visibilityTimeout: cdk.Duration.seconds(900),
+      enforceSSL: true,
       deadLetterQueue: {
-        queue: ingestionDealLetterQueue,
+        queue: ingestionDeadLetterQueue,
         maxReceiveCount: 3,
       },
     });
+
+    const uploadLogsBucket = new s3.Bucket(this, "UploadLogsBucket");
 
     const uploadBucket = new s3.Bucket(this, "UploadBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       transferAcceleration: true,
+      serverAccessLogsBucket: uploadLogsBucket,
       cors: [
         {
           allowedHeaders: ["*"],
@@ -84,10 +90,13 @@ export class DataImport extends Construct {
       ],
     });
 
+    const processingLogsBucket = new s3.Bucket(this, "ProcessingLogsBucket");
+
     const processingBucket = new s3.Bucket(this, "ProcessingBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      serverAccessLogsBucket: processingLogsBucket,
     });
 
     uploadBucket.addEventNotification(
@@ -215,5 +224,22 @@ export class DataImport extends Construct {
     this.fileImportWorkflow = fileImportWorkflow.stateMachine;
     this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;
     this.rssIngestorFunction = rssSubscription.rssIngestorFunction;
+
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressions(
+      [uploadLogsBucket, processingLogsBucket],
+      [
+        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
+        {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
+      ]
+    );
+    NagSuppressions.addResourceSuppressions(
+      [uploadBucket, processingBucket],
+      [
+        {id: "AwsSolutions-S10", reason: "Bucket only used for internal requests."},
+      ]
+    );
   }
 }
