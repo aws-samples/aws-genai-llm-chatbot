@@ -13,6 +13,7 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../shared";
 import { Direction } from "../shared/types";
+import { NagSuppressions } from "cdk-nag";
 
 interface WebSocketApiProps {
   readonly shared: Shared;
@@ -34,6 +35,7 @@ export class WebSocketApi extends Construct {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      pointInTimeRecovery: true,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -182,10 +184,13 @@ export class WebSocketApi extends Construct {
       })
     );
 
-    const deadLetterQueue = new sqs.Queue(this, "OutgoingMessagesDLQ");
+    const deadLetterQueue = new sqs.Queue(this, "OutgoingMessagesDLQ", {
+      enforceSSL: true,
+    });
 
     const queue = new sqs.Queue(this, "OutgoingMessagesQueue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      enforceSSL: true,
       deadLetterQueue: {
         queue: deadLetterQueue,
         maxReceiveCount: 3,
@@ -223,5 +228,18 @@ export class WebSocketApi extends Construct {
 
     this.api = webSocketApi;
     this.messagesTopic = messagesTopic;
+
+    NagSuppressions.addResourceSuppressions([webSocketApi, stage],
+      [
+        {id: "AwsSolutions-APIG1", reason: "CDK does not provide an option to enable access logging for WebSocketApi construct."},
+        {id: "AwsSolutions-APIG4", reason: "Connect authorizer not required for user usage."}
+      ]
+    );
+    NagSuppressions.addResourceSuppressions(messagesTopic,
+      [
+        {id: "AwsSolutions-SNS2", reason: "No sensitive data in topic."},
+        {id: "AwsSolutions-SNS3", reason: "No sensitive data in topic."},
+      ]
+    );
   }
 }

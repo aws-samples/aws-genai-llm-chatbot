@@ -39,6 +39,7 @@
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.104.0-alpha.0",
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.104.0-alpha.0",
     "aws-cdk-lib": "2.104.0",
+    "cdk-nag": "2.27.170",
     "commander": "^11.0.0",
     "constructs": "^10.0.0",
     "enquirer": "^2.4.1",

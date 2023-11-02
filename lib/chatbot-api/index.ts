@@ -13,6 +13,7 @@ import { ChatBotDynamoDBTables } from "./chatbot-dynamodb-tables";
 import { ChatBotS3Buckets } from "./chatbot-s3-buckets";
 import { RestApi } from "./rest-api";
 import { WebSocketApi } from "./websocket-api";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export interface ChatBotApiProps {
   readonly shared: Shared;

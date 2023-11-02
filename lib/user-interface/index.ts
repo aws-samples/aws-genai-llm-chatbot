@@ -15,6 +15,7 @@ import * as path from "node:path";
 import { Shared } from "../shared";
 import { SystemConfig } from "../shared/types";
 import { Utils } from "../shared/utils";
+import { NagSuppressions } from "cdk-nag";
 
 export interface UserInterfaceProps {
   readonly config: SystemConfig;
@@ -36,89 +37,101 @@ export class UserInterface extends Construct {
     const appPath = path.join(__dirname, "react-app");
     const buildPath = path.join(appPath, "dist");
 
+    const uploadLogsBucket = new s3.Bucket(this, "WebsiteLogsBucket");
+
     const websiteBucket = new s3.Bucket(this, "WebsiteBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       autoDeleteObjects: true,
       websiteIndexDocument: "index.html",
       websiteErrorDocument: "index.html",
+      versioned: true,
+      serverAccessLogsBucket: uploadLogsBucket
     });
 
     const originAccessIdentity = new cf.OriginAccessIdentity(this, "S3OAI");
     websiteBucket.grantRead(originAccessIdentity);
     props.chatbotFilesBucket.grantRead(originAccessIdentity);
 
-    const distribution = new cf.CloudFrontWebDistribution(
-      this,
-      "Distirbution",
+    const distributionLogsBucket = new s3.Bucket(this, "DistributionLogsBucket",
       {
-        viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        priceClass: cf.PriceClass.PRICE_CLASS_ALL,
-        httpVersion: cf.HttpVersion.HTTP2_AND_3,
-        originConfigs: [
-          {
-            behaviors: [{ isDefaultBehavior: true }],
-            s3OriginSource: {
-              s3BucketSource: websiteBucket,
-              originAccessIdentity,
-            },
+        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+      });
+
+    const distribution = new cf.CloudFrontWebDistribution(
+        this,
+        "Distribution",
+        {
+          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          priceClass: cf.PriceClass.PRICE_CLASS_ALL,
+          httpVersion: cf.HttpVersion.HTTP2_AND_3,
+          loggingConfig: {
+            bucket: distributionLogsBucket,
           },
-          {
-            behaviors: [
-              {
-                pathPattern: "/api/*",
-                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
-                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                defaultTtl: cdk.Duration.seconds(0),
-                forwardedValues: {
-                  queryString: true,
-                  headers: [
-                    "Referer",
-                    "Origin",
-                    "Authorization",
-                    "Content-Type",
-                    "x-forwarded-user",
-                    "Access-Control-Request-Headers",
-                    "Access-Control-Request-Method",
-                  ],
+          originConfigs: [
+            {
+              behaviors: [{isDefaultBehavior: true}],
+              s3OriginSource: {
+                s3BucketSource: websiteBucket,
+                originAccessIdentity,
+              },
+            },
+            {
+              behaviors: [
+                {
+                  pathPattern: "/api/*",
+                  allowedMethods: cf.CloudFrontAllowedMethods.ALL,
+                  viewerProtocolPolicy: cf.ViewerProtocolPolicy.HTTPS_ONLY,
+                  defaultTtl: cdk.Duration.seconds(0),
+                  forwardedValues: {
+                    queryString: true,
+                    headers: [
+                      "Referer",
+                      "Origin",
+                      "Authorization",
+                      "Content-Type",
+                      "x-forwarded-user",
+                      "Access-Control-Request-Headers",
+                      "Access-Control-Request-Method",
+                    ],
+                  },
+                },
+              ],
+              customOriginSource: {
+                domainName: `${props.restApi.restApiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
+                originHeaders: {
+                  "X-Origin-Verify": props.shared.xOriginVerifySecret
+                      .secretValueFromJson("headerValue")
+                      .unsafeUnwrap(),
                 },
               },
-            ],
-            customOriginSource: {
-              domainName: `${props.restApi.restApiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
-              originHeaders: {
-                "X-Origin-Verify": props.shared.xOriginVerifySecret
-                  .secretValueFromJson("headerValue")
-                  .unsafeUnwrap(),
-              },
             },
-          },
-          {
-            behaviors: [
-              {
-                pathPattern: "/socket",
-                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
-                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                forwardedValues: {
-                  queryString: true,
-                  headers: [
-                    "Sec-WebSocket-Key",
-                    "Sec-WebSocket-Version",
-                    "Sec-WebSocket-Protocol",
-                    "Sec-WebSocket-Accept",
-                    "Sec-WebSocket-Extensions",
-                  ],
+            {
+              behaviors: [
+                {
+                  pathPattern: "/socket",
+                  allowedMethods: cf.CloudFrontAllowedMethods.ALL,
+                  viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                  forwardedValues: {
+                    queryString: true,
+                    headers: [
+                      "Sec-WebSocket-Key",
+                      "Sec-WebSocket-Version",
+                      "Sec-WebSocket-Protocol",
+                      "Sec-WebSocket-Accept",
+                      "Sec-WebSocket-Extensions",
+                    ],
+                  },
+                },
+              ],
+              customOriginSource: {
+                domainName: `${props.webSocketApi.apiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
+                originHeaders: {
+                  "X-Origin-Verify": props.shared.xOriginVerifySecret
+                      .secretValueFromJson("headerValue")
+                      .unsafeUnwrap(),
                 },
               },
-            ],
-            customOriginSource: {
-              domainName: `${props.webSocketApi.apiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
-              originHeaders: {
-                "X-Origin-Verify": props.shared.xOriginVerifySecret
-                  .secretValueFromJson("headerValue")
-                  .unsafeUnwrap(),
-              },
-            },
           },
           {
             behaviors: [
@@ -287,5 +300,29 @@ export class UserInterface extends Construct {
     new cdk.CfnOutput(this, "UserInterfaceDomainName", {
       value: `https://${distribution.distributionDomainName}`,
     });
+
+    NagSuppressions.addResourceSuppressions(
+        [uploadLogsBucket, distributionLogsBucket],
+        [
+          {id: "AwsSolutions-S1", reason: "Bucket is the server access logs bucket for websiteBucket."}
+        ]
+    );
+    NagSuppressions.addResourceSuppressions(websiteBucket,
+      [
+        {id: "AwsSolutions-S5", reason: "OAI is configured for read."}
+      ]
+    );
+    NagSuppressions.addResourceSuppressions(distribution,
+      [
+        {id: "AwsSolutions-CFR1", reason: "No geo restrictions"},
+        {id: "AwsSolutions-CFR2", reason: "WAF not required due to configured Cognito auth."},
+        {id: "AwsSolutions-CFR4", reason: "TLS 1.2 is the default."}
+      ]
+    );
+    NagSuppressions.addResourceSuppressions(websiteBucket,
+      [
+        {id: "AwsSolutions-S10", reason: "Bucket only used for internal requests."}
+      ]
+    );
   }
 }

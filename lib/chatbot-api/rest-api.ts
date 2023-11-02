@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as cdk from "aws-cdk-lib";
+import { RemovalPolicy } from "aws-cdk-lib";
 import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
@@ -273,6 +274,10 @@ export class RestApi extends Construct {
       }
     }
 
+    const logGroup = new logs.LogGroup(this, "ChatBotApiAccessLogs", {
+      removalPolicy: RemovalPolicy.DESTROY
+    });
+
     const chatBotApi = new apigateway.RestApi(this, "ChatBotApi", {
       endpointTypes: [apigateway.EndpointType.REGIONAL],
       cloudWatchRole: true,
@@ -289,7 +294,15 @@ export class RestApi extends Construct {
         tracingEnabled: true,
         metricsEnabled: true,
         throttlingRateLimit: 2500,
+        accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
+        accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
       },
+    });
+
+    chatBotApi.addRequestValidator("ValidateRequest", {
+      requestValidatorName: "chatbot-api-validator",
+      validateRequestBody: true,
+      validateRequestParameters: true,
     });
 
     const cognitoAuthorizer = new apigateway.CfnAuthorizer(
@@ -310,7 +323,12 @@ export class RestApi extends Construct {
         authorizer: { authorizerId: cognitoAuthorizer.ref },
       },
     });
-    const v1ProxyResource = v1Resource.addResource("{proxy+}");
+    const v1ProxyResource = v1Resource.addResource("{proxy+}", {
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+        authorizer: { authorizerId: cognitoAuthorizer.ref },
+      },
+    });
     v1ProxyResource.addMethod(
       "ANY",
       new apigateway.LambdaIntegration(apiHandler, {

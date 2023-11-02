@@ -11,6 +11,7 @@ import * as aws_ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
+import { NagSuppressions } from "cdk-nag";
 
 export interface FileImportBatchJobProps {
   readonly config: SystemConfig;
@@ -153,7 +154,7 @@ export class FileImportBatchJob extends Construct {
             "bedrock:InvokeModel",
             "bedrock:InvokeModelWithResponseStream",
           ],
-          resources: ["*"],
+          resources: ["arn:aws:bedrock:*"],
         })
       );
 
@@ -169,5 +170,12 @@ export class FileImportBatchJob extends Construct {
 
     this.jobQueue = jobQueue;
     this.fileImportJob = fileImportJob;
+
+    NagSuppressions.addResourceSuppressions(fileImportJobRole,
+      [
+        {id: "AwsSolutions-IAM4", reason: "Allow user freedom of model usage in Bedrock."},
+        {id: "AwsSolutions-IAM5", reason: "Access to all log groups required for CloudWatch log group creation."},
+        {id: "AwsSolutions-IAM5", reason: "S3 write access required for upload and processing buckets."}
+      ])
   }
 }
