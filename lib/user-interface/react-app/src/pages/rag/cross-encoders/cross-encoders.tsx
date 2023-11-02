@@ -255,6 +255,7 @@ export default function CrossEncoders() {
                         onChange={({ detail: { selectedOption } }) =>
                           onChange({ crossEncoderModel: selectedOption })
                         }
+                        empty={<div>No cross-encoder models found</div>}
                       />
                     </FormField>
                   </SpaceBetween>

@@ -60,7 +60,8 @@ export class LangChainInterface extends Construct {
         AURORA_DB_SECRET_ID: props.ragEngines?.auroraPgVector?.database?.secret
           ?.secretArn as string,
         SAGEMAKER_RAG_MODELS_ENDPOINT:
-          props.ragEngines?.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+          props.ragEngines?.sageMakerRagModels?.model.endpoint
+            ?.attrEndpointName ?? "",
         OPEN_SEARCH_COLLECTION_ENDPOINT:
           props.ragEngines?.openSearchVector?.openSearchCollectionEndpoint ??
           "",
@@ -126,11 +127,13 @@ export class LangChainInterface extends Construct {
     if (props.ragEngines) {
       props.ragEngines.workspacesTable.grantReadWriteData(requestHandler);
       props.ragEngines.documentsTable.grantReadWriteData(requestHandler);
+    }
 
+    if (props.ragEngines?.sageMakerRagModels) {
       requestHandler.addToRolePolicy(
         new iam.PolicyStatement({
           actions: ["sagemaker:InvokeEndpoint"],
-          resources: [props.ragEngines?.sageMakerRagModelsEndpoint.ref],
+          resources: [props.ragEngines.sageMakerRagModels.model.endpoint.ref],
         })
       );
     }
@@ -162,7 +165,9 @@ export class LangChainInterface extends Construct {
             new iam.PolicyStatement({
               actions: ["kendra:Retrieve", "kendra:Query"],
               resources: [
-                `arn:${cdk.Aws.PARTITION}:kendra:${item.region}:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
+                `arn:${cdk.Aws.PARTITION}:kendra:${
+                  item.region ?? cdk.Aws.REGION
+                }:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
               ],
             })
           );

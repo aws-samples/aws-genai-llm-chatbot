@@ -21,8 +21,7 @@ class CrossEncodersRequest(BaseModel):
 @router.get("/cross-encoders/models")
 @tracer.capture_method
 def models():
-    config = genai_core.parameters.get_config()
-    models = config["rag"]["crossEncoderModels"]
+    models = genai_core.cross_encoder.get_cross_encoder_models()
 
     return {"ok": True, "data": models}
 
@@ -30,8 +29,6 @@ def models():
 @router.post("/cross-encoders")
 @tracer.capture_method
 def cross_encoders():
-    config = genai_core.parameters.get_config()
-
     data: dict = router.current_event.json_body
     request = CrossEncodersRequest(**data)
     selected_model = genai_core.cross_encoder.get_cross_encoder_model(

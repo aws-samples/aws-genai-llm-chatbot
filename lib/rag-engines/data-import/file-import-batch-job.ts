@@ -37,7 +37,7 @@ export class FileImportBatchJob extends Construct {
         vpc: props.shared.vpc,
         allocationStrategy: batch.AllocationStrategy.BEST_FIT,
         maxvCpus: 4,
-        minvCpus: 4,
+        minvCpus: 0,
         replaceComputeEnvironment: true,
         updateTimeout: cdk.Duration.minutes(30),
         updateToLatestImageVersion: true,

@@ -18,7 +18,8 @@ def generate_embeddings(
     input = list(map(lambda x: x[:10000], input))
 
     ret_value = []
-    batch_split = [input[i : i + batch_size] for i in range(0, len(input), batch_size)]
+    batch_split = [input[i: i + batch_size]
+                   for i in range(0, len(input), batch_size)]
 
     for batch in batch_split:
         if model.provider == "openai":
@@ -31,6 +32,17 @@ def generate_embeddings(
             raise genai_core.types.CommonError(f"Unknown provider")
 
     return ret_value
+
+
+def get_embeddings_models():
+    config = genai_core.parameters.get_config()
+    models = config["rag"]["embeddingsModels"]
+
+    if not SAGEMAKER_RAG_MODELS_ENDPOINT:
+        models = list(
+            filter(lambda x: x["provider"] != "sagemaker", models))
+
+    return models
 
 
 def get_embeddings_model(
