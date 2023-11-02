@@ -84,6 +84,9 @@ export class Models extends Construct {
           containerStartupHealthCheckTimeoutInSeconds: 300,
           env: {
             SM_NUM_GPUS: JSON.stringify(1),
+            MAX_INPUT_LENGTH: JSON.stringify(2048),
+            MAX_TOTAL_TOKENS: JSON.stringify(4096),
+            //HF_MODEL_QUANTIZE: "bitsandbytes",
           },
         },
       });
