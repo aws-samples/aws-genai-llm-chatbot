@@ -16,6 +16,8 @@ export interface AppConfig {
           name: CognitoHostedUIIdentityProvider;
         };
     rag_enabled: boolean;
+    cross_encoders_enabled: boolean;
+    sagemaker_embeddings_enabled: boolean;
     api_endpoint: string;
     websocket_endpoint: string;
     default_embeddings_model: string;
@@ -27,7 +29,6 @@ export interface AppConfig {
       region: string;
     };
   };
-
 }
 
 export interface NavigationPanelState {

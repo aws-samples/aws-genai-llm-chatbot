@@ -25,6 +25,8 @@ export interface UserInterfaceProps {
   readonly restApi: apigateway.RestApi;
   readonly webSocketApi: apigwv2.WebSocketApi;
   readonly chatbotFilesBucket: s3.Bucket;
+  readonly crossEncodersEnabled: boolean;
+  readonly sagemakerEmbeddingsEnabled: boolean;
 }
 
 export class UserInterface extends Construct {
@@ -172,6 +174,8 @@ export class UserInterface extends Construct {
         api_endpoint: `https://${distribution.distributionDomainName}/api`,
         websocket_endpoint: `wss://${distribution.distributionDomainName}/socket`,
         rag_enabled: props.config.rag.enabled,
+        cross_encoders_enabled: props.crossEncodersEnabled,
+        sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,
         default_embeddings_model: Utils.getDefaultEmbeddingsModel(props.config),
         default_cross_encoder_model: Utils.getDefaultCrossEncoderModel(
           props.config

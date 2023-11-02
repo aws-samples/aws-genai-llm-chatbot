@@ -39,7 +39,6 @@ export function getConfig(): SystemConfig {
         {
           provider: "sagemaker",
           name: "intfloat/multilingual-e5-large",
-          default: true,
           dimensions: 1024,
         },
         {
@@ -51,6 +50,7 @@ export function getConfig(): SystemConfig {
           provider: "bedrock",
           name: "amazon.titan-embed-text-v1",
           dimensions: 1536,
+          default: true,
         },
         {
           provider: "openai",

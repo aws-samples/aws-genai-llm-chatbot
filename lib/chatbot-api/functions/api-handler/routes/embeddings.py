@@ -20,8 +20,7 @@ class EmbeddingsRequest(BaseModel):
 @router.get("/embeddings/models")
 @tracer.capture_method
 def models():
-    config = genai_core.parameters.get_config()
-    models = config["rag"]["embeddingsModels"]
+    models = genai_core.embeddings.get_embeddings_models()
 
     return {"ok": True, "data": models}
 
@@ -38,6 +37,7 @@ def embeddings():
     if selected_model is None:
         raise genai_core.types.CommonError("Model not found")
 
-    ret_value = genai_core.embeddings.generate_embeddings(selected_model, request.input)
+    ret_value = genai_core.embeddings.generate_embeddings(
+        selected_model, request.input)
 
     return {"ok": True, "data": ret_value}

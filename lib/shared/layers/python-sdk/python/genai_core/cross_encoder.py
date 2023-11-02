@@ -22,6 +22,17 @@ def rank_passages(
     raise genai_core.typesCommonError(f"Unknown provider")
 
 
+def get_cross_encoder_models():
+    config = genai_core.parameters.get_config()
+    models = config["rag"]["crossEncoderModels"]
+
+    if not SAGEMAKER_RAG_MODELS_ENDPOINT:
+        models = list(
+            filter(lambda x: x["provider"] != "sagemaker", models))
+
+    return models
+
+
 def get_cross_encoder_model(
     provider: str, name: str
 ) -> Optional[genai_core.types.CrossEncoderModel]:
