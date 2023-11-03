@@ -14,6 +14,12 @@ You will need the CloudFormation Output values displayed after completion in the
 
 See `.env.template` for the variables, and replace with the Output values from the previous step.
 
+Alternatively you can grab the `aws-exports.json` from the CloudFront distribution endpoint you obtained from the CDK Output, and save it into `./lib/user-interface/react-app/public/` folder.
+
+The URL is something like:
+
+https://dxxxxxxxxxxxx.cloudfront.net/aws-exports.json
+
 ### Build and run local dev server
 
 ```
