@@ -65,25 +65,16 @@ class SMMistralInstructAdapter(ModelAdapter):
 {context}
 </s>[INST] {question} [/INST]"""
 
-        return PromptTemplate(
-            template=template, input_variables=["context", "question"]
-        )
+        return PromptTemplate.from_template(template)
 
     def get_prompt(self):
         template = """<s>[INST] The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.[/INST]
 
 {chat_history}
-<s>[/INST] {input} [/INST]"""
+<s>[INST] {input} [/INST]"""
 
-        input_variables = ["input", "chat_history"]
-        prompt_template_args = {
-            "chat_history": "{chat_history}",
-            "input_variables": input_variables,
-            "template": template,
-        }
-        prompt_template = PromptTemplate(**prompt_template_args)
-
-        return prompt_template
+        
+        return PromptTemplate.from_template(template)
 
     def get_condense_question_prompt(self):
         template = """<s>[INST] Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.[/INST]
@@ -91,11 +82,7 @@ class SMMistralInstructAdapter(ModelAdapter):
 {chat_history}
 </s>[INST] {question} [/INST]"""
 
-        return PromptTemplate(
-            input_variables=["chat_history", "question"],
-            chat_history="{chat_history}",
-            template=template,
-        )
+        return PromptTemplate.from_template(template)
 
 # Register the adapter
 registry.register(r"(?i)sagemaker\.mistralai-Mistral*", SMMistralInstructAdapter)
