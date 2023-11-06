@@ -62,7 +62,7 @@ class ModelAdapter:
         return ConversationBufferMemory(
             memory_key="chat_history",
             chat_memory=self.chat_history,
-            return_messages=True,
+            return_messages=False,
             output_key=output_key,
         )
 
@@ -73,15 +73,8 @@ class ModelAdapter:
         {chat_history}
 
         Question: {input}"""
-        input_variables = ["input", "chat_history"]
-        prompt_template_args = {
-            "chat_history": "{chat_history}",
-            "input_variables": input_variables,
-            "template": template,
-        }
-        prompt_template = PromptTemplate(**prompt_template_args)
-
-        return prompt_template
+        
+        return PromptTemplate.from_template(template)
 
     def get_condense_question_prompt(self):
         return CONDENSE_QUESTION_PROMPT
