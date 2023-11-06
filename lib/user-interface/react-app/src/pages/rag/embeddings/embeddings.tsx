@@ -31,6 +31,7 @@ import { MetricsHelper } from "../../../common/helpers/metrics-helper";
 import { MetricsMatrix } from "./metrics-matrix";
 import { EmbeddingsModelHelper } from "../../../common/helpers/embeddings-model-helper";
 import { Utils } from "../../../common/utils";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 export default function Embeddings() {
   const onFollow = useOnFollow();
@@ -193,7 +194,7 @@ export default function Embeddings() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

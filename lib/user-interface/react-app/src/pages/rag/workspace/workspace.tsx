@@ -21,6 +21,7 @@ import AuroraWorkspaceSettings from "./aurora-workspace-settings";
 import DocumentsTab from "./documents-tab";
 import OpenSearchWorkspaceSettings from "./open-search-workspace-settings";
 import KendraWorkspaceSettings from "./kendra-workspace-settings";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 export default function Workspace() {
   const appContext = useContext(AppContext);
@@ -64,7 +65,7 @@ export default function Workspace() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

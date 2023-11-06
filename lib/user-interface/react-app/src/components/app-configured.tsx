@@ -14,6 +14,7 @@ import { Alert, StatusIndicator } from "@cloudscape-design/components";
 import { StorageHelper } from "../common/helpers/storage-helper";
 import { Mode } from "@cloudscape-design/global-styles";
 import "@aws-amplify/ui-react/styles.css";
+import { CHATBOT_NAME } from "../common/constants";
 
 export default function AppConfigured() {
   const { tokens } = useTheme();
@@ -148,7 +149,7 @@ export default function AppConfigured() {
                     padding={`${tokens.space.xl} 0 0 ${tokens.space.xl}`}
                     level={3}
                   >
-                    AWS GenAI Chatbot
+                    {CHATBOT_NAME}
                   </Heading>
                 );
               },

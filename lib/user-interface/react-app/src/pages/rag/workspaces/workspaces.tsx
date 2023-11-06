@@ -2,6 +2,7 @@ import { BreadcrumbGroup } from "@cloudscape-design/components";
 import useOnFollow from "../../../common/hooks/use-on-follow";
 import WorkspacesTable from "./workspaces-table";
 import BaseAppLayout from "../../../components/base-app-layout";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 export default function Workspaces() {
   const onFollow = useOnFollow();
@@ -14,7 +15,7 @@ export default function Workspaces() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {
