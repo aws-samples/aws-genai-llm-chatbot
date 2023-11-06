@@ -11,6 +11,7 @@ import { AppContext } from "../../../common/app-context";
 import { useContext, useEffect, useState } from "react";
 import useOnFollow from "../../../common/hooks/use-on-follow";
 import BaseAppLayout from "../../../components/base-app-layout";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 const CARD_DEFINITIONS = {
   header: (item: EngineItem) => (
@@ -65,7 +66,7 @@ export default function Engines() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

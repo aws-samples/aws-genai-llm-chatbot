@@ -10,6 +10,7 @@ import {
 import BaseAppLayout from "../components/base-app-layout";
 import RouterButton from "../components/wrappers/router-button";
 import useOnFollow from "../common/hooks/use-on-follow";
+import { CHATBOT_NAME } from "../common/constants";
 
 export default function Welcome() {
   const onFollow = useOnFollow();
@@ -21,7 +22,7 @@ export default function Welcome() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
           ]}

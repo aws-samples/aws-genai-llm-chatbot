@@ -8,6 +8,7 @@ import { ResultValue } from "../../common/types";
 import ChatMessage from "./chat-message";
 import ChatInputPanel, { ChatScrollState } from "./chat-input-panel";
 import styles from "../../styles/chat.module.scss";
+import { CHATBOT_NAME } from "../../common/constants";
 
 export default function Chat(props: { sessionId?: string }) {
   const appContext = useContext(AppContext);
@@ -76,7 +77,7 @@ export default function Chat(props: { sessionId?: string }) {
       </SpaceBetween>
       <div className={styles.welcome_text}>
         {messageHistory.length == 0 && !session?.loading && (
-          <center>AWS GenAI Chatbot</center>
+          <center>{CHATBOT_NAME}</center>
         )}
         {session?.loading && (
           <center>
