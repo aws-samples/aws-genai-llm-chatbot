@@ -31,6 +31,7 @@ import { useSearchParams } from "react-router-dom";
 import { Utils } from "../../../common/utils";
 import SemanticSearchDetails from "./semantic-search-details";
 import ResultItems from "./result-items";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 interface SemanticSearchData {
   workspace: SelectProps.Option | null;
@@ -174,7 +175,7 @@ export default function SemanticSearch() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

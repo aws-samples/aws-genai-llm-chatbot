@@ -15,6 +15,7 @@ import CreateWorkspaceOpenSearch from "./create-workspace-opensearch";
 import CreateWorkspaceAurora from "./create-workspace-aurora";
 import CreateWorkspaceKendra from "./create-workspace-kendra";
 import SelectEnginePanel from "./select-engine-panel";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 export default function CreateWorkspace() {
   const onFollow = useOnFollow();
@@ -61,7 +62,7 @@ export default function CreateWorkspace() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

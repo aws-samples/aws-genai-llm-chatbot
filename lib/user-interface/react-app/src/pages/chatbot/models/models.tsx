@@ -20,6 +20,7 @@ import {
   ModelsColumnDefinitions,
   ModelsColumnFilteringProperties,
 } from "./column-definitions";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 export default function Models() {
   const onFollow = useOnFollow();
@@ -81,7 +82,7 @@ export default function Models() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

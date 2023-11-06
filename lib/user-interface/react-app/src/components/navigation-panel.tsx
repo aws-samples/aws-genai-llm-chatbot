@@ -6,6 +6,7 @@ import useOnFollow from "../common/hooks/use-on-follow";
 import { useNavigationPanelState } from "../common/hooks/use-navigation-panel-state";
 import { AppContext } from "../common/app-context";
 import { useContext, useState } from "react";
+import { CHATBOT_NAME } from "../common/constants";
 
 export default function NavigationPanel() {
   const appContext = useContext(AppContext);
@@ -103,7 +104,7 @@ export default function NavigationPanel() {
     <SideNavigation
       onFollow={onFollow}
       onChange={onChange}
-      header={{ href: "/", text: "AWS GenAI Chatbot" }}
+      header={{ href: "/", text: CHATBOT_NAME }}
       items={items.map((value, idx) => {
         if (value.type === "section") {
           const collapsed =

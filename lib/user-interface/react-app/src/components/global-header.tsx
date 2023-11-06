@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { StorageHelper } from "../common/helpers/storage-helper";
 import { Auth } from "aws-amplify";
 import useOnFollow from "../common/hooks/use-on-follow";
+import { CHATBOT_NAME } from "../common/constants";
 
 export default function GlobalHeader() {
   const onFollow = useOnFollow();
@@ -53,7 +54,7 @@ export default function GlobalHeader() {
       <TopNavigation
         identity={{
           href: "/",
-          logo: { src: "/images/logo.png", alt: "AWS GenAI Chatbot Logo" },
+          logo: { src: "/images/logo.png", alt: {CHATBOT_NAME} + " Logo" },
         }}
         utilities={[
           {
