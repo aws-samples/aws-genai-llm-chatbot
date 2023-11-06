@@ -6,10 +6,17 @@ from typing import List
 from psycopg2 import sql
 from genai_core.aurora.connection import AuroraConnection
 from genai_core.aurora.utils import convert_types
+from aws_lambda_powertools import Logger
 
+logger = Logger()
 
 def query_workspace_aurora(
-    workspace_id: str, workspace: dict, query: str, limit: int, full_response: bool
+    workspace_id: str,
+    workspace: dict,
+    query: str,
+    limit: int,
+    full_response: bool,
+    threshold: int = 0,
 ):
     table_name = sql.Identifier(workspace_id.replace("-", ""))
     embeddings_model_provider = workspace["embeddings_model_provider"]
@@ -185,8 +192,9 @@ def query_workspace_aurora(
         )
 
         for i in range(len(unique_items)):
-            unique_items[i]["score"] = passage_scores[i]
-            score_dict[unique_items[i]["chunk_id"]] = passage_scores[i]
+            score = passage_scores[i]
+            unique_items[i]["score"] = score
+            score_dict[unique_items[i]["chunk_id"]] = score
 
     unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
     unique_items = unique_items[:limit]
@@ -208,6 +216,17 @@ def query_workspace_aurora(
             "keyword_search_items": convert_types(keyword_search_records),
         }
     else:
+        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))
+        if len(ret_items) < limit:
+            unique_items = sorted(
+                unique_items, key=lambda x: x["vector_search_score"], reverse=True
+            )
+            ret_items = ret_items + (
+                list(
+                    filter(lambda val: val["vector_search_score"] > 0.5, unique_items)
+                )[: (limit - len(ret_items))]
+            )
+
         ret_value = {
             "engine": "aurora",
             "query_language": language_name,
@@ -218,7 +237,7 @@ def query_workspace_aurora(
             ),
         }
 
-    print(ret_value)
+    logger.info(ret_value)
 
     return ret_value
 
