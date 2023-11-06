@@ -14,6 +14,12 @@
     "deploy": "npm run format && npx cdk deploy"
   },
   "devDependencies": {
+    "@aws-lambda-powertools/batch": "^1.14.1",
+    "@aws-lambda-powertools/logger": "^1.14.1",
+    "@aws-sdk/credential-provider-node": "^3.441.0",
+    "@aws-sdk/protocol-http": "^3.374.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
+    "@types/aws-lambda": "^8.10.125",
     "@types/node": "20.1.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
