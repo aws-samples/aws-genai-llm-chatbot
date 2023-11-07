@@ -90,6 +90,7 @@ class ModelAdapter:
             conversation = ConversationalRetrievalChain.from_llm(
                 self.llm,
                 WorkspaceRetriever(workspace_id=workspace_id),
+                condense_question_llm=self.get_llm(streaming=False),
                 condense_question_prompt=self.get_condense_question_prompt(),
                 combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
                 return_source_documents=True,
