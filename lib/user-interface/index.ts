@@ -275,6 +275,7 @@ export class UserInterface extends Construct {
     });
 
     new s3deploy.BucketDeployment(this, "UserInterfaceDeployment", {
+      prune: false,
       sources: [asset, exportsAsset],
       destinationBucket: websiteBucket,
       distribution,
