@@ -73,7 +73,7 @@ Assistant:"""
         template = """
 {chat_history}
 
-Human: Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+Human: Given the above conversation and a follow up input, rephrase the follow up input to be a standalone question, in the same language as the follow up input.
 Follow Up Input: {question}
 
 Assistant:"""
