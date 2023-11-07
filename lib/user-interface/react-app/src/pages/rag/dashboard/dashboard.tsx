@@ -9,6 +9,7 @@ import WorkspacesTable from "./workspaces-table";
 import useOnFollow from "../../../common/hooks/use-on-follow";
 import BaseAppLayout from "../../../components/base-app-layout";
 import GeneralConfig, { WorkspacesStatistics } from "./general-config";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 export default function Dashboard() {
   const onFollow = useOnFollow();
@@ -49,7 +50,7 @@ export default function Dashboard() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

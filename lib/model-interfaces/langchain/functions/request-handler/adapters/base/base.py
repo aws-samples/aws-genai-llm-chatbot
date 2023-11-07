@@ -58,11 +58,11 @@ class ModelAdapter:
             user_id=self.user_id,
         )
 
-    def get_memory(self, output_key=None):
+    def get_memory(self, output_key=None, return_messages=False):
         return ConversationBufferMemory(
             memory_key="chat_history",
             chat_memory=self.chat_history,
-            return_messages=True,
+            return_messages=return_messages,
             output_key=output_key,
         )
 
@@ -73,15 +73,8 @@ class ModelAdapter:
         {chat_history}
 
         Question: {input}"""
-        input_variables = ["input", "chat_history"]
-        prompt_template_args = {
-            "chat_history": "{chat_history}",
-            "input_variables": input_variables,
-            "template": template,
-        }
-        prompt_template = PromptTemplate(**prompt_template_args)
-
-        return prompt_template
+        
+        return PromptTemplate.from_template(template)
 
     def get_condense_question_prompt(self):
         return CONDENSE_QUESTION_PROMPT
@@ -97,10 +90,11 @@ class ModelAdapter:
             conversation = ConversationalRetrievalChain.from_llm(
                 self.llm,
                 WorkspaceRetriever(workspace_id=workspace_id),
+                condense_question_llm=self.get_llm({"streaming": False}),
                 condense_question_prompt=self.get_condense_question_prompt(),
                 combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
                 return_source_documents=True,
-                memory=self.get_memory(output_key="answer"),
+                memory=self.get_memory(output_key="answer", return_messages=True),
                 verbose=True,
                 callbacks=[self.callback_handler],
             )

@@ -8,6 +8,7 @@ import {
   SpaceBetween,
 } from "@cloudscape-design/components";
 import BaseAppLayout from "../components/base-app-layout";
+import { CHATBOT_NAME } from "../common/constants";
 
 export default function NotFound() {
   const onFollow = useOnFollow();
@@ -19,7 +20,7 @@ export default function NotFound() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {

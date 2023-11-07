@@ -27,6 +27,7 @@ import { ApiClient } from "../../../common/api-client/api-client";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { Utils } from "../../../common/utils";
 import React from "react";
+import { CHATBOT_NAME } from "../../../common/constants";
 
 export default function CrossEncoders() {
   const onFollow = useOnFollow();
@@ -189,7 +190,7 @@ export default function CrossEncoders() {
           onFollow={onFollow}
           items={[
             {
-              text: "AWS GenAI Chatbot",
+              text: CHATBOT_NAME,
               href: "/",
             },
             {
