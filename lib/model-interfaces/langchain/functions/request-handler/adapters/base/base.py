@@ -58,11 +58,11 @@ class ModelAdapter:
             user_id=self.user_id,
         )
 
-    def get_memory(self, output_key=None):
+    def get_memory(self, output_key=None, return_messages=False):
         return ConversationBufferMemory(
             memory_key="chat_history",
             chat_memory=self.chat_history,
-            return_messages=False,
+            return_messages=return_messages,
             output_key=output_key,
         )
 
@@ -93,7 +93,7 @@ class ModelAdapter:
                 condense_question_prompt=self.get_condense_question_prompt(),
                 combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
                 return_source_documents=True,
-                memory=self.get_memory(output_key="answer"),
+                memory=self.get_memory(output_key="answer", return_messages=True),
                 verbose=True,
                 callbacks=[self.callback_handler],
             )
