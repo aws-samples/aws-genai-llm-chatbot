@@ -197,14 +197,14 @@ def query_workspace_aurora(
             score_dict[unique_items[i]["chunk_id"]] = score
 
     unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
-    unique_items = unique_items[:limit]
-
+    
     for record in vector_search_records:
         record["score"] = score_dict[record["chunk_id"]]
     for record in keyword_search_records:
         record["score"] = score_dict[record["chunk_id"]]
 
     if full_response:
+        unique_items = unique_items[:limit]
         ret_value = {
             "engine": "aurora",
             "query_language": language_name,
@@ -216,16 +216,27 @@ def query_workspace_aurora(
             "keyword_search_items": convert_types(keyword_search_records),
         }
     else:
-        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))
+        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[:limit]
         if len(ret_items) < limit:
-            unique_items = sorted(
-                unique_items, key=lambda x: x["vector_search_score"], reverse=True
-            )
-            ret_items = ret_items + (
-                list(
-                    filter(lambda val: val["vector_search_score"] > 0.5, unique_items)
-                )[: (limit - len(ret_items))]
-            )
+            # inner product metric is negative hence we sort ascending
+            if metric == "inner":
+                unique_items = sorted(
+                    unique_items, key=lambda x: x["vector_search_score"] or 1, reverse=False
+                )
+                ret_items = ret_items + (
+                    list(
+                        filter(lambda val: (val["vector_search_score"] or 1) < -0.5, unique_items)
+                    )[: (limit - len(ret_items))]
+                )
+            else: 
+                unique_items = sorted(
+                    unique_items, key=lambda x: x["vector_search_score"] or -1, reverse=True
+                )
+                ret_items = ret_items + (
+                    list(
+                        filter(lambda val: (val["vector_search_score"] or -1) > 0.5 , unique_items)
+                    )[: (limit - len(ret_items))]
+                )
 
         ret_value = {
             "engine": "aurora",
@@ -233,7 +244,7 @@ def query_workspace_aurora(
             "supported_languages": languages,
             "detected_languages": detected_languages,
             "items": convert_types(
-                list(filter(lambda val: val["score"] > 0, unique_items))
+                ret_items
             ),
         }
 
