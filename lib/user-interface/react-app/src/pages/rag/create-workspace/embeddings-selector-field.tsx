@@ -2,7 +2,6 @@ import { FormField, Select, SelectProps } from "@cloudscape-design/components";
 import {
   EmbeddingsModelItem,
   LoadingStatus,
-  OpenSearchWorkspaceCreateInput,
   ResultValue,
 } from "../../../common/types";
 import { EmbeddingsModelHelper } from "../../../common/helpers/embeddings-model-helper";
