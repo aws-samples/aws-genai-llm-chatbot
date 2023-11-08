@@ -7,12 +7,11 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Layer } from "../layer";
 import { SystemConfig } from "./types";
+import { SharedAssetBundler } from "./multi-folder-bundler";
 
 const pythonRuntime = lambda.Runtime.PYTHON_3_11;
 const lambdaArchitecture = lambda.Architecture.X86_64;
 process.env.DOCKER_DEFAULT_PLATFORM = lambdaArchitecture.dockerPlatform;
-
-export const SHARED_CODE_PATH = path.join(__dirname, 'python-sdk', 'python', 'genai_core')
 
 export interface SharedProps {
   readonly config: SystemConfig;
@@ -28,6 +27,7 @@ export class Shared extends Construct {
   readonly apiKeysSecret: secretsmanager.Secret;
   readonly commonLayer: lambda.ILayerVersion;
   readonly powerToolsLayer: lambda.ILayerVersion;
+  readonly sharedCode: SharedAssetBundler;
 
   constructor(scope: Construct, id: string, props: SharedProps) {
     super(scope, id);
@@ -124,6 +124,10 @@ export class Shared extends Construct {
       architecture: lambdaArchitecture,
       path: path.join(__dirname, "./layers/common"),
     });
+
+    this.sharedCode = new SharedAssetBundler(this, 'genai-core', [ 
+      path.join(__dirname, 'layers', 'python-sdk', 'python', 'genai_core')
+    ])
 
     const xOriginVerifySecret = new secretsmanager.Secret(
       this,
