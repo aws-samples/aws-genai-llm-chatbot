@@ -10,8 +10,12 @@ export class SharedAssetBundler extends Construct {
     private readonly sharedAssets: string[];
     private readonly WORKING_PATH = '/asset-input/'
     /**
-     * Instantiate a new SharedAssetBundler. You then invoke `bundleAsset(pathToAsset)` to 
-     * bundle your asset code with the common 
+     * Instantiate a new SharedAssetBundler. You then invoke `bundleWithAsset(pathToAsset)` to 
+     * bundle your asset code with the common code.
+     * 
+     * For Lambda function handler assets, you can use `bundleWithLambdaAsset(pathToAsset)` as 
+     * a drop-in replacement for `lambda.Code.fromAsset()`
+     * 
      * @param scope 
      * @param id 
      * @param commonFolders : array of common folders to bundle with your asset code
