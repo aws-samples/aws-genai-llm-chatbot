@@ -7,7 +7,7 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Layer } from "../layer";
 import { SystemConfig } from "./types";
-import { SharedAssetBundler } from "./multi-folder-bundler";
+import { SharedAssetBundler } from "./shared-asset-bundler";
 
 const pythonRuntime = lambda.Runtime.PYTHON_3_11;
 const lambdaArchitecture = lambda.Architecture.X86_64;
