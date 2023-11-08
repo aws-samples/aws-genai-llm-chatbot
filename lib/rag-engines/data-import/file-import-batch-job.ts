@@ -88,7 +88,7 @@ export class FileImportBatchJob extends Construct {
           DOCUMENTS_TABLE_NAME:
             props.ragDynamoDBTables.documentsTable.tableName ?? "",
           DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
-            props.ragDynamoDBTables.documentsByCompountKeyIndexName ?? "",
+            props.ragDynamoDBTables.documentsByCompoundKeyIndexName ?? "",
           SAGEMAKER_RAG_MODELS_ENDPOINT:
             props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:

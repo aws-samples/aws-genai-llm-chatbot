@@ -84,7 +84,7 @@ export class RagEngines extends Construct {
       documentsTable: tables.documentsTable,
       ragDynamoDBTables: tables,
       workspacesByObjectTypeIndexName: tables.workspacesByObjectTypeIndexName,
-      documentsByCompountKeyIndexName: tables.documentsByCompountKeyIndexName,
+      documentsByCompoundKeyIndexName: tables.documentsByCompoundKeyIndexName,
       openSearchVector: openSearchVector ?? undefined,
       kendraRetrieval: kendraRetrieval ?? undefined,
     });
@@ -110,7 +110,7 @@ export class RagEngines extends Construct {
     this.workspacesByObjectTypeIndexName =
       tables.workspacesByObjectTypeIndexName;
     this.documentsByCompountKeyIndexName =
-      tables.documentsByCompountKeyIndexName;
+      tables.documentsByCompoundKeyIndexName;
     this.fileImportWorkflow = dataImport.fileImportWorkflow;
     this.websiteCrawlingWorkflow = dataImport.websiteCrawlingWorkflow;
     this.deleteWorkspaceWorkflow = workspaces.deleteWorkspaceWorkflow;

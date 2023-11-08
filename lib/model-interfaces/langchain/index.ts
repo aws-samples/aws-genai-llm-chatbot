@@ -10,7 +10,7 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 import * as path from "path";
 import { RagEngines } from "../../rag-engines";
-import { SHARED_CODE_PATH, Shared } from "../../shared";
+import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
 import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
@@ -30,17 +30,11 @@ export class LangChainInterface extends Construct {
   constructor(scope: Construct, id: string, props: LangChainInterfaceProps) {
     super(scope, id);
 
-
-    const requestHandlerAsset = new MultiDirAsset(this, 'lambda-asset', {
-      path: path.join(__dirname, "./functions/request-handler"),
-      additionalFolders: [
-        SHARED_CODE_PATH
-      ]
-    })
-
     const requestHandler = new lambda.Function(this, "RequestHandler", {
       vpc: props.shared.vpc,
-      code: lambda.Code.fromBucket(requestHandlerAsset.bucket, requestHandlerAsset.s3ObjectKey),
+      code: props.shared.sharedCode.bundleWithLambdaAsset(
+        path.join(__dirname, "./functions/request-handler")
+      ),
       handler: "index.handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,

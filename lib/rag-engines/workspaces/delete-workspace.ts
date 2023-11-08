@@ -6,14 +6,13 @@ import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import { Construct } from "constructs";
 import * as path from "path";
-import { SHARED_CODE_PATH, Shared } from "../../shared";
+import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
 import { AuroraPgVector } from "../aurora-pgvector";
 import { DataImport } from "../data-import";
 import { KendraRetrieval } from "../kendra-retrieval";
 import { OpenSearchVector } from "../opensearch-vector";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
-import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface DeleteWorkspaceProps {
   readonly config: SystemConfig;
@@ -31,19 +30,13 @@ export class DeleteWorkspace extends Construct {
   constructor(scope: Construct, id: string, props: DeleteWorkspaceProps) {
     super(scope, id);
 
-    const lambdaAsset = new MultiDirAsset(this, "lambda-asset", {
-      path: path.join(__dirname, "./functions/delete-workspace-workflow/delete"),
-      additionalFolders: [ SHARED_CODE_PATH ]
-    })
-
     const deleteFunction = new lambda.Function(
       this,
       "DeleteWorkspaceFunction",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromBucket(
-          lambdaAsset.bucket,
-          lambdaAsset.s3ObjectKey,
+        code: props.shared.sharedCode.bundleWithLambdaAsset(
+          path.join(__dirname, "./functions/delete-workspace-workflow/delete")
         ),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
@@ -67,7 +60,7 @@ export class DeleteWorkspace extends Construct {
           DOCUMENTS_TABLE_NAME:
             props.ragDynamoDBTables?.documentsTable.tableName ?? "",
           DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
-            props.ragDynamoDBTables?.documentsByCompountKeyIndexName ?? "",
+            props.ragDynamoDBTables?.documentsByCompoundKeyIndexName ?? "",
           DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
             props.kendraRetrieval?.kendraS3DataSourceBucket?.bucketName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:
