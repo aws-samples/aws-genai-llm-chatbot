@@ -12,7 +12,6 @@ import * as path from "path";
 import { RagEngines } from "../../rag-engines";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 interface LangChainInterfaceProps {
   readonly shared: Shared;
@@ -42,10 +41,7 @@ export class LangChainInterface extends Construct {
       timeout: cdk.Duration.minutes(15),
       memorySize: 1024,
       logRetention: logs.RetentionDays.ONE_WEEK,
-      layers: [
-        props.shared.powerToolsLayer,
-        props.shared.commonLayer,
-      ],
+      layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,

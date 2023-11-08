@@ -14,7 +14,6 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 interface IdeficsInterfaceProps {
   readonly shared: Shared;
@@ -160,10 +159,7 @@ export class IdeficsInterface extends Construct {
         ),
         runtime: props.shared.pythonRuntime,
         handler: "index.handler",
-        layers: [
-          props.shared.powerToolsLayer,
-          props.shared.commonLayer,
-        ],
+        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         architecture: props.shared.lambdaArchitecture,
         tracing: lambda.Tracing.ACTIVE,
         timeout: cdk.Duration.minutes(lambdaDurationInMinutes),

@@ -11,7 +11,6 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as cr from "aws-cdk-lib/custom-resources";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface AuroraPgVectorProps {
   readonly config: SystemConfig;
@@ -35,7 +34,7 @@ export class AuroraPgVector extends Construct {
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
     });
-    
+
     const databaseSetupFunction = new lambda.Function(
       this,
       "DatabaseSetupFunction",
@@ -47,10 +46,7 @@ export class AuroraPgVector extends Construct {
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
-        layers: [
-          props.shared.powerToolsLayer,
-          props.shared.commonLayer,
-        ],
+        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         timeout: cdk.Duration.minutes(5),
         logRetention: logs.RetentionDays.ONE_WEEK,
         environment: {

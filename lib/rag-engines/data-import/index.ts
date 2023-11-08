@@ -21,7 +21,6 @@ import * as s3Notifications from "aws-cdk-lib/aws-s3-notifications";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface DataImportProps {
   readonly config: SystemConfig;
@@ -139,7 +138,7 @@ export class DataImport extends Construct {
         openSearchVector: props.openSearchVector,
       }
     );
-    
+
     const uploadHandler = new lambda.Function(this, "UploadHandler", {
       code: props.shared.sharedCode.bundleWithLambdaAsset(
         path.join(__dirname, "./functions/upload-handler")
@@ -151,10 +150,7 @@ export class DataImport extends Construct {
       memorySize: 512,
       tracing: lambda.Tracing.ACTIVE,
       logRetention: logs.RetentionDays.ONE_WEEK,
-      layers: [
-        props.shared.powerToolsLayer,
-        props.shared.commonLayer,
-      ],
+      layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       vpc: props.shared.vpc,
       vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,
       environment: {
