@@ -3,7 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
-import { Shared } from "../shared";
+import { SHARED_CODE_PATH, Shared } from "../shared";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
@@ -12,6 +12,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import { MultiDirAsset } from "../shared/multi-dir-asset";
 
 export interface RestApiProps {
   readonly shared: Shared;
@@ -34,10 +35,13 @@ export class RestApi extends Construct {
       vpc: props.shared.vpc,
     });
 
+    const apiHandlerAsset = new MultiDirAsset(this, 'api-handler', {
+      path: path.join(__dirname, "./functions/api-handler"),
+      additionalFolders: [SHARED_CODE_PATH]
+    })
+
     const apiHandler = new lambda.Function(this, "ApiHandler", {
-      code: lambda.Code.fromAsset(
-        path.join(__dirname, "./functions/api-handler")
-      ),
+      code: lambda.Code.fromBucket(apiHandlerAsset.bucket, apiHandlerAsset.s3ObjectKey),
       handler: "index.handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
@@ -48,7 +52,6 @@ export class RestApi extends Construct {
       layers: [
         props.shared.powerToolsLayer,
         props.shared.commonLayer,
-        props.shared.pythonSDKLayer,
       ],
       vpc: props.shared.vpc,
       securityGroups: [apiSecurityGroup],
@@ -191,8 +194,7 @@ export class RestApi extends Construct {
             new iam.PolicyStatement({
               actions: ["kendra:Retrieve", "kendra:Query"],
               resources: [
-                `arn:${cdk.Aws.PARTITION}:kendra:${
-                  item.region ?? cdk.Aws.REGION
+                `arn:${cdk.Aws.PARTITION}:kendra:${item.region ?? cdk.Aws.REGION
                 }:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
               ],
             })

@@ -12,6 +12,8 @@ const pythonRuntime = lambda.Runtime.PYTHON_3_11;
 const lambdaArchitecture = lambda.Architecture.X86_64;
 process.env.DOCKER_DEFAULT_PLATFORM = lambdaArchitecture.dockerPlatform;
 
+export const SHARED_CODE_PATH = path.join(__dirname, 'python-sdk', 'python', 'genai_core')
+
 export interface SharedProps {
   readonly config: SystemConfig;
 }
@@ -26,7 +28,6 @@ export class Shared extends Construct {
   readonly apiKeysSecret: secretsmanager.Secret;
   readonly commonLayer: lambda.ILayerVersion;
   readonly powerToolsLayer: lambda.ILayerVersion;
-  readonly pythonSDKLayer: lambda.ILayerVersion;
 
   constructor(scope: Construct, id: string, props: SharedProps) {
     super(scope, id);
@@ -124,13 +125,6 @@ export class Shared extends Construct {
       path: path.join(__dirname, "./layers/common"),
     });
 
-    const pythonSDKLayer = new lambda.LayerVersion(this, "PythonSDKLayer", {
-      code: lambda.Code.fromAsset(path.join(__dirname, "./layers/python-sdk")),
-      compatibleRuntimes: [pythonRuntime],
-      compatibleArchitectures: [lambdaArchitecture],
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-
     const xOriginVerifySecret = new secretsmanager.Secret(
       this,
       "X-Origin-Verify-Secret",
@@ -155,7 +149,6 @@ export class Shared extends Construct {
     this.apiKeysSecret = apiKeysSecret;
     this.powerToolsLayer = powerToolsLayer;
     this.commonLayer = commonLayer.layer;
-    this.pythonSDKLayer = pythonSDKLayer;
 
     new cdk.CfnOutput(this, "ApiKeysSecretName", {
       value: apiKeysSecret.secretName,

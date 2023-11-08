@@ -7,9 +7,10 @@ import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import { Construct } from "constructs";
 import * as path from "path";
-import { Shared } from "../../shared";
+import { SHARED_CODE_PATH, Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
+import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface CreateOpenSearchWorkspaceProps {
   readonly config: SystemConfig;
@@ -31,13 +32,19 @@ export class CreateOpenSearchWorkspace extends Construct {
   ) {
     super(scope, id);
 
+    const lambdaAsset = new MultiDirAsset(this, 'lambda-asset', {
+      path: path.join(__dirname, "./functions/create-workflow/create"),
+      additionalFolders: [ SHARED_CODE_PATH ]
+    })
+
     const createFunction = new lambda.Function(
       this,
       "CreateOpenSearchWorkspaceFunction",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromAsset(
-          path.join(__dirname, "./functions/create-workflow/create")
+        code: lambda.Code.fromBucket(
+          lambdaAsset.bucket,
+          lambdaAsset.s3ObjectKey,
         ),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
@@ -45,7 +52,6 @@ export class CreateOpenSearchWorkspace extends Construct {
         layers: [
           props.shared.powerToolsLayer,
           props.shared.commonLayer,
-          props.shared.pythonSDKLayer,
         ],
         timeout: cdk.Duration.minutes(5),
         logRetention: logs.RetentionDays.ONE_WEEK,

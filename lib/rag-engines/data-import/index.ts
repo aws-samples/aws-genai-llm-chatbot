@@ -2,7 +2,7 @@ import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
-import { Shared } from "../../shared";
+import { SHARED_CODE_PATH, Shared } from "../../shared";
 import { FileImportBatchJob } from "./file-import-batch-job";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { FileImportWorkflow } from "./file-import-workflow";
@@ -21,6 +21,7 @@ import * as s3Notifications from "aws-cdk-lib/aws-s3-notifications";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface DataImportProps {
   readonly config: SystemConfig;
@@ -139,9 +140,15 @@ export class DataImport extends Construct {
       }
     );
 
+    const uploadHandlerAsset = new MultiDirAsset(this, 'lambda-asset', {
+      path: path.join(__dirname, "./functions/upload-handler"),
+      additionalFolders: [ SHARED_CODE_PATH ]
+    })
+
     const uploadHandler = new lambda.Function(this, "UploadHandler", {
-      code: lambda.Code.fromAsset(
-        path.join(__dirname, "./functions/upload-handler")
+      code: lambda.Code.fromBucket(
+        uploadHandlerAsset.bucket,
+        uploadHandlerAsset.s3ObjectKey,
       ),
       handler: "index.lambda_handler",
       runtime: props.shared.pythonRuntime,
@@ -153,7 +160,6 @@ export class DataImport extends Construct {
       layers: [
         props.shared.powerToolsLayer,
         props.shared.commonLayer,
-        props.shared.pythonSDKLayer,
       ],
       vpc: props.shared.vpc,
       vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,

@@ -2,13 +2,14 @@ import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
-import { Shared } from "../../shared";
+import { SHARED_CODE_PATH, Shared } from "../../shared";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
+import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface CreateAuroraWorkspaceProps {
   readonly config: SystemConfig;
@@ -23,13 +24,19 @@ export class CreateAuroraWorkspace extends Construct {
   constructor(scope: Construct, id: string, props: CreateAuroraWorkspaceProps) {
     super(scope, id);
 
+    const lambdaAsset = new MultiDirAsset(this, "lambda-asset", {
+      path: path.join(__dirname, "./functions/create-workflow/create"),
+      additionalFolders: [ SHARED_CODE_PATH ]
+    })
+
     const createFunction = new lambda.Function(
       this,
       "CreateAuroraWorkspaceFunction",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromAsset(
-          path.join(__dirname, "./functions/create-workflow/create")
+        code: lambda.Code.fromBucket(
+          lambdaAsset.bucket,
+          lambdaAsset.s3ObjectKey,
         ),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
@@ -37,7 +44,6 @@ export class CreateAuroraWorkspace extends Construct {
         layers: [
           props.shared.powerToolsLayer,
           props.shared.commonLayer,
-          props.shared.pythonSDKLayer,
         ],
         timeout: cdk.Duration.minutes(5),
         logRetention: logs.RetentionDays.ONE_WEEK,
