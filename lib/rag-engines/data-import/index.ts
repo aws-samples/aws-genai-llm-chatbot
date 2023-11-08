@@ -2,7 +2,7 @@ import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
-import { SHARED_CODE_PATH, Shared } from "../../shared";
+import { Shared } from "../../shared";
 import { FileImportBatchJob } from "./file-import-batch-job";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { FileImportWorkflow } from "./file-import-workflow";
@@ -34,7 +34,7 @@ export interface DataImportProps {
   readonly workspacesTable: dynamodb.Table;
   readonly documentsTable: dynamodb.Table;
   readonly workspacesByObjectTypeIndexName: string;
-  readonly documentsByCompountKeyIndexName: string;
+  readonly documentsByCompoundKeyIndexName: string;
 }
 
 export class DataImport extends Construct {
@@ -139,16 +139,10 @@ export class DataImport extends Construct {
         openSearchVector: props.openSearchVector,
       }
     );
-
-    const uploadHandlerAsset = new MultiDirAsset(this, 'lambda-asset', {
-      path: path.join(__dirname, "./functions/upload-handler"),
-      additionalFolders: [ SHARED_CODE_PATH ]
-    })
-
+    
     const uploadHandler = new lambda.Function(this, "UploadHandler", {
-      code: lambda.Code.fromBucket(
-        uploadHandlerAsset.bucket,
-        uploadHandlerAsset.s3ObjectKey,
+      code: props.shared.sharedCode.bundleWithLambdaAsset(
+        path.join(__dirname, "./functions/upload-handler")
       ),
       handler: "index.lambda_handler",
       runtime: props.shared.pythonRuntime,
@@ -174,7 +168,7 @@ export class DataImport extends Construct {
           props.workspacesByObjectTypeIndexName ?? "",
         DOCUMENTS_TABLE_NAME: props.documentsTable.tableName ?? "",
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
-          props.documentsByCompountKeyIndexName ?? "",
+          props.documentsByCompoundKeyIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.sageMakerRagModels?.model.endpoint.attrEndpointName ?? "",
         FILE_IMPORT_WORKFLOW_ARN:

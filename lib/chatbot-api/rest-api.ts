@@ -3,7 +3,6 @@ import * as cdk from "aws-cdk-lib";
 import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
-import { SHARED_CODE_PATH, Shared } from "../shared";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
@@ -13,6 +12,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import { MultiDirAsset } from "../shared/multi-dir-asset";
+import { Shared } from "../shared";
 
 export interface RestApiProps {
   readonly shared: Shared;
@@ -35,13 +35,8 @@ export class RestApi extends Construct {
       vpc: props.shared.vpc,
     });
 
-    const apiHandlerAsset = new MultiDirAsset(this, 'api-handler', {
-      path: path.join(__dirname, "./functions/api-handler"),
-      additionalFolders: [SHARED_CODE_PATH]
-    })
-
     const apiHandler = new lambda.Function(this, "ApiHandler", {
-      code: lambda.Code.fromBucket(apiHandlerAsset.bucket, apiHandlerAsset.s3ObjectKey),
+      code: props.shared.sharedCode.bundleWithLambdaAsset(path.join(__dirname, "./functions/api-handler")),
       handler: "index.handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
