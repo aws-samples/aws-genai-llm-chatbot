@@ -2,7 +2,7 @@ import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
-import { Shared } from "../../shared";
+import { SHARED_CODE_PATH, Shared } from "../../shared";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { OpenSearchVector } from "../opensearch-vector";
 import * as rds from "aws-cdk-lib/aws-rds";
@@ -13,6 +13,7 @@ import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
+import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface WebsiteCrawlingWorkflowProps {
   readonly config: SystemConfig;
@@ -34,16 +35,22 @@ export class WebsiteCrawlingWorkflow extends Construct {
   ) {
     super(scope, id);
 
+    const lambdaAsset = new MultiDirAsset(this, 'lambda-asset', {
+      path: path.join(
+        __dirname,
+        "./functions/website-crawling-workflow/website-parser"
+      ),
+      additionalFolders: [ SHARED_CODE_PATH ]
+    })
+
     const websiteParserFunction = new lambda.Function(
       this,
       "WebsiteParserFunction",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromAsset(
-          path.join(
-            __dirname,
-            "./functions/website-crawling-workflow/website-parser"
-          )
+        code: lambda.Code.fromBucket(
+          lambdaAsset.bucket, 
+          lambdaAsset.s3ObjectKey,
         ),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
@@ -52,7 +59,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
         layers: [
           props.shared.powerToolsLayer,
           props.shared.commonLayer,
-          props.shared.pythonSDKLayer,
         ],
         timeout: cdk.Duration.minutes(15),
         logRetention: logs.RetentionDays.ONE_WEEK,

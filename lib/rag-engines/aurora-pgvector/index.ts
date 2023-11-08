@@ -2,7 +2,7 @@ import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
-import { Shared } from "../../shared";
+import { SHARED_CODE_PATH, Shared } from "../../shared";
 import { CreateAuroraWorkspace } from "./create-aurora-workspace";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
@@ -11,6 +11,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as cr from "aws-cdk-lib/custom-resources";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface AuroraPgVectorProps {
   readonly config: SystemConfig;
@@ -35,21 +36,25 @@ export class AuroraPgVector extends Construct {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
     });
 
+    const lambdaAsset = new MultiDirAsset(this, "lambda-asset", {
+      path: path.join(__dirname, "./functions/pgvector-setup"),
+      additionalFolders: [ SHARED_CODE_PATH ]
+    })
+
     const databaseSetupFunction = new lambda.Function(
       this,
       "DatabaseSetupFunction",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromAsset(
-          path.join(__dirname, "./functions/pgvector-setup")
-        ),
+        code: lambda.Code.fromBucket(
+          lambdaAsset.bucket,
+          lambdaAsset.s3ObjectKey,),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
         layers: [
           props.shared.powerToolsLayer,
           props.shared.commonLayer,
-          props.shared.pythonSDKLayer,
         ],
         timeout: cdk.Duration.minutes(5),
         logRetention: logs.RetentionDays.ONE_WEEK,
