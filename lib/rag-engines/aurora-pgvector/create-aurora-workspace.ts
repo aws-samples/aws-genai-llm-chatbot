@@ -9,7 +9,6 @@ import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
-import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
 export interface CreateAuroraWorkspaceProps {
   readonly config: SystemConfig;
@@ -35,10 +34,7 @@ export class CreateAuroraWorkspace extends Construct {
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
-        layers: [
-          props.shared.powerToolsLayer,
-          props.shared.commonLayer,
-        ],
+        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         timeout: cdk.Duration.minutes(5),
         logRetention: logs.RetentionDays.ONE_WEEK,
         environment: {

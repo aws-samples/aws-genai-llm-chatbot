@@ -11,7 +11,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import { MultiDirAsset } from "../shared/multi-dir-asset";
 import { Shared } from "../shared";
 
 export interface RestApiProps {
@@ -36,7 +35,9 @@ export class RestApi extends Construct {
     });
 
     const apiHandler = new lambda.Function(this, "ApiHandler", {
-      code: props.shared.sharedCode.bundleWithLambdaAsset(path.join(__dirname, "./functions/api-handler")),
+      code: props.shared.sharedCode.bundleWithLambdaAsset(
+        path.join(__dirname, "./functions/api-handler")
+      ),
       handler: "index.handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
@@ -44,10 +45,7 @@ export class RestApi extends Construct {
       memorySize: 512,
       tracing: lambda.Tracing.ACTIVE,
       logRetention: logs.RetentionDays.ONE_WEEK,
-      layers: [
-        props.shared.powerToolsLayer,
-        props.shared.commonLayer,
-      ],
+      layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       vpc: props.shared.vpc,
       securityGroups: [apiSecurityGroup],
       vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,
@@ -189,7 +187,8 @@ export class RestApi extends Construct {
             new iam.PolicyStatement({
               actions: ["kendra:Retrieve", "kendra:Query"],
               resources: [
-                `arn:${cdk.Aws.PARTITION}:kendra:${item.region ?? cdk.Aws.REGION
+                `arn:${cdk.Aws.PARTITION}:kendra:${
+                  item.region ?? cdk.Aws.REGION
                 }:${cdk.Aws.ACCOUNT_ID}:index/${item.kendraId}`,
               ],
             })
