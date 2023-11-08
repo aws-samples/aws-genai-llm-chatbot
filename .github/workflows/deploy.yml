@@ -1,9 +1,9 @@
 name: Deploy VitePress site to Pages
 
 on:
-  # Runs on pushes targeting the `gh_pages` branch. Should be default branch
+  # Runs on pushes targeting the `main` branch. Should be default branch
   push:
-    branches: [gh-pages]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
