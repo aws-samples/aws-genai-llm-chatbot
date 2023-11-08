@@ -2,7 +2,7 @@ import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
-import { SHARED_CODE_PATH, Shared } from "../../shared";
+import { Shared } from "../../shared";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
@@ -24,19 +24,13 @@ export class CreateAuroraWorkspace extends Construct {
   constructor(scope: Construct, id: string, props: CreateAuroraWorkspaceProps) {
     super(scope, id);
 
-    const lambdaAsset = new MultiDirAsset(this, "lambda-asset", {
-      path: path.join(__dirname, "./functions/create-workflow/create"),
-      additionalFolders: [ SHARED_CODE_PATH ]
-    })
-
     const createFunction = new lambda.Function(
       this,
       "CreateAuroraWorkspaceFunction",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromBucket(
-          lambdaAsset.bucket,
-          lambdaAsset.s3ObjectKey,
+        code: props.shared.sharedCode.bundleWithLambdaAsset(
+          path.join(__dirname, "./functions/create-workflow/create")
         ),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,

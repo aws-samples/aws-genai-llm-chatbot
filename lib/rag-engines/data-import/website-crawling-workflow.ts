@@ -2,7 +2,7 @@ import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig } from "../../shared/types";
-import { SHARED_CODE_PATH, Shared } from "../../shared";
+import { Shared } from "../../shared";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { OpenSearchVector } from "../opensearch-vector";
 import * as rds from "aws-cdk-lib/aws-rds";
@@ -35,22 +35,16 @@ export class WebsiteCrawlingWorkflow extends Construct {
   ) {
     super(scope, id);
 
-    const lambdaAsset = new MultiDirAsset(this, 'lambda-asset', {
-      path: path.join(
-        __dirname,
-        "./functions/website-crawling-workflow/website-parser"
-      ),
-      additionalFolders: [ SHARED_CODE_PATH ]
-    })
-
     const websiteParserFunction = new lambda.Function(
       this,
       "WebsiteParserFunction",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromBucket(
-          lambdaAsset.bucket, 
-          lambdaAsset.s3ObjectKey,
+        code: props.shared.sharedCode.bundleWithLambdaAsset(
+          path.join(
+            __dirname,
+            "./functions/website-crawling-workflow/website-parser"
+          )
         ),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
@@ -76,7 +70,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
           DOCUMENTS_TABLE_NAME:
             props.ragDynamoDBTables.documentsTable.tableName ?? "",
           DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
-            props.ragDynamoDBTables.documentsByCompountKeyIndexName ?? "",
+            props.ragDynamoDBTables.documentsByCompoundKeyIndexName ?? "",
           SAGEMAKER_RAG_MODELS_ENDPOINT:
             props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:

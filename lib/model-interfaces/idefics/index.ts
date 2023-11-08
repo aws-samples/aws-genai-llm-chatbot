@@ -12,7 +12,7 @@ import * as sns from "aws-cdk-lib/aws-sns";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 import * as path from "path";
-import { SHARED_CODE_PATH, Shared } from "../../shared";
+import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
 import { MultiDirAsset } from "../../shared/multi-dir-asset";
 
@@ -150,21 +150,14 @@ export class IdeficsInterface extends Construct {
       },
     });
 
-    const requestHandlerAsset = new MultiDirAsset(this, 'lambda-asset', {
-      path: path.join(__dirname, "./functions/request-handler"),
-      additionalFolders: [
-        SHARED_CODE_PATH
-      ]
-    })
-
     const requestHandler = new lambda.Function(
       this,
       "IdeficsInterfaceRequestHandler",
       {
         vpc: props.shared.vpc,
-        code: lambda.Code.fromBucket(
-          requestHandlerAsset.bucket, 
-          requestHandlerAsset.s3ObjectKey),
+        code: props.shared.sharedCode.bundleWithLambdaAsset(
+          path.join(__dirname, "./functions/request-handler")
+        ),
         runtime: props.shared.pythonRuntime,
         handler: "index.handler",
         layers: [
