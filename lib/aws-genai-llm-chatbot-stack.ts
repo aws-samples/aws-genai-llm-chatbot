@@ -172,14 +172,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
     NagSuppressions.addResourceSuppressionsByPath(this,
       [
-        `/${this.stackName}/RagEngines/KendraRetrieval/LogsBucket/Resource`,
-        `/${this.stackName}/RagEngines/KendraRetrieval/LogsBucket/Policy/Resource`,
-      ],
-      [
-        {id: "AwsSolutions-S10", reason: "S3 Bucket implicitly created by CDK."},
-      ]);
-    NagSuppressions.addResourceSuppressionsByPath(this,
-      [
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource`
       ],
       [
@@ -211,54 +203,15 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       `/${this.stackName}/ChatBotApi/RestApi/ChatBotApi/DeploymentStage.api/Resource`,
       [
         {id: "AwsSolutions-APIG3", reason: "WAF not required due to configured Cognito auth."}
-      ])
-    NagSuppressions.addResourceSuppressionsByPath(this,
-      `/${this.stackName}/RagEngines/AuroraPgVector/AuroraDatabase/Secret/Resource`,
-      [
-        {id: "AwsSolutions-SMG4", reason: "Secret created implicitly by CDK."}
-      ])
+      ]
+    );
     NagSuppressions.addResourceSuppressionsByPath(this,
       [
         `/${this.stackName}/Authentication/IdentityPool/AuthenticatedRole/DefaultPolicy/Resource`,
         `/${this.stackName}/Authentication/UserPool/smsRole/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/CodeBuildRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/OnEventHandler/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/IsCompleteHandler/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onEvent/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-isComplete/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-isComplete/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/waiter-state-machine/Role/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/SageMakerExecutionRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupFunction/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspace/Role/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspace/Role/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/KendraRetrieval/CreateAuroraWorkspace/CreateKendraWorkspace/Role/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportJobRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportContainer/ExecutionRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/FileImportWorkflow/FileImportStateMachine/Role/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteCrawling/Role/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspaceFunction/ServiceRole/Resource`,
-        `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspace/Role/DefaultPolicy/Resource`,
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource`,
-        `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource`,
         `/${this.stackName}/ChatBotApi/RestApi/ApiHandler/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/RestApi/ApiHandler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/ChatBotApi/RestApi/ChatBotApi/CloudWatchRole/Resource`,
@@ -272,7 +225,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/ChatBotApi/WebSocketApi/OutgoingMessageFunction/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
         `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource`,
       ],
       [
@@ -282,18 +234,10 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
     NagSuppressions.addResourceSuppressionsByPath(this,
       [
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/LogsBucket/Policy/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Bucket/Resource`,
-        `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Bucket/Policy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/UploadLogsBucket/Policy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/ProcessingLogsBucket/Policy/Resource`,
         `/${this.stackName}/ChatBotApi/ChatBuckets/LogsBucket/Policy/Resource`,
         `/${this.stackName}/UserInterface/WebsiteLogsBucket/Resource`,
         `/${this.stackName}/UserInterface/WebsiteLogsBucket/Policy/Resource`,
         `/${this.stackName}/UserInterface/DistributionLogsBucket/Resource`,
-        `/${this.stackName}/RagEngines/KendraRetrieval/KendraDataBucket/Policy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/UploadBucket/Policy/Resource`,
-        `/${this.stackName}/RagEngines/DataImport/ProcessingBucket/Policy/Resource`,
         `/${this.stackName}/ChatBotApi/ChatBuckets/FilesBucket/Policy/Resource`,
         `/${this.stackName}/UserInterface/WebsiteBucket/Policy/Resource`
       ],
@@ -302,6 +246,115 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
       ]
     );
+    // RAG configuration
+    if (props.config.rag.enabled) {
+      NagSuppressions.addResourceSuppressionsByPath(this,
+        [
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/CodeBuildRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/OnEventHandler/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/IsCompleteHandler/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onEvent/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-isComplete/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-isComplete/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/waiter-state-machine/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/SageMakerExecutionRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportJobRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportContainer/ExecutionRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/FileImportWorkflow/FileImportStateMachine/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteCrawling/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspaceFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspace/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
+          `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource`,
+          `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource`,
+        ],
+        [
+          {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
+          {id: "AwsSolutions-IAM5", reason: "IAM role implicitly created by CDK."},
+        ]
+      );
+      NagSuppressions.addResourceSuppressionsByPath(this,
+        [
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/LogsBucket/Policy/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Bucket/Resource`,
+          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Bucket/Policy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/UploadLogsBucket/Policy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/ProcessingLogsBucket/Policy/Resource`,
+          `/${this.stackName}/RagEngines/KendraRetrieval/KendraDataBucket/Policy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/UploadBucket/Policy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/ProcessingBucket/Policy/Resource`,
+        ],
+        [
+          {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
+          {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
+        ]
+      );
+
+      if (props.config.rag.engines.aurora.enabled) {
+        NagSuppressions.addResourceSuppressionsByPath(this,
+          `/${this.stackName}/RagEngines/AuroraPgVector/AuroraDatabase/Secret/Resource`,
+          [
+            {id: "AwsSolutions-SMG4", reason: "Secret created implicitly by CDK."}
+          ]
+        );
+        NagSuppressions.addResourceSuppressionsByPath(this,
+          [
+            `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupFunction/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspace/Role/DefaultPolicy/Resource`,
+          ],
+          [
+            {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
+            {id: "AwsSolutions-IAM5", reason: "IAM role implicitly created by CDK."},
+          ]
+        );
+      }
+      if (props.config.rag.engines.opensearch.enabled) {
+        NagSuppressions.addResourceSuppressionsByPath(this,
+          [
+            `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspace/Role/DefaultPolicy/Resource`,
+          ],
+          [
+            {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
+            {id: "AwsSolutions-IAM5", reason: "IAM role implicitly created by CDK."},
+          ]
+        );
+      }
+      if (props.config.rag.engines.kendra.enabled) {
+        NagSuppressions.addResourceSuppressionsByPath(this,
+          [
+            `/${this.stackName}/RagEngines/KendraRetrieval/LogsBucket/Resource`,
+            `/${this.stackName}/RagEngines/KendraRetrieval/LogsBucket/Policy/Resource`,
+          ],
+          [
+            {id: "AwsSolutions-S10", reason: "S3 Bucket implicitly created by CDK."},
+          ]
+        );
+        NagSuppressions.addResourceSuppressionsByPath(this,
+          [
+            `/${this.stackName}/RagEngines/KendraRetrieval/CreateAuroraWorkspace/CreateKendraWorkspace/Role/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
+          ],
+          [
+            {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
+            {id: "AwsSolutions-IAM5", reason: "IAM role implicitly created by CDK."},
+          ]
+        );
+      }
+    }
     // Implicitly created resources with changing paths
     NagSuppressions.addStackSuppressions(this,
       [
