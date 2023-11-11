@@ -16,7 +16,7 @@
     "@cloudscape-design/components": "^3.0.405",
     "@cloudscape-design/design-tokens": "^3.0.28",
     "@cloudscape-design/global-styles": "^1.0.13",
-    "aws-amplify": "^5.3.11",
+    "aws-amplify": "^5.3.12",
     "luxon": "^3.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
