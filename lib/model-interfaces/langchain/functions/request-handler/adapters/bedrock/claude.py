@@ -34,30 +34,36 @@ class BedrockClaudeAdapter(ModelAdapter):
 
     def get_qa_prompt(self):
         template = """
+        Mens: Dit is een vriendschappelijk gesprek tussen een mens en een AI. 
+        De AI is spraakzaam en geeft specifieke details uit zijn context, maar beperkt dit tot 240 tokens.
+        Als de AI het antwoord op een vraag niet weet, zegt hij eerlijk dat hij het niet weet. 
+        het niet weet.
 
-Human: Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        Assistent: OK, begrepen, ik zal een spraakzame waarheidsgetrouwe AI-assistent zijn.
 
-{context}
+        Mens: Hier zijn een paar documenten in <documenten> tags:
+        <documenten>
+        {context}
+        </documenten>
+        Geef op basis van de bovenstaande documenten een gedetailleerd antwoord op {question}. 
+        Antwoord "weet niet" indien niet aanwezig in het document. 
 
-Question: {question}
-
-Assistant:"""
+        Assistent:
+        """
 
         return PromptTemplate(
             template=template, input_variables=["context", "question"]
         )
 
     def get_prompt(self):
-        template = """
+        template = """Het volgende is een vriendschappelijk gesprek tussen een mens en een AI. Als de AI het antwoord op een vraag niet weet, zegt hij eerlijk dat hij het niet weet.
 
-Human: The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
+        Huidig gesprek:
+        {chat_history}
 
-Current conversation:
-{chat_history}
-
-Question: {input}
-
-Assistant:"""
+        Vraag: {input}
+        
+        Assistent: """
 
         input_variables = ["input", "chat_history"]
         prompt_template_args = {
@@ -70,13 +76,15 @@ Assistant:"""
         return prompt_template
 
     def get_condense_question_prompt(self):
-        template = """
-{chat_history}
+        template = """{chat_history}
+        Mens:
+        Gegeven het vorige gesprek en een vervolgvraag hieronder, herformuleer de vervolgvraag
+        zodat het een op zichzelf staande vraag wordt.
 
-Human: Given the above conversation and a follow up input, rephrase the follow up input to be a standalone question, in the same language as the follow up input.
-Follow Up Input: {question}
+        Vervolgvraag: {question}
+        Op zichzelf staande vraag:
 
-Assistant:"""
+        Assistent:"""
 
         return PromptTemplate(
             input_variables=["chat_history", "question"],

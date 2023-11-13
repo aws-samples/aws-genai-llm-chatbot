@@ -67,12 +67,12 @@ class ModelAdapter:
         )
 
     def get_prompt(self):
-        template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
+        template = """Het volgende is een vriendschappelijk gesprek tussen een mens en een AI. Als de AI het antwoord op een vraag niet weet, zegt hij eerlijk dat hij het niet weet.
 
-        Current conversation:
+        Huidig gesprek:
         {chat_history}
 
-        Question: {input}"""
+        Vraag: {input}"""
         
         return PromptTemplate.from_template(template)
 

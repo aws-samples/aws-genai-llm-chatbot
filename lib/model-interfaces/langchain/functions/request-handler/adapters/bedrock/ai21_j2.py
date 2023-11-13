@@ -1,4 +1,5 @@
 import genai_core.clients
+
 from langchain.llms import Bedrock
 from langchain.prompts.prompt import PromptTemplate
 
@@ -31,14 +32,14 @@ class AI21J2Adapter(ModelAdapter):
         )
 
     def get_prompt(self):
-        template = """Human: The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
+        template = """Het volgende is een vriendschappelijk gesprek tussen een mens en een AI. Als de AI het antwoord op een vraag niet weet, zegt hij eerlijk dat hij het niet weet.
 
-Current conversation:
-{chat_history}
+        Huidig gesprek:
+        {chat_history}
 
-Question: {input}
-
-Assistant:"""
+        Vraag: {input}
+        
+        Assistent: """
 
         input_variables = ["input", "chat_history"]
         prompt_template_args = {
