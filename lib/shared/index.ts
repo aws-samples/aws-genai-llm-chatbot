@@ -74,7 +74,6 @@ export class Shared extends Construct {
       // Create a VPC endpoint for S3.
       const s3GatewayEndpoint = vpc.addGatewayEndpoint("S3GatewayEndpoint", {
         service: ec2.GatewayVpcEndpointAwsService.S3,
-        
       });
 
       const s3vpcEndpoint = vpc.addInterfaceEndpoint("S3InterfaceEndpoint", {
@@ -101,7 +100,6 @@ export class Shared extends Construct {
         service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
         open: true,
       });
-
     }
 
     const configParameter = new ssm.StringParameter(this, "Config", {
@@ -125,9 +123,9 @@ export class Shared extends Construct {
       path: path.join(__dirname, "./layers/common"),
     });
 
-    this.sharedCode = new SharedAssetBundler(this, 'genai-core', [ 
-      path.join(__dirname, 'layers', 'python-sdk', 'python', 'genai_core')
-    ])
+    this.sharedCode = new SharedAssetBundler(this, "genai-core", [
+      path.join(__dirname, "layers", "python-sdk", "python", "genai_core"),
+    ]);
 
     const xOriginVerifySecret = new secretsmanager.Secret(
       this,
