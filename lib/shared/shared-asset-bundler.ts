@@ -10,7 +10,7 @@ function calculateHash(paths: string[]): string {
     return paths.reduce((mh, p) => {
         const dirs = fs.readdirSync(p);
         let hash = calculateHash(dirs.filter(d => fs.statSync(path.join(p, d)).isDirectory()).map(v => path.join(p, v)))
-        return md5hash(mh + dirs.filter(d => !fs.statSync(path.join(p,d)).isDirectory()).reduce((h, f) => { return md5hash(h + fs.readFileSync(path.join(p,f)))}, hash));
+        return md5hash(mh + dirs.filter(d => fs.statSync(path.join(p,d)).isFile()).reduce((h, f) => { return md5hash(h + fs.readFileSync(path.join(p,f)))}, hash));
         }, ""
     )
 }
