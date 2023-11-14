@@ -1,10 +1,19 @@
-import { BundlingOutput, DockerImage, IAsset, aws_s3_assets } from "aws-cdk-lib";
-import { AssetApiDefinition } from "aws-cdk-lib/aws-apigateway";
+import { AssetHashType, BundlingOutput, DockerImage, aws_s3_assets } from "aws-cdk-lib";
 import { Code, S3Code } from "aws-cdk-lib/aws-lambda";
 import { Asset } from "aws-cdk-lib/aws-s3-assets";
 import { md5hash } from "aws-cdk-lib/core/lib/helpers-internal";
 import { Construct } from "constructs";
 import * as path from "path";
+import * as fs from "fs";
+
+function calculateHash(paths: string[]): string {
+    return paths.reduce((mh, p) => {
+        const dirs = fs.readdirSync(p);
+        let hash = calculateHash(dirs.filter(d => fs.statSync(path.join(p, d)).isDirectory()).map(v => path.join(p, v)))
+        return md5hash(mh + dirs.filter(d => !fs.statSync(path.join(p,d)).isDirectory()).reduce((h, f) => { return md5hash(h + fs.readFileSync(path.join(p,f)))}, hash));
+        }, ""
+    )
+}
 
 export class SharedAssetBundler extends Construct {
     private readonly sharedAssets: string[];
@@ -26,18 +35,21 @@ export class SharedAssetBundler extends Construct {
     }
 
     bundleWithAsset(assetPath: string): Asset {
+        console.log(`Bundling asset ${assetPath}`)
         const asset = new aws_s3_assets.Asset(this, md5hash(assetPath).slice(0, 6), {
             path: assetPath,
             bundling: {
                 image: DockerImage.fromBuild(path.join(__dirname, 'alpine-zip')),
-                command: ["zip", "-r", path.join("/asset-output", "lambda.zip"), "."],
+                command: ["zip", "-r", path.join("/asset-output", "asset.zip"), "."],
                 volumes: this.sharedAssets.map(f => ({
                         containerPath: path.join(this.WORKING_PATH, path.basename(f)),
                         hostPath: f
                     })),
                 workingDirectory: this.WORKING_PATH,
                 outputType: BundlingOutput.ARCHIVED,
-            }
+            },
+            assetHash: calculateHash([assetPath, ...this.sharedAssets]),
+            assetHashType: AssetHashType.CUSTOM,
         })
         return asset;
     }
