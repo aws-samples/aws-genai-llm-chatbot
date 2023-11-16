@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from 'remark-gfm';
 import styles from "../../styles/chat.module.scss";
 import {
   ChatBotConfiguration,
@@ -20,6 +21,7 @@ import {
 } from "./types";
 
 import { getSignedUrl } from "./utils";
+
 import "react-json-view-lite/dist/index.css";
 import "../../styles/app.scss";
 
@@ -111,6 +113,7 @@ export default function ChatMessage(props: ChatMessageProps) {
           ) : null}
           <ReactMarkdown
             children={props.message.content}
+            remarkPlugins={[remarkGfm]}
             components={{
               pre(props) {
                 const { children, className, node, ...rest } = props;
@@ -121,6 +124,30 @@ export default function ChatMessage(props: ChatMessageProps) {
                   >
                     {children}
                   </pre>
+                );
+              },
+              table(props) {
+                const { children, ...rest } = props;
+                return (
+                  <table {...rest} className={styles.markdownTable}>
+                    {children}
+                  </table>
+                );
+              },
+              th(props) {
+                const { children, ...rest } = props;
+                return (
+                  <th {...rest} className={styles.markdownTableCell}>
+                    {children}
+                  </th>
+                );
+              },
+              td(props) {
+                const { children, ...rest } = props;
+                return (
+                  <td {...rest} className={styles.markdownTableCell}>
+                    {children}
+                  </td>
                 );
               },
             }}
