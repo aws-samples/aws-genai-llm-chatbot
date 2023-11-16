@@ -11,10 +11,9 @@ Llama2ChatPrompt = """<<SYS>>\nYou are an helpful assistant that provides concis
 {chat_history} <s> [INST] {input}"""
 
 Llama2ChatQAPrompt = """<<SYS>>\nUse the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
-
-{context}
-
 <<SYS>>
+
+<s> [INST] {context} [/INST] </s>
 
 <s> [INST] {question}"""
 
