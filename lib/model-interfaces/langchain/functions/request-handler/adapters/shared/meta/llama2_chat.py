@@ -5,28 +5,28 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
 
-Llama2ChatPrompt = """<<SYS>>You are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.
+Llama2ChatPrompt = """[INST]<<SYS>>You are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.
 <<SYS>>
 
 {chat_history}
 
-[INST] {input} [/INST]"""
+{input} [/INST]"""
 
-Llama2ChatQAPrompt = """<<SYS>>\nUse the following conversation history and pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
+Llama2ChatQAPrompt = """[INST]<<SYS>>\nUse the following conversation history and pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
 <<SYS>>
 
 {chat_history}
 
 [INST] Context: {context} [/INST]
 
-[INST] {question} [/INST]"""
+{question} [/INST]"""
 
-Llama2ChatCondensedQAPrompt = """<<SYS>>Given the following conversation and the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
+Llama2ChatCondensedQAPrompt = """[INST]<<SYS>>Given the following conversation and the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
 <<SYS>>
 
 {chat_history}
 
-[INST] {question} [/INST]"""
+{question} [/INST]"""
 
 
 Llama2ChatPromptTemplate = PromptTemplate.from_template(Llama2ChatPrompt)
@@ -50,10 +50,10 @@ class Llama2ConversationBufferMemory(ConversationBufferMemory):
                 if human_message_cnt == 0:
                     message = f"{m.content} [/INST]"
                 else:
-                    message = f"<s> [INST] {m.content} [/INST]"
+                    message = f"[INST] {m.content} [/INST]"
                 human_message_cnt += 1
             elif isinstance(m, AIMessage):
-                message = f"{m.content} </s>"
+                message = f"{m.content}"
             else:
                 raise ValueError(f"Got unsupported message type: {m}")
             string_messages.append(message)
