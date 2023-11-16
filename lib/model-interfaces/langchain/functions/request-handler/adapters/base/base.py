@@ -94,7 +94,7 @@ class ModelAdapter:
                 condense_question_prompt=self.get_condense_question_prompt(),
                 combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
                 return_source_documents=True,
-                memory=self.get_memory(output_key="answer", return_messages=True),
+                memory=self.get_memory(output_key="answer", return_messages=False),
                 verbose=True,
                 callbacks=[self.callback_handler],
             )
