@@ -18,7 +18,7 @@ Llama2ChatQAPrompt = """<<SYS>>\nUse the following pieces of context to answer t
 
 <s> [INST] {question}"""
 
-Llama2ChatConsensedQAPrompt = """<<SYS>>\nGiven the following conversation and  the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
+Llama2ChatCondensedQAPrompt = """<<SYS>>\nGiven the following conversation and  the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
 <<SYS>>
 
 <s> [INST] {question}"""
@@ -26,8 +26,8 @@ Llama2ChatConsensedQAPrompt = """<<SYS>>\nGiven the following conversation and  
 
 Llama2ChatPromptTemplate = PromptTemplate.from_template(Llama2ChatPrompt)
 Llama2ChatQAPromptTemplate = PromptTemplate.from_template(Llama2ChatQAPrompt)
-Llama2ChatConsensedQAPromptTemplate = PromptTemplate.from_template(
-    Llama2ChatConsensedQAPrompt
+Llama2ChatCondensedQAPromptTemplate = PromptTemplate.from_template(
+    Llama2ChatCondensedQAPrompt
 )
 
 
