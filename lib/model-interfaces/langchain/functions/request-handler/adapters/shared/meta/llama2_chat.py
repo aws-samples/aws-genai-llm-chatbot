@@ -16,12 +16,12 @@ Llama2ChatQAPrompt = """<<SYS>>\nUse the following pieces of context to answer t
 
 <<SYS>>
 
-{chat_history} <s> [INST] {input}"""
+<s> [INST] {question}"""
 
 Llama2ChatConsensedQAPrompt = """<<SYS>>\nGiven the following conversation and  the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
 <<SYS>>
 
-{chat_history} <s> [INST] {input}"""
+<s> [INST] {question}"""
 
 
 Llama2ChatPromptTemplate = PromptTemplate.from_template(Llama2ChatPrompt)
