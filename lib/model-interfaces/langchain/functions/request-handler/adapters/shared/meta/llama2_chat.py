@@ -56,7 +56,7 @@ class Llama2ConversationBufferMemory(ConversationBufferMemory):
                     message = f"<s> [INST] {m.content} [/INST]"
                 human_message_cnt += 1
             elif isinstance(m, AIMessage):
-                message = f"{m.content}"
+                message = f"{m.content} </s>"
             else:
                 raise ValueError(f"Got unsupported message type: {m}")
             string_messages.append(message)
