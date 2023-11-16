@@ -6,7 +6,11 @@ from langchain.llms.sagemaker_endpoint import LLMContentHandler, SagemakerEndpoi
 from ...base import ModelAdapter
 from ...registry import registry
 
-from ...shared.meta.llama2_chat import Llama2ChatPromptTemplate
+from ...shared.meta.llama2_chat import (
+    Llama2ChatPromptTemplate,
+    Llama2ChatQAPromptTemplate,
+    Llama2ChatConsensedQAPromptTemplate,
+)
 from ...shared.meta.llama2_chat import Llama2ConversationBufferMemory
 
 
@@ -69,6 +73,12 @@ class SMLlama2ChatAdapter(ModelAdapter):
 
     def get_prompt(self):
         return Llama2ChatPromptTemplate
+
+    def get_qa_prompt(self):
+        return Llama2ChatQAPromptTemplate
+
+    def get_condense_question_prompt(self):
+        return Llama2ChatConsensedQAPromptTemplate
 
 
 # Register the adapter

@@ -10,7 +10,25 @@ Llama2ChatPrompt = """<<SYS>>\nYou are an helpful assistant that provides concis
 
 {chat_history} <s> [INST] {input}"""
 
+Llama2ChatQAPrompt = """<<SYS>>\nUse the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
+
+{context}
+
+<<SYS>>
+
+{chat_history} <s> [INST] {input}"""
+
+Llama2ChatConsensedQAPrompt = """<<SYS>>\nGiven the following conversation and  the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
+<<SYS>>
+
+{chat_history} <s> [INST] {input}"""
+
+
 Llama2ChatPromptTemplate = PromptTemplate.from_template(Llama2ChatPrompt)
+Llama2ChatQAPromptTemplate = PromptTemplate.from_template(Llama2ChatQAPrompt)
+Llama2ChatConsensedQAPromptTemplate = PromptTemplate.from_template(
+    Llama2ChatConsensedQAPrompt
+)
 
 
 class Llama2ConversationBufferMemory(ConversationBufferMemory):

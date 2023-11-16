@@ -6,7 +6,11 @@ from .base import Bedrock
 from langchain.prompts.prompt import PromptTemplate
 
 
-from ..shared.meta.llama2_chat import Llama2ChatPromptTemplate
+from ..shared.meta.llama2_chat import (
+    Llama2ChatPromptTemplate,
+    Llama2ChatQAPromptTemplate,
+    Llama2ChatConsensedQAPromptTemplate,
+)
 from ..shared.meta.llama2_chat import Llama2ConversationBufferMemory
 
 from ..base import ModelAdapter
@@ -48,6 +52,12 @@ class BedrockMetaLLama2ChatAdapter(ModelAdapter):
 
     def get_prompt(self):
         return Llama2ChatPromptTemplate
+
+    def get_qa_prompt(self):
+        return Llama2ChatQAPromptTemplate
+
+    def get_condense_question_prompt(self):
+        return Llama2ChatConsensedQAPromptTemplate
 
 
 # Register the adapter
