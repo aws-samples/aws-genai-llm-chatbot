@@ -5,6 +5,14 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
 
+Llama2ChatPrompt = """<<SYS>>\nYou are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.
+<<SYS>>
+
+{chat_history} <s> [INST] {input}"""
+
+Llama2ChatPromptTemplate = PromptTemplate.from_template(Llama2ChatPrompt)
+
+
 class Llama2ConversationBufferMemory(ConversationBufferMemory):
     @property
     def buffer_as_str(self) -> str:
@@ -26,11 +34,3 @@ class Llama2ConversationBufferMemory(ConversationBufferMemory):
             else:
                 raise ValueError(f"Got unsupported message type: {m}")
             string_messages.append(message)
-
-
-Llama2ChatPrompt = """<<SYS>>\nYou are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.
-<<SYS>>
-
-{chat_history} <s> [INST] {input}"""
-
-Llama2ChatPromptTemplate = PromptTemplate.from_template(Llama2ChatPrompt)
