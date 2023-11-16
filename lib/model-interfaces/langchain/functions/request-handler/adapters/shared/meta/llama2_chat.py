@@ -13,9 +13,7 @@ Llama2ChatPrompt = """<<SYS>>\nYou are an helpful assistant that provides concis
 Llama2ChatQAPrompt = """<<SYS>>\nUse the following conversation history and pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
 <<SYS>>
 
-<s> [INST] Current convesation:
-
-{chat_history} [/INST] </s>
+{chat_history}
 
 <s> [INST] Context:
 
@@ -26,9 +24,7 @@ Llama2ChatQAPrompt = """<<SYS>>\nUse the following conversation history and piec
 Llama2ChatCondensedQAPrompt = """<<SYS>>\nGiven the following conversation and the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
 <<SYS>>
 
-<s> [INST] Current conversation:
-
- {chat_history} [/INST] </s>
+{chat_history}
 
 <s> [INST] {question}"""
 
