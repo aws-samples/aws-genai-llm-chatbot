@@ -5,7 +5,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
 
-Llama2ChatPrompt = """[INST] <<SYS>>
+Llama2ChatPrompt = """<<SYS>>
 You are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.
 <</SYS>>
 
@@ -13,7 +13,7 @@ You are an helpful assistant that provides concise answers to user questions wit
 
 {input} [/INST]"""
 
-Llama2ChatQAPrompt = """[INST] <<SYS>>
+Llama2ChatQAPrompt = """<<SYS>>
 Use the following conversation history and pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
 <</SYS>>
 
@@ -23,7 +23,7 @@ Use the following conversation history and pieces of context to answer the quest
 
 {question} [/INST]"""
 
-Llama2ChatCondensedQAPrompt = """[INST]  <<SYS>>
+Llama2ChatCondensedQAPrompt = """<<SYS>>
 Given the following conversation and the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input. You do not repeat yourself. You avoid bulleted list or emojis.
 <</SYS>>
 
@@ -53,7 +53,7 @@ class Llama2ConversationBufferMemory(ConversationBufferMemory):
                 if human_message_cnt == 0:
                     message = f"{m.content} [/INST]"
                 else:
-                    message = f"[INST] {m.content} [/INST]"
+                    message = f"<s> [INST] {m.content} [/INST]"
                 human_message_cnt += 1
             elif isinstance(m, AIMessage):
                 message = f"{m.content}"

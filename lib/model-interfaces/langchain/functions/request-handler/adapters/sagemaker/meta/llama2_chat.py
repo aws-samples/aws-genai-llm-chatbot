@@ -18,7 +18,14 @@ class Llama2ChatContentHandler(LLMContentHandler):
     content_type = "application/json"
     accepts = "application/json"
 
+    def clean_prompt(self, prompt):
+        """Remove only the very last occurence of [/INST] tag if present"""
+        if prompt.endswith("[/INST]"):
+            prompt = prompt[: prompt.rfind("[/INST]")]
+        return prompt
+
     def transform_input(self, prompt, model_kwargs) -> bytes:
+        prompt = self.clean_prompt(prompt)
         input_str = json.dumps(
             {
                 "inputs": [
