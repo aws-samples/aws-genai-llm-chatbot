@@ -5,15 +5,17 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
 
-Llama2ChatPrompt = """[INST]<<SYS>>You are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.
-<<SYS>>
+Llama2ChatPrompt = """[INST] <<SYS>>
+You are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.
+<</SYS>>
 
 {chat_history}
 
 {input} [/INST]"""
 
-Llama2ChatQAPrompt = """[INST]<<SYS>>\nUse the following conversation history and pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
-<<SYS>>
+Llama2ChatQAPrompt = """[INST] <<SYS>>
+Use the following conversation history and pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. You do not repeat yourself. You avoid bulleted list or emojis.
+<</SYS>>
 
 {chat_history}
 
@@ -21,8 +23,9 @@ Llama2ChatQAPrompt = """[INST]<<SYS>>\nUse the following conversation history an
 
 {question} [/INST]"""
 
-Llama2ChatCondensedQAPrompt = """[INST]<<SYS>>Given the following conversation and the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input.You do not repeat yourself. You avoid bulleted list or emojis.
-<<SYS>>
+Llama2ChatCondensedQAPrompt = """[INST]  <<SYS>>
+Given the following conversation and the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input. You do not repeat yourself. You avoid bulleted list or emojis.
+<</SYS>>
 
 {chat_history}
 
