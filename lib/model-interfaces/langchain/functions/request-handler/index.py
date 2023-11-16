@@ -59,7 +59,7 @@ def handle_heartbeat(record):
             "action": ChatbotAction.HEARTBEAT.value,
             "connectionId": connection_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
-            "userId": user_id
+            "userId": user_id,
         }
     )
 
@@ -79,6 +79,7 @@ def handle_run(record):
         session_id = str(uuid.uuid4())
 
     adapter = registry.get_adapter(f"{provider}.{model_id}")
+    print(adapter)
 
     adapter.on_llm_new_token = lambda *args, **kwargs: on_llm_new_token(
         connection_id, user_id, session_id, *args, **kwargs
@@ -91,6 +92,7 @@ def handle_run(record):
         user_id=user_id,
         model_kwargs=data.get("modelKwargs", {}),
     )
+    print(model)
 
     response = model.run(
         prompt=prompt,

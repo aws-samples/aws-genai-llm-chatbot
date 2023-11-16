@@ -6,6 +6,9 @@ from langchain.llms.sagemaker_endpoint import LLMContentHandler, SagemakerEndpoi
 from ...base import ModelAdapter
 from ...registry import registry
 
+from ...shared.meta.llama2_chat import Llama2ChatPromptTemplate
+from ...shared.meta.llama2_chat import Llama2ConversationBufferMemory
+
 
 class Llama2ChatContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -38,6 +41,14 @@ class SMLlama2ChatAdapter(ModelAdapter):
 
         super().__init__(**kwargs)
 
+    def get_memory(self, output_key=None, return_messages=False):
+        return Llama2ConversationBufferMemory(
+            memory_key="chat_history",
+            chat_memory=self.chat_history,
+            return_messages=return_messages,
+            output_key=output_key,
+        )
+
     def get_llm(self, model_kwargs={}):
         params = {}
         if "temperature" in model_kwargs:
@@ -55,6 +66,9 @@ class SMLlama2ChatAdapter(ModelAdapter):
             content_handler=content_handler,
             callbacks=[self.callback_handler],
         )
+
+    def get_prompt(self):
+        return Llama2ChatPromptTemplate
 
 
 # Register the adapter

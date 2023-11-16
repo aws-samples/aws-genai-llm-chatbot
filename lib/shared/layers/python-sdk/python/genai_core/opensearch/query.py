@@ -107,7 +107,7 @@ def query_workspace_open_search(
             unique_items[i]["score"] = score
             score_dict[unique_items[i]["chunk_id"]] = score
     unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
-    
+
     for record in vector_search_records:
         record["score"] = score_dict[record["chunk_id"]]
     for record in keyword_search_records:
@@ -124,14 +124,19 @@ def query_workspace_open_search(
             "keyword_search_items": keyword_search_records,
         }
     else:
-        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[:limit]
+        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[
+            :limit
+        ]
         if len(ret_items) < limit:
             unique_items = sorted(
                 unique_items, key=lambda x: x["vector_search_score"] or -1, reverse=True
             )
             ret_items = ret_items + (
                 list(
-                    filter(lambda val: (val["vector_search_score"] or -1)  > 0.5, unique_items)
+                    filter(
+                        lambda val: (val["vector_search_score"] or -1) > 0.5,
+                        unique_items,
+                    )
                 )[: (limit - len(ret_items))]
             )
 
