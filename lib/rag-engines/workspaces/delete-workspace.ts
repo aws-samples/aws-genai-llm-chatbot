@@ -41,7 +41,10 @@ export class DeleteWorkspace extends Construct {
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
-        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
+        layers: [
+          props.shared.powerToolsLayer,
+          props.shared.commonLayer,
+        ],
         timeout: cdk.Duration.minutes(15),
         logRetention: logs.RetentionDays.ONE_WEEK,
         environment: {

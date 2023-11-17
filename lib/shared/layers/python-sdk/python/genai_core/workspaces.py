@@ -153,6 +153,7 @@ def create_workspace_aurora(
     )
 
     print(response)
+
     return {
         "id": workspace_id,
     }
@@ -221,6 +222,7 @@ def create_workspace_open_search(
     )
 
     print(response)
+
     return {
         "id": workspace_id,
     }
@@ -265,6 +267,7 @@ def create_workspace_kendra(
     )
 
     print(response)
+
     return {
         "id": workspace_id,
     }
@@ -282,7 +285,7 @@ def delete_workspace(workspace_id: str):
 
     if item["status"] != "ready" and item["status"] != "error":
         raise genai_core.types.CommonError("Workspace not ready for deletion")
-    
+
     response = sfn_client.start_execution(
         stateMachineArn=DELETE_WORKSPACE_WORKFLOW_ARN,
         input=json.dumps(
@@ -293,5 +296,3 @@ def delete_workspace(workspace_id: str):
     )
 
     print(response)
-
-

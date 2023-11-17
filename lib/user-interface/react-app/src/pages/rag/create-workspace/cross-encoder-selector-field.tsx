@@ -1,17 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { ApiClient } from "../../../common/api-client/api-client";
-import {
-  CrossEncoderModelItem,
-  LoadingStatus,
-  ResultValue,
-} from "../../../common/types";
+import { CrossEncoderModelItem, LoadingStatus, ResultValue } from "../../../common/types";
 import { AppContext } from "../../../common/app-context";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { Select, SelectProps } from "@cloudscape-design/components";
 
 interface CrossEncoderSelectorProps {
   submitting: boolean;
-  onChange: (data: Partial<{ crossEncoderModel: SelectProps.Option }>) => void;
+  onChange: (data: Partial<{crossEncoderModel: SelectProps.Option}>) => void;
   selectedModel: SelectProps.Option | null;
   errors: Record<string, string | string[]>;
 }
