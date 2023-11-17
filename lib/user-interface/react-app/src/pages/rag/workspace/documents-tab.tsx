@@ -36,11 +36,14 @@ export default function DocumentsTab(props: DocumentsTabProps) {
       setLoading(true);
 
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.documents.getDocuments(
-        props.workspaceId,
-        props.documentType,
-        params?.lastDocumentId
-      );
+      const result =
+        props.documentType != "rss"
+          ? await apiClient.documents.getDocuments(
+              props.workspaceId,
+              props.documentType,
+              params?.lastDocumentId
+            )
+          : await apiClient.rss.getRssFeedSubscriptions(props.workspaceId);
 
       if (ResultValue.ok(result)) {
         setPages((current) => {
@@ -101,12 +104,12 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const typeStr = ragDocumentTypeToString(props.documentType);
   const typeAddStr = ragDocumentTypeToAddString(props.documentType);
   const typeTitleStr = ragDocumentTypeToTitleString(props.documentType);
-
+  const columnDefinitions = getColumnDefinition(props.documentType);
   return (
     <Table
       loading={loading}
       loadingText={`Loading ${typeStr}s`}
-      columnDefinitions={getColumnDefinition(props.documentType)}
+      columnDefinitions={columnDefinitions}
       items={pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items}
       header={
         <Header
@@ -120,7 +123,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
               </RouterButton>
             </SpaceBetween>
           }
-          description="Please expect a delay for your changes to be reflected. Press the refresh button to see the latest changes."
+          description={ragDocumentTypeDescription(props.documentType)}
         >
           {typeTitleStr}
         </Header>
@@ -147,6 +150,15 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   );
 }
 
+function ragDocumentTypeDescription(type: RagDocumentType) {
+  switch (type) {
+    case "rss":
+      return 'Existing RSS feed subscriptions are listed below. To remove a subscription, click "Delete". RSS Feeds are refreshed daily. Any new posts found will show under the websites tab after they are crawled.';
+    default:
+      return "Please expect a delay for your changes to be reflected. Press the refresh button to see the latest changes.";
+  }
+}
+
 function ragDocumentTypeToString(type: RagDocumentType) {
   switch (type) {
     case "file":
@@ -157,6 +169,8 @@ function ragDocumentTypeToString(type: RagDocumentType) {
       return "Q&A";
     case "website":
       return "Website";
+    case "rss":
+      return "RSS Feed";
   }
 }
 
@@ -170,6 +184,8 @@ function ragDocumentTypeToTitleString(type: RagDocumentType) {
       return "Q&As";
     case "website":
       return "Websites";
+    case "rss":
+      return "RSS Feeds";
   }
 }
 
@@ -183,5 +199,7 @@ function ragDocumentTypeToAddString(type: RagDocumentType) {
       return "Add Q&A";
     case "website":
       return "Crawl website";
+    case "rss":
+      return "Subcribe to RSS Feed";
   }
 }

@@ -118,10 +118,7 @@ export default function ChatMessage(props: ChatMessageProps) {
               pre(props) {
                 const { children, className, node, ...rest } = props;
                 return (
-                  <pre
-                    {...rest}
-                    className={styles.codeMarkdown}
-                  >
+                  <pre {...rest} className={styles.codeMarkdown}>
                     {children}
                   </pre>
                 );

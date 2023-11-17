@@ -32,6 +32,7 @@ class WebsiteDocumentRequest(BaseModel):
     limit: int
 
 
+
 allowed_extensions = set(
     [
         ".csv",
@@ -156,6 +157,7 @@ def add_document(workspace_id: str, document_type: str):
                 "documentId": result["document_id"],
             },
         }
+    
 
 
 def _convert_document(document: dict):

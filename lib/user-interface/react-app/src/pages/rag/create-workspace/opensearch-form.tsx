@@ -1,6 +1,4 @@
-import {
-  OpenSearchWorkspaceCreateInput,
-} from "../../../common/types";
+import { OpenSearchWorkspaceCreateInput } from "../../../common/types";
 import {
   Container,
   Header,

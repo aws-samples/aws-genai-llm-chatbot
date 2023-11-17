@@ -59,7 +59,7 @@ export interface ApiErrorResult {
 
 export type LoadingStatus = "pending" | "loading" | "finished" | "error";
 export type ModelProvider = "sagemaker" | "bedrock" | "openai";
-export type RagDocumentType = "file" | "text" | "qna" | "website";
+export type RagDocumentType = "file" | "text" | "qna" | "website" | "rss";
 export type Modality = "TEXT" | "IMAGE";
 export type ModelInterface = "langchain" | "idefics";
 
@@ -127,6 +127,7 @@ export interface SessionItem {
 
 export interface DocumentItem {
   id: string;
+  workspaceId?: string;
   type: RagDocumentType;
   subType?: string;
   status: string;

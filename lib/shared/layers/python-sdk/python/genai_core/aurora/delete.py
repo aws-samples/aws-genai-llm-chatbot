@@ -3,6 +3,7 @@ import boto3
 import genai_core.utils.delete_files_with_prefix
 from psycopg2 import sql
 from genai_core.aurora.connection import AuroraConnection
+import genai_core.rss
 
 PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
 UPLOAD_BUCKET_NAME = os.environ["UPLOAD_BUCKET_NAME"]
@@ -61,7 +62,7 @@ def delete_aurora_workspace(workspace: dict):
                         "document_id": item["document_id"],
                     }
                 )
-
+    genai_core.rss.delete_workspace_subscriptions(workspace_id)
     print(f"Deleted {len(items_to_delete)} items.")
 
     response = workspaces_table.delete_item(
