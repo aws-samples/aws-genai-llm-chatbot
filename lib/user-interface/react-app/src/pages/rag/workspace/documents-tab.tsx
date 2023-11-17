@@ -123,7 +123,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
               </RouterButton>
             </SpaceBetween>
           }
-          description={ragDocumentTypeDescription(props.documentType)}
+          description="Please expect a delay for your changes to be reflected. Press the refresh button to see the latest changes."
         >
           {typeTitleStr}
         </Header>
@@ -148,15 +148,6 @@ export default function DocumentsTab(props: DocumentsTabProps) {
       }
     />
   );
-}
-
-function ragDocumentTypeDescription(type: RagDocumentType) {
-  switch (type) {
-    case "rss":
-      return 'Existing RSS feed subscriptions are listed below. To remove a subscription, click "Delete". RSS Feeds are refreshed daily. Any new posts found will show under the websites tab after they are crawled.';
-    default:
-      return "Please expect a delay for your changes to be reflected. Press the refresh button to see the latest changes.";
-  }
 }
 
 function ragDocumentTypeToString(type: RagDocumentType) {
