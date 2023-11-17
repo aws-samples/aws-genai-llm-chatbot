@@ -99,6 +99,17 @@ export class RestApi extends Construct {
         DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
           props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket
             ?.bucketName ?? "",
+        RSS_SCHEDULE_GROUP_NAME:
+          props.ragEngines?.dataImport.rssIngestorScheduleGroup ?? "",
+        RSS_FEED_INGESTOR_FUNCTION:
+          props.ragEngines?.dataImport.rssIngestorFunction.functionArn ?? "",
+        RSS_FEED_SCHEDULE_ROLE_ARN:
+          props.ragEngines?.dataImport.scheduledRssIngestFunctionRoleArn ?? "",
+        RSS_FEED_TABLE: props.ragEngines?.rssFeedTable.tableName ?? "",
+        RSS_FEED_WORKSPACE_DOCUMENT_TYPE_INDEX:
+          props.ragEngines?.rssFeedWorkspaceDocumentTypesIndexName ?? "",
+        RSS_FEED_DOCUMENT_TYPE_STATUS_INDEX:
+          props.ragEngines?.rssFeedDocumentTypeStatusIndexName ?? "",
       },
     });
 
@@ -108,6 +119,41 @@ export class RestApi extends Construct {
 
     if (props.ragEngines?.documentsTable) {
       props.ragEngines.documentsTable.grantReadWriteData(apiHandler);
+    }
+
+    if (props.ragEngines?.rssFeedTable) {
+      props.ragEngines.dataImport.rssIngestorFunction.grantInvoke(apiHandler);
+      props.ragEngines.rssFeedTable.grantReadWriteData(apiHandler);
+      apiHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: [
+            "scheduler:ListSechedules",
+            "scheduler:CreateSchedule",
+            "scheduler:UpdateSchedule",
+            "scheduler:DeleteSchedule",
+          ],
+          effect: iam.Effect.ALLOW,
+          resources: [
+            `arn:aws:scheduler:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:schedule/${props.ragEngines.dataImport.rssIngestorScheduleGroup}/*`,
+          ],
+        })
+      );
+      if (props.ragEngines.dataImport.scheduledRssIngestFunctionRoleArn) {
+        apiHandler.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["iam:PassRole"],
+            effect: iam.Effect.ALLOW,
+            resources: [
+              props.ragEngines.dataImport.scheduledRssIngestFunctionRoleArn,
+            ],
+            conditions: {
+              StringLike: {
+                "iam:PassedToService": "scheduler.amazonaws.com",
+              },
+            },
+          })
+        );
+      }
     }
 
     if (props.ragEngines?.auroraPgVector) {

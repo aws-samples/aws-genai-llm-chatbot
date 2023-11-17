@@ -2,6 +2,7 @@ import os
 import boto3
 from .client import get_open_search_client
 import genai_core.utils.delete_files_with_prefix
+import genai_core.rss
 
 
 PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
@@ -62,7 +63,7 @@ def delete_open_search_workspace(workspace: dict):
                         "document_id": item["document_id"],
                     }
                 )
-
+    genai_core.rss.delete_workspace_subscriptions(workspace_id)
     print(f"Deleted {len(items_to_delete)} items.")
 
     response = workspaces_table.delete_item(

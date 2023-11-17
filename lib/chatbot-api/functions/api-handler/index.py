@@ -23,6 +23,7 @@ from routes.sessions import router as sessions_router
 from routes.semantic_search import router as semantic_search_router
 from routes.documents import router as documents_router
 from routes.kendra import router as kendra_router
+from routes.rss import router as rss_router
 
 tracer = Tracer()
 logger = Logger()
@@ -40,11 +41,13 @@ app.include_router(rag_router)
 app.include_router(embeddings_router)
 app.include_router(cross_encoders_router)
 app.include_router(models_router)
+app.include_router(rss_router)
 app.include_router(workspaces_router)
 app.include_router(sessions_router)
 app.include_router(semantic_search_router)
 app.include_router(documents_router)
 app.include_router(kendra_router)
+
 
 
 @app.exception_handler(genai_core.types.CommonError)

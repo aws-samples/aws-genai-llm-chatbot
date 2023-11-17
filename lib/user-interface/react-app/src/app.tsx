@@ -15,6 +15,7 @@ import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
 import AddData from "./pages/rag/add-data/add-data";
 import "./styles/app.scss";
 import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
+import RssFeed from "./pages/rag/workspace/rss-feed";
 
 function App() {
   return (
@@ -40,6 +41,10 @@ function App() {
               <Route path="workspaces" element={<Workspaces />} />
               <Route path="workspaces/create" element={<CreateWorkspace />} />
               <Route path="workspaces/:workspaceId" element={<Workspace />} />
+              <Route
+                path="workspaces/:workspaceId/rss/:feedId"
+                element={<RssFeed />}
+              />
               <Route path="workspaces/add-data" element={<AddData />} />
             </Route>
             <Route path="*" element={<NotFound />} />
