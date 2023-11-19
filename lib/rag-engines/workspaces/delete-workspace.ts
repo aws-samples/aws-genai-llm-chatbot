@@ -61,16 +61,14 @@ export class DeleteWorkspace extends Construct {
             props.ragDynamoDBTables?.documentsTable.tableName ?? "",
           DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
             props.ragDynamoDBTables?.documentsByCompoundKeyIndexName ?? "",
+          DOCUMENTS_BY_STATUS_INDEX:
+            props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
           DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
             props.kendraRetrieval?.kendraS3DataSourceBucket?.bucketName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:
             props.openSearchVector?.openSearchCollectionEndpoint ?? "",
           RSS_SCHEDULE_GROUP_NAME: props.dataImport.rssIngestorScheduleGroup,
-          RSS_FEED_TABLE: props.ragDynamoDBTables.rssFeedTable.tableName,
-          RSS_FEED_DOCUMENT_TYPE_STATUS_INDEX:
-            props.ragDynamoDBTables.rssFeedDocumentTypeStatusIndexName,
-          RSS_FEED_WORKSPACE_DOCUMENT_TYPE_INDEX:
-            props.ragDynamoDBTables.rssFeedWorkspaceDocumentTypesIndexName,
+          
         },
       }
     );
@@ -128,7 +126,7 @@ export class DeleteWorkspace extends Construct {
     );
     props.ragDynamoDBTables.workspacesTable.grantReadWriteData(deleteFunction);
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(deleteFunction);
-    props.ragDynamoDBTables.rssFeedTable.grantReadWriteData(deleteFunction);
+    
 
     const handleError = new tasks.DynamoUpdateItem(this, "HandleError", {
       table: props.ragDynamoDBTables.workspacesTable,

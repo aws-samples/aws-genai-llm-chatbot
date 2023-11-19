@@ -29,8 +29,7 @@ export class RagEngines extends Construct {
   public readonly rssFeedTable: dynamodb.Table;
   public readonly workspacesByObjectTypeIndexName: string;
   public readonly documentsByCompountKeyIndexName: string;
-  public readonly rssFeedDocumentTypeStatusIndexName: string;
-  public readonly rssFeedWorkspaceDocumentTypesIndexName: string;
+  public readonly documentsByStatusIndexName: string;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
   public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
@@ -111,18 +110,14 @@ export class RagEngines extends Construct {
     this.processingBucket = dataImport.processingBucket;
     this.workspacesTable = tables.workspacesTable;
     this.documentsTable = tables.documentsTable;
-    this.rssFeedTable = tables.rssFeedTable;
     this.workspacesByObjectTypeIndexName =
       tables.workspacesByObjectTypeIndexName;
     this.documentsByCompountKeyIndexName =
       tables.documentsByCompoundKeyIndexName;
+    this.documentsByStatusIndexName = tables.documentsByStatusIndexName;
     this.fileImportWorkflow = dataImport.fileImportWorkflow;
     this.websiteCrawlingWorkflow = dataImport.websiteCrawlingWorkflow;
     this.deleteWorkspaceWorkflow = workspaces.deleteWorkspaceWorkflow;
-    this.rssFeedDocumentTypeStatusIndexName =
-      tables.rssFeedDocumentTypeStatusIndexName;
-    this.rssFeedWorkspaceDocumentTypesIndexName =
-      tables.rssFeedWorkspaceDocumentTypesIndexName;
     this.dataImport = dataImport;
   }
 }
