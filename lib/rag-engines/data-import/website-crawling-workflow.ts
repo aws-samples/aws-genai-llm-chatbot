@@ -110,7 +110,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
       timeout: cdk.Duration.minutes(15),
       logRetention: logs.RetentionDays.ONE_WEEK,
       environment: {
-        RSS_FEED_TABLE: props.ragDynamoDBTables.rssFeedTable.tableName,
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
         API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
@@ -124,15 +123,13 @@ export class WebsiteCrawlingWorkflow extends Construct {
           props.ragDynamoDBTables.documentsTable.tableName ?? "",
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
           props.ragDynamoDBTables.documentsByCompoundKeyIndexName ?? "",
+        DOCUMENTS_BY_STATUS_INDEX:
+          props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
         OPEN_SEARCH_COLLECTION_ENDPOINT:
           props.openSearchVector?.openSearchCollectionEndpoint ?? "",
         RSS_SCHEDULE_GROUP_NAME: this.rssIngestorScheduleGroup,
-        RSS_FEED_DOCUMENT_TYPE_STATUS_INDEX:
-          props.ragDynamoDBTables.rssFeedDocumentTypeStatusIndexName,
-        RSS_FEED_WORKSPACE_DOCUMENT_TYPE_INDEX:
-          props.ragDynamoDBTables.rssFeedWorkspaceDocumentTypesIndexName,
       },
     });
 
@@ -176,16 +173,13 @@ export class WebsiteCrawlingWorkflow extends Construct {
             props.ragDynamoDBTables.documentsTable.tableName ?? "",
           DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
             props.ragDynamoDBTables.documentsByCompoundKeyIndexName ?? "",
+          DOCUMENTS_BY_STATUS_INDEX:
+            props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
           SAGEMAKER_RAG_MODELS_ENDPOINT:
             props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:
             props.openSearchVector?.openSearchCollectionEndpoint ?? "",
-          RSS_FEED_TABLE: props.ragDynamoDBTables.rssFeedTable.tableName,
           RSS_SCHEDULE_GROUP_NAME: this.rssIngestorScheduleGroup,
-          RSS_FEED_DOCUMENT_TYPE_STATUS_INDEX:
-            props.ragDynamoDBTables.rssFeedDocumentTypeStatusIndexName,
-          RSS_FEED_WORKSPACE_DOCUMENT_TYPE_INDEX:
-            props.ragDynamoDBTables.rssFeedWorkspaceDocumentTypesIndexName,
         },
       }
     );
@@ -194,15 +188,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
       schedule: events.Schedule.expression("rate(5 minutes)"),
     }).addTarget(new targets.LambdaFunction(batchCrawlRssPostsFunction));
 
-    props.ragDynamoDBTables.rssFeedTable.grantReadWriteData(
-      rssIngestorFunction
-    );
-
-    props.ragDynamoDBTables.rssFeedTable.grantReadWriteData(
-      batchCrawlRssPostsFunction
-    );
-
-    props.shared.configParameter.grantRead(websiteParserFunction);
+       props.shared.configParameter.grantRead(websiteParserFunction);
     props.shared.configParameter.grantRead(batchCrawlRssPostsFunction);
     props.shared.apiKeysSecret.grantRead(websiteParserFunction);
     props.shared.apiKeysSecret.grantRead(batchCrawlRssPostsFunction);

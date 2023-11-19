@@ -69,6 +69,8 @@ export class RestApi extends Construct {
         DOCUMENTS_TABLE_NAME: props.ragEngines?.documentsTable.tableName ?? "",
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
           props.ragEngines?.documentsByCompountKeyIndexName ?? "",
+        DOCUMENTS_BY_STATUS_INDEX:
+            props.ragEngines?.documentsByStatusIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.ragEngines?.sageMakerRagModels?.model.endpoint
             ?.attrEndpointName ?? "",
@@ -105,11 +107,7 @@ export class RestApi extends Construct {
           props.ragEngines?.dataImport.rssIngestorFunction.functionArn ?? "",
         RSS_FEED_SCHEDULE_ROLE_ARN:
           props.ragEngines?.dataImport.scheduledRssIngestFunctionRoleArn ?? "",
-        RSS_FEED_TABLE: props.ragEngines?.rssFeedTable.tableName ?? "",
-        RSS_FEED_WORKSPACE_DOCUMENT_TYPE_INDEX:
-          props.ragEngines?.rssFeedWorkspaceDocumentTypesIndexName ?? "",
-        RSS_FEED_DOCUMENT_TYPE_STATUS_INDEX:
-          props.ragEngines?.rssFeedDocumentTypeStatusIndexName ?? "",
+  
       },
     });
 
