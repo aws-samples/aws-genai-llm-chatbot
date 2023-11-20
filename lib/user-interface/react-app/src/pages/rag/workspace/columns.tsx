@@ -174,7 +174,7 @@ export function getColumnDefinition(documentType: RagDocumentType) {
       return QNA_COLUMN_DEFINITIONS;
     case "website":
       return WEBSITES_COLUMN_DEFINITIONS;
-    case "rss":
+    case "rssfeed":
       return RSS_COLUMN_DEFINITIONS;
     default:
       return [];

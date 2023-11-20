@@ -43,8 +43,7 @@ export class DataImport extends Construct {
   public readonly fileImportWorkflow: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow: sfn.StateMachine;
   public readonly rssIngestorFunction: lambda.Function;
-  public readonly scheduledRssIngestFunctionRoleArn: string;
-  public readonly rssIngestorScheduleGroup: string;
+  
 
   constructor(scope: Construct, id: string, props: DataImportProps) {
     super(scope, id);
@@ -142,6 +141,7 @@ export class DataImport extends Construct {
       }
     );
 
+    
     const uploadHandler = new lambda.Function(this, "UploadHandler", {
       code: props.shared.sharedCode.bundleWithLambdaAsset(
         path.join(__dirname, "./functions/upload-handler")
@@ -207,11 +207,7 @@ export class DataImport extends Construct {
     this.processingBucket = processingBucket;
     this.ingestionQueue = ingestionQueue;
     this.fileImportWorkflow = fileImportWorkflow.stateMachine;
-    this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;
-    this.rssIngestorFunction = websiteCrawlingWorkflow.rssIngestorFunction;
-    this.scheduledRssIngestFunctionRoleArn =
-      websiteCrawlingWorkflow.scheduledRssIngestFunctionRole.roleArn;
-    this.rssIngestorScheduleGroup =
-      websiteCrawlingWorkflow.rssIngestorScheduleGroup;
+    this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;  
+    this.rssIngestorFunction = websiteCrawlingWorkflow.rssIngestorFunction  
   }
 }

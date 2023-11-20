@@ -5,6 +5,7 @@ import { SystemConfig } from "../../shared/types";
 import { Shared } from "../../shared";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { OpenSearchVector } from "../opensearch-vector";
+import { EventbridgeToLambda } from '@aws-solutions-constructs/aws-eventbridge-lambda';
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
@@ -15,7 +16,6 @@ import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
-import * as scheduler from "aws-cdk-lib/aws-scheduler";
 
 export interface WebsiteCrawlingWorkflowProps {
   readonly config: SystemConfig;
@@ -30,10 +30,6 @@ export interface WebsiteCrawlingWorkflowProps {
 export class WebsiteCrawlingWorkflow extends Construct {
   public readonly stateMachine: sfn.StateMachine;
   public readonly rssIngestorFunction: lambda.Function;
-  public readonly batchCrawlRssPostsFunction: lambda.Function;
-  public readonly rssIngestorScheduleGroup: string = "RssIngestionGroup";
-  public readonly scheduledRssIngestFunctionRole: iam.Role;
-
   constructor(
     scope: Construct,
     id: string,
@@ -83,17 +79,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
       }
     );
 
-    new scheduler.CfnScheduleGroup(this, "RssIngestorScheduleGroup", {
-      name: this.rssIngestorScheduleGroup,
-    });
-
-    const scheduledRssIngestFunctionRole = new iam.Role(
-      this,
-      "scheduledRssIngestFunctionRole",
-      {
-        assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
-      }
-    );
 
     const rssIngestorFunction = new lambda.Function(this, "RssIngestor", {
       code: props.shared.sharedCode.bundleWithLambdaAsset(
@@ -109,6 +94,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       timeout: cdk.Duration.minutes(15),
       logRetention: logs.RetentionDays.ONE_WEEK,
+
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
@@ -128,84 +114,121 @@ export class WebsiteCrawlingWorkflow extends Construct {
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
         OPEN_SEARCH_COLLECTION_ENDPOINT:
-          props.openSearchVector?.openSearchCollectionEndpoint ?? "",
-        RSS_SCHEDULE_GROUP_NAME: this.rssIngestorScheduleGroup,
+          props.openSearchVector?.openSearchCollectionEndpoint ?? ""
       },
     });
 
-    scheduledRssIngestFunctionRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ["lambda:InvokeFunction"],
-        effect: iam.Effect.ALLOW,
-        resources: [rssIngestorFunction.functionArn],
-      })
-    );
+    const triggerRssIngestorsFunction = new EventbridgeToLambda(
+      this,
+      "triggerRssIngestors",
+      {
+        lambdaFunctionProps: {
+          code: props.shared.sharedCode.bundleWithLambdaAsset(
+            path.join(__dirname, "./functions/trigger-rss-ingestors")
+          ),
+          description:
+            "Function ingests RSS feed items and adds new enteries to dynamoDB table.",
+          architecture: props.shared.lambdaArchitecture,
+          runtime: props.shared.pythonRuntime,
+          tracing: lambda.Tracing.ACTIVE,
+          memorySize: 1024,
+          handler: "index.lambda_handler",
+          layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
+          timeout: cdk.Duration.minutes(15),
+          logRetention: logs.RetentionDays.ONE_WEEK,
+          environment: {
+            ...props.shared.defaultEnvironmentVariables,
+            CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
+            API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
+            AURORA_DB_SECRET_ID: props.auroraDatabase?.secret?.secretArn as string,
+            PROCESSING_BUCKET_NAME: props.processingBucket.bucketName,
+            WORKSPACES_TABLE_NAME:
+              props.ragDynamoDBTables.workspacesTable.tableName,
+            WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
+              props.ragDynamoDBTables.workspacesByObjectTypeIndexName,
+            DOCUMENTS_TABLE_NAME:
+              props.ragDynamoDBTables.documentsTable.tableName ?? "",
+            DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
+              props.ragDynamoDBTables.documentsByCompoundKeyIndexName ?? "",
+            DOCUMENTS_BY_STATUS_INDEX:
+              props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
+            SAGEMAKER_RAG_MODELS_ENDPOINT:
+              props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+            OPEN_SEARCH_COLLECTION_ENDPOINT:
+              props.openSearchVector?.openSearchCollectionEndpoint ?? ""
+          },
+        },
+        eventRuleProps: {
+          schedule: events.Schedule.rate(cdk.Duration.days(1))
+        }
+      }
+    )
 
-    const batchCrawlRssPostsFunction = new lambda.Function(
+    rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction.lambdaFunction)
+
+    const batchCrawlRssPostsFunction = new EventbridgeToLambda(
       this,
       "batchCrawlRssPosts",
       {
-        vpc: props.shared.vpc,
-        description:
-          "Functions polls the RSS items for pending urls and invokes Website crawler inference. Max of 10 URLs per invoke.",
-        code: props.shared.sharedCode.bundleWithLambdaAsset(
-          path.join(__dirname, "./functions/batch-crawl-rss-posts")
-        ),
-        architecture: props.shared.lambdaArchitecture,
-        runtime: props.shared.pythonRuntime,
-        tracing: lambda.Tracing.ACTIVE,
-        memorySize: 1024,
-        handler: "index.lambda_handler",
-        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
-        timeout: cdk.Duration.minutes(5),
-        environment: {
-          ...props.shared.defaultEnvironmentVariables,
-          CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
-          API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
-          AURORA_DB_SECRET_ID: props.auroraDatabase?.secret
-            ?.secretArn as string,
-          PROCESSING_BUCKET_NAME: props.processingBucket.bucketName,
-          WORKSPACES_TABLE_NAME:
-            props.ragDynamoDBTables.workspacesTable.tableName,
-          WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
-            props.ragDynamoDBTables.workspacesByObjectTypeIndexName,
-          DOCUMENTS_TABLE_NAME:
-            props.ragDynamoDBTables.documentsTable.tableName ?? "",
-          DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
-            props.ragDynamoDBTables.documentsByCompoundKeyIndexName ?? "",
-          DOCUMENTS_BY_STATUS_INDEX:
-            props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
-          SAGEMAKER_RAG_MODELS_ENDPOINT:
-            props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
-          OPEN_SEARCH_COLLECTION_ENDPOINT:
-            props.openSearchVector?.openSearchCollectionEndpoint ?? "",
-          RSS_SCHEDULE_GROUP_NAME: this.rssIngestorScheduleGroup,
+        lambdaFunctionProps: {
+          vpc: props.shared.vpc,
+          description:
+            "Functions polls the RSS items for pending urls and invokes Website crawler inference. Max of 10 URLs per invoke.",
+          code: props.shared.sharedCode.bundleWithLambdaAsset(
+            path.join(__dirname, "./functions/batch-crawl-rss-posts")
+          ),
+          architecture: props.shared.lambdaArchitecture,
+          runtime: props.shared.pythonRuntime,
+          tracing: lambda.Tracing.ACTIVE,
+          memorySize: 1024,
+          handler: "index.lambda_handler",
+          layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
+          timeout: cdk.Duration.minutes(5),
+          environment: {
+            ...props.shared.defaultEnvironmentVariables,
+            CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
+            API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
+            AURORA_DB_SECRET_ID: props.auroraDatabase?.secret
+              ?.secretArn as string,
+            PROCESSING_BUCKET_NAME: props.processingBucket.bucketName,
+            WORKSPACES_TABLE_NAME:
+              props.ragDynamoDBTables.workspacesTable.tableName,
+            WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
+              props.ragDynamoDBTables.workspacesByObjectTypeIndexName,
+            DOCUMENTS_TABLE_NAME:
+              props.ragDynamoDBTables.documentsTable.tableName ?? "",
+            DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
+              props.ragDynamoDBTables.documentsByCompoundKeyIndexName ?? "",
+            DOCUMENTS_BY_STATUS_INDEX:
+              props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
+            SAGEMAKER_RAG_MODELS_ENDPOINT:
+              props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
+            OPEN_SEARCH_COLLECTION_ENDPOINT:
+              props.openSearchVector?.openSearchCollectionEndpoint ?? ""
+          },
         },
+        eventRuleProps: {
+          schedule: events.Schedule.rate(cdk.Duration.minutes(5))
+        }
       }
     );
 
-    new events.Rule(this, "WebsiteCrawlRssItemsFunctionRule", {
-      schedule: events.Schedule.expression("rate(5 minutes)"),
-    }).addTarget(new targets.LambdaFunction(batchCrawlRssPostsFunction));
 
-       props.shared.configParameter.grantRead(websiteParserFunction);
-    props.shared.configParameter.grantRead(batchCrawlRssPostsFunction);
-    props.shared.apiKeysSecret.grantRead(websiteParserFunction);
-    props.shared.apiKeysSecret.grantRead(batchCrawlRssPostsFunction);
-    props.processingBucket.grantReadWrite(websiteParserFunction);
-    props.processingBucket.grantReadWrite(batchCrawlRssPostsFunction);
-    props.ragDynamoDBTables.workspacesTable.grantReadWriteData(
-      websiteParserFunction
-    );
-    props.ragDynamoDBTables.workspacesTable.grantReadWriteData(
-      batchCrawlRssPostsFunction
-    );
+
+    props.shared.configParameter.grantRead(websiteParserFunction);
+    props.shared.configParameter.grantRead(batchCrawlRssPostsFunction.lambdaFunction);
+    props.shared.configParameter.grantRead(triggerRssIngestorsFunction.lambdaFunction)
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(
       websiteParserFunction
     );
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(
-      batchCrawlRssPostsFunction
+      batchCrawlRssPostsFunction.lambdaFunction
     );
+
+    props.ragDynamoDBTables.documentsTable.grantReadData(
+      triggerRssIngestorsFunction.lambdaFunction
+    )
+
 
     if (props.auroraDatabase) {
       props.auroraDatabase.secret?.grantRead(websiteParserFunction);
@@ -220,13 +243,13 @@ export class WebsiteCrawlingWorkflow extends Construct {
         resources: [props.openSearchVector.openSearchCollection.attrArn],
       });
       websiteParserFunction.addToRolePolicy(openSearchVectorPolicy);
-      batchCrawlRssPostsFunction.addToRolePolicy(openSearchVectorPolicy);
+      batchCrawlRssPostsFunction.lambdaFunction.addToRolePolicy(openSearchVectorPolicy);
 
       props.openSearchVector.addToAccessPolicy(
         "website-crawling-workflow",
         [
           websiteParserFunction.role?.roleArn,
-          batchCrawlRssPostsFunction.role?.roleArn,
+          batchCrawlRssPostsFunction.lambdaFunction.role?.roleArn,
         ],
         ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
       );
@@ -234,9 +257,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
       props.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
         websiteParserFunction
       );
-      props.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
-        batchCrawlRssPostsFunction
-      );
+      
     }
 
     if (props.sageMakerRagModelsEndpoint) {
@@ -247,7 +268,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
       websiteParserFunction.addToRolePolicy(
         invokeSageMakerRagModelEndpointPolicy
       );
-      batchCrawlRssPostsFunction.addToRolePolicy(
+      batchCrawlRssPostsFunction.lambdaFunction.addToRolePolicy(
         invokeSageMakerRagModelEndpointPolicy
       );
     }
@@ -261,7 +282,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
         resources: ["*"],
       });
       websiteParserFunction.addToRolePolicy(bedrockInokePolicy);
-      batchCrawlRssPostsFunction.addToRolePolicy(bedrockInokePolicy);
+      batchCrawlRssPostsFunction.lambdaFunction.addToRolePolicy(bedrockInokePolicy);
 
       if (props.config.bedrock?.roleArn) {
         const bedrockAssumePolicy = new iam.PolicyStatement({
@@ -269,7 +290,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
           resources: [props.config.bedrock.roleArn],
         });
         websiteParserFunction.addToRolePolicy(bedrockAssumePolicy);
-        batchCrawlRssPostsFunction.addToRolePolicy(bedrockAssumePolicy);
+        batchCrawlRssPostsFunction.lambdaFunction.addToRolePolicy(bedrockAssumePolicy);
       }
     }
 
@@ -366,14 +387,12 @@ export class WebsiteCrawlingWorkflow extends Construct {
         resources: ["*"],
       })
     );
-    batchCrawlRssPostsFunction.addEnvironment(
+    batchCrawlRssPostsFunction.lambdaFunction.addEnvironment(
       "WEBSITE_CRAWLING_WORKFLOW_ARN",
       stateMachine.stateMachineArn
     );
-    stateMachine.grantStartExecution(batchCrawlRssPostsFunction);
-    this.rssIngestorFunction = rssIngestorFunction;
-    this.batchCrawlRssPostsFunction = batchCrawlRssPostsFunction;
-    this.scheduledRssIngestFunctionRole = scheduledRssIngestFunctionRole;
+    stateMachine.grantStartExecution(batchCrawlRssPostsFunction.lambdaFunction);
     this.stateMachine = stateMachine;
+    this.rssIngestorFunction = rssIngestorFunction
   }
 }

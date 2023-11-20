@@ -6,6 +6,7 @@ import {
   Container,
   ContentLayout,
   Header,
+  Pagination,
   SpaceBetween,
   StatusIndicator,
   Table,
@@ -27,57 +28,84 @@ import { TableEmptyState } from "../../../components/table-empty-state";
 import { DateTime } from "luxon";
 import { Utils } from "../../../common/utils";
 
+
+
 export default function RssFeed() {
   const appContext = useContext(AppContext);
   const navigate = useNavigate();
   const onFollow = useOnFollow();
   const { workspaceId, feedId } = useParams();
   const [loading, setLoading] = useState(true);
-  const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
   const [rssSubscription, setRssSubscription] = useState<DocumentItem | null>(
     null
   );
-  const [rssSubscriptionPosts, setRssSubscriptionPosts] =
-    useState<DocumentResult>({ items: [] });
+  const [currentPageIndex, setCurrentPageIndex] = useState(1);
+  const [pages, setPages] = useState<DocumentResult[]>([]);
+  const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
+
 
   const getWorkspace = useCallback(async () => {
     if (!appContext || !workspaceId) return;
+
     const apiClient = new ApiClient(appContext);
-    const workspaceResult =
-      await apiClient.workspaces.getWorkspace(workspaceId);
-    if (ResultValue.ok(workspaceResult)) {
-      if (!workspaceResult.data) {
+    const result = await apiClient.workspaces.getWorkspace(workspaceId);
+
+    if (ResultValue.ok(result)) {
+      if (!result.data) {
         navigate("/rag/workspaces");
         return;
       }
-      setWorkspace(workspaceResult.data);
-      setLoading(false);
+
+      setWorkspace(result.data);
     }
   }, [appContext, navigate, workspaceId]);
+
+  const getRssSubscriptionPosts = useCallback(
+    async (params: { lastDocumentId?: string; pageIndex?: number }) => {
+    if (!appContext || !workspaceId || !feedId) return;
+    const apiClient = new ApiClient(appContext);
+    const result =
+      await apiClient.documents.getRssSubscriptionPosts(workspaceId,feedId,params.lastDocumentId)
+    if (ResultValue.ok(result)) {
+      setPages((current) => {
+        const foundIndex = current.findIndex(
+          (c) => c.lastDocumentId === result.data.lastDocumentId
+        );
+
+        if (foundIndex !== -1) {
+          current[foundIndex] = result.data;
+          return [...current];
+        } else if (typeof params.pageIndex !== "undefined") {
+          current[params.pageIndex - 1] = result.data;
+          return [...current];
+        } else if (result.data.items.length === 0) {
+          return current;
+        } else {
+          return [...current, result.data];
+        }
+      });
+    }   
+
+    setLoading(false);
+  }, [appContext, workspaceId, feedId]);
+
 
   const getRssSubscriptionDetails = useCallback(async () => {
     if (!appContext || !workspaceId || !feedId) return;
     const apiClient = new ApiClient(appContext);
-    const rssSubscriptionResult = await apiClient.rss.getRssSubscriptionDetails(
+    const rssSubscriptionResult = await apiClient.documents.getDocumentDetails(
       workspaceId,
-      feedId
+      feedId,
     );
-    if (ResultValue.ok(rssSubscriptionResult)) {
-      setRssSubscription(rssSubscriptionResult.data);
+    if (ResultValue.ok(rssSubscriptionResult) && rssSubscriptionResult.data.items) {
+      setRssSubscription(rssSubscriptionResult.data.items[0]);
     }
+    
     setLoading(false);
   }, [appContext, workspaceId, feedId]);
 
-  const getRssSubscriptionPosts = useCallback(async () => {
-    if (!appContext || !workspaceId || !feedId) return;
-    const apiClient = new ApiClient(appContext);
-    const rssSubscriptionPostsResult =
-      await apiClient.rss.getRssSubscriptionPosts(workspaceId, feedId);
-    if (ResultValue.ok(rssSubscriptionPostsResult)) {
-      setRssSubscriptionPosts(rssSubscriptionPostsResult.data);
-    }
-    setLoading(false);
-  }, [appContext, workspaceId, feedId]);
+
+  
 
   const toggleRssSubscription = useCallback(
     async (toState: string) => {
@@ -86,22 +114,22 @@ export default function RssFeed() {
       if (toState.toLowerCase() == "disable") {
         console.debug("Toggle to Disabled!");
         const apiClient = new ApiClient(appContext);
-        const result = await apiClient.rss.disableRssSubscription(
+        const result = await apiClient.documents.disableRssSubscription(
           workspaceId,
           feedId
         );
         if (ResultValue.ok(result)) {
-          setRssSubscription(result.data);
+          setRssSubscription(result.data.items[0]);
         }
       } else if (toState.toLowerCase() == "enable") {
         console.debug("Toggle to Enabled!");
         const apiClient = new ApiClient(appContext);
-        const result = await apiClient.rss.enableRssSubscription(
+        const result = await apiClient.documents.enableRssSubscription(
           workspaceId,
           feedId
         );
         if (ResultValue.ok(result)) {
-          setRssSubscription(result.data);
+          setRssSubscription(result.data.items[0]);
         }
       }
       getRssSubscriptionDetails();
@@ -111,10 +139,37 @@ export default function RssFeed() {
   );
 
   useEffect(() => {
-    getWorkspace();
     getRssSubscriptionDetails();
-    getRssSubscriptionPosts();
-  }, [getWorkspace, getRssSubscriptionDetails, getRssSubscriptionPosts]);
+    getRssSubscriptionPosts({});
+    getWorkspace();
+  }, [getRssSubscriptionDetails, getRssSubscriptionPosts, getWorkspace]);
+
+  const onNextPageClick = async () => {
+    const lastDocumentId = pages[currentPageIndex - 1]?.lastDocumentId;
+
+    if (lastDocumentId) {
+      if (pages.length <= currentPageIndex) {
+        await getRssSubscriptionPosts({ lastDocumentId });
+      }
+
+      setCurrentPageIndex((current) => Math.min(pages.length + 1, current + 1));
+    }
+  };
+
+  const onPreviousPageClick = async () => {
+    setCurrentPageIndex((current) =>
+      Math.max(1, Math.min(pages.length - 1, current - 1))
+    );
+  };
+
+  const refreshPage = async () => {
+    if (currentPageIndex <= 1) {
+      await getRssSubscriptionPosts({ pageIndex: currentPageIndex });
+    } else {
+      const lastDocumentId = pages[currentPageIndex - 2]?.lastDocumentId;
+      await getRssSubscriptionPosts({ lastDocumentId });
+    }
+  };
 
   return (
     <BaseAppLayout
@@ -277,26 +332,37 @@ export default function RssFeed() {
                       : "",
                 },
               ]}
-              items={rssSubscriptionPosts?.items}
+              items={pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items}
               empty={
                 <TableEmptyState
                   resourceName="RSS Subscription Post"
                   createText="Subcribe to a new RSS Feed"
-                  createHref={`/rag/workspaces/add-data?workspaceId=${rssSubscription?.workspaceId}&tab=rss`}
+                  createHref={`/rag/workspaces/add-data?workspaceId=${rssSubscription?.workspaceId}&tab=rssfeed`}
                 />
+              }
+              pagination={
+                pages.length === 0 ? null : (
+                  <Pagination
+                    openEnd={true}
+                    pagesCount={0}
+                    currentPageIndex={currentPageIndex}
+                    onNextPageClick={onNextPageClick}
+                    onPreviousPageClick={onPreviousPageClick}
+                  />
+                )
               }
               header={
                 <Header
                   actions={[
                     <SpaceBetween direction="horizontal" size="xs">
                       <Button
-                        href={`/rag/workspaces/${workspace?.id}?tab=website`}
+                        href={`/rag/workspaces/${workspaceId}?tab=website`}
                       >
                         View Crawled Websites
                       </Button>
                       <Button
                         iconName="refresh"
-                        onClick={getRssSubscriptionPosts}
+                        onClick={refreshPage}
                       />
                     </SpaceBetween>,
                   ]}

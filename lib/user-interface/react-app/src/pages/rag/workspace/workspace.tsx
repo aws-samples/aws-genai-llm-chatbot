@@ -56,7 +56,7 @@ export default function Workspace() {
 
   const showTabs = !workspace?.kendraIndexExternal;
   const disabledTabs =
-    workspace?.engine === "kendra" ? ["qna", "website", "rss"] : [];
+    workspace?.engine === "kendra" ? ["qna", "website", "rssfeed"] : [];
 
   return (
     <BaseAppLayout
@@ -121,7 +121,7 @@ export default function Workspace() {
                       {
                         id: "add-rss-subscription",
                         text: "Add RSS subscription",
-                        href: `/rag/workspaces/add-data?tab=rss&workspaceId=${workspaceId}`,
+                        href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
                       },
                     ]}
                   >
@@ -209,12 +209,12 @@ export default function Workspace() {
                   },
                   {
                     label: "RSS Feeds",
-                    id: "rss",
-                    disabled: disabledTabs.includes("website"),
+                    id: "rssfeed",
+                    disabled: disabledTabs.includes("rssfeed"),
                     content: (
                       <DocumentsTab
                         workspaceId={workspaceId}
-                        documentType="rss"
+                        documentType="rssfeed"
                       />
                     ),
                   },

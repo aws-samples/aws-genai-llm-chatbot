@@ -26,7 +26,6 @@ export class RagEngines extends Construct {
   public readonly processingBucket: s3.Bucket;
   public readonly documentsTable: dynamodb.Table;
   public readonly workspacesTable: dynamodb.Table;
-  public readonly rssFeedTable: dynamodb.Table;
   public readonly workspacesByObjectTypeIndexName: string;
   public readonly documentsByCompountKeyIndexName: string;
   public readonly documentsByStatusIndexName: string;

@@ -11,15 +11,11 @@ tracer = Tracer()
 @tracer.capture_lambda_handler()
 @logger.inject_lambda_context(log_event=True)
 def lambda_handler(event, context: LambdaContext):
-    logger.info(f"Starting scheduled RSS Feed poll")
-    workspace_id = event['workspace_id']
-    document_id = event['document_id']
-    logger.info(f"workspace_id = {workspace_id}")
-    logger.info(f'document_id = {document_id}')
+    logger.info(f"Triggering daily checks for RSS Feed Posts")
     try:
-        genai_core.documents.check_rss_feed_for_posts(workspace_id,document_id)
+        genai_core.documents.ingest_rss_feeds()
     except Exception as e:
-        logger.error(f'Error checking for new posts from feed!')
+        logger.error(f'Error triggering RSS Feed checks')
         logger.error(e)
         raise e
     
