@@ -9,7 +9,7 @@ import { SessionsClient } from "./sessions-client";
 import { SemanticSearchClient } from "./semantic-search-client";
 import { DocumentsClient } from "./documents-client";
 import { KendraClient } from "./kendra-client";
-import { RssClient } from "./rss-client";
+
 
 export class ApiClient {
   private _healthClient: HealthClient | undefined;
@@ -22,7 +22,7 @@ export class ApiClient {
   private _semanticSearchClient: SemanticSearchClient | undefined;
   private _documentsClient: DocumentsClient | undefined;
   private _kendraClient: KendraClient | undefined;
-  private _rssClient: RssClient | undefined;
+
 
   public get health() {
     if (!this._healthClient) {
@@ -104,12 +104,6 @@ export class ApiClient {
     return this._kendraClient;
   }
 
-  public get rss() {
-    if (!this._rssClient) {
-      this._rssClient = new RssClient(this._appConfig);
-    }
-    return this._rssClient;
-  }
 
   constructor(protected _appConfig: AppConfig) {}
 }

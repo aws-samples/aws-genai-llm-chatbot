@@ -66,27 +66,11 @@ export class DeleteWorkspace extends Construct {
           DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
             props.kendraRetrieval?.kendraS3DataSourceBucket?.bucketName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:
-            props.openSearchVector?.openSearchCollectionEndpoint ?? "",
-          RSS_SCHEDULE_GROUP_NAME: props.dataImport.rssIngestorScheduleGroup,
-          
+            props.openSearchVector?.openSearchCollectionEndpoint ?? "",          
         },
       }
     );
 
-    deleteFunction.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: [
-          "scheduler:ListSechedules",
-          "scheduler:CreateSchedule",
-          "scheduler:UpdateSchedule",
-          "scheduler:DeleteSchedule",
-        ],
-        effect: iam.Effect.ALLOW,
-        resources: [
-          `arn:aws:scheduler:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:schedule/${props.dataImport.rssIngestorScheduleGroup}/*`,
-        ],
-      })
-    );
 
     if (props.auroraPgVector) {
       props.auroraPgVector.database.secret?.grantRead(deleteFunction);

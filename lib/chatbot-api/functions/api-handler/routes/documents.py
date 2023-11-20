@@ -31,6 +31,11 @@ class WebsiteDocumentRequest(BaseModel):
     followLinks: bool
     limit: int
 
+class RssFeedDocumentRequest(BaseModel):
+    address: str
+    limit: int
+    title: str
+
 
 
 allowed_extensions = set(
@@ -81,6 +86,38 @@ def get_documents(workspace_id: str, document_type: str):
 
     result = genai_core.documents.list_documents(
         workspace_id, document_type, last_document_id
+    )
+
+    return {
+        "ok": True,
+        "data": {
+            "items": [_convert_document(item) for item in result["items"]],
+            "lastDocumentId": result["last_document_id"],
+        },
+    }
+
+
+@router.get("/workspaces/<workspace_id>/documents/<document_id>/detail")
+@tracer.capture_method
+def get_document_details(workspace_id: str, document_id: str):
+    result = genai_core.documents.get_document(workspace_id, document_id)
+
+    return {
+        "ok": True,
+        "data": {
+            "items":[_convert_document(result)],
+            "lastDocumentId": None
+        }
+    }
+
+@router.get("/workspaces/<workspace_id>/documents/<document_id>/posts")
+@tracer.capture_method
+def get_rss_posts(workspace_id: str, document_id: str):
+    query_string = router.current_event.query_string_parameters or {}
+    last_document_id = query_string.get("lastDocumentId", None)
+
+    result = genai_core.documents.list_documents(
+        workspace_id, document_id, last_document_id
     )
 
     return {
@@ -158,20 +195,43 @@ def add_document(workspace_id: str, document_type: str):
             },
         }
     
+    elif document_type == "rssfeed":
+        request = RssFeedDocumentRequest(**data)
+        request.address = request.address.strip()[:10000]
+        request.limit = 30
+        path=request.address
+
+        result = genai_core.documents.create_document(
+            workspace_id=workspace_id,
+            document_type=document_type,
+            path=path,
+            title=request.title,
+        )
+
+        return {
+            "ok": True,
+            "data": {
+                "workspaceId": result["workspace_id"],
+                "documentId": result["document_id"],
+            }
+        }
+    
+    
 
 
 def _convert_document(document: dict):
     return {
         "id": document["document_id"],
+        "workspaceId": document["workspace_id"],
         "type": document["document_type"],
-        "subType": document["document_sub_type"],
+        "subType": document["document_sub_type"] if "document_sub_type" in document else None,
         "status": document["status"],
         "title": document["title"],
         "path": document["path"],
-        "sizeInBytes": document["size_in_bytes"],
-        "vectors": document["vectors"],
-        "subDocuments": document["sub_documents"],
-        "errors": document["errors"],
+        "sizeInBytes": document["size_in_bytes"] if "size_in_bytes" in document else None,
+        "vectors": document["vectors"] if "vectors" in document else None,
+        "subDocuments": document["sub_documents"] if "sub_documents" in document else None,
+        "errors": document["errors"] if "errors" in document else [],
         "createdAt": document["created_at"],
-        "updatedAt": document["updated_at"],
+        "updatedAt": document["updated_at"] if "updated_at" in document else None,
     }

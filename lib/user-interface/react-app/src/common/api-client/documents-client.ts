@@ -55,6 +55,26 @@ export class DocumentsClient extends ApiClientBase {
     }
   }
 
+  async getDocumentDetails(
+    workspaceId: string,
+    documentId: string
+  ): Promise<ApiResult<DocumentResult>> {
+    try{
+      const headers = await this.getHeaders();
+    const result = await fetch(
+      this.getApiUrl(`/workspaces/${workspaceId}/documents/${documentId}/detail`),
+      {
+        headers
+      }
+    );
+      return result.json();  
+    }catch (error){
+      return this.error(error);
+    }
+    
+
+  }
+
   async addTextDocument(
     workspaceId: string,
     title: string,
@@ -122,4 +142,86 @@ export class DocumentsClient extends ApiClientBase {
       return this.error(error);
     }
   }
+
+  async addRssFeedSubscription(
+    workspaceId: string,
+    address: string,
+    title: string
+  ): Promise<ApiResult<AddDocumentResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const results = await fetch(this.getApiUrl(`/workspaces/${workspaceId}/documents/rssfeed`), {
+        headers: headers,
+        method: "POST",
+        body: JSON.stringify({ address, title }),
+      });
+      return results.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+ 
+
+  async getRssSubscriptionPosts(
+    workspaceId: string,
+    feedId: string,
+    lastDocumentId?: string
+  ): Promise<ApiResult<DocumentResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch( lastDocumentId ?
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/posts?lastDocumentId=${lastDocumentId}`) :
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/posts`),
+        {
+          headers,
+        }
+      );
+
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  
+
+  async disableRssSubscription(
+    workspaceId: string,
+    feedId: string
+  ): Promise<ApiResult<DocumentResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const results = await fetch(
+        this.getApiUrl(`/workspace/${workspaceId}/documents/rssfeed/${feedId}/disable`),
+        {
+          headers: headers,
+        }
+      );
+      return results.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async enableRssSubscription(
+    workspaceId: string,
+    feedId: string
+  ): Promise<ApiResult<DocumentResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const results = await fetch(
+        this.getApiUrl(`/workspace/${workspaceId}/documents/rssfeed/${feedId}/enable`),
+        {
+          headers: headers,
+        }
+      );
+      return results.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
 }
+
+
+

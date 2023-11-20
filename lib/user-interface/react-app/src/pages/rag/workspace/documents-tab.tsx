@@ -37,13 +37,13 @@ export default function DocumentsTab(props: DocumentsTabProps) {
 
       const apiClient = new ApiClient(appContext);
       const result =
-        props.documentType != "rss"
-          ? await apiClient.documents.getDocuments(
-              props.workspaceId,
-              props.documentType,
-              params?.lastDocumentId
-            )
-          : await apiClient.rss.getRssFeedSubscriptions(props.workspaceId);
+
+        await apiClient.documents.getDocuments(
+          props.workspaceId,
+          props.documentType,
+          params?.lastDocumentId
+        )
+
 
       if (ResultValue.ok(result)) {
         setPages((current) => {
@@ -160,8 +160,10 @@ function ragDocumentTypeToString(type: RagDocumentType) {
       return "Q&A";
     case "website":
       return "Website";
-    case "rss":
+    case "rssfeed":
       return "RSS Feed";
+    case "rsspost":
+      return "RSS Post";
   }
 }
 
@@ -175,8 +177,10 @@ function ragDocumentTypeToTitleString(type: RagDocumentType) {
       return "Q&As";
     case "website":
       return "Websites";
-    case "rss":
+    case "rssfeed":
       return "RSS Feeds";
+    case "rsspost":
+      return "RSS Posts";
   }
 }
 
@@ -190,7 +194,9 @@ function ragDocumentTypeToAddString(type: RagDocumentType) {
       return "Add Q&A";
     case "website":
       return "Crawl website";
-    case "rss":
+    case "rssfeed":
       return "Subcribe to RSS Feed";
+    case "rsspost":
+      return "Add RSS Post";
   }
 }

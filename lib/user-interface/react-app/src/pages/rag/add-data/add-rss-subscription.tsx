@@ -68,7 +68,7 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
     setGlobalError(undefined);
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.rss.addRssFeedSubscription(
+    const result = await apiClient.documents.addRssFeedSubscription(
       props.data.workspace.value,
       data.rssFeedUrl,
       data.rssFeedTitle
@@ -82,7 +82,7 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
         onDismiss: () => setFlashbarItem(null),
         buttonText: "View RSS Feed Subscriptions",
         onButtonClick: () => {
-          navigate(`/rag/workspaces/${props.data.workspace?.value}?tab=rss`);
+          navigate(`/rag/workspaces/${props.data.workspace?.value}?tab=rssfeed`);
         },
       });
 
