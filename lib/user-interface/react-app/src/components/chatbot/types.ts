@@ -1,6 +1,10 @@
-import { ModelItem, LoadingStatus, WorkspaceItem } from "../../common/types";
+import {
+  ModelItem,
+  LoadingStatus,
+  WorkspaceItem,
+  ModelInterface,
+} from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
-import { ModelInterface } from "../../common/types";
 
 export interface ChatBotConfiguration {
   streaming: boolean;
@@ -85,7 +89,14 @@ export interface ChatBotHistoryItem {
   content: string;
   metadata: Record<
     string,
-    string | boolean | number | null | undefined | ImageFile[]
+    | string
+    | boolean
+    | number
+    | null
+    | undefined
+    | ImageFile[]
+    | string[]
+    | string[][]
   >;
   tokens?: ChatBotToken[];
 }

@@ -9,6 +9,7 @@ from langchain.chains.conversational_retrieval.prompts import (
     QA_PROMPT,
     CONDENSE_QUESTION_PROMPT,
 )
+from typing import Dict, List, Any
 
 from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 from genai_core.types import ChatbotMode
@@ -20,6 +21,16 @@ class Mode(Enum):
     CHAIN = "chain"
 
 
+class LLMStartHandler(BaseCallbackHandler):
+    prompts = []
+
+    def on_llm_start(
+        self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
+    ) -> Any:
+        logger.info(prompts)
+        self.prompts.append(prompts)
+
+
 class ModelAdapter:
     def __init__(
         self, session_id, user_id, mode=ChatbotMode.CHAIN.value, model_kwargs={}
@@ -29,7 +40,7 @@ class ModelAdapter:
         self._mode = mode
         self.model_kwargs = model_kwargs
 
-        self.callback_handler = BaseCallbackHandler()
+        self.callback_handler = LLMStartHandler()
         self.__bind_callbacks()
 
         self.chat_history = self.get_chat_history()
@@ -86,6 +97,8 @@ class ModelAdapter:
         if not self.llm:
             raise ValueError("llm must be set")
 
+        self.callback_handler.prompts = []
+
         if workspace_id:
             conversation = ConversationalRetrievalChain.from_llm(
                 self.llm,
@@ -116,6 +129,7 @@ class ModelAdapter:
                 "userId": self.user_id,
                 "workspaceId": workspace_id,
                 "documents": documents,
+                "prompts": self.callback_handler.prompts,
             }
 
             self.chat_history.add_metadata(metadata)
@@ -144,6 +158,7 @@ class ModelAdapter:
             "sessionId": self.session_id,
             "userId": self.user_id,
             "documents": [],
+            "prompts": self.callback_handler.prompts,
         }
 
         self.chat_history.add_metadata(metadata)
