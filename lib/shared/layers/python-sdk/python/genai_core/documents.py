@@ -34,6 +34,7 @@ WORKSPACE_OBJECT_TYPE = "workspace"
 s3 = boto3.resource("s3")
 s3_client = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
+dynamodb_client = boto3.client("dynamodb")
 sfn_client = boto3.client("stepfunctions")
 scheduler = boto3.client("scheduler")
 lambda_client = boto3.client("lambda")
@@ -529,7 +530,7 @@ def _upload_document_content(
 
 
 def ingest_rss_feeds():
-    feeds_to_crawl = dynamodb.query(
+    feeds_to_crawl = dynamodb_client.query(
         TableName=DOCUMENTS_TABLE_NAME,
         IndexName=DOCUMENTS_BY_STATUS_INDEX,
         KeyConditionExpression="#status = :status AND #document_type = :document_type",
