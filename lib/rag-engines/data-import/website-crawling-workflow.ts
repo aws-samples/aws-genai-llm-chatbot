@@ -78,13 +78,18 @@ export class WebsiteCrawlingWorkflow extends Construct {
       }
     );
 
+    props.shared.configParameter.grantRead(websiteParserFunction);
+    props.ragDynamoDBTables.documentsTable.grantReadWriteData(
+      websiteParserFunction
+    );
+    props.processingBucket.grantReadWrite(websiteParserFunction)
 
     const rssIngestorFunction = new lambda.Function(this, "RssIngestor", {
       code: props.shared.sharedCode.bundleWithLambdaAsset(
         path.join(__dirname, "./functions/rss-ingestor")
       ),
       description:
-        "Function ingests RSS feed items and adds new enteries to dynamoDB table.",
+        "Retrieves the latest data from the RSS Feed and adds any newly found posts to be queued for Website Crawling",
       architecture: props.shared.lambdaArchitecture,
       runtime: props.shared.pythonRuntime,
       tracing: lambda.Tracing.ACTIVE,
@@ -113,9 +118,15 @@ export class WebsiteCrawlingWorkflow extends Construct {
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
         OPEN_SEARCH_COLLECTION_ENDPOINT:
-          props.openSearchVector?.openSearchCollectionEndpoint ?? ""
+          props.openSearchVector?.openSearchCollectionEndpoint ?? "",
       },
     });
+
+    props.shared.configParameter.grantRead(rssIngestorFunction);
+    props.ragDynamoDBTables.documentsTable.grantReadWriteData(
+      rssIngestorFunction
+    );
+    props.ragDynamoDBTables.workspacesTable.grantReadData(rssIngestorFunction);
 
     const triggerRssIngestorsFunction = new lambda.Function(
       this,
@@ -124,8 +135,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
         code: props.shared.sharedCode.bundleWithLambdaAsset(
           path.join(__dirname, "./functions/trigger-rss-ingestors")
         ),
-        description:
-          "Invokes RSS Feed Ingestors for each Subscribed RSS Feed",
+        description: "Invokes RSS Feed Ingestors for each Subscribed RSS Feed",
         architecture: props.shared.lambdaArchitecture,
         runtime: props.shared.pythonRuntime,
         tracing: lambda.Tracing.ACTIVE,
@@ -138,7 +148,8 @@ export class WebsiteCrawlingWorkflow extends Construct {
           ...props.shared.defaultEnvironmentVariables,
           CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
           API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
-          AURORA_DB_SECRET_ID: props.auroraDatabase?.secret?.secretArn as string,
+          AURORA_DB_SECRET_ID: props.auroraDatabase?.secret
+            ?.secretArn as string,
           PROCESSING_BUCKET_NAME: props.processingBucket.bucketName,
           WORKSPACES_TABLE_NAME:
             props.ragDynamoDBTables.workspacesTable.tableName,
@@ -154,17 +165,22 @@ export class WebsiteCrawlingWorkflow extends Construct {
             props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:
             props.openSearchVector?.openSearchCollectionEndpoint ?? "",
-          RSS_FEED_INGESTOR_FUNCTION: rssIngestorFunction.functionName
+          RSS_FEED_INGESTOR_FUNCTION: rssIngestorFunction.functionName,
         },
-      },
-    )
+      }
+    );
 
-    rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction)
+    rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction);
+    props.shared.configParameter.grantRead(triggerRssIngestorsFunction);
 
-    new events.Rule(this, 'triggerRssIngestorsFunctionSchedule', {
+    props.ragDynamoDBTables.documentsTable.grantReadData(
+      triggerRssIngestorsFunction
+    );
+
+    new events.Rule(this, "triggerRssIngestorsFunctionSchedule", {
       schedule: events.Schedule.rate(cdk.Duration.minutes(15)),
-      targets: [new targets.LambdaFunction(triggerRssIngestorsFunction)]
-    })
+      targets: [new targets.LambdaFunction(triggerRssIngestorsFunction)],
+    });
 
     const crawlQueuedRssPostsFunction = new lambda.Function(
       this,
@@ -204,37 +220,23 @@ export class WebsiteCrawlingWorkflow extends Construct {
             props.sageMakerRagModelsEndpoint?.attrEndpointName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:
             props.openSearchVector?.openSearchCollectionEndpoint ?? "",
-
         },
-      },
+      }
     );
 
-    new events.Rule(this, 'CrawlQueuedRssPostsScheduleRule', {
+    new events.Rule(this, "CrawlQueuedRssPostsScheduleRule", {
       schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
-      targets: [new targets.LambdaFunction(crawlQueuedRssPostsFunction)]
-    })
-    
+      targets: [new targets.LambdaFunction(crawlQueuedRssPostsFunction)],
+    });
 
-
-
-    props.shared.configParameter.grantRead(websiteParserFunction);
     props.shared.configParameter.grantRead(crawlQueuedRssPostsFunction);
-    props.shared.configParameter.grantRead(triggerRssIngestorsFunction)
-    props.ragDynamoDBTables.documentsTable.grantReadWriteData(
-      websiteParserFunction
-    );
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(
       crawlQueuedRssPostsFunction
     );
-
-    props.ragDynamoDBTables.documentsTable.grantReadData(
-      triggerRssIngestorsFunction
-    )
-
-    props.ragDynamoDBTables.workspacesTable.grantReadData(
-      triggerRssIngestorsFunction
-    )
-
+    props.ragDynamoDBTables.workspacesTable.grantReadWriteData(
+      crawlQueuedRssPostsFunction
+    );
+    props.processingBucket.grantReadWrite(crawlQueuedRssPostsFunction);
 
     if (props.auroraDatabase) {
       props.auroraDatabase.secret?.grantRead(websiteParserFunction);
@@ -263,7 +265,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
       props.openSearchVector.createOpenSearchWorkspaceWorkflow.grantStartExecution(
         websiteParserFunction
       );
-
     }
 
     if (props.sageMakerRagModelsEndpoint) {
@@ -399,6 +400,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
     );
     stateMachine.grantStartExecution(crawlQueuedRssPostsFunction);
     this.stateMachine = stateMachine;
-    this.rssIngestorFunction = rssIngestorFunction
+    this.rssIngestorFunction = rssIngestorFunction;
   }
 }

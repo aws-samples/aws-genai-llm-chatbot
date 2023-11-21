@@ -117,7 +117,8 @@ def get_rss_posts(workspace_id: str, document_id: str):
     last_document_id = query_string.get("lastDocumentId", None)
 
     result = genai_core.documents.list_documents(
-        workspace_id, document_id, last_document_id
+        workspace_id, "rsspost", last_document_id=last_document_id, 
+        parent_document_id=document_id
     )
 
     return {
@@ -126,6 +127,34 @@ def get_rss_posts(workspace_id: str, document_id: str):
             "items": [_convert_document(item) for item in result["items"]],
             "lastDocumentId": result["last_document_id"],
         },
+    }
+
+@router.get("/workspaces/<workspace_id>/documents/<document_id>/enable")
+@tracer.capture_method
+def enable_document(workspace_id: str, document_id: str):
+    result = genai_core.documents.enable_document_subscription(workspace_id, document_id)
+
+    return {
+        "ok": True,
+        "data": {
+            "workspaceId": workspace_id,
+            "documentId": document_id,
+            "status": "enabled"
+        }
+    }
+
+@router.get("/workspaces/<workspace_id>/documents/<document_id>/disable")
+@tracer.capture_method
+def disable_document(workspace_id: str, document_id: str):
+    result = genai_core.documents.disable_document_subscription(workspace_id, document_id)
+
+    return {
+        "ok": True,
+        "data": {
+            "workspaceId": workspace_id,
+            "documentId": document_id,
+            "status": "disabled"
+        }
     }
 
 
@@ -216,7 +245,7 @@ def add_document(workspace_id: str, document_type: str):
             }
         }
     
-    
+
 
 
 def _convert_document(document: dict):
@@ -234,4 +263,6 @@ def _convert_document(document: dict):
         "errors": document["errors"] if "errors" in document else [],
         "createdAt": document["created_at"],
         "updatedAt": document["updated_at"] if "updated_at" in document else None,
+        "rssFeedId": document['rss_feed_id'] if "rss_feed_id" in document else None,
+        "rssLastCheckedAt": document['rss_last_checked'] if "rss_last_checked" in document else None,
     }

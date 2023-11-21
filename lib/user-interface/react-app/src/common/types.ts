@@ -138,6 +138,14 @@ export interface DocumentItem {
   subDocuments: number;
   createdAt: string;
   updatedAt: string;
+  rssFeedId?: string;
+  rssLastCheckedAt: string;
+}
+
+export interface DocumentSubscriptionToggleResult {
+  id: string;
+  workspaceId: string;
+  status: string;
 }
 
 export interface DocumentResult {
