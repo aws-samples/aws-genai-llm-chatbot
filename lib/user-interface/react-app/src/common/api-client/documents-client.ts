@@ -147,14 +147,16 @@ export class DocumentsClient extends ApiClientBase {
   async addRssFeedSubscription(
     workspaceId: string,
     address: string,
-    title: string
+    title: string,
+    limit: number,
+    followLinks: boolean
   ): Promise<ApiResult<AddDocumentResult>> {
     try {
       const headers = await this.getHeaders();
       const results = await fetch(this.getApiUrl(`/workspaces/${workspaceId}/documents/rssfeed`), {
         headers: headers,
         method: "POST",
-        body: JSON.stringify({ address, title }),
+        body: JSON.stringify({ address, title, limit, followLinks }),
       });
       return results.json();
     } catch (error) {

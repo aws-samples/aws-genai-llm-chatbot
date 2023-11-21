@@ -18,6 +18,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import {
   DocumentItem,
   DocumentResult,
+  DocumentSubscriptionStatus,
   ResultValue,
   WorkspaceItem,
 } from "../../../common/types";
@@ -39,7 +40,7 @@ export default function RssFeed() {
   const [rssSubscription, setRssSubscription] = useState<DocumentItem | null>(
     null
   );
-  const [rssSubscriptionStatus, setRssSubscriptionStatus] = useState<boolean | null>(null)
+  const [rssSubscriptionStatus, setRssSubscriptionStatus] = useState<DocumentSubscriptionStatus>(DocumentSubscriptionStatus.DEFAULT)
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pages, setPages] = useState<DocumentResult[]>([]);
   const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
@@ -100,7 +101,7 @@ export default function RssFeed() {
     );
     if (ResultValue.ok(rssSubscriptionResult) && rssSubscriptionResult.data.items) {
       setRssSubscription(rssSubscriptionResult.data.items[0]);
-      setRssSubscriptionStatus(rssSubscriptionResult.data.items[0].status == "enabled");
+      setRssSubscriptionStatus(rssSubscriptionResult.data.items[0].status == "enabled" ? DocumentSubscriptionStatus.ENABLED : DocumentSubscriptionStatus.DISABLED);
     }
     
     setLoading(false);
@@ -112,29 +113,25 @@ export default function RssFeed() {
   const toggleRssSubscription = useCallback(
     async (toState: string) => {
       if (!appContext || !workspaceId || !feedId) return;
-      setLoading(true);
       if (toState.toLowerCase() == "disable") {
-        console.debug("Toggle to Disabled!");
         const apiClient = new ApiClient(appContext);
         const result = await apiClient.documents.disableRssSubscription(
           workspaceId,
           feedId
         );
         if (ResultValue.ok(result)) {
-          setRssSubscriptionStatus(result.data.status === "enabled")
+          setRssSubscriptionStatus(result.data.status == "enabled" ? DocumentSubscriptionStatus.ENABLED : DocumentSubscriptionStatus.DISABLED)
         }
       } else if (toState.toLowerCase() == "enable") {
-        console.debug("Toggle to Enabled!");
         const apiClient = new ApiClient(appContext);
         const result = await apiClient.documents.enableRssSubscription(
           workspaceId,
           feedId
         );
         if (ResultValue.ok(result)) {
-          setRssSubscriptionStatus(result.data.status == "enabled")
+          setRssSubscriptionStatus(result.data.status == "enabled" ? DocumentSubscriptionStatus.ENABLED : DocumentSubscriptionStatus.DISABLED)
         }
       }
-      setLoading(false);
     },
     [appContext, workspaceId, feedId]
   );
@@ -211,7 +208,7 @@ export default function RssFeed() {
                 <Button
                   onClick={() =>
                     toggleRssSubscription(
-                      rssSubscriptionStatus
+                      rssSubscriptionStatus == DocumentSubscriptionStatus.ENABLED
                         ? "disable"
                         : "enable"
                     )
@@ -256,12 +253,10 @@ export default function RssFeed() {
                     <div>
                       <StatusIndicator
                         type={
-                          Labels.statusTypeMap[
-                            rssSubscription?.status ?? "unknown"
-                          ]
+                          Labels.statusTypeMap[rssSubscriptionStatus]
                         }
                       >
-                        {Labels.statusMap[rssSubscription?.status ?? "unknown"]}
+                        {Labels.statusMap[rssSubscriptionStatus]}
                       </StatusIndicator>
                       {}
                     </div>

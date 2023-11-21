@@ -7,6 +7,7 @@ import {
   FormField,
   Input,
   SpaceBetween,
+  Toggle,
 } from "@cloudscape-design/components";
 import { AddDataData } from "./types";
 import { useForm } from "../../../common/hooks/use-form";
@@ -28,6 +29,8 @@ export interface AddRssSubscriptionProps {
 interface AddRssSubscriptionData {
   rssFeedUrl: string;
   rssFeedTitle: string;
+  linkLimit: number;
+  followLinks: boolean;
 }
 
 export default function AddRssSubscription(props: AddRssSubscriptionProps) {
@@ -41,6 +44,8 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
       return {
         rssFeedUrl: "",
         rssFeedTitle: "",
+        linkLimit: 250,
+        followLinks: true,
       };
     },
     validate: (form) => {
@@ -51,6 +56,12 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
       } else if (Utils.isValidURL(form.rssFeedUrl) === false) {
         errors.rssFeedUrl = "Website address is not valid.";
       }
+
+      if (form.linkLimit < 1 || form.linkLimit > 1000) {
+        errors.limit = "Page limit should be between 1 and 1000";
+      }
+
+      return errors;
 
       return errors;
     },
@@ -71,7 +82,9 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
     const result = await apiClient.documents.addRssFeedSubscription(
       props.data.workspace.value,
       data.rssFeedUrl,
-      data.rssFeedTitle
+      data.rssFeedTitle,
+      data.linkLimit,
+      data.followLinks
     );
 
     if (ResultValue.ok(result)) {
@@ -144,6 +157,35 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
                 value={data.rssFeedTitle}
                 onChange={({ detail: { value } }) =>
                   onChange({ rssFeedTitle: value })
+                }
+              />
+            </FormField>
+            <FormField
+              label="Follow Links"
+              description="Follow links on the website to crawl more pages"
+              errorText={errors.followLinks}
+            >
+              <Toggle
+                disabled={props.submitting}
+                checked={data.followLinks}
+                onChange={({ detail: { checked } }) =>
+                  onChange({ followLinks: checked })
+                }
+              >
+                Follow
+              </Toggle>
+            </FormField>
+            <FormField
+              label="Page Limit"
+              errorText={errors.limit}
+              description="Maximum number of pages to crawl for each post in the RSS Feed"
+            >
+              <Input
+                type="number"
+                disabled={props.submitting || !data.followLinks}
+                value={data.linkLimit.toString()}
+                onChange={({ detail: { value } }) =>
+                  onChange({ linkLimit: parseInt(value) })
                 }
               />
             </FormField>
