@@ -11,7 +11,7 @@
     "create": "node ./cli/magic.js create",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json|css)\"",
-    "deploy": "npx cdk deploy",
+    "deploy": "npm run format && npx cdk deploy",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -38,8 +38,7 @@
     "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.104.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.104.0-alpha.0",
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.104.0-alpha.0",
-    "@aws-solutions-constructs/aws-eventbridge-lambda": "^2.46.0",
-    "aws-cdk-lib": "2.105.0",
+    "aws-cdk-lib": "2.104.0",
     "commander": "^11.0.0",
     "constructs": "^10.0.0",
     "enquirer": "^2.4.1",
