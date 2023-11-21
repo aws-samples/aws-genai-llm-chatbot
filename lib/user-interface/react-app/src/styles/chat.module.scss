@@ -129,3 +129,27 @@
   border-radius: 5px;
   padding: 5px;
 }
+
+.markdownTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+  border: 1px solid awsui.$color-border-divider-default;
+  border-radius: awsui.$border-radius-container;
+}
+
+.markdownTable th,
+.markdownTable td {
+  border: 1px solid awsui.$color-border-divider-default;
+  padding: 8px;
+  text-align: left;
+}
+
+.markdownTable th {
+  background-color: awsui.$color-background-container-header;
+}
+
+.markdownTable tr:nth-child(even) {
+  background-color: awsui.$color-background-container-content;
+}
+
