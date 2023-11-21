@@ -39,6 +39,7 @@ export default function RssFeed() {
   const [rssSubscription, setRssSubscription] = useState<DocumentItem | null>(
     null
   );
+  const [rssSubscriptionStatus, setRssSubscriptionStatus] = useState<boolean | null>(null)
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pages, setPages] = useState<DocumentResult[]>([]);
   const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
@@ -99,6 +100,7 @@ export default function RssFeed() {
     );
     if (ResultValue.ok(rssSubscriptionResult) && rssSubscriptionResult.data.items) {
       setRssSubscription(rssSubscriptionResult.data.items[0]);
+      setRssSubscriptionStatus(rssSubscriptionResult.data.items[0].status == "enabled");
     }
     
     setLoading(false);
@@ -119,7 +121,7 @@ export default function RssFeed() {
           feedId
         );
         if (ResultValue.ok(result)) {
-          setRssSubscription(result.data.items[0]);
+          setRssSubscriptionStatus(result.data.status === "enabled")
         }
       } else if (toState.toLowerCase() == "enable") {
         console.debug("Toggle to Enabled!");
@@ -129,13 +131,12 @@ export default function RssFeed() {
           feedId
         );
         if (ResultValue.ok(result)) {
-          setRssSubscription(result.data.items[0]);
+          setRssSubscriptionStatus(result.data.status == "enabled")
         }
       }
-      getRssSubscriptionDetails();
       setLoading(false);
     },
-    [appContext, workspaceId, feedId, getRssSubscriptionDetails]
+    [appContext, workspaceId, feedId]
   );
 
   useEffect(() => {
@@ -210,7 +211,7 @@ export default function RssFeed() {
                 <Button
                   onClick={() =>
                     toggleRssSubscription(
-                      rssSubscription?.status == "enabled"
+                      rssSubscriptionStatus
                         ? "disable"
                         : "enable"
                     )
@@ -282,9 +283,9 @@ export default function RssFeed() {
                       RSS Subscription Last Checked
                     </Box>
                     <div>
-                      {rssSubscription?.updatedAt
+                      {rssSubscription?.rssLastCheckedAt
                         ? DateTime.fromISO(
-                            new Date(rssSubscription?.updatedAt).toISOString()
+                            new Date(rssSubscription?.rssLastCheckedAt).toISOString()
                           ).toLocaleString(DateTime.DATETIME_SHORT)
                         : ""}
                     </div>

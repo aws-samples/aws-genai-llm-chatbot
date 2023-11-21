@@ -2,6 +2,7 @@ import {
   AddDocumentResult,
   ApiResult,
   DocumentResult,
+  DocumentSubscriptionToggleResult,
   FileUploadItem,
   RagDocumentType,
 } from "../types";
@@ -189,11 +190,11 @@ export class DocumentsClient extends ApiClientBase {
   async disableRssSubscription(
     workspaceId: string,
     feedId: string
-  ): Promise<ApiResult<DocumentResult>> {
+  ): Promise<ApiResult<DocumentSubscriptionToggleResult>> {
     try {
       const headers = await this.getHeaders();
       const results = await fetch(
-        this.getApiUrl(`/workspace/${workspaceId}/documents/rssfeed/${feedId}/disable`),
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/disable`),
         {
           headers: headers,
         }
@@ -207,11 +208,11 @@ export class DocumentsClient extends ApiClientBase {
   async enableRssSubscription(
     workspaceId: string,
     feedId: string
-  ): Promise<ApiResult<DocumentResult>> {
+  ): Promise<ApiResult<DocumentSubscriptionToggleResult>> {
     try {
       const headers = await this.getHeaders();
       const results = await fetch(
-        this.getApiUrl(`/workspace/${workspaceId}/documents/rssfeed/${feedId}/enable`),
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/enable`),
         {
           headers: headers,
         }
