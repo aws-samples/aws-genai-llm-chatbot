@@ -99,6 +99,11 @@
   float: right;
 }
 
+.btn_chabot_metadata_copy {
+  float: right;
+  margin-top: 1em;
+}
+
 .img_chabot_message {
   max-width: 30%;
   border-radius: 8px;
@@ -152,4 +157,3 @@
 .markdownTable tr:nth-child(even) {
   background-color: awsui.$color-background-container-content;
 }
-

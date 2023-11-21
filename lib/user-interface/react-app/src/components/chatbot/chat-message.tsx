@@ -6,12 +6,14 @@ import {
   Popover,
   Spinner,
   StatusIndicator,
+  Tabs,
   TextContent,
+  Textarea,
 } from "@cloudscape-design/components";
 import { useEffect, useState } from "react";
 import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from 'remark-gfm';
+import remarkGfm from "remark-gfm";
 import styles from "../../styles/chat.module.scss";
 import {
   ChatBotConfiguration,
@@ -65,11 +67,16 @@ export default function ChatMessage(props: ChatMessageProps) {
         <Container
           footer={
             ((props.showMetadata && props.message.metadata) ||
-              (props.message.metadata &&
-                props.configuration?.showMetadata)) && (
+              (props.message.metadata && props.showMetadata)) && (
               <ExpandableSection variant="footer" headerText="Metadata">
                 <JsonView
-                  data={props.message.metadata}
+                  shouldInitiallyExpand={(level) => level < 2}
+                  data={JSON.parse(
+                    JSON.stringify(props.message.metadata).replace(
+                      /\\n/g,
+                      "\\\\n"
+                    )
+                  )}
                   style={{
                     ...darkStyles,
                     stringValue: "jsonStrings",
@@ -79,6 +86,101 @@ export default function ChatMessage(props: ChatMessageProps) {
                     container: "jsonContainer",
                   }}
                 />
+                {props.message.metadata.documents && (
+                  <>
+                    <div className={styles.btn_chabot_metadata_copy}>
+                      <Popover
+                        size="medium"
+                        position="top"
+                        triggerType="custom"
+                        dismissButton={false}
+                        content={
+                          <StatusIndicator type="success">
+                            Copied to clipboard
+                          </StatusIndicator>
+                        }
+                      >
+                        <Button
+                          variant="inline-icon"
+                          iconName="copy"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              "" //p["page_content"]
+                            );
+                          }}
+                        />
+                      </Popover>
+                    </div>
+                    <Tabs
+                      tabs={(props.message.metadata.documents as string[]).map(
+                        (p: any, i) => {
+                          return {
+                            id: `${i}`,
+                            label: p.metadata.path,
+                            content: (
+                              <>
+                                <Textarea
+                                  value={p["page_content"]}
+                                  readOnly={true}
+                                  rows={8}
+                                />
+                              </>
+                            ),
+                          };
+                        }
+                      )}
+                    />
+                  </>
+                )}
+                {props.message.metadata.prompts && (
+                  <>
+                    <div className={styles.btn_chabot_metadata_copy}>
+                      <Popover
+                        size="medium"
+                        position="top"
+                        triggerType="custom"
+                        dismissButton={false}
+                        content={
+                          <StatusIndicator type="success">
+                            Copied to clipboard
+                          </StatusIndicator>
+                        }
+                      >
+                        <Button
+                          variant="inline-icon"
+                          iconName="copy"
+                          onClick={() => {
+                            navigator.clipboard.writeText("");
+                          }}
+                        />
+                      </Popover>
+                    </div>
+                    <Tabs
+                      tabs={(props.message.metadata.prompts as string[][]).map(
+                        (p, i) => {
+                          return {
+                            id: `${i}`,
+                            label: `Prompt ${
+                              (props.message.metadata.prompts as string[][])
+                                .length > 1
+                                ? i + 1
+                                : ""
+                            }`,
+                            content: (
+                              <>
+                                <Textarea
+                                  value={p[0]}
+                                  readOnly={true}
+                                  rows={8}
+                                />
+                              </>
+                            ),
+                          };
+                        }
+                      )}
+                    />
+                  </>
+                )}
               </ExpandableSection>
             )
           }
@@ -118,10 +220,7 @@ export default function ChatMessage(props: ChatMessageProps) {
               pre(props) {
                 const { children, className, node, ...rest } = props;
                 return (
-                  <pre
-                    {...rest}
-                    className={styles.codeMarkdown}
-                  >
+                  <pre {...rest} className={styles.codeMarkdown}>
                     {children}
                   </pre>
                 );
