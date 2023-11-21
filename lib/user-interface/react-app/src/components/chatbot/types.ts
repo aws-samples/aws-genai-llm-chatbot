@@ -109,7 +109,14 @@ export interface ChatBotMessageResponse {
     content?: string;
     metadata: Record<
       string,
-      string | boolean | number | null | undefined | ImageFile[]
+      | string
+      | boolean
+      | number
+      | null
+      | undefined
+      | ImageFile[]
+      | string[]
+      | string[][]
     >;
   };
 }
