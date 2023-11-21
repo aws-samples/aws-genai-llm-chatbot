@@ -148,6 +148,12 @@ export interface DocumentSubscriptionToggleResult {
   status: string;
 }
 
+export enum DocumentSubscriptionStatus {
+  ENABLED = "enabled",
+  DISABLED = "disabled",
+  UNKNOWN = "unknown",
+  DEFAULT = UNKNOWN
+}
 export interface DocumentResult {
   items: DocumentItem[];
   lastDocumentId?: string;

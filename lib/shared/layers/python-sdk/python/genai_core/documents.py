@@ -317,6 +317,9 @@ def create_document(
             "created_at": timestamp,
             "updated_at": timestamp,
         }
+        if document_type in ["rssfeed"]:
+            document["crawler_properties"] = kwargs["crawler_properties"]
+        
 
         response = documents_table.put_item(Item=document)
         print(response)
@@ -616,11 +619,11 @@ def check_rss_feed_for_posts(workspace_id, document_id):
     if not workspace:
         raise genai_core.types.CommonError("Workspace not found")
 
-    document = get_document(workspace_id, document_id)
+    rss_document = get_document(workspace_id, document_id)
     if not document:
         raise genai_core.types.CommonError("Document not found")
     
-    feed_path = document["path"]
+    feed_path = rss_document["path"]
     print(f"Parsing RSS Feed for {feed_path}")
     try:
         feed_contents = feedparser.parse(feed_path)
@@ -645,6 +648,7 @@ def check_rss_feed_for_posts(workspace_id, document_id):
                     "errors": [],
                     "created_at": timestamp,
                     "updated_at": timestamp,
+                    "crawler_properties": rss_document['crawler_properties'] if 'crawler_properties' in rss_document else None,
                 }
                 try:
                     documents_table.put_item(
@@ -680,9 +684,11 @@ def batch_crawl_websites():
             feed_id = post['rss_feed_id']['S']
             document_id = post['document_id']['S']
             path = post['path']['S']
+            follow_links = post['crawler_properties']['follow_links'] if 'crawler_properties' in post else True
+            limit = post['crawler_properties']['limit'] if 'crawler_properties' in post else 250
             create_document(workspace_id,"website",path=path, crawler_properties={
-                "follow_links": True,
-                "limit": 250
+                "follow_links": follow_links,
+                "limit": limit
             })
             set_status(workspace_id,document_id,"processed")
             update_subscription_timestamp(workspace_id,feed_id)

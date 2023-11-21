@@ -35,6 +35,7 @@ class RssFeedDocumentRequest(BaseModel):
     address: str
     limit: int
     title: str
+    followLinks: bool
 
 
 
@@ -235,6 +236,10 @@ def add_document(workspace_id: str, document_type: str):
             document_type=document_type,
             path=path,
             title=request.title,
+            crawler_properties={
+                "follow_links": request.followLinks,
+                "limit": request.limit,
+            },
         )
 
         return {
