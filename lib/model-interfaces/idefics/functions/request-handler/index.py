@@ -119,6 +119,7 @@ def handle_run(record):
         "mode": mode,
         "sessionId": session_id,
         "userId": user_id,
+        "prompts": [prompt_template],
     }
     if files:
         metadata["files"] = files
@@ -131,6 +132,7 @@ def handle_run(record):
         "sessionId": session_id,
         "type": "text",
         "content": mlm_response,
+        "metadata": metadata,
     }
 
     send_to_client(
