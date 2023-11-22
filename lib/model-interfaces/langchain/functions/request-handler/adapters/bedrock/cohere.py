@@ -55,4 +55,6 @@ Assistant:"""
 
 
 # Register the adapter
-registry.register(r"^bedrock.cohere.command-text*", BedrockCohereCommandAdapter)
+registry.register(
+    r"^bedrock\.cohere\.command-(text|light-text).*", BedrockCohereCommandAdapter
+)
