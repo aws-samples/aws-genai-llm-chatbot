@@ -66,8 +66,9 @@ export default function ChatMessage(props: ChatMessageProps) {
       {props.message?.type === ChatBotMessageType.AI && (
         <Container
           footer={
-            ((props.showMetadata && props.message.metadata) ||
-              (props.message.metadata && props.showMetadata)) && (
+            ((props?.showMetadata && props.message.metadata) ||
+              (props.message.metadata &&
+                props.configuration?.showMetadata)) && (
               <ExpandableSection variant="footer" headerText="Metadata">
                 <JsonView
                   shouldInitiallyExpand={(level) => level < 2}
