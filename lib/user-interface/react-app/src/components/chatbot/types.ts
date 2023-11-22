@@ -69,7 +69,7 @@ export interface ChatBotRunRequest {
   data: {
     modelName: string;
     provider: string;
-    sessionId?: string;
+    sessionId: string;
     files: ImageFile[] | null;
     text: string;
     mode: string;
@@ -82,6 +82,21 @@ export interface ChatBotToken {
   sequenceNumber: number;
   runId?: string;
   value: string;
+}
+
+export interface RagDocument {
+  page_content: string;
+  metadata: {
+    chunk_id: string;
+    workspace_id: string;
+    document_id: string;
+    document_sub_id: string | null;
+    document_type: string;
+    document_sub_type: string | null;
+    path: string;
+    title: string | null;
+    score: number;
+  };
 }
 
 export interface ChatBotHistoryItem {
@@ -97,6 +112,7 @@ export interface ChatBotHistoryItem {
     | ImageFile[]
     | string[]
     | string[][]
+    | RagDocument[]
   >;
   tokens?: ChatBotToken[];
 }
