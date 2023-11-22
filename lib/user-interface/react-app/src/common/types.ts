@@ -139,7 +139,11 @@ export interface DocumentItem {
   createdAt: string;
   updatedAt: string;
   rssFeedId?: string;
-  rssLastCheckedAt: string;
+  rssLastCheckedAt?: string;
+  crawlerProperties?: {
+    followLinks: boolean;
+    limit: number;
+  }
 }
 
 export interface DocumentSubscriptionToggleResult {

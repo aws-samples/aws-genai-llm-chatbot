@@ -62,8 +62,6 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
       }
 
       return errors;
-
-      return errors;
     },
   });
 
@@ -100,6 +98,7 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
       });
 
       onChange({ rssFeedUrl: "" }, true);
+      onChange({ rssFeedTitle: "" }, true);
     } else {
       setGlobalError(Utils.getErrorMessage(result));
     }

@@ -317,7 +317,7 @@ def create_document(
             "created_at": timestamp,
             "updated_at": timestamp,
         }
-        if document_type in ["rssfeed"]:
+        if document_type in ["rssfeed"] and "crawler_properties" in kwargs:
             document["crawler_properties"] = kwargs["crawler_properties"]
         
 
@@ -367,6 +367,26 @@ def create_document(
         "document_id": document_id,
     }
 
+def update_document(workspace_id: str, document_id: str, document_type: str, **kwargs):
+    if document_type == "rssfeed":
+        if "limit" in kwargs and "follow_links" in kwargs:
+            follow_links = kwargs['follow_links']
+            limit = kwargs['limit'] 
+            response = documents_table.update_item(
+                Key={"workspace_id": workspace_id, "document_id": document_id},
+                UpdateExpression="SET #crawler_properties=:crawler_properties, updated_at=:timestampValue",
+                ExpressionAttributeNames={"#crawler_properties": "crawler_properties"},
+                ExpressionAttributeValues={
+                    ":crawler_properties": {"follow_links": follow_links, "limit": limit},
+                    ":timestampValue": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                },
+                ReturnValues="ALL_NEW",
+            )
+            return response
+        else:
+            raise Exception("Invalid update values for rssfeed")
+    else:  
+        return f"Error! Document Type {document_type} doesn't have any update options"    
 
 
 def _process_document_kendra(
