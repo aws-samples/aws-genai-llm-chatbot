@@ -145,7 +145,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
         memorySize: 1024,
         handler: "index.lambda_handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
-        timeout: cdk.Duration.minutes(15),
+        timeout: cdk.Duration.seconds(15),
         logRetention: logs.RetentionDays.ONE_WEEK,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
