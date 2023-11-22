@@ -6,12 +6,26 @@ from langchain.llms.sagemaker_endpoint import LLMContentHandler, SagemakerEndpoi
 from ...base import ModelAdapter
 from ...registry import registry
 
+from ...shared.meta.llama2_chat import (
+    Llama2ChatPromptTemplate,
+    Llama2ChatQAPromptTemplate,
+    Llama2ChatCondensedQAPromptTemplate,
+)
+from ...shared.meta.llama2_chat import Llama2ConversationBufferMemory
+
 
 class Llama2ChatContentHandler(LLMContentHandler):
     content_type = "application/json"
     accepts = "application/json"
 
+    def clean_prompt(self, prompt):
+        """Remove only the very last occurence of [/INST] tag if present"""
+        if prompt.endswith("[/INST]"):
+            prompt = prompt[: prompt.rfind("[/INST]")]
+        return prompt
+
     def transform_input(self, prompt, model_kwargs) -> bytes:
+        prompt = self.clean_prompt(prompt)
         input_str = json.dumps(
             {
                 "inputs": [
@@ -38,6 +52,14 @@ class SMLlama2ChatAdapter(ModelAdapter):
 
         super().__init__(**kwargs)
 
+    def get_memory(self, output_key=None, return_messages=False):
+        return Llama2ConversationBufferMemory(
+            memory_key="chat_history",
+            chat_memory=self.chat_history,
+            return_messages=return_messages,
+            output_key=output_key,
+        )
+
     def get_llm(self, model_kwargs={}):
         params = {}
         if "temperature" in model_kwargs:
@@ -55,6 +77,15 @@ class SMLlama2ChatAdapter(ModelAdapter):
             content_handler=content_handler,
             callbacks=[self.callback_handler],
         )
+
+    def get_prompt(self):
+        return Llama2ChatPromptTemplate
+
+    def get_qa_prompt(self):
+        return Llama2ChatQAPromptTemplate
+
+    def get_condense_question_prompt(self):
+        return Llama2ChatCondensedQAPromptTemplate
 
 
 # Register the adapter

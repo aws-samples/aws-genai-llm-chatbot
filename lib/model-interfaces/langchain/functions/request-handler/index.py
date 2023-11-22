@@ -59,7 +59,7 @@ def handle_heartbeat(record):
             "action": ChatbotAction.HEARTBEAT.value,
             "connectionId": connection_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
-            "userId": user_id
+            "userId": user_id,
         }
     )
 

@@ -73,7 +73,7 @@ class ModelAdapter:
         {chat_history}
 
         Question: {input}"""
-        
+
         return PromptTemplate.from_template(template)
 
     def get_condense_question_prompt(self):

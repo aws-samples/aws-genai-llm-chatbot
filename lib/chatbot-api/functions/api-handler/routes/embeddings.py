@@ -37,7 +37,6 @@ def embeddings():
     if selected_model is None:
         raise genai_core.types.CommonError("Model not found")
 
-    ret_value = genai_core.embeddings.generate_embeddings(
-        selected_model, request.input)
+    ret_value = genai_core.embeddings.generate_embeddings(selected_model, request.input)
 
     return {"ok": True, "data": ret_value}
