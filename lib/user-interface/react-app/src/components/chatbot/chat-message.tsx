@@ -20,6 +20,7 @@ import {
   ChatBotHistoryItem,
   ChatBotMessageType,
   ImageFile,
+  RagDocument,
 } from "./types";
 
 import { getSignedUrl } from "./utils";
@@ -108,32 +109,33 @@ export default function ChatMessage(props: ChatMessageProps) {
                           iconName="copy"
                           onClick={() => {
                             navigator.clipboard.writeText(
-                              (props.message.metadata.documents as string[])[
-                                parseInt(documentIndex)
-                              ]
+                              (
+                                props.message.metadata
+                                  .documents as RagDocument[]
+                              )[parseInt(documentIndex)].page_content
                             );
                           }}
                         />
                       </Popover>
                     </div>
                     <Tabs
-                      tabs={(props.message.metadata.documents as string[]).map(
-                        (p: any, i) => {
-                          return {
-                            id: `${i}`,
-                            label: p.metadata.path,
-                            content: (
-                              <>
-                                <Textarea
-                                  value={p["page_content"]}
-                                  readOnly={true}
-                                  rows={8}
-                                />
-                              </>
-                            ),
-                          };
-                        }
-                      )}
+                      tabs={(
+                        props.message.metadata.documents as RagDocument[]
+                      ).map((p: any, i) => {
+                        return {
+                          id: `${i}`,
+                          label: p.metadata.path,
+                          content: (
+                            <>
+                              <Textarea
+                                value={p.page_content}
+                                readOnly={true}
+                                rows={8}
+                              />
+                            </>
+                          ),
+                        };
+                      })}
                       activeTabId={documentIndex}
                       onChange={({ detail }) =>
                         setDocumentIndex(detail.activeTabId)
