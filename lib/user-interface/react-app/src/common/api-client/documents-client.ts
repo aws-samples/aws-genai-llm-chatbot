@@ -40,11 +40,11 @@ export class DocumentsClient extends ApiClientBase {
       const result = await fetch(
         lastDocumentId
           ? this.getApiUrl(
-              `/workspaces/${workspaceId}/documents/${documentType}?lastDocumentId=${lastDocumentId}`
-            )
+            `/workspaces/${workspaceId}/documents/${documentType}?lastDocumentId=${lastDocumentId}`
+          )
           : this.getApiUrl(
-              `/workspaces/${workspaceId}/documents/${documentType}`
-            ),
+            `/workspaces/${workspaceId}/documents/${documentType}`
+          ),
         {
           headers,
         }
@@ -60,19 +60,19 @@ export class DocumentsClient extends ApiClientBase {
     workspaceId: string,
     documentId: string
   ): Promise<ApiResult<DocumentResult>> {
-    try{
+    try {
       const headers = await this.getHeaders();
-    const result = await fetch(
-      this.getApiUrl(`/workspaces/${workspaceId}/documents/${documentId}/detail`),
-      {
-        headers
-      }
-    );
-      return result.json();  
-    }catch (error){
+      const result = await fetch(
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${documentId}/detail`),
+        {
+          headers
+        }
+      );
+      return result.json();
+    } catch (error) {
       return this.error(error);
     }
-    
+
 
   }
 
@@ -164,7 +164,7 @@ export class DocumentsClient extends ApiClientBase {
     }
   }
 
- 
+
 
   async getRssSubscriptionPosts(
     workspaceId: string,
@@ -173,7 +173,7 @@ export class DocumentsClient extends ApiClientBase {
   ): Promise<ApiResult<DocumentResult>> {
     try {
       const headers = await this.getHeaders();
-      const result = await fetch( lastDocumentId ?
+      const result = await fetch(lastDocumentId ?
         this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/posts?lastDocumentId=${lastDocumentId}`) :
         this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/posts`),
         {
@@ -187,7 +187,7 @@ export class DocumentsClient extends ApiClientBase {
     }
   }
 
-  
+
 
   async disableRssSubscription(
     workspaceId: string,
@@ -223,6 +223,29 @@ export class DocumentsClient extends ApiClientBase {
     } catch (error) {
       return this.error(error);
     }
+  }
+
+  async updateRssSubscriptionCrawler(
+    workspaceId: string,
+    feedId: string,
+    followLinks: boolean,
+    limit: number
+  ): Promise<ApiResult<string>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}`),
+        {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({ followLinks, limit, "documentType": "rssfeed" }),
+        }
+      );
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+
   }
 }
 

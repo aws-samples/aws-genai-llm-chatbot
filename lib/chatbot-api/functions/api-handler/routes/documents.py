@@ -37,6 +37,11 @@ class RssFeedDocumentRequest(BaseModel):
     title: str
     followLinks: bool
 
+class RssFeedCrawlerUpdateRequest(BaseModel):
+    documentType: str
+    followLinks: bool
+    limit: int
+
 
 
 allowed_extensions = set(
@@ -249,10 +254,33 @@ def add_document(workspace_id: str, document_type: str):
             }
         }
     
+@router.patch("/workspaces/<workspace_id>/documents/<document_id>/")
+@tracer.capture_method
+def update_document(workspace_id: str, document_id: str):
+    data: dict = router.current_event.json_body
+    if "documentType" in data:
+        if data["documentType"] == "rssfeed":
+            request = RssFeedCrawlerUpdateRequest(**data)
+            result = genai_core.documents.update_document(
+                workspace_id=workspace_id,
+                document_id=document_id,
+                document_type=request.documentType,
+                follow_links=request.followLinks,
+                limit=request.limit,
+            )
+            return {
+                "ok": True,
+                "data": "done"
+            }
 
 
 
 def _convert_document(document: dict):
+    if "crawler_properties" in document:
+        document["crawler_properties"] = {
+            "followLinks": document["crawler_properties"]["follow_links"],
+            "limit": document["crawler_properties"]["limit"],
+        }
     return {
         "id": document["document_id"],
         "workspaceId": document["workspace_id"],
