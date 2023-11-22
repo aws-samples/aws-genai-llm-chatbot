@@ -620,7 +620,7 @@ def check_rss_feed_for_posts(workspace_id, document_id):
         raise genai_core.types.CommonError("Workspace not found")
 
     rss_document = get_document(workspace_id, document_id)
-    if not document:
+    if not rss_document:
         raise genai_core.types.CommonError("Document not found")
     
     feed_path = rss_document["path"]
@@ -679,16 +679,13 @@ def batch_crawl_websites():
     posts = _get_batch_pending_posts()
     if posts['Count'] > 0:
         for post in posts['Items']:
-    
             workspace_id = post['workspace_id']['S']
             feed_id = post['rss_feed_id']['S']
             document_id = post['document_id']['S']
             path = post['path']['S']
-            follow_links = post['crawler_properties']['follow_links'] if 'crawler_properties' in post else True
-            limit = post['crawler_properties']['limit'] if 'crawler_properties' in post else 250
-            create_document(workspace_id,"website",path=path, crawler_properties={
-                "follow_links": follow_links,
-                "limit": limit
+            create_document(workspace_id,"website",path=path, crawler_properties = {
+                "follow_links": post['crawler_properties']['M']['follow_links']['BOOL'] if "crawler_properties" in post else True,
+                "limit": int(post['crawler_properties']['M']['limit']['N']) if "crawler_properties" in post else 250
             })
             set_status(workspace_id,document_id,"processed")
             update_subscription_timestamp(workspace_id,feed_id)
