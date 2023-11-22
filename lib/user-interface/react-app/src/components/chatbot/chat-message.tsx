@@ -37,6 +37,8 @@ export default function ChatMessage(props: ChatMessageProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [message] = useState<ChatBotHistoryItem>(props.message);
   const [files, setFiles] = useState<ImageFile[]>([] as ImageFile[]);
+  const [documentIndex, setDocumentIndex] = useState("0");
+  const [promptIndex, setPromptIndex] = useState("0");
 
   useEffect(() => {
     const getSignedUrls = async () => {
@@ -106,7 +108,9 @@ export default function ChatMessage(props: ChatMessageProps) {
                           iconName="copy"
                           onClick={() => {
                             navigator.clipboard.writeText(
-                              "" //p["page_content"]
+                              (props.message.metadata.documents as string[])[
+                                parseInt(documentIndex)
+                              ]
                             );
                           }}
                         />
@@ -130,6 +134,10 @@ export default function ChatMessage(props: ChatMessageProps) {
                           };
                         }
                       )}
+                      activeTabId={documentIndex}
+                      onChange={({ detail }) =>
+                        setDocumentIndex(detail.activeTabId)
+                      }
                     />
                   </>
                 )}
@@ -151,7 +159,11 @@ export default function ChatMessage(props: ChatMessageProps) {
                           variant="inline-icon"
                           iconName="copy"
                           onClick={() => {
-                            navigator.clipboard.writeText("");
+                            navigator.clipboard.writeText(
+                              (props.message.metadata.prompts as string[][])[
+                                parseInt(promptIndex)
+                              ][0]
+                            );
                           }}
                         />
                       </Popover>
@@ -179,6 +191,10 @@ export default function ChatMessage(props: ChatMessageProps) {
                           };
                         }
                       )}
+                      activeTabId={promptIndex}
+                      onChange={({ detail }) =>
+                        setPromptIndex(detail.activeTabId)
+                      }
                     />
                   </>
                 )}
