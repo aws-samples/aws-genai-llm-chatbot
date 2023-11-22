@@ -58,7 +58,7 @@ class SMMistralInstructAdapter(ModelAdapter):
             model_kwargs=params,
             callbacks=[self.callback_handler],
         )
-    
+
     def get_qa_prompt(self):
         template = """<s>[INST] Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.[/INST]
 
@@ -73,7 +73,6 @@ class SMMistralInstructAdapter(ModelAdapter):
 {chat_history}
 <s>[INST] {input} [/INST]"""
 
-        
         return PromptTemplate.from_template(template)
 
     def get_condense_question_prompt(self):
@@ -83,6 +82,7 @@ class SMMistralInstructAdapter(ModelAdapter):
 </s>[INST] {question} [/INST]"""
 
         return PromptTemplate.from_template(template)
+
 
 # Register the adapter
 registry.register(r"(?i)sagemaker\.mistralai-Mistral*", SMMistralInstructAdapter)

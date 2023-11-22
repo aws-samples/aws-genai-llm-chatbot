@@ -1,6 +1,10 @@
-import { ModelItem, LoadingStatus, WorkspaceItem } from "../../common/types";
+import {
+  ModelItem,
+  LoadingStatus,
+  WorkspaceItem,
+  ModelInterface,
+} from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
-import { ModelInterface } from "../../common/types";
 
 export interface ChatBotConfiguration {
   streaming: boolean;
@@ -65,7 +69,7 @@ export interface ChatBotRunRequest {
   data: {
     modelName: string;
     provider: string;
-    sessionId?: string;
+    sessionId: string;
     files: ImageFile[] | null;
     text: string;
     mode: string;
@@ -80,12 +84,35 @@ export interface ChatBotToken {
   value: string;
 }
 
+export interface RagDocument {
+  page_content: string;
+  metadata: {
+    chunk_id: string;
+    workspace_id: string;
+    document_id: string;
+    document_sub_id: string | null;
+    document_type: string;
+    document_sub_type: string | null;
+    path: string;
+    title: string | null;
+    score: number;
+  };
+}
+
 export interface ChatBotHistoryItem {
   type: ChatBotMessageType;
   content: string;
   metadata: Record<
     string,
-    string | boolean | number | null | undefined | ImageFile[]
+    | string
+    | boolean
+    | number
+    | null
+    | undefined
+    | ImageFile[]
+    | string[]
+    | string[][]
+    | RagDocument[]
   >;
   tokens?: ChatBotToken[];
 }
@@ -98,7 +125,15 @@ export interface ChatBotMessageResponse {
     content?: string;
     metadata: Record<
       string,
-      string | boolean | number | null | undefined | ImageFile[]
+      | string
+      | boolean
+      | number
+      | null
+      | undefined
+      | ImageFile[]
+      | string[]
+      | string[][]
+      | RagDocument[]
     >;
   };
 }

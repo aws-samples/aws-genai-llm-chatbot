@@ -20,5 +20,5 @@ class AdapterRegistry:
                 return adapter
         # If no match is found, returns None
         raise ValueError(
-            f"Model {model} not found in registry. Available models: {self.registry}"
+            f"Adapter for model {model} not found in registry. Available adapters: {self.registry}"
         )

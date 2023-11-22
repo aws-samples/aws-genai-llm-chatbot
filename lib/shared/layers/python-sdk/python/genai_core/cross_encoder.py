@@ -27,8 +27,7 @@ def get_cross_encoder_models():
     models = config["rag"]["crossEncoderModels"]
 
     if not SAGEMAKER_RAG_MODELS_ENDPOINT:
-        models = list(
-            filter(lambda x: x["provider"] != "sagemaker", models))
+        models = list(filter(lambda x: x["provider"] != "sagemaker", models))
 
     return models
 
