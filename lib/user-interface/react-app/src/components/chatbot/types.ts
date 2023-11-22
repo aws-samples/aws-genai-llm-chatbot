@@ -133,6 +133,7 @@ export interface ChatBotMessageResponse {
       | ImageFile[]
       | string[]
       | string[][]
+      | RagDocument[]
     >;
   };
 }
