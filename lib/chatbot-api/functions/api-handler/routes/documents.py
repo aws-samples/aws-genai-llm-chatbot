@@ -228,7 +228,6 @@ def add_document(workspace_id: str, document_type: str):
     elif document_type == "rssfeed":
         request = RssFeedDocumentRequest(**data)
         request.address = request.address.strip()[:10000]
-        request.limit = 30
         path=request.address
 
         result = genai_core.documents.create_document(
@@ -270,4 +269,5 @@ def _convert_document(document: dict):
         "updatedAt": document["updated_at"] if "updated_at" in document else None,
         "rssFeedId": document['rss_feed_id'] if "rss_feed_id" in document else None,
         "rssLastCheckedAt": document['rss_last_checked'] if "rss_last_checked" in document else None,
+        "crawlerProperties": document["crawler_properties"] if "crawler_properties" in document else None,
     }
