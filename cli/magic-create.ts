@@ -156,8 +156,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "multiselect",
       name: "sagemakerModels",
-      message:
-        "Which SageMaker Models do you want to enable (enter for None, space to select)",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which SageMaker Models do you want to enable",
       choices: Object.values(SupportedSageMakerModels),
       initial:
         (options.sagemakerModels ?? []).filter((m: string) =>
@@ -175,8 +175,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "multiselect",
       name: "ragsToEnable",
-      message:
-        "Which datastores do you want to enable for RAG (enter for None, space to select)",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which datastores do you want to enable for RAG",
       choices: [
         { message: "Aurora", name: "aurora" },
         { message: "OpenSearch", name: "opensearch" },
