@@ -162,16 +162,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
      */
     NagSuppressions.addResourceSuppressionsByPath(this,
       [
-        `/${this.stackName}/Shared/VPC/FlowLogS3/Bucket/Resource`,
-        `/${this.stackName}/Shared/VPC/FlowLogS3/Bucket/Policy/Resource`
-      ],
-      [
-        {id: "AwsSolutions-S1", reason: "S3 Bucket implicitly created by CDK VPC resource."},
-        {id: "AwsSolutions-S10", reason: "S3 Bucket implicitly created by CDK VPC resource."}
-      ]
-    );
-    NagSuppressions.addResourceSuppressionsByPath(this,
-      [
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource`
       ],
       [
@@ -232,20 +222,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         {id: "AwsSolutions-IAM5", reason: "IAM role implicitly created by CDK."},
       ]
     );
-    NagSuppressions.addResourceSuppressionsByPath(this,
-      [
-        `/${this.stackName}/ChatBotApi/ChatBuckets/LogsBucket/Policy/Resource`,
-        `/${this.stackName}/UserInterface/WebsiteLogsBucket/Resource`,
-        `/${this.stackName}/UserInterface/WebsiteLogsBucket/Policy/Resource`,
-        `/${this.stackName}/UserInterface/DistributionLogsBucket/Resource`,
-        `/${this.stackName}/ChatBotApi/ChatBuckets/FilesBucket/Policy/Resource`,
-        `/${this.stackName}/UserInterface/WebsiteBucket/Policy/Resource`
-      ],
-      [
-        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
-        {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
-      ]
-    );
+
     // RAG configuration
     if (props.config.rag.enabled) {
       NagSuppressions.addResourceSuppressionsByPath(this,
@@ -279,22 +256,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         [
           {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
           {id: "AwsSolutions-IAM5", reason: "IAM role implicitly created by CDK."},
-        ]
-      );
-      NagSuppressions.addResourceSuppressionsByPath(this,
-        [
-          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/LogsBucket/Policy/Resource`,
-          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Bucket/Resource`,
-          `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Bucket/Policy/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/UploadLogsBucket/Policy/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/ProcessingLogsBucket/Policy/Resource`,
-          `/${this.stackName}/RagEngines/KendraRetrieval/KendraDataBucket/Policy/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/UploadBucket/Policy/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/ProcessingBucket/Policy/Resource`,
-        ],
-        [
-          {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
-          {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
         ]
       );
 
@@ -336,15 +297,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       if (props.config.rag.engines.kendra.enabled) {
         NagSuppressions.addResourceSuppressionsByPath(this,
           [
-            `/${this.stackName}/RagEngines/KendraRetrieval/LogsBucket/Resource`,
-            `/${this.stackName}/RagEngines/KendraRetrieval/LogsBucket/Policy/Resource`,
-          ],
-          [
-            {id: "AwsSolutions-S10", reason: "S3 Bucket implicitly created by CDK."},
-          ]
-        );
-        NagSuppressions.addResourceSuppressionsByPath(this,
-          [
             `/${this.stackName}/RagEngines/KendraRetrieval/CreateAuroraWorkspace/CreateKendraWorkspace/Role/DefaultPolicy/Resource`,
             `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
           ],
@@ -358,7 +310,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     // Implicitly created resources with changing paths
     NagSuppressions.addStackSuppressions(this,
       [
-        {id: "CdkNagValidationFailure", reason: "Intrinstic function references."},
+        {id: "CdkNagValidationFailure", reason: "Intrinstic function references."}
       ]
     );
   }

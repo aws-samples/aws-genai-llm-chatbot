@@ -9,13 +9,20 @@ export class ChatBotS3Buckets extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const logsBucket = new s3.Bucket(this, "LogsBucket");
+    const logsBucket = new s3.Bucket(this, "LogsBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      enforceSSL: true,
+    });
+
 
     const filesBucket = new s3.Bucket(this, "FilesBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       transferAcceleration: true,
+      enforceSSL: true,
       serverAccessLogsBucket:  logsBucket,
       cors: [
         {
@@ -38,12 +45,6 @@ export class ChatBotS3Buckets extends Construct {
     NagSuppressions.addResourceSuppressions(logsBucket,
       [
         {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
-        {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
-      ]
-    );
-    NagSuppressions.addResourceSuppressions(filesBucket,
-      [
-        {id: "AwsSolutions-S10", reason: "Bucket only used for internal requests."}
       ]
     );
   }

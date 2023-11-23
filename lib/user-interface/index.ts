@@ -35,7 +35,12 @@ export class UserInterface extends Construct {
     const appPath = path.join(__dirname, "react-app");
     const buildPath = path.join(appPath, "dist");
 
-    const uploadLogsBucket = new s3.Bucket(this, "WebsiteLogsBucket");
+    const uploadLogsBucket = new s3.Bucket(this, "WebsiteLogsBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      enforceSSL: true,
+    });
 
     const websiteBucket = new s3.Bucket(this, "WebsiteBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -43,7 +48,7 @@ export class UserInterface extends Construct {
       autoDeleteObjects: true,
       websiteIndexDocument: "index.html",
       websiteErrorDocument: "index.html",
-      versioned: true,
+      enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket
     });
 
@@ -269,11 +274,6 @@ export class UserInterface extends Construct {
         {id: "AwsSolutions-CFR1", reason: "No geo restrictions"},
         {id: "AwsSolutions-CFR2", reason: "WAF not required due to configured Cognito auth."},
         {id: "AwsSolutions-CFR4", reason: "TLS 1.2 is the default."}
-      ]
-    );
-    NagSuppressions.addResourceSuppressions(websiteBucket,
-      [
-        {id: "AwsSolutions-S10", reason: "Bucket only used for internal requests."}
       ]
     );
   }

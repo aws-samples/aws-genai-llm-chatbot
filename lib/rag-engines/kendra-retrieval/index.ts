@@ -39,12 +39,18 @@ export class KendraRetrieval extends Construct {
     if (props.config.rag.engines.kendra.createIndex) {
       const indexName = Utils.getName(props.config, "genaichatbot-workspaces");
 
-      const logsBucket = new s3.Bucket(this, "LogsBucket");
+      const logsBucket = new s3.Bucket(this, "LogsBucket", {
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+        enforceSSL: true,
+      });
 
       const dataBucket = new s3.Bucket(this, "KendraDataBucket", {
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
+        enforceSSL: true,
         serverAccessLogsBucket: logsBucket
       });
 
@@ -118,14 +124,7 @@ export class KendraRetrieval extends Construct {
       this.kendraIndex = kendraIndex;
       this.kendraS3DataSource = s3DataSource;
       this.kendraS3DataSourceBucket = dataBucket;
-
-      NagSuppressions.addResourceSuppressions(dataBucket,
-        [
-          {id: "AwsSolutions-S10", reason: "Bucket only used for internal requests."},
-        ]
-      );
     }
-
     this.createKendraWorkspaceWorkflow = createWorkflow.stateMachine;
   }
 }
