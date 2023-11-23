@@ -50,11 +50,17 @@ export class HuggingFaceCustomScriptModel extends Construct {
       ? props.modelId.join(",")
       : props.modelId;
 
-    const logsBucket = new s3.Bucket(this, "LogsBucket");
+    const logsBucket = new s3.Bucket(this, "LogsBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      enforceSSL: true,
+    });
 
     const buildBucket = new s3.Bucket(this, "Bucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      enforceSSL: true,
       serverAccessLogsBucket: logsBucket,
       autoDeleteObjects: true,
     });
@@ -307,8 +313,7 @@ export class HuggingFaceCustomScriptModel extends Construct {
     );
     NagSuppressions.addResourceSuppressions(logsBucket,
       [
-        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
-        {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
+        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."}
       ]
     );
   }
