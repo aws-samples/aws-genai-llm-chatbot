@@ -323,12 +323,7 @@ export class RestApi extends Construct {
         authorizer: { authorizerId: cognitoAuthorizer.ref },
       },
     });
-    const v1ProxyResource = v1Resource.addResource("{proxy+}", {
-      defaultMethodOptions: {
-        authorizationType: apigateway.AuthorizationType.COGNITO,
-        authorizer: { authorizerId: cognitoAuthorizer.ref },
-      },
-    });
+    const v1ProxyResource = v1Resource.addResource("{proxy+}");
     v1ProxyResource.addMethod(
       "ANY",
       new apigateway.LambdaIntegration(apiHandler, {
