@@ -60,12 +60,15 @@ export class Shared extends Construct {
             name: "isolated",
             subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
           },
-        ],
-        flowLogs: {
-          'FlowLogS3': {
-            destination: ec2.FlowLogDestination.toS3()
-          }
-        }
+        ]
+      });
+
+      const logGroup = new logs.LogGroup(this, "FLowLogsLogGroup", {
+        removalPolicy: RemovalPolicy.DESTROY
+      });
+      new ec2.FlowLog(this, 'FlowLog', {
+        resourceType: ec2.FlowLogResourceType.fromVpc(vpc),
+        destination: ec2.FlowLogDestination.toCloudWatchLogs(logGroup)
       });
     } else {
       vpc = ec2.Vpc.fromLookup(this, "VPC", {
