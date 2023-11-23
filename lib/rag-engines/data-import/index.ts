@@ -66,13 +66,20 @@ export class DataImport extends Construct {
       },
     });
 
-    const uploadLogsBucket = new s3.Bucket(this, "UploadLogsBucket");
+    const uploadLogsBucket = new s3.Bucket(this, "UploadLogsBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      enforceSSL: true,
+    });
+
 
     const uploadBucket = new s3.Bucket(this, "UploadBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       transferAcceleration: true,
+      enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
       cors: [
         {
@@ -90,12 +97,18 @@ export class DataImport extends Construct {
       ],
     });
 
-    const processingLogsBucket = new s3.Bucket(this, "ProcessingLogsBucket");
+    const processingLogsBucket = new s3.Bucket(this, "ProcessingLogsBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      enforceSSL: true,
+    });
 
     const processingBucket = new s3.Bucket(this, "ProcessingBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      enforceSSL: true,
       serverAccessLogsBucket: processingLogsBucket,
     });
 
@@ -231,14 +244,7 @@ export class DataImport extends Construct {
     NagSuppressions.addResourceSuppressions(
       [uploadLogsBucket, processingLogsBucket],
       [
-        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
-        {id: "AwsSolutions-S10", reason: "Logging bucket does not require SSL."}
-      ]
-    );
-    NagSuppressions.addResourceSuppressions(
-      [uploadBucket, processingBucket],
-      [
-        {id: "AwsSolutions-S10", reason: "Bucket only used for internal requests."},
+        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."}
       ]
     );
   }
