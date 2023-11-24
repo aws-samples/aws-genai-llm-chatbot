@@ -15,8 +15,8 @@ from typing import Optional
 from datetime import datetime
 import hashlib
 
-PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
-WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
+PROCESSING_BUCKET_NAME = os.environ.get("PROCESSING_BUCKET_NAME", "")
+WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME", "")
 DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME = os.environ.get(
     "DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME"
