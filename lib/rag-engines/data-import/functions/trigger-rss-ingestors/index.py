@@ -15,7 +15,6 @@ def lambda_handler(event, context: LambdaContext):
     try:
         genai_core.documents.ingest_rss_feeds()
     except Exception as e:
-        logger.error(f'Error triggering RSS Feed checks')
+        logger.error("Error triggering RSS Feed checks")
         logger.error(e)
         raise e
-    
