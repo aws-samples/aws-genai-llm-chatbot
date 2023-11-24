@@ -16,7 +16,6 @@ export class ChatBotS3Buckets extends Construct {
       enforceSSL: true,
     });
 
-
     const filesBucket = new s3.Bucket(this, "FilesBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -42,6 +41,9 @@ export class ChatBotS3Buckets extends Construct {
 
     this.filesBucket = filesBucket;
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions(logsBucket,
       [
         {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},

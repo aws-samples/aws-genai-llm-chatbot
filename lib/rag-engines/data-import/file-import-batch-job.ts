@@ -179,6 +179,9 @@ export class FileImportBatchJob extends Construct {
     this.jobQueue = jobQueue;
     this.fileImportJob = fileImportJob;
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions(fileImportJobRole,
       [
         {id: "AwsSolutions-IAM4", reason: "Allow user freedom of model usage in Bedrock."},

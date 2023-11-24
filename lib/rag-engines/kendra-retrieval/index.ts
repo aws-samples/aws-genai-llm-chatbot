@@ -125,6 +125,7 @@ export class KendraRetrieval extends Construct {
       this.kendraS3DataSource = s3DataSource;
       this.kendraS3DataSourceBucket = dataBucket;
     }
+
     this.createKendraWorkspaceWorkflow = createWorkflow.stateMachine;
   }
 }
