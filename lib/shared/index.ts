@@ -35,7 +35,7 @@ export class Shared extends Construct {
     const powerToolsLayerVersion = "46";
 
     this.defaultEnvironmentVariables = {
-      POWERTOOLS_DEV: "true",
+      POWERTOOLS_DEV: "false",
       LOG_LEVEL: "INFO",
       POWERTOOLS_LOGGER_LOG_EVENT: "true",
       POWERTOOLS_SERVICE_NAME: "chatbot",
