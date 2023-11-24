@@ -36,14 +36,11 @@ export default function DocumentsTab(props: DocumentsTabProps) {
       setLoading(true);
 
       const apiClient = new ApiClient(appContext);
-      const result =
-
-        await apiClient.documents.getDocuments(
-          props.workspaceId,
-          props.documentType,
-          params?.lastDocumentId
-        )
-
+      const result = await apiClient.documents.getDocuments(
+        props.workspaceId,
+        props.documentType,
+        params?.lastDocumentId
+      );
 
       if (ResultValue.ok(result)) {
         setPages((current) => {

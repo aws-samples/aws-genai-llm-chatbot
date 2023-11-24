@@ -40,11 +40,11 @@ export class DocumentsClient extends ApiClientBase {
       const result = await fetch(
         lastDocumentId
           ? this.getApiUrl(
-            `/workspaces/${workspaceId}/documents/${documentType}?lastDocumentId=${lastDocumentId}`
-          )
+              `/workspaces/${workspaceId}/documents/${documentType}?lastDocumentId=${lastDocumentId}`
+            )
           : this.getApiUrl(
-            `/workspaces/${workspaceId}/documents/${documentType}`
-          ),
+              `/workspaces/${workspaceId}/documents/${documentType}`
+            ),
         {
           headers,
         }
@@ -63,17 +63,17 @@ export class DocumentsClient extends ApiClientBase {
     try {
       const headers = await this.getHeaders();
       const result = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/${documentId}/detail`),
+        this.getApiUrl(
+          `/workspaces/${workspaceId}/documents/${documentId}/detail`
+        ),
         {
-          headers
+          headers,
         }
       );
       return result.json();
     } catch (error) {
       return this.error(error);
     }
-
-
   }
 
   async addTextDocument(
@@ -153,18 +153,19 @@ export class DocumentsClient extends ApiClientBase {
   ): Promise<ApiResult<AddDocumentResult>> {
     try {
       const headers = await this.getHeaders();
-      const results = await fetch(this.getApiUrl(`/workspaces/${workspaceId}/documents/rssfeed`), {
-        headers: headers,
-        method: "POST",
-        body: JSON.stringify({ address, title, limit, followLinks }),
-      });
+      const results = await fetch(
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/rssfeed`),
+        {
+          headers: headers,
+          method: "POST",
+          body: JSON.stringify({ address, title, limit, followLinks }),
+        }
+      );
       return results.json();
     } catch (error) {
       return this.error(error);
     }
   }
-
-
 
   async getRssSubscriptionPosts(
     workspaceId: string,
@@ -173,9 +174,14 @@ export class DocumentsClient extends ApiClientBase {
   ): Promise<ApiResult<DocumentResult>> {
     try {
       const headers = await this.getHeaders();
-      const result = await fetch(lastDocumentId ?
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/posts?lastDocumentId=${lastDocumentId}`) :
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/posts`),
+      const result = await fetch(
+        lastDocumentId
+          ? this.getApiUrl(
+              `/workspaces/${workspaceId}/documents/${feedId}/posts?lastDocumentId=${lastDocumentId}`
+            )
+          : this.getApiUrl(
+              `/workspaces/${workspaceId}/documents/${feedId}/posts`
+            ),
         {
           headers,
         }
@@ -187,8 +193,6 @@ export class DocumentsClient extends ApiClientBase {
     }
   }
 
-
-
   async disableRssSubscription(
     workspaceId: string,
     feedId: string
@@ -196,7 +200,9 @@ export class DocumentsClient extends ApiClientBase {
     try {
       const headers = await this.getHeaders();
       const results = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/disable`),
+        this.getApiUrl(
+          `/workspaces/${workspaceId}/documents/${feedId}/disable`
+        ),
         {
           headers: headers,
         }
@@ -238,16 +244,12 @@ export class DocumentsClient extends ApiClientBase {
         {
           method: "PATCH",
           headers: headers,
-          body: JSON.stringify({ followLinks, limit, "documentType": "rssfeed" }),
+          body: JSON.stringify({ followLinks, limit, documentType: "rssfeed" }),
         }
       );
       return result.json();
     } catch (error) {
       return this.error(error);
     }
-
   }
 }
-
-
-

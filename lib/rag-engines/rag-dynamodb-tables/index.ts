@@ -9,8 +9,7 @@ export class RagDynamoDBTables extends Construct {
     "by_object_type_idx";
   public readonly documentsByCompoundKeyIndexName: string =
     "by_compound_key_idx";
-  public readonly documentsByStatusIndexName: string = 
-    "by_status_idx";
+  public readonly documentsByStatusIndexName: string = "by_status_idx";
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -69,17 +68,16 @@ export class RagDynamoDBTables extends Construct {
 
     documentsTable.addGlobalSecondaryIndex({
       indexName: this.documentsByStatusIndexName,
-      partitionKey:{
+      partitionKey: {
         name: "status",
         type: dynamodb.AttributeType.STRING,
       },
       sortKey: {
         name: "document_type",
         type: dynamodb.AttributeType.STRING,
-      }
-    })
+      },
+    });
 
-    
     this.workspacesTable = workspacesTable;
     this.documentsTable = documentsTable;
   }

@@ -41,10 +41,7 @@ export class DeleteWorkspace extends Construct {
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
-        layers: [
-          props.shared.powerToolsLayer,
-          props.shared.commonLayer,
-        ],
+        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         timeout: cdk.Duration.minutes(15),
         logRetention: logs.RetentionDays.ONE_WEEK,
         environment: {
@@ -66,11 +63,10 @@ export class DeleteWorkspace extends Construct {
           DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
             props.kendraRetrieval?.kendraS3DataSourceBucket?.bucketName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:
-            props.openSearchVector?.openSearchCollectionEndpoint ?? "",          
+            props.openSearchVector?.openSearchCollectionEndpoint ?? "",
         },
       }
     );
-
 
     if (props.auroraPgVector) {
       props.auroraPgVector.database.secret?.grantRead(deleteFunction);
@@ -110,7 +106,6 @@ export class DeleteWorkspace extends Construct {
     );
     props.ragDynamoDBTables.workspacesTable.grantReadWriteData(deleteFunction);
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(deleteFunction);
-    
 
     const handleError = new tasks.DynamoUpdateItem(this, "HandleError", {
       table: props.ragDynamoDBTables.workspacesTable,

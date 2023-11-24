@@ -10,7 +10,6 @@ import { SemanticSearchClient } from "./semantic-search-client";
 import { DocumentsClient } from "./documents-client";
 import { KendraClient } from "./kendra-client";
 
-
 export class ApiClient {
   private _healthClient: HealthClient | undefined;
   private _ragEnginesClient: RagEnginesClient | undefined;
@@ -22,7 +21,6 @@ export class ApiClient {
   private _semanticSearchClient: SemanticSearchClient | undefined;
   private _documentsClient: DocumentsClient | undefined;
   private _kendraClient: KendraClient | undefined;
-
 
   public get health() {
     if (!this._healthClient) {
@@ -103,7 +101,6 @@ export class ApiClient {
 
     return this._kendraClient;
   }
-
 
   constructor(protected _appConfig: AppConfig) {}
 }
