@@ -229,6 +229,9 @@ export class WebSocketApi extends Construct {
     this.api = webSocketApi;
     this.messagesTopic = messagesTopic;
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions([webSocketApi, stage],
       [
         {id: "AwsSolutions-APIG1", reason: "CDK does not provide an option to enable access logging for WebSocketApi construct."},

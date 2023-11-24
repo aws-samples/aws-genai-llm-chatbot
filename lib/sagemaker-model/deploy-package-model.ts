@@ -61,6 +61,9 @@ export function deployPackageModel(
 
   endpoint.addDependency(endpointConfig);
 
+  /**
+   * CDK NAG suppression
+   */
   NagSuppressions.addResourceSuppressions(executionRole, [
     {id: "AwsSolutions-IAM4", reason: "Gives user ability to deploy and delete endpoints from the UI."},
     {id: "AwsSolutions-IAM5", reason: "Gives user ability to deploy and delete endpoints from the UI."},

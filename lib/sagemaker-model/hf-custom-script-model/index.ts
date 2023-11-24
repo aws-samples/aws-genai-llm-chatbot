@@ -294,6 +294,9 @@ export class HuggingFaceCustomScriptModel extends Construct {
     this.model = model;
     this.endpoint = endpoint;
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions(codeBuildRole,
       [
         {id: "AwsSolutions-IAM5", reason: "Access to all log groups required for CloudWatch log group creation."},
