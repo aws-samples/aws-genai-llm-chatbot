@@ -27,9 +27,9 @@ DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
     "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME"
 )
 
-RSS_FEED_INGESTOR_FUNCTION = os.environ['RSS_FEED_INGESTOR_FUNCTION'] if "RSS_FEED_INGESTOR_FUNCTION" in os.environ else ""
-RSS_FEED_SCHEDULE_ROLE_ARN = os.environ['RSS_FEED_SCHEDULE_ROLE_ARN'] if "RSS_FEED_SCHEDULE_ROLE_ARN" in os.environ else ""
-DOCUMENTS_BY_STATUS_INDEX = os.environ.get("DOCUMENTS_BY_STATUS_INDEX")
+RSS_FEED_INGESTOR_FUNCTION = os.environ.get("RSS_FEED_INGESTOR_FUNCTION", "")
+RSS_FEED_SCHEDULE_ROLE_ARN = os.environ.get("RSS_FEED_SCHEDULE_ROLE_ARN", "")
+DOCUMENTS_BY_STATUS_INDEX = os.environ.get("DOCUMENTS_BY_STATUS_INDEX", "")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -61,9 +61,8 @@ def list_documents(
         scan_index_forward = False
 
     sort_key_prefix = f"{document_type}/"
-    if document_type == "rsspost" and parent_document_id != None:
-        sort_key_prefix = f"rsspost/{parent_document_id}/"
-    
+    if parent_document_id != None:
+        sort_key_prefix = sort_key_prefix + f"{parent_document_id}/"
 
     if last_document_id:
         last_document = get_document(workspace_id, last_document_id)
@@ -84,7 +83,7 @@ def list_documents(
                 ":sort_key_prefix": sort_key_prefix,
             },
             Limit=page_size,
-            ScanIndexForward=scan_index_forward
+            ScanIndexForward=scan_index_forward,
         )
     else:
         response = documents_table.query(
@@ -95,7 +94,7 @@ def list_documents(
                 ":sort_key_prefix": sort_key_prefix,
             },
             Limit=page_size,
-            ScanIndexForward=scan_index_forward
+            ScanIndexForward=scan_index_forward,
         )
 
     items = response["Items"]
@@ -108,11 +107,10 @@ def list_documents(
     }
 
 
-
 def set_document_vectors(
     workspace_id: str, document_id: str, vectors: int, replace: bool
 ):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp = _get_timestamp()
 
     response = workspaces_table.update_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
@@ -150,7 +148,7 @@ def set_document_vectors(
 
 
 def set_sub_documents(workspace_id: str, document_id: str, sub_documents: int):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp = _get_timestamp()
 
     response = documents_table.update_item(
         Key={"workspace_id": workspace_id, "document_id": document_id},
@@ -195,8 +193,7 @@ def get_document_content(workspace_id: str, document_id: str):
 
 
 def set_status(workspace_id: str, document_id: str, status: str):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-
+    timestamp = _get_timestamp()
     response = documents_table.update_item(
         Key={"workspace_id": workspace_id, "document_id": document_id},
         UpdateExpression="SET #status=:status, updated_at=:timestampValue",
@@ -208,30 +205,20 @@ def set_status(workspace_id: str, document_id: str, status: str):
             ":timestampValue": timestamp,
         },
     )
-    update_timestamp(workspace_id, document_id)
     return response
 
-def update_timestamp(workspace_id: str, document_id: str):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    response = documents_table.update_item(
-        Key={"workspace_id": workspace_id, "document_id": document_id},
-        UpdateExpression="SET updated_at=:timestampValue",
-        ExpressionAttributeValues={
-            ":timestampValue": timestamp,
-        }
-    )
-    return response
 
 def update_subscription_timestamp(workspace_id: str, document_id: str):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp = _get_timestamp()
     response = documents_table.update_item(
         Key={"workspace_id": workspace_id, "document_id": document_id},
         UpdateExpression="SET rss_last_checked=:timestampValue",
         ExpressionAttributeValues={
             ":timestampValue": timestamp,
-        }
+        },
     )
-    return response
+    print(response)
+
 
 def create_document(
     workspace_id: str,
@@ -245,7 +232,7 @@ def create_document(
     content_complement: Optional[str] = None,
     **kwargs,
 ):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp = _get_timestamp()
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
         return None
@@ -319,7 +306,6 @@ def create_document(
         }
         if document_type in ["rssfeed"] and "crawler_properties" in kwargs:
             document["crawler_properties"] = kwargs["crawler_properties"]
-        
 
         response = documents_table.put_item(Item=document)
         print(response)
@@ -338,7 +324,6 @@ def create_document(
     )
 
     print(response)
-    
 
     _upload_document_content(
         workspace_id,
@@ -367,26 +352,35 @@ def create_document(
         "document_id": document_id,
     }
 
+
 def update_document(workspace_id: str, document_id: str, document_type: str, **kwargs):
+    timestamp = _get_timestamp()
     if document_type == "rssfeed":
         if "limit" in kwargs and "follow_links" in kwargs:
-            follow_links = kwargs['follow_links']
-            limit = kwargs['limit'] 
+            follow_links = kwargs["follow_links"]
+            limit = kwargs["limit"]
             response = documents_table.update_item(
                 Key={"workspace_id": workspace_id, "document_id": document_id},
                 UpdateExpression="SET #crawler_properties=:crawler_properties, updated_at=:timestampValue",
                 ExpressionAttributeNames={"#crawler_properties": "crawler_properties"},
                 ExpressionAttributeValues={
-                    ":crawler_properties": {"follow_links": follow_links, "limit": limit},
-                    ":timestampValue": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                    ":crawler_properties": {
+                        "follow_links": follow_links,
+                        "limit": limit,
+                    },
+                    ":timestampValue": timestamp,
                 },
                 ReturnValues="ALL_NEW",
             )
             return response
         else:
             raise Exception("Invalid update values for rssfeed")
-    else:  
-        return f"Error! Document Type {document_type} doesn't have any update options"    
+    else:
+        return f"Error! Document Type {document_type} doesn't have any update options"
+
+
+def _get_timestamp():
+    return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def _process_document_kendra(
@@ -584,14 +578,15 @@ def ingest_rss_feeds():
             },
             ":document_type": {
                 "S": "rssfeed",
-            }
-        }
+            },
+        },
     )
-    if feeds_to_crawl['Count'] > 0:
-        for item in feeds_to_crawl['Items']:
-            workspace_id = item['workspace_id']['S']
-            document_id = item['document_id']['S']
+    if feeds_to_crawl["Count"] > 0:
+        for item in feeds_to_crawl["Items"]:
+            workspace_id = item["workspace_id"]["S"]
+            document_id = item["document_id"]["S"]
             _trigger_rss_feed_ingestor(workspace_id, document_id)
+
 
 def _trigger_rss_feed_ingestor(
     workspace_id: str,
@@ -614,25 +609,27 @@ def _trigger_rss_feed_ingestor(
 
 
 def _toggle_document_subscription(
-        workspace_id: str,
-        document_id: str,
-        enable: bool,
+    workspace_id: str,
+    document_id: str,
+    enable: bool,
 ):
     subscription_status = "enabled" if enable else "disabled"
-    set_status(workspace_id,document_id,subscription_status)
+    set_status(workspace_id, document_id, subscription_status)
+
 
 def enable_document_subscription(
-        workspace_id: str,
-        document_id: str,
+    workspace_id: str,
+    document_id: str,
 ):
     _toggle_document_subscription(workspace_id, document_id, True)
 
 
 def disable_document_subscription(
-        workspace_id: str,
-        document_id: str,
-): 
-    _toggle_document_subscription(workspace_id,document_id, False)
+    workspace_id: str,
+    document_id: str,
+):
+    _toggle_document_subscription(workspace_id, document_id, False)
+
 
 def check_rss_feed_for_posts(workspace_id, document_id):
     workspace = genai_core.workspaces.get_workspace(workspace_id)
@@ -642,15 +639,15 @@ def check_rss_feed_for_posts(workspace_id, document_id):
     rss_document = get_document(workspace_id, document_id)
     if not rss_document:
         raise genai_core.types.CommonError("Document not found")
-    
+
     feed_path = rss_document["path"]
     print(f"Parsing RSS Feed for {feed_path}")
     try:
         feed_contents = feedparser.parse(feed_path)
         if feed_contents:
             for feed_entry in feed_contents.entries:
-                timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-                post_id = str(_get_hash_id_from_path(feed_entry['link']))
+                timestamp = _get_timestamp()
+                post_id = str(_get_hash_id_from_path(feed_entry.get("link", "")))
                 document = {
                     "format_version": 1,
                     "workspace_id": workspace_id,
@@ -659,66 +656,81 @@ def check_rss_feed_for_posts(workspace_id, document_id):
                     "document_type": "rsspost",
                     "document_sub_type": None,
                     "sub_documents": None,
-                    "compound_sort_key": "rsspost/" + document_id + "/" + post_id,
+                    "compound_sort_key": f"rsspost/{document_id}/{post_id}",
                     "status": "pending",
-                    "title": feed_entry['title'],
-                    "path": feed_entry['link'],
+                    "title": feed_entry.get("title", ""),
+                    "path": feed_entry.get("link", ""),
                     "size_in_bytes": 0,
                     "vectors": 0,
                     "errors": [],
                     "created_at": timestamp,
                     "updated_at": timestamp,
-                    "crawler_properties": rss_document['crawler_properties'] if 'crawler_properties' in rss_document else None,
+                    "crawler_properties": rss_document.get("crawler_properties", None),
                 }
                 try:
                     documents_table.put_item(
                         Item=document,
-                        ConditionExpression="attribute_not_exists(document_id)"
-                        )
+                        ConditionExpression="attribute_not_exists(document_id)",
+                    )
                 except botocore.exceptions.ClientError as e:
-                    if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                    if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
                         print(f"Post already exists: {feed_entry['link']}")
                         continue
                     else:
                         raise e
-        update_subscription_timestamp(workspace_id,document_id)
+        update_subscription_timestamp(workspace_id, document_id)
     except Exception as e:
-        raise genai_core.types.CommonError("Error parsing feed",e)
-    
+        raise genai_core.types.CommonError("Error parsing feed", e)
+
+
 def _get_hash_id_from_path(path):
-    '''Returns a hash id from a path
-        This is useful if the ID needs to be NON-unique.
-    '''
+    """Returns a hash id from a path
+    This is useful if the ID needs to be NON-unique.
+    """
     return hashlib.sha256(path.encode("utf-8")).hexdigest()
 
 
-
 def batch_crawl_websites():
-    '''Gets next 10 pending posts and sends them to be website crawled
-    '''
+    """Gets next 10 pending posts and sends them to be website crawled"""
     posts = _get_batch_pending_posts()
-    if posts['Count'] > 0:
-        for post in posts['Items']:
-            workspace_id = post['workspace_id']['S']
-            feed_id = post['rss_feed_id']['S']
-            document_id = post['document_id']['S']
-            path = post['path']['S']
-            create_document(workspace_id,"website",path=path, crawler_properties = {
-                "follow_links": post['crawler_properties']['M']['follow_links']['BOOL'] if "crawler_properties" in post else True,
-                "limit": int(post['crawler_properties']['M']['limit']['N']) if "crawler_properties" in post else 250
-            })
-            set_status(workspace_id,document_id,"processed")
-            update_subscription_timestamp(workspace_id,feed_id)
+    if posts["Count"] > 0:
+        for post in posts["Items"]:
+            workspace_id = post["workspace_id"]["S"]
+            feed_id = post["rss_feed_id"]["S"]
+            document_id = post["document_id"]["S"]
+            path = post["path"]["S"]
+            create_document(
+                workspace_id,
+                "website",
+                path=path,
+                crawler_properties={
+                    "follow_links": post["crawler_properties"]["M"]["follow_links"][
+                        "BOOL"
+                    ]
+                    if "crawler_properties" in post
+                    else True,
+                    "limit": int(post["crawler_properties"]["M"]["limit"]["N"])
+                    if "crawler_properties" in post
+                    else 250,
+                },
+            )
+            set_status(workspace_id, document_id, "processed")
+            update_subscription_timestamp(workspace_id, feed_id)
 
 
 def _get_batch_pending_posts():
-      '''Gets the first 10 Pending Posts from the RSS Feed to Crawl
-      '''
-      return dynamodb_client.query(
-            TableName=DOCUMENTS_TABLE_NAME,
-            IndexName=DOCUMENTS_BY_STATUS_INDEX,
-            Limit=10,
-            KeyConditionExpression="#status = :status and #document_type = :document_type",
-            ExpressionAttributeValues={ ":status": { "S": "pending" }, ":document_type": { "S": "rsspost" } }, 
-            ExpressionAttributeNames={ "#status": "status", "#document_type": "document_type" }
-      )
+    """Gets the first 10 Pending Posts from the RSS Feed to Crawl"""
+    return dynamodb_client.query(
+        TableName=DOCUMENTS_TABLE_NAME,
+        IndexName=DOCUMENTS_BY_STATUS_INDEX,
+        Limit=10,
+        KeyConditionExpression="#status = :status and #document_type = :document_type",
+        ExpressionAttributeValues={
+            ":status": {"S": "pending"},
+            ":document_type": {"S": "rsspost"},
+        },
+        ExpressionAttributeNames={
+            "#status": "status",
+            "#document_type": "document_type",
+        },
+    )

@@ -101,7 +101,9 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const typeStr = ragDocumentTypeToString(props.documentType);
   const typeAddStr = ragDocumentTypeToAddString(props.documentType);
   const typeTitleStr = ragDocumentTypeToTitleString(props.documentType);
+
   const columnDefinitions = getColumnDefinition(props.documentType);
+
   return (
     <Table
       loading={loading}
