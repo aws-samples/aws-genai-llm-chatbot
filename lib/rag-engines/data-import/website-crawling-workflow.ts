@@ -84,8 +84,8 @@ export class WebsiteCrawlingWorkflow extends Construct {
     );
     props.ragDynamoDBTables.workspacesTable.grantReadWriteData(
       websiteParserFunction
-    )
-    props.processingBucket.grantReadWrite(websiteParserFunction)
+    );
+    props.processingBucket.grantReadWrite(websiteParserFunction);
 
     const rssIngestorFunction = new lambda.Function(this, "RssIngestor", {
       code: props.shared.sharedCode.bundleWithLambdaAsset(

@@ -70,7 +70,7 @@ export class RestApi extends Construct {
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
           props.ragEngines?.documentsByCompountKeyIndexName ?? "",
         DOCUMENTS_BY_STATUS_INDEX:
-            props.ragEngines?.documentsByStatusIndexName ?? "",
+          props.ragEngines?.documentsByStatusIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.ragEngines?.sageMakerRagModels?.model.endpoint
             ?.attrEndpointName ?? "",
@@ -103,7 +103,6 @@ export class RestApi extends Construct {
             ?.bucketName ?? "",
         RSS_FEED_INGESTOR_FUNCTION:
           props.ragEngines?.dataImport.rssIngestorFunction.functionArn ?? "",
-  
       },
     });
 
@@ -115,8 +114,6 @@ export class RestApi extends Construct {
       props.ragEngines.documentsTable.grantReadWriteData(apiHandler);
       props.ragEngines.dataImport.rssIngestorFunction.grantInvoke(apiHandler);
     }
-
-    
 
     if (props.ragEngines?.auroraPgVector) {
       props.ragEngines.auroraPgVector.database.secret?.grantRead(apiHandler);

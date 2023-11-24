@@ -93,7 +93,9 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
         onDismiss: () => setFlashbarItem(null),
         buttonText: "View RSS Feed Subscriptions",
         onButtonClick: () => {
-          navigate(`/rag/workspaces/${props.data.workspace?.value}?tab=rssfeed`);
+          navigate(
+            `/rag/workspaces/${props.data.workspace?.value}?tab=rssfeed`
+          );
         },
       });
 

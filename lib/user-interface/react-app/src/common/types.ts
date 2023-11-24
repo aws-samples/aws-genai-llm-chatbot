@@ -59,7 +59,13 @@ export interface ApiErrorResult {
 
 export type LoadingStatus = "pending" | "loading" | "finished" | "error";
 export type ModelProvider = "sagemaker" | "bedrock" | "openai";
-export type RagDocumentType = "file" | "text" | "qna" | "website" | "rssfeed" | "rsspost";
+export type RagDocumentType =
+  | "file"
+  | "text"
+  | "qna"
+  | "website"
+  | "rssfeed"
+  | "rsspost";
 export type Modality = "TEXT" | "IMAGE";
 export type ModelInterface = "langchain" | "idefics";
 
@@ -143,7 +149,7 @@ export interface DocumentItem {
   crawlerProperties?: {
     followLinks: boolean;
     limit: number;
-  }
+  };
 }
 
 export interface DocumentSubscriptionToggleResult {
@@ -156,7 +162,7 @@ export enum DocumentSubscriptionStatus {
   ENABLED = "enabled",
   DISABLED = "disabled",
   UNKNOWN = "unknown",
-  DEFAULT = UNKNOWN
+  DEFAULT = UNKNOWN,
 }
 export interface DocumentResult {
   items: DocumentItem[];

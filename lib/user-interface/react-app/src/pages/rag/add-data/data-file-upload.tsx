@@ -200,7 +200,9 @@ export default function DataFileUpload(props: DataFileUploadProps) {
                 showFileSize
                 showFileThumbnail
                 tokenLimit={3}
-                constraintText={`Text documents up to 100MB supported (${Array.from(fileExtensions.values()).join(", ")})`}
+                constraintText={`Text documents up to 100MB supported (${Array.from(
+                  fileExtensions.values()
+                ).join(", ")})`}
                 fileErrors={fileErrors}
                 errorText={uploadError}
               />
