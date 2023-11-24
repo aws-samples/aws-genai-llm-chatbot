@@ -73,7 +73,6 @@ export class DataImport extends Construct {
       enforceSSL: true,
     });
 
-
     const uploadBucket = new s3.Bucket(this, "UploadBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -242,7 +241,10 @@ export class DataImport extends Construct {
      * CDK NAG suppression
      */
     NagSuppressions.addResourceSuppressions(
-      [uploadLogsBucket, processingLogsBucket],
+      [
+        uploadLogsBucket,
+        processingLogsBucket
+      ],
       [
         {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."}
       ]

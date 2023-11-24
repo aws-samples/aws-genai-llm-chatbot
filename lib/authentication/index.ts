@@ -71,6 +71,9 @@ export class Authentication extends Construct {
       }/users?region=${cdk.Stack.of(this).region}`,
     });
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions(userPool,
       [
         {id: "AwsSolutions-COG1", reason: "Default password policy requires min length of 8, digits, lowercase characters, symbols and uppercase characters: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cognito.PasswordPolicy.html"},

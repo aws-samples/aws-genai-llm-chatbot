@@ -258,8 +258,14 @@ export class UserInterface extends Construct {
       value: `https://${distribution.distributionDomainName}`,
     });
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions(
-        [uploadLogsBucket, distributionLogsBucket],
+        [
+          uploadLogsBucket,
+          distributionLogsBucket
+        ],
         [
           {id: "AwsSolutions-S1", reason: "Bucket is the server access logs bucket for websiteBucket."}
         ]

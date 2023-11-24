@@ -106,6 +106,9 @@ export class AuroraPgVector extends Construct {
     this.database = dbCluster;
     this.createAuroraWorkspaceWorkflow = createWorkflow.stateMachine;
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions(dbCluster,
       [
         {id: "AwsSolutions-RDS10", reason: "Deletion protection disabled to allow deletion as part of the CloudFormation stack."}

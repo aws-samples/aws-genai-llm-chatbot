@@ -81,6 +81,9 @@ export class RealtimeGraphqlApiBackend extends Construct {
     this.messagesTopic = messagesTopic;
     this.resolvers = resolvers;
 
+    /**
+     * CDK NAG suppression
+     */
     NagSuppressions.addResourceSuppressions(messagesTopic,
       [
         {id: "AwsSolutions-SNS2", reason: "No sensitive data in topic."},
