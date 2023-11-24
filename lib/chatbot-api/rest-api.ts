@@ -102,7 +102,7 @@ export class RestApi extends Construct {
           props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket
             ?.bucketName ?? "",
         RSS_FEED_INGESTOR_FUNCTION:
-          props.ragEngines?.dataImport.rssIngestorFunction.functionArn ?? "",
+          props.ragEngines?.dataImport.rssIngestorFunction?.functionArn ?? "",
       },
     });
 
@@ -112,7 +112,7 @@ export class RestApi extends Construct {
 
     if (props.ragEngines?.documentsTable) {
       props.ragEngines.documentsTable.grantReadWriteData(apiHandler);
-      props.ragEngines.dataImport.rssIngestorFunction.grantInvoke(apiHandler);
+      props.ragEngines?.dataImport.rssIngestorFunction?.grantInvoke(apiHandler);
     }
 
     if (props.ragEngines?.auroraPgVector) {
