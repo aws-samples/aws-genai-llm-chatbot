@@ -62,6 +62,9 @@ const embeddingModels = [
       options.bedrockEndpoint = config.bedrock?.endpointUrl;
       options.bedrockRoleArn = config.bedrock?.roleArn;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
+      options.enableSagemakerModels = config.llms?.sagemaker
+        ? config.llms?.sagemaker.length > 0
+        : false;
       options.enableRag = config.rag.enabled;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
@@ -154,6 +157,12 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.bedrockRoleArn || "",
     },
     {
+      type: "confirm",
+      name: "enableSagemakerModels",
+      message: "Do you want to use any Sagemaker Models",
+      initial: options.enableSagemakerModels || false,
+    },
+    {
       type: "multiselect",
       name: "sagemakerModels",
       hint: "SPACE to select, ENTER to confirm selection",
@@ -165,6 +174,15 @@ async function processCreateOptions(options: any): Promise<void> {
             .map((x) => x.toString())
             .includes(m)
         ) || [],
+      validate(choices: any) {
+        return choices.length > 0
+          ? true
+          : "You need to select at least one model";
+      },
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.enableSagemakerModels;
+      },
     },
     {
       type: "confirm",
@@ -198,8 +216,6 @@ async function processCreateOptions(options: any): Promise<void> {
           options.kendraExternal.length > 0) ||
         false,
       skip: function (): boolean {
-        // workaround for https://github.com/enquirer/enquirer/issues/298
-        (this as any).state._choices = (this as any).state.choices;
         return !(this as any).state.answers.enableRag;
       },
     },
