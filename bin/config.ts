@@ -15,7 +15,6 @@ export function getConfig(): SystemConfig {
     bedrock: {
       enabled: true,
       region: SupportedRegion.US_EAST_1,
-      endpointUrl: "https://bedrock-runtime.us-east-1.amazonaws.com",
     },
     llms: {
       // sagemaker: [SupportedSageMakerModels.FalconLite]

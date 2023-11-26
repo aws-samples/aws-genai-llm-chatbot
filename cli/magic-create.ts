@@ -59,7 +59,6 @@ const embeddingModels = [
       options.prefix = config.prefix;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
-      options.bedrockEndpoint = config.bedrock?.endpointUrl;
       options.bedrockRoleArn = config.bedrock?.roleArn;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableSagemakerModels = config.llms?.sagemaker
@@ -133,16 +132,6 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.bedrockRegion ?? "us-east-1",
       skip() {
         return !(this as any).state.answers.bedrockEnable;
-      },
-    },
-    {
-      type: "input",
-      name: "bedrockEndpoint",
-      message: "Bedrock endpoint - leave as is for standard endpoint",
-      initial() {
-        return `https://bedrock-runtime.${
-          (this as any).state.answers.bedrockRegion
-        }.amazonaws.com`;
       },
     },
     {
@@ -316,7 +305,6 @@ async function processCreateOptions(options: any): Promise<void> {
           region: answers.bedrockRegion,
           roleArn:
             answers.bedrockRoleArn === "" ? undefined : answers.bedrockRoleArn,
-          endpointUrl: answers.bedrockEndpoint,
         }
       : undefined,
     llms: {
