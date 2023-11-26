@@ -9,7 +9,7 @@ import genai_core.opensearch.chunks
 from typing import List, Optional
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
+PROCESSING_BUCKET_NAME = os.environ.get("PROCESSING_BUCKET_NAME", "")
 s3 = boto3.resource("s3")
 
 
