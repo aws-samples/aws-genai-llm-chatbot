@@ -164,7 +164,7 @@ async function processCreateOptions(options: any): Promise<void> {
             .includes(m)
         ) || [],
       validate(choices: any) {
-        return choices.length > 0
+        return (this as any).skipped || choices.length > 0
           ? true
           : "You need to select at least one model";
       },
@@ -204,12 +204,13 @@ async function processCreateOptions(options: any): Promise<void> {
         (options.kendraExternal !== undefined &&
           options.kendraExternal.length > 0) ||
         false,
-      skip: function (): boolean {
+      skip(): boolean {
         return !(this as any).state.answers.enableRag;
       },
     },
   ];
   const answers: any = await enquirer.prompt(questions);
+  console.log(answers);
   const kendraExternal = [];
   let newKendra = answers.enableRag && answers.kendra;
   const existingKendraIndices = Array.from(options.kendraExternal || []);
