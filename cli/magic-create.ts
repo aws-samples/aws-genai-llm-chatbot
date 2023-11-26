@@ -59,9 +59,11 @@ const embeddingModels = [
       options.prefix = config.prefix;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
-      options.bedrockEndpoint = config.bedrock?.endpointUrl;
       options.bedrockRoleArn = config.bedrock?.roleArn;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
+      options.enableSagemakerModels = config.llms?.sagemaker
+        ? config.llms?.sagemaker.length > 0
+        : false;
       options.enableRag = config.rag.enabled;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
@@ -134,16 +136,6 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "input",
-      name: "bedrockEndpoint",
-      message: "Bedrock endpoint - leave as is for standard endpoint",
-      initial() {
-        return `https://bedrock-runtime.${
-          (this as any).state.answers.bedrockRegion
-        }.amazonaws.com`;
-      },
-    },
-    {
-      type: "input",
       name: "bedrockRoleArn",
       message:
         "Cross account role arn to invoke Bedrock - leave empty if Bedrock is in same account",
@@ -154,10 +146,16 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.bedrockRoleArn || "",
     },
     {
+      type: "confirm",
+      name: "enableSagemakerModels",
+      message: "Do you want to use any Sagemaker Models",
+      initial: options.enableSagemakerModels || false,
+    },
+    {
       type: "multiselect",
       name: "sagemakerModels",
-      message:
-        "Which SageMaker Models do you want to enable (enter for None, space to select)",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which SageMaker Models do you want to enable",
       choices: Object.values(SupportedSageMakerModels),
       initial:
         (options.sagemakerModels ?? []).filter((m: string) =>
@@ -165,6 +163,15 @@ async function processCreateOptions(options: any): Promise<void> {
             .map((x) => x.toString())
             .includes(m)
         ) || [],
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one model";
+      },
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.enableSagemakerModels;
+      },
     },
     {
       type: "confirm",
@@ -175,8 +182,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "multiselect",
       name: "ragsToEnable",
-      message:
-        "Which datastores do you want to enable for RAG (enter for None, space to select)",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which datastores do you want to enable for RAG",
       choices: [
         { message: "Aurora", name: "aurora" },
         { message: "OpenSearch", name: "opensearch" },
@@ -197,14 +204,13 @@ async function processCreateOptions(options: any): Promise<void> {
         (options.kendraExternal !== undefined &&
           options.kendraExternal.length > 0) ||
         false,
-      skip: function (): boolean {
-        // workaround for https://github.com/enquirer/enquirer/issues/298
-        (this as any).state._choices = (this as any).state.choices;
+      skip(): boolean {
         return !(this as any).state.answers.enableRag;
       },
     },
   ];
   const answers: any = await enquirer.prompt(questions);
+  console.log(answers);
   const kendraExternal = [];
   let newKendra = answers.enableRag && answers.kendra;
   const existingKendraIndices = Array.from(options.kendraExternal || []);
@@ -300,7 +306,6 @@ async function processCreateOptions(options: any): Promise<void> {
           region: answers.bedrockRegion,
           roleArn:
             answers.bedrockRoleArn === "" ? undefined : answers.bedrockRoleArn,
-          endpointUrl: answers.bedrockEndpoint,
         }
       : undefined,
     llms: {
