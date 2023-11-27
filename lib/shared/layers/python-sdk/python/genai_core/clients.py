@@ -35,13 +35,10 @@ def get_bedrock_client(service_name="bedrock-runtime"):
 
     bedrock_config_data = {"service_name": service_name}
     region_name = bedrock_config.get("region")
-    endpoint_url = bedrock_config.get("endpointUrl")
     role_arn = bedrock_config.get("roleArn")
 
     if region_name:
         bedrock_config_data["region_name"] = region_name
-    if endpoint_url:
-        bedrock_config_data["endpoint_url"] = endpoint_url
 
     if role_arn:
         assumed_role_object = sts_client.assume_role(
