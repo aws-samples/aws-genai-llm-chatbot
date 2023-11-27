@@ -187,6 +187,7 @@ export class FileImportBatchJob extends Construct {
         {id: "AwsSolutions-IAM4", reason: "Allow user freedom of model usage in Bedrock."},
         {id: "AwsSolutions-IAM5", reason: "Access to all log groups required for CloudWatch log group creation."},
         {id: "AwsSolutions-IAM5", reason: "S3 write access required for upload and processing buckets."}
-      ])
+      ]
+    );
   }
 }
