@@ -30,5 +30,5 @@ def get_config():
     return config
 
 
-def get_sagemaker_models():
-    return parameters.get_parameter(MODELS_PARAMETER_NAME, transform="json", max_age=30)
+def get_sagemaker_models(): 
+    return parameters.get_parameters(MODELS_PARAMETER_NAME, transform="json", max_age=30)

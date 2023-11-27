@@ -1,6 +1,10 @@
 import * as path from "path";
 import * as cdk from "aws-cdk-lib";
-import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
+import {
+  MODEL_PARAMETER_PATH,
+  SageMakerModelEndpoint,
+  SystemConfig,
+} from "../shared/types";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
@@ -20,12 +24,11 @@ export interface RestApiProps {
   readonly userPool: cognito.UserPool;
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
-  readonly modelsParameter: ssm.StringParameter;
-  readonly models: SageMakerModelEndpoint[];
 }
 
 export class RestApi extends Construct {
   public readonly api: apigateway.RestApi;
+  public readonly apiHandler: lambda.Function;
 
   constructor(scope: Construct, id: string, props: RestApiProps) {
     super(scope, id);
@@ -52,7 +55,7 @@ export class RestApi extends Construct {
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
-        MODELS_PARAMETER_NAME: props.modelsParameter.parameterName,
+        MODELS_PARAMETER_NAME: `/${MODEL_PARAMETER_PATH}/`,
         X_ORIGIN_VERIFY_SECRET_ARN: props.shared.xOriginVerifySecret.secretArn,
         API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
         SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
@@ -218,15 +221,6 @@ export class RestApi extends Construct {
       );
     }
 
-    for (const model of props.models) {
-      apiHandler.addToRolePolicy(
-        new iam.PolicyStatement({
-          actions: ["sagemaker:InvokeEndpoint"],
-          resources: [model.endpoint.ref],
-        })
-      );
-    }
-
     apiHandler.addToRolePolicy(
       new iam.PolicyStatement({
         actions: [
@@ -240,10 +234,23 @@ export class RestApi extends Construct {
     props.shared.xOriginVerifySecret.grantRead(apiHandler);
     props.shared.apiKeysSecret.grantRead(apiHandler);
     props.shared.configParameter.grantRead(apiHandler);
-    props.modelsParameter.grantRead(apiHandler);
     props.sessionsTable.grantReadWriteData(apiHandler);
     props.ragEngines?.uploadBucket.grantReadWrite(apiHandler);
     props.ragEngines?.processingBucket.grantReadWrite(apiHandler);
+    apiHandler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          "ssm:GetParameters",
+          "ssm:GetParameter",
+          "ssm:GetParametersByPath",
+          "ssm:DescribeParameters",
+        ],
+        effect: iam.Effect.ALLOW,
+        resources: [
+          `arn:${cdk.Aws.PARTITION}:ssm:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:parameter/${MODEL_PARAMETER_PATH}/*`,
+        ],
+      })
+    );
 
     if (props.config.bedrock?.enabled) {
       apiHandler.addToRolePolicy(
@@ -314,5 +321,6 @@ export class RestApi extends Construct {
     );
 
     this.api = chatBotApi;
+    this.apiHandler = apiHandler;
   }
 }

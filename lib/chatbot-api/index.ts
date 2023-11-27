@@ -4,7 +4,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
-import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
 import { Shared } from "../shared";
@@ -19,12 +19,11 @@ export interface ChatBotApiProps {
   readonly config: SystemConfig;
   readonly ragEngines?: RagEngines;
   readonly userPool: cognito.UserPool;
-  readonly modelsParameter: ssm.StringParameter;
-  readonly models: SageMakerModelEndpoint[];
 }
 
 export class ChatBotApi extends Construct {
   public readonly restApi: apigateway.RestApi;
+  public readonly apiHandler: lambda.Function;
   public readonly webSocketApi: apigwv2.WebSocketApi;
   public readonly messagesTopic: sns.Topic;
   public readonly sessionsTable: dynamodb.Table;
@@ -46,6 +45,7 @@ export class ChatBotApi extends Construct {
     const webSocketApi = new WebSocketApi(this, "WebSocketApi", props);
 
     this.restApi = restApi.api;
+    this.apiHandler = restApi.apiHandler;
     this.webSocketApi = webSocketApi.api;
     this.messagesTopic = webSocketApi.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;

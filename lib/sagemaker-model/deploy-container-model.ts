@@ -1,4 +1,3 @@
-import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import { Construct } from "constructs";
@@ -54,8 +53,12 @@ export function deployContainerModel(
     executionRoleArn: executionRole.roleArn,
     ...modelProps,
     vpcConfig: {
-      securityGroupIds: [props.vpc.vpcDefaultSecurityGroup],
-      subnets: props.vpc.privateSubnets.map((subnet) => subnet.subnetId),
+      securityGroupIds: [
+        props.securityGroupId ?? props.vpc!.vpcDefaultSecurityGroup,
+      ],
+      subnets:
+        props.privateSubnets ??
+        props.vpc!.privateSubnets.map((subnet) => subnet.subnetId),
     },
   });
 

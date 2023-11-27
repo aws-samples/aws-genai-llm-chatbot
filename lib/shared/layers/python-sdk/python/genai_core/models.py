@@ -112,7 +112,12 @@ def list_bedrock_finetuned_models():
 
 
 def list_sagemaker_models():
-    models = genai_core.parameters.get_sagemaker_models()
+    parameters = genai_core.parameters.get_sagemaker_models()
+    if parameters is None:
+        return None
+    
+    models = parameters.get("Parameters", [])
+
 
     return [
         {

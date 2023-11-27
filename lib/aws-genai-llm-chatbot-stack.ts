@@ -29,10 +29,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
 
     const shared = new Shared(this, "Shared", { config: props.config });
     const authentication = new Authentication(this, "Authentication");
-    const models = new Models(this, "Models", {
-      config: props.config,
-      shared,
-    });
 
     let ragEngines: RagEngines | undefined = undefined;
     if (props.config.rag.enabled) {
@@ -47,100 +43,98 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       config: props.config,
       ragEngines: ragEngines,
       userPool: authentication.userPool,
-      modelsParameter: models.modelsParameter,
-      models: models.models,
     });
 
     // Langchain Interface Construct
     // This is the model interface recieving messages from the websocket interface via the message topic
     // and interacting with the model via LangChain library
-    const langchainModels = models.models.filter(
-      (model) => model.interface === ModelInterface.LangChain
-    );
+    // const langchainModels = models.models.filter(
+    //   (model) => model.interface === ModelInterface.LangChain
+    // );
 
     // check if any deployed model requires langchain interface or if bedrock is enabled from config
-    if (langchainModels.length > 0 || props.config.bedrock?.enabled) {
-      const langchainInterface = new LangChainInterface(
-        this,
-        "LangchainInterface",
-        {
-          shared,
-          config: props.config,
-          ragEngines,
-          messagesTopic: chatBotApi.messagesTopic,
-          sessionsTable: chatBotApi.sessionsTable,
-          byUserIdIndex: chatBotApi.byUserIdIndex,
-        }
-      );
 
-      // Route all incoming messages targeted to langchain to the langchain model interface queue
-      chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(langchainInterface.ingestionQueue, {
-          filterPolicyWithMessageBody: {
-            direction: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [Direction.In],
-              })
-            ),
-            modelInterface: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [ModelInterface.LangChain],
-              })
-            ),
-          },
-        })
-      );
-
-      for (const model of models.models) {
-        if (model.interface === ModelInterface.LangChain) {
-          langchainInterface.addSageMakerEndpoint(model);
-        }
+    const langchainInterface = new LangChainInterface(
+      this,
+      "LangchainInterface",
+      {
+        shared,
+        config: props.config,
+        ragEngines,
+        messagesTopic: chatBotApi.messagesTopic,
+        sessionsTable: chatBotApi.sessionsTable,
+        byUserIdIndex: chatBotApi.byUserIdIndex,
       }
-    }
+    );
+
+    // Route all incoming messages targeted to langchain to the langchain model interface queue
+    chatBotApi.messagesTopic.addSubscription(
+      new subscriptions.SqsSubscription(langchainInterface.ingestionQueue, {
+        filterPolicyWithMessageBody: {
+          direction: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [Direction.In],
+            })
+          ),
+          modelInterface: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [ModelInterface.LangChain],
+            })
+          ),
+        },
+      })
+    );
+
+    // for (const model of models.models) {
+    //   if (model.interface === ModelInterface.LangChain) {
+    //     langchainInterface.addSageMakerEndpoint(model);
+    //   }
+    // }
+    // }
 
     // IDEFICS Interface Construct
     // This is the model interface recieving messages from the websocket interface via the message topic
     // and interacting with IDEFICS visual language models
-    const ideficsModels = models.models.filter(
-      (model) => model.interface === ModelInterface.Idefics
-    );
+    // const ideficsModels = models.models.filter(
+    //   (model) => model.interface === ModelInterface.Idefics
+    // );
 
     // check if any deployed model requires idefics interface
-    if (ideficsModels.length > 0) {
-      const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
-        shared,
-        config: props.config,
-        messagesTopic: chatBotApi.messagesTopic,
-        sessionsTable: chatBotApi.sessionsTable,
-        byUserIdIndex: chatBotApi.byUserIdIndex,
-        chatbotFilesBucket: chatBotApi.filesBucket,
-      });
+    // if (ideficsModels.length > 0) {
+    const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
+      shared,
+      config: props.config,
+      messagesTopic: chatBotApi.messagesTopic,
+      sessionsTable: chatBotApi.sessionsTable,
+      byUserIdIndex: chatBotApi.byUserIdIndex,
+      chatbotFilesBucket: chatBotApi.filesBucket,
+    });
 
-      // Route all incoming messages targeted to idefics to the idefics model interface queue
-      chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
-          filterPolicyWithMessageBody: {
-            direction: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [Direction.In],
-              })
-            ),
-            modelInterface: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [ModelInterface.Idefics],
-              })
-            ),
-          },
-        })
-      );
+    // Route all incoming messages targeted to idefics to the idefics model interface queue
+    chatBotApi.messagesTopic.addSubscription(
+      new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
+        filterPolicyWithMessageBody: {
+          direction: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [Direction.In],
+            })
+          ),
+          modelInterface: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [ModelInterface.Idefics],
+            })
+          ),
+        },
+      })
+    );
 
-      for (const model of models.models) {
-        // if model name contains idefics then add to idefics interface
-        if (model.interface === ModelInterface.Idefics) {
-          ideficsInterface.addSageMakerEndpoint(model);
-        }
-      }
-    }
+    // for (const model of models.models) {
+    //   // if model name contains idefics then add to idefics interface
+    //   if (model.interface === ModelInterface.Idefics) {
+    //     ideficsInterface.addSageMakerEndpoint(model);
+    //   }
+    // }
+    // }
 
     new UserInterface(this, "UserInterface", {
       shared,
@@ -155,6 +149,13 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
       sagemakerEmbeddingsEnabled:
         typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
+    });
+
+    const models = new Models(this, "Models", {
+      config: props.config,
+      shared: shared,
+      ragEngines: ragEngines,
+      chatBotApi: chatBotApi,
     });
   }
 }

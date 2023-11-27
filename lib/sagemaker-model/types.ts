@@ -2,12 +2,26 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
+import * as servicecatalog from "aws-cdk-lib/aws-servicecatalog";
+import { Modality, ModelInterface } from "../shared/types";
 
-export interface SageMakerModelProps extends cdk.NestedStackProps {
-  vpc: ec2.Vpc;
+export interface SageMakerModelProps extends servicecatalog.ProductStackProps {
+  vpc?: ec2.Vpc;
+  vpcId?: string;
+  privateSubnets?: string[];
+  securityGroupId: string;
   region: string;
   model: ModelConfig;
+  responseStreamingSupported?: boolean;
+  inputModalities?: Modality[];
+  outputModalities?: Modality[];
+  interface?: ModelInterface;
+  ragSupported?: boolean;
+  apiHandler?: lambda.Function;
+  modelName?: string;
 }
+
+export interface SageMakerModelProductProps extends SageMakerModelProps {}
 
 export enum DeploymentType {
   Container = "container",
