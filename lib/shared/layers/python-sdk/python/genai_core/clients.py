@@ -52,3 +52,6 @@ def get_bedrock_client(service_name="bedrock-runtime"):
         bedrock_config_data["aws_session_token"] = credentials["SessionToken"]
 
     return boto3.client(**bedrock_config_data)
+
+def get_service_catalog_client():
+    return boto3.client('servicecatalog')

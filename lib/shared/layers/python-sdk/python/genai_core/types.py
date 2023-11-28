@@ -31,6 +31,7 @@ class Provider(Enum):
     BEDROCK = "bedrock"
     OPENAI = "openai"
     SAGEMAKER = "sagemaker"
+    SERVICECATALOG = "servicecatalog"
 
 
 class Modality(Enum):

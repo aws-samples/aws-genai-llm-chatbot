@@ -3,13 +3,12 @@ export * from "./types";
 import * as servicecatalog from "aws-cdk-lib/aws-servicecatalog";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import { deployContainerModel } from "./deploy-container-model";
 import { deployCustomScriptModel } from "./deploy-custom-script-model";
 import { deployPackageModel } from "./deploy-package-model";
 import { DeploymentType, SageMakerModelProps } from "./types";
-import { Vpc } from "aws-cdk-lib/aws-ec2";
 import { CfnParameter } from "aws-cdk-lib";
 
 export class SageMakerModelProduct extends servicecatalog.ProductStack {
@@ -28,24 +27,28 @@ export class SageMakerModelProduct extends servicecatalog.ProductStack {
     const privateSubnets = new CfnParameter(this, "PrivateSubnets", {
       type: "List<AWS::EC2::Subnet::Id>",
     });
+    const restApiIamRole = new CfnParameter(this, "RestApiIamRole", {
+      type: "String"
+    })
+    const productOwner = new CfnParameter(this, "ProductOwner", {
+      type:"String"
+    })
     let modelProps = props;
-    modelProps.privateSubnets = privateSubnets.valueAsList
-    modelProps.vpcId = vpcId.valueAsString
-    modelProps.securityGroupId = defaultSecurityGroupId.valueAsString
-    new SageMakerModel(this, id, modelProps);
+    modelProps.privateSubnets = privateSubnets.valueAsList;
+    modelProps.vpcId = vpcId.valueAsString;
+    modelProps.securityGroupId = defaultSecurityGroupId.valueAsString;
+    modelProps.restApiIamRole = restApiIamRole.valueAsString;
+    modelProps.productOwner = productOwner!.valueAsString;
+    new SageMakerModel(this, id , modelProps);
   }
 }
 export class SageMakerModel extends Construct {
   public readonly endpoint: sagemaker.CfnEndpoint;
   public readonly modelId: string | string[];
 
-  constructor(
-    scope: Construct,
-    id: string,
-    props: SageMakerModelProps,
-  ) {
+  constructor(scope: Construct, id: string, props: SageMakerModelProps) {
     super(scope, id);
-    const MODEL_PARAMETER_PATH = "chatbot/models";
+    const modelParameterPath = "chatbot/models";
     const { model } = props;
     this.modelId = model.modelId;
     if (model.type == DeploymentType.Container) {
@@ -59,8 +62,10 @@ export class SageMakerModel extends Construct {
       this.endpoint = endpoint;
     }
 
-    new ssm.StringParameter(scope, "ModelsParameter", {
-      parameterName: `/${MODEL_PARAMETER_PATH}/${id}`,
+    const parameterName = `/${props.productOwner!}/${modelParameterPath}/${id}`
+    new ssm.StringParameter(this, "ModelsParameter", {
+      parameterName: parameterName,
+      simpleName: false,
       stringValue: JSON.stringify({
         name: id,
         endpoint: this.endpoint.ref,
@@ -72,11 +77,21 @@ export class SageMakerModel extends Construct {
       }),
     });
 
-    // props.apiHandler?.addToRolePolicy(
-    //   new iam.PolicyStatement({
-    //     actions: ["sagemaker:InvokeEndpoint"],
-    //     resources: [this.endpoint.ref],
-    //   })
-    // );
+
+    if (props.restApiIamRole) {
+      //Get the role from the ARN and attach the policy
+      iam.Role.fromRoleArn(this, id, props.restApiIamRole)
+        .attachInlinePolicy(new iam.Policy(this, "SageMakerInvoke", {
+          document: new iam.PolicyDocument({
+            statements: [
+              new iam.PolicyStatement({
+                actions: ["sagemaker:InvokeEndpoint"],
+                resources: [this.endpoint.ref],
+              })
+            ]
+          })
+        }))
+    }
+
   }
 }

@@ -17,11 +17,12 @@ export interface SageMakerModelProps extends servicecatalog.ProductStackProps {
   outputModalities?: Modality[];
   interface?: ModelInterface;
   ragSupported?: boolean;
-  apiHandler?: lambda.Function;
   modelName?: string;
+  restApiIamRole?: string;
+  productOwner?: string;
 }
 
-export interface SageMakerModelProductProps extends SageMakerModelProps {}
+
 
 export enum DeploymentType {
   Container = "container",

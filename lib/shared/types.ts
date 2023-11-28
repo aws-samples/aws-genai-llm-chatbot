@@ -106,7 +106,7 @@ export interface SystemConfig {
   };
 }
 
-export const MODEL_PARAMETER_PATH = "chatbot/models";
+
 
 export interface SageMakerLLMEndpoint {
   name: string;

@@ -11,7 +11,7 @@ export const ModelsColumnDefinitions: TableProps.ColumnDefinition<ModelItem>[] =
       id: "provider",
       header: "Provider",
       sortingField: "provider",
-      cell: (item: ModelItem) => item.provider,
+      cell: (item: ModelItem) => item.provider != "servicecatalog" ? item.provider : "sagemaker",
     },
     {
       id: "name",
@@ -24,26 +24,32 @@ export const ModelsColumnDefinitions: TableProps.ColumnDefinition<ModelItem>[] =
       id: "ragSupported",
       header: "RAG Supported",
       sortingField: "ragSupported",
-      cell: (item: ModelItem) => (item.ragSupported ? "Yes" : "No"),
+      cell: (item: ModelItem) => item.ragSupported != undefined ? (item.ragSupported ? "Yes" : "No") : "",
     },
     {
       id: "inputModalities",
       header: "Input modalities",
       sortingField: "inputModalities",
-      cell: (item: ModelItem) => item.inputModalities.join(", "),
+      cell: (item: ModelItem) => item.inputModalities ? item.inputModalities.join(", ") : "",
     },
     {
       id: "outputModalities",
       header: "Output modalities",
       sortingField: "outputModalities",
-      cell: (item: ModelItem) => item.outputModalities.join(", "),
+      cell: (item: ModelItem) => item.outputModalities ? item.outputModalities.join(", ") : "",
     },
     {
       id: "streaming",
       header: "Streaming",
       sortingField: "streaming",
-      cell: (item: ModelItem) => (item.streaming ? "Yes" : "No"),
+      cell: (item: ModelItem) => item.streaming != undefined ? (item.streaming ? "Yes" : "No") : "",
     },
+    {
+      id: "availability",
+      header: "Model Availability",
+      sortingField: "availability",
+      cell: (item: ModelItem) => item.provider != "servicecatalog" ? <>Available</> : <>Deployable!</>,
+    }
   ];
 
 export const ModelsColumnFilteringProperties: PropertyFilterProperty[] = [

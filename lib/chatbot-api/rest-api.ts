@@ -1,8 +1,6 @@
 import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import {
-  MODEL_PARAMETER_PATH,
-  SageMakerModelEndpoint,
   SystemConfig,
 } from "../shared/types";
 import { Construct } from "constructs";
@@ -55,7 +53,7 @@ export class RestApi extends Construct {
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
-        MODELS_PARAMETER_NAME: `/${MODEL_PARAMETER_PATH}/`,
+        MODELS_PARAMETER_NAME: `/${props.config.prefix}GenAIChatBotStack/`,
         X_ORIGIN_VERIFY_SECRET_ARN: props.shared.xOriginVerifySecret.secretArn,
         API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
         SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
@@ -252,7 +250,7 @@ export class RestApi extends Construct {
         ],
         effect: iam.Effect.ALLOW,
         resources: [
-          `arn:${cdk.Aws.PARTITION}:ssm:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:parameter/${MODEL_PARAMETER_PATH}/*`,
+          `arn:${cdk.Aws.PARTITION}:ssm:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:parameter/${props.config.prefix}GenAIChatBotStack/*`,
         ],
       })
     );

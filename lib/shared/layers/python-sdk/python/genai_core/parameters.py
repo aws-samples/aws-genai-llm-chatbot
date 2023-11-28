@@ -29,6 +29,13 @@ def get_config():
 
     return config
 
+def get_root_parameter_path():
+    config = get_config()
+    return config.get("prefix","") + "GenAIChatBotStack"
 
 def get_sagemaker_models(): 
     return parameters.get_parameters(MODELS_PARAMETER_NAME, transform="json", max_age=30)
+
+def get_provisionable_sagemaker_model_details():
+    path = f'/{get_root_parameter_path()}/products/'
+    return parameters.get_parameters(path, transform="json", max_age=30)

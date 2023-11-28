@@ -1,11 +1,12 @@
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as ssm from "aws-cdk-lib/aws-ssm"
 import * as servicecatalog from "aws-cdk-lib/aws-servicecatalog";
+import * as iam from "aws-cdk-lib/aws-iam"
 import { Construct } from "constructs";
 import {
   ContainerImages,
   DeploymentType,
-  SageMakerModel,
   SageMakerModelProduct,
 } from "../sagemaker-model";
 import { Shared } from "../shared";
@@ -25,32 +26,19 @@ export interface ModelsProps {
 }
 
 export class Models extends Construct {
-  public readonly modelsParameterPath: string = "/chatbot/models/";
   public readonly portfolio: servicecatalog.Portfolio;
 
   constructor(scope: Construct, id: string, props: ModelsProps) {
     super(scope, id);
     const portfolioAssetBucket = new s3.Bucket(this, "PortfolioAssetBucket");
-
-    const portfolio = new servicecatalog.Portfolio(this, "ModelsPortfolio", {
-      displayName: "GenAI Chatbot SageMaker Models",
-      providerName: "GenAI Chatbot",
-      description:
-        "Models that can be launched to be used with the GenAI Chatbot",
-    });
-
-    if (props.chatBotApi.apiHandler.role) {
-      portfolio.giveAccessToRole(props.chatBotApi.apiHandler.role);
-    }
-
+    const productOwner = `${props.config.prefix}GenAIChatBotStack`
     const defaultSecurityGroup = props.shared.vpc.vpcDefaultSecurityGroup;
-
-
+    const falconLiteModelId = "amazon/FalconLite"
     const falconLiteProduct = new servicecatalog.CloudFormationProduct(
-      this,
+      scope,
       "FalconLiteProduct",
       {
-        owner: "GenAI Chatbot",
+        owner: productOwner,
         productName: "FalconLite",
         productVersions: [
           {
@@ -63,7 +51,7 @@ export class Models extends Construct {
                   region: cdk.Aws.REGION,
                   model: {
                     type: DeploymentType.Container,
-                    modelId: "amazon/FalconLite",
+                    modelId: falconLiteModelId,
                     container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_0_9_3,
                     instanceType: "ml.g5.12xlarge",
                     // https://github.com/awslabs/extending-the-context-length-of-open-source-llms/blob/main/custom-tgi-ecr/deploy.ipynb
@@ -86,63 +74,306 @@ export class Models extends Construct {
                   outputModalities: [Modality.Text],
                   interface: ModelInterface.LangChain,
                   ragSupported: true,
-                  apiHandler: props.chatBotApi.apiHandler,
                 })
               ),
           },
         ],
-      }
+      },
     );
 
-    portfolio.addProduct(falconLiteProduct);
+    new ssm.StringParameter(this, "FalconLiteProductParams", {
+      parameterName: `/${productOwner}/products/${falconLiteProduct.productId}`,
+      simpleName: false,
+      stringValue: JSON.stringify({
+        "provider": "sagemaker",
+        "name": falconLiteModelId.split("/").join("-").split(".").join("-"),
+        "streaming": false,
+        "inputModalities": [Modality.Text],
+        "outputModalities": [Modality.Text],
+        "interface": ModelInterface.LangChain,
+        "ragSupported": true,
+      })
+    })
 
-
-
+    const mistral7bInstructModelId = "mistralai/Mistral-7B-Instruct-v0.1"
     const mistral7bInstructProduct = new servicecatalog.CloudFormationProduct(
-      this,
-      "Mistral7bInstructProduct",
-      {
-        owner: "GenAI Chatbot",
-        productName: "Mistral7BInstruct",
-        productVersions: [
-          {
-            cloudFormationTemplate:
-              servicecatalog.CloudFormationTemplate.fromProductStack(
-                new SageMakerModelProduct(
-                  this,
-                  "Mistral7BInstruct",
-                  {
+        this,
+        "Mistral7bInstructProduct",
+        {
+          owner: productOwner,
+          productName: "Mistral7BInstruct",
+          productVersions: [
+            {
+              cloudFormationTemplate:
+                servicecatalog.CloudFormationTemplate.fromProductStack(
+                  new SageMakerModelProduct(
+                    this,
+                    "Mistral7BInstruct",
+                    {
+                      assetBucket: portfolioAssetBucket,
+                      vpc: props.shared.vpc,
+                      securityGroupId: defaultSecurityGroup,
+                      region: cdk.Aws.REGION,
+                      model: {
+                        type: DeploymentType.Container,
+                        modelId: mistral7bInstructModelId,
+                        container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0,
+                        instanceType: "ml.g5.2xlarge",
+                        containerStartupHealthCheckTimeoutInSeconds: 300,
+                        env: {
+                          SM_NUM_GPUS: JSON.stringify(1),
+                          MAX_INPUT_LENGTH: JSON.stringify(2048),
+                          MAX_TOTAL_TOKENS: JSON.stringify(4096),
+                          //HF_MODEL_QUANTIZE: "bitsandbytes",
+                        },
+                      },
+                      responseStreamingSupported: false,
+                      inputModalities: [Modality.Text],
+                      outputModalities: [Modality.Text],
+                      interface: ModelInterface.LangChain,
+                      ragSupported: true,
+                    }
+                  )
+                ),
+            },
+          ],
+        }
+      );
+
+      new ssm.StringParameter(this, "mistral7bInstructProductParams", {
+        parameterName: `/${productOwner}/products/${mistral7bInstructProduct.productId}`,
+        simpleName: false,
+        stringValue: JSON.stringify({
+          "provider": "sagemaker",
+          "name": mistral7bInstructModelId.split("/").join("-").split(".").join("-"),
+          "streaming": false,
+          "inputModalities": [Modality.Text],
+          "outputModalities": [Modality.Text],
+          "interface": ModelInterface.LangChain,
+          "ragSupported": true,
+        })
+      })
+
+      const llama2chatModelId = "meta-LLama2-13b-chat"
+      const llama2chatProduct = new servicecatalog.CloudFormationProduct(
+        this,
+        "LLamaV2_13B_ChatProduct",
+        {
+          owner: productOwner,
+          productName: "LLamaV2_13B_Chat",
+          productVersions: [
+            {
+              cloudFormationTemplate:
+                servicecatalog.CloudFormationTemplate.fromProductStack(
+                  new SageMakerModelProduct(this, "LLamaV2_13B_Chat", {
+                    assetBucket: portfolioAssetBucket,
                     vpc: props.shared.vpc,
                     securityGroupId: defaultSecurityGroup,
                     region: cdk.Aws.REGION,
                     model: {
-                      type: DeploymentType.Container,
-                      modelId: "mistralai/Mistral-7B-Instruct-v0.1",
-                      container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0,
-                      instanceType: "ml.g5.2xlarge",
-                      containerStartupHealthCheckTimeoutInSeconds: 300,
-                      env: {
-                        SM_NUM_GPUS: JSON.stringify(1),
-                        MAX_INPUT_LENGTH: JSON.stringify(2048),
-                        MAX_TOTAL_TOKENS: JSON.stringify(4096),
-                        //HF_MODEL_QUANTIZE: "bitsandbytes",
-                      },
+                      type: DeploymentType.ModelPackage,
+                      modelId: llama2chatModelId,
+                      instanceType: "ml.g5.12xlarge",
+                      packages: (scope) =>
+                        new cdk.CfnMapping(scope, "Llama2ChatPackageMapping", {
+                          lazy: true,
+                          mapping: {
+                            "ap-southeast-1": {
+                              arn: `arn:aws:sagemaker:ap-southeast-1:192199979996:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                            },
+                            "ap-southeast-2": {
+                              arn: `arn:aws:sagemaker:ap-southeast-2:666831318237:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                            },
+                            "eu-west-1": {
+                              arn: `arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                            },
+                            "us-east-1": {
+                              arn: `arn:aws:sagemaker:us-east-1:865070037744:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                            },
+                            "us-east-2": {
+                              arn: `arn:aws:sagemaker:us-east-2:057799348421:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                            },
+                            "us-west-2": {
+                              arn: `arn:aws:sagemaker:us-west-2:594846645681:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
+                            },
+                          },
+                        }),
                     },
                     responseStreamingSupported: false,
                     inputModalities: [Modality.Text],
                     outputModalities: [Modality.Text],
                     interface: ModelInterface.LangChain,
                     ragSupported: true,
-                    apiHandler: props.chatBotApi.apiHandler,
-                  }
-                )
-              ),
-          },
-        ],
-      }
-    );
+                  })
+                ),
+            },
+          ],
+        }
+      );
 
+      new ssm.StringParameter(this, "LLamaV2_13B_ChatProductParams", {
+        parameterName: `/${productOwner}/products/${llama2chatProduct.productId}`,
+        simpleName: false,
+        stringValue: JSON.stringify({
+          "provider": "sagemaker",
+          "name": llama2chatModelId.split("/").join("-").split(".").join("-"),
+          "streaming": false,
+          "inputModalities": [Modality.Text],
+          "outputModalities": [Modality.Text],
+          "interface": ModelInterface.LangChain,
+          "ragSupported": true,
+        })
+      })
+
+      const idefics9bModelId = "HuggingFaceM4/idefics-9b-instruct"
+      const idefics9bProduct = new servicecatalog.CloudFormationProduct(
+        this,
+        "IDEFICS9BProduct",
+        {
+          owner: productOwner,
+          productName: "IDEFICS9B",
+          productVersions: [
+            {
+              cloudFormationTemplate:
+                servicecatalog.CloudFormationTemplate.fromProductStack(
+                  new SageMakerModelProduct(this, "IDEFICS9B", {
+                    assetBucket: portfolioAssetBucket,
+                    vpc: props.shared.vpc,
+                    securityGroupId: defaultSecurityGroup,
+                    region: cdk.Aws.REGION,
+                    model: {
+                      type: DeploymentType.Container,
+                      modelId: idefics9bModelId,
+                      container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0,
+                      instanceType: "ml.g5.12xlarge",
+                      containerStartupHealthCheckTimeoutInSeconds: 300,
+                      env: {
+                        SM_NUM_GPUS: JSON.stringify(4),
+                        MAX_INPUT_LENGTH: JSON.stringify(1024),
+                        MAX_TOTAL_TOKENS: JSON.stringify(2048),
+                        MAX_BATCH_TOTAL_TOKENS: JSON.stringify(8192),
+                      },
+                    },
+                    responseStreamingSupported: false,
+                    inputModalities: [Modality.Text, Modality.Image],
+                    outputModalities: [Modality.Text],
+                    interface: ModelInterface.Idefics,
+                    ragSupported: false,
+                  })),
+            },
+          ],
+        }
+      );
+
+      new ssm.StringParameter(this, "IDEFICS9BProductParams", {
+        parameterName: `/${productOwner}/products/${idefics9bProduct.productId}`,
+        simpleName: false,
+        stringValue: JSON.stringify({
+          "provider": "sagemaker",
+          "name": idefics9bModelId.split("/").join("-").split(".").join("-"),
+          "streaming": false,
+          "inputModalities": [Modality.Text, Modality.Image],
+          "outputModalities": [Modality.Text],
+          "interface": ModelInterface.Idefics,
+          "ragSupported": false,
+        })
+      })
+      
+      const idefics80bModelId = "HuggingFaceM4/idefics-80b-instruct"
+      const idefics80bProduct = new servicecatalog.CloudFormationProduct(
+        this,
+        "IDEFICS80BProduct",
+        {
+          owner: productOwner,
+          productName: "IDEFICS80B",
+          productVersions: [
+            {
+              cloudFormationTemplate:
+                servicecatalog.CloudFormationTemplate.fromProductStack(
+                  new SageMakerModelProduct(this, "IDEFICS80B", {
+                    assetBucket: portfolioAssetBucket,
+                    vpc: props.shared.vpc,
+                    securityGroupId: defaultSecurityGroup,
+                    region: cdk.Aws.REGION,
+                    model: {
+                      type: DeploymentType.Container,
+                      modelId: idefics80bModelId,
+                      container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0,
+                      instanceType: "ml.g5.48xlarge",
+                      containerStartupHealthCheckTimeoutInSeconds: 600,
+                      env: {
+                        SM_NUM_GPUS: JSON.stringify(8),
+                        MAX_INPUT_LENGTH: JSON.stringify(1024),
+                        MAX_TOTAL_TOKENS: JSON.stringify(2048),
+                        MAX_BATCH_TOTAL_TOKENS: JSON.stringify(8192),
+                        // quantization required to work with ml.g5.48xlarge
+                        // comment if deploying with ml.p4d or ml.p4e instances
+                        HF_MODEL_QUANTIZE: "bitsandbytes",
+                      },
+                    },
+                    responseStreamingSupported: false,
+                    inputModalities: [Modality.Text, Modality.Image],
+                    outputModalities: [Modality.Text],
+                    interface: ModelInterface.Idefics,
+                    ragSupported: false,
+                  })
+                ),
+            },
+          ],
+        }
+      );
+
+      new ssm.StringParameter(this, "IDEFICS80BProductParams", {
+        parameterName: `/${productOwner}/products/${idefics80bProduct.productId}`,
+        simpleName: false,
+        stringValue: JSON.stringify({
+          "provider": "sagemaker",
+          "name": idefics80bModelId.split("/").join("-").split(".").join("-"),
+          "streaming": false,
+          "inputModalities": [Modality.Text, Modality.Image],
+          "outputModalities": [Modality.Text],
+          "interface": ModelInterface.Idefics,
+          "ragSupported": false,
+        })
+      })
+
+      //Add all the declared products to a portfolio.
+      const portfolio = new servicecatalog.Portfolio(this, "ModelsPortfolio", {
+        displayName: "GenAI Chatbot SageMaker Models",
+        providerName: productOwner,
+        description:
+          "Models that can be launched to be used with the GenAI Chatbot",
+      });
+
+      new ssm.StringParameter(this, "ProductsConfig", {
+        parameterName: `/${productOwner}/products/config`,
+        stringValue: JSON.stringify({
+          vpcId: props.shared.vpc.vpcId,
+          defaultSecurityGroup: defaultSecurityGroup,
+          privateSubnets: props.shared.vpc.privateSubnets.map(subnet => subnet.subnetId),
+          restApiIamRole: props.chatBotApi.apiHandler.role?.roleArn,
+          productOwner: productOwner,
+        })
+      })
+
+    if(props.chatBotApi.apiHandler.role) {
+      portfolio.giveAccessToRole(props.chatBotApi.apiHandler.role);
+      props.chatBotApi.apiHandler.role.addToPrincipalPolicy(
+        new iam.PolicyStatement({
+          actions: [
+            "servicecatalog:SearchProducts"
+          ],
+          resources: ["*"],
+          effect: iam.Effect.ALLOW,
+        })
+      )
+    }
+    portfolio.addProduct(falconLiteProduct);
     portfolio.addProduct(mistral7bInstructProduct);
+    portfolio.addProduct(idefics80bProduct);
+    portfolio.addProduct(llama2chatProduct);
+    portfolio.addProduct(idefics9bProduct);
+    this.portfolio = portfolio;
 
     // To get Jumpstart model ARNs do the following
     // 1. Identify the modelId via https://sagemaker.readthedocs.io/en/stable/doc_utils/pretrainedmodels.html
@@ -154,158 +385,5 @@ export class Models extends Construct {
     //      model = JumpStartModel(model_id=model_id, region=region)
     //      print(model.model_package_arn)
 
-
-
-    const llama2chatProduct = new servicecatalog.CloudFormationProduct(
-      this,
-      "LLamaV2_13B_ChatProduct",
-      {
-        owner: "GenAI Chatbot",
-        productName: "LLamaV2_13B_Chat",
-        productVersions: [
-          {
-            cloudFormationTemplate:
-              servicecatalog.CloudFormationTemplate.fromProductStack(
-                new SageMakerModelProduct(this, "LLamaV2_13B_Chat", {
-                  assetBucket: portfolioAssetBucket,
-                  vpc: props.shared.vpc,
-                  securityGroupId: defaultSecurityGroup,
-                  region: cdk.Aws.REGION,
-                  model: {
-                    type: DeploymentType.ModelPackage,
-                    modelId: "meta-LLama2-13b-chat",
-                    instanceType: "ml.g5.12xlarge",
-                    packages: (scope) =>
-                      new cdk.CfnMapping(scope, "Llama2ChatPackageMapping", {
-                        lazy: true,
-                        mapping: {
-                          "ap-southeast-1": {
-                            arn: `arn:aws:sagemaker:ap-southeast-1:192199979996:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
-                          },
-                          "ap-southeast-2": {
-                            arn: `arn:aws:sagemaker:ap-southeast-2:666831318237:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
-                          },
-                          "eu-west-1": {
-                            arn: `arn:aws:sagemaker:eu-west-1:985815980388:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
-                          },
-                          "us-east-1": {
-                            arn: `arn:aws:sagemaker:us-east-1:865070037744:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
-                          },
-                          "us-east-2": {
-                            arn: `arn:aws:sagemaker:us-east-2:057799348421:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
-                          },
-                          "us-west-2": {
-                            arn: `arn:aws:sagemaker:us-west-2:594846645681:model-package/llama2-13b-f-v4-55c7c39a0cf535e8bad0d342598c219b`,
-                          },
-                        },
-                      }),
-                  },
-                  responseStreamingSupported: false,
-                  inputModalities: [Modality.Text],
-                  outputModalities: [Modality.Text],
-                  interface: ModelInterface.LangChain,
-                  ragSupported: true,
-                  apiHandler: props.chatBotApi.apiHandler,
-                })
-              ),
-          },
-        ],
-      }
-    );
-
-    portfolio.addProduct(llama2chatProduct);
-
-
-
-    const idefics9bProduct = new servicecatalog.CloudFormationProduct(
-      this,
-      "IDEFICS9BProduct",
-      {
-        owner: "GenAI Chatbot",
-        productName: "IDEFICS9B",
-        productVersions: [
-          {
-            cloudFormationTemplate:
-              servicecatalog.CloudFormationTemplate.fromProductStack(new SageMakerModelProduct(this, "IDEFICS9B", {
-                assetBucket: portfolioAssetBucket,
-                vpc: props.shared.vpc,
-                securityGroupId: defaultSecurityGroup,
-                region: cdk.Aws.REGION,
-                model: {
-                  type: DeploymentType.Container,
-                  modelId: "HuggingFaceM4/idefics-9b-instruct",
-                  container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0,
-                  instanceType: "ml.g5.12xlarge",
-                  containerStartupHealthCheckTimeoutInSeconds: 300,
-                  env: {
-                    SM_NUM_GPUS: JSON.stringify(4),
-                    MAX_INPUT_LENGTH: JSON.stringify(1024),
-                    MAX_TOTAL_TOKENS: JSON.stringify(2048),
-                    MAX_BATCH_TOTAL_TOKENS: JSON.stringify(8192),
-                  },
-                },
-                responseStreamingSupported: false,
-                inputModalities: [Modality.Text, Modality.Image],
-                outputModalities: [Modality.Text],
-                interface: ModelInterface.Idefics,
-                ragSupported: false,
-                apiHandler: props.chatBotApi.apiHandler,
-              })),
-          },
-        ],
-      }
-    );
-
-    portfolio.addProduct(idefics9bProduct);
-
-
-
-    const idefics80bProduct = new servicecatalog.CloudFormationProduct(
-      this,
-      "IDEFICS80BProduct",
-      {
-        owner: "GenAI Chatbot",
-        productName: "IDEFICS80B",
-        productVersions: [
-          {
-            cloudFormationTemplate:
-              servicecatalog.CloudFormationTemplate.fromProductStack(
-                new SageMakerModelProduct(this, "IDEFICS80B", {
-                  assetBucket: portfolioAssetBucket,
-                  vpc: props.shared.vpc,
-                  securityGroupId: defaultSecurityGroup,
-                  region: cdk.Aws.REGION,
-                  model: {
-                    type: DeploymentType.Container,
-                    modelId: "HuggingFaceM4/idefics-80b-instruct",
-                    container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0,
-                    instanceType: "ml.g5.48xlarge",
-                    containerStartupHealthCheckTimeoutInSeconds: 600,
-                    env: {
-                      SM_NUM_GPUS: JSON.stringify(8),
-                      MAX_INPUT_LENGTH: JSON.stringify(1024),
-                      MAX_TOTAL_TOKENS: JSON.stringify(2048),
-                      MAX_BATCH_TOTAL_TOKENS: JSON.stringify(8192),
-                      // quantization required to work with ml.g5.48xlarge
-                      // comment if deploying with ml.p4d or ml.p4e instances
-                      HF_MODEL_QUANTIZE: "bitsandbytes",
-                    },
-                  },
-                  responseStreamingSupported: false,
-                  inputModalities: [Modality.Text, Modality.Image],
-                  outputModalities: [Modality.Text],
-                  interface: ModelInterface.Idefics,
-                  ragSupported: false,
-                  apiHandler: props.chatBotApi.apiHandler,
-                })
-              ),
-          },
-        ],
-      }
-    );
-
-    portfolio.addProduct(idefics80bProduct);
-
-    this.portfolio = portfolio;
   }
 }

@@ -1,3 +1,4 @@
+import json
 import genai_core.types
 import genai_core.clients
 import genai_core.parameters
@@ -19,6 +20,10 @@ def list_models():
     sagemaker_models = list_sagemaker_models()
     if sagemaker_models:
         models.extend(sagemaker_models)
+
+    provisionable_sagemaker_models = list_provisionable_sagemaker_models()
+    if provisionable_sagemaker_models:
+        models.extend(provisionable_sagemaker_models)
 
     openai_models = list_openai_models()
     if openai_models:
@@ -134,3 +139,33 @@ def list_sagemaker_models():
         }
         for model in models
     ]
+
+def list_provisionable_sagemaker_models():
+    service_catalog = genai_core.clients.get_service_catalog_client()
+    product_owner = genai_core.parameters.get_root_parameter_path()
+    products = service_catalog.search_products(
+        Filters={
+            'Owner': [product_owner],
+        }
+    )
+    
+    product_details = genai_core.parameters.get_provisionable_sagemaker_model_details()
+    if product_details['Parameters'] is None:
+        return []
+    
+    models = []
+    for product in products.get('ProductViewSummaries', []):
+        param_name = f'/{genai_core.parameters.get_root_parameter_path()}/products/{product["ProductId"]}'
+        model = [json.loads(details['Value']) for details in product_details if details["Name"] == param_name]
+        models.extend({
+            "provider": Provider.SERVICECATALOG.value,
+            "name": model["name"],
+            "streaming": model.get("responseStreamingSupported", False),
+            "inputModalities": model["inputModalities"],
+            "outputModalities": model["outputModalities"],
+            "interface": model["interface"],
+            "ragSupported": model["ragSupported"],
+        })
+    return models
+
+    
