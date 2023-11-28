@@ -61,7 +61,6 @@ def delete_aurora_workspace(workspace: dict):
                         "document_id": item["document_id"],
                     }
                 )
-
     print(f"Deleted {len(items_to_delete)} items.")
 
     response = workspaces_table.delete_item(

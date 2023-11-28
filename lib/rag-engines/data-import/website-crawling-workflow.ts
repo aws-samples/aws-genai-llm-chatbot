@@ -26,7 +26,6 @@ export interface WebsiteCrawlingWorkflowProps {
 
 export class WebsiteCrawlingWorkflow extends Construct {
   public readonly stateMachine: sfn.StateMachine;
-
   constructor(
     scope: Construct,
     id: string,
@@ -47,6 +46,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
         ),
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
+        tracing: lambda.Tracing.ACTIVE,
         memorySize: 1024,
         handler: "index.lambda_handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
@@ -76,14 +76,13 @@ export class WebsiteCrawlingWorkflow extends Construct {
     );
 
     props.shared.configParameter.grantRead(websiteParserFunction);
-    props.shared.apiKeysSecret.grantRead(websiteParserFunction);
-    props.processingBucket.grantReadWrite(websiteParserFunction);
-    props.ragDynamoDBTables.workspacesTable.grantReadWriteData(
-      websiteParserFunction
-    );
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(
       websiteParserFunction
     );
+    props.ragDynamoDBTables.workspacesTable.grantReadWriteData(
+      websiteParserFunction
+    );
+    props.processingBucket.grantReadWrite(websiteParserFunction);
 
     if (props.auroraDatabase) {
       props.auroraDatabase.secret?.grantRead(websiteParserFunction);
@@ -93,12 +92,11 @@ export class WebsiteCrawlingWorkflow extends Construct {
     }
 
     if (props.openSearchVector) {
-      websiteParserFunction.addToRolePolicy(
-        new iam.PolicyStatement({
-          actions: ["aoss:APIAccessAll"],
-          resources: [props.openSearchVector.openSearchCollection.attrArn],
-        })
-      );
+      const openSearchVectorPolicy = new iam.PolicyStatement({
+        actions: ["aoss:APIAccessAll"],
+        resources: [props.openSearchVector.openSearchCollection.attrArn],
+      });
+      websiteParserFunction.addToRolePolicy(openSearchVectorPolicy);
 
       props.openSearchVector.addToAccessPolicy(
         "website-crawling-workflow",
@@ -112,32 +110,32 @@ export class WebsiteCrawlingWorkflow extends Construct {
     }
 
     if (props.sageMakerRagModelsEndpoint) {
+      const invokeSageMakerRagModelEndpointPolicy = new iam.PolicyStatement({
+        actions: ["sagemaker:InvokeEndpoint"],
+        resources: [props.sageMakerRagModelsEndpoint.ref],
+      });
       websiteParserFunction.addToRolePolicy(
-        new iam.PolicyStatement({
-          actions: ["sagemaker:InvokeEndpoint"],
-          resources: [props.sageMakerRagModelsEndpoint.ref],
-        })
+        invokeSageMakerRagModelEndpointPolicy
       );
     }
 
     if (props.config.bedrock?.enabled) {
-      websiteParserFunction.addToRolePolicy(
-        new iam.PolicyStatement({
-          actions: [
-            "bedrock:InvokeModel",
-            "bedrock:InvokeModelWithResponseStream",
-          ],
-          resources: ["*"],
-        })
-      );
+      const bedrockInokePolicy = new iam.PolicyStatement({
+        actions: [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream",
+        ],
+        resources: ["*"],
+      });
+      websiteParserFunction.addToRolePolicy(bedrockInokePolicy);
 
       if (props.config.bedrock?.roleArn) {
-        websiteParserFunction.addToRolePolicy(
-          new iam.PolicyStatement({
-            actions: ["sts:AssumeRole"],
-            resources: [props.config.bedrock.roleArn],
-          })
-        );
+        const bedrockAssumePolicy = new iam.PolicyStatement({
+          actions: ["sts:AssumeRole"],
+          resources: [props.config.bedrock.roleArn],
+        });
+        websiteParserFunction.addToRolePolicy(bedrockAssumePolicy);
+        // crawlQueuedRssPostsFunction.addToRolePolicy(bedrockAssumePolicy);
       }
     }
 
@@ -227,13 +225,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
       timeout: cdk.Duration.minutes(120),
       comment: "Website crawling workflow",
     });
-
-    stateMachine.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["events:CreateRule", "events:PutRule", "events:PutTargets"],
-        resources: ["*"],
-      })
-    );
 
     this.stateMachine = stateMachine;
   }

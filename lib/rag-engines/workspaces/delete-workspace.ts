@@ -41,10 +41,7 @@ export class DeleteWorkspace extends Construct {
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
-        layers: [
-          props.shared.powerToolsLayer,
-          props.shared.commonLayer,
-        ],
+        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         timeout: cdk.Duration.minutes(15),
         logRetention: logs.RetentionDays.ONE_WEEK,
         environment: {
@@ -61,6 +58,8 @@ export class DeleteWorkspace extends Construct {
             props.ragDynamoDBTables?.documentsTable.tableName ?? "",
           DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
             props.ragDynamoDBTables?.documentsByCompoundKeyIndexName ?? "",
+          DOCUMENTS_BY_STATUS_INDEX:
+            props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
           DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
             props.kendraRetrieval?.kendraS3DataSourceBucket?.bucketName ?? "",
           OPEN_SEARCH_COLLECTION_ENDPOINT:

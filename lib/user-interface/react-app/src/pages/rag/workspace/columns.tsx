@@ -1,4 +1,4 @@
-import { StatusIndicator } from "@cloudscape-design/components";
+import { Link, StatusIndicator } from "@cloudscape-design/components";
 import { DocumentItem, RagDocumentType } from "../../../common/types";
 import { Labels } from "../../../common/constants";
 import { DateTime } from "luxon";
@@ -63,6 +63,36 @@ const TEXTS_COLUMN_DEFINITIONS = [
   },
 ];
 
+const RSS_COLUMN_DEFINITIONS = [
+  {
+    id: "title",
+    header: "RSS Feed Title",
+    cell: (item: DocumentItem) => (
+      <Link href={item.workspaceId + "/rss/" + item.id + "/"}>
+        {Utils.textEllipsis(item.title ?? "", 100)}
+      </Link>
+    ),
+    isRowHeader: true,
+  },
+  {
+    id: "path",
+    header: "RSS Feed URL",
+    cell: (item: DocumentItem) => (
+      <>{Utils.textEllipsis(item.path ?? "", 100)}</>
+    ),
+    isRowHeader: true,
+  },
+  {
+    id: "status",
+    header: "RSS Subscription Status",
+    cell: (item: DocumentItem) => (
+      <StatusIndicator type={Labels.statusTypeMap[item.status]}>
+        {Labels.statusMap[item.status]}
+      </StatusIndicator>
+    ),
+  },
+];
+
 const QNA_COLUMN_DEFINITIONS = [
   {
     id: "title",
@@ -80,6 +110,7 @@ const QNA_COLUMN_DEFINITIONS = [
         {Labels.statusMap[item.status]}
       </StatusIndicator>
     ),
+    isRowHeader: true,
   },
   {
     id: "createdAt",
@@ -88,6 +119,7 @@ const QNA_COLUMN_DEFINITIONS = [
       DateTime.fromISO(new Date(item.createdAt).toISOString()).toLocaleString(
         DateTime.DATETIME_SHORT
       ),
+    isRowHeader: true,
   },
 ];
 
@@ -142,6 +174,8 @@ export function getColumnDefinition(documentType: RagDocumentType) {
       return QNA_COLUMN_DEFINITIONS;
     case "website":
       return WEBSITES_COLUMN_DEFINITIONS;
+    case "rssfeed":
+      return RSS_COLUMN_DEFINITIONS;
     default:
       return [];
   }

@@ -28,9 +28,11 @@ export class RagEngines extends Construct {
   public readonly workspacesTable: dynamodb.Table;
   public readonly workspacesByObjectTypeIndexName: string;
   public readonly documentsByCompountKeyIndexName: string;
+  public readonly documentsByStatusIndexName: string;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
   public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
+  public readonly dataImport: DataImport;
 
   constructor(scope: Construct, id: string, props: RagEnginesProps) {
     super(scope, id);
@@ -111,8 +113,10 @@ export class RagEngines extends Construct {
       tables.workspacesByObjectTypeIndexName;
     this.documentsByCompountKeyIndexName =
       tables.documentsByCompoundKeyIndexName;
+    this.documentsByStatusIndexName = tables.documentsByStatusIndexName;
     this.fileImportWorkflow = dataImport.fileImportWorkflow;
     this.websiteCrawlingWorkflow = dataImport.websiteCrawlingWorkflow;
     this.deleteWorkspaceWorkflow = workspaces.deleteWorkspaceWorkflow;
+    this.dataImport = dataImport;
   }
 }

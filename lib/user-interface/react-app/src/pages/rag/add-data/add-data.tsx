@@ -29,6 +29,7 @@ import AddQnA from "./add-qna";
 import CrawlWebsite from "./crawl-website";
 import DataFileUpload from "./data-file-upload";
 import { CHATBOT_NAME } from "../../../common/constants";
+import AddRssSubscription from "./add-rss-subscription";
 
 export default function AddData() {
   const onFollow = useOnFollow();
@@ -97,7 +98,8 @@ export default function AddData() {
 
   const workspace = workspaces.find((c) => c.id === data.workspace?.value);
   const showTabs = !workspace?.kendraIndexExternal;
-  const disabledTabs = workspace?.engine === "kendra" ? ["qna", "website"] : [];
+  const disabledTabs =
+    workspace?.engine === "kendra" ? ["qna", "website", "rssfeed"] : [];
 
   return (
     <BaseAppLayout
@@ -219,6 +221,20 @@ export default function AddData() {
                     disabled: disabledTabs.includes("website"),
                     content: (
                       <CrawlWebsite
+                        data={data}
+                        validate={validate}
+                        submitting={submitting}
+                        setSubmitting={setSubmitting}
+                        selectedWorkspace={selectedWorkspace}
+                      />
+                    ),
+                  },
+                  {
+                    label: "RSS Feeds",
+                    id: "rssfeed",
+                    disabled: disabledTabs.includes("rssfeed"),
+                    content: (
+                      <AddRssSubscription
                         data={data}
                         validate={validate}
                         submitting={submitting}

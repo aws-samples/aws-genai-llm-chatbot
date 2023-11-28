@@ -102,11 +102,13 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const typeAddStr = ragDocumentTypeToAddString(props.documentType);
   const typeTitleStr = ragDocumentTypeToTitleString(props.documentType);
 
+  const columnDefinitions = getColumnDefinition(props.documentType);
+
   return (
     <Table
       loading={loading}
       loadingText={`Loading ${typeStr}s`}
-      columnDefinitions={getColumnDefinition(props.documentType)}
+      columnDefinitions={columnDefinitions}
       items={pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items}
       header={
         <Header
@@ -157,6 +159,10 @@ function ragDocumentTypeToString(type: RagDocumentType) {
       return "Q&A";
     case "website":
       return "Website";
+    case "rssfeed":
+      return "RSS Feed";
+    case "rsspost":
+      return "RSS Post";
   }
 }
 
@@ -170,6 +176,10 @@ function ragDocumentTypeToTitleString(type: RagDocumentType) {
       return "Q&As";
     case "website":
       return "Websites";
+    case "rssfeed":
+      return "RSS Feeds";
+    case "rsspost":
+      return "RSS Posts";
   }
 }
 
@@ -183,5 +193,9 @@ function ragDocumentTypeToAddString(type: RagDocumentType) {
       return "Add Q&A";
     case "website":
       return "Crawl website";
+    case "rssfeed":
+      return "Subcribe to RSS Feed";
+    case "rsspost":
+      return "Add RSS Post";
   }
 }

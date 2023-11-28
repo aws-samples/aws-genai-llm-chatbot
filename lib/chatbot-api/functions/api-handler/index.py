@@ -47,6 +47,7 @@ app.include_router(documents_router)
 app.include_router(kendra_router)
 
 
+
 @app.exception_handler(genai_core.types.CommonError)
 def handle_value_error(e: genai_core.types.CommonError):
     logger.exception(e)

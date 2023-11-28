@@ -72,6 +72,8 @@ export class RestApi extends Construct {
         DOCUMENTS_TABLE_NAME: props.ragEngines?.documentsTable.tableName ?? "",
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
           props.ragEngines?.documentsByCompountKeyIndexName ?? "",
+        DOCUMENTS_BY_STATUS_INDEX:
+          props.ragEngines?.documentsByStatusIndexName ?? "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.ragEngines?.sageMakerRagModels?.model.endpoint
             ?.attrEndpointName ?? "",
@@ -102,6 +104,8 @@ export class RestApi extends Construct {
         DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
           props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket
             ?.bucketName ?? "",
+        RSS_FEED_INGESTOR_FUNCTION:
+          props.ragEngines?.dataImport.rssIngestorFunction?.functionArn ?? "",
       },
     });
 
@@ -111,6 +115,7 @@ export class RestApi extends Construct {
 
     if (props.ragEngines?.documentsTable) {
       props.ragEngines.documentsTable.grantReadWriteData(apiHandler);
+      props.ragEngines?.dataImport.rssIngestorFunction?.grantInvoke(apiHandler);
     }
 
     if (props.ragEngines?.auroraPgVector) {

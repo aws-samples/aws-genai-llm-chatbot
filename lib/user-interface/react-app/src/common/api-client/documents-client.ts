@@ -2,6 +2,7 @@ import {
   AddDocumentResult,
   ApiResult,
   DocumentResult,
+  DocumentSubscriptionToggleResult,
   FileUploadItem,
   RagDocumentType,
 } from "../types";
@@ -49,6 +50,26 @@ export class DocumentsClient extends ApiClientBase {
         }
       );
 
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async getDocumentDetails(
+    workspaceId: string,
+    documentId: string
+  ): Promise<ApiResult<DocumentResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(
+        this.getApiUrl(
+          `/workspaces/${workspaceId}/documents/${documentId}/detail`
+        ),
+        {
+          headers,
+        }
+      );
       return result.json();
     } catch (error) {
       return this.error(error);
@@ -117,6 +138,115 @@ export class DocumentsClient extends ApiClientBase {
         }
       );
 
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async addRssFeedSubscription(
+    workspaceId: string,
+    address: string,
+    title: string,
+    limit: number,
+    followLinks: boolean
+  ): Promise<ApiResult<AddDocumentResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const results = await fetch(
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/rssfeed`),
+        {
+          headers: headers,
+          method: "POST",
+          body: JSON.stringify({ address, title, limit, followLinks }),
+        }
+      );
+      return results.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async getRssSubscriptionPosts(
+    workspaceId: string,
+    feedId: string,
+    lastDocumentId?: string
+  ): Promise<ApiResult<DocumentResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(
+        lastDocumentId
+          ? this.getApiUrl(
+              `/workspaces/${workspaceId}/documents/${feedId}/posts?lastDocumentId=${lastDocumentId}`
+            )
+          : this.getApiUrl(
+              `/workspaces/${workspaceId}/documents/${feedId}/posts`
+            ),
+        {
+          headers,
+        }
+      );
+
+      return result.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async disableRssSubscription(
+    workspaceId: string,
+    feedId: string
+  ): Promise<ApiResult<DocumentSubscriptionToggleResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const results = await fetch(
+        this.getApiUrl(
+          `/workspaces/${workspaceId}/documents/${feedId}/disable`
+        ),
+        {
+          headers: headers,
+        }
+      );
+      return results.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async enableRssSubscription(
+    workspaceId: string,
+    feedId: string
+  ): Promise<ApiResult<DocumentSubscriptionToggleResult>> {
+    try {
+      const headers = await this.getHeaders();
+      const results = await fetch(
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/enable`),
+        {
+          headers: headers,
+        }
+      );
+      return results.json();
+    } catch (error) {
+      return this.error(error);
+    }
+  }
+
+  async updateRssSubscriptionCrawler(
+    workspaceId: string,
+    feedId: string,
+    followLinks: boolean,
+    limit: number
+  ): Promise<ApiResult<string>> {
+    try {
+      const headers = await this.getHeaders();
+      const result = await fetch(
+        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}`),
+        {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({ followLinks, limit, documentType: "rssfeed" }),
+        }
+      );
       return result.json();
     } catch (error) {
       return this.error(error);

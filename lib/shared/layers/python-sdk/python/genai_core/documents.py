@@ -2,6 +2,9 @@ import os
 import json
 import uuid
 import boto3
+from boto3.dynamodb.conditions import Attr, Key
+import botocore
+import feedparser
 import genai_core.types
 import genai_core.chunks
 import genai_core.websites
@@ -10,9 +13,10 @@ import genai_core.workspaces
 import genai_core.utils.files
 from typing import Optional
 from datetime import datetime
+import hashlib
 
-PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
-WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
+PROCESSING_BUCKET_NAME = os.environ.get("PROCESSING_BUCKET_NAME", "")
+WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME", "")
 DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME = os.environ.get(
     "DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME"
@@ -23,12 +27,19 @@ DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
     "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME"
 )
 
+RSS_FEED_INGESTOR_FUNCTION = os.environ.get("RSS_FEED_INGESTOR_FUNCTION", "")
+RSS_FEED_SCHEDULE_ROLE_ARN = os.environ.get("RSS_FEED_SCHEDULE_ROLE_ARN", "")
+DOCUMENTS_BY_STATUS_INDEX = os.environ.get("DOCUMENTS_BY_STATUS_INDEX", "")
+
 WORKSPACE_OBJECT_TYPE = "workspace"
 
 s3 = boto3.resource("s3")
 s3_client = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
+dynamodb_client = boto3.client("dynamodb")
 sfn_client = boto3.client("stepfunctions")
+scheduler = boto3.client("scheduler")
+lambda_client = boto3.client("lambda")
 
 documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
 workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
@@ -39,6 +50,7 @@ def list_documents(
     document_type: str,
     last_document_id: str = None,
     page_size: int = 100,
+    parent_document_id: str = None,
 ):
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
@@ -47,6 +59,10 @@ def list_documents(
     scan_index_forward = True
     if document_type == "text" or document_type == "qna":
         scan_index_forward = False
+
+    sort_key_prefix = f"{document_type}/"
+    if parent_document_id != None:
+        sort_key_prefix = sort_key_prefix + f"{parent_document_id}/"
 
     if last_document_id:
         last_document = get_document(workspace_id, last_document_id)
@@ -64,7 +80,7 @@ def list_documents(
             },
             ExpressionAttributeValues={
                 ":workspace_id": workspace_id,
-                ":sort_key_prefix": f"{document_type}/",
+                ":sort_key_prefix": sort_key_prefix,
             },
             Limit=page_size,
             ScanIndexForward=scan_index_forward,
@@ -75,7 +91,7 @@ def list_documents(
             KeyConditionExpression="workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)",
             ExpressionAttributeValues={
                 ":workspace_id": workspace_id,
-                ":sort_key_prefix": f"{document_type}/",
+                ":sort_key_prefix": sort_key_prefix,
             },
             Limit=page_size,
             ScanIndexForward=scan_index_forward,
@@ -94,7 +110,7 @@ def list_documents(
 def set_document_vectors(
     workspace_id: str, document_id: str, vectors: int, replace: bool
 ):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp = _get_timestamp()
 
     response = workspaces_table.update_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
@@ -132,7 +148,7 @@ def set_document_vectors(
 
 
 def set_sub_documents(workspace_id: str, document_id: str, sub_documents: int):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp = _get_timestamp()
 
     response = documents_table.update_item(
         Key={"workspace_id": workspace_id, "document_id": document_id},
@@ -177,8 +193,7 @@ def get_document_content(workspace_id: str, document_id: str):
 
 
 def set_status(workspace_id: str, document_id: str, status: str):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-
+    timestamp = _get_timestamp()
     response = documents_table.update_item(
         Key={"workspace_id": workspace_id, "document_id": document_id},
         UpdateExpression="SET #status=:status, updated_at=:timestampValue",
@@ -190,8 +205,19 @@ def set_status(workspace_id: str, document_id: str, status: str):
             ":timestampValue": timestamp,
         },
     )
-
     return response
+
+
+def update_subscription_timestamp(workspace_id: str, document_id: str):
+    timestamp = _get_timestamp()
+    response = documents_table.update_item(
+        Key={"workspace_id": workspace_id, "document_id": document_id},
+        UpdateExpression="SET rss_last_checked=:timestampValue",
+        ExpressionAttributeValues={
+            ":timestampValue": timestamp,
+        },
+    )
+    print(response)
 
 
 def create_document(
@@ -206,13 +232,13 @@ def create_document(
     content_complement: Optional[str] = None,
     **kwargs,
 ):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp = _get_timestamp()
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
         return None
 
     document = None
-    unique_path_document = document_type in ["file", "website"]
+    unique_path_document = document_type in ["file", "website", "rssfeed"]
     if unique_path_document:
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
@@ -258,7 +284,7 @@ def create_document(
         document_id = str(uuid.uuid4())
 
         compound_sort_key = f"{document_type}/{timestamp}"
-        if document_type in ["file", "website"]:
+        if document_type in ["file", "website", "rssfeed"]:
             compound_sort_key = f"{document_type}/{path}"
 
         document = {
@@ -278,6 +304,8 @@ def create_document(
             "created_at": timestamp,
             "updated_at": timestamp,
         }
+        if document_type in ["rssfeed"] and "crawler_properties" in kwargs:
+            document["crawler_properties"] = kwargs["crawler_properties"]
 
         response = documents_table.put_item(Item=document)
         print(response)
@@ -323,6 +351,36 @@ def create_document(
         "workspace_id": workspace_id,
         "document_id": document_id,
     }
+
+
+def update_document(workspace_id: str, document_id: str, document_type: str, **kwargs):
+    timestamp = _get_timestamp()
+    if document_type == "rssfeed":
+        if "limit" in kwargs and "follow_links" in kwargs:
+            follow_links = kwargs["follow_links"]
+            limit = kwargs["limit"]
+            response = documents_table.update_item(
+                Key={"workspace_id": workspace_id, "document_id": document_id},
+                UpdateExpression="SET #crawler_properties=:crawler_properties, updated_at=:timestampValue",
+                ExpressionAttributeNames={"#crawler_properties": "crawler_properties"},
+                ExpressionAttributeValues={
+                    ":crawler_properties": {
+                        "follow_links": follow_links,
+                        "limit": limit,
+                    },
+                    ":timestampValue": timestamp,
+                },
+                ReturnValues="ALL_NEW",
+            )
+            return response
+        else:
+            raise Exception("Invalid update values for rssfeed")
+    else:
+        return f"Error! Document Type {document_type} doesn't have any update options"
+
+
+def _get_timestamp():
+    return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def _process_document_kendra(
@@ -479,6 +537,9 @@ def _process_document(
         )
 
         print(response)
+    elif document_type == "rssfeed":
+        set_status(workspace_id, document_id, "enabled")
+        _trigger_rss_feed_ingestor(workspace_id, document_id)
 
 
 def _upload_document_content(
@@ -500,3 +561,176 @@ def _upload_document_content(
             PROCESSING_BUCKET_NAME,
             f"{workspace_id}/{document_id}/content_complement.txt",
         ).put(Body=content_complement)
+
+
+def ingest_rss_feeds():
+    feeds_to_crawl = dynamodb_client.query(
+        TableName=DOCUMENTS_TABLE_NAME,
+        IndexName=DOCUMENTS_BY_STATUS_INDEX,
+        KeyConditionExpression="#status = :status AND #document_type = :document_type",
+        ExpressionAttributeNames={
+            "#status": "status",
+            "#document_type": "document_type",
+        },
+        ExpressionAttributeValues={
+            ":status": {
+                "S": "enabled",
+            },
+            ":document_type": {
+                "S": "rssfeed",
+            },
+        },
+    )
+    if feeds_to_crawl["Count"] > 0:
+        for item in feeds_to_crawl["Items"]:
+            workspace_id = item["workspace_id"]["S"]
+            document_id = item["document_id"]["S"]
+            _trigger_rss_feed_ingestor(workspace_id, document_id)
+
+
+def _trigger_rss_feed_ingestor(
+    workspace_id: str,
+    document_id: str,
+):
+    try:
+        response = lambda_client.invoke(
+            FunctionName=RSS_FEED_INGESTOR_FUNCTION,
+            InvocationType="Event",
+            Payload=json.dumps(
+                {
+                    "workspace_id": workspace_id,
+                    "document_id": document_id,
+                }
+            ),
+        )
+        print(response)
+    except Exception as e:
+        print(e)
+
+
+def _toggle_document_subscription(
+    workspace_id: str,
+    document_id: str,
+    enable: bool,
+):
+    subscription_status = "enabled" if enable else "disabled"
+    set_status(workspace_id, document_id, subscription_status)
+
+
+def enable_document_subscription(
+    workspace_id: str,
+    document_id: str,
+):
+    _toggle_document_subscription(workspace_id, document_id, True)
+
+
+def disable_document_subscription(
+    workspace_id: str,
+    document_id: str,
+):
+    _toggle_document_subscription(workspace_id, document_id, False)
+
+
+def check_rss_feed_for_posts(workspace_id, document_id):
+    workspace = genai_core.workspaces.get_workspace(workspace_id)
+    if not workspace:
+        raise genai_core.types.CommonError("Workspace not found")
+
+    rss_document = get_document(workspace_id, document_id)
+    if not rss_document:
+        raise genai_core.types.CommonError("Document not found")
+
+    feed_path = rss_document["path"]
+    print(f"Parsing RSS Feed for {feed_path}")
+    try:
+        feed_contents = feedparser.parse(feed_path)
+        if feed_contents:
+            for feed_entry in feed_contents.entries:
+                timestamp = _get_timestamp()
+                post_id = str(_get_hash_id_from_path(feed_entry.get("link", "")))
+                document = {
+                    "format_version": 1,
+                    "workspace_id": workspace_id,
+                    "document_id": post_id,
+                    "rss_feed_id": document_id,
+                    "document_type": "rsspost",
+                    "document_sub_type": None,
+                    "sub_documents": None,
+                    "compound_sort_key": f"rsspost/{document_id}/{post_id}",
+                    "status": "pending",
+                    "title": feed_entry.get("title", ""),
+                    "path": feed_entry.get("link", ""),
+                    "size_in_bytes": 0,
+                    "vectors": 0,
+                    "errors": [],
+                    "created_at": timestamp,
+                    "updated_at": timestamp,
+                    "crawler_properties": rss_document.get("crawler_properties", None),
+                }
+                try:
+                    documents_table.put_item(
+                        Item=document,
+                        ConditionExpression="attribute_not_exists(document_id)",
+                    )
+                except botocore.exceptions.ClientError as e:
+                    if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                        print(f"Post already exists: {feed_entry['link']}")
+                        continue
+                    else:
+                        raise e
+        update_subscription_timestamp(workspace_id, document_id)
+    except Exception as e:
+        raise genai_core.types.CommonError("Error parsing feed", e)
+
+
+def _get_hash_id_from_path(path):
+    """Returns a hash id from a path
+    This is useful if the ID needs to be NON-unique.
+    """
+    return hashlib.sha256(path.encode("utf-8")).hexdigest()
+
+
+def batch_crawl_websites():
+    """Gets next 10 pending posts and sends them to be website crawled"""
+    posts = _get_batch_pending_posts()
+    if posts["Count"] > 0:
+        for post in posts["Items"]:
+            workspace_id = post["workspace_id"]["S"]
+            feed_id = post["rss_feed_id"]["S"]
+            document_id = post["document_id"]["S"]
+            path = post["path"]["S"]
+            create_document(
+                workspace_id,
+                "website",
+                path=path,
+                crawler_properties={
+                    "follow_links": post["crawler_properties"]["M"]["follow_links"][
+                        "BOOL"
+                    ]
+                    if "crawler_properties" in post
+                    else True,
+                    "limit": int(post["crawler_properties"]["M"]["limit"]["N"])
+                    if "crawler_properties" in post
+                    else 250,
+                },
+            )
+            set_status(workspace_id, document_id, "processed")
+            update_subscription_timestamp(workspace_id, feed_id)
+
+
+def _get_batch_pending_posts():
+    """Gets the first 10 Pending Posts from the RSS Feed to Crawl"""
+    return dynamodb_client.query(
+        TableName=DOCUMENTS_TABLE_NAME,
+        IndexName=DOCUMENTS_BY_STATUS_INDEX,
+        Limit=10,
+        KeyConditionExpression="#status = :status and #document_type = :document_type",
+        ExpressionAttributeValues={
+            ":status": {"S": "pending"},
+            ":document_type": {"S": "rsspost"},
+        },
+        ExpressionAttributeNames={
+            "#status": "status",
+            "#document_type": "document_type",
+        },
+    )

@@ -7,6 +7,7 @@ import { FileImportBatchJob } from "./file-import-batch-job";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { FileImportWorkflow } from "./file-import-workflow";
 import { WebsiteCrawlingWorkflow } from "./website-crawling-workflow";
+import { RssSubscription } from "./rss-subscription";
 import { OpenSearchVector } from "../opensearch-vector";
 import { KendraRetrieval } from "../kendra-retrieval";
 import { SageMakerRagModels } from "../sagemaker-rag-models";
@@ -42,7 +43,7 @@ export class DataImport extends Construct {
   public readonly ingestionQueue: sqs.Queue;
   public readonly fileImportWorkflow: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow: sfn.StateMachine;
-
+  public readonly rssIngestorFunction: lambda.Function;
   constructor(scope: Construct, id: string, props: DataImportProps) {
     super(scope, id);
 
@@ -139,6 +140,14 @@ export class DataImport extends Construct {
       }
     );
 
+    const rssSubscription = new RssSubscription(this, "RssSubscription", {
+      shared: props.shared,
+      config: props.config,
+      processingBucket: processingBucket,
+      ragDynamoDBTables: props.ragDynamoDBTables,
+      websiteCrawlerStateMachine: websiteCrawlingWorkflow.stateMachine,
+    });
+
     const uploadHandler = new lambda.Function(this, "UploadHandler", {
       code: props.shared.sharedCode.bundleWithLambdaAsset(
         path.join(__dirname, "./functions/upload-handler")
@@ -205,5 +214,6 @@ export class DataImport extends Construct {
     this.ingestionQueue = ingestionQueue;
     this.fileImportWorkflow = fileImportWorkflow.stateMachine;
     this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;
+    this.rssIngestorFunction = rssSubscription.rssIngestorFunction;
   }
 }
