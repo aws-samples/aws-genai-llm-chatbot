@@ -70,8 +70,10 @@ def list_bedrock_models():
             }
             for model in bedrock_models
             # Exclude embeddings and stable diffusion models
-            if Modality.EMBEDDING.value not in model["outputModalities"]
-            and Modality.IMAGE.value not in model["outputModalities"]
+            if model.get("inputModalities", None) != None
+            and model.get("outputModalities", None) != None
+            and Modality.EMBEDDING.value not in model.get("outputModalities", [])
+            and Modality.IMAGE.value not in model.get("outputModalities", [])
         ]
 
         return models
@@ -101,13 +103,15 @@ def list_bedrock_finetuned_models():
             }
             for model in bedrock_custom_models
             # Exclude embeddings and stable diffusion models
-            if Modality.EMBEDDING.value not in model["outputModalities"]
-            and Modality.IMAGE.value not in model["outputModalities"]
+            if model.get("inputModalities", None) != None
+            and model.get("outputModalities", None) != None
+            and Modality.EMBEDDING.value not in model.get("outputModalities", [])
+            and Modality.IMAGE.value not in model.get("outputModalities", [])
         ]
 
         return models
     except Exception as e:
-        print(f"Error listing Bedrock models: {e}")
+        print(f"Error listing fine-tuned Bedrock models: {e}")
         return None
 
 
@@ -115,9 +119,8 @@ def list_sagemaker_models():
     parameters = genai_core.parameters.get_sagemaker_models()
     if parameters is None:
         return None
-    
-    models = parameters.get("Parameters", [])
 
+    models = parameters.get("Parameters", [])
 
     return [
         {
