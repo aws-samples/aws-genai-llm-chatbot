@@ -445,3 +445,6 @@ bin/config.json
 # Docs
 docs/.vitepress/cache
 docs/.vitepress/dist
+
+# Folder for misc assets during development
+.dev-assets/
