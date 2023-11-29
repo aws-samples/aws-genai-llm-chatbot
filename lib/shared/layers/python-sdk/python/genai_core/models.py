@@ -70,8 +70,8 @@ def list_bedrock_models():
             }
             for model in bedrock_models
             # Exclude embeddings and stable diffusion models
-            if model.get("inputModalities", None) != None
-            and model.get("outputModalities", None) != None
+            if "inputModalities" in model
+            and "outputModalities" in model
             and Modality.EMBEDDING.value not in model.get("outputModalities", [])
             and Modality.IMAGE.value not in model.get("outputModalities", [])
         ]
