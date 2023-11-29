@@ -1,4 +1,4 @@
-import { TableProps } from "@cloudscape-design/components";
+import { Badge, TableProps } from "@cloudscape-design/components";
 import {
   PropertyFilterProperty,
   PropertyFilterOperator,
@@ -11,7 +11,8 @@ export const ModelsColumnDefinitions: TableProps.ColumnDefinition<ModelItem>[] =
       id: "provider",
       header: "Provider",
       sortingField: "provider",
-      cell: (item: ModelItem) => item.provider != "servicecatalog" ? item.provider : "sagemaker",
+      cell: (item: ModelItem) =>
+        item.provider != "servicecatalog" ? item.provider : "sagemaker",
     },
     {
       id: "name",
@@ -24,32 +25,45 @@ export const ModelsColumnDefinitions: TableProps.ColumnDefinition<ModelItem>[] =
       id: "ragSupported",
       header: "RAG Supported",
       sortingField: "ragSupported",
-      cell: (item: ModelItem) => item.ragSupported != undefined ? (item.ragSupported ? "Yes" : "No") : "",
+      cell: (item: ModelItem) =>
+        item.ragSupported != undefined
+          ? item.ragSupported
+            ? "Yes"
+            : "No"
+          : "",
     },
     {
       id: "inputModalities",
       header: "Input modalities",
       sortingField: "inputModalities",
-      cell: (item: ModelItem) => item.inputModalities ? item.inputModalities.join(", ") : "",
+      cell: (item: ModelItem) =>
+        item.inputModalities ? item.inputModalities.join(", ") : "",
     },
     {
       id: "outputModalities",
       header: "Output modalities",
       sortingField: "outputModalities",
-      cell: (item: ModelItem) => item.outputModalities ? item.outputModalities.join(", ") : "",
+      cell: (item: ModelItem) =>
+        item.outputModalities ? item.outputModalities.join(", ") : "",
     },
     {
       id: "streaming",
       header: "Streaming",
       sortingField: "streaming",
-      cell: (item: ModelItem) => item.streaming != undefined ? (item.streaming ? "Yes" : "No") : "",
+      cell: (item: ModelItem) => (item.streaming ? "Yes" : "No"),
     },
     {
-      id: "availability",
-      header: "Model Availability",
-      sortingField: "availability",
-      cell: (item: ModelItem) => item.provider != "servicecatalog" ? <>Available</> : <>Deployable!</>,
-    }
+      id: "deployment",
+      header: "Hosted Deployment",
+      cell: (item: ModelItem) =>
+        item.deployed == undefined ? (
+          <Badge color="grey">N/A</Badge>
+        ) : item.deployed ? (
+          <Badge color="green">Model Deployed</Badge>
+        ) : (
+          <Badge color="blue">Model Not Deployed</Badge>
+        ),
+    },
   ];
 
 export const ModelsColumnFilteringProperties: PropertyFilterProperty[] = [

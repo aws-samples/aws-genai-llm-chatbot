@@ -20,9 +20,8 @@ export interface SageMakerModelProps extends servicecatalog.ProductStackProps {
   modelName?: string;
   restApiIamRole?: string;
   productOwner?: string;
+  productId?: string;
 }
-
-
 
 export enum DeploymentType {
   Container = "container",

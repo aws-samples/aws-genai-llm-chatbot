@@ -53,5 +53,6 @@ def get_bedrock_client(service_name="bedrock-runtime"):
 
     return boto3.client(**bedrock_config_data)
 
+
 def get_service_catalog_client():
-    return boto3.client('servicecatalog')
+    return boto3.client("servicecatalog")

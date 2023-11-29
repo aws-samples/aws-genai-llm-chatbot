@@ -106,8 +106,6 @@ export interface SystemConfig {
   };
 }
 
-
-
 export interface SageMakerLLMEndpoint {
   name: string;
   endpoint: sagemaker.CfnEndpoint;

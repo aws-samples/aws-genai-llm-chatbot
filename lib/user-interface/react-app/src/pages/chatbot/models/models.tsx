@@ -1,8 +1,10 @@
 import {
   BreadcrumbGroup,
+  ButtonDropdown,
   Header,
   Pagination,
   PropertyFilter,
+  SpaceBetween,
   Table,
 } from "@cloudscape-design/components";
 import useOnFollow from "../../../common/hooks/use-on-follow";
@@ -27,6 +29,7 @@ export default function Models() {
   const appContext = useContext(AppContext);
   const [models, setModels] = useState<ModelItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState<ModelItem[]>([]);
   const {
     items,
     actions,
@@ -100,7 +103,57 @@ export default function Models() {
           variant="full-page"
           stickyHeader={true}
           resizableColumns={true}
-          header={<Header variant="awsui-h1-sticky">Models</Header>}
+          onSelectionChange={({ detail }) =>
+            setSelectedItems(detail.selectedItems)
+          }
+          selectedItems={selectedItems}
+          trackBy="name"
+          selectionType="single"
+          isItemDisabled={(item) => item.deployed == undefined}
+          header={
+            <Header
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  <ButtonDropdown
+                    disabled={selectedItems.length == 0}
+                    items={[
+                      {
+                        text: "Deploy Model",
+                        id: "deploy",
+                        disabled:
+                          selectedItems.length > 0
+                            ? selectedItems[0].deployed
+                            : true,
+                        disabledReason: "Selected model is already deployed.",
+                      },
+                      {
+                        text: "Delete Model",
+                        id: "delete",
+                        disabled:
+                          selectedItems.length > 0
+                            ? !selectedItems[0].deployed
+                            : true,
+                        disabledReason: "Selected model is not deployed.",
+                      },
+                      {
+                        text: "Deployment Details",
+                        id: "details",
+                      },
+                    ]}
+                  >
+                    Actions
+                  </ButtonDropdown>
+                </SpaceBetween>
+              }
+              variant="awsui-h1-sticky"
+              description="View the details of the variable LLM Models available for the Chatbot.
+            Bedrock models are fully managed and don't require resource deployments. 
+            SageMaker models are self-hosted. To deploy, stop or get details on a self-hosted model, 
+            select the model from the table and chose an action from the 'Actions' dropdown."
+            >
+              Models
+            </Header>
+          }
           loading={loading}
           loadingText="Loading Models"
           filter={

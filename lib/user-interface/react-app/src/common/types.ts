@@ -58,7 +58,11 @@ export interface ApiErrorResult {
 }
 
 export type LoadingStatus = "pending" | "loading" | "finished" | "error";
-export type ModelProvider = "sagemaker" | "bedrock" | "openai" | "servicecatalog";
+export type ModelProvider =
+  | "sagemaker"
+  | "bedrock"
+  | "openai"
+  | "servicecatalog";
 export type RagDocumentType =
   | "file"
   | "text"
@@ -122,6 +126,7 @@ export interface ModelItem {
   outputModalities: Modality[];
   interface: ModelInterface;
   ragSupported: boolean;
+  deployed?: boolean;
 }
 
 export interface SessionItem {
