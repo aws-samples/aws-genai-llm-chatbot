@@ -16,18 +16,18 @@ export abstract class EmbeddingsModelHelper {
   static parseValue(value?: string) {
     const retValue = {
       provider: "",
-      dimentions: 0,
+      dimensions: 0,
       name: "",
     };
 
     if (!value) return retValue;
     const [provider, dimensionsStr, name] = value.split("::") ?? [];
-    let dimentions = parseInt(dimensionsStr);
-    if (isNaN(dimentions)) dimentions = 0;
+    let dimensions = parseInt(dimensionsStr);
+    if (isNaN(dimensions)) dimensions = 0;
 
     return {
       provider,
-      dimentions,
+      dimensions,
       name,
     };
   }
