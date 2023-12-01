@@ -63,7 +63,7 @@ export default function OpenSearchWorkspaceSettings(
             <div>{props.workspace.embeddingsModelName}</div>
           </div>
           <div>
-            <Box variant="awsui-key-label">Embeddings dimentions</Box>
+            <Box variant="awsui-key-label">Embeddings dimensions</Box>
             <div>{props.workspace.embeddingsModelDimensions}</div>
           </div>
           <div>
