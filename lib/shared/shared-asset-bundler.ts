@@ -57,10 +57,10 @@ export class SharedAssetBundler extends Construct {
       {
         path: assetPath,
         bundling: {
-          image: DockerImage.fromBuild(path.join(__dirname, "alpine-zip")),
-          command: ["zip", "-r", path.join("/asset-output", "asset.zip"), "."],
+          image: DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip")),
+          command: ["zip", "-r", path.posix.join("/asset-output", "asset.zip"), "."],
           volumes: this.sharedAssets.map((f) => ({
-            containerPath: path.join(this.WORKING_PATH, path.basename(f)),
+            containerPath: path.posix.join(this.WORKING_PATH, path.basename(f)),
             hostPath: f,
           })),
           workingDirectory: this.WORKING_PATH,
