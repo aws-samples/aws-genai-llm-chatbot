@@ -15,3 +15,4 @@ beautifulsoup4==4.12.2
 requests==2.31.0
 attrs==23.1.0
 feedparser==6.0.10
+defusedxml==0.7.1

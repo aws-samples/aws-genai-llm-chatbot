@@ -9,6 +9,7 @@ import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as kendra from "aws-cdk-lib/aws-kendra";
+import {NagSuppressions} from "cdk-nag";
 
 export interface KendraRetrievalProps {
   readonly config: SystemConfig;
@@ -38,10 +39,19 @@ export class KendraRetrieval extends Construct {
     if (props.config.rag.engines.kendra.createIndex) {
       const indexName = Utils.getName(props.config, "genaichatbot-workspaces");
 
+      const logsBucket = new s3.Bucket(this, "LogsBucket", {
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+        enforceSSL: true,
+      });
+
       const dataBucket = new s3.Bucket(this, "KendraDataBucket", {
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
+        enforceSSL: true,
+        serverAccessLogsBucket: logsBucket
       });
 
       const kendraRole = new iam.Role(this, "KendraRole", {
