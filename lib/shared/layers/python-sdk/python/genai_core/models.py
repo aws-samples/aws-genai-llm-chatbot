@@ -70,8 +70,10 @@ def list_bedrock_models():
             }
             for model in bedrock_models
             # Exclude embeddings and stable diffusion models
-            if Modality.EMBEDDING.value not in model["outputModalities"]
-            and Modality.IMAGE.value not in model["outputModalities"]
+            if "inputModalities" in model
+            and "outputModalities" in model
+            and Modality.EMBEDDING.value not in model.get("outputModalities", [])
+            and Modality.IMAGE.value not in model.get("outputModalities", [])
         ]
 
         return models
@@ -101,13 +103,15 @@ def list_bedrock_finetuned_models():
             }
             for model in bedrock_custom_models
             # Exclude embeddings and stable diffusion models
-            if Modality.EMBEDDING.value not in model["outputModalities"]
-            and Modality.IMAGE.value not in model["outputModalities"]
+            if "inputModalities" in model
+            and "outputModalities" in model
+            and Modality.EMBEDDING.value not in model.get("outputModalities", [])
+            and Modality.IMAGE.value not in model.get("outputModalities", [])
         ]
 
         return models
     except Exception as e:
-        print(f"Error listing Bedrock models: {e}")
+        print(f"Error listing fine-tuned Bedrock models: {e}")
         return None
 
 

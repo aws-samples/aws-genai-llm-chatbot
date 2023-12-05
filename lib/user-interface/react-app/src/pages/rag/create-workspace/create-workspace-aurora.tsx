@@ -103,13 +103,13 @@ export default function CreateWorkspaceAurora() {
       }
 
       if (form.index && form.embeddingsModel) {
-        const { dimentions } = EmbeddingsModelHelper.parseValue(
+        const { dimensions } = EmbeddingsModelHelper.parseValue(
           form.embeddingsModel.value
         );
 
-        if (dimentions > 2000) {
+        if (dimensions > 2000) {
           errors.index =
-            "Indexing is not supported for models with more than 2000 dimentions";
+            "Indexing is not supported for models with more than 2000 dimensions";
         }
       }
 
