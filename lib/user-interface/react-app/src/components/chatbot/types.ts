@@ -61,6 +61,9 @@ export interface ImageFile {
 export interface ChatBotHeartbeatRequest {
   action: ChatBotAction.Heartbeat;
   modelInterface: ModelInterface;
+  data: {
+    sessionId: string;
+  }
 }
 
 export interface ChatBotRunRequest {

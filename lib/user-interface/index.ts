@@ -15,6 +15,7 @@ import * as path from "node:path";
 import { Shared } from "../shared";
 import { SystemConfig } from "../shared/types";
 import { Utils } from "../shared/utils";
+import { ChatBotApi } from "../chatbot-api";
 
 export interface UserInterfaceProps {
   readonly config: SystemConfig;
@@ -22,8 +23,7 @@ export interface UserInterfaceProps {
   readonly userPoolId: string;
   readonly userPoolClientId: string;
   readonly identityPool: cognitoIdentityPool.IdentityPool;
-  readonly restApi: apigateway.RestApi;
-  readonly webSocketApi: apigwv2.WebSocketApi;
+  readonly api: ChatBotApi;
   readonly chatbotFilesBucket: s3.Bucket;
   readonly crossEncodersEnabled: boolean;
   readonly sagemakerEmbeddingsEnabled: boolean;
@@ -85,34 +85,7 @@ export class UserInterface extends Construct {
               },
             ],
             customOriginSource: {
-              domainName: `${props.restApi.restApiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
-              originHeaders: {
-                "X-Origin-Verify": props.shared.xOriginVerifySecret
-                  .secretValueFromJson("headerValue")
-                  .unsafeUnwrap(),
-              },
-            },
-          },
-          {
-            behaviors: [
-              {
-                pathPattern: "/socket",
-                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
-                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                forwardedValues: {
-                  queryString: true,
-                  headers: [
-                    "Sec-WebSocket-Key",
-                    "Sec-WebSocket-Version",
-                    "Sec-WebSocket-Protocol",
-                    "Sec-WebSocket-Accept",
-                    "Sec-WebSocket-Extensions",
-                  ],
-                },
-              },
-            ],
-            customOriginSource: {
-              domainName: `${props.webSocketApi.apiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
+              domainName: `${props.api.restApi.restApiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
               originHeaders: {
                 "X-Origin-Verify": props.shared.xOriginVerifySecret
                   .secretValueFromJson("headerValue")
@@ -164,6 +137,16 @@ export class UserInterface extends Construct {
       aws_user_pools_id: props.userPoolId,
       aws_user_pools_web_client_id: props.userPoolClientId,
       aws_cognito_identity_pool_id: props.identityPool.identityPoolId,
+      Auth: {
+        region: cdk.Aws.REGION,
+        userPoolId: props.userPoolId,
+        userPoolWebClientId: props.userPoolClientId,
+        identityPoolId: props.identityPool.identityPoolId,
+      },
+      aws_appsync_graphqlEndpoint: props.api.graphqlApi?.graphQLUrl,
+      aws_appsync_region: cdk.Aws.REGION,
+      aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
+      aws_appsync_apiKey: props.api.graphqlApi?.apiKey,
       Storage: {
         AWSS3: {
           bucket: props.chatbotFilesBucket.bucketName,
@@ -173,6 +156,7 @@ export class UserInterface extends Construct {
       config: {
         api_endpoint: `https://${distribution.distributionDomainName}/api`,
         websocket_endpoint: `wss://${distribution.distributionDomainName}/socket`,
+        appsync_endpoint: props.api.graphqlApi?.graphQLUrl,
         rag_enabled: props.config.rag.enabled,
         cross_encoders_enabled: props.crossEncodersEnabled,
         sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,

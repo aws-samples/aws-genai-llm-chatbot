@@ -1,4 +1,10 @@
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   SelectProps,
   SpaceBetween,
@@ -14,9 +20,11 @@ import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
 import ChatMessage from "./chat-message";
 import MultiChatInputPanel, { ChatScrollState } from "./multi-chat-input-panel";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import { ReadyState } from "react-use-websocket";
 import { OptionsHelper } from "../../common/helpers/options-helper";
-import { Auth } from "aws-amplify";
+import { API } from "aws-amplify";
+import { GraphQLSubscription } from "@aws-amplify/api";
+import { ReceiveMessagesSubscription } from "../../API";
 import {
   ChatBotConfiguration,
   ChatBotAction,
@@ -37,10 +45,12 @@ import {
   ResultValue,
   LoadingStatus,
 } from "../../common/types";
-import { getSelectedModelMetadata, updateChatSessions } from "./utils";
+import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
 import styles from "../../styles/chat.module.scss";
 import { useNavigate } from "react-router-dom";
+import { receiveMessages } from "../../graphql/subscriptions";
+import { sendQuery } from "../../graphql/mutations";
 
 export interface ChatSession {
   configuration: ChatBotConfiguration;
@@ -51,6 +61,7 @@ export interface ChatSession {
   loading: boolean;
   running: boolean;
   messageHistory: ChatBotHistoryItem[];
+  subscription?: Promise<ZenObservable.Subscription>;
 }
 
 function createNewSession(): ChatSession {
@@ -86,7 +97,7 @@ const workspaceDefaultOptions: SelectProps.Option[] = [
 export default function MultiChat() {
   const navigate = useNavigate();
   const appContext = useContext(AppContext);
-  const [socketUrl, setSocketUrl] = useState<string | null>(null);
+  const refChatSessions = useRef<ChatSession[]>([]);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [models, setModels] = useState<ModelItem[]>([]);
   const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
@@ -98,53 +109,24 @@ export default function MultiChat() {
     undefined
   );
   const [showMetadata, setShowMetadata] = useState(false);
-  const { sendJsonMessage, readyState } = useWebSocket(socketUrl, {
-    share: true,
-    shouldReconnect: () => true,
-    onOpen: () => {
-      const request: ChatBotHeartbeatRequest = {
-        action: ChatBotAction.Heartbeat,
-        modelInterface: ChatBotModelInterface.Langchain,
-      };
-
-      sendJsonMessage(request);
-    },
-    onMessage: (payload) => {
-      const response: ChatBotMessageResponse = JSON.parse(payload.data);
-      if (response.action === ChatBotAction.Heartbeat) {
-        return;
-      }
-      const sessionId = response.data.sessionId;
-      const session = chatSessions.filter((c) => c.id === sessionId)[0];
-      if (session !== undefined) {
-        updateChatSessions(session, response);
-        setChatSessions([...chatSessions]);
-      }
-    },
-  });
+  const [readyState, setReadyState] = useState<ReadyState>(
+    ReadyState.UNINSTANTIATED
+  );
 
   useEffect(() => {
     if (!appContext) return;
-
-    setChatSessions([createNewSession(), createNewSession()]); // reset all chats
+    setReadyState(ReadyState.OPEN);
+    addSession();
+    addSession();
     setEnableAddModels(true);
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const [session, modelsResult, workspacesResult] = await Promise.all([
-        Auth.currentSession(),
+      const [modelsResult, workspacesResult] = await Promise.all([
         apiClient.models.getModels(),
         appContext?.config.rag_enabled
           ? apiClient.workspaces.getWorkspaces()
           : Promise.resolve<ApiResult<WorkspaceItem[]>>({ ok: true, data: [] }),
       ]);
-
-      const jwtToken = session.getAccessToken().getJwtToken();
-
-      if (jwtToken) {
-        setSocketUrl(
-          `${appContext.config.websocket_endpoint}?token=${jwtToken}`
-        );
-      }
 
       const models = ResultValue.ok(modelsResult)
         ? modelsResult.data.filter(
@@ -165,6 +147,13 @@ export default function MultiChat() {
         ResultValue.ok(workspacesResult) ? "finished" : "error"
       );
     })();
+    return () => {
+      refChatSessions.current.forEach((session) => {
+        console.log(`Unsubscribing from ${session.id}`);
+        session.subscription?.then((s) => s.unsubscribe());
+      });
+      refChatSessions.current = [];
+    };
   }, [appContext]);
 
   const enabled =
@@ -181,7 +170,7 @@ export default function MultiChat() {
     chatSessions.forEach((chatSession) => {
       if (chatSession.running) return;
       if (readyState !== ReadyState.OPEN) return;
-      ChatScrollState.userHasScrolled = false; // check this
+      ChatScrollState.userHasScrolled = false;
 
       const { name, provider } = OptionsHelper.parseValue(
         chatSession.model?.value
@@ -224,18 +213,94 @@ export default function MultiChat() {
       ];
 
       setChatSessions([...chatSessions]);
-      sendJsonMessage(request);
+      const result = API.graphql({
+        query: sendQuery,
+        variables: {
+          data: JSON.stringify(request),
+        },
+      });
+      console.log(result);
     });
   };
 
-  const addSession = () => {
-    if (chatSessions.length >= 4) {
+  async function subscribe(sessionId: string) {
+    console.log("Subscribing to AppSync");
+    const sub = await API.graphql<
+      GraphQLSubscription<ReceiveMessagesSubscription>
+    >({
+      query: receiveMessages,
+      variables: {
+        sessionId: sessionId,
+      },
+      authMode: "AMAZON_COGNITO_USER_POOLS",
+    }).subscribe({
+      next: ({ value }) => {
+        const data = value.data!.receiveMessages?.data;
+        if (data !== undefined && data !== null) {
+          const response: ChatBotMessageResponse = JSON.parse(data);
+          console.log(response);
+          if (response.action === ChatBotAction.Heartbeat) {
+            console.log("Heartbeat pong!");
+            return;
+          }
+
+          const sessionId = response.data.sessionId;
+          const session = refChatSessions.current.filter(
+            (c) => c.id === sessionId
+          )[0];
+          if (session !== undefined) {
+            updateMessageHistoryRef(
+              session.id,
+              session.messageHistory,
+              response
+            );
+            if ((response.action = ChatBotAction.FinalResponse)) {
+              session.running = false;
+            }
+            setChatSessions([...refChatSessions.current]);
+          }
+        }
+      },
+      error: (error) => console.warn(error),
+    });
+    return sub;
+  }
+
+  function addSession() {
+    if (refChatSessions.current.length >= 4) {
       return;
     }
+
     const session = createNewSession();
 
-    setChatSessions([...chatSessions, session]);
-  };
+    const sub = subscribe(session.id);
+    sub
+      .then(() => {
+        console.log(`Subscribed to session ${session.id}}`);
+        const request: ChatBotHeartbeatRequest = {
+          action: ChatBotAction.Heartbeat,
+          modelInterface: ChatBotModelInterface.Langchain,
+          data: {
+            sessionId: session.id,
+          },
+        };
+        const result = API.graphql({
+          query: sendQuery,
+          variables: {
+            data: JSON.stringify(request),
+          },
+        });
+        console.log(result);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    session.subscription = sub;
+    refChatSessions.current.push(session);
+    console.log(refChatSessions);
+    setChatSessions([...refChatSessions.current]);
+  }
 
   useLayoutEffect(() => {
     if (ChatScrollState.skipNextHistoryUpdate) {
@@ -300,12 +365,14 @@ export default function MultiChat() {
             </Button>
             <Button
               onClick={() => {
-                chatSessions.forEach((s) => {
+                refChatSessions.current.forEach((s) => {
+                  s.subscription?.then((s) => s.unsubscribe());
                   s.messageHistory = [];
                   s.id = uuidv4();
+                  s.subscription = subscribe(s.id);
                 });
                 setEnableAddModels(true);
-                setChatSessions([...chatSessions]);
+                setChatSessions([...refChatSessions.current]);
               }}
               iconName="remove"
             >
@@ -360,11 +427,17 @@ export default function MultiChat() {
                       variant="icon"
                       disabled={chatSessions.length <= 2 || messages.length > 0}
                       onClick={() => {
-                        setChatSessions([
-                          ...chatSessions.filter(
+                        refChatSessions.current
+                          .filter((c) => c.id == chatSession.id)[0]
+                          .subscription?.then((s) => {
+                            console.log(`Unsubscribe from ${chatSession.id}`);
+                            s.unsubscribe();
+                          });
+                        refChatSessions.current =
+                          refChatSessions.current.filter(
                             (c) => c.id !== chatSession.id
-                          ),
-                        ]);
+                          );
+                        setChatSessions([...refChatSessions.current]);
                       }}
                     />
                   </div>
@@ -416,7 +489,6 @@ export default function MultiChat() {
                 <ChatMessage
                   key={idx}
                   message={message}
-                  configuration={chatSessions[idx].configuration}
                   showMetadata={showMetadata}
                 />
               ))}

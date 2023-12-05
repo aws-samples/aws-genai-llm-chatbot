@@ -13,6 +13,7 @@ import { ChatBotDynamoDBTables } from "./chatbot-dynamodb-tables";
 import { ChatBotS3Buckets } from "./chatbot-s3-buckets";
 import { RestApi } from "./rest-api";
 import { WebSocketApi } from "./websocket-api";
+import { ChatGraphqlApi } from "./appsync-ws";
 
 export interface ChatBotApiProps {
   readonly shared: Shared;
@@ -30,6 +31,7 @@ export class ChatBotApi extends Construct {
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
   public readonly filesBucket: s3.Bucket;
+  public readonly graphqlApi?: ChatGraphqlApi;
 
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
     super(scope, id);
@@ -46,10 +48,10 @@ export class ChatBotApi extends Construct {
     const webSocketApi = new WebSocketApi(this, "WebSocketApi", props);
 
     this.restApi = restApi.api;
-    this.webSocketApi = webSocketApi.api;
     this.messagesTopic = webSocketApi.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
     this.filesBucket = chatBuckets.filesBucket;
+    this.graphqlApi = webSocketApi.graphqlApi;
   }
 }

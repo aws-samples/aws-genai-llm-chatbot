@@ -428,6 +428,7 @@ deploy-models
 cli/*.js
 bin/*.js
 lib/**/*.js
+!lib/chatbot-api/functions/resolvers/**/*.js
 !jest.config.js
 *.d.ts
 node_modules
@@ -445,3 +446,4 @@ bin/config.json
 # Docs
 docs/.vitepress/cache
 docs/.vitepress/dist
+lib/user-interface/react-app/.graphqlconfig.yml

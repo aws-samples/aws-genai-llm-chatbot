@@ -71,7 +71,7 @@ export default function Chat(props: { sessionId?: string }) {
           <ChatMessage
             key={idx}
             message={message}
-            configuration={configuration}
+            showMetadata={configuration.showMetadata}
           />
         ))}
       </SpaceBetween>
@@ -91,7 +91,7 @@ export default function Chat(props: { sessionId?: string }) {
           running={running}
           setRunning={setRunning}
           messageHistory={messageHistory}
-          setMessageHistory={setMessageHistory}
+          setMessageHistory={(history)=>setMessageHistory(history)}
           configuration={configuration}
           setConfiguration={setConfiguration}
         />

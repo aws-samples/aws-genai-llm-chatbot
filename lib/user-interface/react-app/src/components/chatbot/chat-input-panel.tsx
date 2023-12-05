@@ -8,13 +8,13 @@ import {
   Spinner,
   StatusIndicator,
 } from "@cloudscape-design/components";
-import { Auth } from "aws-amplify";
 import {
   Dispatch,
   SetStateAction,
   useContext,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,11 +22,14 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import TextareaAutosize from "react-textarea-autosize";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import { ReadyState } from "react-use-websocket";
 import { ApiClient } from "../../common/api-client/api-client";
 import { AppContext } from "../../common/app-context";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { StorageHelper } from "../../common/helpers/storage-helper";
+import { API } from "aws-amplify";
+import { GraphQLSubscription } from "@aws-amplify/api";
+import { ReceiveMessagesSubscription } from "../../API";
 import {
   ApiResult,
   ModelItem,
@@ -38,30 +41,32 @@ import ConfigDialog from "./config-dialog";
 import ImageDialog from "./image-dialog";
 import {
   ChabotInputModality,
+  ChatBotHeartbeatRequest,
   ChatBotAction,
   ChatBotConfiguration,
-  ChatBotHeartbeatRequest,
   ChatBotHistoryItem,
   ChatBotMessageResponse,
   ChatBotMessageType,
   ChatBotMode,
-  ChatBotModelInterface,
   ChatBotRunRequest,
   ChatInputState,
   ImageFile,
+  ChatBotModelInterface,
 } from "./types";
+import { sendQuery } from "../../graphql/mutations";
 import {
   getSelectedModelMetadata,
   getSignedUrl,
-  updateMessageHistory,
+  updateMessageHistoryRef,
 } from "./utils";
+import { receiveMessages } from "../../graphql/subscriptions";
 
 export interface ChatInputPanelProps {
   running: boolean;
   setRunning: Dispatch<SetStateAction<boolean>>;
   session: { id: string; loading: boolean };
   messageHistory: ChatBotHistoryItem[];
-  setMessageHistory: Dispatch<SetStateAction<ChatBotHistoryItem[]>>;
+  setMessageHistory: (history: ChatBotHistoryItem[]) => void;
   configuration: ChatBotConfiguration;
   setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
 }
@@ -101,40 +106,97 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   const [configDialogVisible, setConfigDialogVisible] = useState(false);
   const [imageDialogVisible, setImageDialogVisible] = useState(false);
   const [files, setFiles] = useState<ImageFile[]>([]);
-  const [socketUrl, setSocketUrl] = useState<string | null>(null);
-  const { sendJsonMessage, readyState } = useWebSocket(socketUrl, {
-    share: true,
-    shouldReconnect: () => true,
-    onOpen: () => {
-      const request: ChatBotHeartbeatRequest = {
-        action: ChatBotAction.Heartbeat,
-        modelInterface: ChatBotModelInterface.Langchain,
-      };
+  const [readyState, setReadyState] = useState<ReadyState>(
+    ReadyState.UNINSTANTIATED
+  );
 
-      sendJsonMessage(request);
-    },
-    onMessage: (payload: { data: string }) => {
-      const response: ChatBotMessageResponse = JSON.parse(payload.data);
-      if (response.action === ChatBotAction.Heartbeat) {
-        return;
-      }
+  const messageHistoryRef = useRef<ChatBotHistoryItem[]>([]);
 
-      updateMessageHistory(
-        props.session.id,
-        props.messageHistory,
-        props.setMessageHistory,
-        response,
-        setState
-      );
+  useEffect(() => {
+    messageHistoryRef.current = props.messageHistory;
+  }, [props.messageHistory]);
 
-      if (
-        response.action === ChatBotAction.FinalResponse ||
-        response.action === ChatBotAction.Error
-      ) {
-        props.setRunning(false);
-      }
-    },
-  });
+  useEffect(() => {
+    async function subscribe() {
+      console.log("Subscribing to AppSync");
+      setReadyState(ReadyState.CONNECTING);
+      const sub = await API.graphql<
+        GraphQLSubscription<ReceiveMessagesSubscription>
+      >({
+        query: receiveMessages,
+        variables: {
+          sessionId: props.session.id,
+        },
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+      }).subscribe({
+        next: ({ value }) => {
+          console.log(`Graphql message:`);
+          console.log(value);
+          const data = value.data!.receiveMessages?.data;
+          if (data !== undefined && data !== null) {
+            const response: ChatBotMessageResponse = JSON.parse(data);
+            console.log(response);
+            if (response.action === ChatBotAction.Heartbeat) {
+              console.log("Heartbeat pong!");
+              return;
+            }
+            updateMessageHistoryRef(
+              props.session.id,
+              messageHistoryRef.current,
+              response
+            );
+
+            if (
+              response.action === ChatBotAction.FinalResponse ||
+              response.action === ChatBotAction.Error
+            ) {
+              console.log("Final message received");
+              props.setRunning(false);
+            }
+            props.setMessageHistory([...messageHistoryRef.current]);
+          }
+        },
+        error: (error) => console.warn(error),
+      });
+      return sub;
+    }
+
+    const sub = subscribe();
+    sub
+      .then(() => {
+        setReadyState(ReadyState.OPEN);
+        console.log(`Subscribed to session ${props.session.id}`);
+        const request: ChatBotHeartbeatRequest = {
+          action: ChatBotAction.Heartbeat,
+          modelInterface: ChatBotModelInterface.Langchain,
+          data: {
+            sessionId: props.session.id,
+          },
+        };
+        const result = API.graphql({
+          query: sendQuery,
+          variables: {
+            data: JSON.stringify(request),
+          },
+        });
+        Promise.all([result])
+          .then((x) => console.log(`Query successful`, x))
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => {
+        console.log(err);
+        setReadyState(ReadyState.CLOSED);
+      });
+
+    return () => {
+      sub
+        .then((s) => {
+          console.log(`Unsubscribing from ${props.session.id}`);
+          s.unsubscribe();
+        })
+        .catch((err) => console.log(err));
+    };
+  }, [props.session.id]);
 
   useEffect(() => {
     if (transcript) {
@@ -147,8 +209,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const [session, modelsResult, workspacesResult] = await Promise.all([
-        Auth.currentSession(),
+      const [modelsResult, workspacesResult] = await Promise.all([
         apiClient.models.getModels(),
         appContext?.config.rag_enabled
           ? apiClient.workspaces.getWorkspaces()
@@ -157,14 +218,6 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               data: [],
             }),
       ]);
-
-      const jwtToken = session.getAccessToken().getJwtToken();
-
-      if (jwtToken) {
-        setSocketUrl(
-          `${appContext.config.websocket_endpoint}?token=${jwtToken}`
-        );
-      }
 
       const models = ResultValue.ok(modelsResult) ? modelsResult.data : [];
       const workspaces = ResultValue.ok(workspacesResult)
@@ -302,25 +355,34 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     });
 
     props.setRunning(true);
+    messageHistoryRef.current = [
+      ...messageHistoryRef.current,
 
-    props.setMessageHistory((prev) =>
-      prev.concat(
-        {
-          type: ChatBotMessageType.Human,
-          content: value,
-          metadata: {
-            ...props.configuration,
-          },
+      {
+        type: ChatBotMessageType.Human,
+        content: value,
+        metadata: {
+          ...props.configuration,
         },
-        {
-          type: ChatBotMessageType.AI,
-          content: "",
-          metadata: {},
-        }
-      )
-    );
+        tokens: [],
+      },
+      {
+        type: ChatBotMessageType.AI,
+        tokens: [],
+        content: "",
+        metadata: {},
+      },
+    ];
 
-    return sendJsonMessage(request);
+    props.setMessageHistory(messageHistoryRef.current);
+
+    const result = API.graphql({
+      query: sendQuery,
+      variables: {
+        data: JSON.stringify(request),
+      },
+    });
+    console.log(result);
   };
 
   const connectionStatus = {
