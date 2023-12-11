@@ -28,6 +28,7 @@
     "@typescript-eslint/parser": "^6.0.0",
     "aws-cdk": "2.104.0",
     "eslint": "^8.45.0",
+    "graphql": "^16.8.1",
     "prettier": "^3.0.3",
     "ts-node": "^10.9.1",
     "typescript": "~5.1.3",

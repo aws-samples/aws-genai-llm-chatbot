@@ -1,0 +1,246 @@
+input CreateWorkspaceAuroraInput {
+  name: String
+  kind: String
+  embeddingsModelProvider: String
+  embeddingsModelName: String
+  crossEncoderModelProvider: String
+  crossEncoderModelName: String
+  languages: [String]
+  metric: String
+  index: Boolean
+  hybridSearch: Boolean
+  chunkingStrategy: String
+  chunkSize: Int
+  chunkOverlap: Int
+}
+
+input CreateWorkspaceKendraInput {
+  name: String
+  kind: String
+  kendraIndexId: String
+  useAllData: Boolean
+}
+
+input CreateWorkspaceOpenSearchInput {
+  name: String
+  kind: String
+  embeddingsModelProvider: String
+  embeddingsModelName: String
+  crossEncoderModelProvider: String
+  crossEncoderModelName: String
+  languages: [String]
+  hybridSearch: Boolean
+  chunkingStrategy: String
+  chunkSize: Int
+  chunkOverlap: Int
+}
+
+type Document {
+  id: String
+  type: String
+  subType: String
+  status: String
+  title: String
+  path: String
+  sizeInBytes: String
+  vectors: String
+  subDocuments: [String]
+  errors: [String]
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Documents {
+  engine: String
+  workspaceId: String
+  queryLanguage: String
+  supportedLanguages: [String]
+  detectedLanguages: [String]
+  items: [SemanticSearchResult]
+  vectorSearchMetric: String
+  vectorSearchItems: [SemanticSearchResult]
+  keywordSearchItems: [SemanticSearchResult]
+}
+
+type DocumentsResult {
+  items: [Document]!
+  lastDocumentId: String!
+}
+
+type Embedding {
+  vector: [Float]
+}
+
+type EmbeddingModel {
+  provider: String
+  model: String
+}
+
+input EmbeddingRequest {
+  provider: String!
+  model: String!
+  input: [String]!
+}
+
+type KendraIndex {
+  id: String
+  name: String
+  external: Boolean
+}
+
+type Model {
+  name: String
+  provider: String
+}
+
+type PassageRank {
+  score: Float
+}
+
+type RagEngine {
+  id: String
+  name: String
+  enabled: Boolean
+}
+
+input RankPassagesInput {
+  provider: String
+  model: String
+  input: String
+  passages: [String]
+}
+
+type SemanticSearchResult {
+  sources: [String]
+  chunkId: String
+  workspaceId: ID!
+  documentId: String
+  documentSubId: String
+  documentSubType: String
+  path: String
+  language: String
+  title: String
+  content: String
+  contentComplement: String
+  vectorSearchScore: Float
+  keywordSearchScore: Float
+  score: Float
+}
+
+type Session {
+  id: String
+  title: String
+  startTime: AWSDateTime
+  history: [SessionHistoryItem]
+}
+
+type SessionHistoryItem {
+  type: String
+  content: String
+  metadata: String
+}
+
+type DocumentResult {
+  workspaceId: String!
+  documentId: String!
+  status: String
+}
+
+type CrossEncoderData {
+  provider: String
+  name: String
+  default: Boolean
+}
+
+type Workspace {
+  id: String
+  name: String
+  engine: String
+  status: String
+  languages: [String]
+  embeddingsModelProvider: String
+  embeddingsModelName: String
+  embeddingsModelDimensions: Float
+  crossEncoderModelName: String
+  crossEncoderModelProvider: String
+  metric: String
+  index: Boolean
+  hybridSearch: Boolean
+  chunkingStrategy: String
+  chunkSize: Int
+  chunkOverlap: Int
+  vectors: String
+  documents: [String]
+  sizeInBytes: Int
+  kendraIndexId: String
+  kendraIndexExternal: String
+  kendraUseAllData: Boolean
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Mutation {
+  createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
+  createOpenSearchWorkspace(input: CreateWorkspaceOpenSearchInput!): Workspace!
+  createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
+  startKendraDataSync(workspaceId: String): Boolean
+  uploadFile(fileName: String): String
+  addTextDocument(
+    workspaceId: String
+    title: String
+    content: String
+  ): DocumentResult
+  addQnADocument(
+    workspaceId: String
+    question: String
+    answer: String
+  ): DocumentResult
+  setDocumentSubscriptionStatus(
+    workspaceId: String
+    documentId: String
+    status: String
+  ): DocumentResult
+  addWebsite(
+    workspaceId: String
+    sitemap: Boolean
+    address: String
+    followLinks: Boolean
+    limit: Int
+  ): DocumentResult
+  addRssFeed(
+    workspaceId: String
+    address: String
+    limit: Int
+    title: String
+    followLinks: Boolean
+  ): DocumentResult
+  updateRssFeed(
+    workspaceId: String
+    documentId: String
+    limit: Int
+    followLinks: Boolean
+  ): DocumentResult
+}
+
+type Query {
+  listModels: [Model]
+  listWorkspaces: [Workspace]
+  listRagEngines: [RagEngine]
+  performSemanticSearch(input: String): [Documents]
+  listSessions: [Session]
+  listEmbeddingModels: [EmbeddingModel]
+  calculateEmbeddings(request: EmbeddingRequest): [Embedding]
+  getSession(id: String): Session
+  listKendraIndexes: [KendraIndex]
+  isKendraDataSynching(workspaceId: String): Boolean
+  getDocuments(workspaceId: String, documentType: String): DocumentsResult
+  getDocumentDetails(workspaceId: String, documentId: String): DocumentsResult
+  getRSSPosts(workspaceId: String, documentId: String): DocumentsResult
+  listCrossEncoders: [CrossEncoderData]
+  rankPassages(input: RankPassagesInput): [PassageRank]
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}

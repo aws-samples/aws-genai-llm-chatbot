@@ -56,7 +56,7 @@ export class ChatGraphqlApi extends Construct {
 
     const resolverFunction = new Function(this, "lambda-resolver", {
       code: Code.fromAsset(
-        "./lib/chatbot-api/functions/resolvers/lambda-resolver"
+        "./lib/chatbot-api/functions/resolvers/subscription-lambda-resolver"
       ),
       handler: "index.handler",
       runtime: Runtime.PYTHON_3_11,
@@ -99,7 +99,7 @@ export class ChatGraphqlApi extends Construct {
       typeName: "Mutation",
       fieldName: "sendQuery",
       code: appsync.Code.fromAsset(
-        "./lib/chatbot-api/functions/resolvers/send-query-resolver.js"
+        "./lib/chatbot-api/functions/resolvers/lambda-resolver.js"
       ),
       runtime: appsync.FunctionRuntime.JS_1_0_0,
       dataSource: functionDataSource,
