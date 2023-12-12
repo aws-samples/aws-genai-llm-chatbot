@@ -14,7 +14,7 @@ logger = Logger()
 class EmbeddingsRequest(BaseModel):
     provider: str
     model: str
-    input: List[str]
+    passages: List[str]
 
 
 @router.resolver(field_name="listEmbeddingModels")
@@ -22,14 +22,13 @@ class EmbeddingsRequest(BaseModel):
 def models():
     models = genai_core.embeddings.get_embeddings_models()
 
-    return {"ok": True, "data": models}
+    return models
 
 
 @router.resolver(field_name="calculateEmbeddings")
 @tracer.capture_method
-def embeddings():
-    data: dict = router.current_event.json_body
-    request = EmbeddingsRequest(**data)
+def embeddings(input: dict):
+    request = EmbeddingsRequest(**input)
     selected_model = genai_core.embeddings.get_embeddings_model(
         request.provider, request.model
     )
@@ -37,6 +36,11 @@ def embeddings():
     if selected_model is None:
         raise genai_core.types.CommonError("Model not found")
 
-    ret_value = genai_core.embeddings.generate_embeddings(selected_model, request.input)
+    ret_value = genai_core.embeddings.generate_embeddings(
+        selected_model, request.passages
+    )
 
-    return {"ok": True, "data": ret_value}
+    return [
+        {"vector": v, "passage": request.passages[idx]}
+        for idx, v in enumerate(ret_value)
+    ]

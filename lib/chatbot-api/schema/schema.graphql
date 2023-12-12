@@ -1,43 +1,43 @@
 input CreateWorkspaceAuroraInput {
-  name: String
-  kind: String
-  embeddingsModelProvider: String
-  embeddingsModelName: String
-  crossEncoderModelProvider: String
-  crossEncoderModelName: String
-  languages: [String]
-  metric: String
-  index: Boolean
-  hybridSearch: Boolean
-  chunkingStrategy: String
-  chunkSize: Int
-  chunkOverlap: Int
+  name: String!
+  kind: String!
+  embeddingsModelProvider: String!
+  embeddingsModelName: String!
+  crossEncoderModelProvider: String!
+  crossEncoderModelName: String!
+  languages: [String]!
+  metric: String!
+  index: Boolean!
+  hybridSearch: Boolean!
+  chunkingStrategy: String!
+  chunkSize: Int!
+  chunkOverlap: Int!
 }
 
 input CreateWorkspaceKendraInput {
-  name: String
-  kind: String
-  kendraIndexId: String
-  useAllData: Boolean
+  name: String!
+  kind: String!
+  kendraIndexId: String!
+  useAllData: Boolean!
 }
 
 input CreateWorkspaceOpenSearchInput {
-  name: String
-  kind: String
-  embeddingsModelProvider: String
-  embeddingsModelName: String
-  crossEncoderModelProvider: String
-  crossEncoderModelName: String
-  languages: [String]
-  hybridSearch: Boolean
-  chunkingStrategy: String
-  chunkSize: Int
-  chunkOverlap: Int
+  name: String!
+  kind: String!
+  embeddingsModelProvider: String!
+  embeddingsModelName: String!
+  crossEncoderModelProvider: String!
+  crossEncoderModelName: String!
+  languages: [String]!
+  hybridSearch: Boolean!
+  chunkingStrategy: String!
+  chunkSize: Int!
+  chunkOverlap: Int!
 }
 
 type Document {
-  id: String
-  type: String
+  id: String!
+  type: String!
   subType: String
   status: String
   title: String
@@ -46,16 +46,16 @@ type Document {
   vectors: String
   subDocuments: [String]
   errors: [String]
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 type Documents {
-  engine: String
-  workspaceId: String
-  queryLanguage: String
-  supportedLanguages: [String]
-  detectedLanguages: [String]
+  engine: String!
+  workspaceId: String!
+  queryLanguage: String!
+  supportedLanguages: [String]!
+  detectedLanguages: [String]!
   items: [SemanticSearchResult]
   vectorSearchMetric: String
   vectorSearchItems: [SemanticSearchResult]
@@ -68,46 +68,49 @@ type DocumentsResult {
 }
 
 type Embedding {
-  vector: [Float]
+  passage: String
+  vector: [Float]!
 }
 
 type EmbeddingModel {
-  provider: String
-  model: String
+  provider: String!
+  name: String!
+  dimensions: Int!
+  default: Boolean
 }
 
-input EmbeddingRequest {
+input CalculateEmbeddingsInput {
   provider: String!
   model: String!
-  input: [String]!
+  passages: [String]!
 }
 
 type KendraIndex {
-  id: String
-  name: String
-  external: Boolean
+  id: String!
+  name: String!
+  external: Boolean!
 }
 
 type Model {
-  name: String
-  provider: String
+  name: String!
+  provider: String!
 }
 
 type PassageRank {
-  score: Float
+  score: Float!
 }
 
 type RagEngine {
-  id: String
-  name: String
-  enabled: Boolean
+  id: String!
+  name: String!
+  enabled: Boolean!
 }
 
 input RankPassagesInput {
-  provider: String
-  model: String
-  input: String
-  passages: [String]
+  provider: String!
+  model: String!
+  input: String!
+  passages: [String]!
 }
 
 type SemanticSearchResult {
@@ -128,15 +131,15 @@ type SemanticSearchResult {
 }
 
 type Session {
-  id: String
+  id: String!
   title: String
-  startTime: AWSDateTime
+  startTime: AWSDateTime!
   history: [SessionHistoryItem]
 }
 
 type SessionHistoryItem {
-  type: String
-  content: String
+  type: String!
+  content: String!
   metadata: String
 }
 
@@ -147,20 +150,23 @@ type DocumentResult {
 }
 
 type CrossEncoderData {
-  provider: String
-  name: String
-  default: Boolean
+  provider: String!
+  name: String!
+  default: Boolean!
 }
 
 type Workspace {
-  id: String
+  id: String!
   name: String
-  engine: String
+  formatVersion: Int
+  engine: String!
   status: String
+  aossEngine: String
   languages: [String]
+  hasIndex: Boolean
   embeddingsModelProvider: String
   embeddingsModelName: String
-  embeddingsModelDimensions: Float
+  embeddingsModelDimensions: Int
   crossEncoderModelName: String
   crossEncoderModelProvider: String
   metric: String
@@ -169,56 +175,56 @@ type Workspace {
   chunkingStrategy: String
   chunkSize: Int
   chunkOverlap: Int
-  vectors: String
-  documents: [String]
+  vectors: Int
+  documents: Int
   sizeInBytes: Int
   kendraIndexId: String
   kendraIndexExternal: String
   kendraUseAllData: Boolean
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
   createOpenSearchWorkspace(input: CreateWorkspaceOpenSearchInput!): Workspace!
   createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
-  startKendraDataSync(workspaceId: String): Boolean
-  uploadFile(fileName: String): String
+  startKendraDataSync(workspaceId: String!): Boolean
+  uploadFile(fileName: String!): String
   addTextDocument(
-    workspaceId: String
-    title: String
-    content: String
+    workspaceId: String!
+    title: String!
+    content: String!
   ): DocumentResult
   addQnADocument(
-    workspaceId: String
-    question: String
-    answer: String
+    workspaceId: String!
+    question: String!
+    answer: String!
   ): DocumentResult
   setDocumentSubscriptionStatus(
-    workspaceId: String
-    documentId: String
-    status: String
+    workspaceId: String!
+    documentId: String!
+    status: String!
   ): DocumentResult
   addWebsite(
-    workspaceId: String
-    sitemap: Boolean
-    address: String
-    followLinks: Boolean
-    limit: Int
+    workspaceId: String!
+    sitemap: Boolean!
+    address: String!
+    followLinks: Boolean!
+    limit: Int!
   ): DocumentResult
   addRssFeed(
-    workspaceId: String
-    address: String
-    limit: Int
-    title: String
-    followLinks: Boolean
+    workspaceId: String!
+    address: String!
+    limit: Int!
+    title: String!
+    followLinks: Boolean!
   ): DocumentResult
   updateRssFeed(
-    workspaceId: String
-    documentId: String
-    limit: Int
-    followLinks: Boolean
+    workspaceId: String!
+    documentId: String!
+    limit: Int!
+    followLinks: Boolean!
   ): DocumentResult
 }
 
@@ -226,18 +232,18 @@ type Query {
   listModels: [Model]
   listWorkspaces: [Workspace]
   listRagEngines: [RagEngine]
-  performSemanticSearch(input: String): [Documents]
+  performSemanticSearch(workspaceId: String!, query: String!): [Documents]
   listSessions: [Session]
   listEmbeddingModels: [EmbeddingModel]
-  calculateEmbeddings(request: EmbeddingRequest): [Embedding]
-  getSession(id: String): Session
+  calculateEmbeddings(input: CalculateEmbeddingsInput): [Embedding]
+  getSession(id: String!): Session
   listKendraIndexes: [KendraIndex]
-  isKendraDataSynching(workspaceId: String): Boolean
-  getDocuments(workspaceId: String, documentType: String): DocumentsResult
-  getDocumentDetails(workspaceId: String, documentId: String): DocumentsResult
-  getRSSPosts(workspaceId: String, documentId: String): DocumentsResult
+  isKendraDataSynching(workspaceId: String!): Boolean
+  getDocuments(workspaceId: String!, documentType: String!): DocumentsResult
+  getDocumentDetails(workspaceId: String!, documentId: String!): DocumentsResult
+  getRSSPosts(workspaceId: String!, documentId: String!): DocumentsResult
   listCrossEncoders: [CrossEncoderData]
-  rankPassages(input: RankPassagesInput): [PassageRank]
+  rankPassages(input: RankPassagesInput!): [PassageRank]
 }
 
 schema {

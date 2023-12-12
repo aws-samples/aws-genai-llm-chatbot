@@ -58,6 +58,8 @@ def list_workspaces():
         if not last_evaluated_key:
             break
 
+    print(all_items)
+
     return all_items
 
 

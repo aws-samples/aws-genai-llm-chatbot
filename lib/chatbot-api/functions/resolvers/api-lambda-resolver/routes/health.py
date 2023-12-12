@@ -9,4 +9,4 @@ logger = Logger()
 @router.resolver(field_name="ping")
 @tracer.capture_method
 def health():
-    return {"ok": True}
+    return True

@@ -92,11 +92,8 @@ def get_documents(
     )
 
     return {
-        "ok": True,
-        "data": {
-            "items": [_convert_document(item) for item in result["items"]],
-            "lastDocumentId": result["last_document_id"],
-        },
+        "items": [_convert_document(item) for item in result["items"]],
+        "lastDocumentId": result["last_document_id"],
     }
 
 
@@ -105,10 +102,7 @@ def get_documents(
 def get_document_details(workspace_id: str, document_id: str):
     result = genai_core.documents.get_document(workspace_id, document_id)
 
-    return {
-        "ok": True,
-        "data": {"items": [_convert_document(result)], "lastDocumentId": None},
-    }
+    return ({"items": [_convert_document(result)], "lastDocumentId": None},)
 
 
 @router.resolver(field_name="getRSSPosts")
@@ -125,11 +119,8 @@ def get_rss_posts(workspace_id: str, document_id: str):
     )
 
     return {
-        "ok": True,
-        "data": {
-            "items": [_convert_document(item) for item in result["items"]],
-            "lastDocumentId": result["last_document_id"],
-        },
+        "items": [_convert_document(item) for item in result["items"]],
+        "lastDocumentId": result["last_document_id"],
     }
 
 
@@ -148,12 +139,9 @@ def enable_document(workspace_id: str, document_id: str, status: str):
         )
 
     return {
-        "ok": True,
-        "data": {
-            "workspaceId": workspace_id,
-            "documentId": document_id,
-            "status": status,
-        },
+        "workspaceId": workspace_id,
+        "documentId": document_id,
+        "status": status,
     }
 
 
@@ -169,11 +157,8 @@ def add_text_document(workspace_id: str, title: str, content: str):
     )
 
     return {
-        "ok": True,
-        "data": {
-            "workspaceId": result["workspace_id"],
-            "documentId": result["document_id"],
-        },
+        "workspaceId": result["workspace_id"],
+        "documentId": result["document_id"],
     }
 
 
@@ -191,11 +176,8 @@ def add_qna_document(workspace_id: str, question: str, answer: str):
     )
 
     return {
-        "ok": True,
-        "data": {
-            "workspaceId": result["workspace_id"],
-            "documentId": result["document_id"],
-        },
+        "workspaceId": result["workspace_id"],
+        "documentId": result["document_id"],
     }
 
 
@@ -220,11 +202,8 @@ def add_website(
     )
 
     return {
-        "ok": True,
-        "data": {
-            "workspaceId": result["workspace_id"],
-            "documentId": result["document_id"],
-        },
+        "workspaceId": result["workspace_id"],
+        "documentId": result["document_id"],
     }
 
 
@@ -248,11 +227,8 @@ def add_rss_feed(
     )
 
     return {
-        "ok": True,
-        "data": {
-            "workspaceId": result["workspace_id"],
-            "documentId": result["document_id"],
-        },
+        "workspaceId": result["workspace_id"],
+        "documentId": result["document_id"],
     }
 
 
@@ -268,16 +244,11 @@ def update_document(
         follow_links=follow_links,
         limit=limit,
     )
-    return (
-        {
-            "ok": True,
-            "data": {
-                "workspaceId": result["workspace_id"],
-                "documentId": result["document_id"],
-                "status": "updated",
-            },
-        },
-    )
+    return {
+        "workspaceId": result["workspace_id"],
+        "documentId": result["document_id"],
+        "status": "updated",
+    }
 
 
 def _convert_document(document: dict):

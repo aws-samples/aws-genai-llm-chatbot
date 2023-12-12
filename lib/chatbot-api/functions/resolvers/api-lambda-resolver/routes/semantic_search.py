@@ -8,28 +8,21 @@ router = Router()
 logger = Logger()
 
 
-class SemanticSearchRequest(BaseModel):
-    workspaceId: str
-    query: str
-
-
 @router.resolver(field_name="performSemanticSearch")
 @tracer.capture_method
-def semantic_search(data: dict):
-    request = SemanticSearchRequest(**data)
-
-    if len(request.query) == 0 or len(request.query) > 1000:
+def semantic_search(workspace_id: str, query: str):
+    if len(query) == 0 or len(query) > 1000:
         raise genai_core.types.CommonError(
             "Query must be between 1 and 1000 characters"
         )
 
     result = genai_core.semantic_search.semantic_search(
-        workspace_id=request.workspaceId,
-        query=request.query,
+        workspace_id=workspace_id,
+        query=query,
         limit=25,
         full_response=True,
     )
-    result = _convert_semantic_search_result(request.workspaceId, result)
+    result = _convert_semantic_search_result(workspace_id, result)
 
     return result
 
