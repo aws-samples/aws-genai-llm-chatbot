@@ -7,6 +7,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+aws-lambda-powertools = "^2.29.0"
+pydantic = "^2.5.2"
+jmespath = "^1.0.1"
+boto3 = "^1.33.10"
 
 
 [build-system]
