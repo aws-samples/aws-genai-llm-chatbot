@@ -46,16 +46,16 @@ export class OpenSearchVector extends Construct {
     let seen = new Set<string>();
     const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
       name: Utils.getName(props.config, "genaichatbot-vpce"),
-      subnetIds: props.shared.vpc.filter(obj => {
-        if (seen.has(obj.availabilityZone)) {
+      subnetIds: props.shared.vpc
+        .filter((obj) => {
+          if (seen.has(obj.availabilityZone)) {
             return false;
-        } else {
+          } else {
             seen.add(obj.availabilityZone);
             return true;
-        }
-      }).privateSubnets.map(
-        (subnet) => subnet.subnetId
-      ),
+          }
+        })
+        .privateSubnets.map((subnet) => subnet.subnetId),
       vpcId: props.shared.vpc.vpcId,
       securityGroupIds: [sg.securityGroupId],
     });
