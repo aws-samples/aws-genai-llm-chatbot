@@ -284,7 +284,41 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 See instructions in the README file of the [`lib/user-interface/react-app`](./lib/user-interface/react-app) folder.
 
+# Using kendra with a non-english index
+If you're using Kendra with an index in a language other than English, you will need to make some code modifications.
 
+You'll need to modify the filters in the file lib/shared/layers/python-sdk/python/genai_core/kendra/query.py.
+
+Example for french :
+```python
+    if kendra_index_external or kendra_use_all_data:
+        result = kendra.retrieve(
+            IndexId=kendra_index_id, 
+            QueryText=query, 
+            PageSize=limit, 
+            PageNumber=1,
+            AttributeFilter={'AndAllFilters': [{"EqualsTo": {"Key": "_language_code","Value": {"StringValue": "fr"}}}]}
+        )
+    else:
+        result = kendra.retrieve(
+            IndexId=kendra_index_id,
+            QueryText=query,
+            PageSize=limit,
+            PageNumber=1,
+            AttributeFilter={'AndAllFilters': 
+                [
+                    {"EqualsTo": {"Key": "_language_code","Value": {"StringValue": "fr"}}},
+                    {"EqualsTo": {"Key": "workspace_id","Value": {"StringValue": workspace_id}}}
+                ]
+            }
+        )
+```
+
+Please note: If these adjustments are made post-deployment, it's essential to rebuild and redeploy. If done prior to deployment, you can proceed with the walkthrough as usual.
+```bash
+npm install && npm run build
+npx cdk deploy
+```
 
 # Clean up
 You can remove the stacks and all the associated resources created in your AWS account by running the following command:
