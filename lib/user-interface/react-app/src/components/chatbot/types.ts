@@ -1,5 +1,5 @@
+import { Model } from "../../API";
 import {
-  ModelItem,
   LoadingStatus,
   WorkspaceItem,
   ModelInterface,
@@ -18,9 +18,9 @@ export interface ChatBotConfiguration {
 export interface ChatInputState {
   value: string;
   workspaces?: WorkspaceItem[];
-  models?: ModelItem[];
+  models?: Model[];
   selectedModel: SelectProps.Option | null;
-  selectedModelMetadata: ModelItem | null;
+  selectedModelMetadata: Model | null;
   selectedWorkspace: SelectProps.Option | null;
   modelsStatus: LoadingStatus;
   workspacesStatus: LoadingStatus;
@@ -63,7 +63,7 @@ export interface ChatBotHeartbeatRequest {
   modelInterface: ModelInterface;
   data: {
     sessionId: string;
-  }
+  };
 }
 
 export interface ChatBotRunRequest {

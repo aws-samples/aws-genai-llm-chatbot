@@ -34,7 +34,7 @@ def kendra_data_sync():
 
 @router.resolver(field_name="isKendraDataSynching")
 @tracer.capture_method
-def kendra_is_syncing(workspace_id: str):
-    result = genai_core.kendra.kendra_is_syncing(workspace_id=workspace_id)
+def kendra_is_syncing(workspaceId: str):
+    result = genai_core.kendra.kendra_is_syncing(workspace_id=workspaceId)
 
     return result

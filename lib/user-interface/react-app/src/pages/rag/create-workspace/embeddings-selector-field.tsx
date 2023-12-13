@@ -1,13 +1,10 @@
 import { FormField, Select, SelectProps } from "@cloudscape-design/components";
-import {
-  EmbeddingsModelItem,
-  LoadingStatus,
-  ResultValue,
-} from "../../../common/types";
+import { LoadingStatus } from "../../../common/types";
 import { EmbeddingsModelHelper } from "../../../common/helpers/embeddings-model-helper";
 import { useContext, useEffect, useState } from "react";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
+import { EmbeddingModel } from "../../../API";
 
 interface EmbeddingsSelectionProps {
   submitting: boolean;
@@ -20,9 +17,9 @@ export default function EmbeddingSelector(props: EmbeddingsSelectionProps) {
   const appContext = useContext(AppContext);
   const [embeddingsModelsStatus, setEmbeddingsModelsStatus] =
     useState<LoadingStatus>("loading");
-  const [embeddingsModels, setEmbeddingsModels] = useState<
-    EmbeddingsModelItem[]
-  >([]);
+  const [embeddingsModels, setEmbeddingsModels] = useState<EmbeddingModel[]>(
+    []
+  );
 
   useEffect(() => {
     if (!appContext?.config) return;
@@ -31,8 +28,8 @@ export default function EmbeddingSelector(props: EmbeddingsSelectionProps) {
       const apiClient = new ApiClient(appContext);
       const result = await apiClient.embeddings.getModels();
 
-      if (ResultValue.ok(result)) {
-        setEmbeddingsModels(result.data);
+      if (result.errors === undefined) {
+        setEmbeddingsModels(result.data!.listEmbeddingModels);
         setEmbeddingsModelsStatus("finished");
       } else {
         setEmbeddingsModelsStatus("error");

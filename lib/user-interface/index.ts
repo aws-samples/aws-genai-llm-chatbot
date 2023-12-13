@@ -143,7 +143,7 @@ export class UserInterface extends Construct {
         userPoolWebClientId: props.userPoolClientId,
         identityPoolId: props.identityPool.identityPoolId,
       },
-      aws_appsync_graphqlEndpoint: props.api.graphqlApi?.graphQLUrl,
+      aws_appsync_graphqlEndpoint: props.api.graphqlApi.graphqlUrl,
       aws_appsync_region: cdk.Aws.REGION,
       aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
       aws_appsync_apiKey: props.api.graphqlApi?.apiKey,
@@ -156,7 +156,7 @@ export class UserInterface extends Construct {
       config: {
         api_endpoint: `https://${distribution.distributionDomainName}/api`,
         websocket_endpoint: `wss://${distribution.distributionDomainName}/socket`,
-        appsync_endpoint: props.api.graphqlApi?.graphQLUrl,
+        appsync_endpoint: props.api.graphqlApi.graphqlUrl,
         rag_enabled: props.config.rag.enabled,
         cross_encoders_enabled: props.crossEncodersEnabled,
         sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,

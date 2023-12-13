@@ -1,10 +1,11 @@
-import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
 import { Shared } from "../shared";
@@ -13,7 +14,7 @@ import { ChatBotDynamoDBTables } from "./chatbot-dynamodb-tables";
 import { ChatBotS3Buckets } from "./chatbot-s3-buckets";
 import { RestApi } from "./rest-api";
 import { WebSocketApi } from "./websocket-api";
-import { ChatGraphqlApi } from "./appsync-ws";
+import * as appsync from "aws-cdk-lib/aws-appsync";
 
 export interface ChatBotApiProps {
   readonly shared: Shared;
@@ -26,12 +27,11 @@ export interface ChatBotApiProps {
 
 export class ChatBotApi extends Construct {
   public readonly restApi: apigateway.RestApi;
-  public readonly webSocketApi: apigwv2.WebSocketApi;
   public readonly messagesTopic: sns.Topic;
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
   public readonly filesBucket: s3.Bucket;
-  public readonly graphqlApi?: ChatGraphqlApi;
+  public readonly graphqlApi: appsync.GraphqlApi;
 
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
     super(scope, id);
@@ -47,11 +47,79 @@ export class ChatBotApi extends Construct {
 
     const webSocketApi = new WebSocketApi(this, "WebSocketApi", props);
 
+    const executionRole = new iam.Role(this, "mergedApiRole", {
+      assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),
+      inlinePolicies: {
+        sourceApisPolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["appsync:SourceGraphQL"],
+              resources: [
+                restApi.graphqlApi.arn,
+                webSocketApi.api.graphQLApi.arn,
+                `${restApi.graphqlApi.arn}/*`,
+                `${webSocketApi.api.graphQLApi.arn}/*`,
+              ],
+            }),
+          ],
+        }),
+      },
+    });
+
+    const mergedApi = new appsync.GraphqlApi(this, "MergedApi", {
+      name: "ChatbotGraphqlApi",
+      definition: {
+        sourceApiOptions: {
+          sourceApis: [
+            {
+              sourceApi: restApi.graphqlApi,
+              description: "Management API",
+            },
+            {
+              sourceApi: webSocketApi.api.graphQLApi,
+              description: "Realtime API",
+            },
+          ],
+          mergedApiExecutionRole: executionRole,
+        },
+      },
+      authorizationConfig: {
+        additionalAuthorizationModes: [
+          {
+            authorizationType: appsync.AuthorizationType.IAM,
+          },
+          {
+            authorizationType: appsync.AuthorizationType.USER_POOL,
+            userPoolConfig: {
+              userPool: props.userPool,
+            },
+          },
+        ],
+      },
+      xrayEnabled: true,
+    });
+
+    // Prints out URL
+    new cdk.CfnOutput(this, "GraphqlAPIURL", {
+      value: mergedApi.graphqlUrl,
+    });
+
+    // Prints out the AppSync GraphQL API key to the terminal
+    new cdk.CfnOutput(this, "GraphqlAPIKey", {
+      value: mergedApi.apiKey || "",
+    });
+
+    // Prints out the AppSync GraphQL API key to the terminal
+    new cdk.CfnOutput(this, "GraphqlAPIId", {
+      value: mergedApi.apiId || "",
+    });
+
     this.restApi = restApi.api;
     this.messagesTopic = webSocketApi.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
     this.filesBucket = chatBuckets.filesBucket;
-    this.graphqlApi = webSocketApi.graphqlApi;
+    this.graphqlApi = mergedApi;
   }
 }

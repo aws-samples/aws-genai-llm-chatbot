@@ -21,10 +21,10 @@ def get_sessions():
     return [
         {
             "id": session.get("SessionId"),
-            "title": session.get("History")[0].get("data", {}).get("content")
-            if session.get("History")
-            else "<no_title>",
-            "startTime": session.get("StartTime"),
+            "title": session.get("History", [{}])[0]
+            .get("data", {})
+            .get("content", "<no title>"),
+            "startTime": f'{session.get("StartTime")}Z',
         }
         for session in sessions
     ]
@@ -32,21 +32,21 @@ def get_sessions():
 
 @router.resolver(field_name="getSession")
 @tracer.capture_method
-def get_session(session_id: str):
+def get_session(id: str):
     user_id = genai_core.auth.get_user_id(router)
     if user_id is None:
         raise genai_core.types.CommonError("User not found")
 
-    session = genai_core.sessions.get_session(session_id, user_id)
+    session = genai_core.sessions.get_session(id, user_id)
     if not session:
-        return {"ok": True, "data": None}
+        return None
 
     return {
         "id": session.get("SessionId"),
-        "title": session.get("History")[0].get("data", {}).get("content")
-        if session.get("History")
-        else "<no_title>",
-        "startTime": session.get("StartTime"),
+        "title": session.get("History", [{}])[0]
+        .get("data", {})
+        .get("content", "<no title>"),
+        "startTime": f'{session.get("StartTime")}Z',
         "history": [
             {
                 "type": item.get("type"),
@@ -72,11 +72,11 @@ def delete_user_sessions():
 
 @router.resolver(field_name="deleteSession")
 @tracer.capture_method
-def delete_session(session_id: str):
+def delete_session(id: str):
     user_id = genai_core.auth.get_user_id(router)
     if user_id is None:
         raise genai_core.types.CommonError("User not found")
 
-    result = genai_core.sessions.delete_session(session_id, user_id)
+    result = genai_core.sessions.delete_session(id, user_id)
 
     return result

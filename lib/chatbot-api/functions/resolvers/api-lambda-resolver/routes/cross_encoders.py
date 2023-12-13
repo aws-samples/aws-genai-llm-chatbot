@@ -14,7 +14,7 @@ logger = Logger()
 class CrossEncodersRequest(BaseModel):
     provider: str
     model: str
-    input: str
+    reference: str
     passages: List[str]
 
 
@@ -38,6 +38,6 @@ def cross_encoders(input: dict):
         raise genai_core.types.CommonError("Model not found")
 
     ret_value = genai_core.cross_encoder.rank_passages(
-        selected_model, request.input, request.passages
+        selected_model, request.reference, request.passages
     )
     return ret_value

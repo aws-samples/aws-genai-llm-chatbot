@@ -24,7 +24,7 @@ import { ReadyState } from "react-use-websocket";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { API } from "aws-amplify";
 import { GraphQLSubscription } from "@aws-amplify/api";
-import { ReceiveMessagesSubscription } from "../../API";
+import { Model, ReceiveMessagesSubscription } from "../../API";
 import {
   ChatBotConfiguration,
   ChatBotAction,
@@ -40,10 +40,10 @@ import {
 } from "./types";
 import {
   ApiResult,
-  ModelItem,
   WorkspaceItem,
   ResultValue,
   LoadingStatus,
+  ModelInterface,
 } from "../../common/types";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
@@ -55,7 +55,7 @@ import { sendQuery } from "../../graphql/mutations";
 export interface ChatSession {
   configuration: ChatBotConfiguration;
   model?: SelectProps.Option;
-  modelMetadata?: ModelItem;
+  modelMetadata?: Model;
   workspace?: SelectProps.Option;
   id: string;
   loading: boolean;
@@ -99,7 +99,7 @@ export default function MultiChat() {
   const appContext = useContext(AppContext);
   const refChatSessions = useRef<ChatSession[]>([]);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [models, setModels] = useState<ModelItem[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
   const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
   const [modelsStatus, setModelsStatus] = useState<LoadingStatus>("loading");
   const [workspacesStatus, setWorkspacesStatus] =
@@ -128,8 +128,8 @@ export default function MultiChat() {
           : Promise.resolve<ApiResult<WorkspaceItem[]>>({ ok: true, data: [] }),
       ]);
 
-      const models = ResultValue.ok(modelsResult)
-        ? modelsResult.data.filter(
+      const models = modelsResult.data
+        ? modelsResult.data.listModels.filter(
             (m) =>
               m.inputModalities.includes(ChabotInputModality.Text) &&
               m.outputModalities.includes(ChabotOutputModality.Text)
@@ -142,7 +142,7 @@ export default function MultiChat() {
 
       setModels(models);
       setWorkspaces(workspaces);
-      setModelsStatus(ResultValue.ok(modelsResult) ? "finished" : "error");
+      setModelsStatus(modelsResult.data ? "finished" : "error");
       setWorkspacesStatus(
         ResultValue.ok(workspacesResult) ? "finished" : "error"
       );
@@ -179,7 +179,7 @@ export default function MultiChat() {
       const value = message.trim();
       const request: ChatBotRunRequest = {
         action: ChatBotAction.Run,
-        modelInterface: chatSession.modelMetadata!.interface,
+        modelInterface: chatSession.modelMetadata!.interface as ModelInterface,
         data: {
           modelName: name,
           provider: provider,

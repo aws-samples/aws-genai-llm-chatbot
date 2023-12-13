@@ -57,7 +57,7 @@ class CreateWorkspaceKendraRequest(BaseModel):
 
 @router.resolver(field_name="listWorkspaces")
 @tracer.capture_method
-def workspaces():
+def list_workspaces():
     workspaces = genai_core.workspaces.list_workspaces()
 
     ret_value = [_convert_workspace(workspace) for workspace in workspaces]
@@ -67,8 +67,8 @@ def workspaces():
 
 @router.resolver(field_name="getWorkspace")
 @tracer.capture_method
-def workspace(workspace_id: str):
-    workspace = genai_core.workspaces.get_workspace(workspace_id)
+def get_workspace(workspaceId: str):
+    workspace = genai_core.workspaces.get_workspace(workspaceId)
 
     if not workspace:
         return None
@@ -80,8 +80,8 @@ def workspace(workspace_id: str):
 
 @router.resolver(field_name="deleteWorkspace")
 @tracer.capture_method
-def workspace(workspace_id: str):
-    genai_core.workspaces.delete_workspace(workspace_id)
+def delete_workspace(workspaceId: str):
+    genai_core.workspaces.delete_workspace(workspaceId)
 
 
 @router.resolver(field_name="createAuroraWorkspace")

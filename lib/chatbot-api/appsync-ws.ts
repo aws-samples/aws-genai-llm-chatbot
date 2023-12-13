@@ -20,6 +20,7 @@ interface ChatGraphqlApiProps {
 export class ChatGraphqlApi extends Construct {
   public readonly apiKey: string | undefined;
   public readonly graphQLUrl: string | undefined;
+  public readonly graphQLApi: appsync.GraphqlApi;
 
   constructor(scope: Construct, id: string, props: ChatGraphqlApiProps) {
     super(scope, id);
@@ -56,7 +57,7 @@ export class ChatGraphqlApi extends Construct {
 
     const resolverFunction = new Function(this, "lambda-resolver", {
       code: Code.fromAsset(
-        "./lib/chatbot-api/functions/resolvers/subscription-lambda-resolver"
+        "./lib/chatbot-api/functions/resolvers/send-query-lambda-resolver"
       ),
       handler: "index.handler",
       runtime: Runtime.PYTHON_3_11,
@@ -98,11 +99,11 @@ export class ChatGraphqlApi extends Construct {
     api.createResolver("send-message-resolver", {
       typeName: "Mutation",
       fieldName: "sendQuery",
+      dataSource: functionDataSource,
       code: appsync.Code.fromAsset(
         "./lib/chatbot-api/functions/resolvers/lambda-resolver.js"
       ),
       runtime: appsync.FunctionRuntime.JS_1_0_0,
-      dataSource: functionDataSource,
     });
 
     api.grantMutation(outgoingMessageAppsync);
@@ -121,23 +122,14 @@ export class ChatGraphqlApi extends Construct {
       typeName: "Subscription",
       fieldName: "receiveMessages",
       code: appsync.Code.fromAsset(
-        "./lib/chatbot-api/functions/resolvers/receive-message-resolver.js"
+        "./lib/chatbot-api/functions/resolvers/subscribe-resolver.js"
       ),
       runtime: appsync.FunctionRuntime.JS_1_0_0,
       dataSource: noneDataSource,
     });
 
-    // Prints out URL
-    new cdk.CfnOutput(this, "GraphqlWSAPIURL", {
-      value: api.graphqlUrl,
-    });
-
-    // Prints out the AppSync GraphQL API key to the terminal
-    new cdk.CfnOutput(this, "GraphqlWSAPIKey", {
-      value: api.apiKey || "",
-    });
-
     this.apiKey = api.apiKey;
     this.graphQLUrl = api.graphqlUrl;
+    this.graphQLApi = api;
   }
 }

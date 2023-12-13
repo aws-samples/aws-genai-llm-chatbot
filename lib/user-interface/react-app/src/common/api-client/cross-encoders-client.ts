@@ -1,17 +1,19 @@
-import { ApiResult, CrossEncoderModelItem } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import { listCrossEncoders, rankPassages } from "../../graphql/queries";
+import { ListCrossEncodersQuery, RankPassagesQuery } from "../../API";
 
-export class CrossEncodersClient extends ApiClientBase {
-  async getModels(): Promise<ApiResult<CrossEncoderModelItem[]>> {
+export class CrossEncodersClient {
+  async getModels(): Promise<
+    GraphQLResult<GraphQLQuery<ListCrossEncodersQuery>>
+  > {
     try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/cross-encoders/models"), {
-        headers,
+      const result = await API.graphql<GraphQLQuery<ListCrossEncodersQuery>>({
+        query: listCrossEncoders,
       });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
+      return result;
+    } catch (error: any) {
+      return error;
     }
   }
 
@@ -20,18 +22,22 @@ export class CrossEncodersClient extends ApiClientBase {
     model: string,
     input: string,
     passages: string[]
-  ): Promise<ApiResult<number[]>> {
+  ): Promise<GraphQLResult<GraphQLQuery<RankPassagesQuery>>> {
     try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/cross-encoders"), {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ provider, model, input, passages }),
+      const result = await API.graphql<GraphQLQuery<RankPassagesQuery>>({
+        query: rankPassages,
+        variables: {
+          input: {
+            model: model,
+            passages: passages,
+            provider: provider,
+            reference: input,
+          },
+        },
       });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
+      return result;
+    } catch (error: any) {
+      return error;
     }
   }
 }

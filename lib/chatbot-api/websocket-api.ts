@@ -18,7 +18,7 @@ interface WebSocketApiProps {
 
 export class WebSocketApi extends Construct {
   public readonly messagesTopic: sns.Topic;
-  public readonly graphqlApi?: ChatGraphqlApi;
+  public readonly api: ChatGraphqlApi;
 
   constructor(scope: Construct, id: string, props: WebSocketApiProps) {
     super(scope, id);
@@ -53,7 +53,7 @@ export class WebSocketApi extends Construct {
       userPool: props.userPool,
       shared: props.shared,
     });
-    this.graphqlApi = graphqlApi;
+    this.api = graphqlApi;
 
     // Route all outgoing messages to the websocket interface queue
     messagesTopic.addSubscription(

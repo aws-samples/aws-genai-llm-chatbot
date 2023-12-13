@@ -21,17 +21,14 @@ import BaseAppLayout from "../../../components/base-app-layout";
 import { useContext, useEffect, useState } from "react";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
-import {
-  EmbeddingsModelItem,
-  LoadingStatus,
-  ResultValue,
-} from "../../../common/types";
+import { LoadingStatus } from "../../../common/types";
 import { useForm } from "../../../common/hooks/use-form";
 import { MetricsHelper } from "../../../common/helpers/metrics-helper";
 import { MetricsMatrix } from "./metrics-matrix";
 import { EmbeddingsModelHelper } from "../../../common/helpers/embeddings-model-helper";
 import { Utils } from "../../../common/utils";
 import { CHATBOT_NAME } from "../../../common/constants";
+import { Embedding, EmbeddingModel } from "../../../API";
 
 export default function Embeddings() {
   const onFollow = useOnFollow();
@@ -42,9 +39,9 @@ export default function Embeddings() {
   const [embeddingsModelStatus, setEmbeddingsModelsStatus] =
     useState<LoadingStatus>("loading");
   const [embeddingsModelsResults, setEmbeddingsModelsResults] = useState<
-    EmbeddingsModelItem[]
+    EmbeddingModel[]
   >([]);
-  const [embeddings, setEmbeddings] = useState<number[][] | null>(null);
+  const [embeddings, setEmbeddings] = useState<Embedding[] | null>(null);
   const [metricsMatrices, setMetricsMatrices] = useState<
     {
       embeddingsVector: number[][];
@@ -106,8 +103,8 @@ export default function Embeddings() {
       const apiClient = new ApiClient(appContext);
       const result = await apiClient.embeddings.getModels();
 
-      if (ResultValue.ok(result)) {
-        setEmbeddingsModelsResults(result.data);
+      if (result.errors === undefined) {
+        setEmbeddingsModelsResults(result.data!.listEmbeddingModels!);
         setEmbeddingsModelsStatus("finished");
       } else {
         setEmbeddingsModelsStatus("error");
@@ -162,16 +159,21 @@ export default function Embeddings() {
     for (let i = 0; i < results.length; i++) {
       console.log(`getting results for ${i}`);
       const result = await results[i];
-      if (ResultValue.ok(result)) {
-        const matrices = MetricsHelper.matrices(result.data);
+
+      if (result.errors === undefined) {
+        const matrices = MetricsHelper.matrices(
+          result.data!.calculateEmbeddings.map((x) => x!.vector)
+        );
         console.log(` results ${i} OK`);
         matricesResults.push({
           embeddingModel: embeddingModels[i],
-          embeddingsVector: result.data,
+          embeddingsVector: result.data!.calculateEmbeddings.map(
+            (x) => x!.vector
+          ),
           ...matrices,
         });
-      } else if (result.message) {
-        setGlobalError(Utils.getErrorMessage(result));
+      } else {
+        setGlobalError(result.errors.map((e) => e.message).join(","));
       }
     }
     console.log(`setting matrices - ${matricesResults.length}`);

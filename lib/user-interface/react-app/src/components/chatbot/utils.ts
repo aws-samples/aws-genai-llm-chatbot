@@ -7,9 +7,9 @@ import {
   ChatBotMessageType,
 } from "./types";
 import { ChatSession } from "./multi-chat";
-import { ModelItem } from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
 import { OptionsHelper } from "../../common/helpers/options-helper";
+import { Model } from "../../API";
 
 export function updateMessageHistory(
   sessionId: string,
@@ -314,10 +314,10 @@ export async function getSignedUrl(key: string) {
 }
 
 export function getSelectedModelMetadata(
-  models: ModelItem[] | undefined,
+  models: Model[] | undefined,
   selectedModelOption: SelectProps.Option | null
-): ModelItem | null {
-  let selectedModelMetadata: ModelItem | null = null;
+): Model | null {
+  let selectedModelMetadata: Model | null = null;
 
   if (selectedModelOption) {
     const { name, provider } = OptionsHelper.parseValue(

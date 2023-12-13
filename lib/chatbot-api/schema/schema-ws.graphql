@@ -1,189 +1,27 @@
-input CreateWorkspaceAuroraInput {
-  name: String
-  kind: String
-  embeddingsModelProvider: String
-  embeddingsModelName: String
-  crossEncoderModelProvider: String
-  crossEncoderModelName: String
-  languages: [String]
-  metric: String
-  index: Boolean
-  hybridSearch: Boolean
-  chunkingStrategy: String
-  chunkSize: Int
-  chunkOverlap: Int
+type Mutation {
+  sendQuery(data: String): String @aws_cognito_user_pools
+  publishResponse(sessionId: String, userId: String, data: String): Channel
+    @aws_iam
 }
 
-input CreateWorkspaceOpenSearchInput {
-  name: String
-  kind: String
-  embeddingsModelProvider: String
-  embeddingsModelName: String
-  crossEncoderModelProvider: String
-  crossEncoderModelName: String
-  languages: [String]
-  hybridSearch: Boolean
-  chunkingStrategy: String
-  chunkSize: Int
-  chunkOverlap: Int
-}
-
-input CreateWorkspaceKendraInput {
-  name: String
-  kind: String
-  kendraIndexId: String
-  useAllData: Boolean
-}
-
-type Model {
-  name: String
-  provider: String
-}
-
-type Workspace {
-  id: String
-  name: String
-  engine: String
-  status: String
-  languages: [String]
-  embeddingsModelProvider: String
-  embeddingsModelName: String
-  embeddingsModelDimensions: Float
-  crossEncoderModelName: String
-  crossEncoderModelProvider: String
-  metric: String
-  index: Boolean
-  hybridSearch: Boolean
-  chunkingStrategy: String
-  chunkSize: Int
-  chunkOverlap: Int
-  vectors: String
-  documents: [String]
-  sizeInBytes: Int
-  kendraIndexId: String
-  kendraIndexExternal: String
-  kendraUseAllData: Boolean
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-}
-
-type RagEngine {
-  id: String
-  name: String
-  enabled: Boolean
-}
-
-type SemanticSearchResult {
-  sources: [String]
-  chunkId: String
-  workspaceId: ID!
-  documentId: String
-  documentSubId: String
-  documentSubType: String
-  path: String
-  language: String
-  title: String
-  content: String
-  contentComplement: String
-  vectorSearchScore: Float
-  keywordSearchScore: Float
-  score: Float
-}
-
-type Documents {
-  engine: String
-  workspaceId: String
-  queryLanguage: String
-  supportedLanguages: [String]
-  detectedLanguages: [String]
-  items: [SemanticSearchResult]
-  vectorSearchMetric: String
-  vectorSearchItems: [SemanticSearchResult]
-  keywordSearchItems: [SemanticSearchResult]
-}
-
-type SessionHistoryItem {
-  type: String
-  content: String
-  metadata: String
-}
-
-type Session {
-  id: String
-  title: String
-  startTime: AWSDateTime
-  history: [SessionHistoryItem]
-}
-
-type KendraIndex {
-  id: String
-  name: String
-  external: Boolean
-}
-
-type Document {
-  id: String
-  type: String
-  subType: String
-  status: String
-  title: String
-  path: String
-  sizeInBytes: String
-  vectors: String
-  subDocuments: [String]
-  errors: [String]
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-}
-
-type DocumentsResult {
-  items: [Document]!
-  lastDocumentId: String!
-}
-
-input RankPassagesInput {
-  provider: String
-  model: String
-  input: String
-  passages: [String]
-}
-
-type PassageRank {
-  score: Float
+type Channel @aws_iam @aws_cognito_user_pools {
+  data: String
+  sessionId: String
+  userId: String
 }
 
 type Query {
-  getModels: [Model]
-  getWorkspaces: [Workspace]
-  getRagEngines: [RagEngine]
-  performSemanticSearch(input: String): [Documents]
-  listSessions: [Session]
-  getSession(id: String): Session
-  listKendraIndexes: [KendraIndex]
-  isKendraDataSynching(workspaceId: String): Boolean
-  getDocuments(workspaceId: String, documentType: String): DocumentsResult
-  listCrossEncoders: [String]
-  rankPassages(input: RankPassagesInput): [PassageRank]
+  none: String
 }
 
-type Mutation {
-  createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
-  createOpenSearchWorkspace(input: CreateWorkspaceOpenSearchInput!): Workspace!
-  createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
-  startKendraDataSync(workspaceId: String): String
-  uploadFile(fileName: String): String
-  addTextDocument(workspaceId: String, title: String, content: String): String
-  addQADocument(workspaceId: String, question: String, answer: String): String
-  addWebsite(
-    workspaceId: String
-    sitemap: Boolean
-    address: String
-    followLinks: Boolean
-    limit: Int
-  ): String
+type Subscription {
+  receiveMessages(sessionId: String): Channel
+    @aws_subscribe(mutations: ["publishResponse"])
+    @aws_cognito_user_pools
 }
 
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }

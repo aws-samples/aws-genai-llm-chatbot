@@ -29,10 +29,10 @@ import { OptionsHelper } from "../../common/helpers/options-helper";
 import { StorageHelper } from "../../common/helpers/storage-helper";
 import { API } from "aws-amplify";
 import { GraphQLSubscription } from "@aws-amplify/api";
-import { ReceiveMessagesSubscription } from "../../API";
+import { Model, ReceiveMessagesSubscription } from "../../API";
 import {
   ApiResult,
-  ModelItem,
+  ModelInterface,
   ResultValue,
   WorkspaceItem,
 } from "../../common/types";
@@ -219,7 +219,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             }),
       ]);
 
-      const models = ResultValue.ok(modelsResult) ? modelsResult.data : [];
+      const models =
+        modelsResult.errors === undefined ? modelsResult.data?.listModels! : [];
       const workspaces = ResultValue.ok(workspacesResult)
         ? workspacesResult.data
         : [];
@@ -240,7 +241,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         selectedModel: selectedModelOption,
         selectedModelMetadata,
         selectedWorkspace: selectedWorkspaceOption,
-        modelsStatus: ResultValue.ok(modelsResult) ? "finished" : "error",
+        modelsStatus: modelsResult.errors === undefined ? "finished" : "error",
         workspacesStatus: ResultValue.ok(workspacesResult)
           ? "finished"
           : "error",
@@ -325,7 +326,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const value = state.value.trim();
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
-      modelInterface: state.selectedModelMetadata!.interface,
+      modelInterface: state.selectedModelMetadata!.interface as ModelInterface,
       data: {
         mode: ChatBotMode.Chain,
         text: value,
@@ -376,13 +377,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     props.setMessageHistory(messageHistoryRef.current);
 
-    const result = API.graphql({
+    API.graphql({
       query: sendQuery,
       variables: {
         data: JSON.stringify(request),
       },
     });
-    console.log(result);
   };
 
   const connectionStatus = {
@@ -635,9 +635,7 @@ function getSelectedWorkspaceOption(
   return selectedWorkspaceOption;
 }
 
-function getSelectedModelOption(
-  models: ModelItem[]
-): SelectProps.Option | null {
+function getSelectedModelOption(models: Model[]): SelectProps.Option | null {
   let selectedModelOption: SelectProps.Option | null = null;
   const savedModel = StorageHelper.getSelectedLLM();
 
@@ -656,7 +654,7 @@ function getSelectedModelOption(
     }
   }
 
-  let candidate: ModelItem | undefined = undefined;
+  let candidate: Model | undefined = undefined;
   if (!selectedModelOption) {
     const bedrockModels = models.filter((m) => m.provider === "bedrock");
     const sageMakerModels = models.filter((m) => m.provider === "sagemaker");

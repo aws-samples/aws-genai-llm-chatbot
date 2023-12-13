@@ -5,6 +5,7 @@ import genai_core.documents
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
+from typing import Optional
 
 tracer = Tracer()
 router = Router()
@@ -12,20 +13,24 @@ logger = Logger()
 
 
 class FileUploadRequest(BaseModel):
+    workspaceId: str
     fileName: str
 
 
 class TextDocumentRequest(BaseModel):
+    workspaceId: str
     title: str
     content: str
 
 
 class QnADocumentRequest(BaseModel):
+    workspaceId: str
     question: str
     answer: str
 
 
 class WebsiteDocumentRequest(BaseModel):
+    workspaceId: str
     sitemap: bool
     address: str
     followLinks: bool
@@ -33,9 +38,11 @@ class WebsiteDocumentRequest(BaseModel):
 
 
 class RssFeedDocumentRequest(BaseModel):
-    address: str
+    workspaceId: str
+    documentId: Optional[str]
+    address: Optional[str]
     limit: int
-    title: str
+    title: Optional[str]
     followLinks: bool
 
 
@@ -43,6 +50,23 @@ class RssFeedCrawlerUpdateRequest(BaseModel):
     documentType: str
     followLinks: bool
     limit: int
+
+
+class ListDocumentsRequest(BaseModel):
+    workspaceId: str
+    documentType: str
+    lastDocumentId: Optional[str]
+
+
+class GetDocumentRequest(BaseModel):
+    workspaceId: str
+    documentId: str
+
+
+class DocumentSubscriptionStatusRequest(BaseModel):
+    workspaceId: str
+    documentId: str
+    status: str
 
 
 allowed_extensions = set(
@@ -72,23 +96,25 @@ allowed_extensions = set(
 
 @router.resolver(field_name="uploadFile")
 @tracer.capture_method
-def file_upload(workspace_id: str, file_name: str):
-    _, extension = os.path.splitext(file_name)
+def file_upload(input: dict):
+    request = FileUploadRequest(**input)
+    _, extension = os.path.splitext(request.fileName)
     if extension not in allowed_extensions:
         raise genai_core.types.CommonError("Invalid file extension")
 
-    result = genai_core.upload.generate_presigned_post(workspace_id, file_name)
+    result = genai_core.upload.generate_presigned_post(
+        request.workspaceId, request.fileName
+    )
 
     return {"ok": True, "data": result}
 
 
-@router.resolver(field_name="getDocuments")
+@router.resolver(field_name="listDocuments")
 @tracer.capture_method
-def get_documents(
-    workspace_id: str, document_type: str, last_document_id: str | None = None
-):
+def get_documents(input: dict):
+    request = ListDocumentsRequest(**input)
     result = genai_core.documents.list_documents(
-        workspace_id, document_type, last_document_id
+        request.workspaceId, request.documentType, request.lastDocumentId
     )
 
     return {
@@ -97,25 +123,26 @@ def get_documents(
     }
 
 
-@router.resolver(field_name="getDocumentDetails")
+@router.resolver(field_name="getDocument")
 @tracer.capture_method
-def get_document_details(workspace_id: str, document_id: str):
-    result = genai_core.documents.get_document(workspace_id, document_id)
+def get_document_details(input: dict):
+    request = GetDocumentRequest(**input)
+
+    result = genai_core.documents.get_document(request.workspaceId, request.documentId)
 
     return ({"items": [_convert_document(result)], "lastDocumentId": None},)
 
 
 @router.resolver(field_name="getRSSPosts")
 @tracer.capture_method
-def get_rss_posts(workspace_id: str, document_id: str):
-    query_string = router.current_event.query_string_parameters or {}
-    last_document_id = query_string.get("lastDocumentId", None)
+def get_rss_posts(input: dict):
+    request = GetDocumentRequest(**input)
 
     result = genai_core.documents.list_documents(
-        workspace_id,
+        request.workspaceId,
         "rsspost",
-        last_document_id=last_document_id,
-        parent_document_id=document_id,
+        last_documentId=request.lastDocumentId,
+        parent_documentId=request.documentId,
     )
 
     return {
@@ -126,31 +153,35 @@ def get_rss_posts(workspace_id: str, document_id: str):
 
 @router.resolver(field_name="setDocumentSubscriptionStatus")
 @tracer.capture_method
-def enable_document(workspace_id: str, document_id: str, status: str):
-    if status not in ["enabled", "disabled"]:
+def enable_document(input: dict):
+    request = DocumentSubscriptionStatusRequest(**input)
+
+    if request.status not in ["enabled", "disabled"]:
         raise genai_core.types.CommonError("Invalid status")
-    if status == "enabled":
+    if request.status == "enabled":
         result = genai_core.documents.enable_document_subscription(
-            workspace_id, document_id
+            request.workspaceId, request.documentId
         )
     else:
         result = genai_core.documents.disable_document_subscription(
-            workspace_id, document_id
+            request.workspaceId, request.documentId
         )
 
     return {
-        "workspaceId": workspace_id,
-        "documentId": document_id,
-        "status": status,
+        "workspaceId": request.workspaceId,
+        "documentId": request.documentId,
+        "status": result,
     }
 
 
 @router.resolver(field_name="addTextDocument")
 @tracer.capture_method
-def add_text_document(workspace_id: str, title: str, content: str):
-    title = title.strip()[:1000]
+def add_text_document(input: dict):
+    request = TextDocumentRequest(**input)
+    title = request.title.strip()[:1000]
+    content = request.content.strip()[:10000]
     result = genai_core.documents.create_document(
-        workspace_id=workspace_id,
+        workspace_id=request.workspaceId,
         document_type="text",
         title=title,
         content=content,
@@ -164,11 +195,12 @@ def add_text_document(workspace_id: str, title: str, content: str):
 
 @router.resolver(field_name="addQnADocument")
 @tracer.capture_method
-def add_qna_document(workspace_id: str, question: str, answer: str):
-    question = question.strip()[:1000]
-    answer = answer.strip()[:1000]
+def add_qna_document(input: dict):
+    request = QnADocumentRequest(**input)
+    question = request.question.strip()[:1000]
+    answer = request.answer.strip()[:1000]
     result = genai_core.documents.create_document(
-        workspace_id=workspace_id,
+        workspace_id=request.workspaceId,
         document_type="qna",
         title=question,
         content=question,
@@ -183,20 +215,20 @@ def add_qna_document(workspace_id: str, question: str, answer: str):
 
 @router.resolver(field_name="addWebsite")
 @tracer.capture_method
-def add_website(
-    workspace_id: str, sitemap: bool, address: str, followLinks: bool, limit: int
-):
+def add_website(input: dict):
+    request = WebsiteDocumentRequest(**input)
+
     address = request.address.strip()[:10000]
-    document_sub_type = "sitemap" if sitemap else None
-    request.limit = min(max(limit, 1), 1000)
+    document_sub_type = "sitemap" if request.sitemap else None
+    limit = min(max(request.limit, 1), 1000)
 
     result = genai_core.documents.create_document(
-        workspace_id=workspace_id,
+        workspace_id=request.workspaceId,
         document_type="website",
         document_sub_type=document_sub_type,
         path=address,
         crawler_properties={
-            "follow_links": followLinks,
+            "follow_links": request.followLinks,
             "limit": limit,
         },
     )
@@ -210,19 +242,20 @@ def add_website(
 @router.resolver(field_name="addRSSFeed")
 @tracer.capture_method
 def add_rss_feed(
-    workspace_id: str, address: str, limit: int, title: str, follow_links: bool
+    input: dict,
 ):
+    request = RssFeedDocumentRequest(**input)
     address = address.strip()[:10000]
     path = address
 
     result = genai_core.documents.create_document(
-        workspace_id=workspace_id,
+        workspace_id=request.workspaceId,
         document_type="rssfeed",
         path=path,
-        title=title,
+        title=request.title,
         crawler_properties={
-            "follow_links": follow_links,
-            "limit": limit,
+            "follow_links": request.followLinks,
+            "limit": request.limit,
         },
     )
 
@@ -234,15 +267,14 @@ def add_rss_feed(
 
 @router.resolver(field_name="updateRSSFeed")
 @tracer.capture_method
-def update_document(
-    workspace_id: str, document_id: str, follow_links: bool, limit: int
-):
+def update_rss_feed(input: dict):
+    request = RssFeedDocumentRequest(**input)
     result = genai_core.documents.update_document(
-        workspace_id=workspace_id,
-        document_id=document_id,
+        workspace_id=request.workspaceId,
+        document_id=request.documentId,
         document_type="rssfeed",
-        follow_links=follow_links,
-        limit=limit,
+        follow_links=request.followLinks,
+        limit=request.limit,
     )
     return {
         "workspaceId": result["workspace_id"],

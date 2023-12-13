@@ -1,5 +1,4 @@
 import { SelectProps } from "@cloudscape-design/components";
-import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth";
 import { ChatBotHistoryItem } from "../components/chatbot/types";
 
 export interface AppConfig {
@@ -13,7 +12,6 @@ export interface AppConfig {
       | {
           auto_redirect: boolean;
           custom: false;
-          name: CognitoHostedUIIdentityProvider;
         };
     rag_enabled: boolean;
     cross_encoders_enabled: boolean;

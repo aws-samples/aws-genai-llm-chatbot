@@ -1,17 +1,22 @@
-import { ApiResult, EmbeddingsModelItem } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import {
+  listEmbeddingModels,
+  calculateEmbeddings,
+} from "../../graphql/queries";
+import { ListEmbeddingModelsQuery, CalculateEmbeddingsQuery } from "../../API";
 
-export class EmbeddingsClient extends ApiClientBase {
-  async getModels(): Promise<ApiResult<EmbeddingsModelItem[]>> {
+export class EmbeddingsClient {
+  async getModels(): Promise<
+    GraphQLResult<GraphQLQuery<ListEmbeddingModelsQuery>>
+  > {
     try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/embeddings/models"), {
-        headers,
+      const result = await API.graphql<GraphQLQuery<ListEmbeddingModelsQuery>>({
+        query: listEmbeddingModels,
       });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
+      return result;
+    } catch (error: any) {
+      return error;
     }
   }
 
@@ -19,18 +24,21 @@ export class EmbeddingsClient extends ApiClientBase {
     provider: string,
     model: string,
     input: string[]
-  ): Promise<ApiResult<number[][]>> {
+  ): Promise<GraphQLResult<GraphQLQuery<CalculateEmbeddingsQuery>>> {
     try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/embeddings"), {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ provider, model, input }),
+      const result = API.graphql<GraphQLQuery<CalculateEmbeddingsQuery>>({
+        query: calculateEmbeddings,
+        variables: {
+          input: {
+            provider: provider,
+            model: model,
+            passages: input,
+          },
+        },
       });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
+      return result;
+    } catch (error: any) {
+      return error;
     }
   }
 }

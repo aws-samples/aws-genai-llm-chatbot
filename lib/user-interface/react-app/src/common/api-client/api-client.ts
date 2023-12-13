@@ -40,7 +40,7 @@ export class ApiClient {
 
   public get embeddings() {
     if (!this._embeddingsClient) {
-      this._embeddingsClient = new EmbeddingsClient(this._appConfig);
+      this._embeddingsClient = new EmbeddingsClient();
     }
 
     return this._embeddingsClient;
@@ -48,7 +48,7 @@ export class ApiClient {
 
   public get crossEncoders() {
     if (!this._crossEncodersClient) {
-      this._crossEncodersClient = new CrossEncodersClient(this._appConfig);
+      this._crossEncodersClient = new CrossEncodersClient();
     }
 
     return this._crossEncodersClient;
@@ -56,7 +56,7 @@ export class ApiClient {
 
   public get models() {
     if (!this._modelsClient) {
-      this._modelsClient = new ModelsClient(this._appConfig);
+      this._modelsClient = new ModelsClient();
     }
 
     return this._modelsClient;
