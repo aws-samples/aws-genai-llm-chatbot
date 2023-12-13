@@ -13,7 +13,6 @@ import { useForm } from "../../../common/hooks/use-form";
 import { useContext, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { ResultValue } from "../../../common/types";
 import { useNavigate } from "react-router-dom";
 import { Utils } from "../../../common/utils";
 import { Workspace } from "../../../API";
@@ -71,13 +70,13 @@ export default function AddQnA(props: AddQnAProps) {
     setGlobalError(undefined);
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.documents.addQnADocument(
-      props.data.workspace.value,
-      data.question,
-      data.answer
-    );
+    try {
+      await apiClient.documents.addQnADocument(
+        props.data.workspace.value,
+        data.question,
+        data.answer
+      );
 
-    if (ResultValue.ok(result)) {
       setFlashbarItem({
         type: "success",
         content: "Q&A added successfully",
@@ -90,8 +89,9 @@ export default function AddQnA(props: AddQnAProps) {
       });
 
       onChange({ question: "", answer: "" }, true);
-    } else {
-      setGlobalError(Utils.getErrorMessage(result));
+    } catch (error: any) {
+      console.error(Utils.getErrorMessage(error));
+      setGlobalError(Utils.getErrorMessage(error));
     }
 
     props.setSubmitting(false);

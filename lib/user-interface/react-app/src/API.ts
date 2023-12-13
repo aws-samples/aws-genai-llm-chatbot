@@ -70,11 +70,6 @@ export type CreateWorkspaceAuroraInput = {
   chunkOverlap: number,
 };
 
-export type FileUploadInput = {
-  workspaceId: string,
-  fileName: string,
-};
-
 export type TextDocumentInput = {
   workspaceId: string,
   title: string,
@@ -127,6 +122,17 @@ export type Channel = {
   data?: string | null,
   sessionId?: string | null,
   userId?: string | null,
+};
+
+export type FileUploadInput = {
+  workspaceId: string,
+  fileName: string,
+};
+
+export type FileUploadResult = {
+  __typename: "FileUploadResult",
+  url: string,
+  fields?: string | null,
 };
 
 export type Model = {
@@ -241,11 +247,12 @@ export type ListDocumentsInput = {
 export type DocumentsResult = {
   __typename: "DocumentsResult",
   items:  Array<Document | null >,
-  lastDocumentId: string,
+  lastDocumentId?: string | null,
 };
 
 export type Document = {
   __typename: "Document",
+  workspaceId: string,
   id: string,
   type: string,
   subType?: string | null,
@@ -260,7 +267,7 @@ export type Document = {
   createdAt: string,
   updatedAt: string,
   rssFeedId?: string | null,
-  rssLastCheckedAt: string,
+  rssLastCheckedAt?: string | null,
 };
 
 export type CrawlerProperties = {
@@ -420,14 +427,6 @@ export type DeleteWorkspaceMutation = {
   deleteWorkspace?: boolean | null,
 };
 
-export type UploadFileMutationVariables = {
-  input: FileUploadInput,
-};
-
-export type UploadFileMutation = {
-  uploadFile?: string | null,
-};
-
 export type AddTextDocumentMutationVariables = {
   input: TextDocumentInput,
 };
@@ -549,6 +548,25 @@ export type PublishResponseMutation = {
     data?: string | null,
     sessionId?: string | null,
     userId?: string | null,
+  } | null,
+};
+
+export type CheckHealthQueryVariables = {
+};
+
+export type CheckHealthQuery = {
+  checkHealth?: boolean | null,
+};
+
+export type GetUploadFileURLQueryVariables = {
+  input: FileUploadInput,
+};
+
+export type GetUploadFileURLQuery = {
+  getUploadFileURL?:  {
+    __typename: "FileUploadResult",
+    url: string,
+    fields?: string | null,
   } | null,
 };
 
@@ -818,6 +836,7 @@ export type ListDocumentsQuery = {
     __typename: "DocumentsResult",
     items:  Array< {
       __typename: "Document",
+      workspaceId: string,
       id: string,
       type: string,
       subType?: string | null,
@@ -836,9 +855,9 @@ export type ListDocumentsQuery = {
       createdAt: string,
       updatedAt: string,
       rssFeedId?: string | null,
-      rssLastCheckedAt: string,
+      rssLastCheckedAt?: string | null,
     } | null >,
-    lastDocumentId: string,
+    lastDocumentId?: string | null,
   },
 };
 
@@ -851,6 +870,7 @@ export type GetDocumentQuery = {
     __typename: "DocumentsResult",
     items:  Array< {
       __typename: "Document",
+      workspaceId: string,
       id: string,
       type: string,
       subType?: string | null,
@@ -869,9 +889,9 @@ export type GetDocumentQuery = {
       createdAt: string,
       updatedAt: string,
       rssFeedId?: string | null,
-      rssLastCheckedAt: string,
+      rssLastCheckedAt?: string | null,
     } | null >,
-    lastDocumentId: string,
+    lastDocumentId?: string | null,
   } | null,
 };
 
@@ -884,6 +904,7 @@ export type GetRSSPostsQuery = {
     __typename: "DocumentsResult",
     items:  Array< {
       __typename: "Document",
+      workspaceId: string,
       id: string,
       type: string,
       subType?: string | null,
@@ -902,9 +923,9 @@ export type GetRSSPostsQuery = {
       createdAt: string,
       updatedAt: string,
       rssFeedId?: string | null,
-      rssLastCheckedAt: string,
+      rssLastCheckedAt?: string | null,
     } | null >,
-    lastDocumentId: string,
+    lastDocumentId?: string | null,
   } | null,
 };
 

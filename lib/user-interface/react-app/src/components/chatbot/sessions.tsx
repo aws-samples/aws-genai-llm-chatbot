@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from "uuid";
 import { useCollection } from "@cloudscape-design/collection-hooks";
 import { ApiClient } from "../../common/api-client/api-client";
 import { AppContext } from "../../common/app-context";
-import { SessionItem } from "../../common/types";
 import RouterButton from "../wrappers/router-button";
 import { Session } from "../../API";
 
@@ -149,7 +148,7 @@ export default function Sessions(props: SessionsProps) {
               id: "startTime",
               header: "Time",
               sortingField: "startTime",
-              cell: (e: SessionItem) =>
+              cell: (e: Session) =>
                 DateTime.fromISO(
                   new Date(e.startTime).toISOString()
                 ).toLocaleString(DateTime.DATETIME_SHORT),

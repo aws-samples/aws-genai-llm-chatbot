@@ -28,7 +28,6 @@ export interface RestApiProps {
 }
 
 export class RestApi extends Construct {
-  public readonly api: apigateway.RestApi;
   public readonly graphqlApi: appsync.GraphqlApi;
 
   constructor(scope: Construct, id: string, props: RestApiProps) {
@@ -357,27 +356,7 @@ export class RestApi extends Construct {
       }
     }
 
-    addPermissions(restApiHandler);
     addPermissions(appSyncLambdaResolver);
-
-    const chatBotApi = new apigateway.RestApi(this, "ChatBotApi", {
-      endpointTypes: [apigateway.EndpointType.REGIONAL],
-      cloudWatchRole: true,
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: ["Content-Type", "Authorization", "X-Amz-Date"],
-        maxAge: cdk.Duration.minutes(10),
-      },
-      deploy: true,
-      deployOptions: {
-        stageName: "api",
-        loggingLevel: apigateway.MethodLoggingLevel.INFO,
-        tracingEnabled: true,
-        metricsEnabled: true,
-        throttlingRateLimit: 2500,
-      },
-    });
 
     const appSyncApi = new appsync.GraphqlApi(this, "graphql-api", {
       name: "chatbot-grqphql-api",
@@ -401,41 +380,9 @@ export class RestApi extends Construct {
     });
 
     props.ragEngines?.openSearchVector?.addToAccessPolicy(
-      "rest-api",
-      [restApiHandler.role?.roleArn],
-      ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
-    );
-
-    props.ragEngines?.openSearchVector?.addToAccessPolicy(
       "graphql-api",
       [appSyncLambdaResolver.role?.roleArn],
       ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
-    );
-
-    const cognitoAuthorizer = new apigateway.CfnAuthorizer(
-      this,
-      "ApiGatewayCognitoAuthorizer",
-      {
-        name: "CognitoAuthorizer",
-        identitySource: "method.request.header.Authorization",
-        providerArns: [props.userPool.userPoolArn],
-        restApiId: chatBotApi.restApiId,
-        type: apigateway.AuthorizationType.COGNITO,
-      }
-    );
-
-    const v1Resource = chatBotApi.root.addResource("v1", {
-      defaultMethodOptions: {
-        authorizationType: apigateway.AuthorizationType.COGNITO,
-        authorizer: { authorizerId: cognitoAuthorizer.ref },
-      },
-    });
-    const v1ProxyResource = v1Resource.addResource("{proxy+}");
-    v1ProxyResource.addMethod(
-      "ANY",
-      new apigateway.LambdaIntegration(restApiHandler, {
-        proxy: true,
-      })
     );
 
     const functionDataSource = appSyncApi.addLambdaDataSource(
@@ -476,7 +423,6 @@ export class RestApi extends Construct {
       value: appSyncApi.apiKey ?? "",
     });
 
-    this.api = chatBotApi;
     this.graphqlApi = appSyncApi;
   }
 }

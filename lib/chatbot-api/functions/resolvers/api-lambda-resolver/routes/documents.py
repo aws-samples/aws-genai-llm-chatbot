@@ -94,7 +94,7 @@ allowed_extensions = set(
 )
 
 
-@router.resolver(field_name="uploadFile")
+@router.resolver(field_name="getUploadFileURL")
 @tracer.capture_method
 def file_upload(input: dict):
     request = FileUploadRequest(**input)
@@ -106,7 +106,7 @@ def file_upload(input: dict):
         request.workspaceId, request.fileName
     )
 
-    return {"ok": True, "data": result}
+    return result
 
 
 @router.resolver(field_name="listDocuments")
@@ -239,13 +239,13 @@ def add_website(input: dict):
     }
 
 
-@router.resolver(field_name="addRSSFeed")
+@router.resolver(field_name="addRssFeed")
 @tracer.capture_method
 def add_rss_feed(
     input: dict,
 ):
     request = RssFeedDocumentRequest(**input)
-    address = address.strip()[:10000]
+    address = request.address.strip()[:10000]
     path = address
 
     result = genai_core.documents.create_document(

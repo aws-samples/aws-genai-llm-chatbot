@@ -85,7 +85,7 @@ export class UserInterface extends Construct {
               },
             ],
             customOriginSource: {
-              domainName: `${props.api.restApi.restApiId}.execute-api.${cdk.Aws.REGION}.${cdk.Aws.URL_SUFFIX}`,
+              domainName: new URL(props.api.graphqlApi.graphqlUrl).hostname,
               originHeaders: {
                 "X-Origin-Verify": props.shared.xOriginVerifySecret
                   .secretValueFromJson("headerValue")
@@ -155,7 +155,7 @@ export class UserInterface extends Construct {
       },
       config: {
         api_endpoint: `https://${distribution.distributionDomainName}/api`,
-        websocket_endpoint: `wss://${distribution.distributionDomainName}/socket`,
+
         appsync_endpoint: props.api.graphqlApi.graphqlUrl,
         rag_enabled: props.config.rag.enabled,
         cross_encoders_enabled: props.crossEncodersEnabled,

@@ -14,7 +14,6 @@ import { useForm } from "../../../common/hooks/use-form";
 import { useContext, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { ResultValue } from "../../../common/types";
 import { Utils } from "../../../common/utils";
 import { useNavigate } from "react-router-dom";
 import { Workspace } from "../../../API";
@@ -72,13 +71,13 @@ export default function AddText(props: AddTextProps) {
     setGlobalError(undefined);
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.documents.addTextDocument(
-      props.data.workspace.value,
-      data.title,
-      data.content
-    );
+    try {
+      await apiClient.documents.addTextDocument(
+        props.data.workspace.value,
+        data.title,
+        data.content
+      );
 
-    if (ResultValue.ok(result)) {
       setFlashbarItem({
         type: "success",
         content: "Text added successfully",
@@ -91,8 +90,9 @@ export default function AddText(props: AddTextProps) {
       });
 
       onChange({ title: "", content: "" }, true);
-    } else {
-      setGlobalError(Utils.getErrorMessage(result));
+    } catch (error: any) {
+      console.log(Utils.getErrorMessage(error));
+      setGlobalError(Utils.getErrorMessage(error));
     }
 
     props.setSubmitting(false);

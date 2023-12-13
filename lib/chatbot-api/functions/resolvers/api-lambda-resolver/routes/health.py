@@ -6,7 +6,7 @@ router = Router()
 logger = Logger()
 
 
-@router.resolver(field_name="ping")
+@router.resolver(field_name="checkHealth")
 @tracer.capture_method
 def health():
     return True

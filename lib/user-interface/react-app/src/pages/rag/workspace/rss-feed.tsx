@@ -22,12 +22,7 @@ import useOnFollow from "../../../common/hooks/use-on-follow";
 import BaseAppLayout from "../../../components/base-app-layout";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useContext, useEffect, useState } from "react";
-import {
-  DocumentItem,
-  DocumentResult,
-  DocumentSubscriptionStatus,
-  ResultValue,
-} from "../../../common/types";
+import { DocumentSubscriptionStatus } from "../../../common/types";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { CHATBOT_NAME, Labels } from "../../../common/constants";
@@ -35,7 +30,7 @@ import { TableEmptyState } from "../../../components/table-empty-state";
 import { DateTime } from "luxon";
 import { Utils } from "../../../common/utils";
 import { useForm } from "../../../common/hooks/use-form";
-import { Workspace } from "../../../API";
+import { Workspace, Document, DocumentsResult } from "../../../API";
 
 export default function RssFeed() {
   const appContext = useContext(AppContext);
@@ -43,15 +38,15 @@ export default function RssFeed() {
   const onFollow = useOnFollow();
   const { workspaceId, feedId } = useParams();
   const [loading, setLoading] = useState(true);
-  const [rssSubscription, setRssSubscription] = useState<DocumentItem | null>(
-    null
-  );
+  const [rssSubscription, setRssSubscription] = useState<Document | null>(null);
   const [rssSubscriptionStatus, setRssSubscriptionStatus] =
     useState<DocumentSubscriptionStatus>(DocumentSubscriptionStatus.DEFAULT);
   const [rssCrawlerFollowLinks, setRssCrawlerFollowLinks] = useState(false);
   const [rssCrawlerLimit, setRssCrawlerLimit] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
-  const [pages, setPages] = useState<DocumentResult[]>([]);
+  const [pages, setPages] = useState<(DocumentsResult | undefined | null)[]>(
+    []
+  );
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [isEditingCrawlerSettings, setIsEditingCrawlerSettings] =
     useState(false);
@@ -81,32 +76,35 @@ export default function RssFeed() {
       if (!appContext || !workspaceId || !feedId) return;
       setPostsLoading(true);
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.documents.getRssSubscriptionPosts(
-        workspaceId,
-        feedId,
-        params.lastDocumentId
-      );
-      if (ResultValue.ok(result)) {
+      try {
+        const result = await apiClient.documents.getRssSubscriptionPosts(
+          workspaceId,
+          feedId,
+          params.lastDocumentId
+        );
+
         setPages((current) => {
           const foundIndex = current.findIndex(
-            (c) => c.lastDocumentId === result.data.lastDocumentId
+            (c) =>
+              c!.lastDocumentId === result.data?.listDocuments?.lastDocumentId
           );
           setPostsLoading(false);
 
           if (foundIndex !== -1) {
-            current[foundIndex] = result.data;
+            current[foundIndex] = result.data?.listDocuments;
             return [...current];
           } else if (typeof params.pageIndex !== "undefined") {
-            current[params.pageIndex - 1] = result.data;
+            current[params.pageIndex - 1] = result.data?.listDocuments;
             return [...current];
-          } else if (result.data.items.length === 0) {
+          } else if (result.data?.listDocuments.items.length === 0) {
             return current;
           } else {
-            return [...current, result.data];
+            return [...current, result.data?.listDocuments];
           }
         });
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
       }
-
       setLoading(false);
     },
     [appContext, workspaceId, feedId]
@@ -115,29 +113,23 @@ export default function RssFeed() {
   const getRssSubscriptionDetails = useCallback(async () => {
     if (!appContext || !workspaceId || !feedId) return;
     const apiClient = new ApiClient(appContext);
-    const rssSubscriptionResult = await apiClient.documents.getDocumentDetails(
-      workspaceId,
-      feedId
-    );
-    if (
-      ResultValue.ok(rssSubscriptionResult) &&
-      rssSubscriptionResult.data.items
-    ) {
-      setRssSubscription(rssSubscriptionResult.data.items[0]);
-      setRssSubscriptionStatus(
-        rssSubscriptionResult.data.items[0].status == "enabled"
-          ? DocumentSubscriptionStatus.ENABLED
-          : DocumentSubscriptionStatus.DISABLED
-      );
-      setRssCrawlerFollowLinks(
-        rssSubscriptionResult.data.items[0].crawlerProperties?.followLinks ??
-          true
-      );
-      setRssCrawlerLimit(
-        rssSubscriptionResult.data.items[0].crawlerProperties?.limit ?? 0
-      );
+    try {
+      const rssSubscriptionResult =
+        await apiClient.documents.getDocumentDetails(workspaceId, feedId);
+      if (rssSubscriptionResult.data?.getDocument?.items) {
+        const doc = rssSubscriptionResult.data.getDocument!.items[0]!;
+        setRssSubscription(doc);
+        setRssSubscriptionStatus(
+          doc.status == "enabled"
+            ? DocumentSubscriptionStatus.ENABLED
+            : DocumentSubscriptionStatus.DISABLED
+        );
+        setRssCrawlerFollowLinks(doc.crawlerProperties?.followLinks ?? true);
+        setRssCrawlerLimit(doc.crawlerProperties?.limit ?? 0);
+      }
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
     }
-
     setLoading(false);
   }, [appContext, workspaceId, feedId]);
 
@@ -146,30 +138,35 @@ export default function RssFeed() {
       if (!appContext || !workspaceId || !feedId) return;
       if (toState.toLowerCase() == "disable") {
         const apiClient = new ApiClient(appContext);
-        const result = await apiClient.documents.disableRssSubscription(
-          workspaceId,
-          feedId
-        );
-        setIsEditingCrawlerSettings(false);
-        if (ResultValue.ok(result)) {
+        try {
+          const result = await apiClient.documents.disableRssSubscription(
+            workspaceId,
+            feedId
+          );
+          setIsEditingCrawlerSettings(false);
+
           setRssSubscriptionStatus(
-            result.data.status == "enabled"
+            result.data?.setDocumentSubscriptionStatus!.status! == "enabled"
               ? DocumentSubscriptionStatus.ENABLED
               : DocumentSubscriptionStatus.DISABLED
           );
+        } catch (error) {
+          console.error(Utils.getErrorMessage(error));
         }
       } else if (toState.toLowerCase() == "enable") {
         const apiClient = new ApiClient(appContext);
-        const result = await apiClient.documents.enableRssSubscription(
-          workspaceId,
-          feedId
-        );
-        if (ResultValue.ok(result)) {
+        try {
+          const result = await apiClient.documents.enableRssSubscription(
+            workspaceId,
+            feedId
+          );
           setRssSubscriptionStatus(
-            result.data.status == "enabled"
+            result.data?.setDocumentSubscriptionStatus!.status! == "enabled"
               ? DocumentSubscriptionStatus.ENABLED
               : DocumentSubscriptionStatus.DISABLED
           );
+        } catch (error) {
+          console.error(Utils.getErrorMessage(error));
         }
       }
     },
@@ -219,7 +216,7 @@ export default function RssFeed() {
     if (currentPageIndex <= 1) {
       await getRssSubscriptionPosts({ pageIndex: currentPageIndex });
     } else {
-      const lastDocumentId = pages[currentPageIndex - 2]?.lastDocumentId;
+      const lastDocumentId = pages[currentPageIndex - 2]?.lastDocumentId!;
       await getRssSubscriptionPosts({ lastDocumentId });
     }
   };
@@ -450,7 +447,7 @@ export default function RssFeed() {
                 {
                   id: "title",
                   header: "Title",
-                  cell: (item: DocumentItem) => (
+                  cell: (item: Document) => (
                     <>{Utils.textEllipsis(item.title ?? "", 100)}</>
                   ),
                   isRowHeader: true,
@@ -458,7 +455,7 @@ export default function RssFeed() {
                 {
                   id: "url",
                   header: "URL",
-                  cell: (item: DocumentItem) => (
+                  cell: (item: Document) => (
                     <RssFeedPostUrlPopover item={item} />
                   ),
                   isRowHeader: true,
@@ -466,16 +463,16 @@ export default function RssFeed() {
                 {
                   id: "status",
                   header: "Status",
-                  cell: (item: DocumentItem) => (
-                    <StatusIndicator type={Labels.statusTypeMap[item.status]}>
-                      {Labels.statusMap[item.status]}
+                  cell: (item: Document) => (
+                    <StatusIndicator type={Labels.statusTypeMap[item.status!]}>
+                      {Labels.statusMap[item.status!]}
                     </StatusIndicator>
                   ),
                 },
                 {
                   id: "createdAt",
                   header: "RSS Post Detected",
-                  cell: (item: DocumentItem) =>
+                  cell: (item: Document) =>
                     item.createdAt
                       ? DateTime.fromISO(
                           new Date(item.createdAt).toISOString()
@@ -484,7 +481,7 @@ export default function RssFeed() {
                 },
               ]}
               items={
-                pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items
+                pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items!
               }
               empty={
                 <TableEmptyState
@@ -534,7 +531,7 @@ export default function RssFeed() {
 }
 
 export interface RssFeedPostUrlPopoverProps {
-  item: DocumentItem;
+  item: Document;
 }
 
 export function RssFeedPostUrlPopover(props: RssFeedPostUrlPopoverProps) {
@@ -577,7 +574,7 @@ export function RssFeedPostUrlPopover(props: RssFeedPostUrlPopoverProps) {
           )}
           <div>
             <Box>
-              <Button target="_blank" href={item.path}>
+              <Button target="_blank" href={item.path!}>
                 Visit Post
               </Button>
             </Box>
@@ -629,14 +626,17 @@ export function RssFeedCrawlerForm(props: RssFeedEditorProps) {
     if (!validationResult) return;
     props.setSubmitting(true);
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.documents.updateRssSubscriptionCrawler(
-      props.workspaceId,
-      props.documentId,
-      data.followLinks,
-      data.limit
-    );
-    if (ResultValue.ok(result)) {
+    try {
+      await apiClient.documents.updateRssSubscriptionCrawler(
+        props.workspaceId,
+        props.documentId,
+        data.followLinks,
+        data.limit
+      );
+
       props.setSubmitting(false);
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
     }
   };
   return (

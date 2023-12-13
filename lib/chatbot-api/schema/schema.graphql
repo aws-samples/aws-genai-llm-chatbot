@@ -52,17 +52,18 @@ type CrossEncoderData @aws_cognito_user_pools {
   default: Boolean!
 }
 
-type DeleteSessionResult {
+type DeleteSessionResult @aws_cognito_user_pools {
   id: String
   deleted: Boolean!
 }
 
-type DetectedLanguage {
+type DetectedLanguage @aws_cognito_user_pools {
   code: String!
   score: Float!
 }
 
 type Document @aws_cognito_user_pools {
+  workspaceId: String!
   id: String!
   type: String!
   subType: String
@@ -77,7 +78,7 @@ type Document @aws_cognito_user_pools {
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   rssFeedId: String
-  rssLastCheckedAt: AWSDateTime!
+  rssLastCheckedAt: AWSDateTime
 }
 
 type DocumentResult @aws_cognito_user_pools {
@@ -94,7 +95,7 @@ input DocumentSubscriptionStatusInput {
 
 type DocumentsResult @aws_cognito_user_pools {
   items: [Document]!
-  lastDocumentId: String!
+  lastDocumentId: String
 }
 
 type Embedding @aws_cognito_user_pools {
@@ -112,6 +113,11 @@ type EmbeddingModel @aws_cognito_user_pools {
 input FileUploadInput {
   workspaceId: String!
   fileName: String!
+}
+
+type FileUploadResult @aws_cognito_user_pools {
+  url: String!
+  fields: String
 }
 
 input GetDocumentInput {
@@ -273,7 +279,6 @@ type Mutation {
     @aws_cognito_user_pools
   startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools
   deleteWorkspace(worspaceId: String!): Boolean @aws_cognito_user_pools
-  uploadFile(input: FileUploadInput!): String @aws_cognito_user_pools
   addTextDocument(input: TextDocumentInput!): DocumentResult
     @aws_cognito_user_pools
   addQnADocument(input: QnADocumentInput!): DocumentResult
@@ -289,6 +294,9 @@ type Mutation {
 }
 
 type Query {
+  checkHealth: Boolean @aws_cognito_user_pools
+  getUploadFileURL(input: FileUploadInput!): FileUploadResult
+    @aws_cognito_user_pools
   listModels: [Model!]! @aws_cognito_user_pools
   listWorkspaces: [Workspace!]! @aws_cognito_user_pools
   getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools

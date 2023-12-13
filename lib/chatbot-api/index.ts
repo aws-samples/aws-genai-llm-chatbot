@@ -27,7 +27,6 @@ export interface ChatBotApiProps {
 }
 
 export class ChatBotApi extends Construct {
-  public readonly restApi: apigateway.RestApi;
   public readonly messagesTopic: sns.Topic;
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
@@ -143,7 +142,6 @@ export class ChatBotApi extends Construct {
       value: mergedApi.apiId || "",
     });
 
-    this.restApi = restApi.api;
     this.messagesTopic = webSocketApi.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;

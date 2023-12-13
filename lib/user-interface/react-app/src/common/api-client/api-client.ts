@@ -24,7 +24,7 @@ export class ApiClient {
 
   public get health() {
     if (!this._healthClient) {
-      this._healthClient = new HealthClient(this._appConfig);
+      this._healthClient = new HealthClient();
     }
 
     return this._healthClient;
@@ -32,7 +32,7 @@ export class ApiClient {
 
   public get ragEngines() {
     if (!this._ragEnginesClient) {
-      this._ragEnginesClient = new RagEnginesClient(this._appConfig);
+      this._ragEnginesClient = new RagEnginesClient();
     }
 
     return this._ragEnginesClient;
@@ -88,7 +88,7 @@ export class ApiClient {
 
   public get documents() {
     if (!this._documentsClient) {
-      this._documentsClient = new DocumentsClient(this._appConfig);
+      this._documentsClient = new DocumentsClient();
     }
 
     return this._documentsClient;
@@ -96,7 +96,7 @@ export class ApiClient {
 
   public get kendra() {
     if (!this._kendraClient) {
-      this._kendraClient = new KendraClient(this._appConfig);
+      this._kendraClient = new KendraClient();
     }
 
     return this._kendraClient;

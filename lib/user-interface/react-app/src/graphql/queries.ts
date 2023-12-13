@@ -8,6 +8,24 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
+export const checkHealth = /* GraphQL */ `query CheckHealth {
+  checkHealth
+}
+` as GeneratedQuery<
+  APITypes.CheckHealthQueryVariables,
+  APITypes.CheckHealthQuery
+>;
+export const getUploadFileURL = /* GraphQL */ `query GetUploadFileURL($input: FileUploadInput!) {
+  getUploadFileURL(input: $input) {
+    url
+    fields
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetUploadFileURLQueryVariables,
+  APITypes.GetUploadFileURLQuery
+>;
 export const listModels = /* GraphQL */ `query ListModels {
   listModels {
     name
@@ -263,6 +281,7 @@ export const isKendraDataSynching = /* GraphQL */ `query IsKendraDataSynching($w
 export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocumentsInput) {
   listDocuments(input: $input) {
     items {
+      workspaceId
       id
       type
       subType
@@ -295,6 +314,7 @@ export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocu
 export const getDocument = /* GraphQL */ `query GetDocument($input: GetDocumentInput) {
   getDocument(input: $input) {
     items {
+      workspaceId
       id
       type
       subType
@@ -327,6 +347,7 @@ export const getDocument = /* GraphQL */ `query GetDocument($input: GetDocumentI
 export const getRSSPosts = /* GraphQL */ `query GetRSSPosts($input: GetDocumentInput) {
   getRSSPosts(input: $input) {
     items {
+      workspaceId
       id
       type
       subType

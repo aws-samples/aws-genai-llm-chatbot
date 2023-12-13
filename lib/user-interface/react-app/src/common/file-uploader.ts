@@ -1,16 +1,19 @@
-import { FileUploadItem } from "./types";
+import { FileUploadResult } from "../API";
 
 export class FileUploader {
   upload(
     file: File,
-    signature: FileUploadItem,
+    signature: FileUploadResult,
     onProgress: (uploaded: number) => void
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
-      Object.keys(signature.fields).forEach((key) => {
-        formData.append(key, signature.fields[key]);
-      });
+      console.log(signature);
+      const fields = signature.fields!.replace("{", "").replace("}", "");
+      for (let f in fields.split(",")) {
+        const [k, v] = f.split("=");
+        formData.append(k, v);
+      }
 
       formData.append("file", file);
 

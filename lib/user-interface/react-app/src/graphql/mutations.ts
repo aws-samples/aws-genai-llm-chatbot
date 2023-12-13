@@ -130,13 +130,6 @@ export const deleteWorkspace = /* GraphQL */ `mutation DeleteWorkspace($worspace
   APITypes.DeleteWorkspaceMutationVariables,
   APITypes.DeleteWorkspaceMutation
 >;
-export const uploadFile = /* GraphQL */ `mutation UploadFile($input: FileUploadInput!) {
-  uploadFile(input: $input)
-}
-` as GeneratedMutation<
-  APITypes.UploadFileMutationVariables,
-  APITypes.UploadFileMutation
->;
 export const addTextDocument = /* GraphQL */ `mutation AddTextDocument($input: TextDocumentInput!) {
   addTextDocument(input: $input) {
     workspaceId

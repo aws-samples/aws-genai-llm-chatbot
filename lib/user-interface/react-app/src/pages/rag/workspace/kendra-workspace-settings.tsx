@@ -10,11 +10,9 @@ import {
   Flashbar,
 } from "@cloudscape-design/components";
 import { Labels } from "../../../common/constants";
-import { ResultValue } from "../../../common/types";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { Utils } from "../../../common/utils";
 import { Workspace } from "../../../API";
 
 export interface KendraWorkspaceSettingsProps {
@@ -34,10 +32,14 @@ export default function KendraWorkspaceSettings(
     const apiClient = new ApiClient(appContext);
 
     const getStatus = async () => {
-      const result = await apiClient.kendra.kendraIsSyncing(props.workspace.id);
+      try {
+        const result = await apiClient.kendra.kendraIsSyncing(
+          props.workspace.id
+        );
 
-      if (ResultValue.ok(result)) {
-        setKendraIndexSyncing(result.data === true);
+        setKendraIndexSyncing(result.data?.isKendraDataSynching === true);
+      } catch (error) {
+        console.error(error);
       }
     };
 
@@ -55,14 +57,13 @@ export default function KendraWorkspaceSettings(
     setGlobalError("");
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.kendra.startKendraDataSync(
-      props.workspace.id
-    );
+    try {
+      await apiClient.kendra.startKendraDataSync(props.workspace.id);
 
-    if (ResultValue.ok(result)) {
       setKendraIndexSyncing(true);
-    } else {
-      setGlobalError(Utils.getErrorMessage(result));
+    } catch (error: any) {
+      console.error(error);
+      setGlobalError(error.errors.map((e: any) => e.message).join(","));
     }
 
     setSendingRequest(false);
