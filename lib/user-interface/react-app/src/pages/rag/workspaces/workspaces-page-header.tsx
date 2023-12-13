@@ -5,18 +5,18 @@ import {
   SpaceBetween,
 } from "@cloudscape-design/components";
 import RouterButton from "../../../components/wrappers/router-button";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import WorkspaceDeleteModal from "../../../components/rag/workspace-delete-modal";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
+import { Workspace } from "../../../API";
 
 interface WorkspacesPageHeaderProps extends HeaderProps {
   title?: string;
   createButtonText?: string;
   getWorkspaces: () => Promise<void>;
-  selectedWorkspaces: readonly WorkspaceItem[];
+  selectedWorkspaces: readonly Workspace[];
 }
 
 export function WorkspacesPageHeader({
@@ -52,14 +52,16 @@ export function WorkspacesPageHeader({
 
     setShowDeleteModal(false);
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.deleteWorkspace(
-      props.selectedWorkspaces[0].id
-    );
+    try {
+      await apiClient.workspaces.deleteWorkspace(
+        props.selectedWorkspaces[0].id
+      );
 
-    if (ResultValue.ok(result)) {
       setTimeout(async () => {
         await props.getWorkspaces();
       }, 2500);
+    } catch (error) {
+      console.error(error);
     }
   };
 

@@ -21,6 +21,7 @@ export class ChatGraphqlApi extends Construct {
   public readonly apiKey: string | undefined;
   public readonly graphQLUrl: string | undefined;
   public readonly graphQLApi: appsync.GraphqlApi;
+  public readonly outgoingMessageHandler: Function;
 
   constructor(scope: Construct, id: string, props: ChatGraphqlApiProps) {
     super(scope, id);
@@ -67,7 +68,7 @@ export class ChatGraphqlApi extends Construct {
       layers: [props.shared.powerToolsLayer],
     });
 
-    const outgoingMessageAppsync = new NodejsFunction(
+    const outgoingMessageHandler = new NodejsFunction(
       this,
       "outgoing-message-handler",
       {
@@ -84,7 +85,7 @@ export class ChatGraphqlApi extends Construct {
       }
     );
 
-    outgoingMessageAppsync.addEventSource(new SqsEventSource(props.queue));
+    outgoingMessageHandler.addEventSource(new SqsEventSource(props.queue));
 
     props.topic.grantPublish(resolverFunction);
 
@@ -100,13 +101,9 @@ export class ChatGraphqlApi extends Construct {
       typeName: "Mutation",
       fieldName: "sendQuery",
       dataSource: functionDataSource,
-      code: appsync.Code.fromAsset(
-        "./lib/chatbot-api/functions/resolvers/lambda-resolver.js"
-      ),
-      runtime: appsync.FunctionRuntime.JS_1_0_0,
     });
 
-    api.grantMutation(outgoingMessageAppsync);
+    //api.grantMutation(outgoingMessageHandler);
 
     api.createResolver("publish-response-resolver", {
       typeName: "Mutation",
@@ -131,5 +128,6 @@ export class ChatGraphqlApi extends Construct {
     this.apiKey = api.apiKey;
     this.graphQLUrl = api.graphqlUrl;
     this.graphQLApi = api;
+    this.outgoingMessageHandler = outgoingMessageHandler;
   }
 }

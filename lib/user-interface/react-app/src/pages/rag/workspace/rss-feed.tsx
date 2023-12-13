@@ -27,7 +27,6 @@ import {
   DocumentResult,
   DocumentSubscriptionStatus,
   ResultValue,
-  WorkspaceItem,
 } from "../../../common/types";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
@@ -36,6 +35,7 @@ import { TableEmptyState } from "../../../components/table-empty-state";
 import { DateTime } from "luxon";
 import { Utils } from "../../../common/utils";
 import { useForm } from "../../../common/hooks/use-form";
+import { Workspace } from "../../../API";
 
 export default function RssFeed() {
   const appContext = useContext(AppContext);
@@ -52,7 +52,7 @@ export default function RssFeed() {
   const [rssCrawlerLimit, setRssCrawlerLimit] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pages, setPages] = useState<DocumentResult[]>([]);
-  const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [isEditingCrawlerSettings, setIsEditingCrawlerSettings] =
     useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -62,15 +62,17 @@ export default function RssFeed() {
     if (!appContext || !workspaceId) return;
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.getWorkspace(workspaceId);
+    try {
+      const result = await apiClient.workspaces.getWorkspace(workspaceId);
 
-    if (ResultValue.ok(result)) {
-      if (!result.data) {
+      if (!result.data?.getWorkspace) {
         navigate("/rag/workspaces");
         return;
       }
 
-      setWorkspace(result.data);
+      setWorkspace(result.data?.getWorkspace);
+    } catch (e) {
+      console.error(e);
     }
   }, [appContext, navigate, workspaceId]);
 

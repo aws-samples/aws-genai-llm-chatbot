@@ -8,10 +8,6 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
-export const none = /* GraphQL */ `query None {
-  none
-}
-` as GeneratedQuery<APITypes.NoneQueryVariables, APITypes.NoneQuery>;
 export const listModels = /* GraphQL */ `query ListModels {
   listModels {
     name
@@ -64,6 +60,42 @@ export const listWorkspaces = /* GraphQL */ `query ListWorkspaces {
   APITypes.ListWorkspacesQueryVariables,
   APITypes.ListWorkspacesQuery
 >;
+export const getWorkspace = /* GraphQL */ `query GetWorkspace($workspaceId: String!) {
+  getWorkspace(workspaceId: $workspaceId) {
+    id
+    name
+    formatVersion
+    engine
+    status
+    aossEngine
+    languages
+    hasIndex
+    embeddingsModelProvider
+    embeddingsModelName
+    embeddingsModelDimensions
+    crossEncoderModelName
+    crossEncoderModelProvider
+    metric
+    index
+    hybridSearch
+    chunkingStrategy
+    chunkSize
+    chunkOverlap
+    vectors
+    documents
+    sizeInBytes
+    kendraIndexId
+    kendraIndexExternal
+    kendraUseAllData
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetWorkspaceQueryVariables,
+  APITypes.GetWorkspaceQuery
+>;
 export const listRagEngines = /* GraphQL */ `query ListRagEngines {
   listRagEngines {
     id
@@ -82,7 +114,11 @@ export const performSemanticSearch = /* GraphQL */ `query PerformSemanticSearch(
     workspaceId
     queryLanguage
     supportedLanguages
-    detectedLanguages
+    detectedLanguages {
+      code
+      score
+      __typename
+    }
     items {
       sources
       chunkId
@@ -90,6 +126,7 @@ export const performSemanticSearch = /* GraphQL */ `query PerformSemanticSearch(
       documentId
       documentSubId
       documentSubType
+      documentType
       path
       language
       title
@@ -108,6 +145,7 @@ export const performSemanticSearch = /* GraphQL */ `query PerformSemanticSearch(
       documentId
       documentSubId
       documentSubType
+      documentType
       path
       language
       title
@@ -125,6 +163,7 @@ export const performSemanticSearch = /* GraphQL */ `query PerformSemanticSearch(
       documentId
       documentSubId
       documentSubType
+      documentType
       path
       language
       title
@@ -339,3 +378,7 @@ export const rankPassages = /* GraphQL */ `query RankPassages($input: RankPassag
   APITypes.RankPassagesQueryVariables,
   APITypes.RankPassagesQuery
 >;
+export const none = /* GraphQL */ `query None {
+  none
+}
+` as GeneratedQuery<APITypes.NoneQueryVariables, APITypes.NoneQuery>;

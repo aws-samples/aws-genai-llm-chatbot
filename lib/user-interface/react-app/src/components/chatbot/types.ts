@@ -1,9 +1,5 @@
-import { Model } from "../../API";
-import {
-  LoadingStatus,
-  WorkspaceItem,
-  ModelInterface,
-} from "../../common/types";
+import { Model, Workspace } from "../../API";
+import { LoadingStatus, ModelInterface } from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
 
 export interface ChatBotConfiguration {
@@ -17,7 +13,7 @@ export interface ChatBotConfiguration {
 
 export interface ChatInputState {
   value: string;
-  workspaces?: WorkspaceItem[];
+  workspaces?: Workspace[];
   models?: Model[];
   selectedModel: SelectProps.Option | null;
   selectedModelMetadata: Model | null;

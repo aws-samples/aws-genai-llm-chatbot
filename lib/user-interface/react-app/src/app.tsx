@@ -10,7 +10,7 @@ import CrossEncoders from "./pages/rag/cross-encoders/cross-encoders";
 import Welcome from "./pages/welcome";
 import Playground from "./pages/chatbot/playground/playground";
 import Models from "./pages/chatbot/models/models";
-import Workspace from "./pages/rag/workspace/workspace";
+import WorkspacePane from "./pages/rag/workspace/workspace";
 import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
 import AddData from "./pages/rag/add-data/add-data";
 import "./styles/app.scss";
@@ -40,7 +40,10 @@ function App() {
               <Route path="semantic-search" element={<SemanticSearch />} />
               <Route path="workspaces" element={<Workspaces />} />
               <Route path="workspaces/create" element={<CreateWorkspace />} />
-              <Route path="workspaces/:workspaceId" element={<Workspace />} />
+              <Route
+                path="workspaces/:workspaceId"
+                element={<WorkspacePane />}
+              />
               <Route
                 path="workspaces/:workspaceId/rss/:feedId"
                 element={<RssFeed />}

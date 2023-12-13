@@ -5,11 +5,11 @@ import {
   Button,
   Alert,
 } from "@cloudscape-design/components";
-import { WorkspaceItem } from "../../common/types";
+import { Workspace } from "../../API";
 
 export interface WorkspaceDeleteModalProps {
   visible: boolean;
-  workspace?: WorkspaceItem;
+  workspace?: Workspace;
   onDelete: () => void;
   onDiscard: () => void;
 }

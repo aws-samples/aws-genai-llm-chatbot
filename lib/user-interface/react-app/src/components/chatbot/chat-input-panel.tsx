@@ -28,14 +28,9 @@ import { AppContext } from "../../common/app-context";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { StorageHelper } from "../../common/helpers/storage-helper";
 import { API } from "aws-amplify";
-import { GraphQLSubscription } from "@aws-amplify/api";
-import { Model, ReceiveMessagesSubscription } from "../../API";
-import {
-  ApiResult,
-  ModelInterface,
-  ResultValue,
-  WorkspaceItem,
-} from "../../common/types";
+import { GraphQLSubscription, GraphQLResult } from "@aws-amplify/api";
+import { Model, ReceiveMessagesSubscription, Workspace } from "../../API";
+import { LoadingStatus, ModelInterface } from "../../common/types";
 import styles from "../../styles/chat.module.scss";
 import ConfigDialog from "./config-dialog";
 import ImageDialog from "./image-dialog";
@@ -209,21 +204,23 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const [modelsResult, workspacesResult] = await Promise.all([
-        apiClient.models.getModels(),
-        appContext?.config.rag_enabled
-          ? apiClient.workspaces.getWorkspaces()
-          : Promise.resolve<ApiResult<WorkspaceItem[]>>({
-              ok: true,
-              data: [],
-            }),
-      ]);
+      let workspaces: Workspace[] = [];
+      let workspacesStatus: LoadingStatus = "finished";
+      let modelsResult: GraphQLResult<any>;
+      let workspacesResult: GraphQLResult<any>;
+      if (appContext?.config.rag_enabled) {
+        [modelsResult, workspacesResult] = await Promise.all([
+          apiClient.models.getModels(),
+          apiClient.workspaces.getWorkspaces(),
+        ]);
+        workspaces = workspacesResult.data?.listWorkspaces;
+        workspacesStatus =
+          workspacesResult.errors === undefined ? "finished" : "error";
+      } else {
+        modelsResult = await apiClient.models.getModels();
+      }
 
-      const models =
-        modelsResult.errors === undefined ? modelsResult.data?.listModels! : [];
-      const workspaces = ResultValue.ok(workspacesResult)
-        ? workspacesResult.data
-        : [];
+      const models = modelsResult.data ? modelsResult.data.listModels : [];
 
       const selectedModelOption = getSelectedModelOption(models);
       const selectedModelMetadata = getSelectedModelMetadata(
@@ -242,9 +239,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         selectedModelMetadata,
         selectedWorkspace: selectedWorkspaceOption,
         modelsStatus: modelsResult.errors === undefined ? "finished" : "error",
-        workspacesStatus: ResultValue.ok(workspacesResult)
-          ? "finished"
-          : "error",
+        workspacesStatus: workspacesStatus,
       }));
     })();
   }, [appContext, state.modelsStatus]);
@@ -613,7 +608,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 }
 
 function getSelectedWorkspaceOption(
-  workspaces: WorkspaceItem[]
+  workspaces: Workspace[]
 ): SelectProps.Option | null {
   let selectedWorkspaceOption: SelectProps.Option | null = null;
 

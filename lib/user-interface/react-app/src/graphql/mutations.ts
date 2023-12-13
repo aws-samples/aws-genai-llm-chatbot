@@ -8,25 +8,6 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const sendQuery = /* GraphQL */ `mutation SendQuery($data: String) {
-  sendQuery(data: $data)
-}
-` as GeneratedMutation<
-  APITypes.SendQueryMutationVariables,
-  APITypes.SendQueryMutation
->;
-export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionId: String, $userId: String, $data: String) {
-  publishResponse(sessionId: $sessionId, userId: $userId, data: $data) {
-    data
-    sessionId
-    userId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.PublishResponseMutationVariables,
-  APITypes.PublishResponseMutation
->;
 export const createKendraWorkspace = /* GraphQL */ `mutation CreateKendraWorkspace($input: CreateWorkspaceKendraInput!) {
   createKendraWorkspace(input: $input) {
     id
@@ -142,6 +123,13 @@ export const startKendraDataSync = /* GraphQL */ `mutation StartKendraDataSync($
   APITypes.StartKendraDataSyncMutationVariables,
   APITypes.StartKendraDataSyncMutation
 >;
+export const deleteWorkspace = /* GraphQL */ `mutation DeleteWorkspace($worspaceId: String!) {
+  deleteWorkspace(worspaceId: $worspaceId)
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkspaceMutationVariables,
+  APITypes.DeleteWorkspaceMutation
+>;
 export const uploadFile = /* GraphQL */ `mutation UploadFile($input: FileUploadInput!) {
   uploadFile(input: $input)
 }
@@ -244,4 +232,23 @@ export const deleteSession = /* GraphQL */ `mutation DeleteSession($id: String!)
 ` as GeneratedMutation<
   APITypes.DeleteSessionMutationVariables,
   APITypes.DeleteSessionMutation
+>;
+export const sendQuery = /* GraphQL */ `mutation SendQuery($data: String) {
+  sendQuery(data: $data)
+}
+` as GeneratedMutation<
+  APITypes.SendQueryMutationVariables,
+  APITypes.SendQueryMutation
+>;
+export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionId: String, $userId: String, $data: String) {
+  publishResponse(sessionId: $sessionId, userId: $userId, data: $data) {
+    data
+    sessionId
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.PublishResponseMutationVariables,
+  APITypes.PublishResponseMutation
 >;

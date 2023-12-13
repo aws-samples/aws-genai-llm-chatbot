@@ -156,9 +156,7 @@ def create_workspace_aurora(
 
     print(response)
 
-    return {
-        "id": workspace_id,
-    }
+    return item
 
 
 def create_workspace_open_search(
@@ -225,9 +223,7 @@ def create_workspace_open_search(
 
     print(response)
 
-    return {
-        "id": workspace_id,
-    }
+    return item
 
 
 def create_workspace_kendra(
@@ -270,9 +266,7 @@ def create_workspace_kendra(
 
     print(response)
 
-    return {
-        "id": workspace_id,
-    }
+    return item
 
 
 def delete_workspace(workspace_id: str):

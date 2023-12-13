@@ -2,13 +2,6 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
-export type Channel = {
-  __typename: "Channel",
-  data?: string | null,
-  sessionId?: string | null,
-  userId?: string | null,
-};
-
 export type CreateWorkspaceKendraInput = {
   name: string,
   kind: string,
@@ -19,7 +12,7 @@ export type CreateWorkspaceKendraInput = {
 export type Workspace = {
   __typename: "Workspace",
   id: string,
-  name?: string | null,
+  name: string,
   formatVersion?: number | null,
   engine: string,
   status?: string | null,
@@ -129,6 +122,13 @@ export type DeleteSessionResult = {
   deleted: boolean,
 };
 
+export type Channel = {
+  __typename: "Channel",
+  data?: string | null,
+  sessionId?: string | null,
+  userId?: string | null,
+};
+
 export type Model = {
   __typename: "Model",
   name: string,
@@ -156,13 +156,19 @@ export type SemanticSearchResult = {
   __typename: "SemanticSearchResult",
   engine: string,
   workspaceId: string,
-  queryLanguage: string,
-  supportedLanguages: Array< string | null >,
-  detectedLanguages: Array< string | null >,
-  items?:  Array<SemanticSearchItem | null > | null,
+  queryLanguage?: string | null,
+  supportedLanguages?: Array< string > | null,
+  detectedLanguages?:  Array<DetectedLanguage > | null,
+  items?:  Array<SemanticSearchItem > | null,
   vectorSearchMetric?: string | null,
-  vectorSearchItems?:  Array<SemanticSearchItem | null > | null,
-  keywordSearchItems?:  Array<SemanticSearchItem | null > | null,
+  vectorSearchItems?:  Array<SemanticSearchItem > | null,
+  keywordSearchItems?:  Array<SemanticSearchItem > | null,
+};
+
+export type DetectedLanguage = {
+  __typename: "DetectedLanguage",
+  code: string,
+  score: number,
 };
 
 export type SemanticSearchItem = {
@@ -173,6 +179,7 @@ export type SemanticSearchItem = {
   documentId?: string | null,
   documentSubId?: string | null,
   documentSubType?: string | null,
+  documentType: string,
   path?: string | null,
   language?: string | null,
   title?: string | null,
@@ -286,29 +293,6 @@ export type PassageRank = {
   score: number,
 };
 
-export type SendQueryMutationVariables = {
-  data?: string | null,
-};
-
-export type SendQueryMutation = {
-  sendQuery?: string | null,
-};
-
-export type PublishResponseMutationVariables = {
-  sessionId?: string | null,
-  userId?: string | null,
-  data?: string | null,
-};
-
-export type PublishResponseMutation = {
-  publishResponse?:  {
-    __typename: "Channel",
-    data?: string | null,
-    sessionId?: string | null,
-    userId?: string | null,
-  } | null,
-};
-
 export type CreateKendraWorkspaceMutationVariables = {
   input: CreateWorkspaceKendraInput,
 };
@@ -317,7 +301,7 @@ export type CreateKendraWorkspaceMutation = {
   createKendraWorkspace:  {
     __typename: "Workspace",
     id: string,
-    name?: string | null,
+    name: string,
     formatVersion?: number | null,
     engine: string,
     status?: string | null,
@@ -354,7 +338,7 @@ export type CreateOpenSearchWorkspaceMutation = {
   createOpenSearchWorkspace:  {
     __typename: "Workspace",
     id: string,
-    name?: string | null,
+    name: string,
     formatVersion?: number | null,
     engine: string,
     status?: string | null,
@@ -391,7 +375,7 @@ export type CreateAuroraWorkspaceMutation = {
   createAuroraWorkspace:  {
     __typename: "Workspace",
     id: string,
-    name?: string | null,
+    name: string,
     formatVersion?: number | null,
     engine: string,
     status?: string | null,
@@ -426,6 +410,14 @@ export type StartKendraDataSyncMutationVariables = {
 
 export type StartKendraDataSyncMutation = {
   startKendraDataSync?: boolean | null,
+};
+
+export type DeleteWorkspaceMutationVariables = {
+  worspaceId: string,
+};
+
+export type DeleteWorkspaceMutation = {
+  deleteWorkspace?: boolean | null,
 };
 
 export type UploadFileMutationVariables = {
@@ -537,11 +529,27 @@ export type DeleteSessionMutation = {
   } | null,
 };
 
-export type NoneQueryVariables = {
+export type SendQueryMutationVariables = {
+  data?: string | null,
 };
 
-export type NoneQuery = {
-  none?: string | null,
+export type SendQueryMutation = {
+  sendQuery?: string | null,
+};
+
+export type PublishResponseMutationVariables = {
+  sessionId?: string | null,
+  userId?: string | null,
+  data?: string | null,
+};
+
+export type PublishResponseMutation = {
+  publishResponse?:  {
+    __typename: "Channel",
+    data?: string | null,
+    sessionId?: string | null,
+    userId?: string | null,
+  } | null,
 };
 
 export type ListModelsQueryVariables = {
@@ -567,7 +575,7 @@ export type ListWorkspacesQuery = {
   listWorkspaces:  Array< {
     __typename: "Workspace",
     id: string,
-    name?: string | null,
+    name: string,
     formatVersion?: number | null,
     engine: string,
     status?: string | null,
@@ -596,6 +604,43 @@ export type ListWorkspacesQuery = {
   } >,
 };
 
+export type GetWorkspaceQueryVariables = {
+  workspaceId: string,
+};
+
+export type GetWorkspaceQuery = {
+  getWorkspace?:  {
+    __typename: "Workspace",
+    id: string,
+    name: string,
+    formatVersion?: number | null,
+    engine: string,
+    status?: string | null,
+    aossEngine?: string | null,
+    languages?: Array< string | null > | null,
+    hasIndex?: boolean | null,
+    embeddingsModelProvider?: string | null,
+    embeddingsModelName?: string | null,
+    embeddingsModelDimensions?: number | null,
+    crossEncoderModelName?: string | null,
+    crossEncoderModelProvider?: string | null,
+    metric?: string | null,
+    index?: boolean | null,
+    hybridSearch?: boolean | null,
+    chunkingStrategy?: string | null,
+    chunkSize?: number | null,
+    chunkOverlap?: number | null,
+    vectors?: number | null,
+    documents?: number | null,
+    sizeInBytes?: number | null,
+    kendraIndexId?: string | null,
+    kendraIndexExternal?: string | null,
+    kendraUseAllData?: boolean | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
 export type ListRagEnginesQueryVariables = {
 };
 
@@ -617,9 +662,13 @@ export type PerformSemanticSearchQuery = {
     __typename: "SemanticSearchResult",
     engine: string,
     workspaceId: string,
-    queryLanguage: string,
-    supportedLanguages: Array< string | null >,
-    detectedLanguages: Array< string | null >,
+    queryLanguage?: string | null,
+    supportedLanguages?: Array< string > | null,
+    detectedLanguages?:  Array< {
+      __typename: "DetectedLanguage",
+      code: string,
+      score: number,
+    } > | null,
     items?:  Array< {
       __typename: "SemanticSearchItem",
       sources?: Array< string | null > | null,
@@ -628,6 +677,7 @@ export type PerformSemanticSearchQuery = {
       documentId?: string | null,
       documentSubId?: string | null,
       documentSubType?: string | null,
+      documentType: string,
       path?: string | null,
       language?: string | null,
       title?: string | null,
@@ -636,7 +686,7 @@ export type PerformSemanticSearchQuery = {
       vectorSearchScore?: number | null,
       keywordSearchScore?: number | null,
       score?: number | null,
-    } | null > | null,
+    } > | null,
     vectorSearchMetric?: string | null,
     vectorSearchItems?:  Array< {
       __typename: "SemanticSearchItem",
@@ -646,6 +696,7 @@ export type PerformSemanticSearchQuery = {
       documentId?: string | null,
       documentSubId?: string | null,
       documentSubType?: string | null,
+      documentType: string,
       path?: string | null,
       language?: string | null,
       title?: string | null,
@@ -654,7 +705,7 @@ export type PerformSemanticSearchQuery = {
       vectorSearchScore?: number | null,
       keywordSearchScore?: number | null,
       score?: number | null,
-    } | null > | null,
+    } > | null,
     keywordSearchItems?:  Array< {
       __typename: "SemanticSearchItem",
       sources?: Array< string | null > | null,
@@ -663,6 +714,7 @@ export type PerformSemanticSearchQuery = {
       documentId?: string | null,
       documentSubId?: string | null,
       documentSubType?: string | null,
+      documentType: string,
       path?: string | null,
       language?: string | null,
       title?: string | null,
@@ -671,7 +723,7 @@ export type PerformSemanticSearchQuery = {
       vectorSearchScore?: number | null,
       keywordSearchScore?: number | null,
       score?: number | null,
-    } | null > | null,
+    } > | null,
   },
 };
 
@@ -877,6 +929,13 @@ export type RankPassagesQuery = {
     __typename: "PassageRank",
     score: number,
   } >,
+};
+
+export type NoneQueryVariables = {
+};
+
+export type NoneQuery = {
+  none?: string | null,
 };
 
 export type ReceiveMessagesSubscriptionVariables = {

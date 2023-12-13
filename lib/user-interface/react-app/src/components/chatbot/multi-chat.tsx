@@ -23,8 +23,8 @@ import MultiChatInputPanel, { ChatScrollState } from "./multi-chat-input-panel";
 import { ReadyState } from "react-use-websocket";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { API } from "aws-amplify";
-import { GraphQLSubscription } from "@aws-amplify/api";
-import { Model, ReceiveMessagesSubscription } from "../../API";
+import { GraphQLSubscription, GraphQLResult } from "@aws-amplify/api";
+import { Model, ReceiveMessagesSubscription, Workspace } from "../../API";
 import {
   ChatBotConfiguration,
   ChatBotAction,
@@ -38,13 +38,7 @@ import {
   ChatBotHeartbeatRequest,
   ChatBotModelInterface,
 } from "./types";
-import {
-  ApiResult,
-  WorkspaceItem,
-  ResultValue,
-  LoadingStatus,
-  ModelInterface,
-} from "../../common/types";
+import { LoadingStatus, ModelInterface } from "../../common/types";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
 import styles from "../../styles/chat.module.scss";
@@ -100,7 +94,7 @@ export default function MultiChat() {
   const refChatSessions = useRef<ChatSession[]>([]);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [models, setModels] = useState<Model[]>([]);
-  const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [modelsStatus, setModelsStatus] = useState<LoadingStatus>("loading");
   const [workspacesStatus, setWorkspacesStatus] =
     useState<LoadingStatus>("loading");
@@ -119,33 +113,35 @@ export default function MultiChat() {
     addSession();
     addSession();
     setEnableAddModels(true);
+
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const [modelsResult, workspacesResult] = await Promise.all([
-        apiClient.models.getModels(),
-        appContext?.config.rag_enabled
-          ? apiClient.workspaces.getWorkspaces()
-          : Promise.resolve<ApiResult<WorkspaceItem[]>>({ ok: true, data: [] }),
-      ]);
+      let workspaces: Workspace[] = [];
+      let modelsResult: GraphQLResult<any>;
+      let workspacesResult: GraphQLResult<any>;
+      if (appContext?.config.rag_enabled) {
+        [modelsResult, workspacesResult] = await Promise.all([
+          apiClient.models.getModels(),
+          apiClient.workspaces.getWorkspaces(),
+        ]);
+        workspaces = workspacesResult.data?.listWorkspaces;
+        setWorkspacesStatus(
+          workspacesResult.errors === undefined ? "finished" : "error"
+        );
+      } else {
+        modelsResult = await apiClient.models.getModels();
+      }
 
       const models = modelsResult.data
         ? modelsResult.data.listModels.filter(
-            (m) =>
+            (m: any) =>
               m.inputModalities.includes(ChabotInputModality.Text) &&
               m.outputModalities.includes(ChabotOutputModality.Text)
           )
         : [];
-
-      const workspaces = ResultValue.ok(workspacesResult)
-        ? workspacesResult.data
-        : [];
-
       setModels(models);
       setWorkspaces(workspaces);
       setModelsStatus(modelsResult.data ? "finished" : "error");
-      setWorkspacesStatus(
-        ResultValue.ok(workspacesResult) ? "finished" : "error"
-      );
     })();
     return () => {
       refChatSessions.current.forEach((session) => {

@@ -15,6 +15,7 @@ import { ChatBotS3Buckets } from "./chatbot-s3-buckets";
 import { RestApi } from "./rest-api";
 import { WebSocketApi } from "./websocket-api";
 import * as appsync from "aws-cdk-lib/aws-appsync";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
 
 export interface ChatBotApiProps {
   readonly shared: Shared;
@@ -67,6 +68,21 @@ export class ChatBotApi extends Construct {
       },
     });
 
+    const loggingRole = new iam.Role(this, "mergedApiLoggingRole", {
+      assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),
+      inlinePolicies: {
+        loggingPolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["logs:*"],
+              resources: ["*"],
+            }),
+          ],
+        }),
+      },
+    });
+
     const mergedApi = new appsync.GraphqlApi(this, "MergedApi", {
       name: "ChatbotGraphqlApi",
       definition: {
@@ -97,8 +113,20 @@ export class ChatBotApi extends Construct {
           },
         ],
       },
+      logConfig: {
+        fieldLogLevel: appsync.FieldLogLevel.ALL,
+        retention: RetentionDays.ONE_WEEK,
+        role: loggingRole,
+      },
       xrayEnabled: true,
     });
+
+    webSocketApi.api.outgoingMessageHandler.addEnvironment(
+      "GRAPHQL_ENDPOINT",
+      mergedApi.graphqlUrl
+    );
+
+    mergedApi.grantMutation(webSocketApi.api.outgoingMessageHandler);
 
     // Prints out URL
     new cdk.CfnOutput(this, "GraphqlAPIURL", {

@@ -1,3 +1,14 @@
+input CalculateEmbeddingsInput {
+  provider: String!
+  model: String!
+  passages: [String]!
+}
+
+type CrawlerProperties @aws_cognito_user_pools {
+  followLinks: Boolean
+  limit: Int
+}
+
 input CreateWorkspaceAuroraInput {
   name: String!
   kind: String!
@@ -5,7 +16,7 @@ input CreateWorkspaceAuroraInput {
   embeddingsModelName: String!
   crossEncoderModelProvider: String!
   crossEncoderModelName: String!
-  languages: [String]!
+  languages: [String!]!
   metric: String!
   index: Boolean!
   hybridSearch: Boolean!
@@ -28,16 +39,27 @@ input CreateWorkspaceOpenSearchInput {
   embeddingsModelName: String!
   crossEncoderModelProvider: String!
   crossEncoderModelName: String!
-  languages: [String]!
+  languages: [String!]!
   hybridSearch: Boolean!
   chunkingStrategy: String!
   chunkSize: Int!
   chunkOverlap: Int!
 }
 
-type CrawlerProperties @aws_cognito_user_pools {
-  followLinks: Boolean
-  limit: Int
+type CrossEncoderData @aws_cognito_user_pools {
+  provider: String!
+  name: String!
+  default: Boolean!
+}
+
+type DeleteSessionResult {
+  id: String
+  deleted: Boolean!
+}
+
+type DetectedLanguage {
+  code: String!
+  score: Float!
 }
 
 type Document @aws_cognito_user_pools {
@@ -51,45 +73,23 @@ type Document @aws_cognito_user_pools {
   vectors: Int
   subDocuments: Int
   crawlerProperties: CrawlerProperties
-  errors: [String]
+  errors: [String!]
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   rssFeedId: String
   rssLastCheckedAt: AWSDateTime!
 }
 
-input SemanticSearchInput {
+type DocumentResult @aws_cognito_user_pools {
   workspaceId: String!
-  query: String!
+  documentId: String!
+  status: String
 }
 
-type SemanticSearchItem @aws_cognito_user_pools {
-  sources: [String]
-  chunkId: String
-  workspaceId: ID!
-  documentId: String
-  documentSubId: String
-  documentSubType: String
-  path: String
-  language: String
-  title: String
-  content: String
-  contentComplement: String
-  vectorSearchScore: Float
-  keywordSearchScore: Float
-  score: Float
-}
-
-type SemanticSearchResult @aws_cognito_user_pools {
-  engine: String!
+input DocumentSubscriptionStatusInput {
   workspaceId: String!
-  queryLanguage: String!
-  supportedLanguages: [String]!
-  detectedLanguages: [String]!
-  items: [SemanticSearchItem]
-  vectorSearchMetric: String
-  vectorSearchItems: [SemanticSearchItem]
-  keywordSearchItems: [SemanticSearchItem]
+  documentId: String!
+  status: String!
 }
 
 type DocumentsResult @aws_cognito_user_pools {
@@ -99,7 +99,7 @@ type DocumentsResult @aws_cognito_user_pools {
 
 type Embedding @aws_cognito_user_pools {
   passage: String
-  vector: [Float]!
+  vector: [Float!]!
 }
 
 type EmbeddingModel @aws_cognito_user_pools {
@@ -109,10 +109,14 @@ type EmbeddingModel @aws_cognito_user_pools {
   default: Boolean
 }
 
-input CalculateEmbeddingsInput {
-  provider: String!
-  model: String!
-  passages: [String]!
+input FileUploadInput {
+  workspaceId: String!
+  fileName: String!
+}
+
+input GetDocumentInput {
+  workspaceId: String!
+  documentId: String!
 }
 
 type KendraIndex @aws_cognito_user_pools {
@@ -121,13 +125,30 @@ type KendraIndex @aws_cognito_user_pools {
   external: Boolean!
 }
 
+input ListDocumentsInput {
+  workspaceId: String!
+  documentType: String!
+  lastDocumentId: String
+}
+
 type Model @aws_cognito_user_pools {
   name: String!
   provider: String!
+  interface: String!
+  ragSupported: Boolean!
+  inputModalities: [String!]!
+  outputModalities: [String!]!
+  streaming: Boolean!
 }
 
 type PassageRank @aws_cognito_user_pools {
   score: Float!
+}
+
+input QnADocumentInput {
+  workspaceId: String!
+  question: String!
+  answer: String!
 }
 
 type RagEngine @aws_cognito_user_pools {
@@ -143,6 +164,49 @@ input RankPassagesInput {
   passages: [String]!
 }
 
+input RssFeedInput {
+  workspaceId: String!
+  address: String!
+  limit: Int!
+  title: String
+  followLinks: Boolean!
+}
+
+input SemanticSearchInput {
+  workspaceId: String!
+  query: String!
+}
+
+type SemanticSearchItem @aws_cognito_user_pools {
+  sources: [String]
+  chunkId: String
+  workspaceId: ID!
+  documentId: String
+  documentSubId: String
+  documentSubType: String
+  documentType: String!
+  path: String
+  language: String
+  title: String
+  content: String
+  contentComplement: String
+  vectorSearchScore: Float
+  keywordSearchScore: Float
+  score: Float
+}
+
+type SemanticSearchResult @aws_cognito_user_pools {
+  engine: String!
+  workspaceId: String!
+  queryLanguage: String
+  supportedLanguages: [String!]
+  detectedLanguages: [DetectedLanguage!]
+  items: [SemanticSearchItem!]
+  vectorSearchMetric: String
+  vectorSearchItems: [SemanticSearchItem!]
+  keywordSearchItems: [SemanticSearchItem!]
+}
+
 type Session @aws_cognito_user_pools {
   id: String!
   title: String
@@ -156,21 +220,23 @@ type SessionHistoryItem @aws_cognito_user_pools {
   metadata: String
 }
 
-type DocumentResult @aws_cognito_user_pools {
+input TextDocumentInput {
   workspaceId: String!
-  documentId: String!
-  status: String
+  title: String!
+  content: String!
 }
 
-type CrossEncoderData @aws_cognito_user_pools {
-  provider: String!
-  name: String!
-  default: Boolean!
+input WebsiteInput {
+  workspaceId: String!
+  sitemap: Boolean!
+  address: String!
+  followLinks: Boolean!
+  limit: Int!
 }
 
 type Workspace @aws_cognito_user_pools {
   id: String!
-  name: String
+  name: String!
   formatVersion: Int
   engine: String!
   status: String
@@ -198,50 +264,6 @@ type Workspace @aws_cognito_user_pools {
   updatedAt: AWSDateTime!
 }
 
-input TextDocumentInput {
-  workspaceId: String!
-  title: String!
-  content: String!
-}
-
-input QnADocumentInput {
-  workspaceId: String!
-  question: String!
-  answer: String!
-}
-
-input DocumentSubscriptionStatusInput {
-  workspaceId: String!
-  documentId: String!
-  status: String!
-}
-
-input WebsiteInput {
-  workspaceId: String!
-  sitemap: Boolean!
-  address: String!
-  followLinks: Boolean!
-  limit: Int!
-}
-
-input RssFeedInput {
-  workspaceId: String!
-  address: String!
-  limit: Int!
-  title: String
-  followLinks: Boolean!
-}
-
-input FileUploadInput {
-  workspaceId: String!
-  fileName: String!
-}
-
-type DeleteSessionResult {
-  id: String
-  deleted: Boolean!
-}
-
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
     @aws_cognito_user_pools
@@ -250,6 +272,7 @@ type Mutation {
   createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
     @aws_cognito_user_pools
   startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools
+  deleteWorkspace(worspaceId: String!): Boolean @aws_cognito_user_pools
   uploadFile(input: FileUploadInput!): String @aws_cognito_user_pools
   addTextDocument(input: TextDocumentInput!): DocumentResult
     @aws_cognito_user_pools
@@ -265,36 +288,26 @@ type Mutation {
   deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
 }
 
-input ListDocumentsInput {
-  workspaceId: String!
-  documentType: String!
-  lastDocumentId: String
-}
-
-input GetDocumentInput {
-  workspaceId: String!
-  documentId: String!
-}
-
 type Query {
-  listModels: [Model]! @aws_cognito_user_pools
-  listWorkspaces: [Workspace]! @aws_cognito_user_pools
-  listRagEngines: [RagEngine]! @aws_cognito_user_pools
+  listModels: [Model!]! @aws_cognito_user_pools
+  listWorkspaces: [Workspace!]! @aws_cognito_user_pools
+  getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools
+  listRagEngines: [RagEngine!]! @aws_cognito_user_pools
   performSemanticSearch(input: SemanticSearchInput!): SemanticSearchResult!
     @aws_cognito_user_pools
-  listSessions: [Session]! @aws_cognito_user_pools
-  listEmbeddingModels: [EmbeddingModel]! @aws_cognito_user_pools
+  listSessions: [Session!]! @aws_cognito_user_pools
+  listEmbeddingModels: [EmbeddingModel!]! @aws_cognito_user_pools
   calculateEmbeddings(input: CalculateEmbeddingsInput): [Embedding]!
     @aws_cognito_user_pools
   getSession(id: String!): Session @aws_cognito_user_pools
-  listKendraIndexes: [KendraIndex]! @aws_cognito_user_pools
+  listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools
   isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools
   listDocuments(input: ListDocumentsInput): DocumentsResult!
     @aws_cognito_user_pools
   getDocument(input: GetDocumentInput): DocumentsResult @aws_cognito_user_pools
   getRSSPosts(input: GetDocumentInput): DocumentsResult @aws_cognito_user_pools
   listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools
-  rankPassages(input: RankPassagesInput!): [PassageRank]!
+  rankPassages(input: RankPassagesInput!): [PassageRank!]!
     @aws_cognito_user_pools
 }
 

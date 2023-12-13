@@ -1,22 +1,16 @@
-import { ApiResult, SemanticSearchResult } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import { performSemanticSearch } from "../../graphql/queries";
+import { PerformSemanticSearchQuery } from "../../API";
 
-export class SemanticSearchClient extends ApiClientBase {
+export class SemanticSearchClient {
   async query(
     workspaceId: string,
     query: string
-  ): Promise<ApiResult<SemanticSearchResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/semantic-search"), {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ workspaceId, query }),
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<PerformSemanticSearchQuery>>> {
+    return API.graphql({
+      query: performSemanticSearch,
+      variables: { input: { workspaceId, query } },
+    });
   }
 }

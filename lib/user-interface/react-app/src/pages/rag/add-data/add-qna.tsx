@@ -13,14 +13,15 @@ import { useForm } from "../../../common/hooks/use-form";
 import { useContext, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
+import { ResultValue } from "../../../common/types";
 import { useNavigate } from "react-router-dom";
 import { Utils } from "../../../common/utils";
+import { Workspace } from "../../../API";
 
 export interface AddQnAProps {
   data: AddDataData;
   validate: () => boolean;
-  selectedWorkspace?: WorkspaceItem;
+  selectedWorkspace?: Workspace;
   submitting: boolean;
   setSubmitting: (submitting: boolean) => void;
 }

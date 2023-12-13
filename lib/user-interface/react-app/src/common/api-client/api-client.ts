@@ -64,7 +64,7 @@ export class ApiClient {
 
   public get workspaces() {
     if (!this._workspacesClient) {
-      this._workspacesClient = new WorkspacesClient(this._appConfig);
+      this._workspacesClient = new WorkspacesClient();
     }
 
     return this._workspacesClient;
@@ -72,7 +72,7 @@ export class ApiClient {
 
   public get sessions() {
     if (!this._sessionsClient) {
-      this._sessionsClient = new SessionsClient(this._appConfig);
+      this._sessionsClient = new SessionsClient();
     }
 
     return this._sessionsClient;
@@ -80,7 +80,7 @@ export class ApiClient {
 
   public get semanticSearch() {
     if (!this._semanticSearchClient) {
-      this._semanticSearchClient = new SemanticSearchClient(this._appConfig);
+      this._semanticSearchClient = new SemanticSearchClient();
     }
 
     return this._semanticSearchClient;
