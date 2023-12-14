@@ -55,69 +55,6 @@ export class UserInterface extends Construct {
       }
     );
 
-    const responseHeadersPolicy = new cf.ResponseHeadersPolicy(
-      this,
-      "ResponseHeadersPolicyCors",
-      {
-        comment: "A default CORS policy",
-        corsBehavior: {
-          accessControlAllowCredentials: false,
-          accessControlAllowHeaders: ["*"],
-          accessControlAllowMethods: ["ALL"],
-          accessControlAllowOrigins: [
-            "https://localhost:3000",
-            "http://localhost:3000",
-          ],
-          accessControlExposeHeaders: ["*"],
-          accessControlMaxAge: cdk.Duration.seconds(600),
-          originOverride: true,
-        },
-        securityHeadersBehavior: {
-          contentSecurityPolicy: {
-            contentSecurityPolicy: "default-src 'self';",
-            override: true,
-          },
-          contentTypeOptions: { override: false },
-          frameOptions: {
-            frameOption: cf.HeadersFrameOption.DENY,
-            override: true,
-          },
-          referrerPolicy: {
-            referrerPolicy:
-              cf.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
-            override: true,
-          },
-        },
-        removeHeaders: ["Server", "X-Powered-By"],
-        serverTimingSamplingRate: 50,
-      }
-    );
-
-    const originRequestPolicy = new cf.OriginRequestPolicy(
-      this,
-      "OriginRequestPolicy",
-      {
-        headerBehavior: cf.OriginRequestHeaderBehavior.allowList(
-          "Origin",
-          "Referer",
-          "Access-Control-Request-Method",
-          "Access-Control-Request-Headers",
-          "Content-Type",
-          "Sec-WebSocket-Key",
-          "Sec-WebSocket-Version",
-          "Sec-WebSocket-Protocol",
-          "Sec-WebSocket-Accept",
-          "Sec-WebSocket-Extensions"
-        ),
-        queryStringBehavior: cf.OriginRequestQueryStringBehavior.all(),
-        cookieBehavior: cf.OriginRequestCookieBehavior.all(),
-      }
-    );
-
-    const appSyncOrigin = new HttpOrigin(
-      cdk.Fn.select(2, cdk.Fn.split("/", props.api.graphqlApi.graphqlUrl))
-    );
-
     const filesOrigin = new S3Origin(props.chatbotFilesBucket);
     const websiteOrigin = new S3Origin(websiteBucket);
 
@@ -130,27 +67,10 @@ export class UserInterface extends Construct {
         viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       additionalBehaviors: {
-        "/graphql": {
-          origin: appSyncOrigin,
-          allowedMethods: cf.AllowedMethods.ALLOW_ALL,
-          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          responseHeadersPolicy,
-          originRequestPolicy,
-          cachePolicy: cf.CachePolicy.AMPLIFY,
-        },
-        "/graphql/*": {
-          origin: appSyncOrigin,
-          allowedMethods: cf.AllowedMethods.ALLOW_ALL,
-          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          responseHeadersPolicy,
-          originRequestPolicy,
-          cachePolicy: cf.CachePolicy.AMPLIFY,
-        },
         "/chatbot/files/*": {
           origin: filesOrigin,
           allowedMethods: cf.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          originRequestPolicy,
           cachePolicy: cf.CachePolicy.CACHING_DISABLED,
         },
       },
@@ -184,7 +104,7 @@ export class UserInterface extends Construct {
     }
 
     addOAC(originAccessControl, distribution, 0);
-    addOAC(originAccessControl, distribution, 2);
+    addOAC(originAccessControl, distribution, 1);
 
     const s3OriginNode = distribution.node
       .findAll()
@@ -234,7 +154,7 @@ export class UserInterface extends Construct {
         userPoolWebClientId: props.userPoolClientId,
         identityPoolId: props.identityPool.identityPoolId,
       },
-      aws_appsync_graphqlEndpoint: `https://${distribution.distributionDomainName}/graphql`,
+      aws_appsync_graphqlEndpoint: props.api.graphqlApi.graphqlUrl,
       aws_appsync_region: cdk.Aws.REGION,
       aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
       aws_appsync_apiKey: props.api.graphqlApi?.apiKey,
