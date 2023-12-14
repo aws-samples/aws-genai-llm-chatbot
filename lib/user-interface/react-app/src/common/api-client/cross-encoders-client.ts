@@ -7,14 +7,10 @@ export class CrossEncodersClient {
   async getModels(): Promise<
     GraphQLResult<GraphQLQuery<ListCrossEncodersQuery>>
   > {
-    try {
-      const result = await API.graphql<GraphQLQuery<ListCrossEncodersQuery>>({
-        query: listCrossEncoders,
-      });
-      return result;
-    } catch (error: any) {
-      return error;
-    }
+    const result = await API.graphql<GraphQLQuery<ListCrossEncodersQuery>>({
+      query: listCrossEncoders,
+    });
+    return result;
   }
 
   async getRanking(
@@ -23,21 +19,17 @@ export class CrossEncodersClient {
     input: string,
     passages: string[]
   ): Promise<GraphQLResult<GraphQLQuery<RankPassagesQuery>>> {
-    try {
-      const result = await API.graphql<GraphQLQuery<RankPassagesQuery>>({
-        query: rankPassages,
-        variables: {
-          input: {
-            model: model,
-            passages: passages,
-            provider: provider,
-            reference: input,
-          },
+    const result = await API.graphql<GraphQLQuery<RankPassagesQuery>>({
+      query: rankPassages,
+      variables: {
+        input: {
+          model: model,
+          passages: passages,
+          provider: provider,
+          reference: input,
         },
-      });
-      return result;
-    } catch (error: any) {
-      return error;
-    }
+      },
+    });
+    return result;
   }
 }

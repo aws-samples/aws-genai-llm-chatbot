@@ -35,7 +35,7 @@ export class SessionsClient {
     const result = await API.graphql<GraphQLQuery<DeleteSessionMutation>>({
       query: deleteSession,
       variables: {
-        sessionId: sessionId,
+        id: sessionId,
       },
     });
     return result;

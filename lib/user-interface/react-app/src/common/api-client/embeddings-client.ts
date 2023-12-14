@@ -10,14 +10,10 @@ export class EmbeddingsClient {
   async getModels(): Promise<
     GraphQLResult<GraphQLQuery<ListEmbeddingModelsQuery>>
   > {
-    try {
-      const result = await API.graphql<GraphQLQuery<ListEmbeddingModelsQuery>>({
-        query: listEmbeddingModels,
-      });
-      return result;
-    } catch (error: any) {
-      return error;
-    }
+    const result = await API.graphql<GraphQLQuery<ListEmbeddingModelsQuery>>({
+      query: listEmbeddingModels,
+    });
+    return result;
   }
 
   async getEmbeddings(
@@ -25,20 +21,16 @@ export class EmbeddingsClient {
     model: string,
     input: string[]
   ): Promise<GraphQLResult<GraphQLQuery<CalculateEmbeddingsQuery>>> {
-    try {
-      const result = API.graphql<GraphQLQuery<CalculateEmbeddingsQuery>>({
-        query: calculateEmbeddings,
-        variables: {
-          input: {
-            provider: provider,
-            model: model,
-            passages: input,
-          },
+    const result = API.graphql<GraphQLQuery<CalculateEmbeddingsQuery>>({
+      query: calculateEmbeddings,
+      variables: {
+        input: {
+          provider: provider,
+          model: model,
+          passages: input,
         },
-      });
-      return result;
-    } catch (error: any) {
-      return error;
-    }
+      },
+    });
+    return result;
   }
 }

@@ -295,7 +295,7 @@ type Mutation {
   addWebsite(input: WebsiteInput!): DocumentResult @aws_cognito_user_pools
   addRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
   updateRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
-  deleteUserSessions: DeleteSessionResult @aws_cognito_user_pools
+  deleteUserSessions: [DeleteSessionResult!] @aws_cognito_user_pools
   deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
 }
 

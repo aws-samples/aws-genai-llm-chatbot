@@ -5,6 +5,7 @@ import { AppContext } from "../../../common/app-context";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { Select, SelectProps } from "@cloudscape-design/components";
 import { CrossEncoderData } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 interface CrossEncoderSelectorProps {
   submitting: boolean;
@@ -26,12 +27,14 @@ export function CrossEncoderSelectorField(props: CrossEncoderSelectorProps) {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.crossEncoders.getModels();
+      try {
+        const result = await apiClient.crossEncoders.getModels();
 
-      if (result.errors === undefined) {
         setCrossEncoderModels(result.data?.listCrossEncoders!);
         setCrossEncoderModelsStatus("finished");
-      } else {
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
+        setCrossEncoderModels([]);
         setCrossEncoderModelsStatus("error");
       }
     })();

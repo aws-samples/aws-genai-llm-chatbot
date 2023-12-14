@@ -37,78 +37,6 @@ export class RestApi extends Construct {
       vpc: props.shared.vpc,
     });
 
-    const restApiHandler = new lambda.Function(this, "ApiHandler", {
-      code: props.shared.sharedCode.bundleWithLambdaAsset(
-        path.join(__dirname, "./functions/api-handler")
-      ),
-      handler: "index.handler",
-      runtime: props.shared.pythonRuntime,
-      architecture: props.shared.lambdaArchitecture,
-      timeout: cdk.Duration.minutes(10),
-      memorySize: 512,
-      tracing: lambda.Tracing.ACTIVE,
-      logRetention: logs.RetentionDays.ONE_WEEK,
-      layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
-      vpc: props.shared.vpc,
-      securityGroups: [apiSecurityGroup],
-      vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,
-      environment: {
-        ...props.shared.defaultEnvironmentVariables,
-        CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
-        MODELS_PARAMETER_NAME: props.modelsParameter.parameterName,
-        X_ORIGIN_VERIFY_SECRET_ARN: props.shared.xOriginVerifySecret.secretArn,
-        API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
-        SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
-        SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
-        UPLOAD_BUCKET_NAME: props.ragEngines?.uploadBucket?.bucketName ?? "",
-        PROCESSING_BUCKET_NAME:
-          props.ragEngines?.processingBucket?.bucketName ?? "",
-        AURORA_DB_SECRET_ID: props.ragEngines?.auroraPgVector?.database?.secret
-          ?.secretArn as string,
-        WORKSPACES_TABLE_NAME:
-          props.ragEngines?.workspacesTable.tableName ?? "",
-        WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
-          props.ragEngines?.workspacesByObjectTypeIndexName ?? "",
-        DOCUMENTS_TABLE_NAME: props.ragEngines?.documentsTable.tableName ?? "",
-        DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
-          props.ragEngines?.documentsByCompountKeyIndexName ?? "",
-        DOCUMENTS_BY_STATUS_INDEX:
-          props.ragEngines?.documentsByStatusIndexName ?? "",
-        SAGEMAKER_RAG_MODELS_ENDPOINT:
-          props.ragEngines?.sageMakerRagModels?.model.endpoint
-            ?.attrEndpointName ?? "",
-        DELETE_WORKSPACE_WORKFLOW_ARN:
-          props.ragEngines?.deleteWorkspaceWorkflow?.stateMachineArn ?? "",
-        CREATE_AURORA_WORKSPACE_WORKFLOW_ARN:
-          props.ragEngines?.auroraPgVector?.createAuroraWorkspaceWorkflow
-            ?.stateMachineArn ?? "",
-        CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN:
-          props.ragEngines?.openSearchVector?.createOpenSearchWorkspaceWorkflow
-            ?.stateMachineArn ?? "",
-        CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN:
-          props.ragEngines?.kendraRetrieval?.createKendraWorkspaceWorkflow
-            ?.stateMachineArn ?? "",
-        FILE_IMPORT_WORKFLOW_ARN:
-          props.ragEngines?.fileImportWorkflow?.stateMachineArn ?? "",
-        WEBSITE_CRAWLING_WORKFLOW_ARN:
-          props.ragEngines?.websiteCrawlingWorkflow?.stateMachineArn ?? "",
-        OPEN_SEARCH_COLLECTION_ENDPOINT:
-          props.ragEngines?.openSearchVector?.openSearchCollectionEndpoint ??
-          "",
-        DEFAULT_KENDRA_INDEX_ID:
-          props.ragEngines?.kendraRetrieval?.kendraIndex?.attrId ?? "",
-        DEFAULT_KENDRA_INDEX_NAME:
-          props.ragEngines?.kendraRetrieval?.kendraIndex?.name ?? "",
-        DEFAULT_KENDRA_S3_DATA_SOURCE_ID:
-          props.ragEngines?.kendraRetrieval?.kendraS3DataSource?.attrId ?? "",
-        DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME:
-          props.ragEngines?.kendraRetrieval?.kendraS3DataSourceBucket
-            ?.bucketName ?? "",
-        RSS_FEED_INGESTOR_FUNCTION:
-          props.ragEngines?.dataImport.rssIngestorFunction?.functionArn ?? "",
-      },
-    });
-
     const appSyncLambdaResolver = new lambda.Function(
       this,
       "GraphQLApiHandler",
@@ -359,7 +287,7 @@ export class RestApi extends Construct {
     addPermissions(appSyncLambdaResolver);
 
     const appSyncApi = new appsync.GraphqlApi(this, "graphql-api", {
-      name: "chatbot-grqphql-api",
+      name: "chatbot-graphql-api",
       schema: appsync.SchemaFile.fromAsset(
         "lib/chatbot-api/schema/schema.graphql"
       ),

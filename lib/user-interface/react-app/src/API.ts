@@ -265,7 +265,7 @@ export type Document = {
   crawlerProperties?: CrawlerProperties | null,
   errors?: Array< string > | null,
   createdAt: string,
-  updatedAt: string,
+  updatedAt?: string | null,
   rssFeedId?: string | null,
   rssLastCheckedAt?: string | null,
 };
@@ -515,11 +515,11 @@ export type DeleteUserSessionsMutationVariables = {
 };
 
 export type DeleteUserSessionsMutation = {
-  deleteUserSessions?:  {
+  deleteUserSessions?:  Array< {
     __typename: "DeleteSessionResult",
     id?: string | null,
     deleted: boolean,
-  } | null,
+  } > | null,
 };
 
 export type DeleteSessionMutationVariables = {
@@ -859,7 +859,7 @@ export type ListDocumentsQuery = {
       } | null,
       errors?: Array< string > | null,
       createdAt: string,
-      updatedAt: string,
+      updatedAt?: string | null,
       rssFeedId?: string | null,
       rssLastCheckedAt?: string | null,
     } | null >,
@@ -891,7 +891,7 @@ export type GetDocumentQuery = {
     } | null,
     errors?: Array< string > | null,
     createdAt: string,
-    updatedAt: string,
+    updatedAt?: string | null,
     rssFeedId?: string | null,
     rssLastCheckedAt?: string | null,
   } | null,
@@ -923,7 +923,7 @@ export type GetRSSPostsQuery = {
       } | null,
       errors?: Array< string > | null,
       createdAt: string,
-      updatedAt: string,
+      updatedAt?: string | null,
       rssFeedId?: string | null,
       rssLastCheckedAt?: string | null,
     } | null >,

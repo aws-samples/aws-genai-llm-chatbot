@@ -100,14 +100,14 @@ export default function CrossEncoders() {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.crossEncoders.getModels();
+      try {
+        const result = await apiClient.crossEncoders.getModels();
 
-      if (result?.errors == undefined) {
         console.log(result?.data?.listCrossEncoders);
         setCrossEncoderModels(result?.data?.listCrossEncoders!);
         setCrossEncoderModelsStatus("finished");
-      } else {
-        console.log(result?.errors);
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
         setCrossEncoderModelsStatus("error");
       }
     })();

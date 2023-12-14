@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
 import { EmbeddingModel } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 interface EmbeddingsSelectionProps {
   submitting: boolean;
@@ -26,12 +27,13 @@ export default function EmbeddingSelector(props: EmbeddingsSelectionProps) {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.embeddings.getModels();
+      try {
+        const result = await apiClient.embeddings.getModels();
 
-      if (result.errors === undefined) {
         setEmbeddingsModels(result.data!.listEmbeddingModels);
         setEmbeddingsModelsStatus("finished");
-      } else {
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
         setEmbeddingsModelsStatus("error");
       }
     })();

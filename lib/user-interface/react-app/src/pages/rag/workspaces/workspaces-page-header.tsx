@@ -34,7 +34,11 @@ export function WorkspacesPageHeader({
       props.selectedWorkspaces[0].status == "error");
 
   const onRefreshClick = async () => {
-    await props.getWorkspaces();
+    try {
+      await props.getWorkspaces();
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
+    }
   };
 
   const onViewDetailsClick = () => {

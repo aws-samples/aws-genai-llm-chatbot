@@ -5,14 +5,10 @@ import { ListModelsQuery } from "../../API";
 
 export class ModelsClient {
   async getModels(): Promise<GraphQLResult<GraphQLQuery<ListModelsQuery>>> {
-    try {
-      const result = await API.graphql<GraphQLQuery<ListModelsQuery>>({
-        query: listModels,
-      });
+    const result = await API.graphql<GraphQLQuery<ListModelsQuery>>({
+      query: listModels,
+    });
 
-      return result;
-    } catch (error: any) {
-      return error;
-    }
+    return result;
   }
 }

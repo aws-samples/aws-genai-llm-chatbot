@@ -55,6 +55,7 @@ import {
   updateMessageHistoryRef,
 } from "./utils";
 import { receiveMessages } from "../../graphql/subscriptions";
+import { Utils } from "../../common/utils";
 
 export interface ChatInputPanelProps {
   running: boolean;
@@ -208,39 +209,47 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       let workspacesStatus: LoadingStatus = "finished";
       let modelsResult: GraphQLResult<any>;
       let workspacesResult: GraphQLResult<any>;
-      if (appContext?.config.rag_enabled) {
-        [modelsResult, workspacesResult] = await Promise.all([
-          apiClient.models.getModels(),
-          apiClient.workspaces.getWorkspaces(),
-        ]);
-        workspaces = workspacesResult.data?.listWorkspaces;
-        workspacesStatus =
-          workspacesResult.errors === undefined ? "finished" : "error";
-      } else {
-        modelsResult = await apiClient.models.getModels();
+      try {
+        if (appContext?.config.rag_enabled) {
+          [modelsResult, workspacesResult] = await Promise.all([
+            apiClient.models.getModels(),
+            apiClient.workspaces.getWorkspaces(),
+          ]);
+          workspaces = workspacesResult.data?.listWorkspaces;
+          workspacesStatus =
+            workspacesResult.errors === undefined ? "finished" : "error";
+        } else {
+          modelsResult = await apiClient.models.getModels();
+        }
+
+        const models = modelsResult.data ? modelsResult.data.listModels : [];
+
+        const selectedModelOption = getSelectedModelOption(models);
+        const selectedModelMetadata = getSelectedModelMetadata(
+          models,
+          selectedModelOption
+        );
+        const selectedWorkspaceOption = appContext?.config.rag_enabled
+          ? getSelectedWorkspaceOption(workspaces)
+          : workspaceDefaultOptions[0];
+
+        setState((state) => ({
+          ...state,
+          models,
+          workspaces,
+          selectedModel: selectedModelOption,
+          selectedModelMetadata,
+          selectedWorkspace: selectedWorkspaceOption,
+          modelsStatus: "finished",
+          workspacesStatus: workspacesStatus,
+        }));
+      } catch (error) {
+        console.log(Utils.getErrorMessage(error));
+        setState((state) => ({
+          ...state,
+          modelsStatus: "error",
+        }));
       }
-
-      const models = modelsResult.data ? modelsResult.data.listModels : [];
-
-      const selectedModelOption = getSelectedModelOption(models);
-      const selectedModelMetadata = getSelectedModelMetadata(
-        models,
-        selectedModelOption
-      );
-      const selectedWorkspaceOption = appContext?.config.rag_enabled
-        ? getSelectedWorkspaceOption(workspaces)
-        : workspaceDefaultOptions[0];
-
-      setState((state) => ({
-        ...state,
-        models,
-        workspaces,
-        selectedModel: selectedModelOption,
-        selectedModelMetadata,
-        selectedWorkspace: selectedWorkspaceOption,
-        modelsStatus: modelsResult.errors === undefined ? "finished" : "error",
-        workspacesStatus: workspacesStatus,
-      }));
     })();
   }, [appContext, state.modelsStatus]);
 

@@ -45,6 +45,7 @@ import styles from "../../styles/chat.module.scss";
 import { useNavigate } from "react-router-dom";
 import { receiveMessages } from "../../graphql/subscriptions";
 import { sendQuery } from "../../graphql/mutations";
+import { Utils } from "../../common/utils";
 
 export interface ChatSession {
   configuration: ChatBotConfiguration;
@@ -119,30 +120,36 @@ export default function MultiChat() {
       let workspaces: Workspace[] = [];
       let modelsResult: GraphQLResult<any>;
       let workspacesResult: GraphQLResult<any>;
-      if (appContext?.config.rag_enabled) {
-        [modelsResult, workspacesResult] = await Promise.all([
-          apiClient.models.getModels(),
-          apiClient.workspaces.getWorkspaces(),
-        ]);
-        workspaces = workspacesResult.data?.listWorkspaces;
-        setWorkspacesStatus(
-          workspacesResult.errors === undefined ? "finished" : "error"
-        );
-      } else {
-        modelsResult = await apiClient.models.getModels();
-      }
+      try {
+        if (appContext?.config.rag_enabled) {
+          [modelsResult, workspacesResult] = await Promise.all([
+            apiClient.models.getModels(),
+            apiClient.workspaces.getWorkspaces(),
+          ]);
+          workspaces = workspacesResult.data?.listWorkspaces;
+          setWorkspacesStatus(
+            workspacesResult.errors === undefined ? "finished" : "error"
+          );
+        } else {
+          modelsResult = await apiClient.models.getModels();
+        }
 
-      const models = modelsResult.data
-        ? modelsResult.data.listModels.filter(
-            (m: any) =>
-              m.inputModalities.includes(ChabotInputModality.Text) &&
-              m.outputModalities.includes(ChabotOutputModality.Text)
-          )
-        : [];
-      setModels(models);
-      setWorkspaces(workspaces);
-      setModelsStatus(modelsResult.data ? "finished" : "error");
+        const models = modelsResult.data
+          ? modelsResult.data.listModels.filter(
+              (m: any) =>
+                m.inputModalities.includes(ChabotInputModality.Text) &&
+                m.outputModalities.includes(ChabotOutputModality.Text)
+            )
+          : [];
+        setModels(models);
+        setWorkspaces(workspaces);
+        setModelsStatus("finished");
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
+        setModelsStatus("error");
+      }
     })();
+
     return () => {
       refChatSessions.current.forEach((session) => {
         console.log(`Unsubscribing from ${session.id}`);

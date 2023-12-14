@@ -17,6 +17,7 @@ import {
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { Workspace } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 export default function WorkspacesTable() {
   const appContext = useContext(AppContext);
@@ -65,7 +66,7 @@ export default function WorkspacesTable() {
 
       setWorkspaces(result.data!.listWorkspaces);
     } catch (error) {
-      console.log(error);
+      console.error(Utils.getErrorMessage(error));
     }
 
     setLoading(false);

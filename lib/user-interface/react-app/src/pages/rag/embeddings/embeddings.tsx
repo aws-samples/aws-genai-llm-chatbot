@@ -101,12 +101,13 @@ export default function Embeddings() {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.embeddings.getModels();
+      try {
+        const result = await apiClient.embeddings.getModels();
 
-      if (result.errors === undefined) {
         setEmbeddingsModelsResults(result.data!.listEmbeddingModels!);
         setEmbeddingsModelsStatus("finished");
-      } else {
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
         setEmbeddingsModelsStatus("error");
       }
     })();
@@ -155,12 +156,12 @@ export default function Embeddings() {
     });
 
     const matricesResults = [];
-    await Promise.all(results);
-    for (let i = 0; i < results.length; i++) {
-      console.log(`getting results for ${i}`);
-      const result = await results[i];
+    try {
+      await Promise.all(results);
+      for (let i = 0; i < results.length; i++) {
+        console.log(`getting results for ${i}`);
+        const result = await results[i];
 
-      if (result.errors === undefined) {
         const matrices = MetricsHelper.matrices(
           result.data!.calculateEmbeddings.map((x) => x!.vector)
         );
@@ -172,9 +173,10 @@ export default function Embeddings() {
           ),
           ...matrices,
         });
-      } else {
-        setGlobalError(result.errors.map((e) => e.message).join(","));
       }
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
+      setGlobalError("Error while calculating embeddings");
     }
     console.log(`setting matrices - ${matricesResults.length}`);
     setMetricsMatrices(matricesResults);

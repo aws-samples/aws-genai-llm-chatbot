@@ -21,6 +21,7 @@ import {
 } from "./column-definitions";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Model } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 export default function Models() {
   const onFollow = useOnFollow();
@@ -60,11 +61,13 @@ export default function Models() {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.models.getModels();
-    if (result.data) {
-      setModels(result.data.listModels);
-    }
+    try {
+      const result = await apiClient.models.getModels();
 
+      setModels(result.data!.listModels);
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
+    }
     setLoading(false);
   }, [appContext]);
 
