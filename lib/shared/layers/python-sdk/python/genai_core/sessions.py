@@ -50,9 +50,9 @@ def delete_session(session_id, user_id):
         else:
             print(error)
 
-        return {"deleted": False}
+        return {"id": session_id, "deleted": False}
 
-    return {"deleted": True}
+    return {"id": session_id, "deleted": True}
 
 
 def delete_user_sessions(user_id):
