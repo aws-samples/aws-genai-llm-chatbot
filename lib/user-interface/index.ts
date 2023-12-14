@@ -85,7 +85,10 @@ export class UserInterface extends Construct {
               },
             ],
             customOriginSource: {
-              domainName: new URL(props.api.graphqlApi.graphqlUrl).hostname,
+              domainName: cdk.Fn.select(
+                2,
+                cdk.Fn.split("/", props.api.graphqlApi.graphqlUrl)
+              ),
               originHeaders: {
                 "X-Origin-Verify": props.shared.xOriginVerifySecret
                   .secretValueFromJson("headerValue")

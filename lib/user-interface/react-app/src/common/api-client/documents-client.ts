@@ -4,6 +4,7 @@ import {
   getDocument,
   listDocuments,
   getUploadFileURL,
+  getRSSPosts,
 } from "../../graphql/queries";
 import {
   addQnADocument,
@@ -20,6 +21,7 @@ import {
   SetDocumentSubscriptionStatusMutation,
   GetDocumentQuery,
   ListDocumentsQuery,
+  GetRSSPostsQuery,
   GetUploadFileURLQuery,
   UpdateRssFeedMutation,
 } from "../../API";
@@ -160,15 +162,14 @@ export class DocumentsClient {
     workspaceId: string,
     feedId: string,
     lastDocumentId?: string
-  ): Promise<GraphQLResult<GraphQLQuery<ListDocumentsQuery>>> {
-    const result = API.graphql<GraphQLQuery<ListDocumentsQuery>>({
-      query: listDocuments,
+  ): Promise<GraphQLResult<GraphQLQuery<GetRSSPostsQuery>>> {
+    const result = API.graphql<GraphQLQuery<GetRSSPostsQuery>>({
+      query: getRSSPosts,
       variables: {
         input: {
           workspaceId,
-          feedId,
+          documentId: feedId,
           lastDocumentId,
-          documentType: "rssfeed",
         },
       },
     });

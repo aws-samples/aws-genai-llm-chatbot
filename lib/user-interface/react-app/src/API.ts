@@ -281,6 +281,12 @@ export type GetDocumentInput = {
   documentId: string,
 };
 
+export type GetRSSPostsInput = {
+  workspaceId: string,
+  documentId: string,
+  lastDocumentId?: string | null,
+};
+
 export type CrossEncoderData = {
   __typename: "CrossEncoderData",
   provider: string,
@@ -420,7 +426,7 @@ export type StartKendraDataSyncMutation = {
 };
 
 export type DeleteWorkspaceMutationVariables = {
-  worspaceId: string,
+  workspaceId: string,
 };
 
 export type DeleteWorkspaceMutation = {
@@ -777,7 +783,7 @@ export type ListEmbeddingModelsQuery = {
 };
 
 export type CalculateEmbeddingsQueryVariables = {
-  input?: CalculateEmbeddingsInput | null,
+  input: CalculateEmbeddingsInput,
 };
 
 export type CalculateEmbeddingsQuery = {
@@ -828,7 +834,7 @@ export type IsKendraDataSynchingQuery = {
 };
 
 export type ListDocumentsQueryVariables = {
-  input?: ListDocumentsInput | null,
+  input: ListDocumentsInput,
 };
 
 export type ListDocumentsQuery = {
@@ -862,41 +868,37 @@ export type ListDocumentsQuery = {
 };
 
 export type GetDocumentQueryVariables = {
-  input?: GetDocumentInput | null,
+  input: GetDocumentInput,
 };
 
 export type GetDocumentQuery = {
   getDocument?:  {
-    __typename: "DocumentsResult",
-    items:  Array< {
-      __typename: "Document",
-      workspaceId: string,
-      id: string,
-      type: string,
-      subType?: string | null,
-      status?: string | null,
-      title?: string | null,
-      path?: string | null,
-      sizeInBytes?: number | null,
-      vectors?: number | null,
-      subDocuments?: number | null,
-      crawlerProperties?:  {
-        __typename: "CrawlerProperties",
-        followLinks?: boolean | null,
-        limit?: number | null,
-      } | null,
-      errors?: Array< string > | null,
-      createdAt: string,
-      updatedAt: string,
-      rssFeedId?: string | null,
-      rssLastCheckedAt?: string | null,
-    } | null >,
-    lastDocumentId?: string | null,
+    __typename: "Document",
+    workspaceId: string,
+    id: string,
+    type: string,
+    subType?: string | null,
+    status?: string | null,
+    title?: string | null,
+    path?: string | null,
+    sizeInBytes?: number | null,
+    vectors?: number | null,
+    subDocuments?: number | null,
+    crawlerProperties?:  {
+      __typename: "CrawlerProperties",
+      followLinks?: boolean | null,
+      limit?: number | null,
+    } | null,
+    errors?: Array< string > | null,
+    createdAt: string,
+    updatedAt: string,
+    rssFeedId?: string | null,
+    rssLastCheckedAt?: string | null,
   } | null,
 };
 
 export type GetRSSPostsQueryVariables = {
-  input?: GetDocumentInput | null,
+  input: GetRSSPostsInput,
 };
 
 export type GetRSSPostsQuery = {

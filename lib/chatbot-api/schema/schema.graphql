@@ -76,7 +76,7 @@ type Document @aws_cognito_user_pools {
   crawlerProperties: CrawlerProperties
   errors: [String!]
   createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
+  updatedAt: AWSDateTime
   rssFeedId: String
   rssLastCheckedAt: AWSDateTime
 }
@@ -123,6 +123,12 @@ type FileUploadResult @aws_cognito_user_pools {
 input GetDocumentInput {
   workspaceId: String!
   documentId: String!
+}
+
+input GetRSSPostsInput {
+  workspaceId: String!
+  documentId: String!
+  lastDocumentId: String
 }
 
 type KendraIndex @aws_cognito_user_pools {
@@ -278,7 +284,7 @@ type Mutation {
   createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
     @aws_cognito_user_pools
   startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools
-  deleteWorkspace(worspaceId: String!): Boolean @aws_cognito_user_pools
+  deleteWorkspace(workspaceId: String!): Boolean @aws_cognito_user_pools
   addTextDocument(input: TextDocumentInput!): DocumentResult
     @aws_cognito_user_pools
   addQnADocument(input: QnADocumentInput!): DocumentResult
@@ -305,15 +311,15 @@ type Query {
     @aws_cognito_user_pools
   listSessions: [Session!]! @aws_cognito_user_pools
   listEmbeddingModels: [EmbeddingModel!]! @aws_cognito_user_pools
-  calculateEmbeddings(input: CalculateEmbeddingsInput): [Embedding]!
+  calculateEmbeddings(input: CalculateEmbeddingsInput!): [Embedding]!
     @aws_cognito_user_pools
   getSession(id: String!): Session @aws_cognito_user_pools
   listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools
   isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools
-  listDocuments(input: ListDocumentsInput): DocumentsResult!
+  listDocuments(input: ListDocumentsInput!): DocumentsResult!
     @aws_cognito_user_pools
-  getDocument(input: GetDocumentInput): DocumentsResult @aws_cognito_user_pools
-  getRSSPosts(input: GetDocumentInput): DocumentsResult @aws_cognito_user_pools
+  getDocument(input: GetDocumentInput!): Document @aws_cognito_user_pools
+  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult @aws_cognito_user_pools
   listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools
   rankPassages(input: RankPassagesInput!): [PassageRank!]!
     @aws_cognito_user_pools

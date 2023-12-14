@@ -86,20 +86,20 @@ export default function RssFeed() {
         setPages((current) => {
           const foundIndex = current.findIndex(
             (c) =>
-              c!.lastDocumentId === result.data?.listDocuments?.lastDocumentId
+              c!.lastDocumentId === result.data?.getRSSPosts?.lastDocumentId
           );
           setPostsLoading(false);
 
           if (foundIndex !== -1) {
-            current[foundIndex] = result.data?.listDocuments;
+            current[foundIndex] = result.data?.getRSSPosts;
             return [...current];
           } else if (typeof params.pageIndex !== "undefined") {
-            current[params.pageIndex - 1] = result.data?.listDocuments;
+            current[params.pageIndex - 1] = result.data?.getRSSPosts;
             return [...current];
-          } else if (result.data?.listDocuments.items.length === 0) {
+          } else if (result.data?.getRSSPosts!.items.length === 0) {
             return current;
           } else {
-            return [...current, result.data?.listDocuments];
+            return [...current, result.data?.getRSSPosts];
           }
         });
       } catch (error) {
@@ -116,8 +116,8 @@ export default function RssFeed() {
     try {
       const rssSubscriptionResult =
         await apiClient.documents.getDocumentDetails(workspaceId, feedId);
-      if (rssSubscriptionResult.data?.getDocument?.items) {
-        const doc = rssSubscriptionResult.data.getDocument!.items[0]!;
+      if (rssSubscriptionResult.data?.getDocument) {
+        const doc = rssSubscriptionResult.data.getDocument!;
         setRssSubscription(doc);
         setRssSubscriptionStatus(
           doc.status == "enabled"

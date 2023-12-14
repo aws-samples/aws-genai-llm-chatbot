@@ -230,7 +230,7 @@ export const listEmbeddingModels = /* GraphQL */ `query ListEmbeddingModels {
   APITypes.ListEmbeddingModelsQueryVariables,
   APITypes.ListEmbeddingModelsQuery
 >;
-export const calculateEmbeddings = /* GraphQL */ `query CalculateEmbeddings($input: CalculateEmbeddingsInput) {
+export const calculateEmbeddings = /* GraphQL */ `query CalculateEmbeddings($input: CalculateEmbeddingsInput!) {
   calculateEmbeddings(input: $input) {
     passage
     vector
@@ -278,7 +278,7 @@ export const isKendraDataSynching = /* GraphQL */ `query IsKendraDataSynching($w
   APITypes.IsKendraDataSynchingQueryVariables,
   APITypes.IsKendraDataSynchingQuery
 >;
-export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocumentsInput) {
+export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocumentsInput!) {
   listDocuments(input: $input) {
     items {
       workspaceId
@@ -311,32 +311,28 @@ export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocu
   APITypes.ListDocumentsQueryVariables,
   APITypes.ListDocumentsQuery
 >;
-export const getDocument = /* GraphQL */ `query GetDocument($input: GetDocumentInput) {
+export const getDocument = /* GraphQL */ `query GetDocument($input: GetDocumentInput!) {
   getDocument(input: $input) {
-    items {
-      workspaceId
-      id
-      type
-      subType
-      status
-      title
-      path
-      sizeInBytes
-      vectors
-      subDocuments
-      crawlerProperties {
-        followLinks
-        limit
-        __typename
-      }
-      errors
-      createdAt
-      updatedAt
-      rssFeedId
-      rssLastCheckedAt
+    workspaceId
+    id
+    type
+    subType
+    status
+    title
+    path
+    sizeInBytes
+    vectors
+    subDocuments
+    crawlerProperties {
+      followLinks
+      limit
       __typename
     }
-    lastDocumentId
+    errors
+    createdAt
+    updatedAt
+    rssFeedId
+    rssLastCheckedAt
     __typename
   }
 }
@@ -344,7 +340,7 @@ export const getDocument = /* GraphQL */ `query GetDocument($input: GetDocumentI
   APITypes.GetDocumentQueryVariables,
   APITypes.GetDocumentQuery
 >;
-export const getRSSPosts = /* GraphQL */ `query GetRSSPosts($input: GetDocumentInput) {
+export const getRSSPosts = /* GraphQL */ `query GetRSSPosts($input: GetRSSPostsInput!) {
   getRSSPosts(input: $input) {
     items {
       workspaceId

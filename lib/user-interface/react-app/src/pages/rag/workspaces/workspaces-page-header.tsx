@@ -11,6 +11,7 @@ import WorkspaceDeleteModal from "../../../components/rag/workspace-delete-modal
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
 import { Workspace } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 interface WorkspacesPageHeaderProps extends HeaderProps {
   title?: string;
@@ -46,7 +47,7 @@ export function WorkspacesPageHeader({
     setShowDeleteModal(true);
   };
 
-  const onDeleteWorksapce = async () => {
+  const onDeleteWorkspace = async () => {
     if (!appContext) return;
     if (!isOnlyOneSelected) return;
 
@@ -59,9 +60,9 @@ export function WorkspacesPageHeader({
 
       setTimeout(async () => {
         await props.getWorkspaces();
-      }, 2500);
+      }, 1500);
     } catch (error) {
-      console.error(error);
+      console.error(Utils.getErrorMessage(error));
     }
   };
 
@@ -70,7 +71,7 @@ export function WorkspacesPageHeader({
       <WorkspaceDeleteModal
         visible={showDeleteModal && canDeleteWorkspace}
         onDiscard={() => setShowDeleteModal(false)}
-        onDelete={onDeleteWorksapce}
+        onDelete={onDeleteWorkspace}
         workspace={props.selectedWorkspaces[0]}
       />
       <Header

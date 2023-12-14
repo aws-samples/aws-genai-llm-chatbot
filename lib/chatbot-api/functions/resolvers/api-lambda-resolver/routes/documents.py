@@ -63,6 +63,12 @@ class GetDocumentRequest(BaseModel):
     documentId: str
 
 
+class GetRssPostsRequest(BaseModel):
+    workspaceId: str
+    documentId: str
+    lastDocumentId: Optional[str]
+
+
 class DocumentSubscriptionStatusRequest(BaseModel):
     workspaceId: str
     documentId: str
@@ -106,6 +112,7 @@ def file_upload(input: dict):
         request.workspaceId, request.fileName
     )
 
+    print(result)
     return result
 
 
@@ -130,19 +137,19 @@ def get_document_details(input: dict):
 
     result = genai_core.documents.get_document(request.workspaceId, request.documentId)
 
-    return ({"items": [_convert_document(result)], "lastDocumentId": None},)
+    return _convert_document(result)
 
 
 @router.resolver(field_name="getRSSPosts")
 @tracer.capture_method
 def get_rss_posts(input: dict):
-    request = GetDocumentRequest(**input)
+    request = GetRssPostsRequest(**input)
 
     result = genai_core.documents.list_documents(
-        request.workspaceId,
-        "rsspost",
-        last_documentId=request.lastDocumentId,
-        parent_documentId=request.documentId,
+        workspace_id=request.workspaceId,
+        document_type="rsspost",
+        last_document_id=request.lastDocumentId,
+        parent_document_id=request.documentId,
     )
 
     return {

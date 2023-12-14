@@ -123,8 +123,8 @@ export const startKendraDataSync = /* GraphQL */ `mutation StartKendraDataSync($
   APITypes.StartKendraDataSyncMutationVariables,
   APITypes.StartKendraDataSyncMutation
 >;
-export const deleteWorkspace = /* GraphQL */ `mutation DeleteWorkspace($worspaceId: String!) {
-  deleteWorkspace(worspaceId: $worspaceId)
+export const deleteWorkspace = /* GraphQL */ `mutation DeleteWorkspace($workspaceId: String!) {
+  deleteWorkspace(workspaceId: $workspaceId)
 }
 ` as GeneratedMutation<
   APITypes.DeleteWorkspaceMutationVariables,
