@@ -1,8 +1,8 @@
-import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
 import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cf from "aws-cdk-lib/aws-cloudfront";
+import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
+import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
@@ -40,99 +40,187 @@ export class UserInterface extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       autoDeleteObjects: true,
-      websiteIndexDocument: "index.html",
-      websiteErrorDocument: "index.html",
     });
 
-    const originAccessIdentity = new cf.OriginAccessIdentity(this, "S3OAI");
-    websiteBucket.grantRead(originAccessIdentity);
-    props.chatbotFilesBucket.grantRead(originAccessIdentity);
-
-    const distribution = new cf.CloudFrontWebDistribution(
+    const originAccessControl = new cf.CfnOriginAccessControl(
       this,
-      "Distirbution",
+      "OriginAccessControl",
       {
-        viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        priceClass: cf.PriceClass.PRICE_CLASS_ALL,
-        httpVersion: cf.HttpVersion.HTTP2_AND_3,
-        originConfigs: [
-          {
-            behaviors: [{ isDefaultBehavior: true }],
-            s3OriginSource: {
-              s3BucketSource: websiteBucket,
-              originAccessIdentity,
-            },
-          },
-          {
-            behaviors: [
-              {
-                pathPattern: "/api/*",
-                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
-                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                defaultTtl: cdk.Duration.seconds(0),
-                forwardedValues: {
-                  queryString: true,
-                  headers: [
-                    "Referer",
-                    "Origin",
-                    "Authorization",
-                    "Content-Type",
-                    "x-forwarded-user",
-                    "Access-Control-Request-Headers",
-                    "Access-Control-Request-Method",
-                  ],
-                },
-              },
-            ],
-            customOriginSource: {
-              domainName: cdk.Fn.select(
-                2,
-                cdk.Fn.split("/", props.api.graphqlApi.graphqlUrl)
-              ),
-              originHeaders: {
-                "X-Origin-Verify": props.shared.xOriginVerifySecret
-                  .secretValueFromJson("headerValue")
-                  .unsafeUnwrap(),
-              },
-            },
-          },
-          {
-            behaviors: [
-              {
-                pathPattern: "/chabot/files/*",
-                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
-                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                defaultTtl: cdk.Duration.seconds(0),
-                forwardedValues: {
-                  queryString: true,
-                  headers: [
-                    "Referer",
-                    "Origin",
-                    "Authorization",
-                    "Content-Type",
-                    "x-forwarded-user",
-                    "Access-Control-Request-Headers",
-                    "Access-Control-Request-Method",
-                  ],
-                },
-              },
-            ],
-            s3OriginSource: {
-              s3BucketSource: props.chatbotFilesBucket,
-              originAccessIdentity,
-            },
-          },
-        ],
-        errorConfigurations: [
-          {
-            errorCode: 404,
-            errorCachingMinTtl: 0,
-            responseCode: 200,
-            responsePagePath: "/index.html",
-          },
-        ],
+        originAccessControlConfig: {
+          signingBehavior: "always",
+          signingProtocol: "sigv4",
+          originAccessControlOriginType: "s3",
+          name: "UserInterfaceOriginAccessControl",
+        },
       }
     );
+
+    const responseHeadersPolicy = new cf.ResponseHeadersPolicy(
+      this,
+      "ResponseHeadersPolicyCors",
+      {
+        comment: "A default CORS policy",
+        corsBehavior: {
+          accessControlAllowCredentials: false,
+          accessControlAllowHeaders: ["*"],
+          accessControlAllowMethods: ["ALL"],
+          accessControlAllowOrigins: [
+            "https://localhost:3000",
+            "http://localhost:3000",
+          ],
+          accessControlExposeHeaders: ["*"],
+          accessControlMaxAge: cdk.Duration.seconds(600),
+          originOverride: true,
+        },
+        securityHeadersBehavior: {
+          contentSecurityPolicy: {
+            contentSecurityPolicy: "default-src 'self';",
+            override: true,
+          },
+          contentTypeOptions: { override: false },
+          frameOptions: {
+            frameOption: cf.HeadersFrameOption.DENY,
+            override: true,
+          },
+          referrerPolicy: {
+            referrerPolicy:
+              cf.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
+            override: true,
+          },
+        },
+        removeHeaders: ["Server", "X-Powered-By"],
+        serverTimingSamplingRate: 50,
+      }
+    );
+
+    const originRequestPolicy = new cf.OriginRequestPolicy(
+      this,
+      "OriginRequestPolicy",
+      {
+        headerBehavior: cf.OriginRequestHeaderBehavior.allowList(
+          "Origin",
+          "Referer",
+          "Access-Control-Request-Method",
+          "Access-Control-Request-Headers",
+          "Content-Type",
+          "Sec-WebSocket-Key",
+          "Sec-WebSocket-Version",
+          "Sec-WebSocket-Protocol",
+          "Sec-WebSocket-Accept",
+          "Sec-WebSocket-Extensions"
+        ),
+        queryStringBehavior: cf.OriginRequestQueryStringBehavior.all(),
+        cookieBehavior: cf.OriginRequestCookieBehavior.all(),
+      }
+    );
+
+    const appSyncOrigin = new HttpOrigin(
+      cdk.Fn.select(2, cdk.Fn.split("/", props.api.graphqlApi.graphqlUrl))
+    );
+
+    const filesOrigin = new S3Origin(props.chatbotFilesBucket);
+    const websiteOrigin = new S3Origin(websiteBucket);
+
+    const distribution = new cf.Distribution(this, "Distribution", {
+      priceClass: cf.PriceClass.PRICE_CLASS_ALL,
+      httpVersion: cf.HttpVersion.HTTP2_AND_3,
+      defaultRootObject: "index.html",
+      defaultBehavior: {
+        origin: websiteOrigin,
+        viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+      additionalBehaviors: {
+        "/graphql": {
+          origin: appSyncOrigin,
+          allowedMethods: cf.AllowedMethods.ALLOW_ALL,
+          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          responseHeadersPolicy,
+          originRequestPolicy,
+          cachePolicy: cf.CachePolicy.AMPLIFY,
+        },
+        "/graphql/*": {
+          origin: appSyncOrigin,
+          allowedMethods: cf.AllowedMethods.ALLOW_ALL,
+          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          responseHeadersPolicy,
+          originRequestPolicy,
+          cachePolicy: cf.CachePolicy.AMPLIFY,
+        },
+        "/chatbot/files/*": {
+          origin: filesOrigin,
+          allowedMethods: cf.AllowedMethods.ALLOW_ALL,
+          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          originRequestPolicy,
+          cachePolicy: cf.CachePolicy.CACHING_DISABLED,
+        },
+      },
+      errorResponses: [
+        {
+          httpStatus: 404,
+          ttl: cdk.Duration.minutes(0),
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+        },
+      ],
+    });
+
+    // Access Origin Control - workarounds
+
+    function addOAC(
+      originAccessControl: cf.CfnOriginAccessControl,
+      distribution: cf.Distribution,
+      index: number
+    ) {
+      const cfnDistribution = distribution.node
+        .defaultChild as cf.CfnDistribution;
+      cfnDistribution.addOverride(
+        `Properties.DistributionConfig.Origins.${index}.S3OriginConfig.OriginAccessIdentity`,
+        ""
+      );
+      cfnDistribution.addPropertyOverride(
+        `DistributionConfig.Origins.${index}.OriginAccessControlId`,
+        originAccessControl.getAtt("Id")
+      );
+    }
+
+    addOAC(originAccessControl, distribution, 0);
+    addOAC(originAccessControl, distribution, 2);
+
+    const s3OriginNode = distribution.node
+      .findAll()
+      .filter((child) => child.node.id === "S3Origin");
+    s3OriginNode.forEach((n) => n.node.tryRemoveChild("Resource"));
+
+    function removeCanonicalUser(bucket: s3.IBucket, accountId: string) {
+      const comS3PolicyOverride = bucket.node.findChild("Policy").node
+        .defaultChild as s3.CfnBucketPolicy;
+
+      comS3PolicyOverride.policyDocument.statements.forEach(
+        (statement: any, idx: any) => {
+          if (
+            statement["_principal"] &&
+            statement["_principal"].CanonicalUser
+          ) {
+            delete statement["_principal"].CanonicalUser;
+          }
+          comS3PolicyOverride.addOverride(
+            `Properties.PolicyDocument.Statement.${idx}.Principal`,
+            { Service: "cloudfront.amazonaws.com" }
+          );
+          comS3PolicyOverride.addOverride(
+            `Properties.PolicyDocument.Statement.${idx}.Condition`,
+            {
+              StringEquals: {
+                "AWS:SourceArn": `arn:aws:cloudfront::${accountId}:distribution/${distribution.distributionId}`,
+              },
+            }
+          );
+        }
+      );
+    }
+
+    removeCanonicalUser(websiteBucket, cdk.Stack.of(this).account);
+    removeCanonicalUser(props.chatbotFilesBucket, cdk.Stack.of(this).account);
 
     const exportsAsset = s3deploy.Source.jsonData("aws-exports.json", {
       aws_project_region: cdk.Aws.REGION,
@@ -146,7 +234,7 @@ export class UserInterface extends Construct {
         userPoolWebClientId: props.userPoolClientId,
         identityPoolId: props.identityPool.identityPoolId,
       },
-      aws_appsync_graphqlEndpoint: props.api.graphqlApi.graphqlUrl,
+      aws_appsync_graphqlEndpoint: `https://${distribution.distributionDomainName}/graphql`,
       aws_appsync_region: cdk.Aws.REGION,
       aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
       aws_appsync_apiKey: props.api.graphqlApi?.apiKey,
@@ -157,9 +245,6 @@ export class UserInterface extends Construct {
         },
       },
       config: {
-        api_endpoint: `https://${distribution.distributionDomainName}/api`,
-
-        appsync_endpoint: props.api.graphqlApi.graphqlUrl,
         rag_enabled: props.config.rag.enabled,
         cross_encoders_enabled: props.crossEncodersEnabled,
         sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,
