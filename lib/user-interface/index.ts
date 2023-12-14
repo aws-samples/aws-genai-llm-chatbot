@@ -40,107 +40,66 @@ export class UserInterface extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       autoDeleteObjects: true,
+      websiteIndexDocument: "index.html",
+      websiteErrorDocument: "index.html",
     });
 
-    const originAccessControl = new cf.CfnOriginAccessControl(
+    const originAccessIdentity = new cf.OriginAccessIdentity(this, "S3OAI");
+    websiteBucket.grantRead(originAccessIdentity);
+    props.chatbotFilesBucket.grantRead(originAccessIdentity);
+
+    const distribution = new cf.CloudFrontWebDistribution(
       this,
-      "OriginAccessControl",
+      "Distribution",
       {
-        originAccessControlConfig: {
-          signingBehavior: "always",
-          signingProtocol: "sigv4",
-          originAccessControlOriginType: "s3",
-          name: "UserInterfaceOriginAccessControl",
-        },
+        viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        priceClass: cf.PriceClass.PRICE_CLASS_ALL,
+        httpVersion: cf.HttpVersion.HTTP2_AND_3,
+        originConfigs: [
+          {
+            behaviors: [{ isDefaultBehavior: true }],
+            s3OriginSource: {
+              s3BucketSource: websiteBucket,
+              originAccessIdentity,
+            },
+          },
+          {
+            behaviors: [
+              {
+                pathPattern: "/chabot/files/*",
+                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
+                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                defaultTtl: cdk.Duration.seconds(0),
+                forwardedValues: {
+                  queryString: true,
+                  headers: [
+                    "Referer",
+                    "Origin",
+                    "Authorization",
+                    "Content-Type",
+                    "x-forwarded-user",
+                    "Access-Control-Request-Headers",
+                    "Access-Control-Request-Method",
+                  ],
+                },
+              },
+            ],
+            s3OriginSource: {
+              s3BucketSource: props.chatbotFilesBucket,
+              originAccessIdentity,
+            },
+          },
+        ],
+        errorConfigurations: [
+          {
+            errorCode: 404,
+            errorCachingMinTtl: 0,
+            responseCode: 200,
+            responsePagePath: "/index.html",
+          },
+        ],
       }
     );
-
-    const filesOrigin = new S3Origin(props.chatbotFilesBucket);
-    const websiteOrigin = new S3Origin(websiteBucket);
-
-    const distribution = new cf.Distribution(this, "Distribution", {
-      priceClass: cf.PriceClass.PRICE_CLASS_ALL,
-      httpVersion: cf.HttpVersion.HTTP2_AND_3,
-      defaultRootObject: "index.html",
-      defaultBehavior: {
-        origin: websiteOrigin,
-        viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      },
-      additionalBehaviors: {
-        "/chatbot/files/*": {
-          origin: filesOrigin,
-          allowedMethods: cf.AllowedMethods.ALLOW_ALL,
-          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: cf.CachePolicy.CACHING_DISABLED,
-        },
-      },
-      errorResponses: [
-        {
-          httpStatus: 404,
-          ttl: cdk.Duration.minutes(0),
-          responseHttpStatus: 200,
-          responsePagePath: "/index.html",
-        },
-      ],
-    });
-
-    // Access Origin Control - workarounds
-
-    function addOAC(
-      originAccessControl: cf.CfnOriginAccessControl,
-      distribution: cf.Distribution,
-      index: number
-    ) {
-      const cfnDistribution = distribution.node
-        .defaultChild as cf.CfnDistribution;
-      cfnDistribution.addOverride(
-        `Properties.DistributionConfig.Origins.${index}.S3OriginConfig.OriginAccessIdentity`,
-        ""
-      );
-      cfnDistribution.addPropertyOverride(
-        `DistributionConfig.Origins.${index}.OriginAccessControlId`,
-        originAccessControl.getAtt("Id")
-      );
-    }
-
-    addOAC(originAccessControl, distribution, 0);
-    addOAC(originAccessControl, distribution, 1);
-
-    const s3OriginNode = distribution.node
-      .findAll()
-      .filter((child) => child.node.id === "S3Origin");
-    s3OriginNode.forEach((n) => n.node.tryRemoveChild("Resource"));
-
-    function removeCanonicalUser(bucket: s3.IBucket, accountId: string) {
-      const comS3PolicyOverride = bucket.node.findChild("Policy").node
-        .defaultChild as s3.CfnBucketPolicy;
-
-      comS3PolicyOverride.policyDocument.statements.forEach(
-        (statement: any, idx: any) => {
-          if (
-            statement["_principal"] &&
-            statement["_principal"].CanonicalUser
-          ) {
-            delete statement["_principal"].CanonicalUser;
-          }
-          comS3PolicyOverride.addOverride(
-            `Properties.PolicyDocument.Statement.${idx}.Principal`,
-            { Service: "cloudfront.amazonaws.com" }
-          );
-          comS3PolicyOverride.addOverride(
-            `Properties.PolicyDocument.Statement.${idx}.Condition`,
-            {
-              StringEquals: {
-                "AWS:SourceArn": `arn:aws:cloudfront::${accountId}:distribution/${distribution.distributionId}`,
-              },
-            }
-          );
-        }
-      );
-    }
-
-    removeCanonicalUser(websiteBucket, cdk.Stack.of(this).account);
-    removeCanonicalUser(props.chatbotFilesBucket, cdk.Stack.of(this).account);
 
     const exportsAsset = s3deploy.Source.jsonData("aws-exports.json", {
       aws_project_region: cdk.Aws.REGION,
