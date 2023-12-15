@@ -39,6 +39,16 @@ class Modality(Enum):
     EMBEDDING = "EMBEDDING"
 
 
+class InferenceType(Enum):
+    ON_DEMAND = "ON_DEMAND"
+    PROVISIONED = "PROVISIONED"
+
+
+class ModelStatus(Enum):
+    ACTIVE = "ACTIVE"
+    LEGACY = "LEGACY"
+
+
 class ModelInterface(Enum):
     LANGCHIAN = "langchain"
     IDEFICS = "idefics"
