@@ -1,8 +1,10 @@
 import genai_core.sessions
 import genai_core.types
 import genai_core.auth
+import genai_core.utils.json
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
+import json
 
 tracer = Tracer()
 router = Router()
@@ -30,18 +32,6 @@ def get_sessions():
     ]
 
 
-import decimal
-
-
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            if o.as_integer_ratio()[1] == 1:
-                return int(o)
-            return float(o)
-        return super().default(o)
-
-
 @router.resolver(field_name="getSession")
 @tracer.capture_method
 def get_session(id: str):
@@ -64,7 +54,8 @@ def get_session(id: str):
                 "type": item.get("type"),
                 "content": item.get("data", {}).get("content"),
                 "metadata": json.dumps(
-                    item.get("data", {}).get("additional_kwargs"), cls=DecimalEncoder
+                    item.get("data", {}).get("additional_kwargs"),
+                    cls=genai_core.utils.json.CustomEncoder,
                 ),
             }
             for item in session.get("History")
