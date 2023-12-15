@@ -18,17 +18,21 @@ import useOnFollow from "../../../common/hooks/use-on-follow";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { useForm } from "../../../common/hooks/use-form";
-import { LoadingStatus } from "../../../common/types";
+import { LoadingStatus, UserRole } from "../../../common/types";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { Utils } from "../../../common/utils";
 import React from "react";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { CrossEncoderData } from "../../../API";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../../common/user-context";
 
 export default function CrossEncoders() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext)
   const [globalError, setGlobalError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [crossEncoderModelsStatus, setCrossEncoderModelsStatus] =
@@ -44,6 +48,19 @@ export default function CrossEncoders() {
       }[]
     | null
   >(null);
+
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   const { data, onChange, errors, validate } = useForm({
     initialValue: () => {
@@ -104,7 +121,10 @@ export default function CrossEncoders() {
         const result = await apiClient.crossEncoders.getModels();
 
         console.log(result?.data?.listCrossEncoders);
-        setCrossEncoderModels(result?.data?.listCrossEncoders!);
+        if(result.data?.listCrossEncoders){
+          setCrossEncoderModels(result?.data?.listCrossEncoders);
+        }
+        
         setCrossEncoderModelsStatus("finished");
       } catch (error) {
         console.error(Utils.getErrorMessage(error));

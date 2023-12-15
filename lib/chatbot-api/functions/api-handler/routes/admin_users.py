@@ -97,25 +97,17 @@ def edit_user():
         return {"ok": False, "error": str(e)}
 
 
-@router.resolver(field_name="disableUser")
+@router.resolver(field_name="toggleUser")
 @tracer.capture_method
 @permissions.admin_only
-def disable_user(user_id: str):
+def toggle_user(user_id: str, action: str):
     try:
-        genai_core.admin_user_management.disable_user(__parse_email(user_id))
-        return {"ok": True}
-    except Exception as e:
-        logger.exception(e)
-        return {"ok": False, "error": str(e)}
-
-
-@router.resolver(field_name="enableUser")
-@tracer.capture_method
-@permissions.admin_only
-def enable_user(user_id: str):
-    try:
-        genai_core.admin_user_management.enable_user(__parse_email(user_id))
-        return {"ok": True}
+        if action == "enable":
+            genai_core.admin_user_management.enable_user(__parse_email(user_id))
+            return {"ok": True}
+        if action == "disable":
+            genai_core.admin_user_management.disable_user(__parse_email(user_id))
+            return {"ok": True}
     except Exception as e:
         logger.exception(e)
         return {"ok": False, "error": str(e)}

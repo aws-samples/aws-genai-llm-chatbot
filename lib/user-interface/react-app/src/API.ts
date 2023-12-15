@@ -117,11 +117,26 @@ export type DeleteSessionResult = {
   deleted: boolean,
 };
 
-export type Channel = {
-  __typename: "Channel",
-  data?: string | null,
-  sessionId?: string | null,
-  userId?: string | null,
+export type ManageUserDataInput = {
+  name: string,
+  email: string,
+  role?: string | null,
+  phoneNumber?: string | null,
+  previousEmail?: string | null,
+};
+
+export type User = {
+  __typename: "User",
+  name: string,
+  email: string,
+  role?: string | null,
+  phoneNumber?: string | null,
+  previousEmail?: string | null,
+};
+
+export type ManageUserStateInput = {
+  email: string,
+  action?: string | null,
 };
 
 export type FileUploadInput = {
@@ -534,27 +549,79 @@ export type DeleteSessionMutation = {
   } | null,
 };
 
-export type SendQueryMutationVariables = {
-  data?: string | null,
+export type CreateUserMutationVariables = {
+  input: ManageUserDataInput,
 };
 
-export type SendQueryMutation = {
-  sendQuery?: string | null,
+export type CreateUserMutation = {
+  createUser:  {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+  },
 };
 
-export type PublishResponseMutationVariables = {
-  sessionId?: string | null,
-  userId?: string | null,
-  data?: string | null,
+export type EditUserMutationVariables = {
+  input: ManageUserDataInput,
 };
 
-export type PublishResponseMutation = {
-  publishResponse?:  {
-    __typename: "Channel",
-    data?: string | null,
-    sessionId?: string | null,
-    userId?: string | null,
-  } | null,
+export type EditUserMutation = {
+  editUser:  {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+  },
+};
+
+export type ToggleUserMutationVariables = {
+  input?: ManageUserStateInput | null,
+};
+
+export type ToggleUserMutation = {
+  toggleUser:  {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+  },
+};
+
+export type ResetUserPasswordMutationVariables = {
+  input?: ManageUserStateInput | null,
+};
+
+export type ResetUserPasswordMutation = {
+  resetUserPassword:  {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+  },
+};
+
+export type DeleteUserMutationVariables = {
+  input?: ManageUserStateInput | null,
+};
+
+export type DeleteUserMutation = {
+  deleteUser:  {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+  },
 };
 
 export type CheckHealthQueryVariables = {
@@ -852,11 +919,6 @@ export type ListDocumentsQuery = {
       sizeInBytes?: number | null,
       vectors?: number | null,
       subDocuments?: number | null,
-      crawlerProperties?:  {
-        __typename: "CrawlerProperties",
-        followLinks?: boolean | null,
-        limit?: number | null,
-      } | null,
       errors?: Array< string > | null,
       createdAt: string,
       updatedAt?: string | null,
@@ -916,11 +978,6 @@ export type GetRSSPostsQuery = {
       sizeInBytes?: number | null,
       vectors?: number | null,
       subDocuments?: number | null,
-      crawlerProperties?:  {
-        __typename: "CrawlerProperties",
-        followLinks?: boolean | null,
-        limit?: number | null,
-      } | null,
       errors?: Array< string > | null,
       createdAt: string,
       updatedAt?: string | null,
@@ -954,22 +1011,31 @@ export type RankPassagesQuery = {
   } >,
 };
 
-export type NoneQueryVariables = {
+export type ListUsersQueryVariables = {
 };
 
-export type NoneQuery = {
-  none?: string | null,
+export type ListUsersQuery = {
+  listUsers:  Array< {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+  } >,
 };
 
-export type ReceiveMessagesSubscriptionVariables = {
-  sessionId?: string | null,
+export type GetUserQueryVariables = {
+  userId: string,
 };
 
-export type ReceiveMessagesSubscription = {
-  receiveMessages?:  {
-    __typename: "Channel",
-    data?: string | null,
-    sessionId?: string | null,
-    userId?: string | null,
-  } | null,
+export type GetUserQuery = {
+  getUser:  {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+  },
 };

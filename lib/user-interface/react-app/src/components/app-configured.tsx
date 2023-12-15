@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Authenticator,
   Heading,
@@ -7,9 +7,10 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import App from "../app";
-import { Amplify } from "aws-amplify";
-import { AppConfig } from "../common/types";
+import { Amplify, Auth, Hub } from "aws-amplify";
+import { AppConfig, UserRole } from "../common/types";
 import { AppContext } from "../common/app-context";
+import { UserContext, userContextDefault } from "../common/user-context";
 import { Alert, StatusIndicator } from "@cloudscape-design/components";
 import { StorageHelper } from "../common/helpers/storage-helper";
 import { Mode } from "@cloudscape-design/global-styles";
@@ -21,6 +22,35 @@ export default function AppConfigured() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [error, setError] = useState<boolean | null>(null);
   const [theme, setTheme] = useState(StorageHelper.getTheme());
+  const [userRole, setUserRole] = useState(userContextDefault.userRole);
+  const [userEmail, setUserEmail] = useState(userContextDefault.userEmail);
+
+  const updateUserContext = useCallback(
+    (event: string) => {
+      if (event === "signIn" || event === "configured") {
+        if (userRole === UserRole.UNDEFINED || userEmail === null) {
+          Auth.currentAuthenticatedUser()
+            .then((user) => {
+              if (user.attributes["custom:userRole"] !== undefined) {
+                setUserRole(user.attributes["custom:userRole"] as UserRole);
+              } else {
+                setUserRole(UserRole.UNDEFINED);
+              }
+              if (user.attributes.email !== undefined) {
+                setUserEmail(user.attributes.email);
+              }
+            })
+            .catch(() => {
+              setUserRole(UserRole.UNDEFINED);
+            });
+        }
+      } else if (event === "signOut") {
+        setUserRole(UserRole.UNDEFINED);
+        setUserEmail("");
+      }
+    },
+    [userRole, setUserRole, setUserEmail, userEmail]
+  );
 
   useEffect(() => {
     (async () => {
@@ -61,6 +91,12 @@ export default function AppConfigured() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    Hub.listen("auth", (authMessage) => {
+      updateUserContext(authMessage.payload.event);
+    });
+  }, [updateUserContext]);
 
   useEffect(() => {
     const observer = new MutationObserver((mutations) => {
@@ -132,6 +168,7 @@ export default function AppConfigured() {
 
   return (
     <AppContext.Provider value={config}>
+      <UserContext.Provider value={{ setUserRole, userRole, setUserEmail, userEmail}}>
       <ThemeProvider
         theme={{
           name: "default-theme",
@@ -159,6 +196,7 @@ export default function AppConfigured() {
           <App />
         </Authenticator>
       </ThemeProvider>
+      </UserContext.Provider>
     </AppContext.Provider>
   );
 }

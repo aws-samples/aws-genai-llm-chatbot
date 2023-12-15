@@ -12,6 +12,8 @@ import BaseAppLayout from "../../../components/base-app-layout";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
+import { UserContext } from "../../../common/user-context";
+import { UserRole } from '../../../common/types'
 import { ApiClient } from "../../../common/api-client/api-client";
 import { Utils } from "../../../common/utils";
 import RouterButton from "../../../components/wrappers/router-button";
@@ -25,6 +27,7 @@ import { Workspace } from "../../../API";
 
 export default function WorkspacePane() {
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
   const onFollow = useOnFollow();
   const { workspaceId } = useParams();
@@ -34,6 +37,18 @@ export default function WorkspacePane() {
   const [workspace, setWorkspace] = useState<Workspace | undefined | null>(
     null
   );
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   const getWorkspace = useCallback(async () => {
     if (!appContext || !workspaceId) return;
@@ -98,37 +113,41 @@ export default function WorkspacePane() {
                   >
                     Semantic search
                   </RouterButton>
-                  <RouterButtonDropdown
-                    items={[
-                      {
-                        id: "upload-file",
-                        text: "Upload files",
-                        href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-text",
-                        text: "Add texts",
-                        href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-qna",
-                        text: "Add Q&A",
-                        href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "crawl-website",
-                        text: "Crawl website",
-                        href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-rss-subscription",
-                        text: "Add RSS subscription",
-                        href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
-                      },
-                    ]}
-                  >
-                    Add data
-                  </RouterButtonDropdown>
+                  {![UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+                    userContext.userRole
+                  ) ?? (
+                    <RouterButtonDropdown
+                      items={[
+                        {
+                          id: "upload-file",
+                          text: "Upload files",
+                          href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-text",
+                          text: "Add texts",
+                          href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-qna",
+                          text: "Add Q&A",
+                          href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "crawl-website",
+                          text: "Crawl website",
+                          href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-rss-subscription",
+                          text: "Add RSS subscription",
+                          href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
+                        },
+                      ]}
+                    >
+                      Add data
+                    </RouterButtonDropdown>
+                  )}
                 </SpaceBetween>
               }
             >

@@ -226,22 +226,73 @@ export const deleteSession = /* GraphQL */ `mutation DeleteSession($id: String!)
   APITypes.DeleteSessionMutationVariables,
   APITypes.DeleteSessionMutation
 >;
-export const sendQuery = /* GraphQL */ `mutation SendQuery($data: String) {
-  sendQuery(data: $data)
-}
-` as GeneratedMutation<
-  APITypes.SendQueryMutationVariables,
-  APITypes.SendQueryMutation
->;
-export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionId: String, $userId: String, $data: String) {
-  publishResponse(sessionId: $sessionId, userId: $userId, data: $data) {
-    data
-    sessionId
-    userId
+export const createUser = /* GraphQL */ `mutation CreateUser($input: ManageUserDataInput!) {
+  createUser(input: $input) {
+    name
+    email
+    role
+    phoneNumber
+    previousEmail
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.PublishResponseMutationVariables,
-  APITypes.PublishResponseMutation
+  APITypes.CreateUserMutationVariables,
+  APITypes.CreateUserMutation
+>;
+export const editUser = /* GraphQL */ `mutation EditUser($input: ManageUserDataInput!) {
+  editUser(input: $input) {
+    name
+    email
+    role
+    phoneNumber
+    previousEmail
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.EditUserMutationVariables,
+  APITypes.EditUserMutation
+>;
+export const toggleUser = /* GraphQL */ `mutation ToggleUser($input: ManageUserStateInput) {
+  toggleUser(input: $input) {
+    name
+    email
+    role
+    phoneNumber
+    previousEmail
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ToggleUserMutationVariables,
+  APITypes.ToggleUserMutation
+>;
+export const resetUserPassword = /* GraphQL */ `mutation ResetUserPassword($input: ManageUserStateInput) {
+  resetUserPassword(input: $input) {
+    name
+    email
+    role
+    phoneNumber
+    previousEmail
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ResetUserPasswordMutationVariables,
+  APITypes.ResetUserPasswordMutation
+>;
+export const deleteUser = /* GraphQL */ `mutation DeleteUser($input: ManageUserStateInput) {
+  deleteUser(input: $input) {
+    name
+    email
+    role
+    phoneNumber
+    previousEmail
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUserMutationVariables,
+  APITypes.DeleteUserMutation
 >;

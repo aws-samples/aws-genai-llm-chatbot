@@ -85,3 +85,55 @@ export interface KendraWorkspaceCreateInput {
   kendraIndex: SelectProps.Option | null;
   useAllData: boolean;
 }
+
+export interface UserConfig {
+  userRole: UserRole;
+}
+
+export enum UserRole {
+  ADMIN = "admin",
+  WORKSPACES_MANAGER = "workspaces_manager",
+  WORKSPACES_USER = "workspaces_user",
+  CHATBOT_USER = "chatbot_user",
+  UNDEFINED = "undefined",
+}
+
+export type UserStatus =
+  | "UNCONFIRMED"
+  | "CONFIRMED"
+  | "ARCHIVED"
+  | "COMPROMISED"
+  | "UNKNOWN"
+  | "RESET_REQUIRED"
+  | "FORCE_CHANGE_PASSWORD";
+
+export interface UserData {
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  role: UserRole;
+  userStatus?: UserStatus;
+  enabled?: boolean;
+  previousEmail?: string;
+}
+
+export interface UserDataApiRequest {
+  email: string;
+  phoneNumber?: string;
+  role: string;
+  name?: string;
+}
+
+export interface UsersResult {
+  users: UserData[];
+}
+
+export enum AdminUsersManagementAction {
+  CREATE,
+  EDIT,
+  DELETE,
+  DISABLE,
+  ENABLE,
+  RESET_PASSWORD,
+  NO_ACTION,
+}

@@ -10,7 +10,7 @@ import {
   Tabs,
 } from "@cloudscape-design/components";
 import { useContext, useEffect, useState } from "react";
-import { LoadingStatus } from "../../../common/types";
+import { LoadingStatus, UserRole } from "../../../common/types";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import BaseAppLayout from "../../../components/base-app-layout";
 import useOnFollow from "../../../common/hooks/use-on-follow";
@@ -18,7 +18,7 @@ import { useForm } from "../../../common/hooks/use-form";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { Utils } from "../../../common/utils";
 import { AppContext } from "../../../common/app-context";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AddDataData } from "./types";
 import AddText from "./add-text";
 import AddQnA from "./add-qna";
@@ -27,10 +27,13 @@ import DataFileUpload from "./data-file-upload";
 import { CHATBOT_NAME } from "../../../common/constants";
 import AddRssSubscription from "./add-rss-subscription";
 import { Workspace } from "../../../API";
+import { UserContext } from "../../../common/user-context";
 
 export default function AddData() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "file");
@@ -62,6 +65,13 @@ export default function AddData() {
 
   useEffect(() => {
     if (!appContext) return;
+    if (
+      ![UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+        userContext.userRole
+      )
+    ) {
+      navigate("/rag/workspaces", { replace: true });
+    }
 
     (async () => {
       const apiClient = new ApiClient(appContext);
@@ -80,14 +90,16 @@ export default function AddData() {
             });
           }
         }
-
-        setWorkspaces(result.data?.listWorkspaces!);
+        if(result.data?.listWorkspaces){
+          setWorkspaces(result.data?.listWorkspaces);
+        }
+        
         setWorkspacesLoadingStatus("finished");
       } catch (error) {
         setWorkspacesLoadingStatus("error");
       }
     })();
-  }, [appContext, onChange, searchParams]);
+  }, [appContext, onChange, searchParams, navigate, userContext]);
 
   if (Utils.isDevelopment()) {
     console.log("re-render");

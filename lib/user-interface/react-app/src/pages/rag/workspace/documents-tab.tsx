@@ -6,7 +6,7 @@ import {
   Pagination,
 } from "@cloudscape-design/components";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { RagDocumentType } from "../../../common/types";
+import { RagDocumentType, UserRole } from "../../../common/types";
 import RouterButton from "../../../components/wrappers/router-button";
 import { TableEmptyState } from "../../../components/table-empty-state";
 import { AppContext } from "../../../common/app-context";
@@ -14,7 +14,7 @@ import { ApiClient } from "../../../common/api-client/api-client";
 import { getColumnDefinition } from "./columns";
 import { Utils } from "../../../common/utils";
 import { DocumentsResult } from "../../../API";
-
+import { UserContext } from "../../../common/user-context";
 export interface DocumentsTabProps {
   workspaceId?: string;
   documentType: RagDocumentType;
@@ -22,9 +22,11 @@ export interface DocumentsTabProps {
 
 export default function DocumentsTab(props: DocumentsTabProps) {
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pages, setPages] = useState<(DocumentsResult | undefined)[]>([]);
+
 
   const getDocuments = useCallback(
     async (params: { lastDocumentId?: string; pageIndex?: number }) => {
@@ -116,11 +118,15 @@ export default function DocumentsTab(props: DocumentsTabProps) {
           actions={
             <SpaceBetween direction="horizontal" size="xs">
               <Button iconName="refresh" onClick={refreshPage} />
-              <RouterButton
-                href={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
-              >
-                {typeAddStr}
-              </RouterButton>
+              {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+                userContext.userRole
+              ) ? (
+                <RouterButton
+                  href={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
+                >
+                  {typeAddStr}
+                </RouterButton>
+              ) : null}
             </SpaceBetween>
           }
           description="Please expect a delay for your changes to be reflected. Press the refresh button to see the latest changes."
@@ -129,11 +135,17 @@ export default function DocumentsTab(props: DocumentsTabProps) {
         </Header>
       }
       empty={
-        <TableEmptyState
-          resourceName={typeStr}
-          createHref={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
-          createText={typeAddStr}
-        />
+        [UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+          userContext.userRole
+        ) ? (
+          <TableEmptyState
+            resourceName={typeStr}
+            createHref={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
+            createText={typeAddStr}
+          />
+        ) : (
+          <TableEmptyState resourceName={typeStr} createText={typeAddStr} />
+        )
       }
       pagination={
         pages.length === 0 ? null : (

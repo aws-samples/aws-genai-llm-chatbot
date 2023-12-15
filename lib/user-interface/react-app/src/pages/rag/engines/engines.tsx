@@ -4,6 +4,7 @@ import {
   StatusIndicator,
   Header,
 } from "@cloudscape-design/components";
+import { UserRole } from "../../../common/types";
 import { EnginesPageHeader } from "./engines-page-header";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
@@ -12,6 +13,8 @@ import useOnFollow from "../../../common/hooks/use-on-follow";
 import BaseAppLayout from "../../../components/base-app-layout";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { RagEngine } from "../../../API";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../../common/user-context";
 
 const CARD_DEFINITIONS = {
   header: (item: RagEngine) => (
@@ -39,9 +42,23 @@ const CARD_DEFINITIONS = {
 
 export default function Engines() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [data, setData] = useState<RagEngine[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   useEffect(() => {
     if (!appContext?.config) return;
@@ -50,8 +67,10 @@ export default function Engines() {
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.ragEngines.getRagEngines();
-
-        setData(result.data?.listRagEngines!);
+        if(result.data?.listRagEngines){
+          setData(result.data?.listRagEngines);
+        }
+        
       } catch (error) {
         console.error(error);
       }

@@ -3,6 +3,7 @@ import { BreadcrumbGroup } from "@cloudscape-design/components";
 import { useContext, useEffect, useState } from "react";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
+import { UserRole } from "../../../common/types";
 import DashboardHeader from "./dashboard-header";
 import WorkspacesTable from "./workspaces-table";
 import useOnFollow from "../../../common/hooks/use-on-follow";
@@ -10,15 +11,31 @@ import BaseAppLayout from "../../../components/base-app-layout";
 import GeneralConfig, { WorkspacesStatistics } from "./general-config";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Workspace } from "../../../API";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../../common/user-context";
 
 export default function Dashboard() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [statistics, setStatistics] = useState<WorkspacesStatistics | null>(
     null
   );
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   useEffect(() => {
     (async () => {
@@ -28,8 +45,8 @@ export default function Dashboard() {
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.workspaces.getWorkspaces();
-
-        const data = result.data?.listWorkspaces!;
+        if(result.data?.listWorkspaces){
+          const data = result.data?.listWorkspaces;
         setWorkspaces(data);
         console.log(data);
         setStatistics({
@@ -38,6 +55,8 @@ export default function Dashboard() {
           vectors: data.reduce((a, b) => a + b.vectors!, 0),
           sizeInBytes: data.reduce((a, b) => a + b.sizeInBytes!, 0),
         });
+        }
+        
 
         setLoading(false);
       } catch (e) {

@@ -276,6 +276,27 @@ type Workspace @aws_cognito_user_pools {
   updatedAt: AWSDateTime!
 }
 
+type User @aws_cognito_user_pools {
+  name: String!
+  email: String!
+  role: String
+  phoneNumber: String
+  previousEmail: String
+}
+
+input ManageUserDataInput {
+  name: String!
+  email: String!
+  role: String
+  phoneNumber: String
+  previousEmail: String
+}
+
+input ManageUserStateInput {
+  email: String!
+  action: String
+}
+
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
     @aws_cognito_user_pools
@@ -297,6 +318,11 @@ type Mutation {
   updateRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
   deleteUserSessions: [DeleteSessionResult!] @aws_cognito_user_pools
   deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
+  createUser(input: ManageUserDataInput!): User! @aws_cognito_user_pools
+  editUser(input: ManageUserDataInput!): User! @aws_cognito_user_pools
+  toggleUser(input: ManageUserStateInput): User! @aws_cognito_user_pools
+  resetUserPassword(input: ManageUserStateInput): User! @aws_cognito_user_pools
+  deleteUser(input: ManageUserStateInput): User! @aws_cognito_user_pools
 }
 
 type Query {
@@ -323,6 +349,8 @@ type Query {
   listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools
   rankPassages(input: RankPassagesInput!): [PassageRank!]!
     @aws_cognito_user_pools
+  listUsers: [User!]! @aws_cognito_user_pools
+  getUser(userId: String!): User! @aws_cognito_user_pools
 }
 
 schema {
