@@ -18,6 +18,7 @@ from routes.sessions import router as sessions_router
 from routes.semantic_search import router as semantic_search_router
 from routes.documents import router as documents_router
 from routes.kendra import router as kendra_router
+from routes.admin_users import router as admin_users_router
 
 tracer = Tracer()
 logger = Logger()
@@ -34,6 +35,7 @@ app.include_router(sessions_router)
 app.include_router(semantic_search_router)
 app.include_router(documents_router)
 app.include_router(kendra_router)
+app.include_router(admin_users_router)
 
 
 @logger.inject_lambda_context(

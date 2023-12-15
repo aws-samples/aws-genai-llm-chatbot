@@ -5,10 +5,12 @@ from typing import List
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
+from genai_core.auth import UserPermissions
 
 tracer = Tracer()
 router = Router()
 logger = Logger()
+permissions = UserPermissions(router)
 
 
 class CrossEncodersRequest(BaseModel):
@@ -20,6 +22,13 @@ class CrossEncodersRequest(BaseModel):
 
 @router.resolver(field_name="listCrossEncoders")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+        permissions.WORKSPACES_USER_ROLE,
+    ]
+)
 def models():
     models = genai_core.cross_encoder.get_cross_encoder_models()
 
@@ -28,6 +37,13 @@ def models():
 
 @router.resolver(field_name="rankPassages")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+        permissions.WORKSPACES_USER_ROLE,
+    ]
+)
 def cross_encoders(input: dict):
     request = CrossEncodersRequest(**input)
     selected_model = genai_core.cross_encoder.get_cross_encoder_model(

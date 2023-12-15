@@ -6,10 +6,12 @@ import genai_core.workspaces
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
+from genai_core.auth import UserPermissions
 
 tracer = Tracer()
 router = Router()
 logger = Logger()
+permissions = UserPermissions(router)
 
 name_regex = re.compile(r"^[\w+_-]+$")
 
@@ -57,6 +59,14 @@ class CreateWorkspaceKendraRequest(BaseModel):
 
 @router.resolver(field_name="listWorkspaces")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+        permissions.WORKSPACES_USER_ROLE,
+        permissions.CHATBOT_USER_ROLE
+    ]
+)
 def list_workspaces():
     workspaces = genai_core.workspaces.list_workspaces()
 
@@ -67,6 +77,13 @@ def list_workspaces():
 
 @router.resolver(field_name="getWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+        permissions.WORKSPACES_USER_ROLE,
+    ]
+)
 def get_workspace(workspaceId: str):
     workspace = genai_core.workspaces.get_workspace(workspaceId)
 
@@ -80,12 +97,24 @@ def get_workspace(workspaceId: str):
 
 @router.resolver(field_name="deleteWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+    ]
+)
 def delete_workspace(workspaceId: str):
     genai_core.workspaces.delete_workspace(workspaceId)
 
 
 @router.resolver(field_name="createAuroraWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+    ]
+)
 def create_aurora_workspace(input: dict):
     config = genai_core.parameters.get_config()
 
@@ -97,6 +126,12 @@ def create_aurora_workspace(input: dict):
 
 @router.resolver(field_name="createOpenSearchWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE
+    ]
+)
 def create_open_search_workspace(input: dict):
     config = genai_core.parameters.get_config()
 
@@ -107,6 +142,12 @@ def create_open_search_workspace(input: dict):
 
 @router.resolver(field_name="createKendraWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+    ]
+)
 def create_kendra_workspace(input: dict):
     config = genai_core.parameters.get_config()
 

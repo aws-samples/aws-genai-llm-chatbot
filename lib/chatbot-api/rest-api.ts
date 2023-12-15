@@ -111,6 +111,7 @@ export class RestApi extends Construct {
               ?.bucketName ?? "",
           RSS_FEED_INGESTOR_FUNCTION:
             props.ragEngines?.dataImport.rssIngestorFunction?.functionArn ?? "",
+          COGNITO_USER_POOL_ID: props.userPool.userPoolId,
         },
       }
     );
@@ -249,6 +250,26 @@ export class RestApi extends Construct {
             "comprehend:DetectSentiment",
           ],
           resources: ["*"],
+        })
+      );
+
+      apiHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: [
+            "cognito-idp:AddCustomAttributes",
+            "cognito-idp:AdminGetUser",
+            "cognito-idp:AdminUpdateUserAttributes",
+            "cognito-idp:ListUsers",
+            "cognito-idp:AdminCreateUser",
+            "cognito-idp:AdminDeleteUser",
+            "cognito-idp:AdminDisableUser",
+            "cognito-idp:AdminEnableUser",
+            "cognito-idp:SignUp",
+            "cognito-idp:ForgotPassword",
+            "cognito-idp:AdminResetUserPassword",
+          ],
+          resources: [props.userPool.userPoolArn],
+          effect: iam.Effect.ALLOW,
         })
       );
 
