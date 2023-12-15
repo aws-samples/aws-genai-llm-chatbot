@@ -56,12 +56,14 @@ def list_bedrock_models():
             return None
 
         response = bedrock.list_foundation_models(
-            byInferenceType="ON_DEMAND", byOutputModality="TEXT"
+            byInferenceType=genai_core.types.InferenceType.ON_DEMAND.value,
+            byOutputModality=genai_core.types.Modality.TEXT.value,
         )
         bedrock_models = [
             m
             for m in response.get("modelSummaries", [])
-            if m.get("modelLifecycle", {}).get("status") == "ACTIVE"
+            if m.get("modelLifecycle", {}).get("status")
+            == genai_core.types.ModelStatus.ACTIVE.value
         ]
 
         models = [
