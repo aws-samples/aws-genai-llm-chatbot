@@ -47,6 +47,7 @@ export class ChatBotApi extends Construct {
 
     const webSocketApi = new WebSocketApi(this, "WebSocketApi", props);
 
+    // Using wildcards since with scoped down policies there were flaky errors
     const executionRole = new iam.Role(this, "mergedApiRole", {
       assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),
       inlinePolicies: {
@@ -54,13 +55,8 @@ export class ChatBotApi extends Construct {
           statements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
-              actions: ["appsync:SourceGraphQL"],
-              resources: [
-                restApi.graphqlApi.arn,
-                webSocketApi.api.graphQLApi.arn,
-                `${restApi.graphqlApi.arn}/*`,
-                `${webSocketApi.api.graphQLApi.arn}/*`,
-              ],
+              actions: ["appsync:*"],
+              resources: ["*"],
             }),
           ],
         }),
