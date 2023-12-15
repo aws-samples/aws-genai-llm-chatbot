@@ -1,7 +1,3 @@
-import json
-import genai_core.types
-import genai_core.parameters
-import genai_core.utils.json
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
