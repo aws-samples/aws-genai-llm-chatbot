@@ -55,8 +55,14 @@ def list_bedrock_models():
         if not bedrock:
             return None
 
-        response = bedrock.list_foundation_models()
-        bedrock_models = response.get("modelSummaries", [])
+        response = bedrock.list_foundation_models(
+            byInferenceType="ON_DEMAND", byOutputModality="TEXT"
+        )
+        bedrock_models = [
+            m
+            for m in response.get("modelSummaries", [])
+            if m.get("modelLifecycle", {}).get("status") == "ACTIVE"
+        ]
 
         models = [
             {
