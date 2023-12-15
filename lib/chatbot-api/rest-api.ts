@@ -42,7 +42,7 @@ export class RestApi extends Construct {
       "GraphQLApiHandler",
       {
         code: props.shared.sharedCode.bundleWithLambdaAsset(
-          path.join(__dirname, "./functions/resolvers/api-lambda-resolver")
+          path.join(__dirname, "./functions/api-handler")
         ),
         handler: "index.handler",
         runtime: props.shared.pythonRuntime,

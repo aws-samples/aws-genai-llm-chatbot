@@ -30,6 +30,18 @@ def get_sessions():
     ]
 
 
+import decimal
+
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            if o.as_integer_ratio()[1] == 1:
+                return int(o)
+            return float(o)
+        return super().default(o)
+
+
 @router.resolver(field_name="getSession")
 @tracer.capture_method
 def get_session(id: str):
@@ -51,7 +63,9 @@ def get_session(id: str):
             {
                 "type": item.get("type"),
                 "content": item.get("data", {}).get("content"),
-                "metadata": item.get("data", {}).get("additional_kwargs"),
+                "metadata": json.dumps(
+                    item.get("data", {}).get("additional_kwargs"), cls=DecimalEncoder
+                ),
             }
             for item in session.get("History")
         ],

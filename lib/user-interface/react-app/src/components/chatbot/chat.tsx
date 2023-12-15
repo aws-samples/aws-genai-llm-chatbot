@@ -54,6 +54,7 @@ export default function Chat(props: { sessionId?: string }) {
           console.log(result.data.getSession);
           ChatScrollState.skipNextHistoryUpdate = true;
           ChatScrollState.skipNextScrollEvent = true;
+          console.log("History", result.data.getSession.history);
           setMessageHistory(
             result
               .data!.getSession!.history.filter((x) => x !== null)
