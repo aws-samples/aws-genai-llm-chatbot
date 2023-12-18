@@ -10,6 +10,13 @@ logger = Logger()
 permissions = UserPermissions(router)
 
 
+class SemanticSearchRequest(BaseModel):
+    workspaceId: str
+    query: str
+
+
+
+
 @router.resolver(field_name="performSemanticSearch")
 @tracer.capture_method
 @permissions.approved_roles(
@@ -19,19 +26,20 @@ permissions = UserPermissions(router)
         permissions.WORKSPACES_USER_ROLE,
     ]
 )
-def semantic_search(workspaceId: str, query: str):
-    if len(query) == 0 or len(query) > 1000:
+def semantic_search(input: dict):
+    request = SemanticSearchRequest(**input)
+    if len(request.query) == 0 or len(request.query) > 1000:
         raise genai_core.types.CommonError(
             "Query must be between 1 and 1000 characters"
         )
 
     result = genai_core.semantic_search.semantic_search(
-        workspace_id=workspaceId,
-        query=query,
+        workspace_id=request.workspaceId,
+        query=request.query,
         limit=25,
         full_response=True,
     )
-    result = _convert_semantic_search_result(workspaceId, result)
+    result = _convert_semantic_search_result(request.workspaceId, result)
 
     return result
 
@@ -55,7 +63,7 @@ def _convert_semantic_search_result(workspace_id: str, result: dict):
     ret_value = {
         "engine": result["engine"],
         "workspaceId": workspace_id,
-        "queryLanguage": result.get("query_language"),
+        "queryLanguage": result.get("query_language", "en"),
         "supportedLanguages": result.get("supported_languages"),
         "detectedLanguages": result.get("detected_languages"),
         "items": items,
@@ -81,7 +89,7 @@ def _convert_semantic_search_item(item: dict):
         "title": item["title"],
         "content": item["content"],
         "contentComplement": item["content_complement"],
-        "vectorSearchScore": item.get("vector_search_score"),
+        "vectorSearchScore": item.get("vector_search_score", 0),
         "keywordSearchScore": item.get("keyword_search_score"),
         "score": item["score"],
     }

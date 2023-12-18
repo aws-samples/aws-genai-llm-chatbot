@@ -8,15 +8,15 @@ export class FileUploader {
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
-      console.log(signature);
       const fields = signature.fields!.replace("{", "").replace("}", "");
-      for (let f in fields.split(",")) {
-        const [k, v] = f.split("=");
+      fields.split(",").forEach((f) => {
+        const sepIdx = f.indexOf("=");
+        const k = f.slice(0, sepIdx);
+        const v = f.slice(sepIdx + 1);
         formData.append(k, v);
-      }
+      });
 
       formData.append("file", file);
-
       const xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
