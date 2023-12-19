@@ -155,6 +155,7 @@ type Model @aws_cognito_user_pools {
 
 type PassageRank @aws_cognito_user_pools {
   score: Float!
+  passage: String!
 }
 
 input QnADocumentInput {

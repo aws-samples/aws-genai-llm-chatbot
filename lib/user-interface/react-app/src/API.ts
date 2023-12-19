@@ -2,6 +2,13 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
+export type Channel = {
+  __typename: "Channel",
+  data?: string | null,
+  sessionId?: string | null,
+  userId?: string | null,
+};
+
 export type CreateWorkspaceKendraInput = {
   name: string,
   kind: string,
@@ -115,13 +122,6 @@ export type DeleteSessionResult = {
   __typename: "DeleteSessionResult",
   id?: string | null,
   deleted: boolean,
-};
-
-export type Channel = {
-  __typename: "Channel",
-  data?: string | null,
-  sessionId?: string | null,
-  userId?: string | null,
 };
 
 export type FileUploadInput = {
@@ -304,6 +304,30 @@ export type RankPassagesInput = {
 export type PassageRank = {
   __typename: "PassageRank",
   score: number,
+  passage: string,
+};
+
+export type SendQueryMutationVariables = {
+  data?: string | null,
+};
+
+export type SendQueryMutation = {
+  sendQuery?: string | null,
+};
+
+export type PublishResponseMutationVariables = {
+  sessionId?: string | null,
+  userId?: string | null,
+  data?: string | null,
+};
+
+export type PublishResponseMutation = {
+  publishResponse?:  {
+    __typename: "Channel",
+    data?: string | null,
+    sessionId?: string | null,
+    userId?: string | null,
+  } | null,
 };
 
 export type CreateKendraWorkspaceMutationVariables = {
@@ -534,27 +558,11 @@ export type DeleteSessionMutation = {
   } | null,
 };
 
-export type SendQueryMutationVariables = {
-  data?: string | null,
+export type NoneQueryVariables = {
 };
 
-export type SendQueryMutation = {
-  sendQuery?: string | null,
-};
-
-export type PublishResponseMutationVariables = {
-  sessionId?: string | null,
-  userId?: string | null,
-  data?: string | null,
-};
-
-export type PublishResponseMutation = {
-  publishResponse?:  {
-    __typename: "Channel",
-    data?: string | null,
-    sessionId?: string | null,
-    userId?: string | null,
-  } | null,
+export type NoneQuery = {
+  none?: string | null,
 };
 
 export type CheckHealthQueryVariables = {
@@ -951,14 +959,8 @@ export type RankPassagesQuery = {
   rankPassages:  Array< {
     __typename: "PassageRank",
     score: number,
+    passage: string,
   } >,
-};
-
-export type NoneQueryVariables = {
-};
-
-export type NoneQuery = {
-  none?: string | null,
 };
 
 export type ReceiveMessagesSubscriptionVariables = {

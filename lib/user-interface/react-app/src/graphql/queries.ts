@@ -8,6 +8,10 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
+export const none = /* GraphQL */ `query None {
+  none
+}
+` as GeneratedQuery<APITypes.NoneQueryVariables, APITypes.NoneQuery>;
 export const checkHealth = /* GraphQL */ `query CheckHealth {
   checkHealth
 }
@@ -388,6 +392,7 @@ export const listCrossEncoders = /* GraphQL */ `query ListCrossEncoders {
 export const rankPassages = /* GraphQL */ `query RankPassages($input: RankPassagesInput!) {
   rankPassages(input: $input) {
     score
+    passage
     __typename
   }
 }
@@ -395,7 +400,3 @@ export const rankPassages = /* GraphQL */ `query RankPassages($input: RankPassag
   APITypes.RankPassagesQueryVariables,
   APITypes.RankPassagesQuery
 >;
-export const none = /* GraphQL */ `query None {
-  none
-}
-` as GeneratedQuery<APITypes.NoneQueryVariables, APITypes.NoneQuery>;

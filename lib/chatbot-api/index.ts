@@ -141,6 +141,11 @@ export class ChatBotApi extends Construct {
       value: webSocketApi.api.graphQLApi.apiId || "",
     });
 
+    // Prints out the AppSync GraphQL API key to the terminal
+    new cdk.CfnOutput(this, "Graphql-merged-apiId", {
+      value: mergedApi.apiId || "",
+    });
+
     this.messagesTopic = webSocketApi.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
