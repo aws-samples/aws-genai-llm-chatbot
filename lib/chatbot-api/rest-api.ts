@@ -288,8 +288,8 @@ export class RestApi extends Construct {
 
     const appSyncApi = new appsync.GraphqlApi(this, "graphql-api", {
       name: "chatbot-graphql-api",
-      schema: appsync.SchemaFile.fromAsset(
-        "lib/chatbot-api/schema/schema.graphql"
+      definition: appsync.Definition.fromFile(
+        path.join(__dirname, "schema/schema.graphql")
       ),
       authorizationConfig: {
         additionalAuthorizationModes: [

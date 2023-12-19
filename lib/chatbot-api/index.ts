@@ -84,10 +84,6 @@ export class ChatBotApi extends Construct {
         sourceApiOptions: {
           sourceApis: [
             {
-              sourceApi: restApi.graphqlApi,
-              description: "Management API",
-            },
-            {
               sourceApi: webSocketApi.api.graphQLApi,
               description: "Realtime API",
             },
@@ -116,6 +112,13 @@ export class ChatBotApi extends Construct {
       xrayEnabled: true,
     });
 
+    new appsync.SourceApiAssociation(this, "RestApiAssociation", {
+      mergedApi: mergedApi,
+      mergedApiExecutionRole: executionRole,
+      sourceApi: restApi.graphqlApi,
+      mergeType: appsync.MergeType.AUTO_MERGE,
+    });
+
     webSocketApi.api.outgoingMessageHandler.addEnvironment(
       "GRAPHQL_ENDPOINT",
       mergedApi.graphqlUrl
@@ -129,13 +132,13 @@ export class ChatBotApi extends Construct {
     });
 
     // Prints out the AppSync GraphQL API key to the terminal
-    new cdk.CfnOutput(this, "GraphqlAPIKey", {
-      value: mergedApi.apiKey || "",
+    new cdk.CfnOutput(this, "Graphql-schema-apiId", {
+      value: restApi.graphqlApi.apiId || "",
     });
 
     // Prints out the AppSync GraphQL API key to the terminal
-    new cdk.CfnOutput(this, "GraphqlAPIId", {
-      value: mergedApi.apiId || "",
+    new cdk.CfnOutput(this, "Graphql-schema-ws-apiId", {
+      value: webSocketApi.api.graphQLApi.apiId || "",
     });
 
     this.messagesTopic = webSocketApi.messagesTopic;

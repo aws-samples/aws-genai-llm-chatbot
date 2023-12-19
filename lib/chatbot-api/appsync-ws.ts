@@ -18,8 +18,6 @@ interface ChatGraphqlApiProps {
 }
 
 export class ChatGraphqlApi extends Construct {
-  public readonly apiKey: string | undefined;
-  public readonly graphQLUrl: string | undefined;
   public readonly graphQLApi: appsync.GraphqlApi;
   public readonly outgoingMessageHandler: Function;
 
@@ -37,8 +35,8 @@ export class ChatGraphqlApi extends Construct {
     // makes a GraphQL API
     const api = new appsync.GraphqlApi(this, "ws-api", {
       name: "chatbot-ws-api",
-      schema: appsync.SchemaFile.fromAsset(
-        "lib/chatbot-api/schema/schema-ws.graphql"
+      definition: appsync.Definition.fromFile(
+        path.join(__dirname, "schema/schema-ws.graphql")
       ),
       authorizationConfig: {
         additionalAuthorizationModes: [
@@ -103,8 +101,6 @@ export class ChatGraphqlApi extends Construct {
       dataSource: functionDataSource,
     });
 
-    //api.grantMutation(outgoingMessageHandler);
-
     api.createResolver("publish-response-resolver", {
       typeName: "Mutation",
       fieldName: "publishResponse",
@@ -125,8 +121,6 @@ export class ChatGraphqlApi extends Construct {
       dataSource: noneDataSource,
     });
 
-    this.apiKey = api.apiKey;
-    this.graphQLUrl = api.graphqlUrl;
     this.graphQLApi = api;
     this.outgoingMessageHandler = outgoingMessageHandler;
   }
