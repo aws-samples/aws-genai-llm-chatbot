@@ -10,18 +10,18 @@ import { UserPool } from "aws-cdk-lib/aws-cognito";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as path from "path";
 
-interface ChatGraphqlApiProps {
+interface RealtimeResolversProps {
   readonly queue: IQueue;
   readonly topic: ITopic;
   readonly userPool: UserPool;
   readonly shared: Shared;
+  readonly api: appsync.GraphqlApi;
 }
 
-export class ChatGraphqlApi extends Construct {
-  public readonly graphQLApi: appsync.GraphqlApi;
+export class RealtimeResolvers extends Construct {
   public readonly outgoingMessageHandler: Function;
 
-  constructor(scope: Construct, id: string, props: ChatGraphqlApiProps) {
+  constructor(scope: Construct, id: string, props: RealtimeResolversProps) {
     super(scope, id);
 
     const powertoolsLayerJS = LayerVersion.fromLayerVersionArn(
@@ -31,28 +31,6 @@ export class ChatGraphqlApi extends Construct {
         cdk.Stack.of(this).region
       }:094274105915:layer:AWSLambdaPowertoolsTypeScript:22`
     );
-
-    // makes a GraphQL API
-    const api = new appsync.GraphqlApi(this, "ws-api", {
-      name: "chatbot-ws-api",
-      definition: appsync.Definition.fromFile(
-        path.join(__dirname, "schema/schema-ws.graphql")
-      ),
-      authorizationConfig: {
-        additionalAuthorizationModes: [
-          {
-            authorizationType: appsync.AuthorizationType.IAM,
-          },
-          {
-            authorizationType: appsync.AuthorizationType.USER_POOL,
-            userPoolConfig: {
-              userPool: props.userPool,
-            },
-          },
-        ],
-      },
-      xrayEnabled: true,
-    });
 
     const resolverFunction = new Function(this, "lambda-resolver", {
       code: Code.fromAsset(
@@ -78,7 +56,7 @@ export class ChatGraphqlApi extends Construct {
         handler: "index.handler",
         runtime: Runtime.NODEJS_18_X,
         environment: {
-          GRAPHQL_ENDPOINT: api.graphqlUrl,
+          GRAPHQL_ENDPOINT: props.api.graphqlUrl,
         },
       }
     );
@@ -87,21 +65,21 @@ export class ChatGraphqlApi extends Construct {
 
     props.topic.grantPublish(resolverFunction);
 
-    const functionDataSource = api.addLambdaDataSource(
-      "resolver-function-source",
+    const functionDataSource = props.api.addLambdaDataSource(
+      "realtimeResolverFunction",
       resolverFunction
     );
-    const noneDataSource = api.addNoneDataSource("none", {
+    const noneDataSource = props.api.addNoneDataSource("none", {
       name: "relay-source",
     });
 
-    api.createResolver("send-message-resolver", {
+    props.api.createResolver("send-message-resolver", {
       typeName: "Mutation",
       fieldName: "sendQuery",
       dataSource: functionDataSource,
     });
 
-    api.createResolver("publish-response-resolver", {
+    props.api.createResolver("publish-response-resolver", {
       typeName: "Mutation",
       fieldName: "publishResponse",
       code: appsync.Code.fromAsset(
@@ -111,7 +89,7 @@ export class ChatGraphqlApi extends Construct {
       dataSource: noneDataSource,
     });
 
-    api.createResolver("subscription-resolver", {
+    props.api.createResolver("subscription-resolver", {
       typeName: "Subscription",
       fieldName: "receiveMessages",
       code: appsync.Code.fromAsset(
@@ -121,7 +99,6 @@ export class ChatGraphqlApi extends Construct {
       dataSource: noneDataSource,
     });
 
-    this.graphQLApi = api;
     this.outgoingMessageHandler = outgoingMessageHandler;
   }
 }

@@ -1,13 +1,4 @@
-input CalculateEmbeddingsInput {
-  provider: String!
-  model: String!
-  passages: [String]!
-}
-
-type CrawlerProperties @aws_cognito_user_pools {
-  followLinks: Boolean
-  limit: Int
-}
+# Workspaces
 
 input CreateWorkspaceAuroraInput {
   name: String!
@@ -44,6 +35,17 @@ input CreateWorkspaceOpenSearchInput {
   chunkingStrategy: String!
   chunkSize: Int!
   chunkOverlap: Int!
+}
+
+input CalculateEmbeddingsInput {
+  provider: String!
+  model: String!
+  passages: [String]!
+}
+
+type CrawlerProperties @aws_cognito_user_pools {
+  followLinks: Boolean
+  limit: Int
 }
 
 type CrossEncoderData @aws_cognito_user_pools {
@@ -277,6 +279,12 @@ type Workspace @aws_cognito_user_pools {
   updatedAt: AWSDateTime!
 }
 
+type Channel @aws_iam @aws_cognito_user_pools {
+  data: String
+  sessionId: String
+  userId: String
+}
+
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
     @aws_cognito_user_pools
@@ -298,6 +306,10 @@ type Mutation {
   updateRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
   deleteUserSessions: [DeleteSessionResult!] @aws_cognito_user_pools
   deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
+  # Real-time
+  sendQuery(data: String): String @aws_cognito_user_pools
+  publishResponse(sessionId: String, userId: String, data: String): Channel
+    @aws_iam
 }
 
 type Query {
@@ -326,7 +338,14 @@ type Query {
     @aws_cognito_user_pools
 }
 
+type Subscription {
+  receiveMessages(sessionId: String): Channel
+    @aws_subscribe(mutations: ["publishResponse"])
+    @aws_cognito_user_pools
+}
+
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }
