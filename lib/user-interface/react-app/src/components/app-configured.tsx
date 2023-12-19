@@ -7,7 +7,7 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import App from "../app";
-import { Amplify } from "aws-amplify";
+import { Amplify, Auth } from "aws-amplify";
 import { AppConfig } from "../common/types";
 import { AppContext } from "../common/app-context";
 import { Alert, StatusIndicator } from "@cloudscape-design/components";
@@ -29,30 +29,30 @@ export default function AppConfigured() {
         const awsExports = await result.json();
         const currentConfig = Amplify.configure(awsExports) as AppConfig | null;
 
-        // if (currentConfig?.config.auth_federated_provider?.auto_redirect) {
-        //   let authenticated = false;
-        //   try {
-        //     const user = await Auth.currentAuthenticatedUser();
-        //     if (user) {
-        //       authenticated = true;
-        //     }
-        //   } catch (e) {
-        //     authenticated = false;
-        //   }
+        if (currentConfig?.config.auth_federated_provider?.auto_redirect) {
+          let authenticated = false;
+          try {
+            const user = await Auth.currentAuthenticatedUser();
+            if (user) {
+              authenticated = true;
+            }
+          } catch (e) {
+            authenticated = false;
+          }
 
-        //   if (!authenticated) {
-        //     const federatedProvider =
-        //       currentConfig.config.auth_federated_provider;
+          if (!authenticated) {
+            const federatedProvider =
+              currentConfig.config.auth_federated_provider;
 
-        //     if (!federatedProvider.custom) {
-        //       Auth.federatedSignIn({ provider: federatedProvider.name });
-        //     } else {
-        //       Auth.federatedSignIn({ customProvider: federatedProvider.name });
-        //     }
+            if (!federatedProvider.custom) {
+              Auth.federatedSignIn({ provider: federatedProvider.name });
+            } else {
+              Auth.federatedSignIn({ customProvider: federatedProvider.name });
+            }
 
-        //     return;
-        //   }
-        // }
+            return;
+          }
+        }
 
         setConfig(currentConfig);
       } catch (e) {
