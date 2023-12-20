@@ -1,65 +1,52 @@
-import { ApiResult, SessionItem } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import { listSessions, getSession } from "../../graphql/queries";
+import { deleteSession, deleteUserSessions } from "../../graphql/mutations";
+import {
+  ListSessionsQuery,
+  GetSessionQuery,
+  DeleteSessionMutation,
+  DeleteUserSessionsMutation,
+} from "../../API";
 
-export class SessionsClient extends ApiClientBase {
-  async getSessions(): Promise<ApiResult<SessionItem[]>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/sessions"), {
-        headers,
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+export class SessionsClient {
+  async getSessions(): Promise<GraphQLResult<GraphQLQuery<ListSessionsQuery>>> {
+    const result = await API.graphql<GraphQLQuery<ListSessionsQuery>>({
+      query: listSessions,
+    });
+    return result;
   }
 
-  async getSession(sessionId: string): Promise<ApiResult<SessionItem | null>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl(`/sessions/${sessionId}`), {
-        headers,
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  async getSession(
+    sessionId: string
+  ): Promise<GraphQLResult<GraphQLQuery<GetSessionQuery>>> {
+    const result = await API.graphql<GraphQLQuery<GetSessionQuery>>({
+      query: getSession,
+      variables: {
+        id: sessionId,
+      },
+    });
+    return result;
   }
 
   async deleteSession(
     sessionId: string
-  ): Promise<ApiResult<{ deleted: boolean }>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl(`/sessions/${sessionId}`), {
-        method: "DELETE",
-        headers,
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<DeleteSessionMutation>>> {
+    const result = await API.graphql<GraphQLQuery<DeleteSessionMutation>>({
+      query: deleteSession,
+      variables: {
+        id: sessionId,
+      },
+    });
+    return result;
   }
 
   async deleteSessions(): Promise<
-    ApiResult<{
-      id: string;
-      deleted: boolean;
-    }>
+    GraphQLResult<GraphQLQuery<DeleteUserSessionsMutation>>
   > {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/sessions"), {
-        method: "DELETE",
-        headers,
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+    const result = await API.graphql<GraphQLQuery<DeleteUserSessionsMutation>>({
+      query: deleteUserSessions,
+    });
+    return result;
   }
 }

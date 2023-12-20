@@ -5,20 +5,23 @@ import {
   Table,
   TableProps,
 } from "@cloudscape-design/components";
-import { useState } from "react";
-import { WorkspaceItem } from "../../../common/types";
+import { useState, useContext } from "react";
+import { UserRole } from "../../../common/types";
+import { UserContext } from "../../../common/user-context";
 import { TextHelper } from "../../../common/helpers/text-helper";
 import { WorkspacesColumnDefinitions } from "./column-definitions";
 import RouterLink from "../../../components/wrappers/router-link";
 import RouterButton from "../../../components/wrappers/router-button";
+import { Workspace } from "../../../API";
 
 export interface WorkspacesTableProps {
   loading: boolean;
-  workspaces: WorkspaceItem[];
+  workspaces: Workspace[];
 }
 
 export default function WorkspacesTable(props: WorkspacesTableProps) {
-  const [selectedItems, setSelectedItems] = useState<WorkspaceItem[]>([]);
+  const userContext = useContext(UserContext);
+  const [selectedItems, setSelectedItems] = useState<Workspace[]>([]);
   const isOnlyOneSelected = selectedItems.length === 1;
 
   return (
@@ -36,9 +39,13 @@ export default function WorkspacesTable(props: WorkspacesTableProps) {
                 Workspace is a collection of documents
               </Box>
             </div>
-            <RouterButton href="/rag/workspaces/create">
-              Create Workspace
-            </RouterButton>
+            {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+              userContext.userRole
+            ) ? (
+              <RouterButton href="/rag/workspaces/create">
+                Create Workspace
+              </RouterButton>
+            ) : null}
           </SpaceBetween>
         </Box>
       }
@@ -46,7 +53,7 @@ export default function WorkspacesTable(props: WorkspacesTableProps) {
       items={props.workspaces.slice(0, 5)}
       selectedItems={selectedItems}
       onSelectionChange={(event: {
-        detail: TableProps.SelectionChangeDetail<WorkspaceItem>;
+        detail: TableProps.SelectionChangeDetail<Workspace>;
       }) => setSelectedItems(event.detail.selectedItems)}
       header={
         <Header
@@ -65,9 +72,13 @@ export default function WorkspacesTable(props: WorkspacesTableProps) {
               >
                 View
               </RouterButton>
-              <RouterButton href="/rag/workspaces/create">
-                Create Workspace
-              </RouterButton>
+              {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+                userContext.userRole
+              ) ? (
+                <RouterButton href="/rag/workspaces/create">
+                  Create Workspace
+                </RouterButton>
+              ) : null}
             </SpaceBetween>
           }
         >

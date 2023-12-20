@@ -4,19 +4,22 @@ import {
   HeaderProps,
   SpaceBetween,
 } from "@cloudscape-design/components";
+import { UserRole } from '../../../common/types'
 import RouterButton from "../../../components/wrappers/router-button";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import WorkspaceDeleteModal from "../../../components/rag/workspace-delete-modal";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
+import { Workspace } from "../../../API";
+import { Utils } from "../../../common/utils";
+import { UserContext } from "../../../common/user-context";
 
 interface WorkspacesPageHeaderProps extends HeaderProps {
   title?: string;
   createButtonText?: string;
   getWorkspaces: () => Promise<void>;
-  selectedWorkspaces: readonly WorkspaceItem[];
+  selectedWorkspaces: readonly Workspace[];
 }
 
 export function WorkspacesPageHeader({
@@ -25,6 +28,7 @@ export function WorkspacesPageHeader({
 }: WorkspacesPageHeaderProps) {
   const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const isOnlyOneSelected = props.selectedWorkspaces.length === 1;
   const canDeleteWorkspace =
@@ -33,7 +37,11 @@ export function WorkspacesPageHeader({
       props.selectedWorkspaces[0].status == "error");
 
   const onRefreshClick = async () => {
-    await props.getWorkspaces();
+    try {
+      await props.getWorkspaces();
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
+    }
   };
 
   const onViewDetailsClick = () => {
@@ -46,20 +54,22 @@ export function WorkspacesPageHeader({
     setShowDeleteModal(true);
   };
 
-  const onDeleteWorksapce = async () => {
+  const onDeleteWorkspace = async () => {
     if (!appContext) return;
     if (!isOnlyOneSelected) return;
 
     setShowDeleteModal(false);
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.deleteWorkspace(
-      props.selectedWorkspaces[0].id
-    );
+    try {
+      await apiClient.workspaces.deleteWorkspace(
+        props.selectedWorkspaces[0].id
+      );
 
-    if (ResultValue.ok(result)) {
       setTimeout(async () => {
         await props.getWorkspaces();
-      }, 2500);
+      }, 1500);
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
     }
   };
 
@@ -68,7 +78,7 @@ export function WorkspacesPageHeader({
       <WorkspaceDeleteModal
         visible={showDeleteModal && canDeleteWorkspace}
         onDiscard={() => setShowDeleteModal(false)}
-        onDelete={onDeleteWorksapce}
+        onDelete={onDeleteWorkspace}
         workspace={props.selectedWorkspaces[0]}
       />
       <Header
@@ -83,20 +93,28 @@ export function WorkspacesPageHeader({
             >
               View
             </RouterButton>
-            <RouterButton
-              data-testid="header-btn-view-details"
-              disabled={!canDeleteWorkspace}
-              onClick={onDeleteClick}
-            >
-              Delete
-            </RouterButton>
-            <RouterButton
-              data-testid="header-btn-create"
-              variant="primary"
-              href="/rag/workspaces/create"
-            >
-              Create Workspace
-            </RouterButton>
+            {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+              userContext.userRole
+            ) ? (
+              <RouterButton
+                data-testid="header-btn-view-details"
+                disabled={!canDeleteWorkspace}
+                onClick={onDeleteClick}
+              >
+                Delete
+              </RouterButton>
+            ) : null}
+            {![UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+              userContext.userRole
+            ) ?? (
+              <RouterButton
+                data-testid="header-btn-create"
+                variant="primary"
+                href="/rag/workspaces/create"
+              >
+                Create Workspace
+              </RouterButton>
+            )}
           </SpaceBetween>
         }
         {...props}

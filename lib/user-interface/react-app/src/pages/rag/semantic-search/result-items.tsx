@@ -5,15 +5,12 @@ import {
   Header,
   SpaceBetween,
 } from "@cloudscape-design/components";
-import {
-  SemanticSearchResult,
-  SemanticSearchResultItem,
-} from "../../../common/types";
 import { Labels } from "../../../common/constants";
 import React from "react";
+import { SemanticSearchItem, SemanticSearchResult } from "../../../API";
 
 export interface ResultItemsProps {
-  items: SemanticSearchResultItem[];
+  items: SemanticSearchItem[];
   result: SemanticSearchResult;
 }
 
@@ -51,7 +48,7 @@ export default function ResultItems(props: ResultItemsProps) {
 }
 
 function ItemDetails(props: {
-  item: SemanticSearchResultItem;
+  item: SemanticSearchItem;
   result: SemanticSearchResult;
 }) {
   const { item, result } = props;
@@ -69,7 +66,9 @@ function ItemDetails(props: {
           <div>
             <Box variant="awsui-key-label">Sources</Box>
             <div>
-              {item.sources.map((c) => Labels.sourceTypeMap[c]).join(", ")}
+              {item
+                .sources!.map((c: any) => Labels.sourceTypeMap[c])
+                .join(", ")}
             </div>
           </div>
           <div>
@@ -101,7 +100,7 @@ function ItemDetails(props: {
         <div>
           <Box variant="awsui-key-label">Sources</Box>
           <div>
-            {item.sources.map((c) => Labels.sourceTypeMap[c]).join(", ")}
+            {item.sources!.map((c: any) => Labels.sourceTypeMap[c]).join(", ")}
           </div>
         </div>
         <div>

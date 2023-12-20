@@ -1,6 +1,4 @@
 import { SelectProps } from "@cloudscape-design/components";
-import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth";
-import { ChatBotHistoryItem } from "../components/chatbot/types";
 
 export interface AppConfig {
   aws_project_region: string;
@@ -13,7 +11,6 @@ export interface AppConfig {
       | {
           auto_redirect: boolean;
           custom: false;
-          name: CognitoHostedUIIdentityProvider;
         };
     rag_enabled: boolean;
     cross_encoders_enabled: boolean;
@@ -36,27 +33,6 @@ export interface NavigationPanelState {
   collapsedSections?: Record<number, boolean>;
 }
 
-export type ApiResult<T> = ApiErrorResult | ApiOKResult<T>;
-export abstract class ResultValue {
-  static ok<T>(apiResult: ApiResult<T>): apiResult is ApiOKResult<T> {
-    return (apiResult as ApiOKResult<T>).ok === true;
-  }
-
-  static error<T>(apiResult: ApiResult<T>): apiResult is ApiErrorResult {
-    return (apiResult as ApiErrorResult).error === true;
-  }
-}
-
-export interface ApiOKResult<T> {
-  ok: true;
-  data: T;
-}
-
-export interface ApiErrorResult {
-  error: true;
-  message?: string | string[];
-}
-
 export type LoadingStatus = "pending" | "loading" | "finished" | "error";
 export type ModelProvider = "sagemaker" | "bedrock" | "openai";
 export type RagDocumentType =
@@ -69,89 +45,6 @@ export type RagDocumentType =
 export type Modality = "TEXT" | "IMAGE";
 export type ModelInterface = "langchain" | "idefics";
 
-export interface WorkspaceItem {
-  id: string;
-  name: string;
-  engine: string;
-  status: string;
-  languages: string[];
-  embeddingsModelProvider: string;
-  embeddingsModelName: string;
-  embeddingsModelDimensions: number;
-  crossEncoderModelProvider: string;
-  crossEncoderModelName: string;
-  metric: string;
-  index: boolean;
-  hybridSearch: boolean;
-  chunkingStrategy: string;
-  chunkSize: number;
-  chunkOverlap: number;
-  vectors: number;
-  documents: number;
-  kendraIndexId?: string;
-  kendraIndexExternal?: boolean;
-  kendraUseAllData?: boolean;
-  sizeInBytes: number;
-  createdAt: string;
-}
-
-export interface EngineItem {
-  id: string;
-  name: string;
-  enabled: boolean;
-}
-
-export interface EmbeddingsModelItem {
-  provider: ModelProvider;
-  name: string;
-  dimensions: number;
-  default?: boolean;
-}
-
-export interface CrossEncoderModelItem {
-  provider: ModelProvider;
-  name: string;
-  default?: boolean;
-}
-
-export interface ModelItem {
-  provider: ModelProvider;
-  name: string;
-  streaming: boolean;
-  inputModalities: Modality[];
-  outputModalities: Modality[];
-  interface: ModelInterface;
-  ragSupported: boolean;
-}
-
-export interface SessionItem {
-  id: string;
-  title: string;
-  startTime: string;
-  history?: ChatBotHistoryItem[];
-}
-
-export interface DocumentItem {
-  id: string;
-  workspaceId?: string;
-  type: RagDocumentType;
-  subType?: string;
-  status: string;
-  title?: string;
-  path: string;
-  sizeInBytes: number;
-  vectors: number;
-  subDocuments: number;
-  createdAt: string;
-  updatedAt: string;
-  rssFeedId?: string;
-  rssLastCheckedAt?: string;
-  crawlerProperties?: {
-    followLinks: boolean;
-    limit: number;
-  };
-}
-
 export interface DocumentSubscriptionToggleResult {
   id: string;
   workspaceId: string;
@@ -163,53 +56,6 @@ export enum DocumentSubscriptionStatus {
   DISABLED = "disabled",
   UNKNOWN = "unknown",
   DEFAULT = UNKNOWN,
-}
-export interface DocumentResult {
-  items: DocumentItem[];
-  lastDocumentId?: string;
-}
-
-export interface AddDocumentResult {
-  workspaceId: string;
-  documentId: string;
-}
-
-export interface FileUploadItem {
-  url: string;
-  fields: Record<string, string>;
-}
-
-export interface SemanticSearchResultItem {
-  sources: string[];
-  chunkId: string;
-  workspaceId: string;
-  documentId: string;
-  documentSubId: string;
-  documentType: string;
-  documentSubType: string;
-  path: string;
-  language: string;
-  title: string;
-  content: string;
-  contentComplement: string;
-  vectorSearchScore?: number;
-  keywordSearchScore?: number;
-  score?: number;
-}
-
-export interface SemanticSearchResult {
-  engine: string;
-  workspaceId: string;
-  queryLanguage?: string;
-  supportedLanguages?: string[];
-  detectedLanguages?: {
-    code: string;
-    score: number;
-  }[];
-  vectorSearchMetric: string;
-  items: SemanticSearchResultItem[];
-  vectorSearchItems: SemanticSearchResultItem[];
-  keywordSearchItems: SemanticSearchResultItem[];
 }
 
 export interface AuroraWorkspaceCreateInput {
@@ -240,8 +86,54 @@ export interface KendraWorkspaceCreateInput {
   useAllData: boolean;
 }
 
-export interface KendraIndexItem {
-  id: string;
+export interface UserConfig {
+  userRole: UserRole;
+}
+
+export enum UserRole {
+  ADMIN = "admin",
+  WORKSPACES_MANAGER = "workspaces_manager",
+  WORKSPACES_USER = "workspaces_user",
+  CHATBOT_USER = "chatbot_user",
+  UNDEFINED = "undefined",
+}
+
+export type UserStatus =
+  | "UNCONFIRMED"
+  | "CONFIRMED"
+  | "ARCHIVED"
+  | "COMPROMISED"
+  | "UNKNOWN"
+  | "RESET_REQUIRED"
+  | "FORCE_CHANGE_PASSWORD";
+
+export interface UserData {
   name: string;
-  external: boolean;
+  email: string;
+  phoneNumber?: string;
+  role: UserRole;
+  userStatus?: UserStatus;
+  enabled?: boolean;
+  previousEmail?: string;
+}
+
+export interface UserDataApiRequest {
+  email: string;
+  phoneNumber?: string;
+  role: string;
+  name?: string;
+}
+
+export interface UsersResult {
+  users: UserData[];
+}
+
+export enum AdminUsersManagementAction {
+  CREATE,
+  EDIT,
+  DELETE,
+  DISABLE,
+  ENABLE,
+  RESET_PASSWORD,
+  NO_ACTION,
 }

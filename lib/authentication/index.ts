@@ -18,6 +18,14 @@ export class Authentication extends Construct {
       signInAliases: {
         email: true,
       },
+      standardAttributes: {
+        email: { required: true },
+        phoneNumber: { required: false },
+        fullname: { required: true },
+      },
+      customAttributes: {
+        userRole: new cognito.StringAttribute({ mutable: true }),
+      }
     });
 
     const userPoolClient = userPool.addClient("UserPoolClient", {
@@ -50,6 +58,10 @@ export class Authentication extends Construct {
 
     new cdk.CfnOutput(this, "UserPoolId", {
       value: userPool.userPoolId,
+    });
+
+    new cdk.CfnOutput(this, "IdentityPoolId", {
+      value: identityPool.identityPoolId,
     });
 
     new cdk.CfnOutput(this, "UserPoolWebClientId", {

@@ -1,55 +1,46 @@
-import { ApiResult, KendraIndexItem } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import { listKendraIndexes, isKendraDataSynching } from "../../graphql/queries";
+import { startKendraDataSync } from "../../graphql/mutations";
+import {
+  ListKendraIndexesQuery,
+  IsKendraDataSynchingQuery,
+  StartKendraDataSyncMutation,
+} from "../../API";
 
-export class KendraClient extends ApiClientBase {
-  async getKendraIndexes(): Promise<ApiResult<KendraIndexItem[]>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl("/rag/engines/kendra/indexes"),
-        {
-          headers,
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+export class KendraClient {
+  async getKendraIndexes(): Promise<
+    GraphQLResult<GraphQLQuery<ListKendraIndexesQuery>>
+  > {
+    const result = await API.graphql<GraphQLQuery<ListKendraIndexesQuery>>({
+      query: listKendraIndexes,
+    });
+    return result;
   }
 
-  async startKendraDataSync(workspaceId: string): Promise<ApiResult<void>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl("/rag/engines/kendra/data-sync"),
-        {
-          headers,
-          method: "POST",
-          body: JSON.stringify({ workspaceId }),
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  async startKendraDataSync(
+    workspaceId: string
+  ): Promise<GraphQLResult<GraphQLQuery<StartKendraDataSyncMutation>>> {
+    const result = await API.graphql<GraphQLQuery<StartKendraDataSyncMutation>>(
+      {
+        query: startKendraDataSync,
+        variables: {
+          workspaceId,
+        },
+      }
+    );
+    return result;
   }
 
-  async kendraIsSyncing(workspaceId: string): Promise<ApiResult<boolean>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl(`/rag/engines/kendra/data-sync/${workspaceId}`),
-        {
-          headers,
-          method: "GET",
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  async kendraIsSyncing(
+    workspaceId: string
+  ): Promise<GraphQLResult<GraphQLQuery<IsKendraDataSynchingQuery>>> {
+    const result = await API.graphql<GraphQLQuery<IsKendraDataSynchingQuery>>({
+      query: isKendraDataSynching,
+      variables: {
+        workspaceId,
+      },
+    });
+    return result;
   }
 }

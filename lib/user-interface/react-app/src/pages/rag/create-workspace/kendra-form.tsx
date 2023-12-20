@@ -1,9 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import {
-  KendraIndexItem,
   KendraWorkspaceCreateInput,
   LoadingStatus,
-  ResultValue,
 } from "../../../common/types";
 import {
   Container,
@@ -17,6 +15,7 @@ import {
 } from "@cloudscape-design/components";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
+import { KendraIndex } from "../../../API";
 
 export interface KendraFormProps {
   data: KendraWorkspaceCreateInput;
@@ -29,36 +28,44 @@ export default function KendraForm(props: KendraFormProps) {
   const appContext = useContext(AppContext);
   const [kendraIndexStatus, setKendraIndexStatus] =
     useState<LoadingStatus>("loading");
-  const [kendraIndexes, setKendraIndexes] = useState<KendraIndexItem[]>([]);
+  const [kendraIndexes, setKendraIndexes] = useState<
+    KendraIndex[] | null | undefined
+  >([]);
 
   useEffect(() => {
     if (!appContext) return;
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.kendra.getKendraIndexes();
+      try {
+        const result = await apiClient.kendra.getKendraIndexes();
 
-      if (ResultValue.ok(result)) {
-        const data = result.data?.sort((a, b) => a.name.localeCompare(b.name));
+        const data = result.data?.listKendraIndexes.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
         setKendraIndexes(data);
         setKendraIndexStatus("finished");
-      } else {
+      } catch (error) {
         setKendraIndexStatus("error");
+        console.error(error);
       }
     })();
   }, [appContext]);
 
-  const kendraIndexOptions: SelectProps.Option[] = kendraIndexes.map((item) => {
-    return {
-      label: item.name,
-      value: item.id,
-      description: item.id,
-    };
-  });
+  const kendraIndexOptions: SelectProps.Option[] = kendraIndexes
+    ? kendraIndexes.map((item) => {
+        return {
+          label: item.name,
+          value: item.id,
+          description: item.id,
+        };
+      })
+    : [];
 
-  const externalSelected =
-    kendraIndexes.find((c) => c.id === props.data.kendraIndex?.value)
-      ?.external === true;
+  const externalSelected = kendraIndexes
+    ? kendraIndexes.find((c) => c.id === props.data.kendraIndex?.value)
+        ?.external === true
+    : false;
 
   return (
     <Container

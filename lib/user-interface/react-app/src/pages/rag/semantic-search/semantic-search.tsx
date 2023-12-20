@@ -19,12 +19,7 @@ import BaseAppLayout from "../../../components/base-app-layout";
 import { useContext, useEffect, useState } from "react";
 import { useForm } from "../../../common/hooks/use-form";
 import { AppContext } from "../../../common/app-context";
-import {
-  LoadingStatus,
-  ResultValue,
-  SemanticSearchResult,
-  WorkspaceItem,
-} from "../../../common/types";
+import { LoadingStatus } from "../../../common/types";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { useSearchParams } from "react-router-dom";
@@ -32,6 +27,7 @@ import { Utils } from "../../../common/utils";
 import SemanticSearchDetails from "./semantic-search-details";
 import ResultItems from "./result-items";
 import { CHATBOT_NAME } from "../../../common/constants";
+import { SemanticSearchResult, Workspace } from "../../../API";
 
 interface SemanticSearchData {
   workspace: SelectProps.Option | null;
@@ -42,15 +38,15 @@ export default function SemanticSearch() {
   const onFollow = useOnFollow();
   const appContext = useContext(AppContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchResult, setSearchResult] = useState<SemanticSearchResult | null>(
-    null
-  );
+  const [searchResult, setSearchResult] = useState<
+    SemanticSearchResult | null | undefined
+  >(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [detailsExpanded, setDetailsExpanded] = useState<boolean>(false);
   const [globalError, setGlobalError] = useState<string | undefined>(undefined);
   const [workspacesLoadingStatus, setWorkspacesLoadingStatus] =
     useState<LoadingStatus>("loading");
-  const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const { data, onChange, errors, validate } = useForm<SemanticSearchData>({
     initialValue: () => {
       return {
@@ -83,15 +79,15 @@ export default function SemanticSearch() {
     setSearchResult(null);
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.semanticSearch.query(
-      data.workspace?.value,
-      data.query
-    );
-
-    if (ResultValue.ok(result)) {
-      setSearchResult(result.data);
-    } else {
-      setGlobalError(Utils.getErrorMessage(result));
+    try {
+      const result = await apiClient.semanticSearch.query(
+        data.workspace?.value,
+        data.query
+      );
+      setSearchResult(result.data?.performSemanticSearch);
+    } catch (error: any) {
+      console.error(error);
+      setGlobalError(error.errors.map((x: any) => x.message).join(","));
     }
 
     setSubmitting(false);
@@ -102,12 +98,12 @@ export default function SemanticSearch() {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.workspaces.getWorkspaces();
+      try {
+        const result = await apiClient.workspaces.getWorkspaces();
 
-      if (ResultValue.ok(result)) {
         const workspaceId = searchParams.get("workspaceId");
         if (workspaceId) {
-          const workspace = result.data.find(
+          const workspace = result.data?.listWorkspaces.find(
             (workspace) => workspace.id === workspaceId
           );
 
@@ -118,11 +114,12 @@ export default function SemanticSearch() {
           }
         }
 
-        setWorkspaces(result.data);
-        setWorkspacesLoadingStatus("finished");
-      } else {
-        setGlobalError(Utils.getErrorMessage(result));
+        setWorkspaces(result.data?.listWorkspaces!);
+      } catch (error: any) {
+        console.error(error);
+        setGlobalError(error.errors?.map((x: any) => x.error).join(","));
       }
+      setWorkspacesLoadingStatus("finished");
     })();
   }, [appContext, onChange, searchParams]);
 
@@ -137,29 +134,31 @@ export default function SemanticSearch() {
     tabs.push({
       label: "Results",
       id: "results",
-      content: <ResultItems items={searchResult.items} result={searchResult} />,
+      content: (
+        <ResultItems items={searchResult!.items!} result={searchResult} />
+      ),
     });
 
-    if (searchResult.vectorSearchItems?.length > 0) {
+    if (searchResult!.vectorSearchItems!.length > 0) {
       tabs.push({
         label: "Vector Search",
         id: "vector-search",
         content: (
           <ResultItems
-            items={searchResult.vectorSearchItems}
+            items={searchResult!.vectorSearchItems!}
             result={searchResult}
           />
         ),
       });
     }
 
-    if (searchResult.keywordSearchItems?.length > 0) {
+    if (searchResult.keywordSearchItems!.length > 0) {
       tabs.push({
         label: "Keyword Search",
         id: "keyword-search",
         content: (
           <ResultItems
-            items={searchResult.keywordSearchItems}
+            items={searchResult!.keywordSearchItems!}
             result={searchResult}
           />
         ),
@@ -264,7 +263,7 @@ export default function SemanticSearch() {
                 </Container>
               </SpaceBetween>
             </Form>
-            {searchResult && (
+            {searchResult && searchResult.items && (
               <>
                 {searchResult.items.length === 0 && (
                   <Container>

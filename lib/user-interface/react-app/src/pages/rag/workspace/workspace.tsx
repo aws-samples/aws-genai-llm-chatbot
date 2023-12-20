@@ -11,8 +11,9 @@ import useOnFollow from "../../../common/hooks/use-on-follow";
 import BaseAppLayout from "../../../components/base-app-layout";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { AppContext } from "../../../common/app-context";
+import { UserContext } from "../../../common/user-context";
+import { UserRole } from '../../../common/types'
 import { ApiClient } from "../../../common/api-client/api-client";
 import { Utils } from "../../../common/utils";
 import RouterButton from "../../../components/wrappers/router-button";
@@ -22,32 +23,48 @@ import DocumentsTab from "./documents-tab";
 import OpenSearchWorkspaceSettings from "./open-search-workspace-settings";
 import KendraWorkspaceSettings from "./kendra-workspace-settings";
 import { CHATBOT_NAME } from "../../../common/constants";
+import { Workspace } from "../../../API";
 
-export default function Workspace() {
+export default function WorkspacePane() {
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
   const onFollow = useOnFollow();
   const { workspaceId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "file");
   const [loading, setLoading] = useState(true);
-  const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
+  const [workspace, setWorkspace] = useState<Workspace | undefined | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   const getWorkspace = useCallback(async () => {
     if (!appContext || !workspaceId) return;
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.getWorkspace(workspaceId);
-
-    if (ResultValue.ok(result)) {
-      if (!result.data) {
+    try {
+      const result = await apiClient.workspaces.getWorkspace(workspaceId);
+      if (!result.data?.getWorkspace) {
         navigate("/rag/workspaces");
         return;
       }
-
-      setWorkspace(result.data);
-      setLoading(false);
+      setWorkspace(result.data!.getWorkspace);
+    } catch (error) {
+      console.error(error);
     }
+    setLoading(false);
   }, [appContext, navigate, workspaceId]);
 
   useEffect(() => {
@@ -96,37 +113,41 @@ export default function Workspace() {
                   >
                     Semantic search
                   </RouterButton>
-                  <RouterButtonDropdown
-                    items={[
-                      {
-                        id: "upload-file",
-                        text: "Upload files",
-                        href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-text",
-                        text: "Add texts",
-                        href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-qna",
-                        text: "Add Q&A",
-                        href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "crawl-website",
-                        text: "Crawl website",
-                        href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-rss-subscription",
-                        text: "Add RSS subscription",
-                        href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
-                      },
-                    ]}
-                  >
-                    Add data
-                  </RouterButtonDropdown>
+                  {![UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+                    userContext.userRole
+                  ) ?? (
+                    <RouterButtonDropdown
+                      items={[
+                        {
+                          id: "upload-file",
+                          text: "Upload files",
+                          href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-text",
+                          text: "Add texts",
+                          href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-qna",
+                          text: "Add Q&A",
+                          href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "crawl-website",
+                          text: "Crawl website",
+                          href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-rss-subscription",
+                          text: "Add RSS subscription",
+                          href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
+                        },
+                      ]}
+                    >
+                      Add data
+                    </RouterButtonDropdown>
+                  )}
                 </SpaceBetween>
               }
             >

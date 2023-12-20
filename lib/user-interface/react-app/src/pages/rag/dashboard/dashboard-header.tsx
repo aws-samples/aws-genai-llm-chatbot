@@ -1,8 +1,12 @@
 import { Header, SpaceBetween } from "@cloudscape-design/components";
 import RouterButton from "../../../components/wrappers/router-button";
 import RouterButtonDropdown from "../../../components/wrappers/router-button-dropdown";
+import { useContext } from "react";
+import { UserContext } from "../../../common/user-context";
+import { UserRole } from "../../../common/types";
 
 export default function DashboardHeader() {
+  const userContext = useContext(UserContext);
   return (
     <Header
       variant="h1"
@@ -11,32 +15,36 @@ export default function DashboardHeader() {
           <RouterButton href="/rag/semantic-search">
             Semantic search
           </RouterButton>
-          <RouterButtonDropdown
-            items={[
-              {
-                id: "upload-file",
-                text: "Upload files",
-                href: "/rag/workspaces/add-data?tab=file",
-              },
-              {
-                id: "add-text",
-                text: "Add texts",
-                href: "/rag/workspaces/add-data?tab=text",
-              },
-              {
-                id: "add-qna",
-                text: "Add Q&A",
-                href: "/rag/workspaces/add-data?tab=qna",
-              },
-              {
-                id: "crawl-website",
-                text: "Crawl website",
-                href: "/rag/workspaces/add-data?tab=website",
-              },
-            ]}
-          >
-            Add data
-          </RouterButtonDropdown>
+          {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+            userContext.userRole
+          ) ? (
+            <RouterButtonDropdown
+              items={[
+                {
+                  id: "upload-file",
+                  text: "Upload files",
+                  href: "/rag/workspaces/add-data?tab=file",
+                },
+                {
+                  id: "add-text",
+                  text: "Add texts",
+                  href: "/rag/workspaces/add-data?tab=text",
+                },
+                {
+                  id: "add-qna",
+                  text: "Add Q&A",
+                  href: "/rag/workspaces/add-data?tab=qna",
+                },
+                {
+                  id: "crawl-website",
+                  text: "Crawl website",
+                  href: "/rag/workspaces/add-data?tab=website",
+                },
+              ]}
+            >
+              Add data
+            </RouterButtonDropdown>
+          ) : null}
         </SpaceBetween>
       }
     >

@@ -18,26 +18,27 @@ import useOnFollow from "../../../common/hooks/use-on-follow";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { useForm } from "../../../common/hooks/use-form";
-import {
-  CrossEncoderModelItem,
-  LoadingStatus,
-  ResultValue,
-} from "../../../common/types";
+import { LoadingStatus, UserRole } from "../../../common/types";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { Utils } from "../../../common/utils";
 import React from "react";
 import { CHATBOT_NAME } from "../../../common/constants";
+import { CrossEncoderData } from "../../../API";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../../common/user-context";
 
 export default function CrossEncoders() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext)
   const [globalError, setGlobalError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [crossEncoderModelsStatus, setCrossEncoderModelsStatus] =
     useState<LoadingStatus>("loading");
   const [crossEncoderModels, setCrossEncoderModels] = useState<
-    CrossEncoderModelItem[]
+    CrossEncoderData[]
   >([]);
   const [ranking, setRanking] = useState<
     | {
@@ -47,6 +48,19 @@ export default function CrossEncoders() {
       }[]
     | null
   >(null);
+
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   const { data, onChange, errors, validate } = useForm({
     initialValue: () => {
@@ -103,12 +117,17 @@ export default function CrossEncoders() {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.crossEncoders.getModels();
+      try {
+        const result = await apiClient.crossEncoders.getModels();
 
-      if (ResultValue.ok(result)) {
-        setCrossEncoderModels(result.data);
+        console.log(result?.data?.listCrossEncoders);
+        if(result.data?.listCrossEncoders){
+          setCrossEncoderModels(result?.data?.listCrossEncoders);
+        }
+        
         setCrossEncoderModelsStatus("finished");
-      } else {
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
         setCrossEncoderModelsStatus("error");
       }
     })();
@@ -159,18 +178,19 @@ export default function CrossEncoders() {
       data.passages.map((p) => p.trim())
     );
 
-    if (ResultValue.ok(result)) {
-      const passages = data.passages
-        .map((passage, index) => ({
+    console.log(result);
+    if (result.errors === undefined) {
+      const passages = result
+        .data!.rankPassages!.map((rank, index) => ({
           index,
-          passage,
-          score: result.data[index],
+          passage: data.passages[index],
+          score: rank!.score!,
         }))
         .sort((a, b) => b.score - a.score);
 
       setRanking(passages);
-    } else if (result.message) {
-      setGlobalError(Utils.getErrorMessage(result));
+    } else {
+      setGlobalError(result.errors.map((x) => x.message).join(","));
     }
 
     setSubmitting(false);
