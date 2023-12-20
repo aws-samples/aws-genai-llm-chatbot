@@ -8,7 +8,6 @@ import {
 import { CreateWorkspaceHeader } from "./create-workspace-header";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { ResultValue } from "../../../common/types";
 import BaseAppLayout from "../../../components/base-app-layout";
 import useOnFollow from "../../../common/hooks/use-on-follow";
 import CreateWorkspaceOpenSearch from "./create-workspace-opensearch";
@@ -16,6 +15,7 @@ import CreateWorkspaceAurora from "./create-workspace-aurora";
 import CreateWorkspaceKendra from "./create-workspace-kendra";
 import SelectEnginePanel from "./select-engine-panel";
 import { CHATBOT_NAME } from "../../../common/constants";
+import { Utils } from "../../../common/utils";
 
 export default function CreateWorkspace() {
   const onFollow = useOnFollow();
@@ -29,16 +29,16 @@ export default function CreateWorkspace() {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.ragEngines.getRagEngines();
+      try {
+        const result = await apiClient.ragEngines.getRagEngines();
 
-      const engineMap = new Map<string, boolean>();
+        const engineMap = new Map<string, boolean>();
 
-      if (ResultValue.ok(result)) {
-        result.data.forEach((engine) => {
+        result.data!.listRagEngines.forEach((engine) => {
           engineMap.set(engine.id, engine.enabled);
         });
 
-        if (result.data.length > 0) {
+        if (result.data!.listRagEngines.length > 0) {
           if (engineMap.get("aurora") === true) {
             setEngine("aurora");
           } else if (engineMap.get("opensearch") === true) {
@@ -49,6 +49,8 @@ export default function CreateWorkspace() {
         }
 
         setEngines(engineMap);
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
       }
 
       setLoading(false);

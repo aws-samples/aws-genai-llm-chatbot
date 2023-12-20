@@ -1,4 +1,3 @@
-import { SemanticSearchResult } from "../../../common/types";
 import {
   ExpandableSection,
   ColumnLayout,
@@ -7,6 +6,7 @@ import {
 } from "@cloudscape-design/components";
 import { Labels } from "../../../common/constants";
 import RouterLink from "../../../components/wrappers/router-link";
+import { SemanticSearchResult } from "../../../API";
 
 export interface SemanticSearchDetailsProps {
   searchResults: SemanticSearchResult | null;

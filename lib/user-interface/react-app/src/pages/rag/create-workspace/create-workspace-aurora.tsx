@@ -1,6 +1,6 @@
 import { SpaceBetween, Button, Form } from "@cloudscape-design/components";
 import { useContext, useState } from "react";
-import { AuroraWorkspaceCreateInput, ResultValue } from "../../../common/types";
+import { AuroraWorkspaceCreateInput } from "../../../common/types";
 import { useForm } from "../../../common/hooks/use-form";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
@@ -133,28 +133,31 @@ export default function CreateWorkspaceAurora() {
     );
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.createAuroraWorkspace({
-      name: data.name.trim(),
-      embeddingsModelProvider: embeddingsModel.provider,
-      embeddingsModelName: embeddingsModel.name,
-      crossEncoderModelProvider: crossEncoderModel.provider,
-      crossEncoderModelName: crossEncoderModel.name,
-      languages: data.languages.map((x) => x.value ?? ""),
-      metric: data.metric,
-      index: data.index,
-      hybridSearch: data.hybridSearch,
-      chunking_strategy: "recursive",
-      chunkSize: data.chunkSize,
-      chunkOverlap: data.chunkOverlap,
-    });
+    try {
+      const result = await apiClient.workspaces.createAuroraWorkspace({
+        name: data.name.trim(),
+        embeddingsModelProvider: embeddingsModel.provider,
+        embeddingsModelName: embeddingsModel.name,
+        crossEncoderModelProvider: crossEncoderModel.provider,
+        crossEncoderModelName: crossEncoderModel.name,
+        languages: data.languages.map((x) => x.value ?? ""),
+        metric: data.metric,
+        index: data.index,
+        hybridSearch: data.hybridSearch,
+        chunkingStrategy: "recursive",
+        chunkSize: data.chunkSize,
+        chunkOverlap: data.chunkOverlap,
+      });
 
-    if (ResultValue.ok(result)) {
-      navigate("/rag/workspaces");
+      navigate(`/rag/workspaces/${result.data?.createAuroraWorkspace.id}`);
       return;
+    } catch (e: any) {
+      setSubmitting(false);
+      console.error(
+        `Invocation error: ${e.errors.map((x: any) => x.message).join("")}`
+      );
+      setGlobalError("Something went wrong");
     }
-
-    setSubmitting(false);
-    setGlobalError("Something went wrong");
   };
 
   if (Utils.isDevelopment()) {

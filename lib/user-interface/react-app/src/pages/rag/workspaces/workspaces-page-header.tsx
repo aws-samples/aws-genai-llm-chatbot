@@ -5,18 +5,19 @@ import {
   SpaceBetween,
 } from "@cloudscape-design/components";
 import RouterButton from "../../../components/wrappers/router-button";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import WorkspaceDeleteModal from "../../../components/rag/workspace-delete-modal";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
+import { Workspace } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 interface WorkspacesPageHeaderProps extends HeaderProps {
   title?: string;
   createButtonText?: string;
   getWorkspaces: () => Promise<void>;
-  selectedWorkspaces: readonly WorkspaceItem[];
+  selectedWorkspaces: readonly Workspace[];
 }
 
 export function WorkspacesPageHeader({
@@ -33,7 +34,11 @@ export function WorkspacesPageHeader({
       props.selectedWorkspaces[0].status == "error");
 
   const onRefreshClick = async () => {
-    await props.getWorkspaces();
+    try {
+      await props.getWorkspaces();
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
+    }
   };
 
   const onViewDetailsClick = () => {
@@ -46,20 +51,22 @@ export function WorkspacesPageHeader({
     setShowDeleteModal(true);
   };
 
-  const onDeleteWorksapce = async () => {
+  const onDeleteWorkspace = async () => {
     if (!appContext) return;
     if (!isOnlyOneSelected) return;
 
     setShowDeleteModal(false);
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.deleteWorkspace(
-      props.selectedWorkspaces[0].id
-    );
+    try {
+      await apiClient.workspaces.deleteWorkspace(
+        props.selectedWorkspaces[0].id
+      );
 
-    if (ResultValue.ok(result)) {
       setTimeout(async () => {
         await props.getWorkspaces();
-      }, 2500);
+      }, 1500);
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
     }
   };
 
@@ -68,7 +75,7 @@ export function WorkspacesPageHeader({
       <WorkspaceDeleteModal
         visible={showDeleteModal && canDeleteWorkspace}
         onDiscard={() => setShowDeleteModal(false)}
-        onDelete={onDeleteWorksapce}
+        onDelete={onDeleteWorkspace}
         workspace={props.selectedWorkspaces[0]}
       />
       <Header

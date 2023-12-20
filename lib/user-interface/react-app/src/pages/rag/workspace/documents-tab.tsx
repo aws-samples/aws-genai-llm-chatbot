@@ -6,16 +6,14 @@ import {
   Pagination,
 } from "@cloudscape-design/components";
 import { useCallback, useContext, useEffect, useState } from "react";
-import {
-  DocumentResult,
-  RagDocumentType,
-  ResultValue,
-} from "../../../common/types";
+import { RagDocumentType } from "../../../common/types";
 import RouterButton from "../../../components/wrappers/router-button";
 import { TableEmptyState } from "../../../components/table-empty-state";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { getColumnDefinition } from "./columns";
+import { Utils } from "../../../common/utils";
+import { DocumentsResult } from "../../../API";
 
 export interface DocumentsTabProps {
   workspaceId?: string;
@@ -26,7 +24,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const appContext = useContext(AppContext);
   const [loading, setLoading] = useState(true);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
-  const [pages, setPages] = useState<DocumentResult[]>([]);
+  const [pages, setPages] = useState<(DocumentsResult | undefined)[]>([]);
 
   const getDocuments = useCallback(
     async (params: { lastDocumentId?: string; pageIndex?: number }) => {
@@ -36,30 +34,33 @@ export default function DocumentsTab(props: DocumentsTabProps) {
       setLoading(true);
 
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.documents.getDocuments(
-        props.workspaceId,
-        props.documentType,
-        params?.lastDocumentId
-      );
+      try {
+        const result = await apiClient.documents.getDocuments(
+          props.workspaceId,
+          props.documentType,
+          params?.lastDocumentId
+        );
 
-      if (ResultValue.ok(result)) {
         setPages((current) => {
           const foundIndex = current.findIndex(
-            (c) => c.lastDocumentId === result.data.lastDocumentId
+            (c) =>
+              c!.lastDocumentId === result.data!.listDocuments.lastDocumentId
           );
 
           if (foundIndex !== -1) {
-            current[foundIndex] = result.data;
+            current[foundIndex] = result.data?.listDocuments;
             return [...current];
           } else if (typeof params.pageIndex !== "undefined") {
-            current[params.pageIndex - 1] = result.data;
+            current[params.pageIndex - 1] = result.data?.listDocuments;
             return [...current];
-          } else if (result.data.items.length === 0) {
+          } else if (result.data?.listDocuments.items.length === 0) {
             return current;
           } else {
-            return [...current, result.data];
+            return [...current, result.data?.listDocuments];
           }
         });
+      } catch (error) {
+        console.error(Utils.getErrorMessage(error));
       }
 
       setLoading(false);
@@ -93,7 +94,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
     if (currentPageIndex <= 1) {
       await getDocuments({ pageIndex: currentPageIndex });
     } else {
-      const lastDocumentId = pages[currentPageIndex - 2]?.lastDocumentId;
+      const lastDocumentId = pages[currentPageIndex - 2]?.lastDocumentId!;
       await getDocuments({ lastDocumentId });
     }
   };
@@ -109,7 +110,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
       loading={loading}
       loadingText={`Loading ${typeStr}s`}
       columnDefinitions={columnDefinitions}
-      items={pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items}
+      items={pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items!}
       header={
         <Header
           actions={

@@ -13,8 +13,8 @@ import { v4 as uuidv4 } from "uuid";
 import { useCollection } from "@cloudscape-design/collection-hooks";
 import { ApiClient } from "../../common/api-client/api-client";
 import { AppContext } from "../../common/app-context";
-import { ResultValue, SessionItem } from "../../common/types";
 import RouterButton from "../wrappers/router-button";
+import { Session } from "../../API";
 
 export interface SessionsProps {
   toolsOpen: boolean;
@@ -22,7 +22,7 @@ export interface SessionsProps {
 
 export default function Sessions(props: SessionsProps) {
   const appContext = useContext(AppContext);
-  const [sessions, setSessions] = useState<SessionItem[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { items, collectionProps, paginationProps } = useCollection(sessions, {
     filtering: {
@@ -50,9 +50,12 @@ export default function Sessions(props: SessionsProps) {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.sessions.getSessions();
-    if (ResultValue.ok(result)) {
-      setSessions(result.data);
+    try {
+      const result = await apiClient.sessions.getSessions();
+      setSessions(result.data!.listSessions);
+    } catch (e) {
+      console.log(e);
+      setSessions([]);
     }
   }, [appContext]);
 
@@ -145,7 +148,7 @@ export default function Sessions(props: SessionsProps) {
               id: "startTime",
               header: "Time",
               sortingField: "startTime",
-              cell: (e: SessionItem) =>
+              cell: (e: Session) =>
                 DateTime.fromISO(
                   new Date(e.startTime).toISOString()
                 ).toLocaleString(DateTime.DATETIME_SHORT),
@@ -180,7 +183,7 @@ export default function Sessions(props: SessionsProps) {
                 </Button>
               ),
             },
-          ] as TableProps.ColumnDefinition<SessionItem>[]
+          ] as TableProps.ColumnDefinition<Session>[]
         }
       />
     </div>

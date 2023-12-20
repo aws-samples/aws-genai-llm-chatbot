@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Utils } from "../../../common/utils";
 import { useForm } from "../../../common/hooks/use-form";
-import { KendraWorkspaceCreateInput, ResultValue } from "../../../common/types";
+import { KendraWorkspaceCreateInput } from "../../../common/types";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import RouterButton from "../../../components/wrappers/router-button";
@@ -58,19 +58,19 @@ export default function CreateWorkspaceKendra() {
     setSubmitting(true);
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.createKendraWorkspace({
-      name: data.name.trim(),
-      kendraIndexId: data.kendraIndex?.value ?? "",
-      useAllData: data.useAllData,
-    });
+    try {
+      await apiClient.workspaces.createKendraWorkspace({
+        name: data.name.trim(),
+        kendraIndexId: data.kendraIndex?.value ?? "",
+        useAllData: data.useAllData,
+      });
 
-    if (ResultValue.ok(result)) {
       navigate("/rag/workspaces");
       return;
+    } catch (e) {
+      setSubmitting(false);
+      setGlobalError("Something went wrong");
     }
-
-    setSubmitting(false);
-    setGlobalError("Something went wrong");
   };
 
   if (Utils.isDevelopment()) {

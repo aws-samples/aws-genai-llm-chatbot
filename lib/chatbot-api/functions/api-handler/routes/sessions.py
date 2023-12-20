@@ -1,15 +1,17 @@
 import genai_core.sessions
 import genai_core.types
 import genai_core.auth
+import genai_core.utils.json
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler.api_gateway import Router
+from aws_lambda_powertools.event_handler.appsync import Router
+import json
 
 tracer = Tracer()
 router = Router()
 logger = Logger()
 
 
-@router.get("/sessions")
+@router.resolver(field_name="listSessions")
 @tracer.capture_method
 def get_sessions():
     user_id = genai_core.auth.get_user_id(router)
@@ -18,53 +20,50 @@ def get_sessions():
 
     sessions = genai_core.sessions.list_sessions_by_user_id(user_id)
 
-    return {
-        "ok": True,
-        "data": [
-            {
-                "id": session.get("SessionId"),
-                "title": session.get("History")[0].get("data", {}).get("content")
-                if session.get("History")
-                else "<no_title>",
-                "startTime": session.get("StartTime"),
-            }
-            for session in sessions
-        ],
-    }
+    return [
+        {
+            "id": session.get("SessionId"),
+            "title": session.get("History", [{}])[0]
+            .get("data", {})
+            .get("content", "<no title>"),
+            "startTime": f'{session.get("StartTime")}Z',
+        }
+        for session in sessions
+    ]
 
 
-@router.get("/sessions/<session_id>")
+@router.resolver(field_name="getSession")
 @tracer.capture_method
-def get_session(session_id: str):
+def get_session(id: str):
     user_id = genai_core.auth.get_user_id(router)
     if user_id is None:
         raise genai_core.types.CommonError("User not found")
 
-    session = genai_core.sessions.get_session(session_id, user_id)
+    session = genai_core.sessions.get_session(id, user_id)
     if not session:
-        return {"ok": True, "data": None}
+        return None
 
     return {
-        "ok": True,
-        "data": {
-            "id": session.get("SessionId"),
-            "title": session.get("History")[0].get("data", {}).get("content")
-            if session.get("History")
-            else "<no_title>",
-            "startTime": session.get("StartTime"),
-            "history": [
-                {
-                    "type": item.get("type"),
-                    "content": item.get("data", {}).get("content"),
-                    "metadata": item.get("data", {}).get("additional_kwargs"),
-                }
-                for item in session.get("History")
-            ],
-        },
+        "id": session.get("SessionId"),
+        "title": session.get("History", [{}])[0]
+        .get("data", {})
+        .get("content", "<no title>"),
+        "startTime": f'{session.get("StartTime")}Z',
+        "history": [
+            {
+                "type": item.get("type"),
+                "content": item.get("data", {}).get("content"),
+                "metadata": json.dumps(
+                    item.get("data", {}).get("additional_kwargs"),
+                    cls=genai_core.utils.json.CustomEncoder,
+                ),
+            }
+            for item in session.get("History")
+        ],
     }
 
 
-@router.delete("/sessions")
+@router.resolver(field_name="deleteUserSessions")
 @tracer.capture_method
 def delete_user_sessions():
     user_id = genai_core.auth.get_user_id(router)
@@ -73,16 +72,16 @@ def delete_user_sessions():
 
     result = genai_core.sessions.delete_user_sessions(user_id)
 
-    return {"ok": True, "data": result}
+    return result
 
 
-@router.delete("/sessions/<session_id>")
+@router.resolver(field_name="deleteSession")
 @tracer.capture_method
-def delete_session(session_id: str):
+def delete_session(id: str):
     user_id = genai_core.auth.get_user_id(router)
     if user_id is None:
         raise genai_core.types.CommonError("User not found")
 
-    result = genai_core.sessions.delete_session(session_id, user_id)
+    result = genai_core.sessions.delete_session(id, user_id)
 
-    return {"ok": True, "data": result}
+    return result

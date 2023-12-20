@@ -24,7 +24,7 @@ export class ApiClient {
 
   public get health() {
     if (!this._healthClient) {
-      this._healthClient = new HealthClient(this._appConfig);
+      this._healthClient = new HealthClient();
     }
 
     return this._healthClient;
@@ -32,7 +32,7 @@ export class ApiClient {
 
   public get ragEngines() {
     if (!this._ragEnginesClient) {
-      this._ragEnginesClient = new RagEnginesClient(this._appConfig);
+      this._ragEnginesClient = new RagEnginesClient();
     }
 
     return this._ragEnginesClient;
@@ -40,7 +40,7 @@ export class ApiClient {
 
   public get embeddings() {
     if (!this._embeddingsClient) {
-      this._embeddingsClient = new EmbeddingsClient(this._appConfig);
+      this._embeddingsClient = new EmbeddingsClient();
     }
 
     return this._embeddingsClient;
@@ -48,7 +48,7 @@ export class ApiClient {
 
   public get crossEncoders() {
     if (!this._crossEncodersClient) {
-      this._crossEncodersClient = new CrossEncodersClient(this._appConfig);
+      this._crossEncodersClient = new CrossEncodersClient();
     }
 
     return this._crossEncodersClient;
@@ -56,7 +56,7 @@ export class ApiClient {
 
   public get models() {
     if (!this._modelsClient) {
-      this._modelsClient = new ModelsClient(this._appConfig);
+      this._modelsClient = new ModelsClient();
     }
 
     return this._modelsClient;
@@ -64,7 +64,7 @@ export class ApiClient {
 
   public get workspaces() {
     if (!this._workspacesClient) {
-      this._workspacesClient = new WorkspacesClient(this._appConfig);
+      this._workspacesClient = new WorkspacesClient();
     }
 
     return this._workspacesClient;
@@ -72,7 +72,7 @@ export class ApiClient {
 
   public get sessions() {
     if (!this._sessionsClient) {
-      this._sessionsClient = new SessionsClient(this._appConfig);
+      this._sessionsClient = new SessionsClient();
     }
 
     return this._sessionsClient;
@@ -80,7 +80,7 @@ export class ApiClient {
 
   public get semanticSearch() {
     if (!this._semanticSearchClient) {
-      this._semanticSearchClient = new SemanticSearchClient(this._appConfig);
+      this._semanticSearchClient = new SemanticSearchClient();
     }
 
     return this._semanticSearchClient;
@@ -88,7 +88,7 @@ export class ApiClient {
 
   public get documents() {
     if (!this._documentsClient) {
-      this._documentsClient = new DocumentsClient(this._appConfig);
+      this._documentsClient = new DocumentsClient();
     }
 
     return this._documentsClient;
@@ -96,7 +96,7 @@ export class ApiClient {
 
   public get kendra() {
     if (!this._kendraClient) {
-      this._kendraClient = new KendraClient(this._appConfig);
+      this._kendraClient = new KendraClient();
     }
 
     return this._kendraClient;

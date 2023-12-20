@@ -1,5 +1,5 @@
 import { StatusIndicatorProps } from "@cloudscape-design/components";
-import { SemanticSearchResult } from "./types";
+import { SemanticSearchResult } from "../API";
 
 export const languageList = [
   { value: "simple", label: "Simple" },
@@ -69,13 +69,13 @@ export abstract class Labels {
     enabled: "Enabled",
   };
 
-  static distainceFunctionScoreMapAurora: Record<string, string> = {
+  static distanceFunctionScoreMapAurora: Record<string, string> = {
     inner: "Negative inner product",
     cosine: "Cosine distance",
     l2: "Euclidean distance / L2 norm",
   };
 
-  static distainceFunctionScoreMapOpenSearch: Record<string, string> = {
+  static distanceFunctionScoreMapOpenSearch: Record<string, string> = {
     l2: "1 divided by 1 + L2 norm",
   };
 
@@ -95,10 +95,10 @@ export abstract class Labels {
 
   static getDistanceFunctionScoreName(result: SemanticSearchResult) {
     if (result.engine === "aurora") {
-      return Labels.distainceFunctionScoreMapAurora[result.vectorSearchMetric];
+      return Labels.distanceFunctionScoreMapAurora[result.vectorSearchMetric!];
     } else if (result.engine === "opensearch") {
-      return Labels.distainceFunctionScoreMapOpenSearch[
-        result.vectorSearchMetric
+      return Labels.distanceFunctionScoreMapOpenSearch[
+        result.vectorSearchMetric!
       ];
     }
 

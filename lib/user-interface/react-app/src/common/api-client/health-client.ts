@@ -1,17 +1,13 @@
-import { ApiResult } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import { checkHealth } from "../../graphql/queries";
+import { CheckHealthQuery } from "../../API";
 
-export class HealthClient extends ApiClientBase {
-  async health(): Promise<ApiResult<null>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/health"), {
-        headers,
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+export class HealthClient {
+  async health(): Promise<GraphQLResult<GraphQLQuery<CheckHealthQuery>>> {
+    const result = await API.graphql<GraphQLQuery<CheckHealthQuery>>({
+      query: checkHealth,
+    });
+    return result;
   }
 }

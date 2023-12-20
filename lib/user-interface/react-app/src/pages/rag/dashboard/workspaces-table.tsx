@@ -6,19 +6,19 @@ import {
   TableProps,
 } from "@cloudscape-design/components";
 import { useState } from "react";
-import { WorkspaceItem } from "../../../common/types";
 import { TextHelper } from "../../../common/helpers/text-helper";
 import { WorkspacesColumnDefinitions } from "./column-definitions";
 import RouterLink from "../../../components/wrappers/router-link";
 import RouterButton from "../../../components/wrappers/router-button";
+import { Workspace } from "../../../API";
 
 export interface WorkspacesTableProps {
   loading: boolean;
-  workspaces: WorkspaceItem[];
+  workspaces: Workspace[];
 }
 
 export default function WorkspacesTable(props: WorkspacesTableProps) {
-  const [selectedItems, setSelectedItems] = useState<WorkspaceItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<Workspace[]>([]);
   const isOnlyOneSelected = selectedItems.length === 1;
 
   return (
@@ -46,7 +46,7 @@ export default function WorkspacesTable(props: WorkspacesTableProps) {
       items={props.workspaces.slice(0, 5)}
       selectedItems={selectedItems}
       onSelectionChange={(event: {
-        detail: TableProps.SelectionChangeDetail<WorkspaceItem>;
+        detail: TableProps.SelectionChangeDetail<Workspace>;
       }) => setSelectedItems(event.detail.selectedItems)}
       header={
         <Header

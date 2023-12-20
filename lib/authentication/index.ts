@@ -52,6 +52,10 @@ export class Authentication extends Construct {
       value: userPool.userPoolId,
     });
 
+    new cdk.CfnOutput(this, "IdentityPoolId", {
+      value: identityPool.identityPoolId,
+    });
+
     new cdk.CfnOutput(this, "UserPoolWebClientId", {
       value: userPoolClient.userPoolClientId,
     });

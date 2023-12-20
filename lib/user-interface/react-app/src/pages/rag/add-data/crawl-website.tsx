@@ -16,13 +16,13 @@ import { useContext, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { useNavigate } from "react-router-dom";
 import { Utils } from "../../../common/utils";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { ApiClient } from "../../../common/api-client/api-client";
+import { Workspace } from "../../../API";
 
 export interface CrawlWebsiteProps {
   data: AddDataData;
   validate: () => boolean;
-  selectedWorkspace?: WorkspaceItem;
+  selectedWorkspace?: Workspace;
   submitting: boolean;
   setSubmitting: (submitting: boolean) => void;
 }
@@ -91,15 +91,15 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
 
     const apiClient = new ApiClient(appContext);
     const isSitemap = data.urlType === "sitemap";
-    const result = await apiClient.documents.addWebsiteDocument(
-      props.data.workspace.value,
-      isSitemap,
-      isSitemap ? data.sitemapUrl : data.websiteUrl,
-      data.followLinks,
-      data.limit
-    );
+    try {
+      await apiClient.documents.addWebsiteDocument(
+        props.data.workspace.value,
+        isSitemap,
+        isSitemap ? data.sitemapUrl : data.websiteUrl,
+        data.followLinks,
+        data.limit
+      );
 
-    if (ResultValue.ok(result)) {
       setFlashbarItem({
         type: "success",
         content: "Website added successfully",
@@ -114,8 +114,9 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
       });
 
       onChange({ websiteUrl: "", sitemapUrl: "" }, true);
-    } else {
-      setGlobalError(Utils.getErrorMessage(result));
+    } catch (error: any) {
+      setGlobalError(Utils.getErrorMessage(error));
+      console.error(Utils.getErrorMessage(error));
     }
 
     props.setSubmitting(false);

@@ -2,7 +2,7 @@ import genai_core.parameters
 import genai_core.kendra
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler.api_gateway import Router
+from aws_lambda_powertools.event_handler.appsync import Router
 
 tracer = Tracer()
 router = Router()
@@ -13,7 +13,7 @@ class KendraDataSynchRequest(BaseModel):
     workspaceId: str
 
 
-@router.get("/rag/engines")
+@router.resolver(field_name="listRagEngines")
 @tracer.capture_method
 def engines():
     config = genai_core.parameters.get_config()
@@ -37,4 +37,4 @@ def engines():
         },
     ]
 
-    return {"ok": True, "data": ret_value}
+    return ret_value
