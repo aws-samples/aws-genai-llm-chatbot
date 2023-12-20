@@ -222,10 +222,6 @@ export class RestApi extends Construct {
       props.ragEngines.deleteWorkspaceWorkflow.grantStartExecution(apiHandler);
     }
 
-    if (props.ragEngines?.deleteDocumentWorkflow) {
-      props.ragEngines.deleteDocumentWorkflow.grantStartExecution(apiHandler);
-    }
-
     if (props.ragEngines?.sageMakerRagModels) {
       apiHandler.addToRolePolicy(
         new iam.PolicyStatement({
