@@ -2,6 +2,7 @@ import os
 import boto3
 import genai_core.workspaces
 import genai_core.types
+import unicodedata
 
 UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME")
 MAX_FILE_SIZE = 100 * 1000 * 1000  # 100Mb
@@ -10,6 +11,7 @@ MAX_FILE_SIZE = 100 * 1000 * 1000  # 100Mb
 def generate_presigned_post(workspace_id: str, file_name: str, expiration=3600):
     s3_client = boto3.client("s3")
 
+    file_name = unicodedata.normalize("NFC", file_name)
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
         raise genai_core.types.CommonError(f"Workspace not found")
