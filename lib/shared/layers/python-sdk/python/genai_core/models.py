@@ -55,8 +55,16 @@ def list_bedrock_models():
         if not bedrock:
             return None
 
-        response = bedrock.list_foundation_models()
-        bedrock_models = response.get("modelSummaries", [])
+        response = bedrock.list_foundation_models(
+            byInferenceType=genai_core.types.InferenceType.ON_DEMAND.value,
+            byOutputModality=genai_core.types.Modality.TEXT.value,
+        )
+        bedrock_models = [
+            m
+            for m in response.get("modelSummaries", [])
+            if m.get("modelLifecycle", {}).get("status")
+            == genai_core.types.ModelStatus.ACTIVE.value
+        ]
 
         models = [
             {

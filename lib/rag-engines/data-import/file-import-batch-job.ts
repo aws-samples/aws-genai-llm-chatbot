@@ -6,6 +6,7 @@ import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { OpenSearchVector } from "../opensearch-vector";
 import * as batch from "aws-cdk-lib/aws-batch";
 import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as aws_ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -35,7 +36,7 @@ export class FileImportBatchJob extends Construct {
       "ManagedEc2EcsComputeEnvironment",
       {
         vpc: props.shared.vpc,
-        allocationStrategy: batch.AllocationStrategy.BEST_FIT,
+        instanceTypes: [ec2.InstanceType.of(ec2.InstanceClass.M6A, ec2.InstanceSize.LARGE)],
         maxvCpus: 4,
         minvCpus: 0,
         replaceComputeEnvironment: true,
@@ -67,8 +68,8 @@ export class FileImportBatchJob extends Construct {
       this,
       "FileImportContainer",
       {
-        cpu: 1,
-        memory: cdk.Size.mebibytes(1024),
+        cpu: 2,
+        memory: cdk.Size.mebibytes(2048),
         image: ecs.ContainerImage.fromAsset("lib/shared", {
           platform: aws_ecr_assets.Platform.LINUX_AMD64,
           file: "file-import-dockerfile",
@@ -100,6 +101,13 @@ export class FileImportBatchJob extends Construct {
     const fileImportJob = new batch.EcsJobDefinition(this, "FileImportJob", {
       container: fileImportContainer,
       timeout: cdk.Duration.minutes(30),
+      retryAttempts: 3,
+      retryStrategies: [
+        batch.RetryStrategy.of(batch.Action.EXIT, batch.Reason.CANNOT_PULL_CONTAINER),
+        batch.RetryStrategy.of(batch.Action.EXIT, batch.Reason.custom({
+          onExitCode: '137',
+        })),
+      ],
     });
 
     props.uploadBucket.grantReadWrite(fileImportJobRole);

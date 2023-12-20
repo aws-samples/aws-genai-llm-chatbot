@@ -1,4 +1,4 @@
-FROM quay.io/unstructured-io/unstructured:0.10.19
+FROM quay.io/unstructured-io/unstructured:0.11.2
 
 WORKDIR /app
 COPY file-import-batch-job/requirements.txt requirements.txt
