@@ -378,6 +378,7 @@ export const listCrossEncoders = /* GraphQL */ `query ListCrossEncoders {
 export const rankPassages = /* GraphQL */ `query RankPassages($input: RankPassagesInput!) {
   rankPassages(input: $input) {
     score
+    passage
     __typename
   }
 }

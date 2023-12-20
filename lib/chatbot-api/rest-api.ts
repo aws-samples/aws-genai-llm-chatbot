@@ -16,7 +16,7 @@ import * as appsync from "aws-cdk-lib/aws-appsync";
 import { parse } from "graphql";
 import { readFileSync } from "fs";
 
-export interface RestApiProps {
+export interface ApiResolversProps {
   readonly shared: Shared;
   readonly config: SystemConfig;
   readonly ragEngines?: RagEngines;
@@ -25,12 +25,11 @@ export interface RestApiProps {
   readonly byUserIdIndex: string;
   readonly modelsParameter: ssm.StringParameter;
   readonly models: SageMakerModelEndpoint[];
+  readonly api: appsync.GraphqlApi;
 }
 
-export class RestApi extends Construct {
-  public readonly graphqlApi: appsync.GraphqlApi;
-
-  constructor(scope: Construct, id: string, props: RestApiProps) {
+export class ApiResolvers extends Construct {
+  constructor(scope: Construct, id: string, props: ApiResolversProps) {
     super(scope, id);
 
     const apiSecurityGroup = new ec2.SecurityGroup(this, "ApiSecurityGroup", {
@@ -307,35 +306,14 @@ export class RestApi extends Construct {
 
     addPermissions(appSyncLambdaResolver);
 
-    const appSyncApi = new appsync.GraphqlApi(this, "graphql-api", {
-      name: "chatbot-graphql-api",
-      schema: appsync.SchemaFile.fromAsset(
-        "lib/chatbot-api/schema/schema.graphql"
-      ),
-      authorizationConfig: {
-        additionalAuthorizationModes: [
-          {
-            authorizationType: appsync.AuthorizationType.IAM,
-          },
-          {
-            authorizationType: appsync.AuthorizationType.USER_POOL,
-            userPoolConfig: {
-              userPool: props.userPool,
-            },
-          },
-        ],
-      },
-      xrayEnabled: true,
-    });
-
     props.ragEngines?.openSearchVector?.addToAccessPolicy(
       "graphql-api",
       [appSyncLambdaResolver.role?.roleArn],
       ["aoss:DescribeIndex", "aoss:ReadDocument", "aoss:WriteDocument"]
     );
 
-    const functionDataSource = appSyncApi.addLambdaDataSource(
-      "api-resolver-function-source",
+    const functionDataSource = props.api.addLambdaDataSource(
+      "proxyResolverFunction",
       appSyncLambdaResolver
     );
 
@@ -351,7 +329,11 @@ export class RestApi extends Construct {
       ).fields.map((z: any) => z.name.value);
 
       for (const fieldName of fieldNames) {
-        appSyncApi.createResolver(`${fieldName}-resolver`, {
+        // These resolvers are added by the Realtime API
+        if (fieldName == "sendQuery" || fieldName == "publishResponse") {
+          continue;
+        }
+        props.api.createResolver(`${fieldName}-resolver`, {
           typeName: operationType,
           fieldName: fieldName,
           dataSource: functionDataSource,
@@ -361,17 +343,5 @@ export class RestApi extends Construct {
 
     addResolvers("Query");
     addResolvers("Mutation");
-
-    // Prints out URL
-    new cdk.CfnOutput(this, "GraphqlAPIURL", {
-      value: appSyncApi.graphqlUrl,
-    });
-
-    // Prints out the AppSync GraphQL API key to the terminal
-    new cdk.CfnOutput(this, "GraphqlAPIKey", {
-      value: appSyncApi.apiKey ?? "",
-    });
-
-    this.graphqlApi = appSyncApi;
   }
 }

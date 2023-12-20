@@ -15,14 +15,13 @@ import {
 } from "@cloudscape-design/components";
 import BaseAppLayout from "../../../components/base-app-layout";
 import useOnFollow from "../../../common/hooks/use-on-follow";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { useForm } from "../../../common/hooks/use-form";
 import { LoadingStatus, UserRole } from "../../../common/types";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { Utils } from "../../../common/utils";
-import React from "react";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { CrossEncoderData } from "../../../API";
 import { useNavigate } from "react-router-dom";
@@ -183,8 +182,8 @@ export default function CrossEncoders() {
       const passages = result
         .data!.rankPassages!.map((rank, index) => ({
           index,
-          passage: data.passages[index],
-          score: rank!.score!,
+          passage: rank.passage,
+          score: rank.score,
         }))
         .sort((a, b) => b.score - a.score);
 

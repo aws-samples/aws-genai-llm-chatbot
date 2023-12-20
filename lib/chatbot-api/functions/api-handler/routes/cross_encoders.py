@@ -56,4 +56,4 @@ def cross_encoders(input: dict):
     ret_value = genai_core.cross_encoder.rank_passages(
         selected_model, request.reference, request.passages
     )
-    return ret_value
+    return [{"score": v, "passage": p} for v, p in zip(ret_value, request.passages)]

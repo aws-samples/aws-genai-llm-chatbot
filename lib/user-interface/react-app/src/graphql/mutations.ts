@@ -226,6 +226,25 @@ export const deleteSession = /* GraphQL */ `mutation DeleteSession($id: String!)
   APITypes.DeleteSessionMutationVariables,
   APITypes.DeleteSessionMutation
 >;
+export const sendQuery = /* GraphQL */ `mutation SendQuery($data: String) {
+  sendQuery(data: $data)
+}
+` as GeneratedMutation<
+  APITypes.SendQueryMutationVariables,
+  APITypes.SendQueryMutation
+>;
+export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionId: String, $userId: String, $data: String) {
+  publishResponse(sessionId: $sessionId, userId: $userId, data: $data) {
+    data
+    sessionId
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.PublishResponseMutationVariables,
+  APITypes.PublishResponseMutation
+>;
 export const createUser = /* GraphQL */ `mutation CreateUser($input: ManageUserDataInput!) {
   createUser(input: $input) {
     name

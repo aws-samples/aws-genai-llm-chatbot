@@ -117,6 +117,13 @@ export type DeleteSessionResult = {
   deleted: boolean,
 };
 
+export type Channel = {
+  __typename: "Channel",
+  data?: string | null,
+  sessionId?: string | null,
+  userId?: string | null,
+};
+
 export type ManageUserDataInput = {
   name: string,
   email: string,
@@ -319,6 +326,7 @@ export type RankPassagesInput = {
 export type PassageRank = {
   __typename: "PassageRank",
   score: number,
+  passage: string,
 };
 
 export type CreateKendraWorkspaceMutationVariables = {
@@ -546,6 +554,29 @@ export type DeleteSessionMutation = {
     __typename: "DeleteSessionResult",
     id?: string | null,
     deleted: boolean,
+  } | null,
+};
+
+export type SendQueryMutationVariables = {
+  data?: string | null,
+};
+
+export type SendQueryMutation = {
+  sendQuery?: string | null,
+};
+
+export type PublishResponseMutationVariables = {
+  sessionId?: string | null,
+  userId?: string | null,
+  data?: string | null,
+};
+
+export type PublishResponseMutation = {
+  publishResponse?:  {
+    __typename: "Channel",
+    data?: string | null,
+    sessionId?: string | null,
+    userId?: string | null,
   } | null,
 };
 
@@ -1008,6 +1039,7 @@ export type RankPassagesQuery = {
   rankPassages:  Array< {
     __typename: "PassageRank",
     score: number,
+    passage: string,
   } >,
 };
 
@@ -1038,4 +1070,17 @@ export type GetUserQuery = {
     phoneNumber?: string | null,
     previousEmail?: string | null,
   },
+};
+
+export type ReceiveMessagesSubscriptionVariables = {
+  sessionId?: string | null,
+};
+
+export type ReceiveMessagesSubscription = {
+  receiveMessages?:  {
+    __typename: "Channel",
+    data?: string | null,
+    sessionId?: string | null,
+    userId?: string | null,
+  } | null,
 };

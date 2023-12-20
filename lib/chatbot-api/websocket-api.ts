@@ -8,19 +8,25 @@ import { Construct } from "constructs";
 
 import { Shared } from "../shared";
 import { Direction } from "../shared/types";
-import { ChatGraphqlApi } from "./appsync-ws";
+import { RealtimeResolvers } from "./appsync-ws";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
+import * as appsync from "aws-cdk-lib/aws-appsync";
 
-interface WebSocketApiProps {
+interface RealtimeGraphqlApiBackendProps {
   readonly shared: Shared;
   readonly userPool: UserPool;
+  readonly api: appsync.GraphqlApi;
 }
 
-export class WebSocketApi extends Construct {
+export class RealtimeGraphqlApiBackend extends Construct {
   public readonly messagesTopic: sns.Topic;
-  public readonly api: ChatGraphqlApi;
+  public readonly resolvers: RealtimeResolvers;
 
-  constructor(scope: Construct, id: string, props: WebSocketApiProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: RealtimeGraphqlApiBackendProps
+  ) {
     super(scope, id);
     // Create the main Message Topic acting as a message bus
     const messagesTopic = new sns.Topic(this, "MessagesTopic");
@@ -47,13 +53,13 @@ export class WebSocketApi extends Construct {
       })
     );
 
-    const graphqlApi = new ChatGraphqlApi(this, "graphql", {
+    const resolvers = new RealtimeResolvers(this, "Resolvers", {
       queue: queue,
       topic: messagesTopic,
       userPool: props.userPool,
       shared: props.shared,
+      api: props.api,
     });
-    this.api = graphqlApi;
 
     // Route all outgoing messages to the websocket interface queue
     messagesTopic.addSubscription(
@@ -69,5 +75,6 @@ export class WebSocketApi extends Construct {
     );
 
     this.messagesTopic = messagesTopic;
+    this.resolvers = resolvers;
   }
 }
