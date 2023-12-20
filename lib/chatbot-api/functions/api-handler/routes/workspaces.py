@@ -32,6 +32,7 @@ class CreateWorkspaceAuroraRequest(BaseModel):
     chunking_strategy: str
     chunkSize: int
     chunkOverlap: int
+    creatorId: str
 
 
 class CreateWorkspaceOpenSearchRequest(BaseModel):
@@ -58,7 +59,11 @@ class CreateWorkspaceKendraRequest(BaseModel):
 @router.get("/workspaces")
 @tracer.capture_method
 def workspaces():
-    workspaces = genai_core.workspaces.list_workspaces()
+
+    user_id = genai_core.auth.get_user_id(router)
+    print('User ID :' + user_id )
+
+    workspaces = genai_core.workspaces.list_workspaces_by_user_id(user_id)
 
     ret_value = [_convert_workspace(workspace) for workspace in workspaces]
 
@@ -68,10 +73,23 @@ def workspaces():
 @router.get("/workspaces/<workspace_id>")
 @tracer.capture_method
 def workspace(workspace_id: str):
+
+    user_id = genai_core.auth.get_user_id(router)
+    #Check readable policy before to fetch a data of workspace
+    policyWorkspace = genai_core.workspaces.is_workspace_readable(workspace_id, user_id)
+
+    if not policyWorkspace:
+      return {"ok": True, "data": None}
+
     workspace = genai_core.workspaces.get_workspace(workspace_id)
 
     if not workspace:
         return {"ok": True, "data": None}
+
+    policyPreservedKeys = ['is_owner', 'is_writable']
+
+    for preservedKey in policyPreservedKeys:
+      workspace[preservedKey] = policyWorkspace[preservedKey]
 
     ret_value = _convert_workspace(workspace)
 
@@ -112,9 +130,10 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
     workspace_name = request.name.strip()
     embedding_models = config["rag"]["embeddingsModels"]
     cross_encoder_models = config["rag"]["crossEncoderModels"]
-
     embeddings_model = None
     cross_encoder_model = None
+    user_id = genai_core.auth.get_user_id(router)
+
     for model in embedding_models:
         if (
             model["provider"] == request.embeddingsModelProvider
@@ -177,6 +196,7 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
         chunking_strategy=request.chunking_strategy,
         chunk_size=request.chunkSize,
         chunk_overlap=request.chunkOverlap,
+        creator_id=user_id
     )
 
 

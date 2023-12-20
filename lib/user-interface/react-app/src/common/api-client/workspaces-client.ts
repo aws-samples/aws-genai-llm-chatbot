@@ -59,6 +59,7 @@ export class WorkspacesClient extends ApiClientBase {
     chunking_strategy: string;
     chunkSize: number;
     chunkOverlap: number;
+    creatorId: string;
   }): Promise<ApiResult<{ id: string }>> {
     try {
       const headers = await this.getHeaders();

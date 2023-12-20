@@ -222,6 +222,7 @@ export interface AuroraWorkspaceCreateInput {
   hybridSearch: boolean;
   chunkSize: number;
   chunkOverlap: number;
+  creatorId: string
 }
 
 export interface OpenSearchWorkspaceCreateInput {
