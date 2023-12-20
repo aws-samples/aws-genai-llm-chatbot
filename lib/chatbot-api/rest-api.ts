@@ -308,6 +308,10 @@ export class ApiResolvers extends Construct {
       ).fields.map((z: any) => z.name.value);
 
       for (const fieldName of fieldNames) {
+        // These resolvers are added by the Realtime API
+        if (fieldName == "sendQuery" || fieldName == "publishResponse") {
+          continue;
+        }
         props.api.createResolver(`${fieldName}-resolver`, {
           typeName: operationType,
           fieldName: fieldName,
