@@ -4,13 +4,19 @@ import uuid
 import boto3
 import genai_core.embeddings
 from datetime import datetime
+from boto3.dynamodb.conditions import Key
+import genai_core.auth
 
 dynamodb = boto3.resource("dynamodb")
 sfn_client = boto3.client("stepfunctions")
 
 WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME")
+WORKSPACES_POLICY_TABLE_NAME = os.environ.get("WORKSPACES_POLICY_TABLE_NAME")
 WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ.get(
     "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME"
+)
+WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME = os.environ.get(
+    "WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME"
 )
 CREATE_AURORA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN"
@@ -28,6 +34,56 @@ WORKSPACE_OBJECT_TYPE = "workspace"
 if WORKSPACES_TABLE_NAME:
     table = dynamodb.Table(WORKSPACES_TABLE_NAME)
 
+if WORKSPACES_POLICY_TABLE_NAME:
+    workspacePolicyTable = dynamodb.Table(WORKSPACES_POLICY_TABLE_NAME)
+
+def list_workspaces_by_user_id(user_id):
+    all_items = []
+    last_evaluated_key = None
+
+    while True:
+        if last_evaluated_key:
+            response = workspacePolicyTable.query(
+                KeyConditionExpression='pk = :pk AND begins_with ( sk, :sk )',
+                ExpressionAttributeValues={
+                    ':pk': f'#userid#{user_id}#',
+                    ':sk': '#workspace#'
+                },
+                ExclusiveStartKey=last_evaluated_key,
+                ScanIndexForward=False
+            )
+        else:
+            response = workspacePolicyTable.query(
+                KeyConditionExpression='pk = :pk AND begins_with ( sk, :sk )',
+                ExpressionAttributeValues={
+                    ':pk': f'#userid#{user_id}#',
+                    ':sk': '#workspace#'
+                },
+                ScanIndexForward=False
+            )
+
+        all_items.extend(response["Items"])
+
+        last_evaluated_key = response.get("LastEvaluatedKey")
+        if not last_evaluated_key:
+            break
+
+    print(all_items)
+
+    workspaces = []
+    policyPreservedKeys = ['is_owner', 'is_writable']
+
+    for item in all_items:
+      itemResponse = table.get_item(Key={"workspace_id": item['workspace_id'], "object_type": WORKSPACE_OBJECT_TYPE})
+
+      workspace = itemResponse.get('Item')
+
+      for preservedKey in policyPreservedKeys:
+        workspace[preservedKey] = item[preservedKey]
+
+      workspaces.append(workspace)
+
+    return workspaces
 
 def list_workspaces():
     all_items = []
@@ -60,15 +116,71 @@ def list_workspaces():
 
     return all_items
 
+def list_policy_workspace_by_id(workspace_id):
+
+  all_items = []
+  last_evaluated_key = None
+
+  while True:
+      if last_evaluated_key:
+          response = workspacePolicyTable.query(
+              IndexName=WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME,
+              KeyConditionExpression=boto3.dynamodb.conditions.Key("workspace_id").eq(workspace_id),
+              ExclusiveStartKey=last_evaluated_key,
+              ScanIndexForward=False
+          )
+      else:
+          response = workspacePolicyTable.query(
+              IndexName=WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME,
+              KeyConditionExpression=boto3.dynamodb.conditions.Key("workspace_id").eq(workspace_id),
+              ScanIndexForward=False
+          )
+
+      all_items.extend(response["Items"])
+
+      last_evaluated_key = response.get("LastEvaluatedKey")
+      if not last_evaluated_key:
+          break
+
+  print(all_items)
+  return all_items
 
 def get_workspace(workspace_id: str):
-    response = table.get_item(
-        Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}
-    )
-    item = response.get("Item")
 
+      response = table.get_item(
+          Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}
+      )
+
+      item = response.get('Item')
+      return item
+
+def is_workspace_readable(workspace_id, user_id):
+
+  response = workspacePolicyTable.get_item(
+      Key={"pk": f"#userid#{user_id}#", "sk": f"#workspace#{workspace_id}#"}
+  )
+
+  item = response.get('Item')
+
+  if item:
+    print('Workspace policy find and it is readable.')
     return item
 
+  return None
+
+def is_workspace_writable(workspace_id, user_id):
+
+  response = workspacePolicyTable.get_item(
+      Key={"pk": f"#userid#{user_id}#", "sk": f"#workspace#{workspace_id}#"}
+  )
+
+  item = response.get('Item')
+
+  if item and item['is_writable'] == True:
+    print('Workspace policy find and it is writable by user.')
+    return True
+
+  return False
 
 def set_status(workspace_id: str, status: str):
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -102,6 +214,7 @@ def create_workspace_aurora(
     chunking_strategy: str,
     chunk_size: int,
     chunk_overlap: int,
+    creator_id: str
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -138,10 +251,23 @@ def create_workspace_aurora(
         "size_in_bytes": 0,
         "created_at": timestamp,
         "updated_at": timestamp,
+        "creator_id": creator_id
     }
 
     response = table.put_item(Item=item)
-    print(response)
+
+    #Create default workspace policy at least for creator
+    itemWorkspacePolicy = {
+        "pk": f"#userid#{creator_id}#",
+        "sk": f"#workspace#{workspace_id}#",
+        "is_owner": True,
+        "is_writable": True,
+        "workspace_id": workspace_id,
+        "created_at": timestamp,
+        "updated_at": timestamp
+    }
+
+    workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,
@@ -151,8 +277,6 @@ def create_workspace_aurora(
             }
         ),
     )
-
-    print(response)
 
     return {
         "id": workspace_id,

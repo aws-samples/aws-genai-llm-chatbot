@@ -66,6 +66,10 @@ export class RestApi extends Construct {
           props.ragEngines?.workspacesTable.tableName ?? "",
         WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
           props.ragEngines?.workspacesByObjectTypeIndexName ?? "",
+        WORKSPACES_POLICY_TABLE_NAME:
+          props.ragEngines?.workspacesPolicyTable.tableName ?? "",
+        WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME:
+          props.ragEngines?.workspacesPolicyByWorkspaceIdIndexName ?? "",
         DOCUMENTS_TABLE_NAME: props.ragEngines?.documentsTable.tableName ?? "",
         DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME:
           props.ragEngines?.documentsByCompountKeyIndexName ?? "",
@@ -113,6 +117,10 @@ export class RestApi extends Construct {
     if (props.ragEngines?.documentsTable) {
       props.ragEngines.documentsTable.grantReadWriteData(apiHandler);
       props.ragEngines?.dataImport.rssIngestorFunction?.grantInvoke(apiHandler);
+    }
+
+    if (props.ragEngines?.workspacesPolicyTable) {
+      props.ragEngines.workspacesPolicyTable.grantReadWriteData(apiHandler);
     }
 
     if (props.ragEngines?.auroraPgVector) {

@@ -1,5 +1,5 @@
 import { SpaceBetween, Button, Form } from "@cloudscape-design/components";
-import { useContext, useState } from "react";
+import {useContext, useEffect, useState} from "react";
 import { AuroraWorkspaceCreateInput, ResultValue } from "../../../common/types";
 import { useForm } from "../../../common/hooks/use-form";
 import { ApiClient } from "../../../common/api-client/api-client";
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import RouterButton from "../../../components/wrappers/router-button";
 import AuroraForm from "./aurora-form";
 import { Utils } from "../../../common/utils";
+import {Auth} from "aws-amplify";
 
 const nameRegex = /^[\w+_-]+$/;
 const metrics = [
@@ -37,6 +38,7 @@ const defaults: AuroraWorkspaceCreateInput = {
   hybridSearch: true,
   chunkSize: 1000,
   chunkOverlap: 200,
+  creatorId: ""
 };
 
 export default function CreateWorkspaceAurora() {
@@ -117,6 +119,22 @@ export default function CreateWorkspaceAurora() {
     },
   });
 
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    (async () => {
+      const result = await Auth.currentUserInfo();
+
+      if (!result || Object.keys(result).length === 0) {
+        return;
+      }
+
+      const username = result?.username;
+
+      setUserName(username);
+    })();
+  }, []);
+
   const submitForm = async () => {
     if (!validate()) return;
     if (!appContext) return;
@@ -146,6 +164,7 @@ export default function CreateWorkspaceAurora() {
       chunking_strategy: "recursive",
       chunkSize: data.chunkSize,
       chunkOverlap: data.chunkOverlap,
+      creatorId: userName
     });
 
     if (ResultValue.ok(result)) {

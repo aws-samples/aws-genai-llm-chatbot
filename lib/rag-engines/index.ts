@@ -27,6 +27,8 @@ export class RagEngines extends Construct {
   public readonly documentsTable: dynamodb.Table;
   public readonly workspacesTable: dynamodb.Table;
   public readonly workspacesByObjectTypeIndexName: string;
+  public readonly workspacesPolicyTable: dynamodb.Table;
+  public readonly workspacesPolicyByWorkspaceIdIndexName: string;
   public readonly documentsByCompountKeyIndexName: string;
   public readonly documentsByStatusIndexName: string;
   public readonly fileImportWorkflow?: sfn.StateMachine;
@@ -108,6 +110,8 @@ export class RagEngines extends Construct {
     this.uploadBucket = dataImport.uploadBucket;
     this.processingBucket = dataImport.processingBucket;
     this.workspacesTable = tables.workspacesTable;
+    this.workspacesPolicyTable = tables.workspacesPolicyTable;
+    this.workspacesPolicyByWorkspaceIdIndexName = tables.workspacesPolicyByWorkspaceIdIndexName;
     this.documentsTable = tables.documentsTable;
     this.workspacesByObjectTypeIndexName =
       tables.workspacesByObjectTypeIndexName;
