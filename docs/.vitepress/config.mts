@@ -44,6 +44,7 @@ export default defineConfig({
       {
         text: 'Documentation',
         items: [
+          { text: 'Private Chatbot', link: '/documentation/private-chatbot' },
           { text: 'Model Requirements', link: '/documentation/model-requirements' },
           { text: 'Inference Script', link: '/documentation/inference-script' },
           { text: 'Document Retrieval', link: '/documentation/retriever' },
