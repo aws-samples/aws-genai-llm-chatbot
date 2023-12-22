@@ -14,6 +14,8 @@ import { Shared } from "../shared";
 import { SystemConfig } from "../shared/types";
 import { Utils } from "../shared/utils";
 import { ChatBotApi } from "../chatbot-api";
+import { PrivateWebsite } from "./private-website"
+import { PublicWebsite } from "./public-website"
 import { NagSuppressions } from "cdk-nag";
 
 export interface UserInterfaceProps {
@@ -46,83 +48,26 @@ export class UserInterface extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       autoDeleteObjects: true,
+      bucketName: props.config.privateWebsite ? props.config.domain : undefined, 
       websiteIndexDocument: "index.html",
       websiteErrorDocument: "index.html",
       enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
     });
+    
+    // Deploy either Private (only accessible within VPC) or Public facing website
+    let apiEndpoint: string;
+    let websocketEndpoint: string;
+    let distribution;
+    
+    if (props.config.privateWebsite) {
+      const privateWebsite = new PrivateWebsite(this, "PrivateWebsite", {...props, websiteBucket: websiteBucket });
+    } else {
+      const publicWebsite = new PublicWebsite(this, "PublicWebsite", {...props, websiteBucket: websiteBucket });
+      distribution = publicWebsite.distribution
+    }
 
-    const originAccessIdentity = new cf.OriginAccessIdentity(this, "S3OAI");
-    websiteBucket.grantRead(originAccessIdentity);
-    props.chatbotFilesBucket.grantRead(originAccessIdentity);
-
-    const distributionLogsBucket = new s3.Bucket(
-      this,
-      "DistributionLogsBucket",
-      {
-        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
-        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
-        enforceSSL: true,
-      }
-    );
-
-    const distribution = new cf.CloudFrontWebDistribution(
-      this,
-      "Distribution",
-      {
-        viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        priceClass: cf.PriceClass.PRICE_CLASS_ALL,
-        httpVersion: cf.HttpVersion.HTTP2_AND_3,
-        loggingConfig: {
-          bucket: distributionLogsBucket,
-        },
-        originConfigs: [
-          {
-            behaviors: [{ isDefaultBehavior: true }],
-            s3OriginSource: {
-              s3BucketSource: websiteBucket,
-              originAccessIdentity,
-            },
-          },
-          {
-            behaviors: [
-              {
-                pathPattern: "/chabot/files/*",
-                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
-                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                defaultTtl: cdk.Duration.seconds(0),
-                forwardedValues: {
-                  queryString: true,
-                  headers: [
-                    "Referer",
-                    "Origin",
-                    "Authorization",
-                    "Content-Type",
-                    "x-forwarded-user",
-                    "Access-Control-Request-Headers",
-                    "Access-Control-Request-Method",
-                  ],
-                },
-              },
-            ],
-            s3OriginSource: {
-              s3BucketSource: props.chatbotFilesBucket,
-              originAccessIdentity,
-            },
-          },
-        ],
-        errorConfigurations: [
-          {
-            errorCode: 404,
-            errorCachingMinTtl: 0,
-            responseCode: 200,
-            responsePagePath: "/index.html",
-          },
-        ],
-      }
-    );
+      
 
     const exportsAsset = s3deploy.Source.jsonData("aws-exports.json", {
       aws_project_region: cdk.Aws.REGION,
@@ -252,21 +197,15 @@ export class UserInterface extends Construct {
       prune: false,
       sources: [asset, exportsAsset],
       destinationBucket: websiteBucket,
-      distribution,
+      distribution: props.config.privateWebsite ? undefined : distribution
     });
 
-    // ###################################################
-    // Outputs
-    // ###################################################
-    new cdk.CfnOutput(this, "UserInterfaceDomainName", {
-      value: `https://${distribution.distributionDomainName}`,
-    });
-
+   
     /**
      * CDK NAG suppression
      */
     NagSuppressions.addResourceSuppressions(
-      [uploadLogsBucket, distributionLogsBucket],
+      uploadLogsBucket, 
       [
         {
           id: "AwsSolutions-S1",
@@ -274,16 +213,5 @@ export class UserInterface extends Construct {
         },
       ]
     );
-    NagSuppressions.addResourceSuppressions(websiteBucket, [
-      { id: "AwsSolutions-S5", reason: "OAI is configured for read." },
-    ]);
-    NagSuppressions.addResourceSuppressions(distribution, [
-      { id: "AwsSolutions-CFR1", reason: "No geo restrictions" },
-      {
-        id: "AwsSolutions-CFR2",
-        reason: "WAF not required due to configured Cognito auth.",
-      },
-      { id: "AwsSolutions-CFR4", reason: "TLS 1.2 is the default." },
-    ]);
   }
 }
