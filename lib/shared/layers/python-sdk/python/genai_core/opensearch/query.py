@@ -16,6 +16,7 @@ def query_workspace_open_search(
     threshold: float = 0.0,
 ):
     index_name = workspace_id.replace("-", "")
+    config = genai_core.parameters.get_config()
 
     embeddings_model_provider = workspace["embeddings_model_provider"]
     embeddings_model_name = workspace["embeddings_model_name"]
@@ -36,12 +37,13 @@ def query_workspace_open_search(
     if selected_model is None:
         raise genai_core.types.CommonError("Embeddings model not found")
 
-    cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
-        cross_encoder_model_provider, cross_encoder_model_name
-    )
+    if (config["rag"]["crossEncodingEnabled"]):
+        cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
+            cross_encoder_model_provider, cross_encoder_model_name
+        )
 
-    if cross_encoder_model is None:
-        raise genai_core.types.CommonError("Cross encoder model not found")
+        if cross_encoder_model is None:
+            raise genai_core.types.CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
         selected_model, [query]
@@ -95,26 +97,58 @@ def query_workspace_open_search(
                 item["keyword_search_score"] = current["keyword_search_score"]
 
     unique_items = list(unique_items.values())
-    score_dict = dict({})
-    if len(unique_items) > 0:
-        passages = [record["content"] for record in unique_items]
-        passage_scores = genai_core.cross_encoder.rank_passages(
-            cross_encoder_model, query, passages
-        )
+    if (config["rag"]["crossEncodingEnabled"]):
+        score_dict = dict({})
+        if len(unique_items) > 0:
+            passages = [record["content"] for record in unique_items]
+            passage_scores = genai_core.cross_encoder.rank_passages(
+                cross_encoder_model, query, passages
+            )
 
-        for i in range(len(unique_items)):
-            score = passage_scores[i]
-            unique_items[i]["score"] = score
-            score_dict[unique_items[i]["chunk_id"]] = score
-    unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
+            for i in range(len(unique_items)):
+                score = passage_scores[i]
+                unique_items[i]["score"] = score
+                score_dict[unique_items[i]["chunk_id"]] = score
+        unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
 
     for record in vector_search_records:
         record["score"] = score_dict[record["chunk_id"]]
     for record in keyword_search_records:
         record["score"] = score_dict[record["chunk_id"]]
 
-    if full_response:
-        unique_items = unique_items[:limit]
+    if (config["rag"]["crossEncodingEnabled"]):
+        for record in vector_search_records:
+            record["score"] = score_dict[record["chunk_id"]]
+        for record in keyword_search_records:
+            record["score"] = score_dict[record["chunk_id"]]
+
+        if full_response:
+            ret_value = {
+                "engine": "opensearch",
+                "supported_languages": languages,
+                "items": unique_items,
+                "vector_search_metric": "l2",
+                "vector_search_items": vector_search_records,
+                "keyword_search_items": keyword_search_records,
+            }
+        else:
+            ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))
+            if len(ret_items) < limit:
+                unique_items = sorted(
+                    unique_items, key=lambda x: x["vector_search_score"], reverse=True
+                )
+                ret_items = ret_items + (
+                    list(
+                        filter(lambda val: val["vector_search_score"] > 0.5, unique_items)
+                    )[: (limit - len(ret_items))]
+                )
+
+            ret_value = {
+                "engine": "opensearch",
+                "supported_languages": languages,
+                "items": ret_items,
+            }
+    else:
         ret_value = {
             "engine": "opensearch",
             "supported_languages": languages,
@@ -122,28 +156,6 @@ def query_workspace_open_search(
             "vector_search_metric": "l2",
             "vector_search_items": vector_search_records,
             "keyword_search_items": keyword_search_records,
-        }
-    else:
-        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[
-            :limit
-        ]
-        if len(ret_items) < limit:
-            unique_items = sorted(
-                unique_items, key=lambda x: x["vector_search_score"] or -1, reverse=True
-            )
-            ret_items = ret_items + (
-                list(
-                    filter(
-                        lambda val: (val["vector_search_score"] or -1) > 0.5,
-                        unique_items,
-                    )
-                )[: (limit - len(ret_items))]
-            )
-
-        ret_value = {
-            "engine": "opensearch",
-            "supported_languages": languages,
-            "items": ret_items,
         }
 
     logger.info(ret_value)

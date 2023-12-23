@@ -19,6 +19,7 @@ def query_workspace_aurora(
     full_response: bool,
     threshold: int = 0,
 ):
+    config = genai_core.parameters.get_config()
     table_name = sql.Identifier(workspace_id.replace("-", ""))
     embeddings_model_provider = workspace["embeddings_model_provider"]
     embeddings_model_name = workspace["embeddings_model_name"]
@@ -37,12 +38,13 @@ def query_workspace_aurora(
     if selected_model is None:
         raise genai_core.types.CommonError("Embeddings model not found")
 
-    cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
-        cross_encoder_model_provider, cross_encoder_model_name
-    )
+    if (config["rag"]["crossEncodingEnabled"]):
+        cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
+            cross_encoder_model_provider, cross_encoder_model_name
+        )
 
-    if cross_encoder_model is None:
-        raise genai_core.types.CommonError("Cross encoder model not found")
+        if cross_encoder_model is None:
+            raise genai_core.types.CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
         selected_model, [query]
@@ -185,27 +187,60 @@ def query_workspace_aurora(
                 item["keyword_search_score"] = current["keyword_search_score"]
 
     unique_items = list(unique_items.values())
-    score_dict = dict({})
-    if len(unique_items) > 0:
-        passages = [record["content"] for record in unique_items]
-        passage_scores = genai_core.cross_encoder.rank_passages(
-            cross_encoder_model, query, passages
-        )
+    if (config["rag"]["crossEncodingEnabled"]):
+        score_dict = dict({})
+        if len(unique_items) > 0:
+            passages = [record["content"] for record in unique_items]
+            passage_scores = genai_core.cross_encoder.rank_passages(
+                cross_encoder_model, query, passages
+            )
 
-        for i in range(len(unique_items)):
-            score = passage_scores[i]
-            unique_items[i]["score"] = score
-            score_dict[unique_items[i]["chunk_id"]] = score
+            for i in range(len(unique_items)):
+                score = passage_scores[i]
+                unique_items[i]["score"] = score
+                score_dict[unique_items[i]["chunk_id"]] = score
 
-    unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
+        unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
 
-    for record in vector_search_records:
-        record["score"] = score_dict[record["chunk_id"]]
-    for record in keyword_search_records:
-        record["score"] = score_dict[record["chunk_id"]]
+    if (config["rag"]["crossEncodingEnabled"]):
+        for record in vector_search_records:
+            record["score"] = score_dict[record["chunk_id"]]
+        for record in keyword_search_records:
+            record["score"] = score_dict[record["chunk_id"]]
 
-    if full_response:
-        unique_items = unique_items[:limit]
+        if full_response:
+            ret_value = {
+                "engine": "aurora",
+                "query_language": language_name,
+                "supported_languages": languages,
+                "detected_languages": detected_languages,
+                "items": convert_types(unique_items),
+                "vector_search_metric": metric,
+                "vector_search_items": convert_types(vector_search_records),
+                "keyword_search_items": convert_types(keyword_search_records),
+            }
+        else:
+            ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))
+            if len(ret_items) < limit:
+                unique_items = sorted(
+                    unique_items, key=lambda x: x["vector_search_score"], reverse=True
+                )
+                ret_items = ret_items + (
+                    list(
+                        filter(lambda val: val["vector_search_score"] > 0.5, unique_items)
+                    )[: (limit - len(ret_items))]
+                )
+
+            ret_value = {
+                "engine": "aurora",
+                "query_language": language_name,
+                "supported_languages": languages,
+                "detected_languages": detected_languages,
+                "items": convert_types(
+                    list(filter(lambda val: val["score"] > 0, unique_items))
+                ),
+            }
+    else:
         ret_value = {
             "engine": "aurora",
             "query_language": language_name,
@@ -215,48 +250,6 @@ def query_workspace_aurora(
             "vector_search_metric": metric,
             "vector_search_items": convert_types(vector_search_records),
             "keyword_search_items": convert_types(keyword_search_records),
-        }
-    else:
-        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[
-            :limit
-        ]
-        if len(ret_items) < limit:
-            # inner product metric is negative hence we sort ascending
-            if metric == "inner":
-                unique_items = sorted(
-                    unique_items,
-                    key=lambda x: x["vector_search_score"] or 1,
-                    reverse=False,
-                )
-                ret_items = ret_items + (
-                    list(
-                        filter(
-                            lambda val: (val["vector_search_score"] or 1) < -0.5,
-                            unique_items,
-                        )
-                    )[: (limit - len(ret_items))]
-                )
-            else:
-                unique_items = sorted(
-                    unique_items,
-                    key=lambda x: x["vector_search_score"] or -1,
-                    reverse=True,
-                )
-                ret_items = ret_items + (
-                    list(
-                        filter(
-                            lambda val: (val["vector_search_score"] or -1) > 0.5,
-                            unique_items,
-                        )
-                    )[: (limit - len(ret_items))]
-                )
-
-        ret_value = {
-            "engine": "aurora",
-            "query_language": language_name,
-            "supported_languages": languages,
-            "detected_languages": detected_languages,
-            "items": convert_types(ret_items),
         }
 
     logger.info(ret_value)
