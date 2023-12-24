@@ -268,6 +268,19 @@ export default function MultiChat() {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
+  const handleFeedback = (feedbackType: 'thumbsUp' | 'thumbsDown', idx: number, message: ChatBotHistoryItem) => {
+    if (message.metadata.sessionId) {
+      addUserFeedback(message.metadata.sessionId as string, idx, feedbackType);
+    }
+  };
+
+  const addUserFeedback = async (sessionId: string, key: number, feedback: string) => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
+    await apiClient.userFeedback.addUserFeedback({sessionId, key, feedback});
+  };
+
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
@@ -418,6 +431,8 @@ export default function MultiChat() {
                   message={message}
                   configuration={chatSessions[idx].configuration}
                   showMetadata={showMetadata}
+                  onThumbsUp={() => handleFeedback('thumbsUp', idx, message)}
+                  onThumbsDown={() => handleFeedback('thumbsDown', idx, message)}
                 />
               ))}
             </ColumnLayout>
