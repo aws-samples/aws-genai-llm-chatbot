@@ -64,6 +64,19 @@ export default function Chat(props: { sessionId?: string }) {
     })();
   }, [appContext, props.sessionId]);
 
+  const handleFeedback = (feedbackType: 'thumbsUp' | 'thumbsDown', idx: number, message: ChatBotHistoryItem) => {
+    if (message.metadata.sessionId) {
+      addUserFeedback(message.metadata.sessionId as string, idx, feedbackType);
+    }
+  };
+
+  const addUserFeedback = async (sessionId: string, key: number, feedback: string) => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
+    await apiClient.userFeedback.addUserFeedback({sessionId, key, feedback});
+  };
+
   return (
     <div className={styles.chat_container}>
       <SpaceBetween direction="vertical" size="m">
@@ -72,6 +85,8 @@ export default function Chat(props: { sessionId?: string }) {
             key={idx}
             message={message}
             configuration={configuration}
+            onThumbsUp={() => handleFeedback('thumbsUp', idx, message)}
+            onThumbsDown={() => handleFeedback('thumbsDown', idx, message)}
           />
         ))}
       </SpaceBetween>

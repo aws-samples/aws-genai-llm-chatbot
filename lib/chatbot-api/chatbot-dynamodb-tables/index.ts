@@ -4,7 +4,9 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export class ChatBotDynamoDBTables extends Construct {
   public readonly sessionsTable: dynamodb.Table;
+  public readonly userFeedbackTable: dynamodb.Table;
   public readonly byUserIdIndex: string = "byUserId";
+  public readonly bySessionIdIndex: string = "bySessionId";
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -28,6 +30,26 @@ export class ChatBotDynamoDBTables extends Construct {
       partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
     });
 
+    const userFeedbackTable = new dynamodb.Table(this, "UserFeedbackTable", {
+      partitionKey: {
+        name: "FeedbackId",
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "SessionId",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      removalPolicy: cdk.RemovalPolicy.DESTROY
+    });
+
+    userFeedbackTable.addGlobalSecondaryIndex({
+      indexName: this.bySessionIdIndex,
+      partitionKey: { name: "SessionId", type: dynamodb.AttributeType.STRING}
+    });
+
     this.sessionsTable = sessionsTable;
+    this.userFeedbackTable = userFeedbackTable;
   }
 }

@@ -20,6 +20,8 @@ export interface RestApiProps {
   readonly userPool: cognito.UserPool;
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
+  readonly userFeedbackTable: dynamodb.Table;
+  readonly bySessionIdIndex: string;
   readonly modelsParameter: ssm.StringParameter;
   readonly models: SageMakerModelEndpoint[];
 }
@@ -57,6 +59,8 @@ export class RestApi extends Construct {
         API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
         SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
         SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
+        USER_FEEDBACK_TABLE_NAME: props.userFeedbackTable.tableName,
+        USER_FEEDBACK_BY_SESSION_ID_INDEX_NAME: props.bySessionIdIndex,
         UPLOAD_BUCKET_NAME: props.ragEngines?.uploadBucket?.bucketName ?? "",
         PROCESSING_BUCKET_NAME:
           props.ragEngines?.processingBucket?.bucketName ?? "",
@@ -247,6 +251,7 @@ export class RestApi extends Construct {
     props.shared.configParameter.grantRead(apiHandler);
     props.modelsParameter.grantRead(apiHandler);
     props.sessionsTable.grantReadWriteData(apiHandler);
+    props.userFeedbackTable.grantReadWriteData(apiHandler);
     props.ragEngines?.uploadBucket.grantReadWrite(apiHandler);
     props.ragEngines?.processingBucket.grantReadWrite(apiHandler);
 

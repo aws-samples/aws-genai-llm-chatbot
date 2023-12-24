@@ -157,3 +157,37 @@
 .markdownTable tr:nth-child(even) {
   background-color: awsui.$color-background-container-content;
 }
+
+.thumbsContainer {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.thumbsIcon {
+  cursor: pointer;
+  margin-right: 10px;
+  opacity: 0.5;
+}
+
+/* Styles for thumbs up icon. Should be compatible with dark theme */
+.thumbsUp {
+  color: #539fe5;
+}
+
+/* Styles for thumbs down icon. Should be compatible with dark theme */
+.thumbsDown {
+  color: #539fe5;
+}
+
+/* Style for clicked state */
+.clicked {
+  opacity: 0.5;
+  pointer-events: none; /* Disable pointer events for a clicked icon */
+}
+
+/* Styles for selected icon */
+.thumbsIcon.selected {
+  opacity: 1 !important;
+  pointer-events: none; /* Disable pointer events for the selected icon */
+}

@@ -9,6 +9,7 @@ import { SessionsClient } from "./sessions-client";
 import { SemanticSearchClient } from "./semantic-search-client";
 import { DocumentsClient } from "./documents-client";
 import { KendraClient } from "./kendra-client";
+import { UserFeedbackClient } from "./user-feedback-client";
 
 export class ApiClient {
   private _healthClient: HealthClient | undefined;
@@ -21,6 +22,7 @@ export class ApiClient {
   private _semanticSearchClient: SemanticSearchClient | undefined;
   private _documentsClient: DocumentsClient | undefined;
   private _kendraClient: KendraClient | undefined;
+  private _userFeedbackClient: UserFeedbackClient | undefined;
 
   public get health() {
     if (!this._healthClient) {
@@ -100,6 +102,14 @@ export class ApiClient {
     }
 
     return this._kendraClient;
+  }
+
+  public get userFeedback() {
+    if(!this._userFeedbackClient) {
+      this._userFeedbackClient = new UserFeedbackClient(this._appConfig);
+    }
+
+    return this._userFeedbackClient;
   }
 
   constructor(protected _appConfig: AppConfig) {}
