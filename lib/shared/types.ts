@@ -70,6 +70,7 @@ export interface SystemConfig {
     roleArn?: string;
   };
   llms: {
+    enableSagemakerModels: boolean;
     sagemaker: SupportedSageMakerModels[];
   };
   rag: {
@@ -103,6 +104,7 @@ export interface SystemConfig {
       name: string;
       default?: boolean;
     }[];
+    crossEncodingEnabled: boolean;
   };
 }
 

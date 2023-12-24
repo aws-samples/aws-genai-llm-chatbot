@@ -18,6 +18,7 @@ export function getConfig(): SystemConfig {
     },
     llms: {
       // sagemaker: [SupportedSageMakerModels.FalconLite]
+      enableSagemakerModels: false,
       sagemaker: [],
     },
     rag: {
@@ -64,6 +65,7 @@ export function getConfig(): SystemConfig {
           default: true,
         },
       ],
+      crossEncodingEnabled: false,
     },
   };
 }

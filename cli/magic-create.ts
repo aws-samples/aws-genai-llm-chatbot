@@ -146,6 +146,18 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.bedrockRoleArn || "",
     },
     {
+      type: "multiselect",
+      name: "selectedEmbeddingModels",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which Embedding Models do you want to enable",
+      choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one model";
+      },
+    },
+    {
       type: "confirm",
       name: "enableSagemakerModels",
       message: "Do you want to use any Sagemaker Models",
@@ -178,6 +190,12 @@ async function processCreateOptions(options: any): Promise<void> {
       name: "enableRag",
       message: "Do you want to enable RAG",
       initial: options.enableRag || false,
+    },
+    {
+      type: "confirm",
+      name: "enableCrossEncoding",
+      message: "Do you want to enable Cross-Encoding",
+      initial: options.enableCrossEncoding || false,
     },
     {
       type: "multiselect",
@@ -309,6 +327,7 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     llms: {
+      enableSagemakerModels: answers.enableSagemakerModels,
       sagemaker: answers.sagemakerModels,
     },
     rag: {
@@ -328,6 +347,7 @@ async function processCreateOptions(options: any): Promise<void> {
       },
       embeddingsModels: [{}],
       crossEncoderModels: [{}],
+      crossEncodingEnabled: answers.enableCrossEncoding,
     },
   };
 
@@ -336,12 +356,20 @@ async function processCreateOptions(options: any): Promise<void> {
     models.defaultEmbedding = embeddingModels[0].name;
   }
 
-  config.rag.crossEncoderModels[0] = {
-    provider: "sagemaker",
-    name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-    default: true,
-  };
-  config.rag.embeddingsModels = embeddingModels;
+  if (answers.enableCrossEncoding && answers.sagemakerModels.length > 0) {
+    config.rag.crossEncoderModels[0] = {
+      provider: "sagemaker",
+      name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+      default: true,
+    };
+  } else {
+    config.rag.crossEncoderModels[0] = {
+      provider: "None",
+      name: "None",
+      default: true,
+    };
+  }
+  config.rag.embeddingsModels = embeddingModels.filter((model) => answers.selectedEmbeddingModels.includes(model.name));
   config.rag.embeddingsModels.forEach((m: any) => {
     if (m.name === models.defaultEmbedding) {
       m.default = true;

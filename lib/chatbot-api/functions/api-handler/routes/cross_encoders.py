@@ -31,14 +31,15 @@ def models():
 def cross_encoders():
     data: dict = router.current_event.json_body
     request = CrossEncodersRequest(**data)
-    selected_model = genai_core.cross_encoder.get_cross_encoder_model(
-        request.provider, request.model
-    )
+    config = genai_core.parameters.get_config()
+    crossEncodingEnabled = config["rag"]["crossEncodingEnabled"]
+    if (crossEncodingEnabled):
+        selected_model = genai_core.cross_encoder.get_cross_encoder_model(request.provider, request.model)
 
-    if selected_model is None:
-        raise genai_core.types.CommonError("Model not found")
+        if selected_model is None:
+            raise genai_core.types.CommonError("Model not found")
 
-    ret_value = genai_core.cross_encoder.rank_passages(
-        selected_model, request.input, request.passages
-    )
-    return {"ok": True, "data": ret_value}
+        ret_value = genai_core.cross_encoder.rank_passages(selected_model, request.input, request.passages)
+        return {"ok": True, "data": ret_value}
+
+    return {"ok": True, "data": request.passages}
