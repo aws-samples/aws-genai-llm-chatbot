@@ -29,8 +29,6 @@ export class ChatBotApi extends Construct {
   public readonly messagesTopic: sns.Topic;
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
-  public readonly userFeedbackTable: dynamodb.Table;
-  public readonly bySessionIdIndex: string;
   public readonly filesBucket: s3.Bucket;
 
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
@@ -43,8 +41,6 @@ export class ChatBotApi extends Construct {
       ...props,
       sessionsTable: chatTables.sessionsTable,
       byUserIdIndex: chatTables.byUserIdIndex,
-      userFeedbackTable: chatTables.userFeedbackTable,
-      bySessionIdIndex: chatTables.bySessionIdIndex
     });
 
     const webSocketApi = new WebSocketApi(this, "WebSocketApi", props);
@@ -54,8 +50,6 @@ export class ChatBotApi extends Construct {
     this.messagesTopic = webSocketApi.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
-    this.userFeedbackTable = chatTables.userFeedbackTable;
-    this.bySessionIdIndex = chatTables.bySessionIdIndex;
     this.filesBucket = chatBuckets.filesBucket;
   }
 }

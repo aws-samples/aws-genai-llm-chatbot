@@ -27,14 +27,11 @@ import { getSignedUrl } from "./utils";
 
 import "react-json-view-lite/dist/index.css";
 import "../../styles/app.scss";
-import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
   configuration?: ChatBotConfiguration;
   showMetadata?: boolean;
-  onThumbsUp: () => void;
-  onThumbsDown: () => void;
 }
 
 export default function ChatMessage(props: ChatMessageProps) {
@@ -43,7 +40,6 @@ export default function ChatMessage(props: ChatMessageProps) {
   const [files, setFiles] = useState<ImageFile[]>([] as ImageFile[]);
   const [documentIndex, setDocumentIndex] = useState("0");
   const [promptIndex, setPromptIndex] = useState("0");
-  const [selectedIcon, setSelectedIcon] = useState<'thumbsUp' | 'thumbsDown' | null>(null);
 
   useEffect(() => {
     const getSignedUrls = async () => {
@@ -274,26 +270,6 @@ export default function ChatMessage(props: ChatMessageProps) {
               },
             }}
           />
-          <div className={styles.thumbsContainer}>
-            {(selectedIcon === 'thumbsUp' || selectedIcon === null) && (
-              <FaThumbsUp
-                className={`${styles.thumbsIcon} ${styles.thumbsUp} ${selectedIcon === 'thumbsUp' ? styles.selected : ''}`}
-                onClick={() => {
-                  props.onThumbsUp();
-                  setSelectedIcon('thumbsUp');
-                }}
-              />
-            )}
-            {(selectedIcon === 'thumbsDown' || selectedIcon === null) && (
-              <FaThumbsDown
-                className={`${styles.thumbsIcon} ${styles.thumbsDown} ${selectedIcon === 'thumbsDown' ? styles.selected : ''}`}
-                onClick={() => {
-                  props.onThumbsDown();
-                  setSelectedIcon('thumbsDown');
-                }}
-              />
-            )}
-          </div>
         </Container>
       )}
       {loading && (
