@@ -110,7 +110,7 @@ export class OpenSearchVector extends Construct {
 
     const createWorkflow = new CreateOpenSearchWorkspace(
       this,
-      "CreateAuroraWorkspace",
+      "CreateOpenSearchWorkspace",
       {
         config: props.config,
         shared: props.shared,
