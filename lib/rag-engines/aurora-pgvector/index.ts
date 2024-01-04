@@ -27,7 +27,7 @@ export class AuroraPgVector extends Construct {
 
     const dbCluster = new rds.DatabaseCluster(this, "AuroraDatabase", {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
-        version: rds.AuroraPostgresEngineVersion.VER_15_3,
+        version: rds.AuroraPostgresEngineVersion.VER_15_5,
       }),
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       writer: rds.ClusterInstance.serverlessV2("ServerlessInstance"),
