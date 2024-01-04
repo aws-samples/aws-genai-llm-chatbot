@@ -7,7 +7,7 @@ requests-aws4auth==1.2.3
 langchain==0.0.331
 opensearch-py==2.3.1
 psycopg2-binary==2.9.7
-pgvector==0.2.2
+pgvector==0.2.4
 pydantic==2.3.0
 urllib3<2
 openai==0.28.0
