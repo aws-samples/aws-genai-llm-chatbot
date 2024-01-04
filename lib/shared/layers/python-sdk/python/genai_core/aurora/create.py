@@ -57,19 +57,19 @@ def create_workspace_table(workspace: dict):
             if metric == "cosine":
                 cursor.execute(
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING hnsw (embedding vector_cosine_ops);"
+                        "CREATE INDEX ON {table} USING hnsw (content_embeddings vector_cosine_ops);"
                     ).format(table=table_name)
                 )
             elif metric == "l2":
                 cursor.execute(
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING hnsw (embedding vector_l2_ops);"
+                        "CREATE INDEX ON {table} USING hnsw (content_embeddings vector_l2_ops);"
                     ).format(table=table_name)
                 )
             elif metric == "inner":
                 cursor.execute(
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING hnsw (embedding vector_ip_ops);"
+                        "CREATE INDEX ON {table} USING hnsw (content_embeddings vector_ip_ops);"
                     ).format(table=table_name)
                 )
 
