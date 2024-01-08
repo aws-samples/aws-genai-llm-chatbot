@@ -44,6 +44,7 @@ export enum SupportedRegion {
 export enum ModelInterface {
   LangChain = "langchain",
   Idefics = "idefics",
+  BedrockAgent = "bedrock-agent",
 }
 
 export enum Modality {
@@ -68,7 +69,10 @@ export interface SystemConfig {
     region?: SupportedRegion;
     endpointUrl?: string;
     roleArn?: string;
+    bedrockAgentAliasId?: string;
+    bedrockAgentId?: string;
   };
+
   llms: {
     sagemaker: SupportedSageMakerModels[];
   };

@@ -11,6 +11,7 @@ import { LangChainInterface } from "./model-interfaces/langchain";
 import { IdeficsInterface } from "./model-interfaces/idefics";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sns from "aws-cdk-lib/aws-sns";
+import { BedrockAgentInterface } from "./model-interfaces/bedrock-agents";
 
 export interface AwsGenAILLMChatbotStackProps extends cdk.StackProps {
   readonly config: SystemConfig;
@@ -57,6 +58,44 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     const langchainModels = models.models.filter(
       (model) => model.interface === ModelInterface.LangChain
     );
+
+    if (
+      props.config.bedrock?.enabled &&
+      props.config.bedrock?.bedrockAgentAliasId &&
+      props.config.bedrock?.bedrockAgentId
+    ) {
+      const bedrockAgentInterface = new BedrockAgentInterface(
+        this,
+        "IBedrockAgent",
+        {
+          shared,
+          config: props.config,
+          messagesTopic: chatBotApi.messagesTopic,
+          sessionsTable: chatBotApi.sessionsTable,
+          byUserIdIndex: chatBotApi.byUserIdIndex,
+        }
+      );
+
+      chatBotApi.messagesTopic.addSubscription(
+        new subscriptions.SqsSubscription(
+          bedrockAgentInterface.ingestionQueue,
+          {
+            filterPolicyWithMessageBody: {
+              direction: sns.FilterOrPolicy.filter(
+                sns.SubscriptionFilter.stringFilter({
+                  allowlist: [Direction.In],
+                })
+              ),
+              modelInterface: sns.FilterOrPolicy.filter(
+                sns.SubscriptionFilter.stringFilter({
+                  allowlist: [ModelInterface.BedrockAgent],
+                })
+              ),
+            },
+          }
+        )
+      );
+    }
 
     // check if any deployed model requires langchain interface or if bedrock is enabled from config
     if (langchainModels.length > 0 || props.config.bedrock?.enabled) {
