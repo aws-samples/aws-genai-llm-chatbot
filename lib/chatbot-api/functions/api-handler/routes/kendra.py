@@ -23,11 +23,8 @@ def kendra_indexes():
 
 @router.resolver(field_name="startKendraDataSync")
 @tracer.capture_method
-def kendra_data_sync():
-    data: dict = router.current_event.json_body
-    request = KendraDataSynchRequest(**data)
-
-    genai_core.kendra.start_kendra_data_sync(workspace_id=request.workspaceId)
+def kendra_data_sync(workspaceId: str):
+    genai_core.kendra.start_kendra_data_sync(workspace_id=workspaceId)
 
     return True
 
