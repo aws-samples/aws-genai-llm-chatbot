@@ -46,7 +46,7 @@ export class OpenSearchVector extends Construct {
     let seen = new Set<string>();
     const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
       name: Utils.getName(props.config, "genaichatbot-vpce"),
-      subnetIds: props.shared.vpc
+      subnetIds: props.shared.vpc.privateSubnets
         .filter((obj) => {
           if (seen.has(obj.availabilityZone)) {
             return false;
@@ -55,7 +55,7 @@ export class OpenSearchVector extends Construct {
             return true;
           }
         })
-        .privateSubnets.map((subnet) => subnet.subnetId),
+        .map((subnet) => subnet.subnetId),
       vpcId: props.shared.vpc.vpcId,
       securityGroupIds: [sg.securityGroupId],
     });
