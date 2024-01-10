@@ -42,11 +42,20 @@ export class OpenSearchVector extends Construct {
       ec2.Port.tcp(443)
     );
 
+    // Make sure the subnets are not in the same availability zone.
+    let seen = new Set<string>();
     const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
       name: Utils.getName(props.config, "genaichatbot-vpce"),
-      subnetIds: props.shared.vpc.privateSubnets.map(
-        (subnet) => subnet.subnetId
-      ),
+      subnetIds: props.shared.vpc
+        .filter((obj) => {
+          if (seen.has(obj.availabilityZone)) {
+            return false;
+          } else {
+            seen.add(obj.availabilityZone);
+            return true;
+          }
+        })
+        .privateSubnets.map((subnet) => subnet.subnetId),
       vpcId: props.shared.vpc.vpcId,
       securityGroupIds: [sg.securityGroupId],
     });
@@ -101,7 +110,7 @@ export class OpenSearchVector extends Construct {
 
     const createWorkflow = new CreateOpenSearchWorkspace(
       this,
-      "CreateAuroraWorkspace",
+      "CreateOpenSearchWorkspace",
       {
         config: props.config,
         shared: props.shared,
