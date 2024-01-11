@@ -130,4 +130,9 @@ export class Utils {
 
     return result !== null;
   }
+
+  static isUserAdmin(email: string) {
+    const adminEmails = import.meta.env.VITE_ADMIN_EMAIL?.split(',') ?? [];
+    return adminEmails.includes(email);
+  }
 }

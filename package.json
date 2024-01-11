@@ -5,7 +5,7 @@
     "aws-genai-llm-chatbot": "bin/aws-genai-llm-chatbot.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit",
     "watch": "tsc -w",
     "cdk": "cdk",
     "create": "node ./cli/magic.js create",
@@ -26,7 +26,7 @@
     "@types/node": "20.1.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "aws-cdk": "2.114.1",
+    "aws-cdk": "2.118.0",
     "eslint": "^8.45.0",
     "prettier": "^3.0.3",
     "ts-node": "^10.9.1",
@@ -38,7 +38,7 @@
     "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.114.1-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.114.1-alpha.0",
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.114.1-alpha.0",
-    "aws-cdk-lib": "2.114.1",
+    "aws-cdk-lib": "2.118.0",
     "commander": "^11.0.0",
     "constructs": "^10.0.0",
     "enquirer": "^2.4.1",

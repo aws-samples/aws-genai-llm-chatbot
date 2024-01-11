@@ -246,7 +246,7 @@ export class UserInterface extends Construct {
           "-c",
           [
             "npm --cache /tmp/.npm install",
-            `npm --cache /tmp/.npm run build`,
+            "npm --cache /tmp/.npm run build",
             "cp -aur /asset-input/dist/* /asset-output/",
           ].join(" && "),
         ],

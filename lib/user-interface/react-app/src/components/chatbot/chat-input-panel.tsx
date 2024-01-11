@@ -55,6 +55,7 @@ import {
   getSignedUrl,
   updateMessageHistory,
 } from "./utils";
+import { Utils } from "../../common/utils";
 
 export interface ChatInputPanelProps {
   running: boolean;
@@ -98,6 +99,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     modelsStatus: "loading",
     workspacesStatus: "loading",
   });
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
+
   const [configDialogVisible, setConfigDialogVisible] = useState(false);
   const [imageDialogVisible, setImageDialogVisible] = useState(false);
   const [files, setFiles] = useState<ImageFile[]>([]);
@@ -135,6 +138,14 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       }
     },
   });
+
+  useEffect(() => {
+    (async () => {
+      const result = await Auth.currentUserInfo();
+      const userName = result?.attributes?.email ?? '';
+      setUserIsAdmin(Utils.isUserAdmin(userName));
+    })();
+  }, []);
 
   useEffect(() => {
     if (transcript) {
@@ -338,6 +349,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     ...OptionsHelper.getSelectOptions(state.workspaces || []),
   ];
 
+
   return (
     <SpaceBetween direction="vertical" size="l">
       <Container>
@@ -457,7 +469,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               : styles.input_controls_selects_1
           }
         >
-          <Select
+         {userIsAdmin ? (<Select
             disabled={props.running}
             statusType={state.modelsStatus}
             loadingText="Loading models (might take few seconds)..."
@@ -485,8 +497,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               }
             }}
             options={modelsOptions}
-          />
-          {appContext?.config.rag_enabled && (
+          />) : null}
+          {userIsAdmin && appContext?.config.rag_enabled ? (
             <Select
               disabled={
                 props.running || !state.selectedModelMetadata?.ragSupported
@@ -513,7 +525,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               }}
               empty={"No Workspaces available"}
             />
-          )}
+          ) : null}
         </div>
         <div className={styles.input_controls_right}>
           <SpaceBetween direction="horizontal" size="xxs" alignItems="center">
@@ -600,7 +612,10 @@ function getSelectedModelOption(
     const sageMakerModels = models.filter((m) => m.provider === "sagemaker");
     const openAIModels = models.filter((m) => m.provider === "openai");
 
-    candidate = bedrockModels.find((m) => m.name === "anthropic.claude-v2");
+    candidate = bedrockModels.find((m) => m.name === "anthropic.claude-v2:1");
+    if (!candidate) {
+      candidate = bedrockModels.find((m) => m.name === "anthropic.claude-v2");
+    }
     if (!candidate) {
       candidate = bedrockModels.find((m) => m.name === "anthropic.claude-v1");
     }

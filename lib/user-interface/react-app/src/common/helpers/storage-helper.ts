@@ -55,7 +55,7 @@ export abstract class StorageHelper {
 
   static getSelectedLLM() {
     const value = localStorage.getItem(SELECTED_MODEL_STORAGE_NAME) ?? null;
-
+console.log('getSelectedLLM', value)
     return value;
   }
 
