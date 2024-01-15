@@ -10,14 +10,13 @@ import {
   Flashbar,
 } from "@cloudscape-design/components";
 import { Labels } from "../../../common/constants";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { Utils } from "../../../common/utils";
+import { Workspace } from "../../../API";
 
 export interface KendraWorkspaceSettingsProps {
-  workspace: WorkspaceItem;
+  workspace: Workspace;
 }
 
 export default function KendraWorkspaceSettings(
@@ -33,10 +32,14 @@ export default function KendraWorkspaceSettings(
     const apiClient = new ApiClient(appContext);
 
     const getStatus = async () => {
-      const result = await apiClient.kendra.kendraIsSyncing(props.workspace.id);
+      try {
+        const result = await apiClient.kendra.kendraIsSyncing(
+          props.workspace.id
+        );
 
-      if (ResultValue.ok(result)) {
-        setKendraIndexSyncing(result.data === true);
+        setKendraIndexSyncing(result.data?.isKendraDataSynching === true);
+      } catch (error) {
+        console.error(error);
       }
     };
 
@@ -54,14 +57,13 @@ export default function KendraWorkspaceSettings(
     setGlobalError("");
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.kendra.startKendraDataSync(
-      props.workspace.id
-    );
+    try {
+      await apiClient.kendra.startKendraDataSync(props.workspace.id);
 
-    if (ResultValue.ok(result)) {
       setKendraIndexSyncing(true);
-    } else {
-      setGlobalError(Utils.getErrorMessage(result));
+    } catch (error: any) {
+      console.error(error);
+      setGlobalError(error.errors.map((e: any) => e.message).join(","));
     }
 
     setSendingRequest(false);
@@ -107,9 +109,9 @@ export default function KendraWorkspaceSettings(
                 <Box variant="awsui-key-label">Status</Box>
                 <div>
                   <StatusIndicator
-                    type={Labels.statusTypeMap[props.workspace.status]}
+                    type={Labels.statusTypeMap[props.workspace.status!]}
                   >
-                    {Labels.statusMap[props.workspace.status]}
+                    {Labels.statusMap[props.workspace.status!]}
                   </StatusIndicator>
                 </div>
               </div>
@@ -125,18 +127,14 @@ export default function KendraWorkspaceSettings(
                 <div>
                   <Box variant="awsui-key-label">External</Box>
                   <div>
-                    {props.workspace.kendraIndexExternal === true
-                      ? "Yes"
-                      : "No"}
+                    {props.workspace.kendraIndexExternal ? "Yes" : "No"}
                   </div>
                 </div>
               )}
               {typeof props.workspace.kendraUseAllData !== "undefined" && (
                 <div>
                   <Box variant="awsui-key-label">Use All Data</Box>
-                  <div>
-                    {props.workspace.kendraUseAllData === true ? "Yes" : "No"}
-                  </div>
+                  <div>{props.workspace.kendraUseAllData ? "Yes" : "No"}</div>
                 </div>
               )}
             </SpaceBetween>

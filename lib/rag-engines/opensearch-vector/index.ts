@@ -45,7 +45,10 @@ export class OpenSearchVector extends Construct {
     const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
       name: Utils.getName(props.config, "genaichatbot-vpce"),
       // Make sure the subnets are not in the same availability zone.
-      subnetIds: props.shared.vpc.selectSubnets({onePerAz: true, subnetType: ec2.SubnetType.PRIVATE_ISOLATED}).subnetIds,
+      subnetIds: props.shared.vpc.selectSubnets({
+        onePerAz: true,
+        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+      }).subnetIds,
       vpcId: props.shared.vpc.vpcId,
       securityGroupIds: [sg.securityGroupId],
     });

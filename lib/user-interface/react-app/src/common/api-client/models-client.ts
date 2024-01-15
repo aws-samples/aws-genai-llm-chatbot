@@ -1,17 +1,14 @@
-import { ApiResult, ModelItem } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import { listModels } from "../../graphql/queries";
+import { ListModelsQuery } from "../../API";
 
-export class ModelsClient extends ApiClientBase {
-  async getModels(): Promise<ApiResult<ModelItem[]>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/models"), {
-        headers,
-      });
+export class ModelsClient {
+  async getModels(): Promise<GraphQLResult<GraphQLQuery<ListModelsQuery>>> {
+    const result = await API.graphql<GraphQLQuery<ListModelsQuery>>({
+      query: listModels,
+    });
 
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+    return result;
   }
 }

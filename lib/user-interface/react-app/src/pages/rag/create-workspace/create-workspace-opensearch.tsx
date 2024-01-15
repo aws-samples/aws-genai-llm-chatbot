@@ -3,10 +3,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Utils } from "../../../common/utils";
 import { useForm } from "../../../common/hooks/use-form";
-import {
-  OpenSearchWorkspaceCreateInput,
-  ResultValue,
-} from "../../../common/types";
+import { OpenSearchWorkspaceCreateInput } from "../../../common/types";
 import { EmbeddingsModelHelper } from "../../../common/helpers/embeddings-model-helper";
 import { AppContext } from "../../../common/app-context";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
@@ -108,26 +105,26 @@ export default function CreateWorkspaceOpenSearch() {
     );
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.createOpenSearchWorkspace({
-      name: data.name.trim(),
-      embeddingsModelProvider: embeddingsModel.provider,
-      embeddingsModelName: embeddingsModel.name,
-      crossEncoderModelProvider: crossEncoderModel.provider,
-      crossEncoderModelName: crossEncoderModel.name,
-      languages: data.languages.map((x) => x.value ?? ""),
-      hybridSearch: data.hybridSearch,
-      chunking_strategy: "recursive",
-      chunkSize: data.chunkSize,
-      chunkOverlap: data.chunkOverlap,
-    });
+    try {
+      await apiClient.workspaces.createOpenSearchWorkspace({
+        name: data.name.trim(),
+        embeddingsModelProvider: embeddingsModel.provider,
+        embeddingsModelName: embeddingsModel.name,
+        crossEncoderModelProvider: crossEncoderModel.provider,
+        crossEncoderModelName: crossEncoderModel.name,
+        languages: data.languages.map((x) => x.value ?? ""),
+        hybridSearch: data.hybridSearch,
+        chunkingStrategy: "recursive",
+        chunkSize: data.chunkSize,
+        chunkOverlap: data.chunkOverlap,
+      });
 
-    if (ResultValue.ok(result)) {
       navigate("/rag/workspaces");
       return;
+    } catch (e) {
+      setSubmitting(false);
+      setGlobalError("Something went wrong");
     }
-
-    setSubmitting(false);
-    setGlobalError("Something went wrong");
   };
 
   if (Utils.isDevelopment()) {

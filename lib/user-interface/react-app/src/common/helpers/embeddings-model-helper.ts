@@ -1,5 +1,5 @@
 import { SelectProps } from "@cloudscape-design/components";
-import { EmbeddingsModelItem } from "../types";
+import { EmbeddingModel } from "../../API";
 
 export abstract class EmbeddingsModelHelper {
   static getSelectOption(model?: string): SelectProps.Option | null {
@@ -32,8 +32,8 @@ export abstract class EmbeddingsModelHelper {
     };
   }
 
-  static getSelectOptions(embeddingsModels: EmbeddingsModelItem[]) {
-    const modelsMap = new Map<string, EmbeddingsModelItem[]>();
+  static getSelectOptions(embeddingsModels: EmbeddingModel[]) {
+    const modelsMap = new Map<string, EmbeddingModel[]>();
     embeddingsModels.forEach((model) => {
       let items = modelsMap.get(model.provider);
       if (!items) {

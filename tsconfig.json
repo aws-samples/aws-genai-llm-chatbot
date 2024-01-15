@@ -19,5 +19,9 @@
     "strictPropertyInitialization": false,
     "typeRoots": ["./node_modules/@types"]
   },
-  "exclude": ["node_modules", "cdk.out", "lib/user-interface/react-app"]
+  "exclude": [
+    "node_modules",
+    "cdk.out",
+    "lib/user-interface/react-app",
+  ]
 }

@@ -1,7 +1,7 @@
 import genai_core.semantic_search
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler.api_gateway import Router
+from aws_lambda_powertools.event_handler.appsync import Router
 
 tracer = Tracer()
 router = Router()
@@ -13,12 +13,10 @@ class SemanticSearchRequest(BaseModel):
     query: str
 
 
-@router.post("/semantic-search")
+@router.resolver(field_name="performSemanticSearch")
 @tracer.capture_method
-def semantic_search():
-    data: dict = router.current_event.json_body
-    request = SemanticSearchRequest(**data)
-
+def semantic_search(input: dict):
+    request = SemanticSearchRequest(**input)
     if len(request.query) == 0 or len(request.query) > 1000:
         raise genai_core.types.CommonError(
             "Query must be between 1 and 1000 characters"
@@ -32,7 +30,7 @@ def semantic_search():
     )
     result = _convert_semantic_search_result(request.workspaceId, result)
 
-    return {"ok": True, "data": result}
+    return result
 
 
 def _convert_semantic_search_result(workspace_id: str, result: dict):
@@ -54,7 +52,7 @@ def _convert_semantic_search_result(workspace_id: str, result: dict):
     ret_value = {
         "engine": result["engine"],
         "workspaceId": workspace_id,
-        "queryLanguage": result.get("query_language"),
+        "queryLanguage": result.get("query_language", "en"),
         "supportedLanguages": result.get("supported_languages"),
         "detectedLanguages": result.get("detected_languages"),
         "items": items,
@@ -80,7 +78,7 @@ def _convert_semantic_search_item(item: dict):
         "title": item["title"],
         "content": item["content"],
         "contentComplement": item["content_complement"],
-        "vectorSearchScore": item.get("vector_search_score"),
+        "vectorSearchScore": item.get("vector_search_score", 0),
         "keywordSearchScore": item.get("keyword_search_score"),
         "score": item["score"],
     }

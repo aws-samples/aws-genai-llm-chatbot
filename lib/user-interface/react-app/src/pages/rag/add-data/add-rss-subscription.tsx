@@ -15,13 +15,13 @@ import { useContext, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { useNavigate } from "react-router-dom";
 import { Utils } from "../../../common/utils";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { ApiClient } from "../../../common/api-client/api-client";
+import { Workspace } from "../../../API";
 
 export interface AddRssSubscriptionProps {
   data: AddDataData;
   validate: () => boolean;
-  selectedWorkspace?: WorkspaceItem;
+  selectedWorkspace?: Workspace;
   submitting: boolean;
   setSubmitting: (submitting: boolean) => void;
 }
@@ -77,15 +77,15 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
     setGlobalError(undefined);
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.documents.addRssFeedSubscription(
-      props.data.workspace.value,
-      data.rssFeedUrl,
-      data.rssFeedTitle,
-      data.linkLimit,
-      data.followLinks
-    );
+    try {
+      await apiClient.documents.addRssFeedSubscription(
+        props.data.workspace.value,
+        data.rssFeedUrl,
+        data.rssFeedTitle,
+        data.linkLimit,
+        data.followLinks
+      );
 
-    if (ResultValue.ok(result)) {
       setFlashbarItem({
         type: "success",
         content: "RSS Feed subscribed successfully",
@@ -101,8 +101,9 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
 
       onChange({ rssFeedUrl: "" }, true);
       onChange({ rssFeedTitle: "" }, true);
-    } else {
-      setGlobalError(Utils.getErrorMessage(result));
+    } catch (error: any) {
+      console.error(Utils.getErrorMessage(error));
+      setGlobalError(Utils.getErrorMessage(error));
     }
 
     props.setSubmitting(false);
