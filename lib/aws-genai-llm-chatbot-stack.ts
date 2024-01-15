@@ -271,6 +271,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/RssIngestor/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/RssIngestor/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/triggerRssIngestorsFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/triggerRssIngestorsFunction/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/crawlQueuedRssPostsFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/crawlQueuedRssPostsFunction/ServiceRole/DefaultPolicy/Resource`
         ],
         [
           {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
@@ -323,9 +329,9 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         if (props.config.rag.engines.opensearch.enabled) {
           NagSuppressions.addResourceSuppressionsByPath(this,
             [
-              `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/Resource`,
-              `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
-              `/${this.stackName}/RagEngines/OpenSearchVector/CreateAuroraWorkspace/CreateOpenSearchWorkspace/Role/DefaultPolicy/Resource`,
+              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/Resource`,
+              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspace/Role/DefaultPolicy/Resource`,
             ],
             [
               {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
@@ -338,11 +344,18 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         NagSuppressions.addResourceSuppressionsByPath(this,
           [
             `/${this.stackName}/RagEngines/KendraRetrieval/CreateAuroraWorkspace/CreateKendraWorkspace/Role/DefaultPolicy/Resource`,
-            `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
           ],
           [
             {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
             {id: "AwsSolutions-IAM5", reason: "IAM role implicitly created by CDK."},
+          ]
+        );
+        NagSuppressions.addResourceSuppressionsByPath(this,
+          [
+            `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`
+          ],
+          [
+            {id: "AwsSolutions-IAM5", reason: "Access to all log groups required for CloudWatch log group creation."},
           ]
         );
       }
@@ -350,7 +363,13 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     // Implicitly created resources with changing paths
     NagSuppressions.addStackSuppressions(this,
       [
-        {id: "CdkNagValidationFailure", reason: "Intrinstic function references."}
+        {id: "CdkNagValidationFailure", reason: "Intrinstic function references."},
+      ]
+    );
+    // Lambda functions still using Python 3.11 even though latest runtime is 3.12. Can be removed after upgrade.
+    NagSuppressions.addStackSuppressions(this,
+      [
+        {id: "AwsSolutions-L1", reason: "Not yet upgraded from Python 3.11 to 3.12."}
       ]
     );
   }
