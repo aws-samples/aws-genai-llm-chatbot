@@ -273,7 +273,7 @@ type Workspace @aws_cognito_user_pools {
   documents: Int
   sizeInBytes: Int
   kendraIndexId: String
-  kendraIndexExternal: String
+  kendraIndexExternal: Boolean
   kendraUseAllData: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
