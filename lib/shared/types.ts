@@ -90,6 +90,7 @@ export interface SystemConfig {
           region?: SupportedRegion;
           roleArn?: string;
         }[];
+        enterprise?: boolean;
       };
     };
     embeddingsModels: {

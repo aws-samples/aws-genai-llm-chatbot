@@ -58,7 +58,7 @@ export class KendraRetrieval extends Construct {
       dataBucket.grantRead(kendraRole);
 
       const kendraIndex = new kendra.CfnIndex(this, "Index", {
-        edition: "DEVELOPER_EDITION",
+        edition: props.config.rag?.engines.kendra?.enterprise ? "ENTERPRISE_EDITION" : "DEVELOPER_EDITION",
         name: indexName,
         roleArn: kendraRole.roleArn,
         documentMetadataConfigurations: [
