@@ -21,7 +21,6 @@ def handler(event, context: LambdaContext):
         "action": request["action"],
         "modelInterface": request["modelInterface"],
         "direction": "IN",
-        "connectionId": "connection_id",
         "timestamp": str(int(round(datetime.now().timestamp()))),
         "userId": event["identity"]["sub"],
         "data": request.get("data", {}),

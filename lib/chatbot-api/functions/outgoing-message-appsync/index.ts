@@ -29,7 +29,6 @@ const recordHandler = async (record: SQSRecord): Promise<void> => {
       detail: dict = json.loads(message["Message"])
       logger.info(detail)
       user_id = detail["userId"]
-      connection_id = detail["connectionId"]
     */
 
     const query = /* GraphQL */ `
