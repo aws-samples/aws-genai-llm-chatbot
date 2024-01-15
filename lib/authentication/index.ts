@@ -25,7 +25,7 @@ export class Authentication extends Construct {
       },
       customAttributes: {
         userRole: new cognito.StringAttribute({ mutable: true }),
-      }
+      },
     });
 
     const userPoolClient = userPool.addClient("UserPoolClient", {

@@ -27,7 +27,6 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pages, setPages] = useState<(DocumentsResult | undefined)[]>([]);
 
-
   const getDocuments = useCallback(
     async (params: { lastDocumentId?: string; pageIndex?: number }) => {
       if (!appContext) return;

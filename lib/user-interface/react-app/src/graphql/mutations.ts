@@ -8,7 +8,8 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const createKendraWorkspace = /* GraphQL */ `mutation CreateKendraWorkspace($input: CreateWorkspaceKendraInput!) {
+export const createKendraWorkspace =
+  /* GraphQL */ `mutation CreateKendraWorkspace($input: CreateWorkspaceKendraInput!) {
   createKendraWorkspace(input: $input) {
     id
     name
@@ -41,10 +42,11 @@ export const createKendraWorkspace = /* GraphQL */ `mutation CreateKendraWorkspa
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateKendraWorkspaceMutationVariables,
-  APITypes.CreateKendraWorkspaceMutation
->;
-export const createOpenSearchWorkspace = /* GraphQL */ `mutation CreateOpenSearchWorkspace($input: CreateWorkspaceOpenSearchInput!) {
+    APITypes.CreateKendraWorkspaceMutationVariables,
+    APITypes.CreateKendraWorkspaceMutation
+  >;
+export const createOpenSearchWorkspace =
+  /* GraphQL */ `mutation CreateOpenSearchWorkspace($input: CreateWorkspaceOpenSearchInput!) {
   createOpenSearchWorkspace(input: $input) {
     id
     name
@@ -77,10 +79,11 @@ export const createOpenSearchWorkspace = /* GraphQL */ `mutation CreateOpenSearc
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateOpenSearchWorkspaceMutationVariables,
-  APITypes.CreateOpenSearchWorkspaceMutation
->;
-export const createAuroraWorkspace = /* GraphQL */ `mutation CreateAuroraWorkspace($input: CreateWorkspaceAuroraInput!) {
+    APITypes.CreateOpenSearchWorkspaceMutationVariables,
+    APITypes.CreateOpenSearchWorkspaceMutation
+  >;
+export const createAuroraWorkspace =
+  /* GraphQL */ `mutation CreateAuroraWorkspace($input: CreateWorkspaceAuroraInput!) {
   createAuroraWorkspace(input: $input) {
     id
     name
@@ -113,24 +116,27 @@ export const createAuroraWorkspace = /* GraphQL */ `mutation CreateAuroraWorkspa
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateAuroraWorkspaceMutationVariables,
-  APITypes.CreateAuroraWorkspaceMutation
->;
-export const startKendraDataSync = /* GraphQL */ `mutation StartKendraDataSync($workspaceId: String!) {
+    APITypes.CreateAuroraWorkspaceMutationVariables,
+    APITypes.CreateAuroraWorkspaceMutation
+  >;
+export const startKendraDataSync =
+  /* GraphQL */ `mutation StartKendraDataSync($workspaceId: String!) {
   startKendraDataSync(workspaceId: $workspaceId)
 }
 ` as GeneratedMutation<
-  APITypes.StartKendraDataSyncMutationVariables,
-  APITypes.StartKendraDataSyncMutation
->;
-export const deleteWorkspace = /* GraphQL */ `mutation DeleteWorkspace($workspaceId: String!) {
+    APITypes.StartKendraDataSyncMutationVariables,
+    APITypes.StartKendraDataSyncMutation
+  >;
+export const deleteWorkspace =
+  /* GraphQL */ `mutation DeleteWorkspace($workspaceId: String!) {
   deleteWorkspace(workspaceId: $workspaceId)
 }
 ` as GeneratedMutation<
-  APITypes.DeleteWorkspaceMutationVariables,
-  APITypes.DeleteWorkspaceMutation
->;
-export const addTextDocument = /* GraphQL */ `mutation AddTextDocument($input: TextDocumentInput!) {
+    APITypes.DeleteWorkspaceMutationVariables,
+    APITypes.DeleteWorkspaceMutation
+  >;
+export const addTextDocument =
+  /* GraphQL */ `mutation AddTextDocument($input: TextDocumentInput!) {
   addTextDocument(input: $input) {
     workspaceId
     documentId
@@ -139,10 +145,11 @@ export const addTextDocument = /* GraphQL */ `mutation AddTextDocument($input: T
   }
 }
 ` as GeneratedMutation<
-  APITypes.AddTextDocumentMutationVariables,
-  APITypes.AddTextDocumentMutation
->;
-export const addQnADocument = /* GraphQL */ `mutation AddQnADocument($input: QnADocumentInput!) {
+    APITypes.AddTextDocumentMutationVariables,
+    APITypes.AddTextDocumentMutation
+  >;
+export const addQnADocument =
+  /* GraphQL */ `mutation AddQnADocument($input: QnADocumentInput!) {
   addQnADocument(input: $input) {
     workspaceId
     documentId
@@ -151,10 +158,11 @@ export const addQnADocument = /* GraphQL */ `mutation AddQnADocument($input: QnA
   }
 }
 ` as GeneratedMutation<
-  APITypes.AddQnADocumentMutationVariables,
-  APITypes.AddQnADocumentMutation
->;
-export const setDocumentSubscriptionStatus = /* GraphQL */ `mutation SetDocumentSubscriptionStatus(
+    APITypes.AddQnADocumentMutationVariables,
+    APITypes.AddQnADocumentMutation
+  >;
+export const setDocumentSubscriptionStatus =
+  /* GraphQL */ `mutation SetDocumentSubscriptionStatus(
   $input: DocumentSubscriptionStatusInput!
 ) {
   setDocumentSubscriptionStatus(input: $input) {
@@ -165,10 +173,11 @@ export const setDocumentSubscriptionStatus = /* GraphQL */ `mutation SetDocument
   }
 }
 ` as GeneratedMutation<
-  APITypes.SetDocumentSubscriptionStatusMutationVariables,
-  APITypes.SetDocumentSubscriptionStatusMutation
->;
-export const addWebsite = /* GraphQL */ `mutation AddWebsite($input: WebsiteInput!) {
+    APITypes.SetDocumentSubscriptionStatusMutationVariables,
+    APITypes.SetDocumentSubscriptionStatusMutation
+  >;
+export const addWebsite =
+  /* GraphQL */ `mutation AddWebsite($input: WebsiteInput!) {
   addWebsite(input: $input) {
     workspaceId
     documentId
@@ -177,10 +186,11 @@ export const addWebsite = /* GraphQL */ `mutation AddWebsite($input: WebsiteInpu
   }
 }
 ` as GeneratedMutation<
-  APITypes.AddWebsiteMutationVariables,
-  APITypes.AddWebsiteMutation
->;
-export const addRssFeed = /* GraphQL */ `mutation AddRssFeed($input: RssFeedInput!) {
+    APITypes.AddWebsiteMutationVariables,
+    APITypes.AddWebsiteMutation
+  >;
+export const addRssFeed =
+  /* GraphQL */ `mutation AddRssFeed($input: RssFeedInput!) {
   addRssFeed(input: $input) {
     workspaceId
     documentId
@@ -189,10 +199,11 @@ export const addRssFeed = /* GraphQL */ `mutation AddRssFeed($input: RssFeedInpu
   }
 }
 ` as GeneratedMutation<
-  APITypes.AddRssFeedMutationVariables,
-  APITypes.AddRssFeedMutation
->;
-export const updateRssFeed = /* GraphQL */ `mutation UpdateRssFeed($input: RssFeedInput!) {
+    APITypes.AddRssFeedMutationVariables,
+    APITypes.AddRssFeedMutation
+  >;
+export const updateRssFeed =
+  /* GraphQL */ `mutation UpdateRssFeed($input: RssFeedInput!) {
   updateRssFeed(input: $input) {
     workspaceId
     documentId
@@ -201,9 +212,9 @@ export const updateRssFeed = /* GraphQL */ `mutation UpdateRssFeed($input: RssFe
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateRssFeedMutationVariables,
-  APITypes.UpdateRssFeedMutation
->;
+    APITypes.UpdateRssFeedMutationVariables,
+    APITypes.UpdateRssFeedMutation
+  >;
 export const deleteUserSessions = /* GraphQL */ `mutation DeleteUserSessions {
   deleteUserSessions {
     id
@@ -215,7 +226,8 @@ export const deleteUserSessions = /* GraphQL */ `mutation DeleteUserSessions {
   APITypes.DeleteUserSessionsMutationVariables,
   APITypes.DeleteUserSessionsMutation
 >;
-export const deleteSession = /* GraphQL */ `mutation DeleteSession($id: String!) {
+export const deleteSession =
+  /* GraphQL */ `mutation DeleteSession($id: String!) {
   deleteSession(id: $id) {
     id
     deleted
@@ -223,9 +235,9 @@ export const deleteSession = /* GraphQL */ `mutation DeleteSession($id: String!)
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteSessionMutationVariables,
-  APITypes.DeleteSessionMutation
->;
+    APITypes.DeleteSessionMutationVariables,
+    APITypes.DeleteSessionMutation
+  >;
 export const sendQuery = /* GraphQL */ `mutation SendQuery($data: String) {
   sendQuery(data: $data)
 }
@@ -233,7 +245,8 @@ export const sendQuery = /* GraphQL */ `mutation SendQuery($data: String) {
   APITypes.SendQueryMutationVariables,
   APITypes.SendQueryMutation
 >;
-export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionId: String, $userId: String, $data: String) {
+export const publishResponse =
+  /* GraphQL */ `mutation PublishResponse($sessionId: String, $userId: String, $data: String) {
   publishResponse(sessionId: $sessionId, userId: $userId, data: $data) {
     data
     sessionId
@@ -242,10 +255,11 @@ export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionI
   }
 }
 ` as GeneratedMutation<
-  APITypes.PublishResponseMutationVariables,
-  APITypes.PublishResponseMutation
->;
-export const createUser = /* GraphQL */ `mutation CreateUser($input: ManageUserDataInput!) {
+    APITypes.PublishResponseMutationVariables,
+    APITypes.PublishResponseMutation
+  >;
+export const createUser =
+  /* GraphQL */ `mutation CreateUser($input: ManageUserDataInput!) {
   createUser(input: $input) {
     name
     email
@@ -256,10 +270,11 @@ export const createUser = /* GraphQL */ `mutation CreateUser($input: ManageUserD
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateUserMutationVariables,
-  APITypes.CreateUserMutation
->;
-export const editUser = /* GraphQL */ `mutation EditUser($input: ManageUserDataInput!) {
+    APITypes.CreateUserMutationVariables,
+    APITypes.CreateUserMutation
+  >;
+export const editUser =
+  /* GraphQL */ `mutation EditUser($input: ManageUserDataInput!) {
   editUser(input: $input) {
     name
     email
@@ -270,48 +285,30 @@ export const editUser = /* GraphQL */ `mutation EditUser($input: ManageUserDataI
   }
 }
 ` as GeneratedMutation<
-  APITypes.EditUserMutationVariables,
-  APITypes.EditUserMutation
->;
-export const toggleUser = /* GraphQL */ `mutation ToggleUser($input: ManageUserStateInput) {
-  toggleUser(input: $input) {
-    name
-    email
-    role
-    phoneNumber
-    previousEmail
-    __typename
-  }
+    APITypes.EditUserMutationVariables,
+    APITypes.EditUserMutation
+  >;
+export const toggleUser =
+  /* GraphQL */ `mutation ToggleUser($input: ManageUserStateInput) {
+  toggleUser(input: $input)
 }
 ` as GeneratedMutation<
-  APITypes.ToggleUserMutationVariables,
-  APITypes.ToggleUserMutation
->;
-export const resetUserPassword = /* GraphQL */ `mutation ResetUserPassword($input: ManageUserStateInput) {
-  resetUserPassword(input: $input) {
-    name
-    email
-    role
-    phoneNumber
-    previousEmail
-    __typename
-  }
+    APITypes.ToggleUserMutationVariables,
+    APITypes.ToggleUserMutation
+  >;
+export const resetUserPassword =
+  /* GraphQL */ `mutation ResetUserPassword($input: ManageUserStateInput) {
+  resetUserPassword(input: $input)
 }
 ` as GeneratedMutation<
-  APITypes.ResetUserPasswordMutationVariables,
-  APITypes.ResetUserPasswordMutation
->;
-export const deleteUser = /* GraphQL */ `mutation DeleteUser($input: ManageUserStateInput) {
-  deleteUser(input: $input) {
-    name
-    email
-    role
-    phoneNumber
-    previousEmail
-    __typename
-  }
+    APITypes.ResetUserPasswordMutationVariables,
+    APITypes.ResetUserPasswordMutation
+  >;
+export const deleteUser =
+  /* GraphQL */ `mutation DeleteUser($input: ManageUserStateInput) {
+  deleteUser(input: $input)
 }
 ` as GeneratedMutation<
-  APITypes.DeleteUserMutationVariables,
-  APITypes.DeleteUserMutation
->;
+    APITypes.DeleteUserMutationVariables,
+    APITypes.DeleteUserMutation
+  >;

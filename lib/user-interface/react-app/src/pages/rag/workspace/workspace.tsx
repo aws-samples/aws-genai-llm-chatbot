@@ -13,7 +13,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AppContext } from "../../../common/app-context";
 import { UserContext } from "../../../common/user-context";
-import { UserRole } from '../../../common/types'
+import { UserRole } from "../../../common/types";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { Utils } from "../../../common/utils";
 import RouterButton from "../../../components/wrappers/router-button";

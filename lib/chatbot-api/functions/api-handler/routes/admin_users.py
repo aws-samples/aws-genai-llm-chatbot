@@ -31,10 +31,10 @@ def __parse_email(encoded_email):
 def list_users():
     try:
         users = genai_core.admin_user_management.list_users()
-        return {"ok": True, "data": users}
+        return users
     except Exception as e:
         logger.exception(e)
-        return {"ok": False, "error": str(e)}
+        return str(e)
 
 
 @router.resolver(field_name="getUser")
@@ -43,10 +43,10 @@ def list_users():
 def get_user(user_id: str):
     try:
         user = genai_core.admin_user_management.get_user(__parse_email(user_id))
-        return {"ok": True, "data": user}
+        return user
     except Exception as e:
         logger.exception(e)
-        return {"ok": False, "error": str(e)}
+        return str(e)
 
 
 @router.resolver(field_name="createUser")
@@ -68,7 +68,7 @@ def create_user():
                 role=user.role,
                 name=user.name,
             )
-            return {"ok": True, "data": user}
+            return user
         else:
             return {"ok": False, "error": "Invalid Role provided"}
     except Exception as e:
@@ -91,7 +91,7 @@ def edit_user():
             name=user.name,
             phone_number=user.phoneNumber,
         )
-        return {"ok": True, "data": user}
+        return user
     except Exception as e:
         logger.exception(e)
         return {"ok": False, "error": str(e)}
@@ -104,13 +104,13 @@ def toggle_user(user_id: str, action: str):
     try:
         if action == "enable":
             genai_core.admin_user_management.enable_user(__parse_email(user_id))
-            return {"ok": True}
+            return True
         if action == "disable":
             genai_core.admin_user_management.disable_user(__parse_email(user_id))
-            return {"ok": True}
+            return True
     except Exception as e:
         logger.exception(e)
-        return {"ok": False, "error": str(e)}
+        return str(e)
 
 
 @router.resolver(field_name="deleteUser")
@@ -120,15 +120,15 @@ def delete_user(user_id: str):
     try:
         response = genai_core.admin_user_management.delete_user(__parse_email(user_id))
         if response:
-            return {"ok": True}
+            return True
         else:
-            return {
-                "ok": False,
-                "error": "The user is not disabled. To delete a user, first disable the user, then delete the user.",
-            }
+            return (
+                "The user is not disabled. To delete a user, first disable the user, then delete the user.",
+            )
+
     except Exception as e:
         logger.exception(e)
-        return {"ok": False, "error": str(e)}
+        return str(e)
 
 
 @router.resolver(field_name="resetPassword")
@@ -137,7 +137,7 @@ def delete_user(user_id: str):
 def reset_password(user_id: str):
     try:
         genai_core.admin_user_management.reset_user_password(__parse_email(user_id))
-        return {"ok": True}
+        return True
     except Exception as e:
         logger.exception(e)
-        return {"ok": False, "error": str(e)}
+        return str(e)

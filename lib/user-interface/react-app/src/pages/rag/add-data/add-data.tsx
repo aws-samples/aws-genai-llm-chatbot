@@ -90,10 +90,10 @@ export default function AddData() {
             });
           }
         }
-        if(result.data?.listWorkspaces){
+        if (result.data?.listWorkspaces) {
           setWorkspaces(result.data?.listWorkspaces);
         }
-        
+
         setWorkspacesLoadingStatus("finished");
       } catch (error) {
         setWorkspacesLoadingStatus("error");

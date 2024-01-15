@@ -168,34 +168,36 @@ export default function AppConfigured() {
 
   return (
     <AppContext.Provider value={config}>
-      <UserContext.Provider value={{ setUserRole, userRole, setUserEmail, userEmail}}>
-      <ThemeProvider
-        theme={{
-          name: "default-theme",
-          overrides: [defaultDarkModeOverride],
-        }}
-        colorMode={theme === Mode.Dark ? "dark" : "light"}
+      <UserContext.Provider
+        value={{ setUserRole, userRole, setUserEmail, userEmail }}
       >
-        <Authenticator
-          hideSignUp={true}
-          components={{
-            SignIn: {
-              Header: () => {
-                return (
-                  <Heading
-                    padding={`${tokens.space.xl} 0 0 ${tokens.space.xl}`}
-                    level={3}
-                  >
-                    {CHATBOT_NAME}
-                  </Heading>
-                );
-              },
-            },
+        <ThemeProvider
+          theme={{
+            name: "default-theme",
+            overrides: [defaultDarkModeOverride],
           }}
+          colorMode={theme === Mode.Dark ? "dark" : "light"}
         >
-          <App />
-        </Authenticator>
-      </ThemeProvider>
+          <Authenticator
+            hideSignUp={true}
+            components={{
+              SignIn: {
+                Header: () => {
+                  return (
+                    <Heading
+                      padding={`${tokens.space.xl} 0 0 ${tokens.space.xl}`}
+                      level={3}
+                    >
+                      {CHATBOT_NAME}
+                    </Heading>
+                  );
+                },
+              },
+            }}
+          >
+            <App />
+          </Authenticator>
+        </ThemeProvider>
       </UserContext.Provider>
     </AppContext.Provider>
   );

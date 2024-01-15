@@ -1,8 +1,6 @@
 import { StatusIndicatorProps } from "@cloudscape-design/components";
 import { SemanticSearchResult } from "../API";
-import { UserRole } from '../common/types'
-
-
+import { UserRole } from "../common/types";
 
 export const languageList = [
   { value: "simple", label: "Simple" },
@@ -120,7 +118,6 @@ export abstract class Labels {
         return "Chatbot User";
     }
   }
-
 }
 
 export const CHATBOT_NAME = "AWS GenAI Chatbot";

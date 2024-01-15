@@ -4,7 +4,7 @@ import {
   HeaderProps,
   SpaceBetween,
 } from "@cloudscape-design/components";
-import { UserRole } from '../../../common/types'
+import { UserRole } from "../../../common/types";
 import RouterButton from "../../../components/wrappers/router-button";
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";

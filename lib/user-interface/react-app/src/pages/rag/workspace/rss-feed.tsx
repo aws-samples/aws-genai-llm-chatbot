@@ -55,7 +55,6 @@ export default function RssFeed() {
   const [submitting, setSubmitting] = useState(false);
   const [postsLoading, setPostsLoading] = useState(true);
 
-
   useEffect(() => {
     if (
       ![
@@ -67,8 +66,6 @@ export default function RssFeed() {
       navigate("/");
     }
   }, [userContext, navigate]);
-
-
 
   const getWorkspace = useCallback(async () => {
     if (!appContext || !workspaceId) return;
@@ -162,10 +159,10 @@ export default function RssFeed() {
           );
           setIsEditingCrawlerSettings(false);
 
-          if(result.data?.setDocumentSubscriptionStatus?.status == "enabled"){
-            setRssSubscriptionStatus(DocumentSubscriptionStatus.ENABLED)
-          }else{
-            setRssSubscriptionStatus(DocumentSubscriptionStatus.DISABLED)
+          if (result.data?.setDocumentSubscriptionStatus?.status == "enabled") {
+            setRssSubscriptionStatus(DocumentSubscriptionStatus.ENABLED);
+          } else {
+            setRssSubscriptionStatus(DocumentSubscriptionStatus.DISABLED);
           }
         } catch (error) {
           console.error(Utils.getErrorMessage(error));
@@ -177,10 +174,10 @@ export default function RssFeed() {
             workspaceId,
             feedId
           );
-          if(result.data?.setDocumentSubscriptionStatus?.status == "enabled"){
-            setRssSubscriptionStatus(DocumentSubscriptionStatus.ENABLED)
-          }else{
-            setRssSubscriptionStatus(DocumentSubscriptionStatus.DISABLED)
+          if (result.data?.setDocumentSubscriptionStatus?.status == "enabled") {
+            setRssSubscriptionStatus(DocumentSubscriptionStatus.ENABLED);
+          } else {
+            setRssSubscriptionStatus(DocumentSubscriptionStatus.DISABLED);
           }
         } catch (error) {
           console.error(Utils.getErrorMessage(error));
@@ -285,8 +282,7 @@ export default function RssFeed() {
                     )
                   }
                 >
-                  {rssSubscriptionStatus ==
-                  DocumentSubscriptionStatus.ENABLED
+                  {rssSubscriptionStatus == DocumentSubscriptionStatus.ENABLED
                     ? "Disable RSS Feed Subscription"
                     : "Enable RSS Feed Subscription"}
                 </Button>
@@ -294,8 +290,7 @@ export default function RssFeed() {
                   onClick={() => setIsEditingCrawlerSettings(true)}
                   disabled={
                     isEditingCrawlerSettings ||
-                    rssSubscriptionStatus ==
-                      DocumentSubscriptionStatus.DISABLED
+                    rssSubscriptionStatus == DocumentSubscriptionStatus.DISABLED
                   }
                 >
                   Edit Website Crawler Configuration
@@ -452,7 +447,7 @@ export default function RssFeed() {
               </SpaceBetween>
             </Container>
             <Table
-              loading={postsLoading}
+              loading={postsLoading || loading}
               loadingText={`Loading RSS Subscription Posts`}
               columnDefinitions={[
                 {

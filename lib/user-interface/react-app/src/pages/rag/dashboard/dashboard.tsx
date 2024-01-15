@@ -45,18 +45,17 @@ export default function Dashboard() {
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.workspaces.getWorkspaces();
-        if(result.data?.listWorkspaces){
+        if (result.data?.listWorkspaces) {
           const data = result.data?.listWorkspaces;
-        setWorkspaces(data);
-        console.log(data);
-        setStatistics({
-          count: data.length,
-          documents: data.reduce((a, b) => a + b.documents!, 0),
-          vectors: data.reduce((a, b) => a + b.vectors!, 0),
-          sizeInBytes: data.reduce((a, b) => a + b.sizeInBytes!, 0),
-        });
+          setWorkspaces(data);
+          console.log(data);
+          setStatistics({
+            count: data.length,
+            documents: data.reduce((a, b) => a + b.documents!, 0),
+            vectors: data.reduce((a, b) => a + b.vectors!, 0),
+            sizeInBytes: data.reduce((a, b) => a + b.sizeInBytes!, 0),
+          });
         }
-        
 
         setLoading(false);
       } catch (e) {

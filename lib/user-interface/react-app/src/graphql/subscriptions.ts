@@ -8,7 +8,8 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
-export const receiveMessages = /* GraphQL */ `subscription ReceiveMessages($sessionId: String) {
+export const receiveMessages =
+  /* GraphQL */ `subscription ReceiveMessages($sessionId: String) {
   receiveMessages(sessionId: $sessionId) {
     data
     sessionId
@@ -17,6 +18,6 @@ export const receiveMessages = /* GraphQL */ `subscription ReceiveMessages($sess
   }
 }
 ` as GeneratedSubscription<
-  APITypes.ReceiveMessagesSubscriptionVariables,
-  APITypes.ReceiveMessagesSubscription
->;
+    APITypes.ReceiveMessagesSubscriptionVariables,
+    APITypes.ReceiveMessagesSubscription
+  >;

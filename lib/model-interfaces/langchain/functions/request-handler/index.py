@@ -24,7 +24,7 @@ sequence_number = 0
 
 
 def on_llm_new_token(
-    connection_id, user_id, session_id, self, token, run_id, *args, **kwargs
+    user_id, session_id, self, token, run_id, *args, **kwargs
 ):
     global sequence_number
     sequence_number += 1
@@ -34,7 +34,6 @@ def on_llm_new_token(
         {
             "type": "text",
             "action": ChatbotAction.LLM_NEW_TOKEN.value,
-            "connectionId": connection_id,
             "userId": user_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "data": {
@@ -50,7 +49,6 @@ def on_llm_new_token(
 
 
 def handle_heartbeat(record):
-    connection_id = record["connectionId"]
     user_id = record["userId"]
     session_id = record["data"]["sessionId"]
 
@@ -58,7 +56,6 @@ def handle_heartbeat(record):
         {
             "type": "text",
             "action": ChatbotAction.HEARTBEAT.value,
-            "connectionId": connection_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "userId": user_id,
             "data": {
@@ -69,7 +66,6 @@ def handle_heartbeat(record):
 
 
 def handle_run(record):
-    connection_id = record["connectionId"]
     user_id = record["userId"]
     data = record["data"]
     provider = data["provider"]
@@ -85,7 +81,7 @@ def handle_run(record):
     adapter = registry.get_adapter(f"{provider}.{model_id}")
 
     adapter.on_llm_new_token = lambda *args, **kwargs: on_llm_new_token(
-        connection_id, user_id, session_id, *args, **kwargs
+        user_id, session_id, *args, **kwargs
     )
 
     model = adapter(
@@ -107,7 +103,6 @@ def handle_run(record):
         {
             "type": "text",
             "action": ChatbotAction.FINAL_RESPONSE.value,
-            "connectionId": connection_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "userId": user_id,
             "data": response,
@@ -135,7 +130,6 @@ def handle_failed_records(records):
         message: dict = json.loads(payload)
         detail: dict = json.loads(message["Message"])
         logger.info(detail)
-        connection_id = detail["connectionId"]
         user_id = detail["userId"]
         data = detail.get("data", {})
         session_id = data.get("sessionId", "")
@@ -145,7 +139,6 @@ def handle_failed_records(records):
                 "type": "text",
                 "action": "error",
                 "direction": "OUT",
-                "connectionId": connection_id,
                 "userId": user_id,
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {

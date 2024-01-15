@@ -6,15 +6,13 @@ You can run this vite react app locally following these steps.
 
 ### Deploy infrastructure to AWS
 
-Follow instructions on the root folder README to deploy the cdk app. 
+Follow instructions on the root folder README to deploy the cdk app.
 
 You will need the CloudFormation Output values displayed after completion in the following step.
 
-### Define environment variables
+### Obtain environment configuration
 
-See `.env.template` for the variables, and replace with the Output values from the previous step.
-
-Alternatively you can grab the `aws-exports.json` from the CloudFront distribution endpoint you obtained from the CDK Output, and save it into `./lib/user-interface/react-app/public/` folder.
+Grab the `aws-exports.json` from the CloudFront distribution endpoint you obtained from the CDK Output, and save it into `./lib/user-interface/react-app/public/` folder.
 
 The URL is something like:
 

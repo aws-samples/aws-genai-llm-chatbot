@@ -16,16 +16,24 @@ export default function NavigationPanel() {
   const onFollow = useOnFollow();
   const [navigationPanelState, setNavigationPanelState] =
     useNavigationPanelState();
-    const [items, setItems] = useState<SideNavigationProps.Item[]>([]);
-  useEffect(()=>{
+  const [items, setItems] = useState<SideNavigationProps.Item[]>([]);
+  useEffect(() => {
     const navItems: SideNavigationProps.Item[] = [
       {
         type: "link",
         text: "Home",
         href: "/",
-      }
-    ]
-    if(userContext && [UserRole.ADMIN, UserRole.WORKSPACES_MANAGER, UserRole.WORKSPACES_USER, UserRole.CHATBOT_USER].includes(userContext?.userRole)){
+      },
+    ];
+    if (
+      userContext &&
+      [
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+        UserRole.CHATBOT_USER,
+      ].includes(userContext?.userRole)
+    ) {
       navItems.push({
         type: "section",
         text: "Chatbot",
@@ -42,11 +50,11 @@ export default function NavigationPanel() {
             href: "/chatbot/models",
           },
         ],
-      },)
+      });
 
       if (appContext?.config.rag_enabled) {
-        const crossEncodersItems: SideNavigationProps.Item[] = appContext?.config
-          .cross_encoders_enabled
+        const crossEncodersItems: SideNavigationProps.Item[] = appContext
+          ?.config.cross_encoders_enabled
           ? [
               {
                 type: "link",
@@ -55,8 +63,8 @@ export default function NavigationPanel() {
               },
             ]
           : [];
-  
-          navItems.push({
+
+        navItems.push({
           type: "section",
           text: "Retrieval-Augmented Generation (RAG)",
           items: [
@@ -95,10 +103,7 @@ export default function NavigationPanel() {
       );
     }
     setItems(navItems);
-  },[setItems, userContext, appContext])
-  
-    
-  
+  }, [setItems, userContext, appContext]);
 
   const onChange = ({
     detail,

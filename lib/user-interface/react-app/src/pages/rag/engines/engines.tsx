@@ -67,10 +67,9 @@ export default function Engines() {
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.ragEngines.getRagEngines();
-        if(result.data?.listRagEngines){
+        if (result.data?.listRagEngines) {
           setData(result.data?.listRagEngines);
         }
-        
       } catch (error) {
         console.error(error);
       }

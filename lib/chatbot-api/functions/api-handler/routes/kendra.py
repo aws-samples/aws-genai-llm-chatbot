@@ -38,11 +38,8 @@ def kendra_indexes():
         permissions.WORKSPACES_MANAGER_ROLE
     ]
 )
-def kendra_data_sync():
-    data: dict = router.current_event.json_body
-    request = KendraDataSynchRequest(**data)
-
-    genai_core.kendra.start_kendra_data_sync(workspace_id=request.workspaceId)
+def kendra_data_sync(workspaceId: str):
+    genai_core.kendra.start_kendra_data_sync(workspace_id=workspaceId)
 
     return True
 

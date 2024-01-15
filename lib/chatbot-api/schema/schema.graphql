@@ -273,7 +273,7 @@ type Workspace @aws_cognito_user_pools {
   documents: Int
   sizeInBytes: Int
   kendraIndexId: String
-  kendraIndexExternal: String
+  kendraIndexExternal: Boolean
   kendraUseAllData: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -284,6 +284,7 @@ type Channel @aws_iam @aws_cognito_user_pools {
   sessionId: String
   userId: String
 }
+
 
 type User @aws_cognito_user_pools {
   name: String!
@@ -331,12 +332,14 @@ type Mutation {
   sendQuery(data: String): String @aws_cognito_user_pools
   publishResponse(sessionId: String, userId: String, data: String): Channel
     @aws_iam
+  # Admin User Management
   createUser(input: ManageUserDataInput!): User! @aws_cognito_user_pools
   editUser(input: ManageUserDataInput!): User! @aws_cognito_user_pools
-  toggleUser(input: ManageUserStateInput): User! @aws_cognito_user_pools
-  resetUserPassword(input: ManageUserStateInput): User! @aws_cognito_user_pools
-  deleteUser(input: ManageUserStateInput): User! @aws_cognito_user_pools
+  toggleUser(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
+  resetUserPassword(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
+  deleteUser(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
 }
+
 
 type Query {
   checkHealth: Boolean @aws_cognito_user_pools
