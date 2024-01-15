@@ -48,10 +48,14 @@ class ModelStatus(Enum):
     ACTIVE = "ACTIVE"
     LEGACY = "LEGACY"
 
+class AgentStatus(Enum):
+    PREPARED = "PREPARED"
+
 
 class ModelInterface(Enum):
     LANGCHIAN = "langchain"
     IDEFICS = "idefics"
+    AGENT = "agent"
 
 
 class Direction(Enum):

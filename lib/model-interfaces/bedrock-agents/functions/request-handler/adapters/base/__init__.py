@@ -1,1 +1,1 @@
-from .base import ModelAdapter, Mode
+from .base import AgentAdapter, Mode

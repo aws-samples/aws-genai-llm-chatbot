@@ -9,6 +9,7 @@ from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from adapters.bedrock import BedrockAgent
 
 from genai_core.utils.websocket import send_to_client
 from genai_core.types import ChatbotAction
@@ -19,14 +20,14 @@ logger = Logger()
 
 AWS_REGION = os.environ["AWS_REGION"]
 API_KEYS_SECRETS_ARN = os.environ["API_KEYS_SECRETS_ARN"]
-CONFIG_PARAMETER_NAME = os.environ["CONFIG_PARAMETER_NAME"]
+#CONFIG_PARAMETER_NAME = os.environ["CONFIG_PARAMETER_NAME"]
 
 sequence_number = 0
-config = parameters.get_parameter(CONFIG_PARAMETER_NAME, region=AWS_REGION)
+#config = parameters.get_parameter(CONFIG_PARAMETER_NAME, region=AWS_REGION)
 
 
 def handle_run(record):
-    agent_id = record["agentId"]
+    agent_id = record["agentId"].split("#")[1]
     connection_id = record["connectionId"]
     user_id = record["userId"]
     data = record["data"]
@@ -39,12 +40,11 @@ def handle_run(record):
     # get the adapter from the registry
 
     # create an agent adapter to invoke a Bedrock Agent using agentId and agentAliasId
-
-    # create the agent from the adapter and the agent alias and agent id
-
+    agent = BedrockAgent()
     # call the agent
     response = agent.run(
         prompt,
+        agent_id,
         session_id,
     )
 
@@ -109,9 +109,9 @@ def handle_failed_records(records):
 def handler(event, context: LambdaContext):
     batch = event["Records"]
 
-    api_keys = parameters.get_secret(API_KEYS_SECRETS_ARN, transform="json")
-    for key in api_keys:
-        os.environ[key] = api_keys[key]
+    # api_keys = parameters.get_secret(API_KEYS_SECRETS_ARN, transform="json")
+    # for key in api_keys:
+    #     os.environ[key] = api_keys[key]
 
     try:
         with processor(records=batch, handler=record_handler):

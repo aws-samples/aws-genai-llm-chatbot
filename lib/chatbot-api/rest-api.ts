@@ -267,6 +267,8 @@ export class ApiResolvers extends Construct {
               "bedrock:ListCustomModels",
               "bedrock:InvokeModel",
               "bedrock:InvokeModelWithResponseStream",
+              "bedrock:ListAgents",
+              "bedrock:InvokeAgent",
             ],
             resources: ["*"],
           })

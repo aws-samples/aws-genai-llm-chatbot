@@ -36,7 +36,9 @@ export class FileImportBatchJob extends Construct {
       "ManagedEc2EcsComputeEnvironment",
       {
         vpc: props.shared.vpc,
-        instanceTypes: [ec2.InstanceType.of(ec2.InstanceClass.M6A, ec2.InstanceSize.LARGE)],
+        instanceTypes: [
+          ec2.InstanceType.of(ec2.InstanceClass.M6A, ec2.InstanceSize.LARGE),
+        ],
         maxvCpus: 4,
         minvCpus: 0,
         replaceComputeEnvironment: true,
@@ -103,10 +105,16 @@ export class FileImportBatchJob extends Construct {
       timeout: cdk.Duration.minutes(30),
       retryAttempts: 3,
       retryStrategies: [
-        batch.RetryStrategy.of(batch.Action.EXIT, batch.Reason.CANNOT_PULL_CONTAINER),
-        batch.RetryStrategy.of(batch.Action.EXIT, batch.Reason.custom({
-          onExitCode: '137',
-        })),
+        batch.RetryStrategy.of(
+          batch.Action.EXIT,
+          batch.Reason.CANNOT_PULL_CONTAINER
+        ),
+        batch.RetryStrategy.of(
+          batch.Action.EXIT,
+          batch.Reason.custom({
+            onExitCode: "137",
+          })
+        ),
       ],
     });
 

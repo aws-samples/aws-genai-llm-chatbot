@@ -60,9 +60,9 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
 
     if (
-      props.config.bedrock?.enabled &&
-      props.config.bedrock?.bedrockAgentAliasId &&
-      props.config.bedrock?.bedrockAgentId
+      props.config.bedrock?.enabled
+      // && props.config.bedrock?.bedrockAgentAliasId
+      // && props.config.bedrock?.bedrockAgentId
     ) {
       const bedrockAgentInterface = new BedrockAgentInterface(
         this,

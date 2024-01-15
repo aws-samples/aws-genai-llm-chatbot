@@ -51,6 +51,11 @@ export class BedrockAgentInterface extends Construct {
       },
     });
 
+    props.sessionsTable.grantReadWriteData(requestHandler);
+    props.messagesTopic.grantPublish(requestHandler);
+    props.shared.apiKeysSecret.grantRead(requestHandler);
+    props.shared.configParameter.grantRead(requestHandler);
+
     requestHandler.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["bedrock:InvokeAgent", "bedrock:GetAgentAlias"],

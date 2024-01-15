@@ -346,9 +346,9 @@ export default function MultiChat() {
                 readyState === ReadyState.OPEN
                   ? "success"
                   : readyState === ReadyState.CONNECTING ||
-                    readyState === ReadyState.UNINSTANTIATED
-                  ? "in-progress"
-                  : "error"
+                      readyState === ReadyState.UNINSTANTIATED
+                    ? "in-progress"
+                    : "error"
               }
             >
               {readyState === ReadyState.OPEN ? "Connected" : connectionStatus}

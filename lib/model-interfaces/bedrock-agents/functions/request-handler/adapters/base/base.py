@@ -6,7 +6,7 @@ import boto3
 from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 from genai_core.types import ChatbotMode
 from pydantic import BaseModel
-from abc import abstract
+from abc import abstractmethod
 
 logger = Logger()
 
@@ -29,7 +29,7 @@ class AgentAdapter(BaseModel):
             user_id=self.user_id,
         )
 
-    def run(self, prompt):
+    def run(self, prompt: str) -> Iterator[str]:
         logger.debug(f"run with {kwargs}")
         logger.debug(f"mode: {self._mode}")
 
@@ -44,6 +44,6 @@ class AgentAdapter(BaseModel):
 
         raise ValueError(f"unknown mode {self._mode}")
 
-    @abstract
+    @abstractmethod
     def _invoke_agent(self, prompt: str, session_id: str) -> Iterator[str]:
         ...

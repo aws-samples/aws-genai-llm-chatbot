@@ -19,7 +19,8 @@ export const checkHealth = /* GraphQL */ `query CheckHealth {
   APITypes.CheckHealthQueryVariables,
   APITypes.CheckHealthQuery
 >;
-export const getUploadFileURL = /* GraphQL */ `query GetUploadFileURL($input: FileUploadInput!) {
+export const getUploadFileURL =
+  /* GraphQL */ `query GetUploadFileURL($input: FileUploadInput!) {
   getUploadFileURL(input: $input) {
     url
     fields
@@ -27,9 +28,9 @@ export const getUploadFileURL = /* GraphQL */ `query GetUploadFileURL($input: Fi
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetUploadFileURLQueryVariables,
-  APITypes.GetUploadFileURLQuery
->;
+    APITypes.GetUploadFileURLQueryVariables,
+    APITypes.GetUploadFileURLQuery
+  >;
 export const listModels = /* GraphQL */ `query ListModels {
   listModels {
     name
@@ -82,7 +83,8 @@ export const listWorkspaces = /* GraphQL */ `query ListWorkspaces {
   APITypes.ListWorkspacesQueryVariables,
   APITypes.ListWorkspacesQuery
 >;
-export const getWorkspace = /* GraphQL */ `query GetWorkspace($workspaceId: String!) {
+export const getWorkspace =
+  /* GraphQL */ `query GetWorkspace($workspaceId: String!) {
   getWorkspace(workspaceId: $workspaceId) {
     id
     name
@@ -115,9 +117,9 @@ export const getWorkspace = /* GraphQL */ `query GetWorkspace($workspaceId: Stri
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetWorkspaceQueryVariables,
-  APITypes.GetWorkspaceQuery
->;
+    APITypes.GetWorkspaceQueryVariables,
+    APITypes.GetWorkspaceQuery
+  >;
 export const listRagEngines = /* GraphQL */ `query ListRagEngines {
   listRagEngines {
     id
@@ -130,7 +132,8 @@ export const listRagEngines = /* GraphQL */ `query ListRagEngines {
   APITypes.ListRagEnginesQueryVariables,
   APITypes.ListRagEnginesQuery
 >;
-export const performSemanticSearch = /* GraphQL */ `query PerformSemanticSearch($input: SemanticSearchInput!) {
+export const performSemanticSearch =
+  /* GraphQL */ `query PerformSemanticSearch($input: SemanticSearchInput!) {
   performSemanticSearch(input: $input) {
     engine
     workspaceId
@@ -200,9 +203,9 @@ export const performSemanticSearch = /* GraphQL */ `query PerformSemanticSearch(
   }
 }
 ` as GeneratedQuery<
-  APITypes.PerformSemanticSearchQueryVariables,
-  APITypes.PerformSemanticSearchQuery
->;
+    APITypes.PerformSemanticSearchQueryVariables,
+    APITypes.PerformSemanticSearchQuery
+  >;
 export const listSessions = /* GraphQL */ `query ListSessions {
   listSessions {
     id
@@ -234,7 +237,8 @@ export const listEmbeddingModels = /* GraphQL */ `query ListEmbeddingModels {
   APITypes.ListEmbeddingModelsQueryVariables,
   APITypes.ListEmbeddingModelsQuery
 >;
-export const calculateEmbeddings = /* GraphQL */ `query CalculateEmbeddings($input: CalculateEmbeddingsInput!) {
+export const calculateEmbeddings =
+  /* GraphQL */ `query CalculateEmbeddings($input: CalculateEmbeddingsInput!) {
   calculateEmbeddings(input: $input) {
     passage
     vector
@@ -242,9 +246,9 @@ export const calculateEmbeddings = /* GraphQL */ `query CalculateEmbeddings($inp
   }
 }
 ` as GeneratedQuery<
-  APITypes.CalculateEmbeddingsQueryVariables,
-  APITypes.CalculateEmbeddingsQuery
->;
+    APITypes.CalculateEmbeddingsQueryVariables,
+    APITypes.CalculateEmbeddingsQuery
+  >;
 export const getSession = /* GraphQL */ `query GetSession($id: String!) {
   getSession(id: $id) {
     id
@@ -275,14 +279,16 @@ export const listKendraIndexes = /* GraphQL */ `query ListKendraIndexes {
   APITypes.ListKendraIndexesQueryVariables,
   APITypes.ListKendraIndexesQuery
 >;
-export const isKendraDataSynching = /* GraphQL */ `query IsKendraDataSynching($workspaceId: String!) {
+export const isKendraDataSynching =
+  /* GraphQL */ `query IsKendraDataSynching($workspaceId: String!) {
   isKendraDataSynching(workspaceId: $workspaceId)
 }
 ` as GeneratedQuery<
-  APITypes.IsKendraDataSynchingQueryVariables,
-  APITypes.IsKendraDataSynchingQuery
->;
-export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocumentsInput!) {
+    APITypes.IsKendraDataSynchingQueryVariables,
+    APITypes.IsKendraDataSynchingQuery
+  >;
+export const listDocuments =
+  /* GraphQL */ `query ListDocuments($input: ListDocumentsInput!) {
   listDocuments(input: $input) {
     items {
       workspaceId
@@ -312,10 +318,11 @@ export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocu
   }
 }
 ` as GeneratedQuery<
-  APITypes.ListDocumentsQueryVariables,
-  APITypes.ListDocumentsQuery
->;
-export const getDocument = /* GraphQL */ `query GetDocument($input: GetDocumentInput!) {
+    APITypes.ListDocumentsQueryVariables,
+    APITypes.ListDocumentsQuery
+  >;
+export const getDocument =
+  /* GraphQL */ `query GetDocument($input: GetDocumentInput!) {
   getDocument(input: $input) {
     workspaceId
     id
@@ -341,10 +348,11 @@ export const getDocument = /* GraphQL */ `query GetDocument($input: GetDocumentI
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetDocumentQueryVariables,
-  APITypes.GetDocumentQuery
->;
-export const getRSSPosts = /* GraphQL */ `query GetRSSPosts($input: GetRSSPostsInput!) {
+    APITypes.GetDocumentQueryVariables,
+    APITypes.GetDocumentQuery
+  >;
+export const getRSSPosts =
+  /* GraphQL */ `query GetRSSPosts($input: GetRSSPostsInput!) {
   getRSSPosts(input: $input) {
     items {
       workspaceId
@@ -374,9 +382,9 @@ export const getRSSPosts = /* GraphQL */ `query GetRSSPosts($input: GetRSSPostsI
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetRSSPostsQueryVariables,
-  APITypes.GetRSSPostsQuery
->;
+    APITypes.GetRSSPostsQueryVariables,
+    APITypes.GetRSSPostsQuery
+  >;
 export const listCrossEncoders = /* GraphQL */ `query ListCrossEncoders {
   listCrossEncoders {
     provider
@@ -389,7 +397,8 @@ export const listCrossEncoders = /* GraphQL */ `query ListCrossEncoders {
   APITypes.ListCrossEncodersQueryVariables,
   APITypes.ListCrossEncodersQuery
 >;
-export const rankPassages = /* GraphQL */ `query RankPassages($input: RankPassagesInput!) {
+export const rankPassages =
+  /* GraphQL */ `query RankPassages($input: RankPassagesInput!) {
   rankPassages(input: $input) {
     score
     passage
@@ -397,6 +406,6 @@ export const rankPassages = /* GraphQL */ `query RankPassages($input: RankPassag
   }
 }
 ` as GeneratedQuery<
-  APITypes.RankPassagesQueryVariables,
-  APITypes.RankPassagesQuery
->;
+    APITypes.RankPassagesQueryVariables,
+    APITypes.RankPassagesQuery
+  >;

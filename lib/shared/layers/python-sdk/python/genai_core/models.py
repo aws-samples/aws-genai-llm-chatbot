@@ -24,7 +24,40 @@ def list_models():
     if openai_models:
         models.extend(openai_models)
 
+    bedrock_agents = list_bedrock_agents()
+    if bedrock_agents:
+        models.extend(bedrock_agents)
+
     return models
+
+def list_bedrock_agents():
+    try:
+        bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock-agent")
+        if not bedrock:
+            return None
+
+        response = bedrock.list_agents(
+        )
+
+        bedrock_agents = [
+            {
+                "provider": Provider.BEDROCK.value,
+                "name": f'{a["agentName"]}#{a["agentId"]}',
+                "streaming": True,
+                "inputModalities": [Modality.TEXT.value],
+                "outputModalities": [Modality.TEXT.value],
+                "interface": ModelInterface.AGENT.value,
+                "ragSupported": False,
+            }
+            for a in response.get("agentSummaries", [])
+            if a.get("agentStatus", "")
+            == genai_core.types.AgentStatus.PREPARED.value
+        ]
+
+        return bedrock_agents
+    except Exception as e:
+        print(f"Error listing Bedrock agents: {e}")
+        return None
 
 
 def list_openai_models():
