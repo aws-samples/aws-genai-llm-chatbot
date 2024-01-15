@@ -32,17 +32,18 @@ export abstract class OptionsHelper {
     }
   }
 
-  static getSelectOptionGroups<T extends { provider: string; name: string }>(
-    data: T[]
-  ) {
+  static getSelectOptionGroups<
+    T extends { provider: string; name: string; interface: string },
+  >(data: T[]) {
     const modelsMap = new Map<string, T[]>();
     data.forEach((item) => {
-      let items = modelsMap.get(item.provider);
+      let group = `${item.provider}:${item.interface}`;
+      let items = modelsMap.get(group);
       if (!items) {
         items = [];
-        modelsMap.set(item.provider, [item]);
+        modelsMap.set(group, [item]);
       } else {
-        modelsMap.set(item.provider, [...items, item]);
+        modelsMap.set(group, [...items, item]);
       }
     });
 
@@ -57,7 +58,7 @@ export abstract class OptionsHelper {
         label: this.getProviderLabel(key),
         options:
           items?.map((item) => ({
-            label: item.name,
+            label: item.name.split("#")[0],
             value: `${item.provider}::${item.name}`,
           })) ?? [],
       };
