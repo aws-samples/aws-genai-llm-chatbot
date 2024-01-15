@@ -5,7 +5,7 @@ from ..base import AgentAdapter
 
 
 class AgentInputOutputAdapter:
-    """Adapter class to prepare the inputs from Langchain to a format
+    """Adapter class to prepare the inputs to a format
     that LLM model expects.
 
     It also provides helper function to extract
@@ -17,10 +17,11 @@ class AgentInputOutputAdapter:
     ) -> Iterator[str]:
         stream = response.get("completion")
 
-        if not stream:
-            return
+        if stream is None:
+            []
 
         for event in stream:
+            print(event)
             chunk = event.get("chunk")
             # chunk obj format varies with provider
             yield chunk["bytes"].decode("utf8")
@@ -100,18 +101,18 @@ class BedrockAgent(AgentAdapter, ABC):
     def _invoke_agent(
         self,
         prompt: str,
-        session_id: str = None,
     ) -> Iterator[str]:
         try:
             response = self.client.invoke_agent(
+                enableTrace = False,
                 inputText=prompt,
                 agentId=self.agent_id,
                 agentAliasId=self.agent_alias_id,
-                sessionId=session_id,
+                sessionId=self.session_id,
             )
         except Exception as e:
             raise ValueError(f"Error raised by bedrock service: {e}")
 
         
-        for chunk in self.prepare_output_stream(response):
+        for chunk in AgentInputOutputAdapter.prepare_output_stream(response):
             yield chunk

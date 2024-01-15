@@ -118,7 +118,10 @@ export function updateMessageHistoryRef(
   messageHistory: ChatBotHistoryItem[],
   response: ChatBotMessageResponse
 ) {
-  if (response.data?.sessionId !== sessionId) return;
+  if (response.data?.sessionId !== sessionId) {
+    console.error("Invalid sessionId");
+    return;
+  }
 
   if (
     response.action === ChatBotAction.LLMNewToken ||

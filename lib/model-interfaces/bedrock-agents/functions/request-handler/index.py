@@ -20,17 +20,16 @@ logger = Logger()
 
 AWS_REGION = os.environ["AWS_REGION"]
 API_KEYS_SECRETS_ARN = os.environ["API_KEYS_SECRETS_ARN"]
-#CONFIG_PARAMETER_NAME = os.environ["CONFIG_PARAMETER_NAME"]
+CONFIG_PARAMETER_NAME = os.environ["CONFIG_PARAMETER_NAME"]
 
 sequence_number = 0
-#config = parameters.get_parameter(CONFIG_PARAMETER_NAME, region=AWS_REGION)
+config = json.loads(parameters.get_parameter(CONFIG_PARAMETER_NAME))
 
 
 def handle_run(record):
-    agent_id = record["agentId"].split("#")[1]
-    connection_id = record["connectionId"]
     user_id = record["userId"]
     data = record["data"]
+    agent_id = data["modelName"].split("#")[1]
     prompt = data["text"]
     session_id = data.get("sessionId")
 
@@ -40,26 +39,59 @@ def handle_run(record):
     # get the adapter from the registry
 
     # create an agent adapter to invoke a Bedrock Agent using agentId and agentAliasId
-    agent = BedrockAgent()
+    agent = BedrockAgent(agent_id=agent_id, user_id=user_id, session_id=session_id, region_name=config.get("bedrock", {}).get("region", AWS_REGION))
     # call the agent
     response = agent.run(
         prompt,
-        agent_id,
-        session_id,
     )
 
     logger.info(response)
-
+    full_response = ""
+    sequence_number = 0
+    runId = str(uuid.uuid4())
+    for r in response:
+        send_to_client(
+            {
+                "type": "text",
+                "action": ChatbotAction.LLM_NEW_TOKEN.value,
+                "timestamp": str(int(round(datetime.now().timestamp()))),
+                "userId": user_id,
+                "data": {
+                    "sessionId": session_id,
+                    "token": {
+                        "runId": runId,
+                        "sequenceNumber": sequence_number,
+                        "value": r,
+                        },
+                    
+                },
+            }
+        )
+        sequence_number += 1
+        full_response += r
+        
     send_to_client(
-        {
-            "type": "text",
-            "action": ChatbotAction.FINAL_RESPONSE.value,
-            "connectionId": connection_id,
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "userId": user_id,
-            "data": response,
-        }
-    )
+            {
+                "type": "text",
+                "action": ChatbotAction.FINAL_RESPONSE.value,
+                "timestamp": str(int(round(datetime.now().timestamp()))),
+                "userId": user_id,
+                "data": {
+                    "sessionId": session_id,
+                    "type": "text",
+                    "content": full_response,
+                    "metadata": {
+                        "modelId": agent_id,
+                        "modelKwargs": None,
+                        "mode": "agent",
+                        "sessionId": session_id,
+                        "userId": user_id,
+                        "documents": [],
+                        "prompts": [prompt]
+                    }
+                }
+            }
+        )
 
 
 @tracer.capture_method
@@ -82,7 +114,6 @@ def handle_failed_records(records):
         message: dict = json.loads(payload)
         detail: dict = json.loads(message["Message"])
         logger.info(detail)
-        connection_id = detail["connectionId"]
         user_id = detail["userId"]
         data = detail.get("data", {})
         session_id = data.get("sessionId", "")
@@ -92,7 +123,6 @@ def handle_failed_records(records):
                 "type": "text",
                 "action": "error",
                 "direction": "OUT",
-                "connectionId": connection_id,
                 "userId": user_id,
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {

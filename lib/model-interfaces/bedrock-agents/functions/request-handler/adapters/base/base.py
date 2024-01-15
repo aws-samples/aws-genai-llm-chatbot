@@ -30,20 +30,11 @@ class AgentAdapter(BaseModel):
         )
 
     def run(self, prompt: str) -> Iterator[str]:
-        logger.debug(f"run with {kwargs}")
-        logger.debug(f"mode: {self._mode}")
 
-        if self._mode == ChatbotMode.AGENT.value:
-            return self._invoke_agent(
-                enableTrace=True,
-                inputText=prompt,
-                sessionId=self.session_id,
-                agentId=self.agent_id,
-                agentAliasId=self.agent_alias_id,
+        return self._invoke_agent(
+            prompt=prompt,
             )
-
-        raise ValueError(f"unknown mode {self._mode}")
-
+        
     @abstractmethod
     def _invoke_agent(self, prompt: str, session_id: str) -> Iterator[str]:
         ...

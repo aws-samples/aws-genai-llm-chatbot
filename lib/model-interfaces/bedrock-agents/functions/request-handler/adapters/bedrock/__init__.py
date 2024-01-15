@@ -1,1 +1,1 @@
-
+from .base import BedrockAgent
