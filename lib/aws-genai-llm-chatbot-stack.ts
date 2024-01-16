@@ -170,52 +170,21 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
     NagSuppressions.addResourceSuppressionsByPath(this,
       [
-        `/${this.stackName}/ChatBotApi/RestApi/ChatBotApi/Default/v1/{proxy+}/OPTIONS/Resource`,
-        `/${this.stackName}/ChatBotApi/RestApi/ChatBotApi/Default/v1/OPTIONS/Resource`,
-        `/${this.stackName}/ChatBotApi/RestApi/ChatBotApi/Default/OPTIONS/Resource`
-      ],
-      [
-        {id: "AwsSolutions-APIG4", reason: "OPTIONS method created implicitly. Explicitly configured methods are authorized."},
-        {id: "AwsSolutions-COG4", reason: "OPTIONS method created implicitly. Explicitly configured methods are authorized."}
-      ]
-    );
-    NagSuppressions.addResourceSuppressionsByPath(this,
-      [
-        `/${this.stackName}/ChatBotApi/WebSocketApi/WebSocketApi/$disconnect-Route/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/WebSocketApi/$default-Route/Resource`,
-      ],
-      [
-        {id: "AwsSolutions-APIG1", reason: "CDK does not provide an option to enable access logging for WebSocketApi construct."},
-        {id: "AwsSolutions-APIG4", reason: "Connect authorizer not required for user usage."},
-      ]
-    );
-    NagSuppressions.addResourceSuppressionsByPath(this,
-      `/${this.stackName}/ChatBotApi/RestApi/ChatBotApi/DeploymentStage.api/Resource`,
-      [
-        {id: "AwsSolutions-APIG3", reason: "WAF not required due to configured Cognito auth."}
-      ]
-    );
-    NagSuppressions.addResourceSuppressionsByPath(this,
-      [
         `/${this.stackName}/Authentication/IdentityPool/AuthenticatedRole/DefaultPolicy/Resource`,
         `/${this.stackName}/Authentication/UserPool/smsRole/Resource`,
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/ChatBotApi/RestApi/ApiHandler/ServiceRole/Resource`,
-        `/${this.stackName}/ChatBotApi/RestApi/ApiHandler/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/ChatBotApi/RestApi/ChatBotApi/CloudWatchRole/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/ConnectionHandlerFunction/ServiceRole/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/ConnectionHandlerFunction/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/AuthorizerFunction/ServiceRole/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/AuthorizerFunction/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/IncomingMessageHandlerFunction/ServiceRole/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/IncomingMessageHandlerFunction/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/OutgoingMessageFunction/ServiceRole/Resource`,
-        `/${this.stackName}/ChatBotApi/WebSocketApi/OutgoingMessageFunction/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
         `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/ChatbotApi/proxyResolverFunction/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/ChatBotApi/ChatbotApi/realtimeResolverFunction/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/ChatBotApi/RestApi/GraphQLApiHandler/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/RestApi/GraphQLApiHandler/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/ChatBotApi/Realtime/Resolvers/lambda-resolver/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`
       ],
       [
         {id: "AwsSolutions-IAM4", reason: "IAM role implicitly created by CDK."},
