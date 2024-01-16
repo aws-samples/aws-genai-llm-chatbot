@@ -16,42 +16,56 @@ import AddData from "./pages/rag/add-data/add-data";
 import "./styles/app.scss";
 import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
 import RssFeed from "./pages/rag/workspace/rss-feed";
+import { useContext } from "react";
+import { UserContext } from "./common/user-context";
+import NoUserRole from "./pages/no-user-role";
+import UsersDashboard from "./pages/admin/users/users-dashboard";
 
 function App() {
+  const userContext = useContext(UserContext);
+  console.log(userContext);
   return (
     <div style={{ height: "100%" }}>
       <BrowserRouter>
         <GlobalHeader />
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
-          <Routes>
-            <Route index path="/" element={<Welcome />} />
-            <Route path="/chatbot" element={<Outlet />}>
-              <Route path="playground" element={<Playground />} />
-              <Route path="playground/:sessionId" element={<Playground />} />
-              <Route path="multichat" element={<MultiChatPlayground />} />
-              <Route path="models" element={<Models />} />
-            </Route>
-            <Route path="/rag" element={<Outlet />}>
-              <Route path="" element={<Dashboard />} />
-              <Route path="engines" element={<Engines />} />
-              <Route path="embeddings" element={<Embeddings />} />
-              <Route path="cross-encoders" element={<CrossEncoders />} />
-              <Route path="semantic-search" element={<SemanticSearch />} />
-              <Route path="workspaces" element={<Workspaces />} />
-              <Route path="workspaces/create" element={<CreateWorkspace />} />
-              <Route
-                path="workspaces/:workspaceId"
-                element={<WorkspacePane />}
-              />
-              <Route
-                path="workspaces/:workspaceId/rss/:feedId"
-                element={<RssFeed />}
-              />
-              <Route path="workspaces/add-data" element={<AddData />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {userContext.userRole !== undefined &&
+          userContext.userRole !== "undefined" ? (
+            <Routes>
+              <Route index path="/" element={<Welcome />} />
+              <Route path="/chatbot" element={<Outlet />}>
+                <Route path="playground" element={<Playground />} />
+                <Route path="playground/:sessionId" element={<Playground />} />
+                <Route path="multichat" element={<MultiChatPlayground />} />
+                <Route path="models" element={<Models />} />
+              </Route>
+              <Route path="/rag" element={<Outlet />}>
+                <Route path="" element={<Dashboard />} />
+                <Route path="engines" element={<Engines />} />
+                <Route path="embeddings" element={<Embeddings />} />
+                <Route path="cross-encoders" element={<CrossEncoders />} />
+                <Route path="semantic-search" element={<SemanticSearch />} />
+                <Route path="workspaces" element={<Workspaces />} />
+                <Route path="workspaces/create" element={<CreateWorkspace />} />
+                <Route
+                  path="workspaces/:workspaceId"
+                  element={<WorkspacePane />}
+                />
+                <Route
+                  path="workspaces/:workspaceId/rss/:feedId"
+                  element={<RssFeed />}
+                />
+                <Route path="workspaces/add-data" element={<AddData />} />
+              </Route>
+              <Route path="/admin" element={<Outlet />}>
+                <Route path="users" element={<UsersDashboard />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          ) : (
+            <NoUserRole />
+          )}
         </div>
       </BrowserRouter>
     </div>

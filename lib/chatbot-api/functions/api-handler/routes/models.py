@@ -8,6 +8,7 @@ router = Router()
 logger = Logger()
 permissions = UserPermissions(router)
 
+
 @router.resolver(field_name="listModels")
 @tracer.capture_method
 @permissions.approved_roles(
@@ -15,7 +16,7 @@ permissions = UserPermissions(router)
         permissions.ADMIN_ROLE,
         permissions.WORKSPACES_MANAGER_ROLE,
         permissions.WORKSPACES_USER_ROLE,
-        permissions.CHATBOT_USER_ROLE
+        permissions.CHATBOT_USER_ROLE,
     ]
 )
 def models():

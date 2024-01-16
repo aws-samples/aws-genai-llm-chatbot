@@ -187,10 +187,7 @@ def get_rss_posts(input: dict):
 @router.resolver(field_name="setDocumentSubscriptionStatus")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def toggle_document_status(input: dict):
     request = DocumentSubscriptionStatusRequest(**input)
@@ -216,10 +213,7 @@ def toggle_document_status(input: dict):
 @router.resolver(field_name="addTextDocument")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def add_text_document(input: dict):
     request = TextDocumentRequest(**input)
@@ -241,10 +235,7 @@ def add_text_document(input: dict):
 @router.resolver(field_name="addQnADocument")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def add_qna_document(input: dict):
     request = QnADocumentRequest(**input)
@@ -267,10 +258,7 @@ def add_qna_document(input: dict):
 @router.resolver(field_name="addWebsite")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def add_website(input: dict):
     request = WebsiteDocumentRequest(**input)
@@ -299,10 +287,7 @@ def add_website(input: dict):
 @router.resolver(field_name="addRssFeed")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def add_rss_feed(
     input: dict,
@@ -331,10 +316,7 @@ def add_rss_feed(
 @router.resolver(field_name="updateRSSFeed")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def update_rss_feed(input: dict):
     request = RssFeedDocumentRequest(**input)

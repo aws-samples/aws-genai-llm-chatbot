@@ -15,8 +15,6 @@ class SemanticSearchRequest(BaseModel):
     query: str
 
 
-
-
 @router.resolver(field_name="performSemanticSearch")
 @tracer.capture_method
 @permissions.approved_roles(

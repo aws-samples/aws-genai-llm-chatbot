@@ -294,7 +294,9 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 7. Open the generated **Cognito User Pool** Link from outputs above i.e. `https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx`
 
-8. Add a user that will be used to log into the web interface.
+8. Add a user that will be used to log into the web interface. 
+
+9. After the user is created, navigate to the newly created user in Cognito. Under 'User attributes' click the **Edit** button. On the 'Optional attributes' click **Add attribute**. An 'Additional attributes' dropdown will appear. For 'Attribute name' select `custom:userRole`. For the attribute value, type `admin`. This will grant your user admin permissions. Going forward, users should be created in the app by admin users in the Admin section. 
 
 9. Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`
 

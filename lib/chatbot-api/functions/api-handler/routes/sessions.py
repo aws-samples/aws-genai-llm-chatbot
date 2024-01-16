@@ -20,7 +20,7 @@ permissions = UserPermissions(router)
         permissions.ADMIN_ROLE,
         permissions.WORKSPACES_MANAGER_ROLE,
         permissions.WORKSPACES_USER_ROLE,
-        permissions.CHATBOT_USER_ROLE
+        permissions.CHATBOT_USER_ROLE,
     ]
 )
 def get_sessions():
@@ -49,7 +49,7 @@ def get_sessions():
         permissions.ADMIN_ROLE,
         permissions.WORKSPACES_MANAGER_ROLE,
         permissions.WORKSPACES_USER_ROLE,
-        permissions.CHATBOT_USER_ROLE
+        permissions.CHATBOT_USER_ROLE,
     ]
 )
 def get_session(id: str):
@@ -88,7 +88,7 @@ def get_session(id: str):
         permissions.ADMIN_ROLE,
         permissions.WORKSPACES_MANAGER_ROLE,
         permissions.WORKSPACES_USER_ROLE,
-        permissions.CHATBOT_USER_ROLE
+        permissions.CHATBOT_USER_ROLE,
     ]
 )
 def delete_user_sessions():
@@ -108,7 +108,7 @@ def delete_user_sessions():
         permissions.ADMIN_ROLE,
         permissions.WORKSPACES_MANAGER_ROLE,
         permissions.WORKSPACES_USER_ROLE,
-        permissions.CHATBOT_USER_ROLE
+        permissions.CHATBOT_USER_ROLE,
     ]
 )
 def delete_session(id: str):

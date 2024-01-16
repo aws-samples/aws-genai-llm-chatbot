@@ -33,10 +33,7 @@ def kendra_indexes():
 @router.resolver(field_name="startKendraDataSync")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def kendra_data_sync(workspaceId: str):
     genai_core.kendra.start_kendra_data_sync(workspace_id=workspaceId)
@@ -47,10 +44,7 @@ def kendra_data_sync(workspaceId: str):
 @router.resolver(field_name="isKendraDataSynching")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def kendra_is_syncing(workspaceId: str):
     result = genai_core.kendra.kendra_is_syncing(workspace_id=workspaceId)

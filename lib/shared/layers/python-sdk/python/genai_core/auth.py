@@ -1,5 +1,6 @@
 from functools import wraps
 
+
 def get_user_id(router):
     user_id = router.current_event.get("identity", {}).get("sub")
 
@@ -81,7 +82,7 @@ class UserPermissions:
                 if user_role in roles:
                     return func(*args, **kargs)
                 else:
-                    return {"ok": False, "error": "Unauthorized"}
+                    return {"error": "Unauthorized"}
 
             return wrapper
 

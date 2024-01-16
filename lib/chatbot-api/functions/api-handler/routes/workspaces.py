@@ -64,7 +64,7 @@ class CreateWorkspaceKendraRequest(BaseModel):
         permissions.ADMIN_ROLE,
         permissions.WORKSPACES_MANAGER_ROLE,
         permissions.WORKSPACES_USER_ROLE,
-        permissions.CHATBOT_USER_ROLE
+        permissions.CHATBOT_USER_ROLE,
     ]
 )
 def list_workspaces():
@@ -127,10 +127,7 @@ def create_aurora_workspace(input: dict):
 @router.resolver(field_name="createOpenSearchWorkspace")
 @tracer.capture_method
 @permissions.approved_roles(
-    [
-        permissions.ADMIN_ROLE,
-        permissions.WORKSPACES_MANAGER_ROLE
-    ]
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
 )
 def create_open_search_workspace(input: dict):
     config = genai_core.parameters.get_config()
