@@ -73,6 +73,7 @@ export const listWorkspaces = /* GraphQL */ `query ListWorkspaces {
     kendraIndexId
     kendraIndexExternal
     kendraUseAllData
+    enableChatHistory
     createdAt
     updatedAt
     __typename
@@ -109,6 +110,7 @@ export const getWorkspace = /* GraphQL */ `query GetWorkspace($workspaceId: Stri
     kendraIndexId
     kendraIndexExternal
     kendraUseAllData
+    enableChatHistory
     createdAt
     updatedAt
     __typename

@@ -102,6 +102,7 @@ def create_workspace_aurora(
     chunking_strategy: str,
     chunk_size: int,
     chunk_overlap: int,
+    enable_chat_history: bool,
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -133,6 +134,7 @@ def create_workspace_aurora(
         "chunking_strategy": chunking_strategy,
         "chunk_size": chunk_size,
         "chunk_overlap": chunk_overlap,
+        "enable_chat_history": enable_chat_history,
         "documents": 0,
         "vectors": 0,
         "size_in_bytes": 0,
@@ -169,6 +171,7 @@ def create_workspace_open_search(
     chunking_strategy: str,
     chunk_size: int,
     chunk_overlap: int,
+    enable_chat_history: bool,
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -200,6 +203,7 @@ def create_workspace_open_search(
         "chunking_strategy": chunking_strategy,
         "chunk_size": chunk_size,
         "chunk_overlap": chunk_overlap,
+        "enable_chat_history": enable_chat_history,
         "documents": 0,
         "vectors": 0,
         "size_in_bytes": 0,
@@ -225,7 +229,7 @@ def create_workspace_open_search(
 
 
 def create_workspace_kendra(
-    workspace_name: str, kendra_index: dict, use_all_data: bool
+    workspace_name: str, kendra_index: dict, use_all_data: bool, enable_chat_history: bool
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -243,6 +247,7 @@ def create_workspace_kendra(
         "kendra_index_id": kendra_index_id,
         "kendra_index_external": kendra_index_external,
         "kendra_use_all_data": use_all_data,
+        "enable_chat_history": enable_chat_history,
         "documents": 0,
         "vectors": 0,
         "size_in_bytes": 0,

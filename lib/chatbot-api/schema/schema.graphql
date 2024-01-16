@@ -14,6 +14,7 @@ input CreateWorkspaceAuroraInput {
   chunkingStrategy: String!
   chunkSize: Int!
   chunkOverlap: Int!
+  enableChatHistory: Boolean!
 }
 
 input CreateWorkspaceKendraInput {
@@ -21,6 +22,7 @@ input CreateWorkspaceKendraInput {
   kind: String!
   kendraIndexId: String!
   useAllData: Boolean!
+  enableChatHistory: Boolean!
 }
 
 input CreateWorkspaceOpenSearchInput {
@@ -35,6 +37,7 @@ input CreateWorkspaceOpenSearchInput {
   chunkingStrategy: String!
   chunkSize: Int!
   chunkOverlap: Int!
+  enableChatHistory: Boolean!
 }
 
 input CalculateEmbeddingsInput {
@@ -275,6 +278,7 @@ type Workspace @aws_cognito_user_pools {
   kendraIndexId: String
   kendraIndexExternal: Boolean
   kendraUseAllData: Boolean
+  enableChatHistory: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

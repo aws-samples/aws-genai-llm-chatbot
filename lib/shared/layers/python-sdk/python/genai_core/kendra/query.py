@@ -13,6 +13,7 @@ def query_workspace_kendra(
     kendra_index_id = workspace.get("kendra_index_id")
     kendra_index_external = workspace.get("kendra_index_external", True)
     kendra_use_all_data = workspace.get("kendra_use_all_data", False)
+    enable_chat_history = workspace.get("enable_chat_history", True)
 
     if not kendra_index_id:
         raise genai_core.types.CommonError(

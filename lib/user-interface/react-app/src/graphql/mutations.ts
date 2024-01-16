@@ -54,6 +54,7 @@ export const createKendraWorkspace = /* GraphQL */ `mutation CreateKendraWorkspa
     kendraIndexId
     kendraIndexExternal
     kendraUseAllData
+    enableChatHistory
     createdAt
     updatedAt
     __typename
@@ -90,6 +91,7 @@ export const createOpenSearchWorkspace = /* GraphQL */ `mutation CreateOpenSearc
     kendraIndexId
     kendraIndexExternal
     kendraUseAllData
+    enableChatHistory
     createdAt
     updatedAt
     __typename
@@ -126,6 +128,7 @@ export const createAuroraWorkspace = /* GraphQL */ `mutation CreateAuroraWorkspa
     kendraIndexId
     kendraIndexExternal
     kendraUseAllData
+    enableChatHistory
     createdAt
     updatedAt
     __typename

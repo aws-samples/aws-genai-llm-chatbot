@@ -6,6 +6,7 @@ import {
   FormField,
   Input,
   ExpandableSection,
+  Toggle,
 } from "@cloudscape-design/components";
 import EmbeddingSelector from "./embeddings-selector-field";
 import { CrossEncoderSelectorField } from "./cross-encoder-selector-field";
@@ -43,6 +44,21 @@ export function OpenSearchForm(props: OpenSearchFormProps) {
               props.onChange({ name: value })
             }
           />
+        </FormField>
+        <FormField
+          label="Enable chat history context for this workspace"
+          description="By default, each chat window will use the previous chat history to form part of its next answer, disabling this setting still records the chat history but prevents it from being used as further context in the chat conversation."
+          errorText={props.errors.index}
+        >
+          <Toggle
+            disabled={props.submitting}
+            checked={props.data.enableChatHistory}
+            onChange={({ detail: { checked } }) =>
+              props.onChange({ enableChatHistory: checked })
+            }
+          >
+            Enable history context
+          </Toggle>
         </FormField>
         <EmbeddingSelector
           submitting={props.submitting}

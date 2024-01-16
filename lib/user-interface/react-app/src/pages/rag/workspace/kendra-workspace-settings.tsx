@@ -137,6 +137,12 @@ export default function KendraWorkspaceSettings(
                   <div>{props.workspace.kendraUseAllData ? "Yes" : "No"}</div>
                 </div>
               )}
+              {typeof props.workspace.enableChatHistory !== "undefined" && (
+                <div>
+                  <Box variant="awsui-key-label">Enable Chat History</Box>
+                  <div>{props.workspace.enableChatHistory ? "Yes" : "No"}</div>
+                </div>
+              )}
             </SpaceBetween>
           </ColumnLayout>
         </Container>

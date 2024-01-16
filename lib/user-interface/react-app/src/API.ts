@@ -14,6 +14,7 @@ export type CreateWorkspaceKendraInput = {
   kind: string,
   kendraIndexId: string,
   useAllData: boolean,
+  enableChatHistory: boolean,
 };
 
 export type Workspace = {
@@ -43,6 +44,7 @@ export type Workspace = {
   kendraIndexId?: string | null,
   kendraIndexExternal?: string | null,
   kendraUseAllData?: boolean | null,
+  enableChatHistory?: boolean | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -362,6 +364,7 @@ export type CreateKendraWorkspaceMutation = {
     kendraIndexId?: string | null,
     kendraIndexExternal?: string | null,
     kendraUseAllData?: boolean | null,
+    enableChatHistory?: boolean | null,
     createdAt: string,
     updatedAt: string,
   },
@@ -399,6 +402,7 @@ export type CreateOpenSearchWorkspaceMutation = {
     kendraIndexId?: string | null,
     kendraIndexExternal?: string | null,
     kendraUseAllData?: boolean | null,
+    enableChatHistory?: boolean | null,
     createdAt: string,
     updatedAt: string,
   },
@@ -436,6 +440,7 @@ export type CreateAuroraWorkspaceMutation = {
     kendraIndexId?: string | null,
     kendraIndexExternal?: string | null,
     kendraUseAllData?: boolean | null,
+    enableChatHistory?: boolean | null,
     createdAt: string,
     updatedAt: string,
   },
@@ -631,6 +636,7 @@ export type ListWorkspacesQuery = {
     kendraIndexId?: string | null,
     kendraIndexExternal?: string | null,
     kendraUseAllData?: boolean | null,
+    enableChatHistory?: boolean | null,
     createdAt: string,
     updatedAt: string,
   } >,
@@ -668,6 +674,7 @@ export type GetWorkspaceQuery = {
     kendraIndexId?: string | null,
     kendraIndexExternal?: string | null,
     kendraUseAllData?: boolean | null,
+    enableChatHistory?: boolean | null,
     createdAt: string,
     updatedAt: string,
   } | null,

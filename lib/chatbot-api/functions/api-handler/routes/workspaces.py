@@ -32,6 +32,7 @@ class CreateWorkspaceAuroraRequest(BaseModel):
     chunkingStrategy: str
     chunkSize: int
     chunkOverlap: int
+    enableChatHistory: bool
 
 
 class CreateWorkspaceOpenSearchRequest(BaseModel):
@@ -46,6 +47,7 @@ class CreateWorkspaceOpenSearchRequest(BaseModel):
     chunkingStrategy: str
     chunkSize: int
     chunkOverlap: int
+    enableChatHistory: bool
 
 
 class CreateWorkspaceKendraRequest(BaseModel):
@@ -53,6 +55,7 @@ class CreateWorkspaceKendraRequest(BaseModel):
     name: str
     kendraIndexId: str
     useAllData: bool
+    enableChatHistory: bool
 
 
 @router.resolver(field_name="listWorkspaces")
@@ -185,6 +188,7 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
             chunking_strategy=request.chunkingStrategy,
             chunk_size=request.chunkSize,
             chunk_overlap=request.chunkOverlap,
+            enable_chat_history=request.enableChatHistory,
         )
     )
 
@@ -256,6 +260,7 @@ def _create_workspace_open_search(
             chunking_strategy=request.chunkingStrategy,
             chunk_size=request.chunkSize,
             chunk_overlap=request.chunkOverlap,
+            enable_chat_history=request.enableChatHistory,
         )
     )
 
@@ -287,12 +292,14 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
             workspace_name=workspace_name,
             kendra_index=kendra_index,
             use_all_data=request.useAllData,
+            enable_chat_history=request.enableChatHistory,
         )
     )
 
 
 def _convert_workspace(workspace: dict):
     kendra_index_external = workspace.get("kendra_index_external")
+    enable_chat_history = workspace.get("enable_chat_history")
 
     return {
         "id": workspace["workspace_id"],
@@ -320,6 +327,7 @@ def _convert_workspace(workspace: dict):
         "kendraIndexId": workspace.get("kendra_index_id"),
         "kendraIndexExternal": kendra_index_external,
         "kendraUseAllData": workspace.get("kendra_use_all_data", kendra_index_external),
+        "enableChatHistory": workspace.get("enable_chat_history", enable_chat_history),
         "createdAt": workspace.get("created_at"),
         "updatedAt": workspace.get("updated_at"),
     }

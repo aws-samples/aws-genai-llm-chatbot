@@ -94,6 +94,10 @@ export default function OpenSearchWorkspaceSettings(
             <Box variant="awsui-key-label">Chunk overlap</Box>
             <div>{props.workspace.chunkOverlap}</div>
           </div>
+          <div>
+            <Box variant="awsui-key-label">Enable Chat History</Box>
+            <div>{props.workspace.enableChatHistory ? "Yes" : "No"}</div>
+          </div>
         </SpaceBetween>
       </ColumnLayout>
     </Container>

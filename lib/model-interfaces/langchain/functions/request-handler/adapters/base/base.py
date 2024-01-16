@@ -13,8 +13,25 @@ from typing import Dict, List, Any
 
 from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 from genai_core.types import ChatbotMode
+import boto3
+
+dynamodb = boto3.resource("dynamodb")
+
+WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME")
+WORKSPACE_OBJECT_TYPE = "workspace"
 
 logger = Logger()
+
+def get_workspace(workspace_id: str):
+    response = table.get_item(
+        Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}
+    )
+    item = response.get("Item")
+
+    return item
+
+if WORKSPACES_TABLE_NAME:
+    table = dynamodb.Table(WORKSPACES_TABLE_NAME)
 
 
 class Mode(Enum):
@@ -69,13 +86,21 @@ class ModelAdapter:
             user_id=self.user_id,
         )
 
-    def get_memory(self, output_key=None, return_messages=False):
-        return ConversationBufferMemory(
+    def get_memory(self, output_key=None, return_messages=False, workspace_id=False):
+        workspace = get_workspace(workspace_id)
+        enable_chat_history = workspace.get("enable_chat_history", True)
+        c = ConversationBufferMemory(
             memory_key="chat_history",
             chat_memory=self.chat_history,
             return_messages=return_messages,
             output_key=output_key,
         )
+        
+        if not enable_chat_history:
+            logger.debug(f"Message history disabled")
+            c.clear()
+        
+        return c
 
     def get_prompt(self):
         template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
@@ -107,7 +132,7 @@ class ModelAdapter:
                 condense_question_prompt=self.get_condense_question_prompt(),
                 combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
                 return_source_documents=True,
-                memory=self.get_memory(output_key="answer", return_messages=True),
+                memory=self.get_memory(output_key="answer", return_messages=True, workspace_id=workspace_id),
                 verbose=True,
                 callbacks=[self.callback_handler],
             )
