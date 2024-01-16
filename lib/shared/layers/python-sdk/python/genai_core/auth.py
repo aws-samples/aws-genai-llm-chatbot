@@ -35,8 +35,7 @@ class UserPermissions:
 
     def __get_user_role(self):
         user_role = (
-            self.router.current_event.get("requestContext", {})
-            .get("authorizer", {})
+            self.router.current_event.get("identity", {})
             .get("claims", {})
             .get("custom:userRole")
         )
