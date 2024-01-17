@@ -1,18 +1,21 @@
-import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as cdk from "aws-cdk-lib";
+import * as path from "path";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
 import { Shared } from "../shared";
 import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
 import { ChatBotDynamoDBTables } from "./chatbot-dynamodb-tables";
 import { ChatBotS3Buckets } from "./chatbot-s3-buckets";
-import { RestApi } from "./rest-api";
-import { WebSocketApi } from "./websocket-api";
+import { ApiResolvers } from "./rest-api";
+import { RealtimeGraphqlApiBackend } from "./websocket-api";
+import * as appsync from "aws-cdk-lib/aws-appsync";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
 
 export interface ChatBotApiProps {
   readonly shared: Shared;
@@ -24,12 +27,11 @@ export interface ChatBotApiProps {
 }
 
 export class ChatBotApi extends Construct {
-  public readonly restApi: apigateway.RestApi;
-  public readonly webSocketApi: apigwv2.WebSocketApi;
   public readonly messagesTopic: sns.Topic;
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
   public readonly filesBucket: s3.Bucket;
+  public readonly graphqlApi: appsync.GraphqlApi;
 
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
     super(scope, id);
@@ -37,19 +39,80 @@ export class ChatBotApi extends Construct {
     const chatTables = new ChatBotDynamoDBTables(this, "ChatDynamoDBTables");
     const chatBuckets = new ChatBotS3Buckets(this, "ChatBuckets");
 
-    const restApi = new RestApi(this, "RestApi", {
+    const loggingRole = new iam.Role(this, "apiLoggingRole", {
+      assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),
+      inlinePolicies: {
+        loggingPolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["logs:*"],
+              resources: ["*"],
+            }),
+          ],
+        }),
+      },
+    });
+
+    const api = new appsync.GraphqlApi(this, "ChatbotApi", {
+      name: "ChatbotGraphqlApi",
+      definition: appsync.Definition.fromFile(
+        path.join(__dirname, "schema/schema.graphql")
+      ),
+      authorizationConfig: {
+        additionalAuthorizationModes: [
+          {
+            authorizationType: appsync.AuthorizationType.IAM,
+          },
+          {
+            authorizationType: appsync.AuthorizationType.USER_POOL,
+            userPoolConfig: {
+              userPool: props.userPool,
+            },
+          },
+        ],
+      },
+      logConfig: {
+        fieldLogLevel: appsync.FieldLogLevel.ALL,
+        retention: RetentionDays.ONE_WEEK,
+        role: loggingRole,
+      },
+      xrayEnabled: true,
+    });
+
+    new ApiResolvers(this, "RestApi", {
       ...props,
       sessionsTable: chatTables.sessionsTable,
       byUserIdIndex: chatTables.byUserIdIndex,
+      api,
     });
 
-    const webSocketApi = new WebSocketApi(this, "WebSocketApi", props);
+    const realtimeBackend = new RealtimeGraphqlApiBackend(this, "Realtime", {
+      ...props,
+      api,
+    });
 
-    this.restApi = restApi.api;
-    this.webSocketApi = webSocketApi.api;
-    this.messagesTopic = webSocketApi.messagesTopic;
+    realtimeBackend.resolvers.outgoingMessageHandler.addEnvironment(
+      "GRAPHQL_ENDPOINT",
+      api.graphqlUrl
+    );
+
+    api.grantMutation(realtimeBackend.resolvers.outgoingMessageHandler);
+
+    // Prints out URL
+    new cdk.CfnOutput(this, "GraphqlAPIURL", {
+      value: api.graphqlUrl,
+    });
+
+    // Prints out the AppSync GraphQL API key to the terminal
+    new cdk.CfnOutput(this, "Graphql-apiId", {
+      value: api.apiId || "",
+    });
+
+    this.messagesTopic = realtimeBackend.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
     this.filesBucket = chatBuckets.filesBucket;
+    this.graphqlApi = api;
   }
 }

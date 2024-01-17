@@ -5,16 +5,16 @@ import {
   Header,
 } from "@cloudscape-design/components";
 import { EnginesPageHeader } from "./engines-page-header";
-import { EngineItem, ResultValue } from "../../../common/types";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
 import { useContext, useEffect, useState } from "react";
 import useOnFollow from "../../../common/hooks/use-on-follow";
 import BaseAppLayout from "../../../components/base-app-layout";
 import { CHATBOT_NAME } from "../../../common/constants";
+import { RagEngine } from "../../../API";
 
 const CARD_DEFINITIONS = {
-  header: (item: EngineItem) => (
+  header: (item: RagEngine) => (
     <div>
       <Header>{item.name}</Header>
     </div>
@@ -23,12 +23,12 @@ const CARD_DEFINITIONS = {
     {
       id: "id",
       header: "id",
-      content: (item: EngineItem) => item.id,
+      content: (item: RagEngine) => item.id,
     },
     {
       id: "state",
       header: "State",
-      content: (item: EngineItem) => (
+      content: (item: RagEngine) => (
         <StatusIndicator type={item.enabled ? "success" : "stopped"}>
           {item.enabled ? "Enabled" : "Disabled"}
         </StatusIndicator>
@@ -40,7 +40,7 @@ const CARD_DEFINITIONS = {
 export default function Engines() {
   const onFollow = useOnFollow();
   const appContext = useContext(AppContext);
-  const [data, setData] = useState<EngineItem[]>([]);
+  const [data, setData] = useState<RagEngine[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,10 +48,12 @@ export default function Engines() {
 
     (async () => {
       const apiClient = new ApiClient(appContext);
-      const result = await apiClient.ragEngines.getRagEngines();
+      try {
+        const result = await apiClient.ragEngines.getRagEngines();
 
-      if (ResultValue.ok(result)) {
-        setData(result.data);
+        setData(result.data?.listRagEngines!);
+      } catch (error) {
+        console.error(error);
       }
 
       setLoading(false);

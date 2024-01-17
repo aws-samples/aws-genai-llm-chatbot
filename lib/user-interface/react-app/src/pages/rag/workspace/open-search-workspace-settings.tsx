@@ -7,10 +7,10 @@ import {
   Header,
 } from "@cloudscape-design/components";
 import { Labels } from "../../../common/constants";
-import { WorkspaceItem } from "../../../common/types";
+import { Workspace } from "../../../API";
 
 export interface OpenSearchWorkspaceSettingsProps {
-  workspace: WorkspaceItem;
+  workspace: Workspace;
 }
 
 export default function OpenSearchWorkspaceSettings(
@@ -38,7 +38,7 @@ export default function OpenSearchWorkspaceSettings(
             <Box variant="awsui-key-label">Languages</Box>
             <div>
               {(props.workspace.languages ?? [])
-                .map((c) => Labels.languageMap.get(c))
+                .map((c) => Labels.languageMap.get(c!))
                 .join(", ")}
             </div>
           </div>
@@ -46,9 +46,9 @@ export default function OpenSearchWorkspaceSettings(
             <Box variant="awsui-key-label">Status</Box>
             <div>
               <StatusIndicator
-                type={Labels.statusTypeMap[props.workspace.status]}
+                type={Labels.statusTypeMap[props.workspace.status!]}
               >
-                {Labels.statusMap[props.workspace.status]}
+                {Labels.statusMap[props.workspace.status!]}
               </StatusIndicator>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function OpenSearchWorkspaceSettings(
             <Box variant="awsui-key-label">Metric (scoring function)</Box>
             <div>
               {
-                Labels.distainceFunctionScoreMapOpenSearch[
+                Labels.distanceFunctionScoreMapOpenSearch[
                   props.workspace.metric ?? ""
                 ]
               }

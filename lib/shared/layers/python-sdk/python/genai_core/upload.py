@@ -30,6 +30,6 @@ def generate_presigned_post(workspace_id: str, file_name: str, expiration=3600):
     if not response:
         return None
 
-    response["url"] = (f"https://{UPLOAD_BUCKET_NAME}.s3-accelerate.amazonaws.com",)
+    response["url"] = f"https://{UPLOAD_BUCKET_NAME}.s3-accelerate.amazonaws.com"
 
     return response
