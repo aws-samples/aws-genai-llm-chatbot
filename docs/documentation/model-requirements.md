@@ -1,0 +1,48 @@
+# Model Requirements
+
+## Amazon SageMaker requirements (for self-hosted models only)
+
+**Instance type quota increase**
+
+If you are looking to self-host models on Amazon SageMaker, you'll likely need to request an increase in service quota for specific SageMaker instance types, such as the `ml.g5` instance type. This will give access to the latest generation of GPU/Multi-GPU instance types. [You can do this from the AWS console](https://console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
+
+## Amazon Bedrock requirements
+
+**Base Models Access**
+
+If you are looking to interact with models from Amazon Bedrock, you need to [request access to the base models in one of the regions where Amazon Bedrock is available](https://console.aws.amazon.com/bedrock/home?#/modelaccess). Make sure to read and accept models' end-user license agreements or EULA.
+
+Note:
+
+- You can deploy the solution to a different region from where you requested Base Model access.
+- **While the Base Model access approval is instant, it might take several minutes to get access and see the list of models in the UI.**
+
+![sample](./assets/enable-models.gif "AWS GenAI Chatbot")
+
+## Third-party models requirements
+
+You can also interact with external providers via their API, such as AI21 Labs, Cohere, OpenAI, etc.
+
+The provider must be supported in the [Model Interface](https://github.com/aws-samples/aws-genai-llm-chatbot/blob/main/lib/model-interfaces/langchain/functions/request-handler/index.py), [see available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list of providers.
+
+Usually, an `API_KEY` is required to integrate with 3P models. To do so, the [Model Interface](https://github.com/aws-samples/aws-genai-llm-chatbot/blob/main/lib/model-interfaces/langchain/index.ts) deployes a Secrets in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), intially with an empty JSON `{}`, where you can add your API KEYS for one or more providers.
+
+These keys will be injected at runtime into the Lambda function Environment Variables; they won't be visible in the AWS Lambda Console.
+
+For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Cohere endpoints:
+
+- Open the [Model Interface Keys Secret](https://github.com/aws-samples/aws-genai-llm-chatbot/blob/main/lib/model-interfaces/langchain/index.ts#L38) in Secrets Manager. You can find the secret name in the stack output, too.
+- Update the Secrets by adding a key to the JSON
+
+```json
+{
+  "AI21_API_KEY": "xxxxx",
+  "OPENAI_API_KEY": "sk-xxxxxxxxxxxxxxx",
+  "COHERE_API_KEY": "xxxxx"
+}
+```
+
+
+N.B: In case of no keys needs, the secret value must be an empty JSON `{}`, NOT an empty string `''`.
+
+make sure that the environment variable matches what is expected by the framework in use, like Langchain ([see available langchain integrations](https://python.langchain.com/docs/integrations/llms/)).
