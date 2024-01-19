@@ -15,7 +15,7 @@ features:
   - title: Modular, comprehensive and ready to use
     details: This solution provides ready-to-use code so you can start experimenting with a variety of Large Language Models and Multimodal Language Models, settings and prompts in your own AWS account.
   - title: Experiment with multimodal models
-    details: Deploy IDEFICS models on Amazon SageMazker and see how the chatbot can answer questions about images, describe visual content, and generate text grounded in multiple images.
+    details: Deploy IDEFICS models on Amazon SageMaker and see how the chatbot can answer questions about images, describe visual content, and generate text grounded in multiple images.
   - title: Multi-Session Chat - evaluate multiple models at once
     details: Send the same query to 2 to 4 separate models at once and see how each one responds based on its own learned history, context and access to the same powerful document retriever.
   - title: Experiment with multiple RAG options with Workspaces
