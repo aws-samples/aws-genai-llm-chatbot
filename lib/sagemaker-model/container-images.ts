@@ -24,6 +24,8 @@ export class ContainerImages {
     "huggingface-pytorch-tgi-inference:2.0.1-tgi1.0.3-gpu-py39-cu118-ubuntu20.04";
   static readonly HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0 =
     "huggingface-pytorch-tgi-inference:2.0.1-tgi1.1.0-gpu-py39-cu118-ubuntu20.04";
+  static readonly HF_PYTORCH_LLM_TGI_INFERENCE_1_3_3 =
+    "huggingface-pytorch-tgi-inference:2.1.1-tgi1.3.3-gpu-py310-cu121-ubuntu20.04";
   static readonly HF_PYTORCH_LLM_TGI_INFERENCE_LATEST =
     ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_1_0;
   /*
