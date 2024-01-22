@@ -155,7 +155,7 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "multiselect",
       name: "sagemakerModels",
-      hint: "SPACE to select, ENTER to confirm selection",
+      hint: "SPACE to select, ENTER to confirm selection [denotes instance size to host model]",
       message: "Which SageMaker Models do you want to enable",
       choices: Object.values(SupportedSageMakerModels),
       initial:
