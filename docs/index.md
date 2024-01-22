@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: Guide
-      link: /guide/getting-started
+      link: /guide/deploy
     - theme: alt
       text: View on GitHub
       link: https://github.com/aws-samples/aws-genai-llm-chatbot
