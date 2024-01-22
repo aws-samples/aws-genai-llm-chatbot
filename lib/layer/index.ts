@@ -37,6 +37,16 @@ export class Layer extends Construct {
             let canRunLocal = false;
             let python = props.runtime.name;
 
+            /* check if local machine architecture matches lambda runtime architecture. annoyingly,
+            Node refers to x86_64 CPUs as x64 instead of using the POSIX standard name. 
+            https://nodejs.org/docs/latest-v18.x/api/process.html#processarch
+            https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda.Architecture.html */
+            if (!((process.arch == 'x64' && architecture.name == 'x86_64') || (process.arch == architecture.name))) {
+              console.log(`Can't do local bundling because local arch != target arch (${process.arch} != ${architecture.name})`);
+              // Local bundling is pointless if architectures don't match
+              return false;
+            }
+
             try {
               // check if pip is available locally
               const testCommand = `${python} -m pip -V`
