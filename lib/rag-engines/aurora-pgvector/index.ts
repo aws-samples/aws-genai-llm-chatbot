@@ -11,6 +11,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as cr from "aws-cdk-lib/custom-resources";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { NagSuppressions } from "cdk-nag";
 
 export interface AuroraPgVectorProps {
   readonly config: SystemConfig;
@@ -25,6 +26,7 @@ export class AuroraPgVector extends Construct {
   constructor(scope: Construct, id: string, props: AuroraPgVectorProps) {
     super(scope, id);
 
+
     const dbCluster = new rds.DatabaseCluster(this, "AuroraDatabase", {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_15_3,
@@ -33,6 +35,7 @@ export class AuroraPgVector extends Construct {
       writer: rds.ClusterInstance.serverlessV2("ServerlessInstance"),
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      iamAuthentication: true
     });
 
     const databaseSetupFunction = new lambda.Function(
@@ -94,5 +97,15 @@ export class AuroraPgVector extends Construct {
 
     this.database = dbCluster;
     this.createAuroraWorkspaceWorkflow = createWorkflow.stateMachine;
+
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressions(dbCluster,
+      [
+        {id: "AwsSolutions-RDS10", reason: "Deletion protection disabled to allow deletion as part of the CloudFormation stack."},
+        {id: "AwsSolutions-RDS2", reason: "Encryption cannot be enabled on an unencrypted DB Cluster, therefore enabling will destroy existing data. Docs provide instructions for users requiring it."}
+      ]
+    );
   }
 }

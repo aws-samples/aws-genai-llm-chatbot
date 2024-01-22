@@ -16,6 +16,7 @@ import { ApiResolvers } from "./rest-api";
 import { RealtimeGraphqlApiBackend } from "./websocket-api";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
+import { NagSuppressions } from "cdk-nag";
 
 export interface ChatBotApiProps {
   readonly shared: Shared;
@@ -114,5 +115,14 @@ export class ChatBotApi extends Construct {
     this.byUserIdIndex = chatTables.byUserIdIndex;
     this.filesBucket = chatBuckets.filesBucket;
     this.graphqlApi = api;
+
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressions(loggingRole,
+      [
+        {id: "AwsSolutions-IAM5", reason: "Access to all log groups required for CloudWatch log group creation."},
+      ]
+    );
   }
 }

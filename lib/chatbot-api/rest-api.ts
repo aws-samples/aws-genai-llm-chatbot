@@ -3,7 +3,6 @@ import * as cdk from "aws-cdk-lib";
 import { SageMakerModelEndpoint, SystemConfig } from "../shared/types";
 import { Construct } from "constructs";
 import { RagEngines } from "../rag-engines";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as ec2 from "aws-cdk-lib/aws-ec2";

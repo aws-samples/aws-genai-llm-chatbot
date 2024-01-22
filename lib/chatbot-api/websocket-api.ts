@@ -11,6 +11,7 @@ import { Direction } from "../shared/types";
 import { RealtimeResolvers } from "./appsync-ws";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
 import * as appsync from "aws-cdk-lib/aws-appsync";
+import { NagSuppressions } from "cdk-nag";
 
 interface RealtimeGraphqlApiBackendProps {
   readonly shared: Shared;
@@ -31,10 +32,13 @@ export class RealtimeGraphqlApiBackend extends Construct {
     // Create the main Message Topic acting as a message bus
     const messagesTopic = new sns.Topic(this, "MessagesTopic");
 
-    const deadLetterQueue = new sqs.Queue(this, "OutgoingMessagesDLQ");
+    const deadLetterQueue = new sqs.Queue(this, "OutgoingMessagesDLQ", {
+      enforceSSL: true,
+    });
 
     const queue = new sqs.Queue(this, "OutgoingMessagesQueue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      enforceSSL: true,
       deadLetterQueue: {
         queue: deadLetterQueue,
         maxReceiveCount: 3,
@@ -76,5 +80,15 @@ export class RealtimeGraphqlApiBackend extends Construct {
 
     this.messagesTopic = messagesTopic;
     this.resolvers = resolvers;
+
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressions(messagesTopic,
+      [
+        {id: "AwsSolutions-SNS2", reason: "No sensitive data in topic."},
+        {id: "AwsSolutions-SNS3", reason: "No sensitive data in topic."},
+      ]
+    );
   }
 }
