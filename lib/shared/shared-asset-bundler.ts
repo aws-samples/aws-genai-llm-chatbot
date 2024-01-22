@@ -35,7 +35,7 @@ function calculateHash(paths: string[]): string {
 export class SharedAssetBundler extends Construct {
   private readonly sharedAssets: string[];
   private readonly WORKING_PATH = "/asset-input/";
-  private readonly container_image: DockerImage;
+  private readonly containerImage: DockerImage;
   private useLocalBundler: boolean = false;
   /**
    * Instantiate a new SharedAssetBundler. You then invoke `bundleWithAsset(pathToAsset)` to
@@ -53,11 +53,11 @@ export class SharedAssetBundler extends Construct {
     this.sharedAssets = sharedAssets;
     // Check if we can do local bundling
     if (!this.localBundlerTest()) {
-      // if not, then build Apline from local definition
-      this.container_image = DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip"));
+      // if not, then build Alpine from local definition
+      this.containerImage = DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip"));
     } else {
       // if yes, then don't build the container. https://hub.docker.com/_/scratch/
-      this.container_image = DockerImage.fromRegistry("scratch");
+      this.containerImage = DockerImage.fromRegistry("scratch");
     }
   }
 
@@ -119,7 +119,7 @@ export class SharedAssetBundler extends Construct {
               return false;
             }
           },
-          image: this.container_image,
+          image: this.containerImage,
           command: ["zip", "-r", path.posix.join("/asset-output", "asset.zip"), "."],
           volumes: this.sharedAssets.map((f) => ({
             containerPath: path.posix.join(this.WORKING_PATH, path.basename(f)),
