@@ -33,7 +33,7 @@ export abstract class OptionsHelper {
   }
 
   static getSelectOptionGroups<
-    T extends { provider: string; name: string; interface: string },
+    T extends { provider: string; name: string; interface?: string },
   >(data: T[]) {
     const modelsMap = new Map<string, T[]>();
     data.forEach((item) => {
