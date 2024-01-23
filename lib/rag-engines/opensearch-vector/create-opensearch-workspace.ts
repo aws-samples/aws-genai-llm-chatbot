@@ -141,9 +141,13 @@ export class CreateOpenSearchWorkspace extends Construct {
       .next(setReady)
       .next(new sfn.Succeed(this, "Success"));
 
-    const logGroup = new logs.LogGroup(this, "CreateOpenSearchWorkspaceSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY
-    });
+    const logGroup = new logs.LogGroup(
+      this,
+      "CreateOpenSearchWorkspaceSMLogGroup",
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+      }
+    );
 
     const stateMachine = new sfn.StateMachine(
       this,
@@ -155,8 +159,8 @@ export class CreateOpenSearchWorkspace extends Construct {
         tracingEnabled: true,
         logs: {
           destination: logGroup,
-          level: sfn.LogLevel.ALL
-        }
+          level: sfn.LogLevel.ALL,
+        },
       }
     );
 

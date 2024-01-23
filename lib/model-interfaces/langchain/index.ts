@@ -196,7 +196,7 @@ export class LangChainInterface extends Construct {
     );
 
     const deadLetterQueue = new sqs.Queue(this, "DLQ", {
-      enforceSSL: true
+      enforceSSL: true,
     });
 
     const queue = new sqs.Queue(this, "Queue", {
@@ -207,7 +207,7 @@ export class LangChainInterface extends Construct {
         queue: deadLetterQueue,
         maxReceiveCount: 3,
       },
-      enforceSSL: true
+      enforceSSL: true,
     });
 
     queue.addToResourcePolicy(

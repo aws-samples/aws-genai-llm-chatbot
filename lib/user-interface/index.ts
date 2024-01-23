@@ -49,20 +49,24 @@ export class UserInterface extends Construct {
       websiteIndexDocument: "index.html",
       websiteErrorDocument: "index.html",
       enforceSSL: true,
-      serverAccessLogsBucket: uploadLogsBucket
+      serverAccessLogsBucket: uploadLogsBucket,
     });
 
     const originAccessIdentity = new cf.OriginAccessIdentity(this, "S3OAI");
     websiteBucket.grantRead(originAccessIdentity);
     props.chatbotFilesBucket.grantRead(originAccessIdentity);
 
-    const distributionLogsBucket = new s3.Bucket(this, "DistributionLogsBucket", {
-      objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-      enforceSSL: true
-    });
+    const distributionLogsBucket = new s3.Bucket(
+      this,
+      "DistributionLogsBucket",
+      {
+        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+        enforceSSL: true,
+      }
+    );
 
     const distribution = new cf.CloudFrontWebDistribution(
       this,
@@ -262,25 +266,24 @@ export class UserInterface extends Construct {
      * CDK NAG suppression
      */
     NagSuppressions.addResourceSuppressions(
-        [
-          uploadLogsBucket,
-          distributionLogsBucket
-        ],
-        [
-          {id: "AwsSolutions-S1", reason: "Bucket is the server access logs bucket for websiteBucket."}
-        ]
-    );
-    NagSuppressions.addResourceSuppressions(websiteBucket,
+      [uploadLogsBucket, distributionLogsBucket],
       [
-        {id: "AwsSolutions-S5", reason: "OAI is configured for read."}
+        {
+          id: "AwsSolutions-S1",
+          reason: "Bucket is the server access logs bucket for websiteBucket.",
+        },
       ]
     );
-    NagSuppressions.addResourceSuppressions(distribution,
-      [
-        {id: "AwsSolutions-CFR1", reason: "No geo restrictions"},
-        {id: "AwsSolutions-CFR2", reason: "WAF not required due to configured Cognito auth."},
-        {id: "AwsSolutions-CFR4", reason: "TLS 1.2 is the default."}
-      ]
-    );
+    NagSuppressions.addResourceSuppressions(websiteBucket, [
+      { id: "AwsSolutions-S5", reason: "OAI is configured for read." },
+    ]);
+    NagSuppressions.addResourceSuppressions(distribution, [
+      { id: "AwsSolutions-CFR1", reason: "No geo restrictions" },
+      {
+        id: "AwsSolutions-CFR2",
+        reason: "WAF not required due to configured Cognito auth.",
+      },
+      { id: "AwsSolutions-CFR4", reason: "TLS 1.2 is the default." },
+    ]);
   }
 }

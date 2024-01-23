@@ -213,9 +213,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "kendraEnterprise",
       message: "Do you want to enable Kendra Enterprise Edition?",
-      initial:
-        options.kendraEnterprise ||
-        false,
+      initial: options.kendraEnterprise || false,
       skip(): boolean {
         return !(this as any).state.answers.ragsToEnable.includes("kendra");
       },
@@ -336,7 +334,7 @@ async function processCreateOptions(options: any): Promise<void> {
           enabled: false,
           createIndex: false,
           external: [{}],
-          enterprise: false
+          enterprise: false,
         },
       },
       embeddingsModels: [{}],
@@ -366,8 +364,7 @@ async function processCreateOptions(options: any): Promise<void> {
   config.rag.engines.kendra.enabled =
     config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
-  config.rag.engines.kendra.enterprise =
-    answers.kendraEnterprise
+  config.rag.engines.kendra.enterprise = answers.kendraEnterprise;
 
   console.log("\n✨ This is the chosen configuration:\n");
   console.log(JSON.stringify(config, undefined, 2));

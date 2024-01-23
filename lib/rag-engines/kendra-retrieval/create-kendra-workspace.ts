@@ -81,9 +81,13 @@ export class CreateKendraWorkspace extends Construct {
       .next(setReady)
       .next(new sfn.Succeed(this, "Success"));
 
-    const logGroup = new logs.LogGroup(this, "CreateKendraWorkspaceSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY
-    });
+    const logGroup = new logs.LogGroup(
+      this,
+      "CreateKendraWorkspaceSMLogGroup",
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+      }
+    );
 
     const stateMachine = new sfn.StateMachine(this, "CreateKendraWorkspace", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),
@@ -92,8 +96,8 @@ export class CreateKendraWorkspace extends Construct {
       tracingEnabled: true,
       logs: {
         destination: logGroup,
-        level: sfn.LogLevel.ALL
-      }
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     this.stateMachine = stateMachine;
