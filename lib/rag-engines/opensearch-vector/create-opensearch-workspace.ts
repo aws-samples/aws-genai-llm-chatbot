@@ -10,6 +10,7 @@ import * as path from "path";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
+import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface CreateOpenSearchWorkspaceProps {
   readonly config: SystemConfig;
@@ -140,6 +141,14 @@ export class CreateOpenSearchWorkspace extends Construct {
       .next(setReady)
       .next(new sfn.Succeed(this, "Success"));
 
+    const logGroup = new logs.LogGroup(
+      this,
+      "CreateOpenSearchWorkspaceSMLogGroup",
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+      }
+    );
+
     const stateMachine = new sfn.StateMachine(
       this,
       "CreateOpenSearchWorkspace",
@@ -147,6 +156,11 @@ export class CreateOpenSearchWorkspace extends Construct {
         definitionBody: sfn.DefinitionBody.fromChainable(workflow),
         timeout: cdk.Duration.minutes(5),
         comment: "Create OpenSearch Workspace Workflow",
+        tracingEnabled: true,
+        logs: {
+          destination: logGroup,
+          level: sfn.LogLevel.ALL,
+        },
       }
     );
 

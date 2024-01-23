@@ -12,6 +12,7 @@ import * as path from "path";
 import { RagEngines } from "../../rag-engines";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
+import { NagSuppressions } from "cdk-nag";
 
 interface LangChainInterfaceProps {
   readonly shared: Shared;
@@ -194,7 +195,10 @@ export class LangChainInterface extends Construct {
       })
     );
 
-    const deadLetterQueue = new sqs.Queue(this, "DLQ");
+    const deadLetterQueue = new sqs.Queue(this, "DLQ", {
+      enforceSSL: true,
+    });
+
     const queue = new sqs.Queue(this, "Queue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
@@ -203,6 +207,7 @@ export class LangChainInterface extends Construct {
         queue: deadLetterQueue,
         maxReceiveCount: 3,
       },
+      enforceSSL: true,
     });
 
     queue.addToResourcePolicy(

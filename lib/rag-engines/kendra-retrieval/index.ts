@@ -38,10 +38,19 @@ export class KendraRetrieval extends Construct {
     if (props.config.rag.engines.kendra.createIndex) {
       const indexName = Utils.getName(props.config, "genaichatbot-workspaces");
 
+      const logsBucket = new s3.Bucket(this, "LogsBucket", {
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+        enforceSSL: true,
+      });
+
       const dataBucket = new s3.Bucket(this, "KendraDataBucket", {
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
+        enforceSSL: true,
+        serverAccessLogsBucket: logsBucket,
       });
 
       const kendraRole = new iam.Role(this, "KendraRole", {
@@ -58,7 +67,9 @@ export class KendraRetrieval extends Construct {
       dataBucket.grantRead(kendraRole);
 
       const kendraIndex = new kendra.CfnIndex(this, "Index", {
-        edition: "DEVELOPER_EDITION",
+        edition: props.config.rag?.engines.kendra?.enterprise
+          ? "ENTERPRISE_EDITION"
+          : "DEVELOPER_EDITION",
         name: indexName,
         roleArn: kendraRole.roleArn,
         documentMetadataConfigurations: [

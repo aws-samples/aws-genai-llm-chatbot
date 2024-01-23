@@ -5,6 +5,8 @@ import { Shared } from "../../shared";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as logs from "aws-cdk-lib/aws-logs";
+import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface CreateKendraWorkspaceProps {
   readonly config: SystemConfig;
@@ -79,10 +81,23 @@ export class CreateKendraWorkspace extends Construct {
       .next(setReady)
       .next(new sfn.Succeed(this, "Success"));
 
+    const logGroup = new logs.LogGroup(
+      this,
+      "CreateKendraWorkspaceSMLogGroup",
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+      }
+    );
+
     const stateMachine = new sfn.StateMachine(this, "CreateKendraWorkspace", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),
       timeout: cdk.Duration.minutes(5),
       comment: "Create Kendra Workspace Workflow",
+      tracingEnabled: true,
+      logs: {
+        destination: logGroup,
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     this.stateMachine = stateMachine;

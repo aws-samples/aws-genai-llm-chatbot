@@ -11,6 +11,7 @@ import { LangChainInterface } from "./model-interfaces/langchain";
 import { IdeficsInterface } from "./model-interfaces/idefics";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sns from "aws-cdk-lib/aws-sns";
+import { NagSuppressions } from "cdk-nag";
 
 export interface AwsGenAILLMChatbotStackProps extends cdk.StackProps {
   readonly config: SystemConfig;
@@ -155,5 +156,262 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       sagemakerEmbeddingsEnabled:
         typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
     });
+
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressionsByPath(
+      this,
+      [
+        `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource`,
+      ],
+      [
+        {
+          id: "AwsSolutions-L1",
+          reason: "Lambda function created implicitly by CDK.",
+        },
+      ]
+    );
+    NagSuppressions.addResourceSuppressionsByPath(
+      this,
+      [
+        `/${this.stackName}/Authentication/IdentityPool/AuthenticatedRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/Authentication/UserPool/smsRole/Resource`,
+        `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource`,
+        `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
+        `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/ChatbotApi/proxyResolverFunction/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/ChatBotApi/ChatbotApi/realtimeResolverFunction/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/ChatBotApi/RestApi/GraphQLApiHandler/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/RestApi/GraphQLApiHandler/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/ChatBotApi/Realtime/Resolvers/lambda-resolver/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`,
+      ],
+      [
+        {
+          id: "AwsSolutions-IAM4",
+          reason: "IAM role implicitly created by CDK.",
+        },
+        {
+          id: "AwsSolutions-IAM5",
+          reason: "IAM role implicitly created by CDK.",
+        },
+      ]
+    );
+
+    if (ideficsModels.length > 0) {
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        [
+          `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/Resource`,
+          `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
+        ],
+        [
+          {
+            id: "AwsSolutions-IAM4",
+            reason: "IAM role implicitly created by CDK.",
+          },
+          {
+            id: "AwsSolutions-IAM5",
+            reason: "IAM role implicitly created by CDK.",
+          },
+        ]
+      );
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/DeploymentStage.prod/Resource`,
+        [
+          {
+            id: "AwsSolutions-APIG3",
+            reason: "WAF not required due to configured Cognito auth.",
+          },
+        ]
+      );
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        [
+          `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
+          `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
+        ],
+        [
+          { id: "AwsSolutions-APIG4", reason: "Private API within a VPC." },
+          { id: "AwsSolutions-COG4", reason: "Private API within a VPC." },
+        ]
+      );
+    }
+
+    // RAG configuration
+    if (props.config.rag.enabled) {
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        [
+          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportJobRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportContainer/ExecutionRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/FileImportWorkflow/FileImportStateMachine/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteCrawling/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspaceFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspace/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
+          `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource`,
+          `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/RssIngestor/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/RssIngestor/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/triggerRssIngestorsFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/triggerRssIngestorsFunction/ServiceRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/crawlQueuedRssPostsFunction/ServiceRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/RssSubscription/crawlQueuedRssPostsFunction/ServiceRole/DefaultPolicy/Resource`,
+        ],
+        [
+          {
+            id: "AwsSolutions-IAM4",
+            reason: "IAM role implicitly created by CDK.",
+          },
+          {
+            id: "AwsSolutions-IAM5",
+            reason: "IAM role implicitly created by CDK.",
+          },
+        ]
+      );
+
+      if (
+        props.config.rag.engines.aurora.enabled ||
+        props.config.rag.engines.opensearch.enabled
+      ) {
+        NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/CodeBuildRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/OnEventHandler/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/IsCompleteHandler/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onEvent/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-isComplete/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-isComplete/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/waiter-state-machine/Role/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/SageMakerExecutionRole/DefaultPolicy/Resource`,
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM4",
+              reason: "IAM role implicitly created by CDK.",
+            },
+            {
+              id: "AwsSolutions-IAM5",
+              reason: "IAM role implicitly created by CDK.",
+            },
+          ]
+        );
+        if (props.config.rag.engines.aurora.enabled) {
+          NagSuppressions.addResourceSuppressionsByPath(
+            this,
+            `/${this.stackName}/RagEngines/AuroraPgVector/AuroraDatabase/Secret/Resource`,
+            [
+              {
+                id: "AwsSolutions-SMG4",
+                reason: "Secret created implicitly by CDK.",
+              },
+            ]
+          );
+          NagSuppressions.addResourceSuppressionsByPath(
+            this,
+            [
+              `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupFunction/ServiceRole/Resource`,
+              `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/Resource`,
+              `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
+              `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/Resource`,
+              `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+              `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspace/Role/DefaultPolicy/Resource`,
+            ],
+            [
+              {
+                id: "AwsSolutions-IAM4",
+                reason: "IAM role implicitly created by CDK.",
+              },
+              {
+                id: "AwsSolutions-IAM5",
+                reason: "IAM role implicitly created by CDK.",
+              },
+            ]
+          );
+        }
+        if (props.config.rag.engines.opensearch.enabled) {
+          NagSuppressions.addResourceSuppressionsByPath(
+            this,
+            [
+              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/Resource`,
+              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspace/Role/DefaultPolicy/Resource`,
+            ],
+            [
+              {
+                id: "AwsSolutions-IAM4",
+                reason: "IAM role implicitly created by CDK.",
+              },
+              {
+                id: "AwsSolutions-IAM5",
+                reason: "IAM role implicitly created by CDK.",
+              },
+            ]
+          );
+        }
+      }
+      if (props.config.rag.engines.kendra.enabled) {
+        NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/RagEngines/KendraRetrieval/CreateAuroraWorkspace/CreateKendraWorkspace/Role/DefaultPolicy/Resource`,
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM4",
+              reason: "IAM role implicitly created by CDK.",
+            },
+            {
+              id: "AwsSolutions-IAM5",
+              reason: "IAM role implicitly created by CDK.",
+            },
+          ]
+        );
+        NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM5",
+              reason:
+                "Access to all log groups required for CloudWatch log group creation.",
+            },
+          ]
+        );
+      }
+    }
+    // Implicitly created resources with changing paths
+    NagSuppressions.addStackSuppressions(this, [
+      {
+        id: "CdkNagValidationFailure",
+        reason: "Intrinstic function references.",
+      },
+    ]);
+    // Lambda functions still using Python 3.11 even though latest runtime is 3.12. Can be removed after upgrade.
+    NagSuppressions.addStackSuppressions(this, [
+      {
+        id: "AwsSolutions-L1",
+        reason: "Not yet upgraded from Python 3.11 to 3.12.",
+      },
+    ]);
   }
 }
