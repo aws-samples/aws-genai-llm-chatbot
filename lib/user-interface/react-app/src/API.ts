@@ -2,13 +2,6 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
-export type Channel = {
-  __typename: "Channel",
-  data?: string | null,
-  sessionId?: string | null,
-  userId?: string | null,
-};
-
 export type CreateWorkspaceKendraInput = {
   name: string,
   kind: string,
@@ -41,7 +34,7 @@ export type Workspace = {
   documents?: number | null,
   sizeInBytes?: number | null,
   kendraIndexId?: string | null,
-  kendraIndexExternal?: string | null,
+  kendraIndexExternal?: boolean | null,
   kendraUseAllData?: boolean | null,
   createdAt: string,
   updatedAt: string,
@@ -122,6 +115,13 @@ export type DeleteSessionResult = {
   __typename: "DeleteSessionResult",
   id?: string | null,
   deleted: boolean,
+};
+
+export type Channel = {
+  __typename: "Channel",
+  data?: string | null,
+  sessionId?: string | null,
+  userId?: string | null,
 };
 
 export type FileUploadInput = {
@@ -307,29 +307,6 @@ export type PassageRank = {
   passage: string,
 };
 
-export type SendQueryMutationVariables = {
-  data?: string | null,
-};
-
-export type SendQueryMutation = {
-  sendQuery?: string | null,
-};
-
-export type PublishResponseMutationVariables = {
-  sessionId?: string | null,
-  userId?: string | null,
-  data?: string | null,
-};
-
-export type PublishResponseMutation = {
-  publishResponse?:  {
-    __typename: "Channel",
-    data?: string | null,
-    sessionId?: string | null,
-    userId?: string | null,
-  } | null,
-};
-
 export type CreateKendraWorkspaceMutationVariables = {
   input: CreateWorkspaceKendraInput,
 };
@@ -360,7 +337,7 @@ export type CreateKendraWorkspaceMutation = {
     documents?: number | null,
     sizeInBytes?: number | null,
     kendraIndexId?: string | null,
-    kendraIndexExternal?: string | null,
+    kendraIndexExternal?: boolean | null,
     kendraUseAllData?: boolean | null,
     createdAt: string,
     updatedAt: string,
@@ -397,7 +374,7 @@ export type CreateOpenSearchWorkspaceMutation = {
     documents?: number | null,
     sizeInBytes?: number | null,
     kendraIndexId?: string | null,
-    kendraIndexExternal?: string | null,
+    kendraIndexExternal?: boolean | null,
     kendraUseAllData?: boolean | null,
     createdAt: string,
     updatedAt: string,
@@ -434,7 +411,7 @@ export type CreateAuroraWorkspaceMutation = {
     documents?: number | null,
     sizeInBytes?: number | null,
     kendraIndexId?: string | null,
-    kendraIndexExternal?: string | null,
+    kendraIndexExternal?: boolean | null,
     kendraUseAllData?: boolean | null,
     createdAt: string,
     updatedAt: string,
@@ -558,11 +535,28 @@ export type DeleteSessionMutation = {
   } | null,
 };
 
-export type NoneQueryVariables = {
+export type SendQueryMutationVariables = {
+  data?: string | null,
 };
 
-export type NoneQuery = {
-  none?: string | null,
+export type SendQueryMutation = {
+  // Real-time
+  sendQuery?: string | null,
+};
+
+export type PublishResponseMutationVariables = {
+  sessionId?: string | null,
+  userId?: string | null,
+  data?: string | null,
+};
+
+export type PublishResponseMutation = {
+  publishResponse?:  {
+    __typename: "Channel",
+    data?: string | null,
+    sessionId?: string | null,
+    userId?: string | null,
+  } | null,
 };
 
 export type CheckHealthQueryVariables = {
@@ -629,7 +623,7 @@ export type ListWorkspacesQuery = {
     documents?: number | null,
     sizeInBytes?: number | null,
     kendraIndexId?: string | null,
-    kendraIndexExternal?: string | null,
+    kendraIndexExternal?: boolean | null,
     kendraUseAllData?: boolean | null,
     createdAt: string,
     updatedAt: string,
@@ -666,7 +660,7 @@ export type GetWorkspaceQuery = {
     documents?: number | null,
     sizeInBytes?: number | null,
     kendraIndexId?: string | null,
-    kendraIndexExternal?: string | null,
+    kendraIndexExternal?: boolean | null,
     kendraUseAllData?: boolean | null,
     createdAt: string,
     updatedAt: string,
