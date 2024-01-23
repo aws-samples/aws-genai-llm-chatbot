@@ -50,7 +50,7 @@ export class KendraRetrieval extends Construct {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
         enforceSSL: true,
-        serverAccessLogsBucket: logsBucket
+        serverAccessLogsBucket: logsBucket,
       });
 
       const kendraRole = new iam.Role(this, "KendraRole", {
@@ -67,7 +67,9 @@ export class KendraRetrieval extends Construct {
       dataBucket.grantRead(kendraRole);
 
       const kendraIndex = new kendra.CfnIndex(this, "Index", {
-        edition: props.config.rag?.engines.kendra?.enterprise ? "ENTERPRISE_EDITION" : "DEVELOPER_EDITION",
+        edition: props.config.rag?.engines.kendra?.enterprise
+          ? "ENTERPRISE_EDITION"
+          : "DEVELOPER_EDITION",
         name: indexName,
         roleArn: kendraRole.roleArn,
         documentMetadataConfigurations: [

@@ -102,29 +102,32 @@ export class Models extends Construct {
       });
     }
 
-
     if (
       props.config.llms?.sagemaker.includes(
         SupportedSageMakerModels.Mistral7b_Instruct2
       )
     ) {
-      const mistral7bInstruct2 = new SageMakerModel(this, "Mistral7BInstruct2", {
-        vpc: props.shared.vpc,
-        region: cdk.Aws.REGION,
-        model: {
-          type: DeploymentType.Container,
-          modelId: "mistralai/Mistral-7B-Instruct-v0.2",
-          container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_3_3,
-          instanceType: "ml.g5.2xlarge",
-          containerStartupHealthCheckTimeoutInSeconds: 300,
-          env: {
-            SM_NUM_GPUS: JSON.stringify(1),
-            MAX_INPUT_LENGTH: JSON.stringify(2048),
-            MAX_TOTAL_TOKENS: JSON.stringify(4096),
-            MAX_CONCURRENT_REQUESTS: JSON.stringify(4),
+      const mistral7bInstruct2 = new SageMakerModel(
+        this,
+        "Mistral7BInstruct2",
+        {
+          vpc: props.shared.vpc,
+          region: cdk.Aws.REGION,
+          model: {
+            type: DeploymentType.Container,
+            modelId: "mistralai/Mistral-7B-Instruct-v0.2",
+            container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_3_3,
+            instanceType: "ml.g5.2xlarge",
+            containerStartupHealthCheckTimeoutInSeconds: 300,
+            env: {
+              SM_NUM_GPUS: JSON.stringify(1),
+              MAX_INPUT_LENGTH: JSON.stringify(2048),
+              MAX_TOTAL_TOKENS: JSON.stringify(4096),
+              MAX_CONCURRENT_REQUESTS: JSON.stringify(4),
+            },
           },
-        },
-      });
+        }
+      );
 
       models.push({
         name: mistral7bInstruct2.endpoint.endpointName!,
@@ -136,31 +139,34 @@ export class Models extends Construct {
         ragSupported: true,
       });
     }
-    
 
     if (
       props.config.llms?.sagemaker.includes(
         SupportedSageMakerModels.Mixtral_8x7b_Instruct
       )
     ) {
-      const mixtral8x7binstruct = new SageMakerModel(this, "Mixtral8x7binstruct", {
-        vpc: props.shared.vpc,
-        region: cdk.Aws.REGION,
-        model: {
-          type: DeploymentType.Container,
-          modelId: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-          container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_3_3,
-          instanceType: "ml.g5.48xlarge",
-          containerStartupHealthCheckTimeoutInSeconds: 300,
-          env: {
-            SM_NUM_GPUS: JSON.stringify(8),
-            MAX_INPUT_LENGTH: JSON.stringify(24576),
-            MAX_TOTAL_TOKENS: JSON.stringify(32768),
-            MAX_BATCH_PREFILL_TOKENS: JSON.stringify(24576),
-            MAX_CONCURRENT_REQUESTS: JSON.stringify(4),
+      const mixtral8x7binstruct = new SageMakerModel(
+        this,
+        "Mixtral8x7binstruct",
+        {
+          vpc: props.shared.vpc,
+          region: cdk.Aws.REGION,
+          model: {
+            type: DeploymentType.Container,
+            modelId: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            container: ContainerImages.HF_PYTORCH_LLM_TGI_INFERENCE_1_3_3,
+            instanceType: "ml.g5.48xlarge",
+            containerStartupHealthCheckTimeoutInSeconds: 300,
+            env: {
+              SM_NUM_GPUS: JSON.stringify(8),
+              MAX_INPUT_LENGTH: JSON.stringify(24576),
+              MAX_TOTAL_TOKENS: JSON.stringify(32768),
+              MAX_BATCH_PREFILL_TOKENS: JSON.stringify(24576),
+              MAX_CONCURRENT_REQUESTS: JSON.stringify(4),
+            },
           },
-        },
-      });
+        }
+      );
 
       models.push({
         name: mixtral8x7binstruct.endpoint.endpointName!,

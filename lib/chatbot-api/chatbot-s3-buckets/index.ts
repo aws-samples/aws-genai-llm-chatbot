@@ -22,7 +22,7 @@ export class ChatBotS3Buckets extends Construct {
       autoDeleteObjects: true,
       transferAcceleration: true,
       enforceSSL: true,
-      serverAccessLogsBucket:  logsBucket,
+      serverAccessLogsBucket: logsBucket,
       cors: [
         {
           allowedHeaders: ["*"],
@@ -44,10 +44,11 @@ export class ChatBotS3Buckets extends Construct {
     /**
      * CDK NAG suppression
      */
-    NagSuppressions.addResourceSuppressions(logsBucket,
-      [
-        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."},
-      ]
-    );
+    NagSuppressions.addResourceSuppressions(logsBucket, [
+      {
+        id: "AwsSolutions-S1",
+        reason: "Logging bucket does not require it's own access logs.",
+      },
+    ]);
   }
 }

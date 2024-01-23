@@ -222,7 +222,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
       .otherwise(setProcessed);
 
     const logGroup = new logs.LogGroup(this, "WebsiteCrawlingSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const stateMachine = new sfn.StateMachine(this, "WebsiteCrawling", {
@@ -232,8 +232,8 @@ export class WebsiteCrawlingWorkflow extends Construct {
       tracingEnabled: true,
       logs: {
         destination: logGroup,
-        level: sfn.LogLevel.ALL
-      }
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     this.stateMachine = stateMachine;

@@ -107,7 +107,7 @@ export class FileImportWorkflow extends Construct {
     });
 
     const logGroup = new logs.LogGroup(this, "FileImportSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const workflow = setProcessing.next(fileImportJob).next(setProcessed);
@@ -118,8 +118,8 @@ export class FileImportWorkflow extends Construct {
       tracingEnabled: true,
       logs: {
         destination: logGroup,
-        level: sfn.LogLevel.ALL
-      }
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     stateMachine.addToRolePolicy(
