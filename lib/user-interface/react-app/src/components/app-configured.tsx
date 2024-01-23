@@ -31,13 +31,24 @@ export default function AppConfigured() {
         if (userRole === UserRole.UNDEFINED || userEmail === null) {
           Auth.currentAuthenticatedUser()
             .then((user) => {
-              if (user.attributes["custom:userRole"] !== undefined) {
-                setUserRole(user.attributes["custom:userRole"] as UserRole);
-              } else {
-                setUserRole(UserRole.UNDEFINED);
-              }
-              if (user.attributes.email !== undefined) {
-                setUserEmail(user.attributes.email);
+              const userGroups = user.signInUserSession.idToken.payload['cognito:groups'] as string[] | undefined
+              if (userGroups !== undefined && userGroups.length > 0) {
+                // A user can be assigned multiple roles, both in and out of Chatbot scope
+                // The following order of checking is based on permission scope to ensure the highest permission assigned is set
+                if (userGroups.includes(UserRole.ADMIN)) {
+                  setUserRole(UserRole.ADMIN);
+                } else if (userGroups.includes(UserRole.WORKSPACES_MANAGER)) {
+                  setUserRole(UserRole.WORKSPACES_MANAGER);
+                } else if (userGroups.includes(UserRole.WORKSPACES_USER)) {
+                  setUserRole(UserRole.WORKSPACES_USER);
+                } else if (userGroups.includes(UserRole.CHATBOT_USER)) {
+                  setUserRole(UserRole.CHATBOT_USER);
+                } else {
+                  setUserRole(UserRole.UNDEFINED);
+                }
+                if (user.attributes.email !== undefined) {
+                  setUserEmail(user.attributes.email);
+                }
               }
             })
             .catch(() => {

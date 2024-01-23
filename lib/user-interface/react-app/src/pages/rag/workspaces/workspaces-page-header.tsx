@@ -104,9 +104,9 @@ export function WorkspacesPageHeader({
                 Delete
               </RouterButton>
             ) : null}
-            {![UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+            {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
               userContext.userRole
-            ) ?? (
+            ) ? (
               <RouterButton
                 data-testid="header-btn-create"
                 variant="primary"
@@ -114,7 +114,7 @@ export function WorkspacesPageHeader({
               >
                 Create Workspace
               </RouterButton>
-            )}
+            ): <></>}
           </SpaceBetween>
         }
         {...props}

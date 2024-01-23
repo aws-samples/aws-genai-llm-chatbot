@@ -93,9 +93,9 @@ export interface UserConfig {
 }
 
 export enum UserRole {
-  ADMIN = "admin",
-  WORKSPACES_MANAGER = "workspaces_manager",
-  WORKSPACES_USER = "workspaces_user",
+  ADMIN = "chatbot_admin",
+  WORKSPACES_MANAGER = "chatbot_workspaces_manager",
+  WORKSPACES_USER = "chatbot_workspaces_user",
   CHATBOT_USER = "chatbot_user",
   UNDEFINED = "undefined",
 }

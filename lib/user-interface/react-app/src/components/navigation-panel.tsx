@@ -52,7 +52,8 @@ export default function NavigationPanel() {
         ],
       });
 
-      if (appContext?.config.rag_enabled) {
+      if (appContext?.config.rag_enabled && 
+        [UserRole.ADMIN, UserRole.WORKSPACES_MANAGER, UserRole.WORKSPACES_USER].includes(userContext.userRole)) {
         const crossEncodersItems: SideNavigationProps.Item[] = appContext
           ?.config.cross_encoders_enabled
           ? [

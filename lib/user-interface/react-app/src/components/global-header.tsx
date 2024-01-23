@@ -48,6 +48,7 @@ export default function GlobalHeader() {
     if (detail.id === "signout") {
       Auth.signOut();
       setUserRole(UserRole.UNDEFINED);
+      setUserName(null);
     }
   };
 

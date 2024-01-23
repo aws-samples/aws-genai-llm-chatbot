@@ -57,7 +57,7 @@ export default function NoUserRole() {
                 <Container>
                   <ol>
                     <li>
-                      Sign in to the AWS Management Console and select{" "}
+                      Sign in to the AWS Management Console and select
                       <b>Cognito</b> under Security, Identity & Compliance or
                       search for it in the Search bar on the top of the console.
                     </li>
@@ -66,32 +66,28 @@ export default function NoUserRole() {
                       to manage users for.
                     </li>
                     <li>
-                      On the user pool page, navigate to the <b>Users</b> tab,
+                      On the user pool page, navigate to the <b>Groups</b> tab,
                       if you aren't already viewing the tab.
                     </li>
                     <li>
-                      This will show a list of all users in the pool. Find the
-                      user you want to edit and click the user name
+                      Click on the <b>chatbot_admin</b> group.
                     </li>
                     <li>
-                      On the user details page, click <b>Edit</b> in the{" "}
-                      <b>User attributes</b> section
+                      On the group page, click the <b>Add user to group</b> button.
                     </li>
                     <li>
-                      In the <b>Optional attributes</b> section, locate the
-                      attribute called <b>custom:userRole</b>.{" "}
-                      <i>If you do not see the attribute</i>, click the{" "}
-                      <b>Add another</b> button to add an aditional attribute
-                      and locate <b>custom:userRole</b> from the list of
-                      possible attributes.
+                      Select the user that should be an admin and click the <b>add</b> button.
                     </li>
                     <li>
-                      In the <b>Value</b> field, input one of the four possible
-                      user roles, depending on what permissions the user should
-                      have. The roles are <b>case sensitive</b>
+                      The user is now an admin for the Chatbot. 
+                      You can update remaining users from the "User Administration" section within the Chatbot application.
+                    </li>
+                    <li><i>Optionally - Update Users in the Cognito Console</i><br/>
+                    If you'd like to update other users, you can add the users to one of the four 
+                    user groups associated with the Chatbot. 
                       <ul>
                         <li>
-                          <b>admin</b> -{" "}
+                          <b>chatbot_admin</b> -{" "}
                           <i>
                             Can access chatbot, manage and use RAG workspaces,
                             and administer the application, such as managing
@@ -99,13 +95,13 @@ export default function NoUserRole() {
                           </i>
                         </li>
                         <li>
-                          <b>workspaces_manager</b> -{" "}
+                          <b>chatbot_workspaces_manager</b> -{" "}
                           <i>
                             Can access chatbot, manage and use RAG workspaces
                           </i>
                         </li>
                         <li>
-                          <b>workspaces_user</b> -{" "}
+                          <b>chatbot_workspaces_user</b> -{" "}
                           <i>
                             Can access chatbot and use RAG workspaces. Cannot
                             create, edit or add data to workspaces
@@ -121,10 +117,6 @@ export default function NoUserRole() {
                       </ul>
                     </li>
                     <li>
-                      Click the <b>Save changes</b> button to complete the
-                      update.
-                    </li>
-                    <li>
                       If the user was already logged in, they should log out.
                       Once they login, the updated user role will take effect.
                     </li>
@@ -132,7 +124,7 @@ export default function NoUserRole() {
                   <i>
                     Note: Users should be created by admin users from within the
                     chatbot application. If a user is created in Cognito, the
-                    user role must be applied. Creating users in the chatbot
+                    user must be added to one of the four groups. Creating users in the chatbot
                     application will ensure is created with the correct
                     configuration.
                   </i>

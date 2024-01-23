@@ -12,19 +12,20 @@ def create_user(name, email, role, phone_number=None):
         attributes = [
             {"Name": "email", "Value": email},
             {"Name": "name", "Value": name},
-            {"Name": "custom:userRole", "Value": role},
         ]
         if phone_number:
             attributes.append({"Name": "phone_number", "Value": phone_number})
-        response = idp.admin_create_user(
+        idp.admin_create_user(
             UserPoolId=COGNITO_USER_POOL_ID,
             Username=email,
             UserAttributes=attributes,
         )
-        if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-            return True
-        else:
-            raise Exception("Error creating user" + str(response))
+        idp.admin_add_user_to_group(
+                UserPoolId=COGNITO_USER_POOL_ID,
+                Username=email,
+                GroupName=role,
+        )
+        return True
     else:
         raise Exception("Invalid role")
 
@@ -33,6 +34,18 @@ def list_users():
     response = idp.list_users(
         UserPoolId=COGNITO_USER_POOL_ID,
     )
+    chatbot_users = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_users')
+    chatbot_workspaces_users = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_workspaces_users')
+    chatbot_workspaces_managers = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_workspaces_managers')
+    chatbot_admin = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_admin')
     users = []
     for user in response["Users"]:
         user_data = {}
@@ -43,8 +56,14 @@ def list_users():
                 user_data["email"] = attribute["Value"]
             if attribute["Name"] == "phone_number":
                 user_data["phoneNumber"] = attribute["Value"]
-            if attribute["Name"] == "custom:userRole":
-                user_data["role"] = attribute["Value"]
+        if user['username'] in (group_user['Username'] for group_user in chatbot_users['Users']):
+            user_data['role'] = 'chatbot_users'
+        if user['username'] in (group_user['Username'] for group_user in chatbot_workspaces_users['Users']):
+            user_data['role'] = 'chatbot_workspaces_users'
+        if user['username'] in (group_user['Username'] for group_user in chatbot_workspaces_managers['Users']):
+            user_data['role'] = 'chatbot_workspaces_managers'
+        if user['username'] in (group_user['Username'] for group_user in chatbot_admin['Users']):
+            user_data['role'] = 'chatbot_admin'
         user_data["enabled"] = user["Enabled"]
         user_data["userStatus"] = user["UserStatus"]
         users.append(user_data)
@@ -53,6 +72,18 @@ def list_users():
 
 def get_user(email):
     response = idp.admin_get_user(UserPoolId=COGNITO_USER_POOL_ID, Username=email)
+    chatbot_users = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_users')
+    chatbot_workspaces_users = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_workspaces_users')
+    chatbot_workspaces_managers = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_workspaces_managers')
+    chatbot_admin = idp.list_users_in_group(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        GroupName='chatbot_admin')
     if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
         user_data = {}
         for attribute in response["UserAttributes"]:
@@ -62,8 +93,14 @@ def get_user(email):
                 user_data["email"] = attribute["Value"]
             if attribute["Name"] == "phone_number":
                 user_data["phoneNumber"] = attribute["Value"]
-            if attribute["Name"] == "custom:userRole":
-                user_data["role"] = attribute["Value"]
+        if response['username'] in (group_user['Username'] for group_user in chatbot_users['Users']):
+            user_data['role'] = 'chatbot_users'
+        if response['username'] in (group_user['Username'] for group_user in chatbot_workspaces_users['Users']):
+            user_data['role'] = 'chatbot_workspaces_users'
+        if response['username'] in (group_user['Username'] for group_user in chatbot_workspaces_managers['Users']):
+            user_data['role'] = 'chatbot_workspaces_managers'
+        if response['username'] in (group_user['Username'] for group_user in chatbot_admin['Users']):
+            user_data['role'] = 'chatbot_admin'
         user_data["enabled"] = response["Enabled"]
         user_data["userStatus"] = response["UserStatus"]
     return user_data
@@ -104,10 +141,19 @@ def update_user_details(current_email, **kwargs):
         "role" in kwargs
         and kwargs["role"] in genai_core.auth.UserPermissions.VALID_ROLES
     ):
-        attributes.append({"Name": "custom:userRole", "Value": kwargs["role"]})
-    print("update_user_details")
-    print(attributes)
-    print(current_email)
+        for group in genai_core.auth.UserPermissions.VALID_ROLES:
+            if group == kwargs["role"]:
+                idp.admin_add_user_to_group(
+                    UserPoolId=COGNITO_USER_POOL_ID,
+                    Username=current_email,
+                    GroupName=group,
+                )
+            else:
+                idp.admin_remove_user_from_group(
+                    UserPoolId=COGNITO_USER_POOL_ID,
+                    Username=current_email,
+                    GroupName=group,
+                )
     response = idp.admin_update_user_attributes(
         UserPoolId=COGNITO_USER_POOL_ID,
         Username=current_email,

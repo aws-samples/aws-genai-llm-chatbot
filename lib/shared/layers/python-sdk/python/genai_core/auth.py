@@ -12,15 +12,15 @@ class UserPermissions:
     Args:
         router (aws_lambda_powertools.event_handler.api_gateway.Router): The lambda powertools router defined for the API endpoints
     Valid Roles:
-        - `ADMIN_ROLE` = `admin`
-        - `WORKSPACES_MANAGER_ROLE` = `workspaces_manager`
-        - `WORKSPACES_USER_ROLE` = `workspaces_user`
+        - `ADMIN_ROLE` = `chatbot_admin`
+        - `WORKSPACES_MANAGER_ROLE` = `chatbot_workspaces_manager`
+        - `WORKSPACES_USER_ROLE` = `chatbot_workspaces_user`
         - `CHATBOT_USER_ROLE` = `chatbot_user`
     """
 
-    ADMIN_ROLE = "admin"
-    WORKSPACES_MANAGER_ROLE = "workspaces_manager"
-    WORKSPACES_USER_ROLE = "workspaces_user"
+    ADMIN_ROLE = "chatbot_admin"
+    WORKSPACES_MANAGER_ROLE = "chatbot_workspaces_manager"
+    WORKSPACES_USER_ROLE = "chatbot_workspaces_user"
     CHATBOT_USER_ROLE = "chatbot_user"
 
     VALID_ROLES = [
@@ -34,13 +34,18 @@ class UserPermissions:
         self.router = router
 
     def __get_user_role(self):
-        user_role = (
-            self.router.current_event.get("identity", {})
-            .get("claims", {})
-            .get("custom:userRole")
-        )
-
-        return user_role
+        user_groups = self.router.current_event.get("identity", {}).get("claims").get('cognito:groups')
+        if user_groups is not None and len(user_groups) > 0:
+            if self.ADMIN_ROLE in user_groups:
+                return self.ADMIN_ROLE
+            elif self.WORKSPACES_MANAGER_ROLE in user_groups:
+                return self.WORKSPACES_MANAGER_ROLE
+            elif self.WORKSPACES_USER_ROLE in user_groups:
+                return self.WORKSPACES_USER_ROLE
+            elif self.CHATBOT_USER_ROLE in user_groups:
+                return self.CHATBOT_USER_ROLE
+            else:
+                return None
 
     def approved_roles(self, roles: []):
         """Validates the user calling the endpoint
@@ -48,9 +53,9 @@ class UserPermissions:
         Args:
             roles (list): list of roles that are approved for the endpoint
         Valid Roles:
-            - `ADMIN_ROLE` = `admin`
-            - `WORKSPACES_MANAGER_ROLE` = `workspaces_manager`
-            - `WORKSPACES_USER_ROLE` = `workspaces_user`
+            - `ADMIN_ROLE` = `chatbot_admin`
+            - `WORKSPACES_MANAGER_ROLE` = `chatbot_workspaces_manager`
+            - `WORKSPACES_USER_ROLE` = `chatbot_workspaces_user`
             - `CHATBOT_USER_ROLE` = `chatbot_user`
         Returns:
             function: If the user is approved, the function being called will be returned for execution
