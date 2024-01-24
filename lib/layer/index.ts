@@ -62,7 +62,8 @@ export class Layer extends Construct {
             }
 
             if (canRunLocal) {
-              const command = `${python} -m pip install -r ${lpath.posix.join(path, "requirements.txt")} -t ${outputDir} ${autoUpgrade ? '-U' : ''}`;
+              const pkgDir = lpath.posix.join(outputDir, "python");
+              const command = `${python} -m pip install -r ${lpath.posix.join(path, "requirements.txt")} -t ${pkgDir} ${autoUpgrade ? '-U' : ''}`;
               try {
                 console.debug(`Local bundling: ${command}`);
                 // this is where the work gets done
