@@ -9,6 +9,7 @@ import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
+import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface CreateAuroraWorkspaceProps {
   readonly config: SystemConfig;
@@ -122,10 +123,23 @@ export class CreateAuroraWorkspace extends Construct {
       .next(setReady)
       .next(new sfn.Succeed(this, "Success"));
 
+    const logGroup = new logs.LogGroup(
+      this,
+      "CreateAuroraWorkspaceSMLogGroup",
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+      }
+    );
+
     const stateMachine = new sfn.StateMachine(this, "CreateAuroraWorkspace", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),
       timeout: cdk.Duration.minutes(5),
       comment: "Create Aurora Workspace Workflow",
+      tracingEnabled: true,
+      logs: {
+        destination: logGroup,
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     this.stateMachine = stateMachine;
