@@ -292,6 +292,8 @@ type User @aws_cognito_user_pools {
   role: String
   phoneNumber: String
   previousEmail: String
+  enabled: Boolean
+  userStatus: String
 }
 
 input ManageUserDataInput {
@@ -333,8 +335,8 @@ type Mutation {
   publishResponse(sessionId: String, userId: String, data: String): Channel
     @aws_iam
   # Admin User Management
-  createUser(input: ManageUserDataInput!): User! @aws_cognito_user_pools
-  editUser(input: ManageUserDataInput!): User! @aws_cognito_user_pools
+  createUser(input: ManageUserDataInput!): Boolean! @aws_cognito_user_pools
+  editUser(input: ManageUserDataInput!): Boolean! @aws_cognito_user_pools
   toggleUser(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
   resetUserPassword(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
   deleteUser(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools

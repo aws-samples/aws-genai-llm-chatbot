@@ -132,15 +132,6 @@ export type ManageUserDataInput = {
   previousEmail?: string | null,
 };
 
-export type User = {
-  __typename: "User",
-  name: string,
-  email: string,
-  role?: string | null,
-  phoneNumber?: string | null,
-  previousEmail?: string | null,
-};
-
 export type ManageUserStateInput = {
   email: string,
   action?: string | null,
@@ -327,6 +318,17 @@ export type PassageRank = {
   __typename: "PassageRank",
   score: number,
   passage: string,
+};
+
+export type User = {
+  __typename: "User",
+  name: string,
+  email: string,
+  role?: string | null,
+  phoneNumber?: string | null,
+  previousEmail?: string | null,
+  enabled?: boolean | null,
+  userStatus?: string | null,
 };
 
 export type CreateKendraWorkspaceMutationVariables = {
@@ -562,6 +564,7 @@ export type SendQueryMutationVariables = {
 };
 
 export type SendQueryMutation = {
+  // Real-time
   sendQuery?: string | null,
 };
 
@@ -585,14 +588,8 @@ export type CreateUserMutationVariables = {
 };
 
 export type CreateUserMutation = {
-  createUser:  {
-    __typename: "User",
-    name: string,
-    email: string,
-    role?: string | null,
-    phoneNumber?: string | null,
-    previousEmail?: string | null,
-  },
+  // Admin User Management
+  createUser: boolean,
 };
 
 export type EditUserMutationVariables = {
@@ -600,14 +597,7 @@ export type EditUserMutationVariables = {
 };
 
 export type EditUserMutation = {
-  editUser:  {
-    __typename: "User",
-    name: string,
-    email: string,
-    role?: string | null,
-    phoneNumber?: string | null,
-    previousEmail?: string | null,
-  },
+  editUser: boolean,
 };
 
 export type ToggleUserMutationVariables = {
@@ -1033,6 +1023,8 @@ export type ListUsersQuery = {
     role?: string | null,
     phoneNumber?: string | null,
     previousEmail?: string | null,
+    enabled?: boolean | null,
+    userStatus?: string | null,
   } >,
 };
 
@@ -1048,6 +1040,8 @@ export type GetUserQuery = {
     role?: string | null,
     phoneNumber?: string | null,
     previousEmail?: string | null,
+    enabled?: boolean | null,
+    userStatus?: string | null,
   },
 };
 

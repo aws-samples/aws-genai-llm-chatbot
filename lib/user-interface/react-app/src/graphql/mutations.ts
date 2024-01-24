@@ -246,28 +246,14 @@ export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionI
   APITypes.PublishResponseMutation
 >;
 export const createUser = /* GraphQL */ `mutation CreateUser($input: ManageUserDataInput!) {
-  createUser(input: $input) {
-    name
-    email
-    role
-    phoneNumber
-    previousEmail
-    __typename
-  }
+  createUser(input: $input)
 }
 ` as GeneratedMutation<
   APITypes.CreateUserMutationVariables,
   APITypes.CreateUserMutation
 >;
 export const editUser = /* GraphQL */ `mutation EditUser($input: ManageUserDataInput!) {
-  editUser(input: $input) {
-    name
-    email
-    role
-    phoneNumber
-    previousEmail
-    __typename
-  }
+  editUser(input: $input)
 }
 ` as GeneratedMutation<
   APITypes.EditUserMutationVariables,

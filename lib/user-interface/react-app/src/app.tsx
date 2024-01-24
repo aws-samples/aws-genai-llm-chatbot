@@ -23,7 +23,6 @@ import UsersDashboard from "./pages/admin/users/users-dashboard";
 
 function App() {
   const userContext = useContext(UserContext);
-  console.log(userContext);
   return (
     <div style={{ height: "100%" }}>
       <BrowserRouter>

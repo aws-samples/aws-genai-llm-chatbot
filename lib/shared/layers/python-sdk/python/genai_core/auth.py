@@ -34,7 +34,11 @@ class UserPermissions:
         self.router = router
 
     def __get_user_role(self):
-        user_groups = self.router.current_event.get("identity", {}).get("claims").get('cognito:groups')
+        user_groups = (
+            self.router.current_event.get("identity", {})
+            .get("claims")
+            .get("cognito:groups")
+        )
         if user_groups is not None and len(user_groups) > 0:
             if self.ADMIN_ROLE in user_groups:
                 return self.ADMIN_ROLE

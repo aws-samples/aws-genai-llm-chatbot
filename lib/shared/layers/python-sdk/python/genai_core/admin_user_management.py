@@ -21,9 +21,9 @@ def create_user(name, email, role, phone_number=None):
             UserAttributes=attributes,
         )
         idp.admin_add_user_to_group(
-                UserPoolId=COGNITO_USER_POOL_ID,
-                Username=email,
-                GroupName=role,
+            UserPoolId=COGNITO_USER_POOL_ID,
+            Username=email,
+            GroupName=role,
         )
         return True
     else:
@@ -31,21 +31,19 @@ def create_user(name, email, role, phone_number=None):
 
 
 def list_users():
-    response = idp.list_users(
-        UserPoolId=COGNITO_USER_POOL_ID,
-    )
+    response = idp.list_users(UserPoolId=COGNITO_USER_POOL_ID)
     chatbot_users = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_users')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_user"
+    )["Users"]
     chatbot_workspaces_users = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_workspaces_users')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_workspaces_user"
+    )["Users"]
     chatbot_workspaces_managers = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_workspaces_managers')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_workspaces_manager"
+    )["Users"]
     chatbot_admin = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_admin')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_admin"
+    )["Users"]
     users = []
     for user in response["Users"]:
         user_data = {}
@@ -56,14 +54,22 @@ def list_users():
                 user_data["email"] = attribute["Value"]
             if attribute["Name"] == "phone_number":
                 user_data["phoneNumber"] = attribute["Value"]
-        if user['username'] in (group_user['Username'] for group_user in chatbot_users['Users']):
-            user_data['role'] = 'chatbot_users'
-        if user['username'] in (group_user['Username'] for group_user in chatbot_workspaces_users['Users']):
-            user_data['role'] = 'chatbot_workspaces_users'
-        if user['username'] in (group_user['Username'] for group_user in chatbot_workspaces_managers['Users']):
-            user_data['role'] = 'chatbot_workspaces_managers'
-        if user['username'] in (group_user['Username'] for group_user in chatbot_admin['Users']):
-            user_data['role'] = 'chatbot_admin'
+        if len(chatbot_users) > 0 and user["Username"] in (
+            group_user["Username"] for group_user in chatbot_users
+        ):
+            user_data["role"] = "chatbot_user"
+        if len(chatbot_workspaces_users) > 0 and user["Username"] in (
+            group_user["Username"] for group_user in chatbot_workspaces_users
+        ):
+            user_data["role"] = "chatbot_workspaces_user"
+        if len(chatbot_workspaces_managers) > 0 and user["Username"] in (
+            group_user["Username"] for group_user in chatbot_workspaces_managers
+        ):
+            user_data["role"] = "chatbot_workspaces_manager"
+        if len(chatbot_admin) > 0 and user["Username"] in (
+            group_user["Username"] for group_user in chatbot_admin
+        ):
+            user_data["role"] = "chatbot_admin"
         user_data["enabled"] = user["Enabled"]
         user_data["userStatus"] = user["UserStatus"]
         users.append(user_data)
@@ -73,17 +79,17 @@ def list_users():
 def get_user(email):
     response = idp.admin_get_user(UserPoolId=COGNITO_USER_POOL_ID, Username=email)
     chatbot_users = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_users')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_user"
+    )
     chatbot_workspaces_users = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_workspaces_users')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_workspaces_user"
+    )
     chatbot_workspaces_managers = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_workspaces_managers')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_workspaces_manager"
+    )
     chatbot_admin = idp.list_users_in_group(
-        UserPoolId=COGNITO_USER_POOL_ID,
-        GroupName='chatbot_admin')
+        UserPoolId=COGNITO_USER_POOL_ID, GroupName="chatbot_admin"
+    )
     if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
         user_data = {}
         for attribute in response["UserAttributes"]:
@@ -93,14 +99,23 @@ def get_user(email):
                 user_data["email"] = attribute["Value"]
             if attribute["Name"] == "phone_number":
                 user_data["phoneNumber"] = attribute["Value"]
-        if response['username'] in (group_user['Username'] for group_user in chatbot_users['Users']):
-            user_data['role'] = 'chatbot_users'
-        if response['username'] in (group_user['Username'] for group_user in chatbot_workspaces_users['Users']):
-            user_data['role'] = 'chatbot_workspaces_users'
-        if response['username'] in (group_user['Username'] for group_user in chatbot_workspaces_managers['Users']):
-            user_data['role'] = 'chatbot_workspaces_managers'
-        if response['username'] in (group_user['Username'] for group_user in chatbot_admin['Users']):
-            user_data['role'] = 'chatbot_admin'
+        if response["username"] in (
+            group_user["Username"] for group_user in chatbot_users["Users"]
+        ):
+            user_data["role"] = "chatbot_users"
+        if response["username"] in (
+            group_user["Username"] for group_user in chatbot_workspaces_users["Users"]
+        ):
+            user_data["role"] = "chatbot_workspaces_users"
+        if response["username"] in (
+            group_user["Username"]
+            for group_user in chatbot_workspaces_managers["Users"]
+        ):
+            user_data["role"] = "chatbot_workspaces_managers"
+        if response["username"] in (
+            group_user["Username"] for group_user in chatbot_admin["Users"]
+        ):
+            user_data["role"] = "chatbot_admin"
         user_data["enabled"] = response["Enabled"]
         user_data["userStatus"] = response["UserStatus"]
     return user_data

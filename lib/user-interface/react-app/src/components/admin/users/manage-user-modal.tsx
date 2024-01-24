@@ -30,9 +30,9 @@ export default function ManageUserModal(
 ) {
   const userContext = useContext(UserContext);
   const userRoleOptions: SelectProps.Option[] = [
-    { label: "Admin", value: "admin" },
-    { label: "Workspaces Manager", value: "workspaces_manager" },
-    { label: "Workspaces User", value: "workspaces_user" },
+    { label: "Admin", value: "chatbot_admin" },
+    { label: "Workspaces Manager", value: "chatbot_workspaces_manager" },
+    { label: "Workspaces User", value: "chatbot_workspaces_user" },
     { label: "Chatbot User", value: "chatbot_user" },
   ];
   const getCurrentRoleSelection = () => {
@@ -40,6 +40,14 @@ export default function ManageUserModal(
     const role = manageUsersModalProps.userData.role;
     return userRoleOptions.find((option) => option.value === role);
   };
+
+  const dismissModal = () => {
+    manageUsersModalProps.onDismiss();
+    setInputName("");
+    setInputEmail("");
+    setInputPhoneNumber("");
+    setInputRole(defaultRole);
+  }
 
   const [inputName, setInputName] = useState<string>(
     manageUsersModalProps.userData?.name ?? ""
@@ -56,17 +64,18 @@ export default function ManageUserModal(
   };
   const [inputRole, setInputRole] = useState(getCurrentRoleSelection());
 
+
   return (
     <Modal
       visible={manageUsersModalProps.visible}
       header={manageUsersModalProps.userData ? "Edit User Details" : "Add User"}
-      onDismiss={manageUsersModalProps.onDismiss}
+      onDismiss={dismissModal}
     >
       <Form
         variant="embedded"
         actions={
           <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={manageUsersModalProps.onDismiss} variant="normal">
+            <Button onClick={dismissModal} variant="normal">
               Cancel
             </Button>
             <Button
@@ -80,7 +89,7 @@ export default function ManageUserModal(
                     : (defaultRole.value as UserRole),
                   previousEmail:
                     manageUsersModalProps.adminAction ===
-                    AdminUsersManagementAction.EDIT
+                      AdminUsersManagementAction.EDIT
                       ? manageUsersModalProps.userData?.email
                       : undefined,
                 });
@@ -134,7 +143,7 @@ export default function ManageUserModal(
           </FormField>
           <FormField label="User Role">
             <Select
-              selectedOption={getCurrentRoleSelection() ?? defaultRole}
+              selectedOption={inputRole || null}
               onChange={({ detail }) => setInputRole(detail.selectedOption)}
               options={userRoleOptions}
               disabled={userContext.userEmail == inputEmail}

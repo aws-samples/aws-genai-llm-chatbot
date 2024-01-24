@@ -91,7 +91,7 @@ export class UsersClient {
       variables: {
         input: {
           email: user.email,
-          status: "disabled",
+          action: "disable",
         },
       },
     });
@@ -106,7 +106,7 @@ export class UsersClient {
       variables: {
         input: {
           email: user.email,
-          status: "enabled",
+          action: "enable",
         },
       },
     });

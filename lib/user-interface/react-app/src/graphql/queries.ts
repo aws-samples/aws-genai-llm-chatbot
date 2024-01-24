@@ -393,6 +393,8 @@ export const listUsers = /* GraphQL */ `query ListUsers {
     role
     phoneNumber
     previousEmail
+    enabled
+    userStatus
     __typename
   }
 }
@@ -404,6 +406,8 @@ export const getUser = /* GraphQL */ `query GetUser($userId: String!) {
     role
     phoneNumber
     previousEmail
+    enabled
+    userStatus
     __typename
   }
 }
