@@ -35,8 +35,47 @@ function calculateHash(paths: string[]): string {
 export class SharedAssetBundler extends Construct {
   private readonly sharedAssets: string[];
   private readonly WORKING_PATH = "/asset-input/";
-  private readonly containerImage: DockerImage;
-  private useLocalBundler: boolean = false;
+  // see static init block below
+  private static useLocalBundler: boolean = false;
+  /** The container image we'll use if Local Bundling is not possible. */
+  private static containerImage: DockerImage;
+
+  /**
+   * Check if possible to use local bundling instead of Docker. Sets `useLocalBundler` to 
+   * true if local environment supports bundling. Referenced below in method bundleWithAsset(...).
+   */
+  static {
+    const command = "zip -v";
+    console.log(`Checking for zip: ${command}`);
+    // check if zip is available locally
+    try {
+      // without stdio option command output does not appear in console
+      execSync(command, { stdio: 'inherit' });
+      // no exception means command executed successfully
+      this.useLocalBundler = true;
+    } catch {
+      /* execSync throws Error in case return value of child process
+      is non-zero. Actual output should be printed to the console. */
+      console.warn("`zip` is required for local bundling; falling back to default method.");
+    }
+
+    try {
+      /** Build Alpine image from local definition. */
+      this.containerImage = DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip"));
+    } catch (erx) {
+      // this will result in an exception if  Docker is unavailable
+      if (this.useLocalBundler) {
+        /* we don't actually need the container if local bundling succeeds, but
+        it is a required parameter in the method below. 
+        https://hub.docker.com/_/scratch/ */
+        this.containerImage = DockerImage.fromRegistry("scratch");
+      } else { 
+        // Build will fail anyway so no point suppressing the exception
+        throw erx; 
+      }
+    }
+  }  
+
   /**
    * Instantiate a new SharedAssetBundler. You then invoke `bundleWithAsset(pathToAsset)` to
    * bundle your asset code with the common code.
@@ -51,42 +90,12 @@ export class SharedAssetBundler extends Construct {
   constructor(scope: Construct, id: string, sharedAssets: string[]) {
     super(scope, id);
     this.sharedAssets = sharedAssets;
-    // Check if we can do local bundling
-    if (!this.localBundlerTest()) {
-      // if not, then build Alpine from local definition
-      this.containerImage = DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip"));
-    } else {
-      // if yes, then don't build the container. https://hub.docker.com/_/scratch/
-      this.containerImage = DockerImage.fromRegistry("scratch");
-    }
-  }
-
-  /**
-   * Check if possible to use local bundling instead of Docker. Sets this.useLocalBundler to 
-   * true if local environment supports bundling. See below in method bundleWithAsset(...).
-   */
-  private localBundlerTest(): boolean {
-    const command = "zip -v";
-    console.log(`Checking for zip: ${command}`);    
-    // check if zip is available locally
-    try {
-      // without stdio option command output does not appear in console
-      execSync(command, {stdio: 'inherit'});
-      // no exception means command executed successfully
-      this.useLocalBundler = true;
-    } catch {
-      // execSync throws Error in case return value of child process
-      // is non-zero. Actual output should be printed to the console.
-      console.warn("Unable to do local bundling! Is zip installed?");
-    }
-    return this.useLocalBundler;
   }
 
   bundleWithAsset(assetPath: string): Asset {
     console.log(`Bundling asset ${assetPath}`);
-    
     // necessary for access from anonymous class
-    const runLocal = this.useLocalBundler;
+    const thisAssets = this.sharedAssets;
 
     const asset = new aws_s3_assets.Asset(
       this,
@@ -100,12 +109,22 @@ export class SharedAssetBundler extends Construct {
             see https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.ILocalBundling.html and 
             https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_s3_assets-readme.html#asset-bundling */
             tryBundle(outputDir: string, options: BundlingOptions) {
-              if (runLocal) {
-                const command = `zip -r ${path.posix.join(outputDir, "asset.zip")} ${assetPath}`;                
+              if (SharedAssetBundler.useLocalBundler) {
+                // base command to execute
+                const command = `zip -r ${path.posix.join(outputDir, "asset.zip")} . `;              
+
                 try {
-                  console.debug(`Local bundling: ${command}`);
-                  // this is where the work gets done
-                  execSync(command, {stdio: 'inherit'});
+                  console.debug(`Local bundling: ${assetPath}`);
+                  // cd to dir of current asset and zip contents
+                  execSync(`cd ${assetPath} && `.concat(command), {stdio: 'inherit'});                    
+                  // do the same for each dir in shared assets array
+                  thisAssets.forEach((a)=>{
+                    /* Complete the command for this specific shared asset path; for example:
+                    `cd ${assetPath}/.. && ${command} -i ${assetPath.basename}/*`   */
+                    const cx = `cd ${path.posix.join(a, '..')} && `.concat(command).concat(`-i "${path.basename(a)}/*"`);
+                    //execute the command in child process
+                    execSync(cx, {stdio: 'inherit'});
+                  });
                   // no exception means command executed successfully
                   return true;
                 } catch (ex) {
@@ -119,7 +138,7 @@ export class SharedAssetBundler extends Construct {
               return false;
             }
           },
-          image: this.containerImage,
+          image: SharedAssetBundler.containerImage,
           command: ["zip", "-r", path.posix.join("/asset-output", "asset.zip"), "."],
           volumes: this.sharedAssets.map((f) => ({
             containerPath: path.posix.join(this.WORKING_PATH, path.basename(f)),
@@ -132,6 +151,7 @@ export class SharedAssetBundler extends Construct {
         assetHashType: AssetHashType.CUSTOM,
       }
     );
+    console.log(`Successfully bundled ${asset.toString()} shared assets for ${assetPath} as ${asset.s3ObjectKey}.`);
     return asset;
   }
 
