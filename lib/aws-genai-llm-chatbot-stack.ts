@@ -384,19 +384,21 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
             },
           ]
         );
-        NagSuppressions.addResourceSuppressionsByPath(
-          this,
-          [
-            `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
-          ],
-          [
-            {
-              id: "AwsSolutions-IAM5",
-              reason:
-                "Access to all log groups required for CloudWatch log group creation.",
-            },
-          ]
-        );
+        if (props.config.rag.engines.kendra.createIndex) {
+          NagSuppressions.addResourceSuppressionsByPath(
+            this,
+            [
+              `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
+            ],
+            [
+              {
+                id: "AwsSolutions-IAM5",
+                reason:
+                  "Access to all log groups required for CloudWatch log group creation.",
+              },
+            ]
+          );
+        }
       }
     }
     // Implicitly created resources with changing paths
