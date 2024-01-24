@@ -297,27 +297,42 @@ export class HuggingFaceCustomScriptModel extends Construct {
     /**
      * CDK NAG suppression
      */
-    NagSuppressions.addResourceSuppressions(codeBuildRole,
-      [
-        {id: "AwsSolutions-IAM5", reason: "Access to all log groups required for CloudWatch log group creation."},
-      ]
-    );
-    NagSuppressions.addResourceSuppressions(codeBuildProject,
-      [
-        {id: "AwsSolutions-CB4", reason: "Build is only ran as part of stack creation and does not contain external data."},
-        {id: "AwsSolutions-CB3", reason: "Privileged mode is required as build project is used to build Docker images."}
-      ]
-    );
-    NagSuppressions.addResourceSuppressions(executionRole,
-      [
-        {id: "AwsSolutions-IAM4", reason: "Gives user ability to deploy and delete endpoints from the UI."},
-        {id: "AwsSolutions-IAM5", reason: "Gives user ability to deploy and delete endpoints from the UI."},
-      ]
-    );
-    NagSuppressions.addResourceSuppressions(logsBucket,
-      [
-        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."}
-      ]
-    );
+    NagSuppressions.addResourceSuppressions(codeBuildRole, [
+      {
+        id: "AwsSolutions-IAM5",
+        reason:
+          "Access to all log groups required for CloudWatch log group creation.",
+      },
+    ]);
+    NagSuppressions.addResourceSuppressions(codeBuildProject, [
+      {
+        id: "AwsSolutions-CB4",
+        reason:
+          "Build is only ran as part of stack creation and does not contain external data.",
+      },
+      {
+        id: "AwsSolutions-CB3",
+        reason:
+          "Privileged mode is required as build project is used to build Docker images.",
+      },
+    ]);
+    NagSuppressions.addResourceSuppressions(executionRole, [
+      {
+        id: "AwsSolutions-IAM4",
+        reason:
+          "Gives user ability to deploy and delete endpoints from the UI.",
+      },
+      {
+        id: "AwsSolutions-IAM5",
+        reason:
+          "Gives user ability to deploy and delete endpoints from the UI.",
+      },
+    ]);
+    NagSuppressions.addResourceSuppressions(logsBucket, [
+      {
+        id: "AwsSolutions-S1",
+        reason: "Logging bucket does not require it's own access logs.",
+      },
+    ]);
   }
 }

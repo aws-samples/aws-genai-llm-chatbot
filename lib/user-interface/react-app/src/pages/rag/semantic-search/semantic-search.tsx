@@ -84,6 +84,7 @@ export default function SemanticSearch() {
         data.workspace?.value,
         data.query
       );
+      console.log(result.data?.performSemanticSearch);
       setSearchResult(result.data?.performSemanticSearch);
     } catch (error: any) {
       console.error(error);
@@ -135,30 +136,36 @@ export default function SemanticSearch() {
       label: "Results",
       id: "results",
       content: (
-        <ResultItems items={searchResult!.items!} result={searchResult} />
+        <ResultItems items={searchResult.items!} result={searchResult} />
       ),
     });
 
-    if (searchResult!.vectorSearchItems!.length > 0) {
+    if (
+      searchResult.vectorSearchItems &&
+      searchResult.vectorSearchItems.length > 0
+    ) {
       tabs.push({
         label: "Vector Search",
         id: "vector-search",
         content: (
           <ResultItems
-            items={searchResult!.vectorSearchItems!}
+            items={searchResult.vectorSearchItems}
             result={searchResult}
           />
         ),
       });
     }
 
-    if (searchResult.keywordSearchItems!.length > 0) {
+    if (
+      searchResult.keywordSearchItems &&
+      searchResult.keywordSearchItems.length > 0
+    ) {
       tabs.push({
         label: "Keyword Search",
         id: "keyword-search",
         content: (
           <ResultItems
-            items={searchResult!.keywordSearchItems!}
+            items={searchResult.keywordSearchItems}
             result={searchResult}
           />
         ),

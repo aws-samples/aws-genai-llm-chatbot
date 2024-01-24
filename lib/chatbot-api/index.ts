@@ -119,10 +119,12 @@ export class ChatBotApi extends Construct {
     /**
      * CDK NAG suppression
      */
-    NagSuppressions.addResourceSuppressions(loggingRole,
-      [
-        {id: "AwsSolutions-IAM5", reason: "Access to all log groups required for CloudWatch log group creation."},
-      ]
-    );
+    NagSuppressions.addResourceSuppressions(loggingRole, [
+      {
+        id: "AwsSolutions-IAM5",
+        reason:
+          "Access to all log groups required for CloudWatch log group creation.",
+      },
+    ]);
   }
 }

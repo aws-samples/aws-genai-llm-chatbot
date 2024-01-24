@@ -53,8 +53,8 @@ export class DataImport extends Construct {
       "IngestionDeadLetterQueue",
       {
         visibilityTimeout: cdk.Duration.seconds(900),
-        enforceSSL: true
-      },
+        enforceSSL: true,
+      }
     );
 
     const ingestionQueue = new sqs.Queue(this, "IngestionQueue", {
@@ -241,12 +241,12 @@ export class DataImport extends Construct {
      * CDK NAG suppression
      */
     NagSuppressions.addResourceSuppressions(
+      [uploadLogsBucket, processingLogsBucket],
       [
-        uploadLogsBucket,
-        processingLogsBucket
-      ],
-      [
-        {id: "AwsSolutions-S1", reason: "Logging bucket does not require it's own access logs."}
+        {
+          id: "AwsSolutions-S1",
+          reason: "Logging bucket does not require it's own access logs.",
+        },
       ]
     );
   }

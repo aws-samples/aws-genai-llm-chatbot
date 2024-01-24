@@ -160,7 +160,7 @@ export class DeleteWorkspace extends Construct {
       .next(new sfn.Succeed(this, "Success"));
 
     const logGroup = new logs.LogGroup(this, "DeleteWorkspaceSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const stateMachine = new sfn.StateMachine(this, "DeleteWorkspace", {
@@ -170,8 +170,8 @@ export class DeleteWorkspace extends Construct {
       tracingEnabled: true,
       logs: {
         destination: logGroup,
-        level: sfn.LogLevel.ALL
-      }
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     this.stateMachine = stateMachine;

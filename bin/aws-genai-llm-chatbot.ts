@@ -2,7 +2,7 @@
 import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
 import { AwsGenAILLMChatbotStack } from "../lib/aws-genai-llm-chatbot-stack";
-import { AwsSolutionsChecks } from "cdk-nag"
+import { AwsSolutionsChecks } from "cdk-nag";
 import { getConfig } from "./config";
 import { Aspects } from "aws-cdk-lib";
 
@@ -18,4 +18,4 @@ new AwsGenAILLMChatbotStack(app, `${config.prefix}GenAIChatBotStack`, {
   },
 });
 
-Aspects.of(app).add(new AwsSolutionsChecks({verbose: true}));
+Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));

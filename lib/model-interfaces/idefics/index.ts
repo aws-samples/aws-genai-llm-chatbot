@@ -54,9 +54,13 @@ export class IdeficsInterface extends Construct {
       }
     );
 
-    const logGroup = new logs.LogGroup(this, "ChatbotFilesPrivateApiAccessLogs", {
-      removalPolicy: RemovalPolicy.DESTROY
-    });
+    const logGroup = new logs.LogGroup(
+      this,
+      "ChatbotFilesPrivateApiAccessLogs",
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+      }
+    );
 
     const api = new apigateway.RestApi(this, "ChatbotFilesPrivateApi", {
       deployOptions: {
@@ -200,7 +204,7 @@ export class IdeficsInterface extends Construct {
     props.shared.configParameter.grantRead(requestHandler);
 
     const deadLetterQueue = new sqs.Queue(this, "DLQ", {
-      enforceSSL: true
+      enforceSSL: true,
     });
     const queue = new sqs.Queue(this, "Queue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -232,12 +236,14 @@ export class IdeficsInterface extends Construct {
     /**
      * CDK NAG suppression
      */
-    NagSuppressions.addResourceSuppressions(integrationRole,
-      [
-        {id: "AwsSolutions-IAM4", reason: "Access to all log groups required for CloudWatch log group creation."},
-        {id: "AwsSolutions-IAM5", reason: "Access limited to KMS resources."}
-      ]
-    );
+    NagSuppressions.addResourceSuppressions(integrationRole, [
+      {
+        id: "AwsSolutions-IAM4",
+        reason:
+          "Access to all log groups required for CloudWatch log group creation.",
+      },
+      { id: "AwsSolutions-IAM5", reason: "Access limited to KMS resources." },
+    ]);
   }
 
   public addSageMakerEndpoint({
