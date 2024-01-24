@@ -115,9 +115,9 @@ def toggle_user(input: dict):
 @tracer.capture_method
 @permissions.admin_only
 def delete_user(input: dict):
-    user_id = input["user_id"]
+    email = input["email"]
     try:
-        response = genai_core.admin_user_management.delete_user(user_id)
+        response = genai_core.admin_user_management.delete_user(email)
         if response:
             return True
         else:

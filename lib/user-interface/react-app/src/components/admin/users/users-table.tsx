@@ -172,6 +172,7 @@ export default function UsersTable() {
     async (userData: UserData) => {
       if (!appContext) return;
       if (!userContext || userContext.userRole != UserRole.ADMIN) return;
+      setLoading(true);
       const apiClient = new ApiClient(appContext);
       const result = await apiClient.adminUsers.disableUser(userData);
       setFlashbarItems([
