@@ -1,0 +1,20 @@
+projects:
+  chatbot:
+    schemaPath: lib/chatbot-api/schema/schema.graphql
+    includes:
+      - lib/user-interface/react-app/src/graphql/*.ts
+    excludes:
+      - ./amplify/**
+    extensions:
+      amplify:
+        codeGenTarget: typescript
+        generatedFileName: lib/user-interface/react-app/src/API.ts
+        docsFilePath: lib/user-interface/react-app/src/graphql/  #The field is not configured correctly and needs to be changed
+        region: us-east-1
+        apiId: null
+        frontend: javascript
+        framework: react
+        maxDepth: 2
+extensions:
+  amplify:
+    version: 3

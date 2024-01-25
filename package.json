@@ -8,6 +8,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
+    "gen": "npx @aws-amplify/cli codegen",
     "create": "node ./cli/magic.js create",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json|css)\"",
@@ -17,6 +18,7 @@
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
+    "@aws-amplify/cli": "^12.10.1",
     "@aws-lambda-powertools/batch": "^1.14.1",
     "@aws-lambda-powertools/logger": "^1.14.1",
     "@aws-sdk/credential-provider-node": "^3.441.0",
