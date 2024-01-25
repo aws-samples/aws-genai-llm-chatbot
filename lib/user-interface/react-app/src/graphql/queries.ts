@@ -8,10 +8,6 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
-export const none = /* GraphQL */ `query None {
-  none
-}
-` as GeneratedQuery<APITypes.NoneQueryVariables, APITypes.NoneQuery>;
 export const checkHealth = /* GraphQL */ `query CheckHealth {
   checkHealth
 }

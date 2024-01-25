@@ -101,7 +101,7 @@ def parse_url(url: str):
     base_url = f"{root_url_parse.scheme}://{root_url_parse.netloc}"
 
     response = requests.get(url, timeout=20)
-    if response.headers["Content-Type"] != "text/html":
+    if "text/html" not in response.headers["Content-Type"]:
         raise Exception(f"Invalid content type {response.headers['Content-Type']}")
     soup = BeautifulSoup(response.content, "html.parser")
     content = soup.text

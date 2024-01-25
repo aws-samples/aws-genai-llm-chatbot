@@ -21,6 +21,7 @@ export class ChatBotDynamoDBTables extends Construct {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      pointInTimeRecovery: true,
     });
 
     sessionsTable.addGlobalSecondaryIndex({

@@ -7,6 +7,8 @@ import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as logs from "aws-cdk-lib/aws-logs";
+import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface FileImportWorkflowProps {
   readonly config: SystemConfig;
@@ -104,11 +106,20 @@ export class FileImportWorkflow extends Construct {
       },
     });
 
+    const logGroup = new logs.LogGroup(this, "FileImportSMLogGroup", {
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
     const workflow = setProcessing.next(fileImportJob).next(setProcessed);
     const stateMachine = new sfn.StateMachine(this, "FileImportStateMachine", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),
       timeout: cdk.Duration.hours(12),
       comment: "File import workflow",
+      tracingEnabled: true,
+      logs: {
+        destination: logGroup,
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     stateMachine.addToRolePolicy(
