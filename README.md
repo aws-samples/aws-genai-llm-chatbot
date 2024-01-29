@@ -4,7 +4,7 @@
 [![GitHub star chart](https://img.shields.io/github/stars/aws-samples/aws-genai-llm-chatbot?style=social)](https://star-history.com/#aws-samples/aws-genai-llm-chatbot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](#deploy-with-github-codespaces)
+[![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://aws-samples.github.io/aws-genai-llm-chatbot/guide/deploy.html#deploy-with-github-codespaces)
 
 #### [Full documentation](https://aws-samples.github.io/aws-genai-llm-chatbot/)
 
