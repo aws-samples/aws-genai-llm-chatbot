@@ -6,7 +6,7 @@
 
 [![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://aws-samples.github.io/aws-genai-llm-chatbot/guide/deploy.html#deploy-with-github-codespaces)
 
-#### [Full documentation](https://aws-samples.github.io/aws-genai-llm-chatbot/)
+[![Full Documentation](https://img.shields.io/badge/Full%20Documentation-blue?style=for-the-badge&logo=Vite&logoColor=white)](https://aws-samples.github.io/aws-genai-llm-chatbot/)
 
 ![sample](docs/about/assets/chabot-sample.gif "AWS GenAI Chatbot")
 
