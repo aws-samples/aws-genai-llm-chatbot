@@ -4,6 +4,7 @@ import {
   HeaderProps,
   SpaceBetween,
 } from "@cloudscape-design/components";
+import { UserRole } from "../../../common/types";
 import RouterButton from "../../../components/wrappers/router-button";
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
@@ -12,6 +13,7 @@ import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
 import { Workspace } from "../../../API";
 import { Utils } from "../../../common/utils";
+import { UserContext } from "../../../common/user-context";
 
 interface WorkspacesPageHeaderProps extends HeaderProps {
   title?: string;
@@ -26,6 +28,7 @@ export function WorkspacesPageHeader({
 }: WorkspacesPageHeaderProps) {
   const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const isOnlyOneSelected = props.selectedWorkspaces.length === 1;
   const canDeleteWorkspace =
@@ -90,20 +93,28 @@ export function WorkspacesPageHeader({
             >
               View
             </RouterButton>
-            <RouterButton
-              data-testid="header-btn-view-details"
-              disabled={!canDeleteWorkspace}
-              onClick={onDeleteClick}
-            >
-              Delete
-            </RouterButton>
-            <RouterButton
-              data-testid="header-btn-create"
-              variant="primary"
-              href="/rag/workspaces/create"
-            >
-              Create Workspace
-            </RouterButton>
+            {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+              userContext.userRole
+            ) ? (
+              <RouterButton
+                data-testid="header-btn-view-details"
+                disabled={!canDeleteWorkspace}
+                onClick={onDeleteClick}
+              >
+                Delete
+              </RouterButton>
+            ) : null}
+            {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+              userContext.userRole
+            ) ? (
+              <RouterButton
+                data-testid="header-btn-create"
+                variant="primary"
+                href="/rag/workspaces/create"
+              >
+                Create Workspace
+              </RouterButton>
+            ): <></>}
           </SpaceBetween>
         }
         {...props}

@@ -147,9 +147,11 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 8. Add a user that will be used to log into the web interface.
 
-9. Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`
+9. In the **Cogntio User Pool**, navigate to the **Groups** tab. Click on the group labeled **chatbot_admin**. Add the newly created user into the group to make the user an admin. Admin users are able to add users from within the Chatbot application. 
 
-10. Login with the user created in .8; you will be asked to change the password.
+10. Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`
+
+11. Login with the user created in .8; you will be asked to change the password.
 
 ## Run user interface locally
 

@@ -21,7 +21,36 @@ export class Authentication extends Construct {
       signInAliases: {
         email: true,
       },
+      standardAttributes: {
+        email: { required: true },
+        phoneNumber: { required: false },
+        fullname: { required: true },
+      }
     });
+
+    new cognito.CfnUserPoolGroup(this, "ChatbotAdminGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "chatbot_admin",
+      description: "User Group allowed to Administer the GenAI Chatbot",
+    })
+
+    new cognito.CfnUserPoolGroup(this, "ChatbotWorkspaceManagerGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "chatbot_workspaces_manager",
+      description: "User Group allowed to Manage the GenAI Chatbot Workspaces",
+    })
+
+    new cognito.CfnUserPoolGroup(this, "ChatbotWorkspaceUserGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "chatbot_workspaces_user",
+      description: "User Group allowed to Access the GenAI Chatbot Workspaces",
+    })
+
+    new cognito.CfnUserPoolGroup(this, "ChatbotUser", {
+      userPoolId: userPool.userPoolId,
+      groupName: "chatbot_user",
+      description: "User Group allowed to Access the GenAI Chatbot",
+    })
 
     const userPoolClient = userPool.addClient("UserPoolClient", {
       generateSecret: false,
@@ -64,11 +93,9 @@ export class Authentication extends Construct {
     });
 
     new cdk.CfnOutput(this, "UserPoolLink", {
-      value: `https://${
-        cdk.Stack.of(this).region
-      }.console.aws.amazon.com/cognito/v2/idp/user-pools/${
-        userPool.userPoolId
-      }/users?region=${cdk.Stack.of(this).region}`,
+      value: `https://${cdk.Stack.of(this).region
+        }.console.aws.amazon.com/cognito/v2/idp/user-pools/${userPool.userPoolId
+        }/users?region=${cdk.Stack.of(this).region}`,
     });
 
     /**

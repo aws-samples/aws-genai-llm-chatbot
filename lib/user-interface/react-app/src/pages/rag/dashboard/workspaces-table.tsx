@@ -5,7 +5,9 @@ import {
   Table,
   TableProps,
 } from "@cloudscape-design/components";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { UserRole } from "../../../common/types";
+import { UserContext } from "../../../common/user-context";
 import { TextHelper } from "../../../common/helpers/text-helper";
 import { WorkspacesColumnDefinitions } from "./column-definitions";
 import RouterLink from "../../../components/wrappers/router-link";
@@ -18,6 +20,7 @@ export interface WorkspacesTableProps {
 }
 
 export default function WorkspacesTable(props: WorkspacesTableProps) {
+  const userContext = useContext(UserContext);
   const [selectedItems, setSelectedItems] = useState<Workspace[]>([]);
   const isOnlyOneSelected = selectedItems.length === 1;
 
@@ -36,9 +39,13 @@ export default function WorkspacesTable(props: WorkspacesTableProps) {
                 Workspace is a collection of documents
               </Box>
             </div>
-            <RouterButton href="/rag/workspaces/create">
-              Create Workspace
-            </RouterButton>
+            {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+              userContext.userRole
+            ) ? (
+              <RouterButton href="/rag/workspaces/create">
+                Create Workspace
+              </RouterButton>
+            ) : null}
           </SpaceBetween>
         </Box>
       }
@@ -65,9 +72,13 @@ export default function WorkspacesTable(props: WorkspacesTableProps) {
               >
                 View
               </RouterButton>
-              <RouterButton href="/rag/workspaces/create">
-                Create Workspace
-              </RouterButton>
+              {[UserRole.ADMIN, UserRole.WORKSPACES_MANAGER].includes(
+                userContext.userRole
+              ) ? (
+                <RouterButton href="/rag/workspaces/create">
+                  Create Workspace
+                </RouterButton>
+              ) : null}
             </SpaceBetween>
           }
         >

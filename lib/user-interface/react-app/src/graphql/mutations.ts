@@ -245,3 +245,38 @@ export const publishResponse = /* GraphQL */ `mutation PublishResponse($sessionI
   APITypes.PublishResponseMutationVariables,
   APITypes.PublishResponseMutation
 >;
+export const createUser = /* GraphQL */ `mutation CreateUser($input: ManageUserDataInput!) {
+  createUser(input: $input)
+}
+` as GeneratedMutation<
+  APITypes.CreateUserMutationVariables,
+  APITypes.CreateUserMutation
+>;
+export const editUser = /* GraphQL */ `mutation EditUser($input: ManageUserDataInput!) {
+  editUser(input: $input)
+}
+` as GeneratedMutation<
+  APITypes.EditUserMutationVariables,
+  APITypes.EditUserMutation
+>;
+export const toggleUser = /* GraphQL */ `mutation ToggleUser($input: ManageUserStateInput) {
+  toggleUser(input: $input)
+}
+` as GeneratedMutation<
+  APITypes.ToggleUserMutationVariables,
+  APITypes.ToggleUserMutation
+>;
+export const resetUserPassword = /* GraphQL */ `mutation ResetUserPassword($input: ManageUserStateInput) {
+  resetUserPassword(input: $input)
+}
+` as GeneratedMutation<
+  APITypes.ResetUserPasswordMutationVariables,
+  APITypes.ResetUserPasswordMutation
+>;
+export const deleteUser = /* GraphQL */ `mutation DeleteUser($input: ManageUserStateInput) {
+  deleteUser(input: $input)
+}
+` as GeneratedMutation<
+  APITypes.DeleteUserMutationVariables,
+  APITypes.DeleteUserMutation
+>;

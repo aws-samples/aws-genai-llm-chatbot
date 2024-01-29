@@ -291,11 +291,6 @@ export const listDocuments = /* GraphQL */ `query ListDocuments($input: ListDocu
       sizeInBytes
       vectors
       subDocuments
-      crawlerProperties {
-        followLinks
-        limit
-        __typename
-      }
       errors
       createdAt
       updatedAt
@@ -353,11 +348,6 @@ export const getRSSPosts = /* GraphQL */ `query GetRSSPosts($input: GetRSSPostsI
       sizeInBytes
       vectors
       subDocuments
-      crawlerProperties {
-        followLinks
-        limit
-        __typename
-      }
       errors
       createdAt
       updatedAt
@@ -396,3 +386,29 @@ export const rankPassages = /* GraphQL */ `query RankPassages($input: RankPassag
   APITypes.RankPassagesQueryVariables,
   APITypes.RankPassagesQuery
 >;
+export const listUsers = /* GraphQL */ `query ListUsers {
+  listUsers {
+    name
+    email
+    role
+    phoneNumber
+    previousEmail
+    enabled
+    userStatus
+    __typename
+  }
+}
+` as GeneratedQuery<APITypes.ListUsersQueryVariables, APITypes.ListUsersQuery>;
+export const getUser = /* GraphQL */ `query GetUser($userId: String!) {
+  getUser(userId: $userId) {
+    name
+    email
+    role
+    phoneNumber
+    previousEmail
+    enabled
+    userStatus
+    __typename
+  }
+}
+` as GeneratedQuery<APITypes.GetUserQueryVariables, APITypes.GetUserQuery>;

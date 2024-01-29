@@ -124,6 +124,19 @@ export type Channel = {
   userId?: string | null,
 };
 
+export type ManageUserDataInput = {
+  name: string,
+  email: string,
+  role?: string | null,
+  phoneNumber?: string | null,
+  previousEmail?: string | null,
+};
+
+export type ManageUserStateInput = {
+  email: string,
+  action?: string | null,
+};
+
 export type FileUploadInput = {
   workspaceId: string,
   fileName: string,
@@ -305,6 +318,17 @@ export type PassageRank = {
   __typename: "PassageRank",
   score: number,
   passage: string,
+};
+
+export type User = {
+  __typename: "User",
+  name: string,
+  email: string,
+  role?: string | null,
+  phoneNumber?: string | null,
+  previousEmail?: string | null,
+  enabled?: boolean | null,
+  userStatus?: string | null,
 };
 
 export type CreateKendraWorkspaceMutationVariables = {
@@ -557,6 +581,47 @@ export type PublishResponseMutation = {
     sessionId?: string | null,
     userId?: string | null,
   } | null,
+};
+
+export type CreateUserMutationVariables = {
+  input: ManageUserDataInput,
+};
+
+export type CreateUserMutation = {
+  // Admin User Management
+  createUser: boolean,
+};
+
+export type EditUserMutationVariables = {
+  input: ManageUserDataInput,
+};
+
+export type EditUserMutation = {
+  editUser: boolean,
+};
+
+export type ToggleUserMutationVariables = {
+  input?: ManageUserStateInput | null,
+};
+
+export type ToggleUserMutation = {
+  toggleUser: boolean,
+};
+
+export type ResetUserPasswordMutationVariables = {
+  input?: ManageUserStateInput | null,
+};
+
+export type ResetUserPasswordMutation = {
+  resetUserPassword: boolean,
+};
+
+export type DeleteUserMutationVariables = {
+  input?: ManageUserStateInput | null,
+};
+
+export type DeleteUserMutation = {
+  deleteUser: boolean,
 };
 
 export type CheckHealthQueryVariables = {
@@ -854,11 +919,6 @@ export type ListDocumentsQuery = {
       sizeInBytes?: number | null,
       vectors?: number | null,
       subDocuments?: number | null,
-      crawlerProperties?:  {
-        __typename: "CrawlerProperties",
-        followLinks?: boolean | null,
-        limit?: number | null,
-      } | null,
       errors?: Array< string > | null,
       createdAt: string,
       updatedAt?: string | null,
@@ -918,11 +978,6 @@ export type GetRSSPostsQuery = {
       sizeInBytes?: number | null,
       vectors?: number | null,
       subDocuments?: number | null,
-      crawlerProperties?:  {
-        __typename: "CrawlerProperties",
-        followLinks?: boolean | null,
-        limit?: number | null,
-      } | null,
       errors?: Array< string > | null,
       createdAt: string,
       updatedAt?: string | null,
@@ -955,6 +1010,39 @@ export type RankPassagesQuery = {
     score: number,
     passage: string,
   } >,
+};
+
+export type ListUsersQueryVariables = {
+};
+
+export type ListUsersQuery = {
+  listUsers:  Array< {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+    enabled?: boolean | null,
+    userStatus?: string | null,
+  } >,
+};
+
+export type GetUserQueryVariables = {
+  userId: string,
+};
+
+export type GetUserQuery = {
+  getUser:  {
+    __typename: "User",
+    name: string,
+    email: string,
+    role?: string | null,
+    phoneNumber?: string | null,
+    previousEmail?: string | null,
+    enabled?: boolean | null,
+    userStatus?: string | null,
+  },
 };
 
 export type ReceiveMessagesSubscriptionVariables = {

@@ -2,10 +2,12 @@ import genai_core.semantic_search
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
+from genai_core.auth import UserPermissions
 
 tracer = Tracer()
 router = Router()
 logger = Logger()
+permissions = UserPermissions(router)
 
 
 class SemanticSearchRequest(BaseModel):
@@ -15,6 +17,13 @@ class SemanticSearchRequest(BaseModel):
 
 @router.resolver(field_name="performSemanticSearch")
 @tracer.capture_method
+@permissions.approved_roles(
+    [
+        permissions.ADMIN_ROLE,
+        permissions.WORKSPACES_MANAGER_ROLE,
+        permissions.WORKSPACES_USER_ROLE,
+    ]
+)
 def semantic_search(input: dict):
     request = SemanticSearchRequest(**input)
     if len(request.query) == 0 or len(request.query) > 1000:

@@ -21,7 +21,7 @@ import BaseAppLayout from "../../../components/base-app-layout";
 import { useContext, useEffect, useState } from "react";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
-import { LoadingStatus } from "../../../common/types";
+import { LoadingStatus, UserRole } from "../../../common/types";
 import { useForm } from "../../../common/hooks/use-form";
 import { MetricsHelper } from "../../../common/helpers/metrics-helper";
 import { MetricsMatrix } from "./metrics-matrix";
@@ -29,10 +29,14 @@ import { EmbeddingsModelHelper } from "../../../common/helpers/embeddings-model-
 import { Utils } from "../../../common/utils";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Embedding, EmbeddingModel } from "../../../API";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../../common/user-context";
 
 export default function Embeddings() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate();
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [globalError, setGlobalError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [pinFirstInput, setPinFirstInput] = useState(false);
@@ -53,6 +57,18 @@ export default function Embeddings() {
     }[]
   >([]);
   const [embeddingModels, setEmbeddingModels] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER,
+        UserRole.WORKSPACES_USER,
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   const { data, onChange, errors, validate } = useForm({
     initialValue: () => {

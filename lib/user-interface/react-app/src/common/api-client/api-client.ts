@@ -9,6 +9,7 @@ import { SessionsClient } from "./sessions-client";
 import { SemanticSearchClient } from "./semantic-search-client";
 import { DocumentsClient } from "./documents-client";
 import { KendraClient } from "./kendra-client";
+import { UsersClient as AdminUsersClient } from "./users-client";
 
 export class ApiClient {
   private _healthClient: HealthClient | undefined;
@@ -21,6 +22,7 @@ export class ApiClient {
   private _semanticSearchClient: SemanticSearchClient | undefined;
   private _documentsClient: DocumentsClient | undefined;
   private _kendraClient: KendraClient | undefined;
+  private _adminUsersClient: AdminUsersClient | undefined;
 
   public get health() {
     if (!this._healthClient) {
@@ -100,6 +102,14 @@ export class ApiClient {
     }
 
     return this._kendraClient;
+  }
+
+  public get adminUsers() {
+    if (!this._adminUsersClient) {
+      this._adminUsersClient = new AdminUsersClient();
+    }
+
+    return this._adminUsersClient;
   }
 
   constructor(protected _appConfig: AppConfig) {}

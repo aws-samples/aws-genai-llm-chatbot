@@ -16,13 +16,29 @@ import CreateWorkspaceKendra from "./create-workspace-kendra";
 import SelectEnginePanel from "./select-engine-panel";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Utils } from "../../../common/utils";
+import { UserContext } from "../../../common/user-context";
+import { UserRole } from "../../../common/types";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateWorkspace() {
   const onFollow = useOnFollow();
+  const navigate = useNavigate()
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const [engine, setEngine] = useState("");
   const [loading, setLoading] = useState(true);
   const [engines, setEngines] = useState<Map<string, boolean>>(new Map());
+
+  useEffect(() => {
+    if (
+      ![
+        UserRole.ADMIN,
+        UserRole.WORKSPACES_MANAGER
+      ].includes(userContext.userRole)
+    ) {
+      navigate("/");
+    }
+  }, [userContext, navigate]);
 
   useEffect(() => {
     if (!appContext?.config) return;

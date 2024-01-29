@@ -1,6 +1,7 @@
 import json
 import uuid
 import decimal
+from pydantic import BaseModel
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -12,5 +13,12 @@ class CustomEncoder(json.JSONEncoder):
 
         if isinstance(obj, uuid.UUID):
             return str(obj)
+
+        if isinstance(obj, BaseModel):
+            try:
+                return obj.model_dump_json()
+            except Exception as e:
+                print(e)
+                return obj.json()
 
         return super(CustomEncoder, self).default(obj)

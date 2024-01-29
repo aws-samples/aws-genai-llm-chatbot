@@ -1,5 +1,6 @@
 import { StatusIndicatorProps } from "@cloudscape-design/components";
 import { SemanticSearchResult } from "../API";
+import { UserRole } from "../common/types";
 
 export const languageList = [
   { value: "simple", label: "Simple" },
@@ -103,6 +104,19 @@ export abstract class Labels {
     }
 
     return null;
+  }
+
+  static getRoleName(role: UserRole) {
+    switch (role) {
+      case UserRole.ADMIN:
+        return "Admin";
+      case UserRole.WORKSPACES_MANAGER:
+        return "Workspace Manager";
+      case UserRole.WORKSPACES_USER:
+        return "Workspace User";
+      case UserRole.CHATBOT_USER:
+        return "Chatbot User";
+    }
   }
 }
 

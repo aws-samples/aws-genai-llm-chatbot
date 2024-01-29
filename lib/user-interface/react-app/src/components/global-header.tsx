@@ -3,16 +3,19 @@ import {
   TopNavigation,
 } from "@cloudscape-design/components";
 import { Mode } from "@cloudscape-design/global-styles";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StorageHelper } from "../common/helpers/storage-helper";
 import { Auth } from "aws-amplify";
 import useOnFollow from "../common/hooks/use-on-follow";
 import { CHATBOT_NAME } from "../common/constants";
+import { UserContext } from "../common/user-context";
+import { UserRole } from "../common/types";
 
 export default function GlobalHeader() {
   const onFollow = useOnFollow();
   const [userName, setUserName] = useState<string | null>(null);
   const [theme, setTheme] = useState<Mode>(StorageHelper.getTheme());
+  const { setUserRole } = useContext(UserContext);
 
   useEffect(() => {
     (async () => {
@@ -20,13 +23,14 @@ export default function GlobalHeader() {
 
       if (!result || Object.keys(result).length === 0) {
         Auth.signOut();
+        setUserRole(UserRole.UNDEFINED);
         return;
       }
 
       const userName = result?.attributes?.email;
       setUserName(userName);
     })();
-  }, []);
+  }, [setUserRole]);
 
   const onChangeThemeClick = () => {
     if (theme === Mode.Dark) {
@@ -43,6 +47,8 @@ export default function GlobalHeader() {
   }) => {
     if (detail.id === "signout") {
       Auth.signOut();
+      setUserRole(UserRole.UNDEFINED);
+      setUserName(null);
     }
   };
 

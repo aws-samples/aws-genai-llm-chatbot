@@ -285,6 +285,30 @@ type Channel @aws_iam @aws_cognito_user_pools {
   userId: String
 }
 
+
+type User @aws_cognito_user_pools {
+  name: String!
+  email: String!
+  role: String
+  phoneNumber: String
+  previousEmail: String
+  enabled: Boolean
+  userStatus: String
+}
+
+input ManageUserDataInput {
+  name: String!
+  email: String!
+  role: String
+  phoneNumber: String
+  previousEmail: String
+}
+
+input ManageUserStateInput {
+  email: String!
+  action: String
+}
+
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
     @aws_cognito_user_pools
@@ -310,7 +334,14 @@ type Mutation {
   sendQuery(data: String): String @aws_cognito_user_pools
   publishResponse(sessionId: String, userId: String, data: String): Channel
     @aws_iam
+  # Admin User Management
+  createUser(input: ManageUserDataInput!): Boolean! @aws_cognito_user_pools
+  editUser(input: ManageUserDataInput!): Boolean! @aws_cognito_user_pools
+  toggleUser(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
+  resetUserPassword(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
+  deleteUser(input: ManageUserStateInput): Boolean! @aws_cognito_user_pools
 }
+
 
 type Query {
   checkHealth: Boolean @aws_cognito_user_pools
@@ -336,6 +367,8 @@ type Query {
   listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools
   rankPassages(input: RankPassagesInput!): [PassageRank!]!
     @aws_cognito_user_pools
+  listUsers: [User!]! @aws_cognito_user_pools
+  getUser(userId: String!): User! @aws_cognito_user_pools
 }
 
 type Subscription {
