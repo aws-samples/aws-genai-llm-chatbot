@@ -5,7 +5,7 @@
     "aws-genai-llm-chatbot": "bin/aws-genai-llm-chatbot.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npx @aws-amplify/cli codegen && tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
     "gen": "npx @aws-amplify/cli codegen",
