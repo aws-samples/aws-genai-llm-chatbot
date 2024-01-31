@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: "AWS GenAI LLM Chatbot"
+  name: "AWS GenAI Chatbot"
   text: "Deploying a Multi-Model and Multi-RAG Powered Chatbot Using AWS CDK on AWS"
   actions:
     - theme: brand

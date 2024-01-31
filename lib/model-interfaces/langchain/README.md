@@ -27,8 +27,9 @@ class GPTAdapter(ModelAdapter):
 
         return ChatOpenAI(model_name=self.model_id, temperature=0, **model_kwargs)
 
-    # (OPTIONAL) 3.If you need to override the default prompt, override the get_prompt method.
-    # If not you can remove this and leverage the get_prompt from the base adapater.
+    # (OPTIONAL) 3.If you need to override the default prompt, override the get_prompt and get_qa_prompt methods.
+    # The get_qa_prompt is only used when RAG is enabled.
+    # If not you can remove this and leverage the get_prompt and get_qa_prompts from the base adapater.
     # must return a PromptTemplate
     def get_prompt(self):
         template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
@@ -46,6 +47,19 @@ class GPTAdapter(ModelAdapter):
         prompt_template = PromptTemplate(**prompt_template_args)
 
         return prompt_template
+
+    def get_qa_prompt(self):
+        template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+        {context}
+
+        Question: {question}
+        Helpful Answer:"""
+        qa_prompt_template = PromptTemplate(
+            template=template, input_variables=["context", "question"]
+        )
+
+        return qa_prompt_template
     ...
 
 # 4. Finally, Register the adapter to match the model id coming from the select UI

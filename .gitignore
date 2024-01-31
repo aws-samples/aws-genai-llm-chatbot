@@ -447,3 +447,9 @@ bin/config.json
 docs/.vitepress/cache
 docs/.vitepress/dist
 lib/user-interface/react-app/.graphqlconfig.yml
+
+# Amplify auto-generated files
+lib/user-interface/react-app/src/API.ts
+lib/user-interface/react-app/src/graphql/mutations.ts
+lib/user-interface/react-app/src/graphql/queries.ts
+lib/user-interface/react-app/src/graphql/subscriptions.ts

@@ -384,19 +384,21 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
             },
           ]
         );
-        NagSuppressions.addResourceSuppressionsByPath(
-          this,
-          [
-            `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
-          ],
-          [
-            {
-              id: "AwsSolutions-IAM5",
-              reason:
-                "Access to all log groups required for CloudWatch log group creation.",
-            },
-          ]
-        );
+        if (props.config.rag.engines.kendra.createIndex) {
+          NagSuppressions.addResourceSuppressionsByPath(
+            this,
+            [
+              `/${this.stackName}/RagEngines/KendraRetrieval/KendraRole/DefaultPolicy/Resource`,
+            ],
+            [
+              {
+                id: "AwsSolutions-IAM5",
+                reason:
+                  "Access to all log groups required for CloudWatch log group creation.",
+              },
+            ]
+          );
+        }
       }
     }
     // Implicitly created resources with changing paths
@@ -413,5 +415,38 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         reason: "Not yet upgraded from Python 3.11 to 3.12.",
       },
     ]);
+    
+    if (props.config.privateWebsite) {
+      NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-0/CustomResourcePolicy/Resource`,
+            `/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-1/CustomResourcePolicy/Resource`,
+            `/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-2/CustomResourcePolicy/Resource`,
+            `/${this.stackName}/UserInterface/PrivateWebsite/describeVpcEndpoints/CustomResourcePolicy/Resource`,
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM5",
+              reason:
+                "Custom Resource requires permissions to Describe VPC Endpoint Network Interfaces",
+            },
+          ]
+      );
+      NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource`
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM4",
+              reason:
+                "IAM role implicitly created by CDK.",
+            },
+          ]
+      );
+      
+    }
   }
 }
