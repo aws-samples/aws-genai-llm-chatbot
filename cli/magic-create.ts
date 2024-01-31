@@ -9,6 +9,7 @@ import {
   SupportedRegion,
   SupportedSageMakerModels,
   SystemConfig,
+  SupportedBedrockRegion
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
@@ -57,6 +58,9 @@ const embeddingModels = [
         fs.readFileSync("./bin/config.json").toString("utf8")
       );
       options.prefix = config.prefix;
+      options.privateWebsite = config.privateWebsite;
+      options.certificate = config.certificate;
+      options.domain = config.domain;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
       options.bedrockRoleArn = config.bedrock?.roleArn;
@@ -115,6 +119,34 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
+      name: "privateWebsite",
+      message: "Do you want to deploy a private website? I.e only accessible in VPC",
+      initial:
+        options.privateWebsite ||
+        false,
+    },
+    {
+      type: "input",
+      name: "certificate",
+      message: "ACM certificate ARN",
+      initial:
+        options.certificate,
+      skip(): boolean {
+        return !(this as any).state.answers.privateWebsite;
+      },
+    },
+    {
+      type: "input",
+      name: "domain",
+      message: "Domain for private website",
+      initial:
+        options.domain,
+      skip(): boolean {
+        return !(this as any).state.answers.privateWebsite;
+      },
+    },
+    {
+      type: "confirm",
       name: "bedrockEnable",
       message: "Do you have access to Bedrock and want to enable it",
       initial: true,
@@ -123,13 +155,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "select",
       name: "bedrockRegion",
       message: "Region where Bedrock is available",
-      choices: [
-        SupportedRegion.US_EAST_1,
-        SupportedRegion.US_WEST_2,
-        SupportedRegion.EU_CENTRAL_1,
-        SupportedRegion.AP_SOUTHEAST_1,
-        SupportedRegion.AP_NORTHEAST_1,
-      ],
+      choices: Object.values(SupportedBedrockRegion),
       initial: options.bedrockRegion ?? "us-east-1",
       skip() {
         return !(this as any).state.answers.bedrockEnable;
@@ -310,6 +336,9 @@ async function processCreateOptions(options: any): Promise<void> {
   // Create the config object
   const config = {
     prefix: answers.prefix,
+    privateWebsite: answers.privateWebsite,
+    certificate: answers.certificate,
+    domain: answers.domain,
     bedrock: answers.bedrockEnable
       ? {
           enabled: answers.bedrockEnable,
