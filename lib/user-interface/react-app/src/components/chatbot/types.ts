@@ -38,6 +38,7 @@ export enum ChatBotAction {
 export enum ChatBotModelInterface {
   Langchain = "langchain",
   Idefics = "idefics",
+  Agent = "bedrock-agent",
 }
 
 export enum ChatBotMode {

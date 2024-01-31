@@ -10,34 +10,34 @@ export type CreateWorkspaceKendraInput = {
 };
 
 export type Workspace = {
-  __typename: "Workspace",
-  id: string,
-  name: string,
-  formatVersion?: number | null,
-  engine: string,
-  status?: string | null,
-  aossEngine?: string | null,
-  languages?: Array< string | null > | null,
-  hasIndex?: boolean | null,
-  embeddingsModelProvider?: string | null,
-  embeddingsModelName?: string | null,
-  embeddingsModelDimensions?: number | null,
-  crossEncoderModelName?: string | null,
-  crossEncoderModelProvider?: string | null,
-  metric?: string | null,
-  index?: boolean | null,
-  hybridSearch?: boolean | null,
-  chunkingStrategy?: string | null,
-  chunkSize?: number | null,
-  chunkOverlap?: number | null,
-  vectors?: number | null,
-  documents?: number | null,
-  sizeInBytes?: number | null,
-  kendraIndexId?: string | null,
-  kendraIndexExternal?: boolean | null,
-  kendraUseAllData?: boolean | null,
-  createdAt: string,
-  updatedAt: string,
+  __typename: "Workspace";
+  id: string;
+  name: string;
+  formatVersion?: number | null;
+  engine: string;
+  status?: string | null;
+  aossEngine?: string | null;
+  languages?: Array<string | null> | null;
+  hasIndex?: boolean | null;
+  embeddingsModelProvider?: string | null;
+  embeddingsModelName?: string | null;
+  embeddingsModelDimensions?: number | null;
+  crossEncoderModelName?: string | null;
+  crossEncoderModelProvider?: string | null;
+  metric?: string | null;
+  index?: boolean | null;
+  hybridSearch?: boolean | null;
+  chunkingStrategy?: string | null;
+  chunkSize?: number | null;
+  chunkOverlap?: number | null;
+  vectors?: number | null;
+  documents?: number | null;
+  sizeInBytes?: number | null;
+  kendraIndexId?: string | null;
+  kendraIndexExternal?: boolean | null;
+  kendraUseAllData?: boolean | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CreateWorkspaceOpenSearchInput = {
@@ -118,10 +118,10 @@ export type DeleteSessionResult = {
 };
 
 export type Channel = {
-  __typename: "Channel",
-  data?: string | null,
-  sessionId?: string | null,
-  userId?: string | null,
+  __typename: "Channel";
+  data?: string | null;
+  sessionId?: string | null;
+  userId?: string | null;
 };
 
 export type FileUploadInput = {
@@ -312,36 +312,36 @@ export type CreateKendraWorkspaceMutationVariables = {
 };
 
 export type CreateKendraWorkspaceMutation = {
-  createKendraWorkspace:  {
-    __typename: "Workspace",
-    id: string,
-    name: string,
-    formatVersion?: number | null,
-    engine: string,
-    status?: string | null,
-    aossEngine?: string | null,
-    languages?: Array< string | null > | null,
-    hasIndex?: boolean | null,
-    embeddingsModelProvider?: string | null,
-    embeddingsModelName?: string | null,
-    embeddingsModelDimensions?: number | null,
-    crossEncoderModelName?: string | null,
-    crossEncoderModelProvider?: string | null,
-    metric?: string | null,
-    index?: boolean | null,
-    hybridSearch?: boolean | null,
-    chunkingStrategy?: string | null,
-    chunkSize?: number | null,
-    chunkOverlap?: number | null,
-    vectors?: number | null,
-    documents?: number | null,
-    sizeInBytes?: number | null,
-    kendraIndexId?: string | null,
-    kendraIndexExternal?: boolean | null,
-    kendraUseAllData?: boolean | null,
-    createdAt: string,
-    updatedAt: string,
-  },
+  createKendraWorkspace: {
+    __typename: "Workspace";
+    id: string;
+    name: string;
+    formatVersion?: number | null;
+    engine: string;
+    status?: string | null;
+    aossEngine?: string | null;
+    languages?: Array<string | null> | null;
+    hasIndex?: boolean | null;
+    embeddingsModelProvider?: string | null;
+    embeddingsModelName?: string | null;
+    embeddingsModelDimensions?: number | null;
+    crossEncoderModelName?: string | null;
+    crossEncoderModelProvider?: string | null;
+    metric?: string | null;
+    index?: boolean | null;
+    hybridSearch?: boolean | null;
+    chunkingStrategy?: string | null;
+    chunkSize?: number | null;
+    chunkOverlap?: number | null;
+    vectors?: number | null;
+    documents?: number | null;
+    sizeInBytes?: number | null;
+    kendraIndexId?: string | null;
+    kendraIndexExternal?: boolean | null;
+    kendraUseAllData?: boolean | null;
+    createdAt: string;
+    updatedAt: string;
+  };
 };
 
 export type CreateOpenSearchWorkspaceMutationVariables = {
@@ -349,36 +349,36 @@ export type CreateOpenSearchWorkspaceMutationVariables = {
 };
 
 export type CreateOpenSearchWorkspaceMutation = {
-  createOpenSearchWorkspace:  {
-    __typename: "Workspace",
-    id: string,
-    name: string,
-    formatVersion?: number | null,
-    engine: string,
-    status?: string | null,
-    aossEngine?: string | null,
-    languages?: Array< string | null > | null,
-    hasIndex?: boolean | null,
-    embeddingsModelProvider?: string | null,
-    embeddingsModelName?: string | null,
-    embeddingsModelDimensions?: number | null,
-    crossEncoderModelName?: string | null,
-    crossEncoderModelProvider?: string | null,
-    metric?: string | null,
-    index?: boolean | null,
-    hybridSearch?: boolean | null,
-    chunkingStrategy?: string | null,
-    chunkSize?: number | null,
-    chunkOverlap?: number | null,
-    vectors?: number | null,
-    documents?: number | null,
-    sizeInBytes?: number | null,
-    kendraIndexId?: string | null,
-    kendraIndexExternal?: boolean | null,
-    kendraUseAllData?: boolean | null,
-    createdAt: string,
-    updatedAt: string,
-  },
+  createOpenSearchWorkspace: {
+    __typename: "Workspace";
+    id: string;
+    name: string;
+    formatVersion?: number | null;
+    engine: string;
+    status?: string | null;
+    aossEngine?: string | null;
+    languages?: Array<string | null> | null;
+    hasIndex?: boolean | null;
+    embeddingsModelProvider?: string | null;
+    embeddingsModelName?: string | null;
+    embeddingsModelDimensions?: number | null;
+    crossEncoderModelName?: string | null;
+    crossEncoderModelProvider?: string | null;
+    metric?: string | null;
+    index?: boolean | null;
+    hybridSearch?: boolean | null;
+    chunkingStrategy?: string | null;
+    chunkSize?: number | null;
+    chunkOverlap?: number | null;
+    vectors?: number | null;
+    documents?: number | null;
+    sizeInBytes?: number | null;
+    kendraIndexId?: string | null;
+    kendraIndexExternal?: boolean | null;
+    kendraUseAllData?: boolean | null;
+    createdAt: string;
+    updatedAt: string;
+  };
 };
 
 export type CreateAuroraWorkspaceMutationVariables = {
@@ -386,36 +386,36 @@ export type CreateAuroraWorkspaceMutationVariables = {
 };
 
 export type CreateAuroraWorkspaceMutation = {
-  createAuroraWorkspace:  {
-    __typename: "Workspace",
-    id: string,
-    name: string,
-    formatVersion?: number | null,
-    engine: string,
-    status?: string | null,
-    aossEngine?: string | null,
-    languages?: Array< string | null > | null,
-    hasIndex?: boolean | null,
-    embeddingsModelProvider?: string | null,
-    embeddingsModelName?: string | null,
-    embeddingsModelDimensions?: number | null,
-    crossEncoderModelName?: string | null,
-    crossEncoderModelProvider?: string | null,
-    metric?: string | null,
-    index?: boolean | null,
-    hybridSearch?: boolean | null,
-    chunkingStrategy?: string | null,
-    chunkSize?: number | null,
-    chunkOverlap?: number | null,
-    vectors?: number | null,
-    documents?: number | null,
-    sizeInBytes?: number | null,
-    kendraIndexId?: string | null,
-    kendraIndexExternal?: boolean | null,
-    kendraUseAllData?: boolean | null,
-    createdAt: string,
-    updatedAt: string,
-  },
+  createAuroraWorkspace: {
+    __typename: "Workspace";
+    id: string;
+    name: string;
+    formatVersion?: number | null;
+    engine: string;
+    status?: string | null;
+    aossEngine?: string | null;
+    languages?: Array<string | null> | null;
+    hasIndex?: boolean | null;
+    embeddingsModelProvider?: string | null;
+    embeddingsModelName?: string | null;
+    embeddingsModelDimensions?: number | null;
+    crossEncoderModelName?: string | null;
+    crossEncoderModelProvider?: string | null;
+    metric?: string | null;
+    index?: boolean | null;
+    hybridSearch?: boolean | null;
+    chunkingStrategy?: string | null;
+    chunkSize?: number | null;
+    chunkOverlap?: number | null;
+    vectors?: number | null;
+    documents?: number | null;
+    sizeInBytes?: number | null;
+    kendraIndexId?: string | null;
+    kendraIndexExternal?: boolean | null;
+    kendraUseAllData?: boolean | null;
+    createdAt: string;
+    updatedAt: string;
+  };
 };
 
 export type StartKendraDataSyncMutationVariables = {
@@ -535,27 +535,26 @@ export type DeleteSessionMutation = {
 };
 
 export type SendQueryMutationVariables = {
-  data?: string | null,
+  data?: string | null;
 };
 
 export type SendQueryMutation = {
-  // Real-time
-  sendQuery?: string | null,
+  sendQuery?: string | null;
 };
 
 export type PublishResponseMutationVariables = {
-  sessionId?: string | null,
-  userId?: string | null,
-  data?: string | null,
+  sessionId?: string | null;
+  userId?: string | null;
+  data?: string | null;
 };
 
 export type PublishResponseMutation = {
-  publishResponse?:  {
-    __typename: "Channel",
-    data?: string | null,
-    sessionId?: string | null,
-    userId?: string | null,
-  } | null,
+  publishResponse?: {
+    __typename: "Channel";
+    data?: string | null;
+    sessionId?: string | null;
+    userId?: string | null;
+  } | null;
 };
 
 export type CheckHealthQueryVariables = {};
@@ -594,36 +593,36 @@ export type ListModelsQuery = {
 export type ListWorkspacesQueryVariables = {};
 
 export type ListWorkspacesQuery = {
-  listWorkspaces:  Array< {
-    __typename: "Workspace",
-    id: string,
-    name: string,
-    formatVersion?: number | null,
-    engine: string,
-    status?: string | null,
-    aossEngine?: string | null,
-    languages?: Array< string | null > | null,
-    hasIndex?: boolean | null,
-    embeddingsModelProvider?: string | null,
-    embeddingsModelName?: string | null,
-    embeddingsModelDimensions?: number | null,
-    crossEncoderModelName?: string | null,
-    crossEncoderModelProvider?: string | null,
-    metric?: string | null,
-    index?: boolean | null,
-    hybridSearch?: boolean | null,
-    chunkingStrategy?: string | null,
-    chunkSize?: number | null,
-    chunkOverlap?: number | null,
-    vectors?: number | null,
-    documents?: number | null,
-    sizeInBytes?: number | null,
-    kendraIndexId?: string | null,
-    kendraIndexExternal?: boolean | null,
-    kendraUseAllData?: boolean | null,
-    createdAt: string,
-    updatedAt: string,
-  } >,
+  listWorkspaces: Array<{
+    __typename: "Workspace";
+    id: string;
+    name: string;
+    formatVersion?: number | null;
+    engine: string;
+    status?: string | null;
+    aossEngine?: string | null;
+    languages?: Array<string | null> | null;
+    hasIndex?: boolean | null;
+    embeddingsModelProvider?: string | null;
+    embeddingsModelName?: string | null;
+    embeddingsModelDimensions?: number | null;
+    crossEncoderModelName?: string | null;
+    crossEncoderModelProvider?: string | null;
+    metric?: string | null;
+    index?: boolean | null;
+    hybridSearch?: boolean | null;
+    chunkingStrategy?: string | null;
+    chunkSize?: number | null;
+    chunkOverlap?: number | null;
+    vectors?: number | null;
+    documents?: number | null;
+    sizeInBytes?: number | null;
+    kendraIndexId?: string | null;
+    kendraIndexExternal?: boolean | null;
+    kendraUseAllData?: boolean | null;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 };
 
 export type GetWorkspaceQueryVariables = {
@@ -631,36 +630,36 @@ export type GetWorkspaceQueryVariables = {
 };
 
 export type GetWorkspaceQuery = {
-  getWorkspace?:  {
-    __typename: "Workspace",
-    id: string,
-    name: string,
-    formatVersion?: number | null,
-    engine: string,
-    status?: string | null,
-    aossEngine?: string | null,
-    languages?: Array< string | null > | null,
-    hasIndex?: boolean | null,
-    embeddingsModelProvider?: string | null,
-    embeddingsModelName?: string | null,
-    embeddingsModelDimensions?: number | null,
-    crossEncoderModelName?: string | null,
-    crossEncoderModelProvider?: string | null,
-    metric?: string | null,
-    index?: boolean | null,
-    hybridSearch?: boolean | null,
-    chunkingStrategy?: string | null,
-    chunkSize?: number | null,
-    chunkOverlap?: number | null,
-    vectors?: number | null,
-    documents?: number | null,
-    sizeInBytes?: number | null,
-    kendraIndexId?: string | null,
-    kendraIndexExternal?: boolean | null,
-    kendraUseAllData?: boolean | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
+  getWorkspace?: {
+    __typename: "Workspace";
+    id: string;
+    name: string;
+    formatVersion?: number | null;
+    engine: string;
+    status?: string | null;
+    aossEngine?: string | null;
+    languages?: Array<string | null> | null;
+    hasIndex?: boolean | null;
+    embeddingsModelProvider?: string | null;
+    embeddingsModelName?: string | null;
+    embeddingsModelDimensions?: number | null;
+    crossEncoderModelName?: string | null;
+    crossEncoderModelProvider?: string | null;
+    metric?: string | null;
+    index?: boolean | null;
+    hybridSearch?: boolean | null;
+    chunkingStrategy?: string | null;
+    chunkSize?: number | null;
+    chunkOverlap?: number | null;
+    vectors?: number | null;
+    documents?: number | null;
+    sizeInBytes?: number | null;
+    kendraIndexId?: string | null;
+    kendraIndexExternal?: boolean | null;
+    kendraUseAllData?: boolean | null;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
 };
 
 export type ListRagEnginesQueryVariables = {};

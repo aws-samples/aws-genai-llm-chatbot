@@ -30,6 +30,10 @@ function calculateHash(paths: string[]): string {
   }, "");
 }
 
+const buildImage = DockerImage.fromBuild(
+  path.posix.join(__dirname, "alpine-zip")
+);
+
 export class SharedAssetBundler extends Construct {
   private readonly sharedAssets: string[];
   private readonly WORKING_PATH = "/asset-input/";
@@ -57,9 +61,7 @@ export class SharedAssetBundler extends Construct {
       {
         path: assetPath,
         bundling: {
-          image: DockerImage.fromBuild(
-            path.posix.join(__dirname, "alpine-zip")
-          ),
+          image: buildImage,
           command: [
             "zip",
             "-r",

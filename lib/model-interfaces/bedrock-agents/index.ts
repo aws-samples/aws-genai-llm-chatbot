@@ -4,14 +4,14 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as logs from "aws-cdk-lib/aws-logs";
-import { CfnEndpoint } from "aws-cdk-lib/aws-sagemaker";
+
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 import * as path from "path";
-import { RagEngines } from "../../rag-engines";
 import { Shared } from "../../shared";
-import { SystemConfig } from "../../shared/types";
+import { Direction, ModelInterface, SystemConfig } from "../../shared/types";
+import { SqsSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 interface BedrockAgentInterfaceProps {
   readonly shared: Shared;
@@ -72,11 +72,12 @@ export class BedrockAgentInterface extends Construct {
       );
     }
 
-    const deadLetterQueue = new sqs.Queue(this, "DLQ");
+    const deadLetterQueue = new sqs.Queue(this, "DLQ", { enforceSSL: true });
     const queue = new sqs.Queue(this, "Queue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(15 * 6),
+      enforceSSL: true,
       deadLetterQueue: {
         queue: deadLetterQueue,
         maxReceiveCount: 3,
@@ -91,6 +92,23 @@ export class BedrockAgentInterface extends Construct {
           new iam.ServicePrincipal("events.amazonaws.com"),
           new iam.ServicePrincipal("sqs.amazonaws.com"),
         ],
+      })
+    );
+
+    props.messagesTopic.addSubscription(
+      new SqsSubscription(queue, {
+        filterPolicyWithMessageBody: {
+          direction: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [Direction.In],
+            })
+          ),
+          modelInterface: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [ModelInterface.BedrockAgent],
+            })
+          ),
+        },
       })
     );
 

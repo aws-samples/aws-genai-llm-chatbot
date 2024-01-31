@@ -348,6 +348,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       },
     };
 
+    console.log(request);
+
     setState((state) => ({
       ...state,
       value: "",

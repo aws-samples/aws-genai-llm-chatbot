@@ -13,9 +13,10 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
-import { SystemConfig } from "../../shared/types";
+import { Direction, ModelInterface, SystemConfig } from "../../shared/types";
 import { RemovalPolicy } from "aws-cdk-lib";
 import { NagSuppressions } from "cdk-nag";
+import { SqsSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 interface IdeficsInterfaceProps {
   readonly shared: Shared;
@@ -225,6 +226,23 @@ export class IdeficsInterface extends Construct {
           new iam.ServicePrincipal("events.amazonaws.com"),
           new iam.ServicePrincipal("sqs.amazonaws.com"),
         ],
+      })
+    );
+
+    props.messagesTopic.addSubscription(
+      new SqsSubscription(queue, {
+        filterPolicyWithMessageBody: {
+          direction: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [Direction.In],
+            })
+          ),
+          modelInterface: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [ModelInterface.Idefics],
+            })
+          ),
+        },
       })
     );
 

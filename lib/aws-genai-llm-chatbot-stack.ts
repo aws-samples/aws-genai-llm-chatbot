@@ -76,26 +76,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           byUserIdIndex: chatBotApi.byUserIdIndex,
         }
       );
-
-      chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(
-          bedrockAgentInterface.ingestionQueue,
-          {
-            filterPolicyWithMessageBody: {
-              direction: sns.FilterOrPolicy.filter(
-                sns.SubscriptionFilter.stringFilter({
-                  allowlist: [Direction.In],
-                })
-              ),
-              modelInterface: sns.FilterOrPolicy.filter(
-                sns.SubscriptionFilter.stringFilter({
-                  allowlist: [ModelInterface.BedrockAgent],
-                })
-              ),
-            },
-          }
-        )
-      );
     }
 
     // check if any deployed model requires langchain interface or if bedrock is enabled from config
@@ -111,24 +91,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           sessionsTable: chatBotApi.sessionsTable,
           byUserIdIndex: chatBotApi.byUserIdIndex,
         }
-      );
-
-      // Route all incoming messages targeted to langchain to the langchain model interface queue
-      chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(langchainInterface.ingestionQueue, {
-          filterPolicyWithMessageBody: {
-            direction: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [Direction.In],
-              })
-            ),
-            modelInterface: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [ModelInterface.LangChain],
-              })
-            ),
-          },
-        })
       );
 
       for (const model of models.models) {
@@ -155,24 +117,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         byUserIdIndex: chatBotApi.byUserIdIndex,
         chatbotFilesBucket: chatBotApi.filesBucket,
       });
-
-      // Route all incoming messages targeted to idefics to the idefics model interface queue
-      chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
-          filterPolicyWithMessageBody: {
-            direction: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [Direction.In],
-              })
-            ),
-            modelInterface: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [ModelInterface.Idefics],
-              })
-            ),
-          },
-        })
-      );
 
       for (const model of models.models) {
         // if model name contains idefics then add to idefics interface
@@ -283,6 +227,24 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         ]
       );
     }
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      this,
+      [
+        `/${this.stackName}/IBedrockAgent/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/IBedrockAgent/RequestHandler/ServiceRole/Resource`,
+      ],
+      [
+        {
+          id: "AwsSolutions-IAM4",
+          reason: "IAM role implicitly created by CDK.",
+        },
+        {
+          id: "AwsSolutions-IAM5",
+          reason: "IAM role implicitly created by CDK.",
+        },
+      ]
+    );
 
     // RAG configuration
     if (props.config.rag.enabled) {
@@ -440,6 +402,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         }
       }
     }
+
     // Implicitly created resources with changing paths
     NagSuppressions.addStackSuppressions(this, [
       {

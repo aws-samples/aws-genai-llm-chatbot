@@ -46,7 +46,7 @@ export enum SupportedRegion {
 export enum ModelInterface {
   LangChain = "langchain",
   Idefics = "idefics",
-  BedrockAgent = "bedrock-agent",
+  BedrockAgent = "agent",
 }
 
 export enum Modality {
