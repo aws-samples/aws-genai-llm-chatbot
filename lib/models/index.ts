@@ -206,7 +206,7 @@ export class Models extends Construct {
       const LLAMA2_13B_CHAT_ENDPOINT_NAME = "meta-LLama2-13b-chat";
 
       const llama2_13b_chat = new JumpStartSageMakerEndpoint(this, 'LLamaV2_13B_Chat', {
-        model: JumpStartModel.META_TEXTGENERATION_LLAMA_2_13B_F_3_0_2,
+        model: JumpStartModel.META_TEXTGENERATION_LLAMA_2_13B_F_2_0_2,
         instanceType: SageMakerInstanceType.ML_G5_12XLARGE,
         vpcConfig: {
           securityGroupIds: [props.shared.vpc.vpcDefaultSecurityGroup],
