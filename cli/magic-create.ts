@@ -9,7 +9,7 @@ import {
   SupportedRegion,
   SupportedSageMakerModels,
   SystemConfig,
-  SupportedBedrockRegion
+  SupportedBedrockRegion,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
@@ -120,17 +120,15 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "privateWebsite",
-      message: "Do you want to deploy a private website? I.e only accessible in VPC",
-      initial:
-        options.privateWebsite ||
-        false,
+      message:
+        "Do you want to deploy a private website? I.e only accessible in VPC",
+      initial: options.privateWebsite || false,
     },
     {
       type: "input",
       name: "certificate",
       message: "ACM certificate ARN",
-      initial:
-        options.certificate,
+      initial: options.certificate,
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite;
       },
@@ -139,8 +137,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "input",
       name: "domain",
       message: "Domain for private website",
-      initial:
-        options.domain,
+      initial: options.domain,
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite;
       },
@@ -225,6 +222,15 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
+      name: "kendraEnterprise",
+      message: "Do you want to enable Kendra Enterprise Edition?",
+      initial: options.kendraEnterprise || false,
+      skip(): boolean {
+        return !(this as any).state.answers.ragsToEnable.includes("kendra");
+      },
+    },
+    {
+      type: "confirm",
       name: "kendra",
       message: "Do you want to add existing Kendra indexes",
       initial:
@@ -235,18 +241,8 @@ async function processCreateOptions(options: any): Promise<void> {
         return !(this as any).state.answers.enableRag;
       },
     },
-    {
-      type: "confirm",
-      name: "kendraEnterprise",
-      message: "Do you want to enable Kendra Enterprise Edition?",
-      initial: options.kendraEnterprise || false,
-      skip(): boolean {
-        return !(this as any).state.answers.ragsToEnable.includes("kendra");
-      },
-    },
   ];
   const answers: any = await enquirer.prompt(questions);
-  console.log(answers);
   const kendraExternal = [];
   let newKendra = answers.enableRag && answers.kendra;
   const existingKendraIndices = Array.from(options.kendraExternal || []);
