@@ -248,7 +248,7 @@ async function processCreateOptions(options: any): Promise<void> {
     },
   ];
   const answers: any = await enquirer.prompt(questions);
-  const kendraExternal = [];
+  const kendraExternal: any[] = [];
   let newKendra = answers.enableRag && answers.kendra;
   const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
