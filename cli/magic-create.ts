@@ -9,7 +9,7 @@ import {
   SupportedRegion,
   SupportedSageMakerModels,
   SystemConfig,
-  SupportedBedrockRegion
+  SupportedBedrockRegion,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
@@ -120,17 +120,15 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "privateWebsite",
-      message: "Do you want to deploy a private website? I.e only accessible in VPC",
-      initial:
-        options.privateWebsite ||
-        false,
+      message:
+        "Do you want to deploy a private website? I.e only accessible in VPC",
+      initial: options.privateWebsite || false,
     },
     {
       type: "input",
       name: "certificate",
       message: "ACM certificate ARN",
-      initial:
-        options.certificate,
+      initial: options.certificate,
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite;
       },
@@ -139,8 +137,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "input",
       name: "domain",
       message: "Domain for private website",
-      initial:
-        options.domain,
+      initial: options.domain,
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite;
       },
@@ -216,6 +213,11 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "OpenSearch", name: "opensearch" },
         { message: "Kendra (managed)", name: "kendra" },
       ],
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one engine";
+      },
       skip(): boolean {
         // workaround for https://github.com/enquirer/enquirer/issues/298
         (this as any).state._choices = (this as any).state.choices;
