@@ -56,7 +56,7 @@ export interface ChatSession {
   loading: boolean;
   running: boolean;
   messageHistory: ChatBotHistoryItem[];
-  subscription?: Promise<ZenObservable.Subscription>;
+  subscription?: ZenObservable.Subscription;
 }
 
 function createNewSession(): ChatSession {
@@ -153,7 +153,7 @@ export default function MultiChat() {
     return () => {
       refChatSessions.current.forEach((session) => {
         console.log(`Unsubscribing from ${session.id}`);
-        session.subscription?.then((s) => s.unsubscribe());
+        session.subscription?.unsubscribe();
       });
       refChatSessions.current = [];
     };
@@ -226,11 +226,9 @@ export default function MultiChat() {
     });
   };
 
-  async function subscribe(sessionId: string) {
+  function subscribe(sessionId: string): ZenObservable.Subscription {
     console.log("Subscribing to AppSync");
-    const sub = await API.graphql<
-      GraphQLSubscription<ReceiveMessagesSubscription>
-    >({
+    const sub = API.graphql<GraphQLSubscription<ReceiveMessagesSubscription>>({
       query: receiveMessages,
       variables: {
         sessionId: sessionId,
@@ -241,7 +239,7 @@ export default function MultiChat() {
         const data = value.data!.receiveMessages?.data;
         if (data !== undefined && data !== null) {
           const response: ChatBotMessageResponse = JSON.parse(data);
-          console.log(response);
+          console.log(JSON.stringify(response));
           if (response.action === ChatBotAction.Heartbeat) {
             console.log("Heartbeat pong!");
             return;
@@ -275,33 +273,28 @@ export default function MultiChat() {
     }
 
     const session = createNewSession();
-
     const sub = subscribe(session.id);
-    sub
-      .then(() => {
-        console.log(`Subscribed to session ${session.id}}`);
-        const request: ChatBotHeartbeatRequest = {
-          action: ChatBotAction.Heartbeat,
-          modelInterface: ChatBotModelInterface.Langchain,
-          data: {
-            sessionId: session.id,
-          },
-        };
-        const result = API.graphql({
-          query: sendQuery,
-          variables: {
-            data: JSON.stringify(request),
-          },
-        });
-        console.log(result);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
 
+    console.log(`Subscribed to session ${session.id}}`);
+    const request: ChatBotHeartbeatRequest = {
+      action: ChatBotAction.Heartbeat,
+      modelInterface: ChatBotModelInterface.Langchain,
+      data: {
+        sessionId: session.id,
+      },
+    };
+    API.graphql({
+      query: sendQuery,
+      variables: {
+        data: JSON.stringify(request),
+      },
+    });
     session.subscription = sub;
     refChatSessions.current.push(session);
-    console.log(refChatSessions);
+    console.log(
+      "Sessions",
+      refChatSessions.current.map((s) => s.id)
+    );
     setChatSessions([...refChatSessions.current]);
   }
 
@@ -369,7 +362,7 @@ export default function MultiChat() {
             <Button
               onClick={() => {
                 refChatSessions.current.forEach((s) => {
-                  s.subscription?.then((s) => s.unsubscribe());
+                  s.subscription?.unsubscribe();
                   s.messageHistory = [];
                   s.id = uuidv4();
                   s.subscription = subscribe(s.id);
@@ -432,10 +425,8 @@ export default function MultiChat() {
                       onClick={() => {
                         refChatSessions.current
                           .filter((c) => c.id == chatSession.id)[0]
-                          .subscription?.then((s) => {
-                            console.log(`Unsubscribe from ${chatSession.id}`);
-                            s.unsubscribe();
-                          });
+                          .subscription?.unsubscribe();
+                        console.log(`Unsubscribe from ${chatSession.id}`);
                         refChatSessions.current =
                           refChatSessions.current.filter(
                             (c) => c.id !== chatSession.id
