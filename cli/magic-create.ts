@@ -213,6 +213,11 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "OpenSearch", name: "opensearch" },
         { message: "Kendra (managed)", name: "kendra" },
       ],
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one engine";
+      },
       skip(): boolean {
         // workaround for https://github.com/enquirer/enquirer/issues/298
         (this as any).state._choices = (this as any).state.choices;
