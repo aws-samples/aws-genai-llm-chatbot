@@ -43,7 +43,7 @@ export function deployContainerModel(
       image,
       mode: "SingleModel",
       environment: {
-        SAGEMAKER_CONTAINER_LOG_LEVEL: "20",
+        SAGEMAKER_CONTAINER_LOG_LEVEL: "50",
         SAGEMAKER_REGION: region,
         HF_MODEL_ID: modelId,
         ...env,
