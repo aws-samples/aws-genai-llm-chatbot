@@ -5,9 +5,10 @@
     "aws-genai-llm-chatbot": "bin/aws-genai-llm-chatbot.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npx @aws-amplify/cli codegen && tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
+    "gen": "npx @aws-amplify/cli codegen",
     "create": "node ./cli/magic.js create",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json|css)\"",
@@ -17,6 +18,7 @@
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
+    "@aws-amplify/cli": "^12.10.1",
     "@aws-lambda-powertools/batch": "^1.14.1",
     "@aws-lambda-powertools/logger": "^1.14.1",
     "@aws-sdk/credential-provider-node": "^3.441.0",
@@ -39,7 +41,8 @@
     "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.114.1-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.114.1-alpha.0",
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.114.1-alpha.0",
-    "aws-cdk-lib": "2.114.1",
+    "@cdklabs/generative-ai-cdk-constructs": "^0.1.50",
+    "aws-cdk-lib": "2.116.0",
     "cdk-nag": "2.27.170",
     "commander": "^11.0.0",
     "constructs": "^10.0.0",

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { HashRouter, BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import GlobalHeader from "./components/global-header";
 import Dashboard from "./pages/rag/dashboard/dashboard";
 import NotFound from "./pages/not-found";
@@ -16,11 +16,14 @@ import AddData from "./pages/rag/add-data/add-data";
 import "./styles/app.scss";
 import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
 import RssFeed from "./pages/rag/workspace/rss-feed";
+import * as InfraConfig from '../../../../bin/config.json';
 
 function App() {
+  const Router = InfraConfig.privateWebsite ? HashRouter : BrowserRouter;
+
   return (
     <div style={{ height: "100%" }}>
-      <BrowserRouter>
+      <Router>
         <GlobalHeader />
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
@@ -53,7 +56,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-      </BrowserRouter>
+      </Router>  
     </div>
   );
 }
