@@ -217,9 +217,21 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
+      name: "enableEmbeddingModelsViaSagemaker",
+      message: "Do you want to enable embedding models via SageMaker?",
+      initial: options.enableEmbeddingModelsViaSagemaker || false,
+      skip(): boolean {
+        return !(this as any).state.answers.enableRag;
+      },
+    },
+    {
+      type: "confirm",
       name: "enableCrossEncoding",
       message: "Do you want to enable Cross-Encoding",
       initial: options.enableCrossEncoding || false,
+      skip(): boolean {
+        return !(this as any).state.answers.enableRag;
+      },
     },
     {
       type: "multiselect",
@@ -372,6 +384,8 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     rag: {
       enabled: answers.enableRag,
+      enableEmbeddingModelsViaSagemaker:
+        answers.enableEmbeddingModelsViaSagemaker,
       engines: {
         aurora: {
           enabled: answers.ragsToEnable.includes("aurora"),
@@ -397,7 +411,7 @@ async function processCreateOptions(options: any): Promise<void> {
     models.defaultEmbedding = embeddingModels[0].name;
   }
 
-  if (answers.enableCrossEncoding && answers.sagemakerModels.length > 0) {
+  if (answers.enableCrossEncoding && answers.enableSagemakerModels) {
     config.rag.crossEncoderModels[0] = {
       provider: "sagemaker",
       name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
@@ -410,7 +424,11 @@ async function processCreateOptions(options: any): Promise<void> {
       default: true,
     };
   }
-  config.rag.embeddingsModels = embeddingModels.filter((model) => answers.selectedEmbeddingModels.includes(model.name));
+  if (!config.rag.enableEmbeddingModelsViaSagemaker) {
+    config.rag.embeddingsModels = embeddingModels.filter(model => model.provider !== "sagemaker");
+  } else {
+    config.rag.embeddingsModels = embeddingModels;
+  }
   config.rag.embeddingsModels.forEach((m: any) => {
     if (m.name === models.defaultEmbedding) {
       m.default = true;

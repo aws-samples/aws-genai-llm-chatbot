@@ -30,11 +30,12 @@ const metrics = [
 const defaults: AuroraWorkspaceCreateInput = {
   name: "",
   embeddingsModel: null,
+  crossEncodingEnabled: false,
   crossEncoderModel: null,
   languages: [{ value: "english", label: "English" }],
   metric: metrics[0].value,
   index: true,
-  hybridSearch: true,
+  hybridSearch: false,
   chunkSize: 1000,
   chunkOverlap: 200,
 };
@@ -51,6 +52,8 @@ export default function CreateWorkspaceAurora() {
         embeddingsModel: EmbeddingsModelHelper.getSelectOption(
           appContext?.config.default_embeddings_model
         ),
+        crossEncodingEnabled: appContext?.config.cross_encoders_enabled || false,
+        hybridSearch: appContext?.config.cross_encoders_enabled || false,
         crossEncoderModel: OptionsHelper.getSelectOption(
           appContext?.config.default_cross_encoder_model
         ),

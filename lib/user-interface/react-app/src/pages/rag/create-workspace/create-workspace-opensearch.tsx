@@ -15,9 +15,10 @@ const nameRegex = /^[\w+_-]+$/;
 const defaults: OpenSearchWorkspaceCreateInput = {
   name: "",
   embeddingsModel: null,
+  crossEncodingEnabled: false,
   crossEncoderModel: null,
   languages: [{ value: "english", label: "English" }],
-  hybridSearch: true,
+  hybridSearch: false,
   chunkSize: 1000,
   chunkOverlap: 200,
 };
@@ -34,6 +35,8 @@ export default function CreateWorkspaceOpenSearch() {
         embeddingsModel: EmbeddingsModelHelper.getSelectOption(
           appContext?.config.default_embeddings_model
         ),
+        crossEncodingEnabled: appContext?.config.cross_encoders_enabled || false,
+        hybridSearch: appContext?.config.cross_encoders_enabled || false,
         crossEncoderModel: OptionsHelper.getSelectOption(
           appContext?.config.default_cross_encoder_model
         ),
