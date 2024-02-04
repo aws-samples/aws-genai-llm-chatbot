@@ -170,18 +170,6 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.bedrockRoleArn || "",
     },
     {
-      type: "multiselect",
-      name: "selectedEmbeddingModels",
-      hint: "SPACE to select, ENTER to confirm selection",
-      message: "Which Embedding Models do you want to enable",
-      choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
-      validate(choices: any) {
-        return (this as any).skipped || choices.length > 0
-          ? true
-          : "You need to select at least one model";
-      },
-    },
-    {
       type: "confirm",
       name: "enableSagemakerModels",
       message: "Do you want to use any Sagemaker Models",
