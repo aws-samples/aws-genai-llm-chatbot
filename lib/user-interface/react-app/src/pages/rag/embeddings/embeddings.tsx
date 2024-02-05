@@ -151,7 +151,7 @@ export default function Embeddings() {
       return apiClient.embeddings.getEmbeddings(
         provider,
         name,
-        data.input.map((input) => input.trim())
+        data.input.map((input) => input.trim()), "store"
       );
     });
 

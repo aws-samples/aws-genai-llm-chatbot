@@ -13,7 +13,7 @@ SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
 
 
 def generate_embeddings(
-    model: genai_core.types.EmbeddingsModel, input: List[str], batch_size: int = 50
+    model: genai_core.types.EmbeddingsModel, input: List[str], task: str = "store", batch_size: int = 50
 ) -> List[List[float]]:
     input = list(map(lambda x: x[:10000], input))
 
@@ -73,7 +73,7 @@ def _generate_embeddings_openai(
 
 
 def _generate_embeddings_bedrock(
-    model: genai_core.types.EmbeddingsModel, input: List[str]
+    model: genai_core.types.EmbeddingsModel, input: List[str], task: str = "store"
 ):
     bedrock = genai_core.clients.get_bedrock_client()
 
@@ -81,8 +81,28 @@ def _generate_embeddings_bedrock(
         raise genai_core.types.CommonError("Bedrock is not enabled.")
 
     ret_value = []
-    for value in input:
-        body = json.dumps({"inputText": value})
+    model_provider = model.name.split(".")[0]
+    if model_provider == "amazon":
+        for value in input:
+            body = json.dumps({"inputText": value})
+            response = bedrock.invoke_model(
+                body=body,
+                modelId=model.name,
+                accept="application/json",
+                contentType="application/json",
+            )
+            response_body = json.loads(response.get("body").read())
+            embedding = response_body.get("embedding")
+
+            ret_value.append(embedding)
+
+        ret_value = np.array(ret_value)
+        ret_value = ret_value / \
+            np.linalg.norm(ret_value, axis=1, keepdims=True)
+        ret_value = ret_value.tolist()
+    elif model_provider == "cohere":
+        input_type = "search_query" if task == "retrieve" else "search_document"
+        body = json.dumps({"texts": input, "input_type": input_type})
         response = bedrock.invoke_model(
             body=body,
             modelId=model.name,
@@ -90,13 +110,10 @@ def _generate_embeddings_bedrock(
             contentType="application/json",
         )
         response_body = json.loads(response.get("body").read())
-        embedding = response_body.get("embedding")
-
-        ret_value.append(embedding)
-
-    ret_value = np.array(ret_value)
-    ret_value = ret_value / np.linalg.norm(ret_value, axis=1, keepdims=True)
-    ret_value = ret_value.tolist()
+        ret_value = response_body.get("embeddings")
+    else:
+        raise genai_core.types.CommonError(
+            f"Unknown embeddings provider \"{model_provider}\"")
 
     return ret_value
 
