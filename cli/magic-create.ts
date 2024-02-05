@@ -34,6 +34,16 @@ const embeddingModels = [
     dimensions: 1536,
   },
   {
+    provider: "bedrock",
+    name: "amazon.titan-embed-image-v1",
+    dimensions: 1024,
+  },
+  {
+    provider: "bedrock",
+    name: "cohere.embed-english-v3",
+    dimensions: 1024,
+  },
+  {
     provider: "openai",
     name: "text-embedding-ada-002",
     dimensions: 1536,

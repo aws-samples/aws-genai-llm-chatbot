@@ -80,19 +80,33 @@ def _generate_embeddings_bedrock(
     if not bedrock:
         raise genai_core.types.CommonError("Bedrock is not enabled.")
 
-    ret_value = []
-    for value in input:
-        body = json.dumps({"inputText": value})
-        response = bedrock.invoke_model(
-            body=body,
-            modelId=model.name,
-            accept="application/json",
-            contentType="application/json",
-        )
-        response_body = json.loads(response.get("body").read())
-        embedding = response_body.get("embedding")
 
-        ret_value.append(embedding)
+    ret_value = []
+    if model.name.startswith("amazon"):
+        for value in input:
+            body = json.dumps({"inputText": value})
+            response = bedrock.invoke_model(
+                body=body,
+                modelId=model.name,
+                accept="application/json",
+                contentType="application/json",
+            )
+            response_body = json.loads(response.get("body").read())
+            embedding = response_body.get("embedding")
+
+            ret_value.append(embedding)
+    elif model.name.startswith("cohere"):
+        body = json.dumps({"texts": input, "input_type": "search_document"})
+        response = bedrock.invoke_model(
+                body=body,
+                modelId=model.name,
+                accept="application/json",
+                contentType="application/json",
+            )
+        response_body = json.loads(response.get("body").read())
+        ret_value = response_body.get("embeddings")
+
+
 
     ret_value = np.array(ret_value)
     ret_value = ret_value / np.linalg.norm(ret_value, axis=1, keepdims=True)
