@@ -44,7 +44,7 @@ def query_workspace_open_search(
         raise genai_core.types.CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
-        selected_model, [query]
+        selected_model, [query], "retrieve"
     )[0]
 
     items = []

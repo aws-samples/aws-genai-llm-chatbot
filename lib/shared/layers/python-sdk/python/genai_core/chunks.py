@@ -40,7 +40,7 @@ def add_chunks(
         raise genai_core.types.CommonError("Embeddings model not found")
 
     chunk_embeddings = genai_core.embeddings.generate_embeddings(
-        embeddings_model, chunks
+        embeddings_model, chunks, "store"
     )
     chunk_ids = [uuid.uuid4() for _ in chunks]
 

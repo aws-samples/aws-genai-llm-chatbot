@@ -1,7 +1,7 @@
 import genai_core.types
 import genai_core.parameters
 import genai_core.embeddings
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
@@ -15,6 +15,7 @@ class EmbeddingsRequest(BaseModel):
     provider: str
     model: str
     passages: List[str]
+    task: Optional[str] = "store"
 
 
 @router.resolver(field_name="listEmbeddingModels")
@@ -37,7 +38,7 @@ def embeddings(input: dict):
         raise genai_core.types.CommonError("Model not found")
 
     ret_value = genai_core.embeddings.generate_embeddings(
-        selected_model, request.passages
+        selected_model, request.passages, request.task
     )
 
     return [
