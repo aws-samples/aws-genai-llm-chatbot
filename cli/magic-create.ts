@@ -44,6 +44,11 @@ const embeddingModels = [
     dimensions: 1024,
   },
   {
+    provider: "bedrock",
+    name: "cohere.embed-multilingual-v3",
+    dimensions: 1024,
+  },
+  {
     provider: "openai",
     name: "text-embedding-ada-002",
     dimensions: 1536,
