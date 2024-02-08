@@ -99,7 +99,7 @@ const embeddingModels = [
 
 function createConfig(config: any): void {
   fs.writeFileSync("./bin/config.json", JSON.stringify(config, undefined, 2));
-  console.log("New config written to ./bin/config.json");
+  console.log("Configuration written to ./bin/config.json");
 }
 
 /**
@@ -403,7 +403,7 @@ async function processCreateOptions(options: any): Promise<void> {
       {
         type: "confirm",
         name: "create",
-        message: "Do you want to create a new config based on the above",
+        message: "Do you want to create/update the configuration based on the above settings",
         initial: true,
       },
     ])) as any

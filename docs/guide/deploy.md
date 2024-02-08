@@ -97,7 +97,7 @@ See the documentation for more details [on environment resize](https://docs.aws.
 npm install && npm run build
 ```
 
-4. Once done, run the magic-create CLI to help you set up the solution with the features you care most:
+4. Once done, run the magic-config CLI to help you set up the solution with the features you care most:
 
 ```bash
 npm run create
@@ -109,11 +109,11 @@ You'll be prompted to configure the different aspects of the solution, such as:
 - Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra..) embeddings selection and more to come.
 - Private Chatbot: Limit accessibility to website and backend to VPC.
 
-When done, answer `Y` to create a new configuration.
+When done, answer `Y` to create or update your configuration.
 
 ![sample](./assets/magic-create-sample.gif "CLI sample")
 
-Your configuration is now stored under `bin/config.json`. You can re-run the magic-create command as needed to update your `config.json`
+Your configuration is now stored under `bin/config.json`. You can re-run the magic-config command as needed to update your `config.json`
 
 5. (Optional) Bootstrap AWS CDK on the target account and region
 
