@@ -111,7 +111,7 @@ You'll be prompted to configure the different aspects of the solution, such as:
 
 When done, answer `Y` to create or update your configuration.
 
-![sample](./assets/magic-create-sample.gif "CLI sample")
+![sample](./assets/magic-config-sample.gif "CLI sample")
 
 Your configuration is now stored under `bin/config.json`. You can re-run the magic-config command as needed to update your `config.json`
 
