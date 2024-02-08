@@ -32,7 +32,7 @@ export class PrivateWebsite extends Construct {
 
     // PRIVATE WEBSITE 
     // REQUIRES: 
-    // 1. ACM Certificate ARN and Domain of website to be input during 'npm run create': 
+    // 1. ACM Certificate ARN and Domain of website to be input during 'npm run config': 
     //    "privateWebsite" : true,
     //    "certificate" : "arn:aws:acm:ap-southeast-2:1234567890:certificate/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX",
     //    "domain" : "sub.example.com"
