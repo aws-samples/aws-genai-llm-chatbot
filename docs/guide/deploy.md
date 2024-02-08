@@ -100,7 +100,7 @@ npm install && npm run build
 4. Once done, run the magic-config CLI to help you set up the solution with the features you care most:
 
 ```bash
-npm run create
+npm run config
 ```
 
 You'll be prompted to configure the different aspects of the solution, such as:
