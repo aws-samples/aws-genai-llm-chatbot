@@ -1,25 +1,33 @@
-import { HashRouter, BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { useContext } from "react";
+import {
+  BrowserRouter,
+  HashRouter,
+  Outlet,
+  Route,
+  Routes,
+} from "react-router-dom";
+import { AppContext } from "./common/app-context";
 import GlobalHeader from "./components/global-header";
-import Dashboard from "./pages/rag/dashboard/dashboard";
-import NotFound from "./pages/not-found";
-import Workspaces from "./pages/rag/workspaces/workspaces";
-import Engines from "./pages/rag/engines/engines";
-import CreateWorkspace from "./pages/rag/create-workspace/create-workspace";
-import Embeddings from "./pages/rag/embeddings/embeddings";
-import CrossEncoders from "./pages/rag/cross-encoders/cross-encoders";
-import Welcome from "./pages/welcome";
-import Playground from "./pages/chatbot/playground/playground";
 import Models from "./pages/chatbot/models/models";
-import WorkspacePane from "./pages/rag/workspace/workspace";
-import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
-import AddData from "./pages/rag/add-data/add-data";
-import "./styles/app.scss";
 import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
+import Playground from "./pages/chatbot/playground/playground";
+import NotFound from "./pages/not-found";
+import AddData from "./pages/rag/add-data/add-data";
+import CreateWorkspace from "./pages/rag/create-workspace/create-workspace";
+import CrossEncoders from "./pages/rag/cross-encoders/cross-encoders";
+import Dashboard from "./pages/rag/dashboard/dashboard";
+import Embeddings from "./pages/rag/embeddings/embeddings";
+import Engines from "./pages/rag/engines/engines";
+import SemanticSearch from "./pages/rag/semantic-search/semantic-search";
 import RssFeed from "./pages/rag/workspace/rss-feed";
-import * as InfraConfig from '../../../../bin/config.json';
+import WorkspacePane from "./pages/rag/workspace/workspace";
+import Workspaces from "./pages/rag/workspaces/workspaces";
+import Welcome from "./pages/welcome";
+import "./styles/app.scss";
 
 function App() {
-  const Router = InfraConfig.privateWebsite ? HashRouter : BrowserRouter;
+  const appContext = useContext(AppContext);
+  const Router = appContext?.config.privateWebsite ? HashRouter : BrowserRouter;
 
   return (
     <div style={{ height: "100%" }}>
@@ -56,7 +64,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-      </Router>  
+      </Router>
     </div>
   );
 }

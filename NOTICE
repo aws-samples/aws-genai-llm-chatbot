@@ -363,7 +363,7 @@ SOFTWARE.
 
 The following Python packages may be included in this product:
 
-- langchain==0.0.331
+- langchain==0.1.5
 
 These packages each contain the following license and notice below:
 
