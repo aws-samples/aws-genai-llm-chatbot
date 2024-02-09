@@ -28,7 +28,7 @@ To have the right instance types and how to request them, read [Amazon SageMaker
 > NOTE: Make sure to review [IDEFICS models license sections](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct#license).
 
 To deploy a multimodal model, follow the [deploy instructions](../guide/deploy)
-and select one of the supported models (press Space to select/deselect) from the magic-create CLI step and deploy as instructed in the above section.
+and select one of the supported models (press Space to select/deselect) from the magic-config CLI step and deploy as instructed in the above section.
 
 > ⚠️ NOTE ⚠️ Amazon SageMaker are billed by the hour. Be aware of not letting this model run unused to avoid unnecessary costs.
 
