@@ -1,6 +1,6 @@
 # Private Chatbot
 
-Allows the deployment of a private chatbot via the 'npm run create' CLI setup.
+Allows the deployment of a private chatbot via the 'npm run config' CLI setup.
 
 - VPC only accessible website with an Application Load Balancer in front of an S3 hosted website.
 - Private Appsync APIs and Web Sockets 
@@ -13,7 +13,7 @@ Allows the deployment of a private chatbot via the 'npm run create' CLI setup.
 1. [AWS Private CA issued ACM certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-private.html) for your chosen domain. (i.e. chatbot.example.org)
 2. A Route 53 [Private Hosted Zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-private.html) (i.e. for example.org)
 
-### During 'npm run create'
+### During 'npm run config'
 ```shellsession
 $ ✔ Do you want to deploy a private website? I.e only accessible in VPC (Y/n) · 
 true

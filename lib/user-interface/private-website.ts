@@ -1,25 +1,14 @@
-import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
 import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
-import * as cf from "aws-cdk-lib/aws-cloudfront";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as route53 from "aws-cdk-lib/aws-route53";
-import { AwsCustomResource, AwsSdkCall, PhysicalResourceId } from "aws-cdk-lib/custom-resources";
+import { AwsCustomResource, AwsSdkCall } from "aws-cdk-lib/custom-resources";
 import { IpTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
 import { Construct } from "constructs";
-import {
-  ExecSyncOptionsWithBufferEncoding,
-  execSync,
-} from "node:child_process";
-import * as path from "node:path";
 import { Shared } from "../shared";
 import { SystemConfig } from "../shared/types";
-import { Utils } from "../shared/utils";
 import { ChatBotApi } from "../chatbot-api";
 import { NagSuppressions } from "cdk-nag";
 
@@ -43,7 +32,7 @@ export class PrivateWebsite extends Construct {
 
     // PRIVATE WEBSITE 
     // REQUIRES: 
-    // 1. ACM Certificate ARN and Domain of website to be input during 'npm run create': 
+    // 1. ACM Certificate ARN and Domain of website to be input during 'npm run config': 
     //    "privateWebsite" : true,
     //    "certificate" : "arn:aws:acm:ap-southeast-2:1234567890:certificate/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX",
     //    "domain" : "sub.example.com"
@@ -51,19 +40,30 @@ export class PrivateWebsite extends Construct {
     // 3. In the PHZ, add an "A Record" that points to the Application Load Balancer Alias (https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-to-elb-load-balancer.html)
 
     // Retrieving S3 Endpoint Ips for ALB Target
-    const s3EndpointId = props.shared.s3vpcEndpoint.vpcEndpointId
     const vpc = props.shared.vpc
-    const vpcEndpointNetworkInterfaceIds = props.shared.s3vpcEndpoint.vpcEndpointNetworkInterfaceIds
 
     // First, retrieve the VPC Endpoint
     const vpcEndpointsCall: AwsSdkCall = {
         service: 'EC2',
         action: 'describeVpcEndpoints',
         parameters: {
-            VpcEndpointIds: [s3EndpointId]
+            Filters: [
+              {
+                Name: "vpc-id",
+                Values: [vpc.vpcId]
+              },
+              {
+                Name: "vpc-endpoint-type",
+                Values: ["Interface"]
+              },
+              {
+                Name: "service-name",
+                Values: [ec2.InterfaceVpcEndpointAwsService.S3.name]
+              }
+            ]
         },
         physicalResourceId: cdk.custom_resources.PhysicalResourceId.of('describeNetworkInterfaces'), //PhysicalResourceId.of('describeVpcEndpoints'), 
-        outputPaths: ['VpcEndpoints.0.NetworkInterfaceIds']
+        outputPaths: ['VpcEndpoints.0']
     }
 
     const vpcEndpoints = new AwsCustomResource(
@@ -79,12 +79,14 @@ export class PrivateWebsite extends Construct {
         }
     })
 
+    if (props.config.vpc?.createVpcEndpoints) {
+        vpcEndpoints.node.addDependency(props.shared.s3vpcEndpoint)
+    }
+
     // Then, retrieve the Private IP Addresses for each ENI of the VPC Endpoint
     let s3IPs: IpTarget[] = [];
     for (let index = 0; index < vpc.availabilityZones.length; index++) {
-        
-        const eniId = cdk.Fn.select(index, vpcEndpointNetworkInterfaceIds)
-        
+
         const sdkCall: AwsSdkCall = {
             service: 'EC2',
             action: 'describeNetworkInterfaces',
@@ -205,7 +207,7 @@ export class PrivateWebsite extends Construct {
             principals: [new iam.AnyPrincipal()],
             resources: [props.websiteBucket.bucketArn, `${props.websiteBucket.bucketArn}/*`],
             conditions: {
-                "StringEquals": { "aws:SourceVpce": s3EndpointId }
+                "StringEquals": { "aws:SourceVpce": vpcEndpoints.getResponseField(`VpcEndpoints.0.VpcEndpointId`) }
             }
         })
     );

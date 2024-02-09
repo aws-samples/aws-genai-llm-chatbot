@@ -156,7 +156,7 @@ export default function AppConfigured() {
             },
           }}
         >
-        <App />
+          <App />
         </Authenticator>
       </ThemeProvider>
     </AppContext.Provider>
