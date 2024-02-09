@@ -152,8 +152,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       api: chatBotApi,
       chatbotFilesBucket: chatBotApi.filesBucket,
       crossEncodersEnabled: props.config.rag.crossEncodingEnabled,
-      sagemakerEmbeddingsEnabled:
-        typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
+      sagemakerEmbeddingsEnabled: props.config.rag.enableEmbeddingModelsViaSagemaker,
     });
 
     /**

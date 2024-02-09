@@ -204,6 +204,15 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.enableRag || false,
     },
     {
+      type: "confirm",
+      name: "enableEmbeddingModelsViaSagemaker",
+      message: "Do you want to enable embedding models via SageMaker?",
+      initial: options.enableEmbeddingModelsViaSagemaker || false,
+      skip(): boolean {
+        return !(this as any).state.answers.enableRag;
+      },
+    },
+    {
       type: "multiselect",
       name: "ragsToEnable",
       hint: "SPACE to select, ENTER to confirm selection",
@@ -349,10 +358,13 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     llms: {
+      enableSagemakerModels: answers.enableSagemakerModels,
       sagemaker: answers.sagemakerModels,
     },
     rag: {
       enabled: answers.enableRag,
+      enableEmbeddingModelsViaSagemaker:
+        answers.enableEmbeddingModelsViaSagemaker,
       engines: {
         aurora: {
           enabled: answers.ragsToEnable.includes("aurora"),
@@ -367,6 +379,7 @@ async function processCreateOptions(options: any): Promise<void> {
           enterprise: false,
         },
       },
+      crossEncodingEnabled: answers.enableEmbeddingModelsViaSagemaker,
       embeddingsModels: [{}],
       crossEncoderModels: [{}],
     },
@@ -377,12 +390,24 @@ async function processCreateOptions(options: any): Promise<void> {
     models.defaultEmbedding = embeddingModels[0].name;
   }
 
-  config.rag.crossEncoderModels[0] = {
-    provider: "sagemaker",
-    name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-    default: true,
-  };
-  config.rag.embeddingsModels = embeddingModels;
+  if (answers.enableEmbeddingModelsViaSagemaker && answers.enableSagemakerModels) {
+    config.rag.crossEncoderModels[0] = {
+      provider: "sagemaker",
+      name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+      default: true,
+    };
+  } else {
+    config.rag.crossEncoderModels[0] = {
+      provider: "None",
+      name: "None",
+      default: true,
+    };
+  }
+  if (!config.rag.enableEmbeddingModelsViaSagemaker) {
+    config.rag.embeddingsModels = embeddingModels.filter(model => model.provider !== "sagemaker");
+  } else {
+    config.rag.embeddingsModels = embeddingModels;
+  }
   config.rag.embeddingsModels.forEach((m: any) => {
     if (m.name === models.defaultEmbedding) {
       m.default = true;

@@ -25,6 +25,7 @@ export function getConfig(): SystemConfig {
     },
     rag: {
       enabled: false,
+      enableEmbeddingModelsViaSagemaker: false,
       engines: {
         aurora: {
           enabled: false,
@@ -61,6 +62,7 @@ export function getConfig(): SystemConfig {
           dimensions: 1536,
         },
       ],
+      crossEncodingEnabled: false,
       crossEncoderModels: [
         {
           provider: "sagemaker",
@@ -68,7 +70,6 @@ export function getConfig(): SystemConfig {
           default: true,
         },
       ],
-      crossEncodingEnabled: false,
     },
   };
 }

@@ -88,6 +88,7 @@ export interface SystemConfig {
   };
   rag: {
     enabled: boolean;
+    enableEmbeddingModelsViaSagemaker: boolean;
     engines: {
       aurora: {
         enabled: boolean;
@@ -113,12 +114,12 @@ export interface SystemConfig {
       dimensions: number;
       default?: boolean;
     }[];
+    crossEncodingEnabled: boolean;
     crossEncoderModels: {
       provider: ModelProvider;
       name: string;
       default?: boolean;
     }[];
-    crossEncodingEnabled: boolean;
   };
 }
 
