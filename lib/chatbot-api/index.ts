@@ -31,9 +31,8 @@ export class ChatBotApi extends Construct {
   public readonly messagesTopic: sns.Topic;
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
-  public readonly userFeedbackTable: dynamodb.Table;
-  public readonly bySessionIdIndex: string;
   public readonly filesBucket: s3.Bucket;
+  public readonly userFeedbackBucket: s3.Bucket;
   public readonly graphqlApi: appsync.GraphqlApi;
 
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
@@ -89,8 +88,7 @@ export class ChatBotApi extends Construct {
       sessionsTable: chatTables.sessionsTable,
       byUserIdIndex: chatTables.byUserIdIndex,
       api,
-      userFeedbackTable: chatTables.userFeedbackTable,
-      bySessionIdIndex: chatTables.bySessionIdIndex
+      userFeedbackBucket: chatBuckets.userFeedbackBucket,
     });
 
     const realtimeBackend = new RealtimeGraphqlApiBackend(this, "Realtime", {
@@ -118,8 +116,7 @@ export class ChatBotApi extends Construct {
     this.messagesTopic = realtimeBackend.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
-    this.userFeedbackTable = chatTables.userFeedbackTable;
-    this.bySessionIdIndex = chatTables.bySessionIdIndex;
+    this.userFeedbackBucket = chatBuckets.userFeedbackBucket;
     this.filesBucket = chatBuckets.filesBucket;
     this.graphqlApi = api;
 

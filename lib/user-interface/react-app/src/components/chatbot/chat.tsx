@@ -3,6 +3,7 @@ import {
   ChatBotConfiguration,
   ChatBotHistoryItem,
   ChatBotMessageType,
+  FeedbackData,
 } from "./types";
 import { SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
@@ -81,15 +82,26 @@ export default function Chat(props: { sessionId?: string }) {
 
   const handleFeedback = (feedbackType: 'thumbsUp' | 'thumbsDown', idx: number, message: ChatBotHistoryItem) => {
     if (message.metadata.sessionId) {
-      addUserFeedback(message.metadata.sessionId as string, idx, feedbackType);
+      const prompt = messageHistory[idx - 1]?.content;
+      const completion = message.content;
+      const model = message.metadata.modelId;
+      const feedbackData: FeedbackData = {
+        sessionId: message.metadata.sessionId as string,
+        key: idx,
+        feedback: feedbackType,
+        prompt: prompt,
+        completion: completion,
+        model: model as string
+      };
+      addUserFeedback(feedbackData);
     }
   };
 
-  const addUserFeedback = async (sessionId: string, key: number, feedback: string) => {
+  const addUserFeedback = async (feedbackData: FeedbackData) => {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    await apiClient.userFeedback.addUserFeedback({sessionId, key, feedback});
+    await apiClient.userFeedback.addUserFeedback({feedbackData});
   };
 
   return (

@@ -14,6 +14,7 @@ import { Shared } from "../shared";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import { parse } from "graphql";
 import { readFileSync } from "fs";
+import * as s3 from "aws-cdk-lib/aws-s3";
 
 export interface ApiResolversProps {
   readonly shared: Shared;
@@ -22,8 +23,7 @@ export interface ApiResolversProps {
   readonly userPool: cognito.UserPool;
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
-  readonly userFeedbackTable: dynamodb.Table;
-  readonly bySessionIdIndex: string;
+  readonly userFeedbackBucket: s3.Bucket;
   readonly modelsParameter: ssm.StringParameter;
   readonly models: SageMakerModelEndpoint[];
   readonly api: appsync.GraphqlApi;
@@ -64,6 +64,7 @@ export class ApiResolvers extends Construct {
           API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
           SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
           SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
+          USER_FEEDBACK_BUCKET_NAME: props.userFeedbackBucket?.bucketName ?? "",
           UPLOAD_BUCKET_NAME: props.ragEngines?.uploadBucket?.bucketName ?? "",
           PROCESSING_BUCKET_NAME:
             props.ragEngines?.processingBucket?.bucketName ?? "",
@@ -257,6 +258,7 @@ export class ApiResolvers extends Construct {
       props.shared.configParameter.grantRead(apiHandler);
       props.modelsParameter.grantRead(apiHandler);
       props.sessionsTable.grantReadWriteData(apiHandler);
+      props.userFeedbackBucket.grantReadWrite(apiHandler);
       props.ragEngines?.uploadBucket.grantReadWrite(apiHandler);
       props.ragEngines?.processingBucket.grantReadWrite(apiHandler);
 

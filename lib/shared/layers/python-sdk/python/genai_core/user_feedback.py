@@ -1,36 +1,51 @@
 import os
 import uuid
 import boto3
+import json
+from pydantic import BaseModel
 from datetime import datetime
 
 dynamodb = boto3.resource("dynamodb")
+s3_client = boto3.client("s3")
 
-USER_FEEDBACK_TABLE_NAME = os.environ.get("USER_FEEDBACK_TABLE_NAME")
+USER_FEEDBACK_BUCKET_NAME = os.environ.get("USER_FEEDBACK_BUCKET_NAME")
 
-if USER_FEEDBACK_TABLE_NAME:
-    table = dynamodb.Table(USER_FEEDBACK_TABLE_NAME)
 
 def add_user_feedback(
-    session_id: str,
-    user_id: str,
+    sessionId: str,
     key: str,
-    feedback: str 
+    feedback: str,
+    prompt: str,
+    completion: str,
+    model: str,
+    userId: str
 ):
-    feedback_id = str(uuid.uuid4())
+    feedbackId = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-
+    
     item = {
-        "FeedbackId": feedback_id,
-        "SessionId": session_id,
-        "UserId": user_id,
-        "Key": key,
-        "Feedback": feedback,
-        "CreatedAt": timestamp
+        "feedbackId": feedbackId,
+        "sessionId": sessionId,
+        "userId": userId,
+        "key": key,
+        "prompt": prompt,
+        "completion": completion,
+        "model": model,
+        "feedback": feedback,
+        "createdAt": timestamp
     }
-
-    response = table.put_item(Item=item)
+    
+    response = s3_client.put_object(
+        Bucket=USER_FEEDBACK_BUCKET_NAME,
+        Key=feedbackId,
+        Body=json.dumps(item),
+        ContentType="application/json",
+        StorageClass='STANDARD_IA',
+    )
     print(response)
-
+    
     return {
-        "id": feedback_id
+        "feedback_id": feedbackId
     }
+    
+    

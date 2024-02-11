@@ -5,6 +5,7 @@ import { NagSuppressions } from "cdk-nag";
 
 export class ChatBotS3Buckets extends Construct {
   public readonly filesBucket: s3.Bucket;
+  public readonly userFeedbackBucket: s3.Bucket;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -39,7 +40,31 @@ export class ChatBotS3Buckets extends Construct {
       ],
     });
 
+    const userFeedbackBucket = new s3.Bucket(this, "UserFeedbackBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      transferAcceleration: true,
+      enforceSSL: true,
+      serverAccessLogsBucket: logsBucket,
+      cors: [
+        {
+          allowedHeaders: ["*"],
+          allowedMethods: [
+            s3.HttpMethods.PUT,
+            s3.HttpMethods.POST,
+            s3.HttpMethods.GET,
+            s3.HttpMethods.HEAD,
+          ],
+          allowedOrigins: ["*"],
+          exposedHeaders: ["ETag"],
+          maxAge: 3000,
+        },
+      ],
+    });
+
     this.filesBucket = filesBucket;
+    this.userFeedbackBucket = userFeedbackBucket;
 
     /**
      * CDK NAG suppression
