@@ -1,18 +1,16 @@
-import { ApiResult, CrossEncoderModelItem } from "../types";
-import { ApiClientBase } from "./api-client-base";
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
+import { listCrossEncoders, rankPassages } from "../../graphql/queries";
+import { ListCrossEncodersQuery, RankPassagesQuery } from "../../API";
 
-export class CrossEncodersClient extends ApiClientBase {
-  async getModels(): Promise<ApiResult<CrossEncoderModelItem[]>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/cross-encoders/models"), {
-        headers,
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+export class CrossEncodersClient {
+  async getModels(): Promise<
+    GraphQLResult<GraphQLQuery<ListCrossEncodersQuery>>
+  > {
+    const result = await API.graphql<GraphQLQuery<ListCrossEncodersQuery>>({
+      query: listCrossEncoders,
+    });
+    return result;
   }
 
   async getRanking(
@@ -20,18 +18,18 @@ export class CrossEncodersClient extends ApiClientBase {
     model: string,
     input: string,
     passages: string[]
-  ): Promise<ApiResult<number[]>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(this.getApiUrl("/cross-encoders"), {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ provider, model, input, passages }),
-      });
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<RankPassagesQuery>>> {
+    const result = await API.graphql<GraphQLQuery<RankPassagesQuery>>({
+      query: rankPassages,
+      variables: {
+        input: {
+          model: model,
+          passages: passages,
+          provider: provider,
+          reference: input,
+        },
+      },
+    });
+    return result;
   }
 }

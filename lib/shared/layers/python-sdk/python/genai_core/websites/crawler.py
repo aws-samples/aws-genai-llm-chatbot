@@ -32,7 +32,8 @@ def crawl_urls(
         if len(priority_queue) == 0:
             break
 
-        priority_queue = sorted(priority_queue, key=lambda val: val["priority"])
+        priority_queue = sorted(
+            priority_queue, key=lambda val: val["priority"])
         current = priority_queue.pop(0)
         current_url = current["url"]
         current_priority = current["priority"]
@@ -97,12 +98,17 @@ def crawl_urls(
 
 
 def parse_url(url: str):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+    }
+
     root_url_parse = urlparse(url)
     base_url = f"{root_url_parse.scheme}://{root_url_parse.netloc}"
 
-    response = requests.get(url, timeout=20)
-    if response.headers["Content-Type"] != "text/html":
-        raise Exception(f"Invalid content type {response.headers['Content-Type']}")
+    response = requests.get(url, headers=headers, timeout=20)
+    if "text/html" not in response.headers["Content-Type"]:
+        raise Exception(
+            f"Invalid content type {response.headers['Content-Type']}")
     soup = BeautifulSoup(response.content, "html.parser")
     content = soup.text
     content = re.sub(r"[ \n]+", " ", content)

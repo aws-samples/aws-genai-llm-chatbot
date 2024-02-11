@@ -14,15 +14,15 @@ import { useContext, useState } from "react";
 import { AddDataData } from "./types";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { Utils } from "../../../common/utils";
 import { FileUploader } from "../../../common/file-uploader";
 import { useNavigate } from "react-router-dom";
+import { Workspace } from "../../../API";
 
 export interface DataFileUploadProps {
   data: AddDataData;
   validate: () => boolean;
-  selectedWorkspace?: WorkspaceItem;
+  selectedWorkspace?: Workspace;
 }
 
 const fileExtensions = new Set([
@@ -111,19 +111,23 @@ export default function DataFileUpload(props: DataFileUploadProps) {
       setCurrentFileName(file.name);
       let fileUploaded = 0;
 
-      const result = await apiClient.documents.presignedFileUploadPost(
-        props.data.workspace?.value,
-        file.name
-      );
+      try {
+        const result = await apiClient.documents.presignedFileUploadPost(
+          props.data.workspace?.value,
+          file.name
+        );
 
-      if (ResultValue.ok(result)) {
         try {
-          await uploader.upload(file, result.data, (uploaded: number) => {
-            fileUploaded = uploaded;
-            const totalUploaded = fileUploaded + accumulator;
-            const percent = Math.round((totalUploaded / totalSize) * 100);
-            setUploadProgress(percent);
-          });
+          await uploader.upload(
+            file,
+            result.data!.getUploadFileURL!,
+            (uploaded: number) => {
+              fileUploaded = uploaded;
+              const totalUploaded = fileUploaded + accumulator;
+              const percent = Math.round((totalUploaded / totalSize) * 100);
+              setUploadProgress(percent);
+            }
+          );
 
           accumulator += file.size;
           setUploadingIndex(Math.min(filesToUpload.length, i + 2));
@@ -133,8 +137,9 @@ export default function DataFileUpload(props: DataFileUploadProps) {
           hasError = true;
           break;
         }
-      } else {
-        setGlobalError(Utils.getErrorMessage(result));
+      } catch (error: any) {
+        setGlobalError(Utils.getErrorMessage(error));
+        console.error(Utils.getErrorMessage(error));
         setUploadingStatus("error");
         hasError = true;
         break;

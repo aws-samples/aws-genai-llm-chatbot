@@ -13,7 +13,6 @@ import { ApiClient } from "../../../common/api-client/api-client";
 import { AppContext } from "../../../common/app-context";
 import { TextHelper } from "../../../common/helpers/text-helper";
 import { PropertyFilterI18nStrings } from "../../../common/i18n/property-filter-i18n-strings";
-import { ModelItem, ResultValue } from "../../../common/types";
 import { TableEmptyState } from "../../../components/table-empty-state";
 import { TableNoMatchState } from "../../../components/table-no-match-state";
 import {
@@ -21,11 +20,13 @@ import {
   ModelsColumnFilteringProperties,
 } from "./column-definitions";
 import { CHATBOT_NAME } from "../../../common/constants";
+import { Model } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 export default function Models() {
   const onFollow = useOnFollow();
   const appContext = useContext(AppContext);
-  const [models, setModels] = useState<ModelItem[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const {
     items,
@@ -60,11 +61,13 @@ export default function Models() {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.models.getModels();
-    if (ResultValue.ok(result)) {
-      setModels(result.data);
-    }
+    try {
+      const result = await apiClient.models.getModels();
 
+      setModels(result.data!.listModels);
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
+    }
     setLoading(false);
   }, [appContext]);
 

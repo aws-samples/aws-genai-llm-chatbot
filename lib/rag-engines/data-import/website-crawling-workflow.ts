@@ -13,6 +13,7 @@ import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
+import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface WebsiteCrawlingWorkflowProps {
   readonly config: SystemConfig;
@@ -220,10 +221,19 @@ export class WebsiteCrawlingWorkflow extends Construct {
       .when(sfn.Condition.booleanEquals("$.done", false), parserStep)
       .otherwise(setProcessed);
 
+    const logGroup = new logs.LogGroup(this, "WebsiteCrawlingSMLogGroup", {
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
     const stateMachine = new sfn.StateMachine(this, "WebsiteCrawling", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),
       timeout: cdk.Duration.minutes(120),
       comment: "Website crawling workflow",
+      tracingEnabled: true,
+      logs: {
+        destination: logGroup,
+        level: sfn.LogLevel.ALL,
+      },
     });
 
     this.stateMachine = stateMachine;

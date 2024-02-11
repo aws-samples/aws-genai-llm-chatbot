@@ -3,11 +3,13 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import * as path from "path";
 import { Layer } from "../layer";
-import { SystemConfig } from "./types";
+import { SystemConfig, SupportedBedrockRegion } from "./types";
 import { SharedAssetBundler } from "./shared-asset-bundler";
+import { NagSuppressions } from "cdk-nag";
 
 const pythonRuntime = lambda.Runtime.PYTHON_3_11;
 const lambdaArchitecture = lambda.Architecture.X86_64;
@@ -28,6 +30,7 @@ export class Shared extends Construct {
   readonly commonLayer: lambda.ILayerVersion;
   readonly powerToolsLayer: lambda.ILayerVersion;
   readonly sharedCode: SharedAssetBundler;
+  readonly s3vpcEndpoint: ec2.InterfaceVpcEndpoint;
 
   constructor(scope: Construct, id: string, props: SharedProps) {
     super(scope, id);
@@ -61,6 +64,13 @@ export class Shared extends Construct {
           },
         ],
       });
+      const logGroup = new logs.LogGroup(this, "FLowLogsLogGroup", {
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      });
+      new ec2.FlowLog(this, "FlowLog", {
+        resourceType: ec2.FlowLogResourceType.fromVpc(vpc),
+        destination: ec2.FlowLogDestination.toCloudWatchLogs(logGroup),
+      });
     } else {
       vpc = ec2.Vpc.fromLookup(this, "VPC", {
         vpcId: props.config.vpc.vpcId,
@@ -81,6 +91,8 @@ export class Shared extends Construct {
         privateDnsEnabled: true,
         open: true,
       });
+      
+      this.s3vpcEndpoint = s3vpcEndpoint;
 
       s3vpcEndpoint.node.addDependency(s3GatewayEndpoint);
 
@@ -100,6 +112,87 @@ export class Shared extends Construct {
         service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
         open: true,
       });
+
+      if (props.config.privateWebsite) {
+        // Create VPC Endpoint for AppSync
+        vpc.addInterfaceEndpoint("AppSyncEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.APP_SYNC,
+        });
+
+        // Create VPC Endpoint for Lambda
+        vpc.addInterfaceEndpoint("LambdaEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.LAMBDA,
+        });
+
+        // Create VPC Endpoint for SNS
+        vpc.addInterfaceEndpoint("SNSEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.SNS,
+        });
+
+        // Create VPC Endpoint for Step Functions
+        vpc.addInterfaceEndpoint("StepFunctionsEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
+        });
+
+        // Create VPC Endpoint for SSM
+        vpc.addInterfaceEndpoint("SSMEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.SSM,
+        });
+
+        // Create VPC Endpoint for KMS
+        vpc.addInterfaceEndpoint("KMSEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.KMS,
+        });
+
+        // Create VPC Endpoint for Bedrock
+        if (props.config.bedrock?.enabled && Object.values(SupportedBedrockRegion).some(val => val === cdk.Stack.of(this).region)){
+          if (props.config.bedrock?.region !== cdk.Stack.of(this).region) {
+            throw new Error(`Bedrock is only supported in the same region as the stack when using private website (Bedrock region: ${props.config.bedrock?.region}, Stack region: ${cdk.Stack.of(this).region}).`);
+          }
+          vpc.addInterfaceEndpoint("BedrockEndpoint", {
+            service: new ec2.InterfaceVpcEndpointService('com.amazonaws.'+cdk.Aws.REGION+'.bedrock-runtime', 443),
+            privateDnsEnabled: true
+          });
+        }
+
+        // Create VPC Endpoint for Kendra
+        if (props.config.rag.engines.kendra.enabled){
+          vpc.addInterfaceEndpoint("KendraEndpoint", {
+              service: ec2.InterfaceVpcEndpointAwsService.KENDRA,
+          });
+        }
+
+        // Create VPC Endpoint for RDS/Aurora
+        if (props.config.rag.engines.aurora.enabled) {
+          vpc.addInterfaceEndpoint("RDSEndpoint", {
+              service: ec2.InterfaceVpcEndpointAwsService.RDS,
+          });
+
+          // Create VPC Endpoint for RDS Data
+          vpc.addInterfaceEndpoint("RDSDataEndpoint", {
+              service: ec2.InterfaceVpcEndpointAwsService.RDS_DATA,
+          });
+        }
+
+        // Create VPC Endpoints needed for Aurora & Opensearch Indexing
+        if (props.config.rag.engines.aurora.enabled ||
+          props.config.rag.engines.opensearch.enabled) {
+          // Create VPC Endpoint for ECS
+          vpc.addInterfaceEndpoint("ECSEndpoint", {
+              service: ec2.InterfaceVpcEndpointAwsService.ECS,
+          });
+
+          // Create VPC Endpoint for Batch
+          vpc.addInterfaceEndpoint("BatchEndpoint", {
+              service: ec2.InterfaceVpcEndpointAwsService.BATCH,
+          });
+
+          // Create VPC Endpoint for EC2
+          vpc.addInterfaceEndpoint("EC2Endpoint", {
+              service: ec2.InterfaceVpcEndpointAwsService.EC2,
+          });
+        }
+      }
     }
 
     const configParameter = new ssm.StringParameter(this, "Config", {
@@ -155,5 +248,15 @@ export class Shared extends Construct {
     new cdk.CfnOutput(this, "ApiKeysSecretName", {
       value: apiKeysSecret.secretName,
     });
+
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressions(xOriginVerifySecret, [
+      { id: "AwsSolutions-SMG4", reason: "Secret is generated by CDK." },
+    ]);
+    NagSuppressions.addResourceSuppressions(apiKeysSecret, [
+      { id: "AwsSolutions-SMG4", reason: "Secret value is blank." },
+    ]);
   }
 }

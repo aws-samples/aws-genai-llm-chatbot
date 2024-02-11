@@ -1,9 +1,5 @@
-import {
-  ModelItem,
-  LoadingStatus,
-  WorkspaceItem,
-  ModelInterface,
-} from "../../common/types";
+import { Model, Workspace } from "../../API";
+import { LoadingStatus, ModelInterface } from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
 
 export interface ChatBotConfiguration {
@@ -17,10 +13,10 @@ export interface ChatBotConfiguration {
 
 export interface ChatInputState {
   value: string;
-  workspaces?: WorkspaceItem[];
-  models?: ModelItem[];
+  workspaces?: Workspace[];
+  models?: Model[];
   selectedModel: SelectProps.Option | null;
-  selectedModelMetadata: ModelItem | null;
+  selectedModelMetadata: Model | null;
   selectedWorkspace: SelectProps.Option | null;
   modelsStatus: LoadingStatus;
   workspacesStatus: LoadingStatus;
@@ -61,6 +57,9 @@ export interface ImageFile {
 export interface ChatBotHeartbeatRequest {
   action: ChatBotAction.Heartbeat;
   modelInterface: ModelInterface;
+  data: {
+    sessionId: string;
+  };
 }
 
 export interface ChatBotRunRequest {

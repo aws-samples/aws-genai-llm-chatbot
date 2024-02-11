@@ -1,6 +1,7 @@
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as oss from "aws-cdk-lib/aws-opensearchserverless";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
@@ -44,9 +45,11 @@ export class OpenSearchVector extends Construct {
 
     const cfnVpcEndpoint = new oss.CfnVpcEndpoint(this, "VpcEndpoint", {
       name: Utils.getName(props.config, "genaichatbot-vpce"),
-      subnetIds: props.shared.vpc.privateSubnets.map(
-        (subnet) => subnet.subnetId
-      ),
+      // Make sure the subnets are not in the same availability zone.
+      subnetIds: props.shared.vpc.selectSubnets({
+        onePerAz: true,
+        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+      }).subnetIds,
       vpcId: props.shared.vpc.vpcId,
       securityGroupIds: [sg.securityGroupId],
     });
@@ -101,7 +104,7 @@ export class OpenSearchVector extends Construct {
 
     const createWorkflow = new CreateOpenSearchWorkspace(
       this,
-      "CreateAuroraWorkspace",
+      "CreateOpenSearchWorkspace",
       {
         config: props.config,
         shared: props.shared,

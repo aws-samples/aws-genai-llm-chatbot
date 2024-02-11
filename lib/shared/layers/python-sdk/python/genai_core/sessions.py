@@ -25,20 +25,37 @@ def get_session(session_id, user_id):
 
 
 def list_sessions_by_user_id(user_id):
-    response = {}
+    items = []
     try:
-        response = table.query(
-            KeyConditionExpression="UserId = :user_id",
-            ExpressionAttributeValues={":user_id": user_id},
-            IndexName=SESSIONS_BY_USER_ID_INDEX_NAME,
-        )
+        last_evaluated_key = None
+        while True:
+            if last_evaluated_key:
+                response = table.query(
+                    KeyConditionExpression="UserId = :user_id",
+                    ExpressionAttributeValues={":user_id": user_id},
+                    IndexName=SESSIONS_BY_USER_ID_INDEX_NAME,
+                    ExclusiveStartKey=last_evaluated_key,
+                )
+            else:
+                response = table.query(
+                    KeyConditionExpression="UserId = :user_id",
+                    ExpressionAttributeValues={":user_id": user_id},
+                    IndexName=SESSIONS_BY_USER_ID_INDEX_NAME,
+                )
+
+            items.extend(response.get("Items", []))
+
+            last_evaluated_key = response.get("LastEvaluatedKey")
+            if not last_evaluated_key:
+                break
+
     except ClientError as error:
         if error.response["Error"]["Code"] == "ResourceNotFoundException":
             print("No record found for user id: %s", user_id)
         else:
             print(error)
 
-    return response.get("Items", [])
+    return items
 
 
 def delete_session(session_id, user_id):
@@ -50,9 +67,9 @@ def delete_session(session_id, user_id):
         else:
             print(error)
 
-        return {"deleted": False}
+        return {"id": session_id, "deleted": False}
 
-    return {"deleted": True}
+    return {"id": session_id, "deleted": True}
 
 
 def delete_user_sessions(user_id):

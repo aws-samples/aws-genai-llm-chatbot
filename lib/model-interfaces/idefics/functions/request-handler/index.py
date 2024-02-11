@@ -24,7 +24,6 @@ logger = Logger()
 
 
 def handle_run(record):
-    connection_id = record["connectionId"]
     user_id = record["userId"]
     data = record["data"]
     provider = data["provider"]
@@ -139,7 +138,6 @@ def handle_run(record):
         {
             "type": "text",
             "action": ChatbotAction.FINAL_RESPONSE.value,
-            "connectionId": connection_id,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "userId": user_id,
             "data": response,
@@ -165,7 +163,6 @@ def handle_failed_records(records):
         message: dict = json.loads(payload)
         detail: dict = json.loads(message["Message"])
         logger.info(detail)
-        connection_id = detail["connectionId"]
         user_id = detail["userId"]
         data = detail.get("data", {})
         session_id = data.get("sessionId", "")
@@ -174,7 +171,6 @@ def handle_failed_records(records):
             {
                 "type": "text",
                 "action": ChatbotAction.FINAL_RESPONSE.value,
-                "connectionId": connection_id,
                 "userId": user_id,
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {

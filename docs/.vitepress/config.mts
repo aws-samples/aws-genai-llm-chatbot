@@ -7,25 +7,51 @@ export default defineConfig({
   base: "/aws-genai-llm-chatbot/",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    search: {
+      provider: 'local'
+    },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/aws-samples/aws-genai-llm-chatbot' }
     ],
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Guide', link: '/guide/getting-started' }
+      { text: 'About', link: '/about/welcome' },
+      {
+        text: 'Guide',
+        items: [
+          { text: 'Deploy', link: '/guide/deploy' },
+          { text: 'Developer Guide', link: '/guide/developers' },
+        ]
+      },
+      { text: 'Documentation', link: '/documentation/model-requirements' }
     ],
     sidebar: [
-      {
-        text: 'Getting Started',
-        items: [
-          { text: 'Welcome', link: '/guide/getting-started' }
+      { text: 'About', items: [
+          { text: 'The Project', link: '/about/welcome' },
+          { text: 'Features', link: '/about/features' },
+          { text: 'Architecture', link: '/about/architecture' },
+          { text: 'Authors & Credits', link: '/about/authors' },
+          { text: 'License Information', link: '/about/license' },
         ]
       },
       {
-        text: 'Example',
+        text: 'Guide',
         items: [
-          { text: 'Lipsum', link: '/guide/lipsum' },
-          { text: 'Lipsum 2', link: '/guide/lipsum2' }
+          { text: 'Deploy', link: '/guide/deploy' },
+          { text: 'Developer Guide', link: '/guide/developers' }
+        ]
+      },
+      {
+        text: 'Documentation',
+        items: [
+          { text: 'Private Chatbot', link: '/documentation/private-chatbot' },
+          { text: 'Model Requirements', link: '/documentation/model-requirements' },
+          { text: 'Self-hosted models', link: '/documentation/self-hosted-models' },
+          { text: 'Inference Script', link: '/documentation/inference-script' },
+          { text: 'Document Retrieval', link: '/documentation/retriever' },
+          { text: 'AppSync', link: '/documentation/appsync' },
+          { text: 'Security', link: '/documentation/vulnerability-scanning' },
+          { text: 'Precautions', link: '/documentation/precautions' }
         ]
       }
     ],

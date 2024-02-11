@@ -1,123 +1,117 @@
+import { API } from "aws-amplify";
+import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
 import {
-  AddDocumentResult,
-  ApiResult,
-  DocumentResult,
-  DocumentSubscriptionToggleResult,
-  FileUploadItem,
-  RagDocumentType,
-} from "../types";
-import { ApiClientBase } from "./api-client-base";
+  getDocument,
+  listDocuments,
+  getUploadFileURL,
+  getRSSPosts,
+} from "../../graphql/queries";
+import {
+  addQnADocument,
+  addRssFeed,
+  addTextDocument,
+  addWebsite,
+  setDocumentSubscriptionStatus,
+} from "../../graphql/mutations";
+import {
+  AddQnADocumentMutation,
+  AddRssFeedMutation,
+  AddTextDocumentMutation,
+  AddWebsiteMutation,
+  SetDocumentSubscriptionStatusMutation,
+  GetDocumentQuery,
+  ListDocumentsQuery,
+  GetRSSPostsQuery,
+  GetUploadFileURLQuery,
+  UpdateRssFeedMutation,
+} from "../../API";
+import { RagDocumentType } from "../types";
 
-export class DocumentsClient extends ApiClientBase {
+export class DocumentsClient {
   async presignedFileUploadPost(
     workspaceId: string,
     fileName: string
-  ): Promise<ApiResult<FileUploadItem>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/file-upload`),
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ fileName }),
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<GetUploadFileURLQuery>>> {
+    const result = API.graphql<GraphQLQuery<GetUploadFileURLQuery>>({
+      query: getUploadFileURL,
+      variables: {
+        input: {
+          workspaceId,
+          fileName,
+        },
+      },
+    });
+    return result;
   }
 
   async getDocuments(
     workspaceId: string,
     documentType: RagDocumentType,
     lastDocumentId?: string
-  ): Promise<ApiResult<DocumentResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        lastDocumentId
-          ? this.getApiUrl(
-              `/workspaces/${workspaceId}/documents/${documentType}?lastDocumentId=${lastDocumentId}`
-            )
-          : this.getApiUrl(
-              `/workspaces/${workspaceId}/documents/${documentType}`
-            ),
-        {
-          headers,
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<ListDocumentsQuery>>> {
+    const result = API.graphql<GraphQLQuery<ListDocumentsQuery>>({
+      query: listDocuments,
+      variables: {
+        input: {
+          workspaceId,
+          documentType,
+          lastDocumentId,
+        },
+      },
+    });
+    return result;
   }
 
   async getDocumentDetails(
     workspaceId: string,
     documentId: string
-  ): Promise<ApiResult<DocumentResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl(
-          `/workspaces/${workspaceId}/documents/${documentId}/detail`
-        ),
-        {
-          headers,
-        }
-      );
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<GetDocumentQuery>>> {
+    const result = API.graphql<GraphQLQuery<GetDocumentQuery>>({
+      query: getDocument,
+      variables: {
+        input: {
+          workspaceId,
+          documentId,
+        },
+      },
+    });
+    return result;
   }
 
   async addTextDocument(
     workspaceId: string,
     title: string,
     content: string
-  ): Promise<ApiResult<AddDocumentResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/text`),
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ title, content }),
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<AddTextDocumentMutation>>> {
+    const result = API.graphql<GraphQLQuery<AddTextDocumentMutation>>({
+      query: addTextDocument,
+      variables: {
+        input: {
+          workspaceId,
+          title,
+          content,
+        },
+      },
+    });
+    return result;
   }
 
   async addQnADocument(
     workspaceId: string,
     question: string,
     answer: string
-  ): Promise<ApiResult<AddDocumentResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/qna`),
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ question, answer }),
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<AddQnADocumentMutation>>> {
+    const result = API.graphql<GraphQLQuery<AddQnADocumentMutation>>({
+      query: addQnADocument,
+      variables: {
+        input: {
+          workspaceId,
+          question,
+          answer,
+        },
+      },
+    });
+    return result;
   }
 
   async addWebsiteDocument(
@@ -126,22 +120,20 @@ export class DocumentsClient extends ApiClientBase {
     address: string,
     followLinks: boolean,
     limit: number
-  ): Promise<ApiResult<AddDocumentResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/website`),
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ sitemap, address, followLinks, limit }),
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<AddWebsiteMutation>>> {
+    const result = API.graphql<GraphQLQuery<AddWebsiteMutation>>({
+      query: addWebsite,
+      variables: {
+        input: {
+          workspaceId,
+          sitemap,
+          address,
+          followLinks,
+          limit,
+        },
+      },
+    });
+    return result;
   }
 
   async addRssFeedSubscription(
@@ -150,85 +142,80 @@ export class DocumentsClient extends ApiClientBase {
     title: string,
     limit: number,
     followLinks: boolean
-  ): Promise<ApiResult<AddDocumentResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const results = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/rssfeed`),
-        {
-          headers: headers,
-          method: "POST",
-          body: JSON.stringify({ address, title, limit, followLinks }),
-        }
-      );
-      return results.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<AddRssFeedMutation>>> {
+    const result = API.graphql<GraphQLQuery<AddRssFeedMutation>>({
+      query: addRssFeed,
+      variables: {
+        input: {
+          workspaceId,
+          address,
+          title,
+          limit,
+          followLinks,
+        },
+      },
+    });
+    return result;
   }
 
   async getRssSubscriptionPosts(
     workspaceId: string,
     feedId: string,
     lastDocumentId?: string
-  ): Promise<ApiResult<DocumentResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        lastDocumentId
-          ? this.getApiUrl(
-              `/workspaces/${workspaceId}/documents/${feedId}/posts?lastDocumentId=${lastDocumentId}`
-            )
-          : this.getApiUrl(
-              `/workspaces/${workspaceId}/documents/${feedId}/posts`
-            ),
-        {
-          headers,
-        }
-      );
-
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<GetRSSPostsQuery>>> {
+    const result = API.graphql<GraphQLQuery<GetRSSPostsQuery>>({
+      query: getRSSPosts,
+      variables: {
+        input: {
+          workspaceId,
+          documentId: feedId,
+          lastDocumentId,
+        },
+      },
+    });
+    return result;
   }
 
   async disableRssSubscription(
     workspaceId: string,
     feedId: string
-  ): Promise<ApiResult<DocumentSubscriptionToggleResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const results = await fetch(
-        this.getApiUrl(
-          `/workspaces/${workspaceId}/documents/${feedId}/disable`
-        ),
-        {
-          headers: headers,
-        }
-      );
-      return results.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<
+    GraphQLResult<GraphQLQuery<SetDocumentSubscriptionStatusMutation>>
+  > {
+    const result = API.graphql<
+      GraphQLQuery<SetDocumentSubscriptionStatusMutation>
+    >({
+      query: setDocumentSubscriptionStatus,
+      variables: {
+        input: {
+          workspaceId,
+          documentId: feedId,
+          status: "disabled",
+        },
+      },
+    });
+    return result;
   }
 
   async enableRssSubscription(
     workspaceId: string,
     feedId: string
-  ): Promise<ApiResult<DocumentSubscriptionToggleResult>> {
-    try {
-      const headers = await this.getHeaders();
-      const results = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}/enable`),
-        {
-          headers: headers,
-        }
-      );
-      return results.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<
+    GraphQLResult<GraphQLQuery<SetDocumentSubscriptionStatusMutation>>
+  > {
+    const result = API.graphql<
+      GraphQLQuery<SetDocumentSubscriptionStatusMutation>
+    >({
+      query: setDocumentSubscriptionStatus,
+      variables: {
+        input: {
+          workspaceId,
+          documentId: feedId,
+          status: "enabled",
+        },
+      },
+    });
+    return result;
   }
 
   async updateRssSubscriptionCrawler(
@@ -236,20 +223,18 @@ export class DocumentsClient extends ApiClientBase {
     feedId: string,
     followLinks: boolean,
     limit: number
-  ): Promise<ApiResult<string>> {
-    try {
-      const headers = await this.getHeaders();
-      const result = await fetch(
-        this.getApiUrl(`/workspaces/${workspaceId}/documents/${feedId}`),
-        {
-          method: "PATCH",
-          headers: headers,
-          body: JSON.stringify({ followLinks, limit, documentType: "rssfeed" }),
-        }
-      );
-      return result.json();
-    } catch (error) {
-      return this.error(error);
-    }
+  ): Promise<GraphQLResult<GraphQLQuery<UpdateRssFeedMutation>>> {
+    const result = API.graphql<GraphQLQuery<UpdateRssFeedMutation>>({
+      query: addRssFeed,
+      variables: {
+        input: {
+          workspaceId,
+          documentId: feedId,
+          followLinks,
+          limit,
+        },
+      },
+    });
+    return result;
   }
 }

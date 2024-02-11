@@ -1,5 +1,3 @@
-import { ApiErrorResult } from "./types";
-
 export class Utils {
   static isDevelopment() {
     return import.meta.env.MODE === "development";
@@ -80,11 +78,9 @@ export class Utils {
     return null;
   }
 
-  static getErrorMessage(error: ApiErrorResult) {
-    if (Array.isArray(error.message)) {
-      return error.message.join(", ");
-    } else if (typeof error.message === "string") {
-      return error.message;
+  static getErrorMessage(error: any) {
+    if (error.errors) {
+      return error.errors.map((e: any) => e.message).join(", ");
     }
 
     return "Unknown error";

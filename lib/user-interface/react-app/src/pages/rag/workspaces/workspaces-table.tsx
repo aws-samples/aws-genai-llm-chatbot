@@ -5,7 +5,6 @@ import {
 } from "@cloudscape-design/components";
 import { useCollection } from "@cloudscape-design/collection-hooks";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { ResultValue, WorkspaceItem } from "../../../common/types";
 import { TextHelper } from "../../../common/helpers/text-helper";
 import { TableEmptyState } from "../../../components/table-empty-state";
 import { TableNoMatchState } from "../../../components/table-no-match-state";
@@ -17,10 +16,12 @@ import {
 } from "./column-definitions";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
+import { Workspace } from "../../../API";
+import { Utils } from "../../../common/utils";
 
 export default function WorkspacesTable() {
   const appContext = useContext(AppContext);
-  const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const {
     items,
@@ -60,9 +61,12 @@ export default function WorkspacesTable() {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    const result = await apiClient.workspaces.getWorkspaces();
-    if (ResultValue.ok(result)) {
-      setWorkspaces(result.data);
+    try {
+      const result = await apiClient.workspaces.getWorkspaces();
+
+      setWorkspaces(result.data!.listWorkspaces);
+    } catch (error) {
+      console.error(Utils.getErrorMessage(error));
     }
 
     setLoading(false);

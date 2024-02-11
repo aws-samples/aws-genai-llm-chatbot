@@ -1,0 +1,351 @@
+# Workspaces
+
+input CreateWorkspaceAuroraInput {
+  name: String!
+  kind: String!
+  embeddingsModelProvider: String!
+  embeddingsModelName: String!
+  crossEncoderModelProvider: String!
+  crossEncoderModelName: String!
+  languages: [String!]!
+  metric: String!
+  index: Boolean!
+  hybridSearch: Boolean!
+  chunkingStrategy: String!
+  chunkSize: Int!
+  chunkOverlap: Int!
+}
+
+input CreateWorkspaceKendraInput {
+  name: String!
+  kind: String!
+  kendraIndexId: String!
+  useAllData: Boolean!
+}
+
+input CreateWorkspaceOpenSearchInput {
+  name: String!
+  kind: String!
+  embeddingsModelProvider: String!
+  embeddingsModelName: String!
+  crossEncoderModelProvider: String!
+  crossEncoderModelName: String!
+  languages: [String!]!
+  hybridSearch: Boolean!
+  chunkingStrategy: String!
+  chunkSize: Int!
+  chunkOverlap: Int!
+}
+
+input CalculateEmbeddingsInput {
+  provider: String!
+  model: String!
+  passages: [String]!
+}
+
+type CrawlerProperties @aws_cognito_user_pools {
+  followLinks: Boolean
+  limit: Int
+}
+
+type CrossEncoderData @aws_cognito_user_pools {
+  provider: String!
+  name: String!
+  default: Boolean!
+}
+
+type DeleteSessionResult @aws_cognito_user_pools {
+  id: String
+  deleted: Boolean!
+}
+
+type DetectedLanguage @aws_cognito_user_pools {
+  code: String!
+  score: Float!
+}
+
+type Document @aws_cognito_user_pools {
+  workspaceId: String!
+  id: String!
+  type: String!
+  subType: String
+  status: String
+  title: String
+  path: String
+  sizeInBytes: Int
+  vectors: Int
+  subDocuments: Int
+  crawlerProperties: CrawlerProperties
+  errors: [String!]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime
+  rssFeedId: String
+  rssLastCheckedAt: AWSDateTime
+}
+
+type DocumentResult @aws_cognito_user_pools {
+  workspaceId: String!
+  documentId: String!
+  status: String
+}
+
+input DocumentSubscriptionStatusInput {
+  workspaceId: String!
+  documentId: String!
+  status: String!
+}
+
+type DocumentsResult @aws_cognito_user_pools {
+  items: [Document]!
+  lastDocumentId: String
+}
+
+type Embedding @aws_cognito_user_pools {
+  passage: String
+  vector: [Float!]!
+}
+
+type EmbeddingModel @aws_cognito_user_pools {
+  provider: String!
+  name: String!
+  dimensions: Int!
+  default: Boolean
+}
+
+input FileUploadInput {
+  workspaceId: String!
+  fileName: String!
+}
+
+type FileUploadResult @aws_cognito_user_pools {
+  url: String!
+  fields: String
+}
+
+input GetDocumentInput {
+  workspaceId: String!
+  documentId: String!
+}
+
+input GetRSSPostsInput {
+  workspaceId: String!
+  documentId: String!
+  lastDocumentId: String
+}
+
+type KendraIndex @aws_cognito_user_pools {
+  id: String!
+  name: String!
+  external: Boolean!
+}
+
+input ListDocumentsInput {
+  workspaceId: String!
+  documentType: String!
+  lastDocumentId: String
+}
+
+type Model @aws_cognito_user_pools {
+  name: String!
+  provider: String!
+  interface: String!
+  ragSupported: Boolean!
+  inputModalities: [String!]!
+  outputModalities: [String!]!
+  streaming: Boolean!
+}
+
+type PassageRank @aws_cognito_user_pools {
+  score: Float!
+  passage: String!
+}
+
+input QnADocumentInput {
+  workspaceId: String!
+  question: String!
+  answer: String!
+}
+
+type RagEngine @aws_cognito_user_pools {
+  id: String!
+  name: String!
+  enabled: Boolean!
+}
+
+input RankPassagesInput {
+  provider: String!
+  model: String!
+  reference: String!
+  passages: [String]!
+}
+
+input RssFeedInput {
+  workspaceId: String!
+  address: String!
+  limit: Int!
+  title: String
+  followLinks: Boolean!
+}
+
+input SemanticSearchInput {
+  workspaceId: String!
+  query: String!
+}
+
+type SemanticSearchItem @aws_cognito_user_pools {
+  sources: [String]
+  chunkId: String
+  workspaceId: ID!
+  documentId: String
+  documentSubId: String
+  documentSubType: String
+  documentType: String!
+  path: String
+  language: String
+  title: String
+  content: String
+  contentComplement: String
+  vectorSearchScore: Float
+  keywordSearchScore: Float
+  score: Float
+}
+
+type SemanticSearchResult @aws_cognito_user_pools {
+  engine: String!
+  workspaceId: String!
+  queryLanguage: String
+  supportedLanguages: [String!]
+  detectedLanguages: [DetectedLanguage!]
+  items: [SemanticSearchItem!]
+  vectorSearchMetric: String
+  vectorSearchItems: [SemanticSearchItem!]
+  keywordSearchItems: [SemanticSearchItem!]
+}
+
+type Session @aws_cognito_user_pools {
+  id: String!
+  title: String
+  startTime: AWSDateTime!
+  history: [SessionHistoryItem]
+}
+
+type SessionHistoryItem @aws_cognito_user_pools {
+  type: String!
+  content: String!
+  metadata: String
+}
+
+input TextDocumentInput {
+  workspaceId: String!
+  title: String!
+  content: String!
+}
+
+input WebsiteInput {
+  workspaceId: String!
+  sitemap: Boolean!
+  address: String!
+  followLinks: Boolean!
+  limit: Int!
+}
+
+type Workspace @aws_cognito_user_pools {
+  id: String!
+  name: String!
+  formatVersion: Int
+  engine: String!
+  status: String
+  aossEngine: String
+  languages: [String]
+  hasIndex: Boolean
+  embeddingsModelProvider: String
+  embeddingsModelName: String
+  embeddingsModelDimensions: Int
+  crossEncoderModelName: String
+  crossEncoderModelProvider: String
+  metric: String
+  index: Boolean
+  hybridSearch: Boolean
+  chunkingStrategy: String
+  chunkSize: Int
+  chunkOverlap: Int
+  vectors: Int
+  documents: Int
+  sizeInBytes: Int
+  kendraIndexId: String
+  kendraIndexExternal: Boolean
+  kendraUseAllData: Boolean
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Channel @aws_iam @aws_cognito_user_pools {
+  data: String
+  sessionId: String
+  userId: String
+}
+
+type Mutation {
+  createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
+    @aws_cognito_user_pools
+  createOpenSearchWorkspace(input: CreateWorkspaceOpenSearchInput!): Workspace!
+    @aws_cognito_user_pools
+  createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
+    @aws_cognito_user_pools
+  startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools
+  deleteWorkspace(workspaceId: String!): Boolean @aws_cognito_user_pools
+  addTextDocument(input: TextDocumentInput!): DocumentResult
+    @aws_cognito_user_pools
+  addQnADocument(input: QnADocumentInput!): DocumentResult
+    @aws_cognito_user_pools
+  setDocumentSubscriptionStatus(
+    input: DocumentSubscriptionStatusInput!
+  ): DocumentResult @aws_cognito_user_pools
+  addWebsite(input: WebsiteInput!): DocumentResult @aws_cognito_user_pools
+  addRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
+  updateRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
+  deleteUserSessions: [DeleteSessionResult!] @aws_cognito_user_pools
+  deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
+  # Real-time
+  sendQuery(data: String): String @aws_cognito_user_pools
+  publishResponse(sessionId: String, userId: String, data: String): Channel
+    @aws_iam
+}
+
+type Query {
+  checkHealth: Boolean @aws_cognito_user_pools
+  getUploadFileURL(input: FileUploadInput!): FileUploadResult
+    @aws_cognito_user_pools
+  listModels: [Model!]! @aws_cognito_user_pools
+  listWorkspaces: [Workspace!]! @aws_cognito_user_pools
+  getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools
+  listRagEngines: [RagEngine!]! @aws_cognito_user_pools
+  performSemanticSearch(input: SemanticSearchInput!): SemanticSearchResult!
+    @aws_cognito_user_pools
+  listSessions: [Session!]! @aws_cognito_user_pools
+  listEmbeddingModels: [EmbeddingModel!]! @aws_cognito_user_pools
+  calculateEmbeddings(input: CalculateEmbeddingsInput!): [Embedding]!
+    @aws_cognito_user_pools
+  getSession(id: String!): Session @aws_cognito_user_pools
+  listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools
+  isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools
+  listDocuments(input: ListDocumentsInput!): DocumentsResult!
+    @aws_cognito_user_pools
+  getDocument(input: GetDocumentInput!): Document @aws_cognito_user_pools
+  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult @aws_cognito_user_pools
+  listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools
+  rankPassages(input: RankPassagesInput!): [PassageRank!]!
+    @aws_cognito_user_pools
+}
+
+type Subscription {
+  receiveMessages(sessionId: String): Channel
+    @aws_subscribe(mutations: ["publishResponse"])
+    @aws_cognito_user_pools
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

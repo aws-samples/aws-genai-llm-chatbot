@@ -2,6 +2,7 @@ import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
+import { NagSuppressions } from "cdk-nag";
 
 export class Authentication extends Construct {
   public readonly userPool: cognito.UserPool;
@@ -14,6 +15,8 @@ export class Authentication extends Construct {
     const userPool = new cognito.UserPool(this, "UserPool", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       selfSignUpEnabled: false,
+      mfa: cognito.Mfa.OPTIONAL,
+      advancedSecurityMode: cognito.AdvancedSecurityMode.ENFORCED,
       autoVerify: { email: true, phone: true },
       signInAliases: {
         email: true,
@@ -52,6 +55,10 @@ export class Authentication extends Construct {
       value: userPool.userPoolId,
     });
 
+    new cdk.CfnOutput(this, "IdentityPoolId", {
+      value: identityPool.identityPoolId,
+    });
+
     new cdk.CfnOutput(this, "UserPoolWebClientId", {
       value: userPoolClient.userPoolClientId,
     });
@@ -63,5 +70,17 @@ export class Authentication extends Construct {
         userPool.userPoolId
       }/users?region=${cdk.Stack.of(this).region}`,
     });
+
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressions(userPool, [
+      {
+        id: "AwsSolutions-COG1",
+        reason:
+          "Default password policy requires min length of 8, digits, lowercase characters, symbols and uppercase characters: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cognito.PasswordPolicy.html",
+      },
+      { id: "AwsSolutions-COG2", reason: "MFA not required for user usage." },
+    ]);
   }
 }
