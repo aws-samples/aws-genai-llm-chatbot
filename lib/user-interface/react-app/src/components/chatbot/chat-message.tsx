@@ -43,7 +43,7 @@ export default function ChatMessage(props: ChatMessageProps) {
   const [files, setFiles] = useState<ImageFile[]>([] as ImageFile[]);
   const [documentIndex, setDocumentIndex] = useState("0");
   const [promptIndex, setPromptIndex] = useState("0");
-  const [selectedIcon, setSelectedIcon] = useState<'thumbsUp' | 'thumbsDown' | null>(null);
+  const [selectedIcon, setSelectedIcon] = useState<1 | 0 | null>(null);
 
   useEffect(() => {
     const getSignedUrls = async () => {
@@ -275,21 +275,21 @@ export default function ChatMessage(props: ChatMessageProps) {
             }}
           />
           <div className={styles.thumbsContainer}>
-            {(selectedIcon === 'thumbsUp' || selectedIcon === null) && (
+            {(selectedIcon === 1 || selectedIcon === null) && (
               <FaThumbsUp
-                className={`${styles.thumbsIcon} ${styles.thumbsUp} ${selectedIcon === 'thumbsUp' ? styles.selected : ''}`}
+                className={`${styles.thumbsIcon} ${styles.thumbsUp} ${selectedIcon === 1 ? styles.selected : ''}`}
                 onClick={() => {
                   props.onThumbsUp();
-                  setSelectedIcon('thumbsUp');
+                  setSelectedIcon(1);
                 }}
               />
             )}
-            {(selectedIcon === 'thumbsDown' || selectedIcon === null) && (
+            {(selectedIcon === 0 || selectedIcon === null) && (
               <FaThumbsDown
-                className={`${styles.thumbsIcon} ${styles.thumbsDown} ${selectedIcon === 'thumbsDown' ? styles.selected : ''}`}
+                className={`${styles.thumbsIcon} ${styles.thumbsDown} ${selectedIcon === 0 ? styles.selected : ''}`}
                 onClick={() => {
                   props.onThumbsDown();
-                  setSelectedIcon('thumbsDown');
+                  setSelectedIcon(0);
                 }}
               />
             )}

@@ -151,7 +151,7 @@ export enum ChabotOutputModality {
 export interface FeedbackData {
   sessionId: string;
   key: number;
-  feedback: string;
+  feedback: number;
   prompt: string;
   completion: string;
   model: string;

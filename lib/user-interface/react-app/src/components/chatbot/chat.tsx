@@ -80,7 +80,7 @@ export default function Chat(props: { sessionId?: string }) {
     })();
   }, [appContext, props.sessionId]);
 
-  const handleFeedback = (feedbackType: 'thumbsUp' | 'thumbsDown', idx: number, message: ChatBotHistoryItem) => {
+  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem) => {
     if (message.metadata.sessionId) {
       const prompt = messageHistory[idx - 1]?.content;
       const completion = message.content;
@@ -112,8 +112,8 @@ export default function Chat(props: { sessionId?: string }) {
             key={idx}
             message={message}
             showMetadata={configuration.showMetadata}
-            onThumbsUp={() => handleFeedback('thumbsUp', idx, message)}
-            onThumbsDown={() => handleFeedback('thumbsDown', idx, message)}
+            onThumbsUp={() => handleFeedback(1, idx, message)}
+            onThumbsDown={() => handleFeedback(0, idx, message)}
           />
         ))}
       </SpaceBetween>

@@ -44,23 +44,8 @@ export class ChatBotS3Buckets extends Construct {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
-      transferAcceleration: true,
       enforceSSL: true,
       serverAccessLogsBucket: logsBucket,
-      cors: [
-        {
-          allowedHeaders: ["*"],
-          allowedMethods: [
-            s3.HttpMethods.PUT,
-            s3.HttpMethods.POST,
-            s3.HttpMethods.GET,
-            s3.HttpMethods.HEAD,
-          ],
-          allowedOrigins: ["*"],
-          exposedHeaders: ["ETag"],
-          maxAge: 3000,
-        },
-      ],
     });
 
     this.filesBucket = filesBucket;

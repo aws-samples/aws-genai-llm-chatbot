@@ -330,7 +330,7 @@ export default function MultiChat() {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
-  const handleFeedback = (feedbackType: 'thumbsUp' | 'thumbsDown', idx: number, message: ChatBotHistoryItem, messageHistory: ChatBotHistoryItem[]) => {
+  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem, messageHistory: ChatBotHistoryItem[]) => {
     console.log("Message history: ", messageHistory);
     if (message.metadata.sessionId) {
       const prompt = messageHistory[idx - 1]?.content;
@@ -510,8 +510,8 @@ export default function MultiChat() {
                   key={idx}
                   message={message}
                   showMetadata={showMetadata}
-                  onThumbsUp={() => handleFeedback('thumbsUp', idx, message, val)}
-                  onThumbsDown={() => handleFeedback('thumbsDown', idx, message, val)}
+                  onThumbsUp={() => handleFeedback(1, idx, message, val)}
+                  onThumbsDown={() => handleFeedback(0, idx, message, val)}
                 />
               ))}
             </ColumnLayout>
