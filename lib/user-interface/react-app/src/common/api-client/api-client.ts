@@ -105,8 +105,8 @@ export class ApiClient {
   }
 
   public get userFeedback() {
-    if(!this._userFeedbackClient) {
-      this._userFeedbackClient = new UserFeedbackClient(this._appConfig);
+    if (!this._userFeedbackClient) {
+      this._userFeedbackClient = new UserFeedbackClient();
     }
 
     return this._userFeedbackClient;
