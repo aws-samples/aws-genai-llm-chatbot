@@ -4,7 +4,7 @@ import time
 import random
 import botocore
 import numpy as np
-import genai_core.types
+from genai_core.types import EmbeddingsModel, CommonError, Provider, Task
 import genai_core.clients
 import genai_core.parameters
 from typing import List, Optional
@@ -13,7 +13,7 @@ SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
 
 
 def generate_embeddings(
-    model: genai_core.types.EmbeddingsModel, input: List[str], task: str = "store", batch_size: int = 50
+    model: EmbeddingsModel, input: List[str], task: str = "store", batch_size: int = 50
 ) -> List[List[float]]:
     input = list(map(lambda x: x[:10000], input))
 
@@ -21,14 +21,14 @@ def generate_embeddings(
     batch_split = [input[i : i + batch_size] for i in range(0, len(input), batch_size)]
 
     for batch in batch_split:
-        if model.provider == "openai":
+        if model.provider.upper() == Provider.OPENAI.value:
             ret_value.extend(_generate_embeddings_openai(model, batch))
-        elif model.provider == "bedrock":
-            ret_value.extend(_generate_embeddings_bedrock(model, batch))
-        elif model.provider == "sagemaker":
+        elif model.provider.upper() == Provider.BEDROCK.value:
+            ret_value.extend(_generate_embeddings_bedrock(model, batch, task))
+        elif model.provider.upper() == Provider.SAGEMAKER.value:
             ret_value.extend(_generate_embeddings_sagemaker(model, batch))
         else:
-            raise genai_core.types.CommonError(f"Unknown provider")
+            raise CommonError(f"Unknown provider: {model.provider}")
 
     return ret_value
 
@@ -45,24 +45,24 @@ def get_embeddings_models():
 
 def get_embeddings_model(
     provider: str, name: str
-) -> Optional[genai_core.types.EmbeddingsModel]:
+) -> Optional[EmbeddingsModel]:
     config = genai_core.parameters.get_config()
     models = config["rag"]["embeddingsModels"]
 
     for model in models:
-        if model["provider"] == provider and model["name"] == name:
-            return genai_core.types.EmbeddingsModel(**model)
+        if model["provider"].upper() == provider.upper() and model["name"] == name:
+            return EmbeddingsModel(**model)
 
     return None
 
 
 def _generate_embeddings_openai(
-    model: genai_core.types.EmbeddingsModel, input: List[str]
+    model: EmbeddingsModel, input: List[str]
 ):
     openai = genai_core.clients.get_openai_client()
 
     if not openai:
-        raise genai_core.types.CommonError(
+        raise CommonError(
             "OpenAI API is not available. Please set OPENAI_API_KEY."
         )
 
@@ -73,36 +73,26 @@ def _generate_embeddings_openai(
 
 
 def _generate_embeddings_bedrock(
-    model: genai_core.types.EmbeddingsModel, input: List[str], task: str = "store"
+    model: EmbeddingsModel, input: List[str], task: Task
 ):
     bedrock = genai_core.clients.get_bedrock_client()
 
     if not bedrock:
-        raise genai_core.types.CommonError("Bedrock is not enabled.")
+        raise CommonError("Bedrock is not enabled.")
 
+    model_provider = model.name.split(".")[0].upper()
+    if model_provider == Provider.AMAZON.value:
+        return _generate_embeddings_amazon(model, input, bedrock)
+    elif model_provider == Provider.COHERE.value:
+        return _generate_embeddings_cohere(model, input, task, bedrock)
+    else:
+        raise CommonError(f"Unknown embeddings provider \"{model_provider}\"")
+
+
+def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedrock):
     ret_value = []
-    model_provider = model.name.split(".")[0]
-    if model_provider == "amazon":
-        for value in input:
-            body = json.dumps({"inputText": value})
-            response = bedrock.invoke_model(
-                body=body,
-                modelId=model.name,
-                accept="application/json",
-                contentType="application/json",
-            )
-            response_body = json.loads(response.get("body").read())
-            embedding = response_body.get("embedding")
-
-            ret_value.append(embedding)
-
-        ret_value = np.array(ret_value)
-        ret_value = ret_value / \
-            np.linalg.norm(ret_value, axis=1, keepdims=True)
-        ret_value = ret_value.tolist()
-    elif model_provider == "cohere":
-        input_type = "search_query" if task == "retrieve" else "search_document"
-        body = json.dumps({"texts": input, "input_type": input_type})
+    for value in input:
+        body = json.dumps({"inputText": value})
         response = bedrock.invoke_model(
             body=body,
             modelId=model.name,
@@ -110,16 +100,32 @@ def _generate_embeddings_bedrock(
             contentType="application/json",
         )
         response_body = json.loads(response.get("body").read())
-        ret_value = response_body.get("embeddings")
-    else:
-        raise genai_core.types.CommonError(
-            f"Unknown embeddings provider \"{model_provider}\"")
+        embedding = response_body.get("embedding")
 
+        ret_value.append(embedding)
+
+    ret_value = np.array(ret_value)
+    ret_value = ret_value / np.linalg.norm(ret_value, axis=1, keepdims=True)
+    ret_value = ret_value.tolist()
     return ret_value
 
 
+def _generate_embeddings_cohere(model: EmbeddingsModel, input: List[str], task: Task, bedrock):
+    input_type = "search_query" if task == Task.RETRIEVE else "search_document"
+    body = json.dumps({"texts": input, "input_type": input_type})
+    response = bedrock.invoke_model(
+        body=body,
+        modelId=model.name,
+        accept="application/json",
+        contentType="application/json",
+    )
+    response_body = json.loads(response.get("body").read())
+    embeddings = response_body.get("embeddings")
+
+    return embeddings
+
 def _generate_embeddings_sagemaker(
-    model: genai_core.types.EmbeddingsModel, input: List[str]
+    model: EmbeddingsModel, input: List[str]
 ):
     client = genai_core.clients.get_sagemaker_client()
 
