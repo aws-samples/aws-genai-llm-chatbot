@@ -23,7 +23,7 @@ Supported model providers:
 | Resource |Description|
 |:-------------|:-------------|
 | [AWS Generative AI CDK Constructs](https://github.com/awslabs/generative-ai-cdk-constructs/) | Open-source library extension of the [AWS Cloud Development Kit (AWS CDK)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)  aimed to help developers build generative AI solutions using pattern-based definitions for their architecture. |
-| [Project Lakechain](https://github.com/awslabs/project-lakechain) | A powerful cloud-native, AI-powered, document (doc, images, videos..) processing framework built on top of the AWS CDK. |
+| [Project Lakechain](https://github.com/awslabs/project-lakechain) | A powerful cloud-native, AI-powered, document (docs, images, audios, videos) processing framework built on top of the AWS CDK. |
 
 # Roadmap
 
