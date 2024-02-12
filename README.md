@@ -27,7 +27,7 @@ Supported model providers:
 
 # Roadmap
 
-Roadmap is available through the [GitHub Project](https://github.com/orgs/awslabs/projects/136)
+Roadmap is available through the [GitHub Project](https://github.com/orgs/aws-samples/projects/69)
 
 # Authors
 
