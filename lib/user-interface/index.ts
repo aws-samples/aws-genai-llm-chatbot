@@ -99,6 +99,7 @@ export class UserInterface extends Construct {
         default_cross_encoder_model: Utils.getDefaultCrossEncoderModel(
           props.config
         ),
+        privateWebsite: props.config.privateWebsite ? true : false,
       },
     });
 

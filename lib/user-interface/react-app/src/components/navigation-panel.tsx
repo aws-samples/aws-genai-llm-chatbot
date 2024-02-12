@@ -78,7 +78,7 @@ export default function NavigationPanel() {
       {
         type: "link",
         text: "Documentation",
-        href: "https://github.com/aws-samples/aws-genai-llm-chatbot",
+        href: "https://aws-samples.github.io/aws-genai-llm-chatbot/",
         external: true,
       }
     );

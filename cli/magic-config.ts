@@ -9,7 +9,7 @@ import {
   SupportedRegion,
   SupportedSageMakerModels,
   SystemConfig,
-  SupportedBedrockRegion
+  SupportedBedrockRegion,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
@@ -99,7 +99,7 @@ const embeddingModels = [
 
 function createConfig(config: any): void {
   fs.writeFileSync("./bin/config.json", JSON.stringify(config, undefined, 2));
-  console.log("New config written to ./bin/config.json");
+  console.log("Configuration written to ./bin/config.json");
 }
 
 /**
@@ -120,17 +120,15 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "privateWebsite",
-      message: "Do you want to deploy a private website? I.e only accessible in VPC",
-      initial:
-        options.privateWebsite ||
-        false,
+      message:
+        "Do you want to deploy a private website? I.e only accessible in VPC",
+      initial: options.privateWebsite || false,
     },
     {
       type: "input",
       name: "certificate",
       message: "ACM certificate ARN",
-      initial:
-        options.certificate,
+      initial: options.certificate,
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite;
       },
@@ -139,8 +137,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "input",
       name: "domain",
       message: "Domain for private website",
-      initial:
-        options.domain,
+      initial: options.domain,
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite;
       },
@@ -216,12 +213,26 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "OpenSearch", name: "opensearch" },
         { message: "Kendra (managed)", name: "kendra" },
       ],
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one engine";
+      },
       skip(): boolean {
         // workaround for https://github.com/enquirer/enquirer/issues/298
         (this as any).state._choices = (this as any).state.choices;
         return !(this as any).state.answers.enableRag;
       },
       initial: options.ragsToEnable || [],
+    },
+    {
+      type: "confirm",
+      name: "kendraEnterprise",
+      message: "Do you want to enable Kendra Enterprise Edition?",
+      initial: options.kendraEnterprise || false,
+      skip(): boolean {
+        return !(this as any).state.answers.ragsToEnable.includes("kendra");
+      },
     },
     {
       type: "confirm",
@@ -235,19 +246,9 @@ async function processCreateOptions(options: any): Promise<void> {
         return !(this as any).state.answers.enableRag;
       },
     },
-    {
-      type: "confirm",
-      name: "kendraEnterprise",
-      message: "Do you want to enable Kendra Enterprise Edition?",
-      initial: options.kendraEnterprise || false,
-      skip(): boolean {
-        return !(this as any).state.answers.ragsToEnable.includes("kendra");
-      },
-    },
   ];
   const answers: any = await enquirer.prompt(questions);
-  console.log(answers);
-  const kendraExternal = [];
+  const kendraExternal: any[] = [];
   let newKendra = answers.enableRag && answers.kendra;
   const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
@@ -402,7 +403,7 @@ async function processCreateOptions(options: any): Promise<void> {
       {
         type: "confirm",
         name: "create",
-        message: "Do you want to create a new config based on the above",
+        message: "Do you want to create/update the configuration based on the above settings",
         initial: true,
       },
     ])) as any

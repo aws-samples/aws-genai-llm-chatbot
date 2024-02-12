@@ -419,21 +419,21 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     ]);
     
     if (props.config.privateWebsite) {
+      const paths = [];
+      for(let index = 0; index < shared.vpc.availabilityZones.length; index++) {
+        paths.push(`/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-${index}/CustomResourcePolicy/Resource`,)
+      }
+      paths.push(`/${this.stackName}/UserInterface/PrivateWebsite/describeVpcEndpoints/CustomResourcePolicy/Resource`,)
       NagSuppressions.addResourceSuppressionsByPath(
-          this,
-          [
-            `/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-0/CustomResourcePolicy/Resource`,
-            `/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-1/CustomResourcePolicy/Resource`,
-            `/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-2/CustomResourcePolicy/Resource`,
-            `/${this.stackName}/UserInterface/PrivateWebsite/describeVpcEndpoints/CustomResourcePolicy/Resource`,
-          ],
-          [
-            {
-              id: "AwsSolutions-IAM5",
-              reason:
-                "Custom Resource requires permissions to Describe VPC Endpoint Network Interfaces",
-            },
-          ]
+        this,
+        paths,
+        [
+          {
+            id: "AwsSolutions-IAM5",
+            reason:
+              "Custom Resource requires permissions to Describe VPC Endpoint Network Interfaces",
+          },
+        ]
       );
       NagSuppressions.addResourceSuppressionsByPath(
           this,

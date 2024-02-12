@@ -21,6 +21,7 @@ export interface AppConfig {
     websocket_endpoint: string;
     default_embeddings_model: string;
     default_cross_encoder_model: string;
+    privateWebsite: boolean;
   };
   Storage: {
     AWSS3: {
