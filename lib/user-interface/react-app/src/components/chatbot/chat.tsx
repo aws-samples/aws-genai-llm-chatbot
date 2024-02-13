@@ -3,6 +3,7 @@ import {
   ChatBotConfiguration,
   ChatBotHistoryItem,
   ChatBotMessageType,
+  FeedbackData,
 } from "./types";
 import { SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
@@ -79,6 +80,30 @@ export default function Chat(props: { sessionId?: string }) {
     })();
   }, [appContext, props.sessionId]);
 
+  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem) => {
+    if (message.metadata.sessionId) {
+      const prompt = messageHistory[idx - 1]?.content;
+      const completion = message.content;
+      const model = message.metadata.modelId;
+      const feedbackData: FeedbackData = {
+        sessionId: message.metadata.sessionId as string,
+        key: idx,
+        feedback: feedbackType,
+        prompt: prompt,
+        completion: completion,
+        model: model as string
+      };
+      addUserFeedback(feedbackData);
+    }
+  };
+
+  const addUserFeedback = async (feedbackData: FeedbackData) => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
+    await apiClient.userFeedback.addUserFeedback({feedbackData});
+  };
+
   return (
     <div className={styles.chat_container}>
       <SpaceBetween direction="vertical" size="m">
@@ -87,6 +112,8 @@ export default function Chat(props: { sessionId?: string }) {
             key={idx}
             message={message}
             showMetadata={configuration.showMetadata}
+            onThumbsUp={() => handleFeedback(1, idx, message)}
+            onThumbsDown={() => handleFeedback(0, idx, message)}
           />
         ))}
       </SpaceBetween>

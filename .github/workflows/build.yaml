@@ -1,5 +1,7 @@
 name: smoke-build
-on: push
+on: 
+  push:
+  pull_request:
 jobs:
   build-cdk:
     runs-on: ubuntu-latest
