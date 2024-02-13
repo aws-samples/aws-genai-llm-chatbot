@@ -7,6 +7,7 @@ from psycopg2 import sql
 from genai_core.aurora.connection import AuroraConnection
 from genai_core.aurora.utils import convert_types
 from aws_lambda_powertools import Logger
+from genai_core.types import Task
 
 logger = Logger()
 
@@ -45,7 +46,7 @@ def query_workspace_aurora(
         raise genai_core.types.CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
-        selected_model, [query], "retrieve"
+        selected_model, [query], Task.RETRIEVE.value
     )[0]
 
     language_name, detected_languages = genai_core.utils.comprehend.get_query_language(
