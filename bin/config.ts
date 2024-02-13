@@ -8,10 +8,12 @@ export function getConfig(): SystemConfig {
   // Default config
   return {
     prefix: "",
-    /*vpc: {
-      vpcId: "vpc-00000000000000000",
-      createVpcEndpoints: true,
+    /* vpc: {
+       vpcId: "vpc-00000000000000000",
+       createVpcEndpoints: true,
     },*/
+    privateWebsite: false,
+    certificate : "",
     bedrock: {
       enabled: true,
       region: SupportedRegion.US_EAST_1,
@@ -32,6 +34,7 @@ export function getConfig(): SystemConfig {
         kendra: {
           enabled: false,
           createIndex: false,
+          enterprise: false
         },
       },
       embeddingsModels: [

@@ -8,10 +8,10 @@ import { LIB_VERSION } from "./version.js";
   let program = new Command();
   program
     .version(LIB_VERSION)
-    .command("create", "📦 creates a new configuration for the a Chatbot")
+    .command("config", "📦 manage the chatbot configuration")
     .command("show", "🚚 display the current chatbot configuration")
     .command("deploy", "🌟 deploys the chatbot to your account")
-    .description("🛠️  Easily create a chatbots");
+    .description("🛠️  Easily create a chatbot");
 
   program.parse(process.argv);
 })();

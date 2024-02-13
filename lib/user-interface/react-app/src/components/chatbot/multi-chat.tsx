@@ -37,6 +37,7 @@ import {
   ChabotOutputModality,
   ChatBotHeartbeatRequest,
   ChatBotModelInterface,
+  FeedbackData,
 } from "./types";
 import { LoadingStatus, ModelInterface } from "../../common/types";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
@@ -44,7 +45,7 @@ import LLMConfigDialog from "./llm-config-dialog";
 import styles from "../../styles/chat.module.scss";
 import { useNavigate } from "react-router-dom";
 import { receiveMessages } from "../../graphql/subscriptions";
-import { sendQuery } from "../../graphql/mutations";
+import { sendQuery } from "../../graphql/mutations.ts";
 import { Utils } from "../../common/utils";
 
 export interface ChatSession {
@@ -56,7 +57,7 @@ export interface ChatSession {
   loading: boolean;
   running: boolean;
   messageHistory: ChatBotHistoryItem[];
-  subscription?: Promise<ZenObservable.Subscription>;
+  subscription?: ZenObservable.Subscription;
 }
 
 function createNewSession(): ChatSession {
@@ -153,7 +154,7 @@ export default function MultiChat() {
     return () => {
       refChatSessions.current.forEach((session) => {
         console.log(`Unsubscribing from ${session.id}`);
-        session.subscription?.then((s) => s.unsubscribe());
+        session.subscription?.unsubscribe();
       });
       refChatSessions.current = [];
     };
@@ -226,11 +227,9 @@ export default function MultiChat() {
     });
   };
 
-  async function subscribe(sessionId: string) {
+  function subscribe(sessionId: string): ZenObservable.Subscription {
     console.log("Subscribing to AppSync");
-    const sub = await API.graphql<
-      GraphQLSubscription<ReceiveMessagesSubscription>
-    >({
+    const sub = API.graphql<GraphQLSubscription<ReceiveMessagesSubscription>>({
       query: receiveMessages,
       variables: {
         sessionId: sessionId,
@@ -241,7 +240,7 @@ export default function MultiChat() {
         const data = value.data!.receiveMessages?.data;
         if (data !== undefined && data !== null) {
           const response: ChatBotMessageResponse = JSON.parse(data);
-          console.log(response);
+          console.log(JSON.stringify(response));
           if (response.action === ChatBotAction.Heartbeat) {
             console.log("Heartbeat pong!");
             return;
@@ -275,33 +274,28 @@ export default function MultiChat() {
     }
 
     const session = createNewSession();
-
     const sub = subscribe(session.id);
-    sub
-      .then(() => {
-        console.log(`Subscribed to session ${session.id}}`);
-        const request: ChatBotHeartbeatRequest = {
-          action: ChatBotAction.Heartbeat,
-          modelInterface: ChatBotModelInterface.Langchain,
-          data: {
-            sessionId: session.id,
-          },
-        };
-        const result = API.graphql({
-          query: sendQuery,
-          variables: {
-            data: JSON.stringify(request),
-          },
-        });
-        console.log(result);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
 
+    console.log(`Subscribed to session ${session.id}}`);
+    const request: ChatBotHeartbeatRequest = {
+      action: ChatBotAction.Heartbeat,
+      modelInterface: ChatBotModelInterface.Langchain,
+      data: {
+        sessionId: session.id,
+      },
+    };
+    API.graphql({
+      query: sendQuery,
+      variables: {
+        data: JSON.stringify(request),
+      },
+    });
     session.subscription = sub;
     refChatSessions.current.push(session);
-    console.log(refChatSessions);
+    console.log(
+      "Sessions",
+      refChatSessions.current.map((s) => s.id)
+    );
     setChatSessions([...refChatSessions.current]);
   }
 
@@ -336,6 +330,31 @@ export default function MultiChat() {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
+  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem, messageHistory: ChatBotHistoryItem[]) => {
+    console.log("Message history: ", messageHistory);
+    if (message.metadata.sessionId) {
+      const prompt = messageHistory[idx - 1]?.content;
+      const completion = message.content;
+      const model = message.metadata.modelId;
+      const feedbackData: FeedbackData = {
+        sessionId: message.metadata.sessionId as string,
+        key: idx,
+        feedback: feedbackType,
+        prompt: prompt,
+        completion: completion,
+        model: model as string
+      };
+      addUserFeedback(feedbackData);
+    }
+  };
+
+  const addUserFeedback = async (feedbackData: FeedbackData) => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
+    await apiClient.userFeedback.addUserFeedback({feedbackData});
+  };
+
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
@@ -369,7 +388,7 @@ export default function MultiChat() {
             <Button
               onClick={() => {
                 refChatSessions.current.forEach((s) => {
-                  s.subscription?.then((s) => s.unsubscribe());
+                  s.subscription?.unsubscribe();
                   s.messageHistory = [];
                   s.id = uuidv4();
                   s.subscription = subscribe(s.id);
@@ -432,10 +451,8 @@ export default function MultiChat() {
                       onClick={() => {
                         refChatSessions.current
                           .filter((c) => c.id == chatSession.id)[0]
-                          .subscription?.then((s) => {
-                            console.log(`Unsubscribe from ${chatSession.id}`);
-                            s.unsubscribe();
-                          });
+                          .subscription?.unsubscribe();
+                        console.log(`Unsubscribe from ${chatSession.id}`);
                         refChatSessions.current =
                           refChatSessions.current.filter(
                             (c) => c.id !== chatSession.id
@@ -493,6 +510,8 @@ export default function MultiChat() {
                   key={idx}
                   message={message}
                   showMetadata={showMetadata}
+                  onThumbsUp={() => handleFeedback(1, idx, message, val)}
+                  onThumbsDown={() => handleFeedback(0, idx, message, val)}
                 />
               ))}
             </ColumnLayout>

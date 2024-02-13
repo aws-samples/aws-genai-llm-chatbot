@@ -32,6 +32,7 @@ export class ChatBotApi extends Construct {
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
   public readonly filesBucket: s3.Bucket;
+  public readonly userFeedbackBucket: s3.Bucket;
   public readonly graphqlApi: appsync.GraphqlApi;
 
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
@@ -79,6 +80,7 @@ export class ChatBotApi extends Construct {
         role: loggingRole,
       },
       xrayEnabled: true,
+      visibility: props.config.privateWebsite ? appsync.Visibility.PRIVATE : appsync.Visibility.GLOBAL
     });
 
     new ApiResolvers(this, "RestApi", {
@@ -86,6 +88,7 @@ export class ChatBotApi extends Construct {
       sessionsTable: chatTables.sessionsTable,
       byUserIdIndex: chatTables.byUserIdIndex,
       api,
+      userFeedbackBucket: chatBuckets.userFeedbackBucket,
     });
 
     const realtimeBackend = new RealtimeGraphqlApiBackend(this, "Realtime", {
@@ -113,6 +116,7 @@ export class ChatBotApi extends Construct {
     this.messagesTopic = realtimeBackend.messagesTopic;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
+    this.userFeedbackBucket = chatBuckets.userFeedbackBucket;
     this.filesBucket = chatBuckets.filesBucket;
     this.graphqlApi = api;
 

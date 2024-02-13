@@ -415,5 +415,38 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         reason: "Not yet upgraded from Python 3.11 to 3.12.",
       },
     ]);
+    
+    if (props.config.privateWebsite) {
+      const paths = [];
+      for(let index = 0; index < shared.vpc.availabilityZones.length; index++) {
+        paths.push(`/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-${index}/CustomResourcePolicy/Resource`,)
+      }
+      paths.push(`/${this.stackName}/UserInterface/PrivateWebsite/describeVpcEndpoints/CustomResourcePolicy/Resource`,)
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        paths,
+        [
+          {
+            id: "AwsSolutions-IAM5",
+            reason:
+              "Custom Resource requires permissions to Describe VPC Endpoint Network Interfaces",
+          },
+        ]
+      );
+      NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource`
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM4",
+              reason:
+                "IAM role implicitly created by CDK.",
+            },
+          ]
+      );
+      
+    }
   }
 }
