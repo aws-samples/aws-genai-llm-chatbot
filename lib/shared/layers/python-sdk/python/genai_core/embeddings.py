@@ -28,7 +28,7 @@ def generate_embeddings(
         elif model.provider == "sagemaker":
             ret_value.extend(_generate_embeddings_sagemaker(model, batch))
         else:
-            raise genai_core.types.CommonError(f"Unknown provider")
+            raise genai_core.types.CommonError(f"Unknown provider {model.provider}")
 
     return ret_value
 

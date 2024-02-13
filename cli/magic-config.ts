@@ -64,6 +64,7 @@ const embeddingModels = [
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
       options.bedrockRoleArn = config.bedrock?.roleArn;
+      options.bedrockAgents = config.bedrock?.agents;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
@@ -168,6 +169,17 @@ async function processCreateOptions(options: any): Promise<void> {
         return v.length === 0 || valid;
       },
       initial: options.bedrockRoleArn || "",
+    },
+    {
+      type: "confirm",
+      name: "bedrockAgents",
+      message: "Do you want to deploy a sample Bedrock Agent?",
+      initial: false,
+      skip() {
+        return !["us-east-1", "us-west-2"].includes(
+          (this as any).state.answers.bedrockRegion
+        );
+      },
     },
     {
       type: "confirm",
@@ -346,6 +358,7 @@ async function processCreateOptions(options: any): Promise<void> {
           region: answers.bedrockRegion,
           roleArn:
             answers.bedrockRoleArn === "" ? undefined : answers.bedrockRoleArn,
+          agents: answers.bedrockAgents,
         }
       : undefined,
     llms: {
@@ -403,7 +416,8 @@ async function processCreateOptions(options: any): Promise<void> {
       {
         type: "confirm",
         name: "create",
-        message: "Do you want to create/update the configuration based on the above settings",
+        message:
+          "Do you want to create/update the configuration based on the above settings",
         initial: true,
       },
     ])) as any

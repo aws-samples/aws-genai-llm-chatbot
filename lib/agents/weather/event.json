@@ -1,0 +1,34 @@
+{
+    "messageVersion": "1.0",
+    "agent": {
+        "name": "alfa",
+        "id": "beta",
+        "alias": "alfa",
+        "version": "1.2"
+    },
+    "inputText": "any text",
+    "sessionId": "1234",
+    "actionGroup": "mygroup",
+    "apiPath": "/current_weather",
+    "httpMethod": "GET",
+    "parameters": [
+        {
+            "name": "place",
+            "type": "string",
+            "value": "Milan"
+        }
+    ],
+    "requestBody": {
+        "content": {
+            "application/json": {
+                "properties": [
+                    {
+                        "name": "place",
+                        "type": "string",
+                        "value": "Milan"
+                    }
+                ]
+            }
+        }
+    }
+}
