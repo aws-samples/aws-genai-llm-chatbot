@@ -21,11 +21,11 @@ def generate_embeddings(
     batch_split = [input[i : i + batch_size] for i in range(0, len(input), batch_size)]
 
     for batch in batch_split:
-        if model.provider.upper() == Provider.OPENAI.value:
+        if model.provider == Provider.OPENAI.value:
             ret_value.extend(_generate_embeddings_openai(model, batch))
-        elif model.provider.upper() == Provider.BEDROCK.value:
+        elif model.provider == Provider.BEDROCK.value:
             ret_value.extend(_generate_embeddings_bedrock(model, batch, task))
-        elif model.provider.upper() == Provider.SAGEMAKER.value:
+        elif model.provider == Provider.SAGEMAKER.value:
             ret_value.extend(_generate_embeddings_sagemaker(model, batch))
         else:
             raise CommonError(f"Unknown provider: {model.provider}")
@@ -44,13 +44,13 @@ def get_embeddings_models():
 
 
 def get_embeddings_model(
-    provider: str, name: str
+    provider: Provider, name: str
 ) -> Optional[EmbeddingsModel]:
     config = genai_core.parameters.get_config()
     models = config["rag"]["embeddingsModels"]
 
     for model in models:
-        if model["provider"].upper() == provider.upper() and model["name"] == name:
+        if model["provider"] == provider.value and model["name"] == name:
             return EmbeddingsModel(**model)
 
     return None
@@ -80,7 +80,7 @@ def _generate_embeddings_bedrock(
     if not bedrock:
         raise CommonError("Bedrock is not enabled.")
 
-    model_provider = model.name.split(".")[0].upper()
+    model_provider = model.name.split(".")[0]
     if model_provider == Provider.AMAZON.value:
         return _generate_embeddings_amazon(model, input, bedrock)
     elif model_provider == Provider.COHERE.value:
