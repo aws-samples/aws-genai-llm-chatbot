@@ -37,6 +37,7 @@ import {
   ChabotOutputModality,
   ChatBotHeartbeatRequest,
   ChatBotModelInterface,
+  FeedbackData,
 } from "./types";
 import { LoadingStatus, ModelInterface } from "../../common/types";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
@@ -44,7 +45,7 @@ import LLMConfigDialog from "./llm-config-dialog";
 import styles from "../../styles/chat.module.scss";
 import { useNavigate } from "react-router-dom";
 import { receiveMessages } from "../../graphql/subscriptions";
-import { sendQuery } from "../../graphql/mutations";
+import { sendQuery } from "../../graphql/mutations.ts";
 import { Utils } from "../../common/utils";
 
 export interface ChatSession {
@@ -329,6 +330,31 @@ export default function MultiChat() {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
+  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem, messageHistory: ChatBotHistoryItem[]) => {
+    console.log("Message history: ", messageHistory);
+    if (message.metadata.sessionId) {
+      const prompt = messageHistory[idx - 1]?.content;
+      const completion = message.content;
+      const model = message.metadata.modelId;
+      const feedbackData: FeedbackData = {
+        sessionId: message.metadata.sessionId as string,
+        key: idx,
+        feedback: feedbackType,
+        prompt: prompt,
+        completion: completion,
+        model: model as string
+      };
+      addUserFeedback(feedbackData);
+    }
+  };
+
+  const addUserFeedback = async (feedbackData: FeedbackData) => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
+    await apiClient.userFeedback.addUserFeedback({feedbackData});
+  };
+
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
@@ -484,6 +510,8 @@ export default function MultiChat() {
                   key={idx}
                   message={message}
                   showMetadata={showMetadata}
+                  onThumbsUp={() => handleFeedback(1, idx, message, val)}
+                  onThumbsDown={() => handleFeedback(0, idx, message, val)}
                 />
               ))}
             </ColumnLayout>

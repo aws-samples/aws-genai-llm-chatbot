@@ -147,3 +147,12 @@ export enum ChabotOutputModality {
   Image = "IMAGE",
   Embedding = "EMBEDDING",
 }
+
+export interface FeedbackData {
+  sessionId: string;
+  key: number;
+  feedback: number;
+  prompt: string;
+  completion: string;
+  model: string;
+}
