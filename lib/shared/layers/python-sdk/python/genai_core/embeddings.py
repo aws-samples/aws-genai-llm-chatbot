@@ -50,7 +50,7 @@ def get_embeddings_model(
     models = config["rag"]["embeddingsModels"]
 
     for model in models:
-        if model["provider"] == provider.value and model["name"] == name:
+        if model["provider"] == provider and model["name"] == name:
             return EmbeddingsModel(**model)
 
     return None
