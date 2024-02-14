@@ -113,7 +113,7 @@ def create_workspace_aurora(
     if not embeddings_model:
         raise genai_core.types.CommonError("Invalid embeddings model")
     # Verify that the embeddings model
-    genai_core.embeddings.generate_embeddings(embeddings_model, ["test"], Task.STORE.value)
+    genai_core.embeddings.generate_embeddings(embeddings_model, ["test"], Task.STORE)
 
     item = {
         "workspace_id": workspace_id,
@@ -180,7 +180,7 @@ def create_workspace_open_search(
     if not embeddings_model:
         raise genai_core.types.CommonError("Invalid embeddings model")
     # Verify that the embeddings model
-    genai_core.embeddings.generate_embeddings(embeddings_model, ["test"], Task.STORE.value)
+    genai_core.embeddings.generate_embeddings(embeddings_model, ["test"], Task.STORE)
 
     item = {
         "workspace_id": workspace_id,

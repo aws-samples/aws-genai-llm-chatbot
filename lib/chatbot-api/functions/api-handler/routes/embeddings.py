@@ -5,7 +5,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
-from genai_core.types import CommonError, Provider, Task
+from genai_core.types import CommonError, Task
 
 tracer = Tracer()
 router = Router()
@@ -13,7 +13,7 @@ logger = Logger()
 
 
 class EmbeddingsRequest(BaseModel):
-    provider: Provider
+    provider: str
     model: str
     passages: List[str]
     task: Optional[Task] = Task.STORE

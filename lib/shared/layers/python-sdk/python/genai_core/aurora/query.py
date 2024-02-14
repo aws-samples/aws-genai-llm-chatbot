@@ -46,7 +46,7 @@ def query_workspace_aurora(
         raise CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
-        selected_model, [query], Task.RETRIEVE.value
+        selected_model, [query], Task.RETRIEVE
     )[0]
 
     language_name, detected_languages = genai_core.utils.comprehend.get_query_language(
