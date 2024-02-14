@@ -351,7 +351,7 @@ async function processCreateOptions(options: any): Promise<void> {
         return true;
       },
       skip() {
-        return !answers.enableRag; 
+        return !answers.enableRag || !(answers.ragsToEnable.includes("aurora") || answers.ragsToEnable.includes("opensearch"));
       }
     }
   ];
