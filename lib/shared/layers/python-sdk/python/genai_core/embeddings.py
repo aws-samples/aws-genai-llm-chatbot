@@ -111,7 +111,7 @@ def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedroc
 
 
 def _generate_embeddings_cohere(model: EmbeddingsModel, input: List[str], task: Task, bedrock):
-    input_type = "search_query" if task == Task.RETRIEVE else "search_document"
+    input_type = Task.SEARCH_QUERY if task == Task.RETRIEVE else Task.SEARCH_DOCUMENT
     body = json.dumps({"texts": input, "input_type": input_type})
     response = bedrock.invoke_model(
         body=body,
