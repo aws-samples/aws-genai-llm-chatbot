@@ -7,7 +7,6 @@ import Engines from "./pages/rag/engines/engines";
 import CreateWorkspace from "./pages/rag/create-workspace/create-workspace";
 import Embeddings from "./pages/rag/embeddings/embeddings";
 import CrossEncoders from "./pages/rag/cross-encoders/cross-encoders";
-import Welcome from "./pages/welcome";
 import Playground from "./pages/chatbot/playground/playground";
 import Models from "./pages/chatbot/models/models";
 import WorkspacePane from "./pages/rag/workspace/workspace";
@@ -28,7 +27,7 @@ function App() {
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
-            <Route index path="/" element={<Welcome />} />
+            <Route index path="/" element={<Playground />} />
             <Route path="/chatbot" element={<Outlet />}>
               <Route path="playground" element={<Playground />} />
               <Route path="playground/:sessionId" element={<Playground />} />

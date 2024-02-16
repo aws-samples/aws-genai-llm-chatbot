@@ -54,7 +54,7 @@ export default function GlobalHeader() {
       <TopNavigation
         identity={{
           href: "/",
-          logo: { src: "/images/delta-logo.png", alt: { CHATBOT_NAME } + " Logo" },
+          logo: { src: "/images/delta-logo.jpg", alt: {CHATBOT_NAME} + " Logo" },
         }}
         utilities={[
           {
