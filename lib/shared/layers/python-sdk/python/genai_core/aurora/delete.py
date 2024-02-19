@@ -3,10 +3,12 @@ import boto3
 import genai_core.utils.delete_files_with_prefix
 from psycopg2 import sql
 from genai_core.aurora.connection import AuroraConnection
+import genai_core.workspaces
 
 PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
 UPLOAD_BUCKET_NAME = os.environ["UPLOAD_BUCKET_NAME"]
 WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
+WORKSPACES_POLICY_TABLE_NAME = os.environ["WORKSPACES_POLICY_TABLE_NAME"]
 DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
@@ -30,6 +32,7 @@ def delete_aurora_workspace(workspace: dict):
         )
 
     workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
+    documents_policy_table = dynamodb.Table(WORKSPACES_POLICY_TABLE_NAME)
     documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
 
     items_to_delete = []
@@ -68,3 +71,18 @@ def delete_aurora_workspace(workspace: dict):
     )
 
     print(f"Delete Item succeeded: {response}")
+
+    # Delete all workspace policy related to the current deletion workspace
+    items_policy_to_delete = genai_core.workspaces.list_policy_workspace_by_id(workspace_id)
+    # Batch delete in groups of 25
+    for i in range(0, len(items_policy_to_delete), 25):
+        with documents_policy_table.batch_writer() as batch:
+            for item in items_policy_to_delete[i : i + 25]:
+                batch.delete_item(
+                    Key={
+                        "pk": item["pk"],
+                        "sk": item["sk"],
+                    }
+                )
+
+    print(f"Deleted {len(items_policy_to_delete)} policy items.")
