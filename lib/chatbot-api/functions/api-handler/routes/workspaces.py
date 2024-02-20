@@ -209,6 +209,7 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
 def _create_workspace_open_search(
     request: CreateWorkspaceOpenSearchRequest, config: dict
 ):
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     embedding_models = config["rag"]["embeddingsModels"]
     cross_encoder_models = config["rag"]["crossEncoderModels"]
@@ -273,11 +274,13 @@ def _create_workspace_open_search(
             chunking_strategy=request.chunkingStrategy,
             chunk_size=request.chunkSize,
             chunk_overlap=request.chunkOverlap,
+            creator_id: user_id,
         )
     )
 
 
 def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict):
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     kendra_indexes = genai_core.kendra.get_kendra_indexes()
 
@@ -304,6 +307,7 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
             workspace_name=workspace_name,
             kendra_index=kendra_index,
             use_all_data=request.useAllData,
+            creator_id=user_id,
         )
     )
 
