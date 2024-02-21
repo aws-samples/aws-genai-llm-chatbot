@@ -12,7 +12,7 @@ def decompress_gzip_data(response):
     os.remove(filename)
     return sitemap_xml
 
-def extract_urls_from_sitemap(sitemap_url):
+def extract_urls_from_sitemap(sitemap_url: str):
     urls = []
     try:
         response = requests.get(sitemap_url)
