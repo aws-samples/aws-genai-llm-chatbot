@@ -274,7 +274,7 @@ def _create_workspace_open_search(
             chunking_strategy=request.chunkingStrategy,
             chunk_size=request.chunkSize,
             chunk_overlap=request.chunkOverlap,
-            creator_id: user_id,
+            creator_id=user_id,
         )
     )
 
