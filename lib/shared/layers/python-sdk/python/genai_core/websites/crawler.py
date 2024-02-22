@@ -119,6 +119,10 @@ def parse_url(url: str):
 
     for idx in range(len(links)):
         link = links[idx]
+        lowercase_link = link.lower().strip()
+        if lowercase_link.startswith("mailto:"):
+            continue
+
         current = urlparse(link)
         if not current.netloc:
             local_links.append(f"{base_url}{link}")
