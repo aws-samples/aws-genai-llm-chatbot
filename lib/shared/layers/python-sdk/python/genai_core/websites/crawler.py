@@ -110,7 +110,7 @@ def parse_url(url: str):
         raise Exception(
             f"Invalid content type {response.headers['Content-Type']}")
     soup = BeautifulSoup(response.content, "html.parser")
-    content = soup.text
+    content = soup.get_text(separator=' ')
     content = re.sub(r"[ \n]+", " ", content)
 
     links = list(set([a["href"] for a in soup.find_all("a", href=True)]))
