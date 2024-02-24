@@ -281,10 +281,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         ]
       );
 
-      if (
-        props.config.rag.engines.aurora.enabled ||
-        props.config.rag.engines.opensearch.enabled
-      ) {
+      if (props.config.llms.enableSagemakerModels) {
         NagSuppressions.addResourceSuppressionsByPath(
           this,
           [

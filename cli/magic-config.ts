@@ -22,21 +22,25 @@ const embeddingModels = [
     provider: "sagemaker",
     name: "intfloat/multilingual-e5-large",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "sagemaker",
     name: "sentence-transformers/all-MiniLM-L6-v2",
     dimensions: 384,
+    default: false,
   },
   {
     provider: "bedrock",
     name: "amazon.titan-embed-text-v1",
     dimensions: 1536,
+    default: false,
   },
   {
     provider: "openai",
     name: "text-embedding-ada-002",
     dimensions: 1536,
+    default: false,
   },
 ];
 
@@ -337,7 +341,7 @@ async function processCreateOptions(options: any): Promise<void> {
       choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
       initial: options.defaultEmbedding || undefined,
       skip(): boolean {
-        return !(this as any).state.answers.enableRag;
+        return !answers.enableRag;
       },
     },
   ];
@@ -385,12 +389,10 @@ async function processCreateOptions(options: any): Promise<void> {
     },
   };
 
-  // If we have not enabled rag the default embedding is set to the first model
-  if (!answers.enableRag) {
-    models.defaultEmbedding = embeddingModels[0].name;
-  }
-
-  if (answers.enableEmbeddingModelsViaSagemaker && answers.enableSagemakerModels) {
+  if (
+    answers.enableEmbeddingModelsViaSagemaker &&
+    answers.enableSagemakerModels
+  ) {
     config.rag.crossEncoderModels[0] = {
       provider: "sagemaker",
       name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
@@ -408,11 +410,16 @@ async function processCreateOptions(options: any): Promise<void> {
   } else {
     config.rag.embeddingsModels = embeddingModels;
   }
-  config.rag.embeddingsModels.forEach((m: any) => {
-    if (m.name === models.defaultEmbedding) {
-      m.default = true;
-    }
-  });
+  // If we have not enabled rag the default embedding is set to the first model
+  if (!answers.enableRag) {
+    (config.rag.embeddingsModels[0] as any).default = true;
+  } else {
+    config.rag.embeddingsModels.forEach((m: any) => {
+      if (m.name === models.defaultEmbedding) {
+        m.default = true;
+      }
+    });
+  }
 
   config.rag.engines.kendra.createIndex =
     answers.ragsToEnable.includes("kendra");
