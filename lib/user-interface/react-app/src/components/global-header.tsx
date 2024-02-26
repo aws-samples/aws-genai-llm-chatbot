@@ -2,9 +2,7 @@ import {
   ButtonDropdownProps,
   TopNavigation,
 } from "@cloudscape-design/components";
-import { Mode } from "@cloudscape-design/global-styles";
 import { useEffect, useState } from "react";
-import { StorageHelper } from "../common/helpers/storage-helper";
 import { Auth } from "aws-amplify";
 import useOnFollow from "../common/hooks/use-on-follow";
 import { CHATBOT_NAME } from "../common/constants";
