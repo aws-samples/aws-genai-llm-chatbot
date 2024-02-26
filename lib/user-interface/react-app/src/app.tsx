@@ -16,46 +16,72 @@ import "./styles/app.scss";
 import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
 import RssFeed from "./pages/rag/workspace/rss-feed";
 import * as InfraConfig from '../../../../bin/config.json';
+import Embedded from "./pages/chatbot/embedded/embedded.tsx";
+import GlobalFooter from "./components/global-footer.tsx";
+
+
+const subHeaderWrapperStyles = {
+  fontSize: '1.6rem',
+  lineHeight: '1.95em',
+  color: '#666666',
+  backgroundColor: '#FFFFFF',
+  // position: 'relative',
+  display: 'block'
+}
+const subHeaderStyles = {
+  backgroundColor: 'rgba(16, 16, 16, 0.5)',
+  padding: '0.5rem 1.5rem',
+  position: 'fixed',
+  zIndex: 1000,
+  display: 'block',
+  left: 0,
+  right: 0,
+}
+const Layout = () => (
+  <>
+    <GlobalHeader />
+    <div style={{ height: 56, backgroundColor: "#000716" }} />
+    <div>
+      <div style={subHeaderWrapperStyles}>
+        <div style={subHeaderStyles}>
+          <a href="https://www.deltacollege.edu/">
+            <img alt="San Joaquin Delta College Logo - Home" className="desktop" src="https://www.deltacollege.edu/sites/default/files/images/delta-logo.jpg" style={{ height: 98, maxHeight: '100%'}} />
+            <img alt="San Joaquin Delta College Logo - Home" className="mobile" src="https://www.deltacollege.edu/sites/default/files/images/header-mobile-logo.jpg" style={{ height: 70, maxHeight: '100%'}} />
+          </a>
+        </div>
+      </div>
+      <div style={{ height: 115, backgroundColor: '#ffffff' }} />
+      <Outlet />
+      <GlobalFooter />
+    </div>
+  </>
+)
 
 function App() {
   const Router = InfraConfig.privateWebsite ? HashRouter : BrowserRouter;
 
   return (
-    <div style={{ height: "100%" }}>
+    <div
+      style={{
+        height: "100%",
+        backgroundColor: "#f9c623"
+      }}
+    >
       <Router>
-        <GlobalHeader />
-        <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
-        <div>
           <Routes>
-            <Route index path="/" element={<Playground />} />
-            <Route path="/chatbot" element={<Outlet />}>
-              <Route path="playground" element={<Playground />} />
-              <Route path="playground/:sessionId" element={<Playground />} />
-              <Route path="multichat" element={<MultiChatPlayground />} />
-              <Route path="models" element={<Models />} />
+            <Route path="/embedded" element={<Embedded />} /> 
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Playground />} />
+              <Route path="/chatbot" element={<Outlet />}>
+                <Route path="playground" element={<Playground />} />
+                <Route path="playground/:sessionId" element={<Playground />} />
+                <Route path="multichat" element={<MultiChatPlayground />} />
+                <Route path="models" element={<Models />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
             </Route>
-            <Route path="/rag" element={<Outlet />}>
-              <Route path="" element={<Dashboard />} />
-              <Route path="engines" element={<Engines />} />
-              <Route path="embeddings" element={<Embeddings />} />
-              <Route path="cross-encoders" element={<CrossEncoders />} />
-              <Route path="semantic-search" element={<SemanticSearch />} />
-              <Route path="workspaces" element={<Workspaces />} />
-              <Route path="workspaces/create" element={<CreateWorkspace />} />
-              <Route
-                path="workspaces/:workspaceId"
-                element={<WorkspacePane />}
-              />
-              <Route
-                path="workspaces/:workspaceId/rss/:feedId"
-                element={<RssFeed />}
-              />
-              <Route path="workspaces/add-data" element={<AddData />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
           </Routes>
-        </div>
-      </Router>  
+      </Router>
     </div>
   );
 }

@@ -14,6 +14,9 @@ div[data-amplify-authenticator],
 div[data-amplify-theme] {
   height: 100%;
 }
+html {
+  background-color: #f9c623;
+}
 
 body {
   background-color: #ffffff;
@@ -22,6 +25,56 @@ body {
 
 body.awsui-dark-mode {
   background-color: #0e1b2a;
+}
+header {
+  background: #000000 !important;
+}
+
+
+@media (min-width: 913px) {
+  ._chat_container_bh7b6_1 {
+    min-height: calc(100vh - 216px) !important;
+  }
+}
+.awsui_layout_hyvsj_p48sj_380:not(#\9).awsui_layout_hyvsj_p48sj_380:not(#\9) {
+  --awsui-footer-height-y98gph: 149px !important;
+}
+
+.awsui_button_vjswe_1u1vg_101.awsui_variant-primary_vjswe_1u1vg_209:not(#\9) {
+  --color-background-button-primary-default-jrg2xu: #f9c623 !important;
+  --color-text-button-primary-default-ltldxu: #000000 !important;
+  &:hover,
+  &:focus,
+  &:active {
+    --color-background-button-primary-hover-l3mbyt: #f9c623 !important;
+    --color-text-button-primary-hover-tcoaeg: #9a7d17 !important;
+  }
+}
+@media (max-width: 860px) {
+  .mobile {
+    display: block;
+  }
+  .desktop {
+    display: none;
+  }
+}
+@media (min-width: 861px) {
+  .mobile {
+    display: none;
+  }
+  .desktop {
+    display: block;
+  }
+}
+footer {
+  a {
+    &:hover,
+    &:focus,
+    &:active {
+      opacity: 0.7
+    }
+    color: #4a4a4a;
+  }
 }
 
 .matrix-table {

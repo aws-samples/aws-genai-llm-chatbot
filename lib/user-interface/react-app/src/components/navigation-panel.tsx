@@ -24,10 +24,9 @@ export default function NavigationPanel() {
         type: "section",
         text: "Chatbot",
         items: [
-          { type: "link", text: "Playground", href: "/chatbot/playground" },
           {
             type: "link",
-            text: "Multi-chat playground",
+            text: "Multi-chat",
             href: "/chatbot/multichat",
           },
           {

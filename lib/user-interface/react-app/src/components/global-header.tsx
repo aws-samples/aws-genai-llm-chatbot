@@ -54,22 +54,12 @@ export default function GlobalHeader() {
       <TopNavigation
         identity={{
           href: "/",
-          logo: { src: "/images/delta-logo.jpg", alt: {CHATBOT_NAME} + " Logo" },
+          logo: {
+            src: "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==",
+            alt: {CHATBOT_NAME} + " Logo"
+          },
         }}
         utilities={[
-          {
-            type: "button",
-            text: theme === Mode.Dark ? "Light Mode" : "Dark Mode",
-            onClick: onChangeThemeClick,
-          },
-          {
-            type: "button",
-            text: "GitHub",
-             /* href: "https://github.com/aws-samples/aws-genai-llm-chatbot",*/
-              href: "https://github.com/KAI-Partners-Inc/sjdc-aws-genai-chatbot",
-            external: true,
-            externalIconAriaLabel: " (opens in a new tab)",
-          },
           {
             type: "menu-dropdown",
             description: userName ?? "",
