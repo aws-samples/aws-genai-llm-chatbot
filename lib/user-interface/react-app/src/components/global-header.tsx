@@ -28,14 +28,6 @@ export default function GlobalHeader() {
     })();
   }, []);
 
-  const onChangeThemeClick = () => {
-    if (theme === Mode.Dark) {
-      setTheme(StorageHelper.applyTheme(Mode.Light));
-    } else {
-      setTheme(StorageHelper.applyTheme(Mode.Dark));
-    }
-  };
-
   const onUserProfileClick = ({
     detail,
   }: {

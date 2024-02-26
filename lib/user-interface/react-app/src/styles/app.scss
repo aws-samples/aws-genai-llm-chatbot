@@ -50,6 +50,15 @@ header {
     --color-text-button-primary-hover-tcoaeg: #9a7d17 !important;
   }
 }
+.subHeader {
+  background-color: rgba(16, 16, 16, 0.5);
+  padding: 0.5rem 1.5rem;
+  position: fixed;
+  z-index: 1000;
+  display: block;
+  left: 0;
+  right: 0;
+}
 @media (max-width: 860px) {
   .mobile {
     display: block;
