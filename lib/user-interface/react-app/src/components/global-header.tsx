@@ -12,7 +12,6 @@ import { CHATBOT_NAME } from "../common/constants";
 export default function GlobalHeader() {
   const onFollow = useOnFollow();
   const [userName, setUserName] = useState<string | null>(null);
-  const [theme, setTheme] = useState<Mode>(StorageHelper.getTheme());
 
   useEffect(() => {
     (async () => {
