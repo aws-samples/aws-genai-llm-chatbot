@@ -26,7 +26,7 @@ def main():
     follow_links = data["follow_links"]
     limit = data["limit"]
 
-    result = genai_core.websites.crawler.crawl_urls(
+    return genai_core.websites.crawler.crawl_urls(
         workspace=workspace,
         document=document,
         priority_queue=priority_queue,
@@ -34,7 +34,6 @@ def main():
         follow_links=follow_links,
         limit=limit,
     )
-    return result
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,6 @@ import { FileImportBatchJob } from "./file-import-batch-job";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { FileImportWorkflow } from "./file-import-workflow";
 import { WebsiteCrawlingWorkflow } from "./website-crawling-workflow";
-import { WebCrawlerWorkflow } from "./web-crawler-workflow";
 import { RssSubscription } from "./rss-subscription";
 import { OpenSearchVector } from "../opensearch-vector";
 import { KendraRetrieval } from "../kendra-retrieval";
@@ -149,20 +148,6 @@ export class DataImport extends Construct {
       }
     );
 
-    const websiteCrawlingWorkflow = new WebsiteCrawlingWorkflow(
-      this,
-      "WebsiteCrawlingWorkflow",
-      {
-        shared: props.shared,
-        config: props.config,
-        processingBucket,
-        auroraDatabase: props.auroraDatabase,
-        ragDynamoDBTables: props.ragDynamoDBTables,
-        sageMakerRagModelsEndpoint: props.sageMakerRagModels?.model.endpoint,
-        openSearchVector: props.openSearchVector,
-      }
-    );
-
     const webCrawlerBatchJob = new WebCrawlerBatchJob(
       this,
       "WebCrawlerBatchJob",
@@ -178,9 +163,9 @@ export class DataImport extends Construct {
       }
     );
 
-    const websiteCrawlerWorkflow = new WebCrawlerWorkflow(
+    const websiteCrawlingWorkflow = new WebsiteCrawlingWorkflow(
       this,
-      "WebCrawlerWorkflow",
+      "WebsiteCrawlingWorkflow",
       {
         shared: props.shared,
         config: props.config,
@@ -262,8 +247,7 @@ export class DataImport extends Construct {
     this.processingBucket = processingBucket;
     this.ingestionQueue = ingestionQueue;
     this.fileImportWorkflow = fileImportWorkflow.stateMachine;
-    // this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;
-    this.websiteCrawlingWorkflow = websiteCrawlerWorkflow.stateMachine;
+    this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;
     this.rssIngestorFunction = rssSubscription.rssIngestorFunction;
 
     /**

@@ -530,7 +530,6 @@ def _process_document(
                     "document_id": document_id,
                     "bucket_name": PROCESSING_BUCKET_NAME,
                     "object_key": iteration_object_key,
-                    "done": False,
                 },
                 cls=genai_core.utils.json.CustomEncoder,
             ),
