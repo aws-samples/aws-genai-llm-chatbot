@@ -17,8 +17,6 @@ def main():
     data = json.loads(file_content)
     print(data)
 
-    # iteration = data["iteration"]
-    # crawler_job_id = data["crawler_job_id"]
     workspace = data["workspace"]
     document = data["document"]
     priority_queue = data["priority_queue"]

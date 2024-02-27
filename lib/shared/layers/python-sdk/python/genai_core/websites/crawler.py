@@ -24,10 +24,8 @@ def crawl_urls(
 ):
     workspace_id = workspace["workspace_id"]
     document_id = document["document_id"]
-    # processed_urls = set(processed_urls)
     batch_size = 20
 
-    # current_limit = len(processed_urls) #min(limit, 20)
     idx = 0
     while True:
         # break the loop when priority loop is empty or processed urls is equal to limit
