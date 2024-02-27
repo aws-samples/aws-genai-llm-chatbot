@@ -512,7 +512,7 @@ def _process_document(
                     "priority_queue": priority_queue,
                     "processed_urls": [],
                     "follow_links": follow_links,
-                    "limit": limit,
+                    "limit": min(limit, len(urls_to_crawl)),
                     "done": False,
                 },
                 cls=genai_core.utils.json.CustomEncoder,

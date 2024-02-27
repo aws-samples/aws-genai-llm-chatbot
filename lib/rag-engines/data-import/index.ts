@@ -7,6 +7,7 @@ import { FileImportBatchJob } from "./file-import-batch-job";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { FileImportWorkflow } from "./file-import-workflow";
 import { WebsiteCrawlingWorkflow } from "./website-crawling-workflow";
+import { WebCrawlerWorkflow } from "./web-crawler-workflow";
 import { RssSubscription } from "./rss-subscription";
 import { OpenSearchVector } from "../opensearch-vector";
 import { KendraRetrieval } from "../kendra-retrieval";
@@ -23,6 +24,7 @@ import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { NagSuppressions } from "cdk-nag";
+import { WebCrawlerBatchJob } from "./web-crawler-batch-job";
 
 export interface DataImportProps {
   readonly config: SystemConfig;
@@ -161,6 +163,32 @@ export class DataImport extends Construct {
       }
     );
 
+    const webCrawlerBatchJob = new WebCrawlerBatchJob(
+      this,
+      "WebCrawlerBatchJob",
+      {
+        shared: props.shared,
+        config: props.config,
+        uploadBucket,
+        processingBucket,
+        auroraDatabase: props.auroraDatabase,
+        ragDynamoDBTables: props.ragDynamoDBTables,
+        sageMakerRagModelsEndpoint: props.sageMakerRagModels?.model.endpoint,
+        openSearchVector: props.openSearchVector,
+      }
+    );
+
+    const websiteCrawlerWorkflow = new WebCrawlerWorkflow(
+      this,
+      "WebCrawlerWorkflow",
+      {
+        shared: props.shared,
+        config: props.config,
+        webCrawlerBatchJob,
+        ragDynamoDBTables: props.ragDynamoDBTables,
+      }
+    );
+
     const rssSubscription = new RssSubscription(this, "RssSubscription", {
       shared: props.shared,
       config: props.config,
@@ -234,7 +262,8 @@ export class DataImport extends Construct {
     this.processingBucket = processingBucket;
     this.ingestionQueue = ingestionQueue;
     this.fileImportWorkflow = fileImportWorkflow.stateMachine;
-    this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;
+    // this.websiteCrawlingWorkflow = websiteCrawlingWorkflow.stateMachine;
+    this.websiteCrawlingWorkflow = websiteCrawlerWorkflow.stateMachine;
     this.rssIngestorFunction = rssSubscription.rssIngestorFunction;
 
     /**
