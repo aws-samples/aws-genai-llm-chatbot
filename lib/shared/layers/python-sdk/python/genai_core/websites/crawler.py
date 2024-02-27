@@ -45,7 +45,7 @@ def crawl_urls(
         idx += 1
 
         document_sub_id = str(uuid.uuid4())
-        processed_urls.add(current_url)
+        processed_urls.append(current_url)
         print(f"Processing url {document_sub_id}: {current_url}")
 
         try:
@@ -92,10 +92,9 @@ def crawl_urls(
         "workspace": workspace,
         "document": document,
         "priority_queue": priority_queue,
-        "processed_urls": list(processed_urls),
+        "processed_urls": processed_urls,
         "follow_links": follow_links,
         "limit": limit,
-        "done": len(priority_queue) == 0 or limit == 0,
     }
 
 
