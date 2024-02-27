@@ -103,7 +103,6 @@ export class WebCrawlerBatchJob extends Construct {
 
     const webCrawlerJob = new batch.EcsJobDefinition(this, "WebCrawlerJob", {
       container: webCrawlerContainer,
-      // timeout: cdk.Duration.minutes(30),
       retryAttempts: 3,
       retryStrategies: [
         batch.RetryStrategy.of(

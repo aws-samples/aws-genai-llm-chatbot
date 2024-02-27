@@ -114,14 +114,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
                 Name: "INPUT_OBJECT_KEY",
                 "Value.$": "$.object_key",
               },
-              // {
-              //   Name: "PROCESSING_BUCKET_NAME",
-              //   "Value.$": "$.processing_bucket_name",
-              // },
-              // {
-              //   Name: "PROCESSING_OBJECT_KEY",
-              //   "Value.$": "$.processing_object_key",
-              // },
             ],
           },
         },
@@ -139,7 +131,6 @@ export class WebsiteCrawlingWorkflow extends Construct {
     const workflow = setProcessing.next(webCrawlerJob).next(setProcessed);
     const stateMachine = new sfn.StateMachine(this, "WebsiteCrawling", {
       definitionBody: sfn.DefinitionBody.fromChainable(workflow),
-      // timeout: cdk.Duration.hours(12),
       comment: "Website Crawling Workflow",
       tracingEnabled: true,
       logs: {
