@@ -96,8 +96,9 @@ export default function ChatMessage(props: ChatMessageProps) {
           navigator.clipboard.writeText(props.message.content);
         }}
         waiting={props.message.content.length === 0}
-        onThumbsUp={props.onThumbsUp}
-        onThumbsDown={props.onThumbsDown}
+        onFeedback={(thumb) => {
+          thumb === "up" ? props.onThumbsUp() : props.onThumbsDown();
+        }}
         expandableContent={
           props.message.type == ChatBotMessageType.AI &&
           ((props?.showMetadata && props.message.metadata) ||

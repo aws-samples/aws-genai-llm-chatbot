@@ -1,28 +1,69 @@
 import {
   Button,
   ExpandableSection,
+  Popover,
   SpaceBetween,
 } from "@cloudscape-design/components";
 import { ReactElement, useState } from "react";
 import styles from "../../styles/chat.module.scss";
 import { CopyWithPopoverButton } from "./CopyButton";
 
-function Avatar(props: { readonly name: string; readonly icon?: string }) {
+function Avatar(props: {
+  readonly name?: string;
+  readonly icon?: string;
+  readonly role: "ai" | "human";
+  readonly waiting?: boolean;
+}) {
   return (
-    <h3
+    <div
       style={{
         display: "block",
-        textAlign: "center",
-
-        position: "relative",
-        color: "#FFFFFF",
-        top: "0%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
+        marginRight: "1em",
+        width: "40px",
+        height: "40px",
+        minWidth: "40px",
+        minHeight: "40px",
+        alignContent: "start",
+        borderRadius: "50%",
+        background:
+          props.role === "ai"
+            ? "linear-gradient(300deg, rgb(52,20,120), rgb(118,72,250), rgb(62,141,255))"
+            : "#545b64",
       }}
     >
-      {props.name}
-    </h3>
+      {props.waiting ? (
+        <div className={styles.wave}>
+          <span className={styles.dot}></span>
+          <span className={styles.dot}></span>
+          <span className={styles.dot}></span>
+        </div>
+      ) : (
+        <>
+          {props?.name && (
+            <div
+              style={{
+                display: "block",
+                textAlign: "center",
+                position: "relative",
+                color: "#FFFFFF",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <Popover
+                content={props.name}
+                dismissButton={false}
+                position="top"
+                size="small"
+              >
+                <h3>{props.name[0].toUpperCase()}</h3>
+              </Popover>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 
@@ -31,11 +72,10 @@ export function BaseChatMessage(props: {
   readonly waiting?: boolean;
   readonly children?: ReactElement;
   readonly expandableContent?: ReactElement;
-  readonly onThumbsUp?: () => void;
-  readonly onThumbsDown?: () => void;
+  readonly onFeedback?: (thumb: "up" | "down") => void;
   readonly onCopy?: () => void;
 }) {
-  const [thumbs, setThumbs] = useState<"up" | "down" | undefined>(undefined);
+  const [thumb, setThumbs] = useState<"up" | "down" | undefined>(undefined);
   return (
     <div
       style={{
@@ -46,33 +86,11 @@ export function BaseChatMessage(props: {
         alignItems: "flex-start",
       }}
     >
-      <div
-        style={{
-          display: "block",
-          marginRight: "1em",
-          width: "40px",
-          height: "40px",
-          minWidth: "40px",
-          minHeight: "40px",
-          alignContent: "start",
-          borderRadius: "50%",
-          background: props.role === "ai" ? "#341478" : "#7638FA",
-        }}
-      >
-        {props.role === "ai" ? (
-          props.waiting ? (
-            <div className={styles.wave}>
-              <span className={styles.dot}></span>
-              <span className={styles.dot}></span>
-              <span className={styles.dot}></span>
-            </div>
-          ) : (
-            <Avatar name="A" />
-          )
-        ) : (
-          <Avatar name="H" />
-        )}
-      </div>
+      <Avatar
+        name={props.role === "ai" ? "Assistant" : "Human"}
+        waiting={props.waiting}
+        role={props.role}
+      />
 
       <div
         style={{
@@ -93,40 +111,42 @@ export function BaseChatMessage(props: {
         >
           {props.children}
         </div>
-        {(props.onCopy || props.onThumbsDown || props.onThumbsUp) && (
+        {(props.onCopy || props.onFeedback) && (
           <div className={styles.btn_chabot_message_copy}>
             <SpaceBetween direction="horizontal" size="xxs">
-              {props.role === "ai" && props.onThumbsUp && thumbs != "down" && (
-                <Button
-                  variant="icon"
-                  iconName={thumbs == "up" ? "thumbs-up-filled" : "thumbs-up"}
-                  disabled={props.waiting}
-                  onClick={() => {
-                    props.onThumbsUp!();
-                    thumbs != "up" ? setThumbs("up") : setThumbs(undefined);
-                  }}
-                />
-              )}
-              {props.role === "ai" && props.onThumbsDown && thumbs != "up" && (
-                <div style={{ fontSize: "0.9em" }}>
-                  <Button
-                    variant="icon"
-                    disabled={props.waiting}
-                    iconName={
-                      thumbs == "down" ? "thumbs-down-filled" : "thumbs-down"
-                    }
-                    onClick={() => {
-                      props.onThumbsDown!();
-                      thumbs != "down"
-                        ? setThumbs("down")
-                        : setThumbs(undefined);
-                    }}
-                  />
-                  {thumbs === "down" ? "Not helpful" : null}
-                </div>
-              )}
-              {props.role == "ai" &&
-                (props.onThumbsDown || props.onThumbsUp) && (
+              {props.role === "ai" && props.onFeedback && (
+                <>
+                  {thumb != "down" && (
+                    <Button
+                      variant="icon"
+                      iconName={
+                        thumb == "up" ? "thumbs-up-filled" : "thumbs-up"
+                      }
+                      disabled={props.waiting}
+                      onClick={() => {
+                        props.onFeedback!("up");
+                        thumb != "up" ? setThumbs("up") : setThumbs(undefined);
+                      }}
+                    />
+                  )}
+                  {thumb != "up" && (
+                    <div style={{ fontSize: "0.9em" }}>
+                      <Button
+                        variant="icon"
+                        disabled={props.waiting}
+                        iconName={
+                          thumb == "down" ? "thumbs-down-filled" : "thumbs-down"
+                        }
+                        onClick={() => {
+                          props.onFeedback!("down");
+                          thumb != "down"
+                            ? setThumbs("down")
+                            : setThumbs(undefined);
+                        }}
+                      />
+                      {thumb === "down" ? "Not helpful" : null}
+                    </div>
+                  )}
                   <div
                     style={{
                       borderRightColor: "#D0D0D0",
@@ -137,8 +157,8 @@ export function BaseChatMessage(props: {
                       marginBottom: "auto",
                     }}
                   />
-                )}
-
+                </>
+              )}
               {props.onCopy ? (
                 <CopyWithPopoverButton
                   disabled={props.waiting}
