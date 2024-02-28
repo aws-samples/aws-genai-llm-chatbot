@@ -38,20 +38,25 @@ def list_bedrock_agents():
 
         response = bedrock.list_agents(
         )
+        agents = [bedrock.get_agent(agentId = a["agentId"])["agent"] for a in response.get("agentSummaries", [])
+            if a.get("agentStatus", "")
+            == genai_core.types.AgentStatus.PREPARED.value]
 
         bedrock_agents = [
             {
                 "provider": Provider.BEDROCK.value,
-                "name": f'{a["agentName"]}#{a["agentId"]}',
+                "name": a["agentName"],
                 "streaming": True,
                 "inputModalities": [Modality.TEXT.value],
                 "outputModalities": [Modality.TEXT.value],
                 "interface": ModelInterface.AGENT.value,
                 "ragSupported": False,
+                "agentId": a["agentId"],
+                "agentVersion": "TSTALIASID",
+                "agentIsUpdated": a["preparedAt"] < a["updatedAt"],
+                "isAgent": True,
             }
-            for a in response.get("agentSummaries", [])
-            if a.get("agentStatus", "")
-            == genai_core.types.AgentStatus.PREPARED.value
+            for a in agents
         ]
 
         return bedrock_agents
@@ -74,8 +79,9 @@ def list_openai_models():
             "streaming": True,
             "inputModalities": [Modality.TEXT.value],
             "outputModalities": [Modality.TEXT.value],
-            "interface": ModelInterface.LANGCHIAN.value,
+            "interface": ModelInterface.LANGCHAIN.value,
             "ragSupported": True,
+            "isAgent": False,
         }
         for model in models.data
         if model["id"].startswith("gpt")
@@ -106,8 +112,9 @@ def list_bedrock_models():
                 "streaming": model.get("responseStreamingSupported", False),
                 "inputModalities": model["inputModalities"],
                 "outputModalities": model["outputModalities"],
-                "interface": ModelInterface.LANGCHIAN.value,
+                "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
+                "isAgent": False,
             }
             for model in bedrock_models
             # Exclude embeddings and stable diffusion models
@@ -139,8 +146,9 @@ def list_bedrock_finetuned_models():
                 "streaming": model.get("responseStreamingSupported", False),
                 "inputModalities": model["inputModalities"],
                 "outputModalities": model["outputModalities"],
-                "interface": ModelInterface.LANGCHIAN.value,
+                "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
+                "isAgent": False,
             }
             for model in bedrock_custom_models
             # Exclude embeddings and stable diffusion models
@@ -168,6 +176,7 @@ def list_sagemaker_models():
             "outputModalities": model["outputModalities"],
             "interface": model["interface"],
             "ragSupported": model["ragSupported"],
+            "isAgent": False,
         }
         for model in models
     ]

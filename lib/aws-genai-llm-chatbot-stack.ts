@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { SystemConfig, ModelInterface, Direction } from "./shared/types";
+import { SystemConfig, ModelInterface } from "./shared/types";
 import { Authentication } from "./authentication";
 import { UserInterface } from "./user-interface";
 import { Shared } from "./shared";
@@ -9,8 +9,6 @@ import { RagEngines } from "./rag-engines";
 import { Models } from "./models";
 import { LangChainInterface } from "./model-interfaces/langchain";
 import { IdeficsInterface } from "./model-interfaces/idefics";
-import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
-import * as sns from "aws-cdk-lib/aws-sns";
 import { BedrockAgentInterface } from "./model-interfaces/bedrock-agents";
 import { NagSuppressions } from "cdk-nag";
 import { BedrockWeatherAgent } from "./agents";
@@ -65,11 +63,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       (model) => model.interface === ModelInterface.LangChain
     );
 
-    if (
-      props.config.bedrock?.enabled
-      // && props.config.bedrock?.bedrockAgentAliasId
-      // && props.config.bedrock?.bedrockAgentId
-    ) {
+    if (props.config.bedrock?.enabled) {
       const bedrockAgentInterface = new BedrockAgentInterface(
         this,
         "IBedrockAgent",

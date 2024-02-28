@@ -33,11 +33,17 @@ export abstract class OptionsHelper {
   }
 
   static getSelectOptionGroups<
-    T extends { provider: string; name: string; interface?: string },
+    T extends {
+      provider: string;
+      name: string;
+      interface?: string;
+      isAgent?: boolean;
+      isAgentUpdated?: boolean;
+    },
   >(data: T[]) {
     const modelsMap = new Map<string, T[]>();
     data.forEach((item) => {
-      let group = `${item.provider}:${item.interface}`;
+      const group = `${item.provider}:${item.interface}`;
       let items = modelsMap.get(group);
       if (!items) {
         items = [];
@@ -53,12 +59,13 @@ export abstract class OptionsHelper {
     const options: SelectProps.OptionGroup[] = keys.map((key) => {
       const items = modelsMap.get(key);
       items?.sort((a, b) => a.name.localeCompare(b.name));
-
       return {
         label: this.getProviderLabel(key),
         options:
           items?.map((item) => ({
-            label: item.name.split("#")[0],
+            label:
+              item.name +
+              (item.isAgent ? (item.isAgentUpdated! ? " ⭐️" : " ✅") : ""),
             value: `${item.provider}::${item.name}`,
           })) ?? [],
       };

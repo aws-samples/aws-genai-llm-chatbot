@@ -14,6 +14,18 @@ import ChatInputPanel, { ChatScrollState } from "./chat-input-panel";
 import styles from "../../styles/chat.module.scss";
 import { CHATBOT_NAME } from "../../common/constants";
 
+export interface AgentTrace {
+  preProcessingTrace?: {
+    modelInvocationInput?: { [key: string]: unknown };
+    modelInvocationOutput?: { [key: string]: unknown };
+  };
+  orchestrationTrace?: {
+    modelInvocationInput?: { [key: string]: unknown };
+    modelInvocationOutput?: { [key: string]: unknown };
+    rationale?: { [key: string]: unknown };
+  };
+}
+
 export default function Chat(props: { sessionId?: string }) {
   const appContext = useContext(AppContext);
   const [running, setRunning] = useState<boolean>(false);
@@ -34,6 +46,10 @@ export default function Chat(props: { sessionId?: string }) {
 
   const [messageHistory, setMessageHistory] = useState<ChatBotHistoryItem[]>(
     []
+  );
+
+  const [agentTrace, setAgentTrace] = useState<AgentTrace | undefined>(
+    undefined
   );
 
   useEffect(() => {
@@ -80,7 +96,11 @@ export default function Chat(props: { sessionId?: string }) {
     })();
   }, [appContext, props.sessionId]);
 
-  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem) => {
+  const handleFeedback = (
+    feedbackType: 1 | 0,
+    idx: number,
+    message: ChatBotHistoryItem
+  ) => {
     if (message.metadata.sessionId) {
       const prompt = messageHistory[idx - 1]?.content;
       const completion = message.content;
@@ -91,7 +111,7 @@ export default function Chat(props: { sessionId?: string }) {
         feedback: feedbackType,
         prompt: prompt,
         completion: completion,
-        model: model as string
+        model: model as string,
       };
       addUserFeedback(feedbackData);
     }
@@ -101,7 +121,7 @@ export default function Chat(props: { sessionId?: string }) {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    await apiClient.userFeedback.addUserFeedback({feedbackData});
+    await apiClient.userFeedback.addUserFeedback({ feedbackData });
   };
 
   return (
@@ -114,6 +134,7 @@ export default function Chat(props: { sessionId?: string }) {
             showMetadata={configuration.showMetadata}
             onThumbsUp={() => handleFeedback(1, idx, message)}
             onThumbsDown={() => handleFeedback(0, idx, message)}
+            agentTrace={agentTrace}
           />
         ))}
       </SpaceBetween>
@@ -136,6 +157,7 @@ export default function Chat(props: { sessionId?: string }) {
           setMessageHistory={(history) => setMessageHistory(history)}
           configuration={configuration}
           setConfiguration={setConfiguration}
+          setAgentTrace={setAgentTrace}
         />
       </div>
     </div>

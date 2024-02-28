@@ -33,6 +33,7 @@ export enum ChatBotAction {
   FinalResponse = "final_response",
   LLMNewToken = "llm_new_token",
   Error = "error",
+  AgentTrace = "agent_trace",
 }
 
 export enum ChatBotModelInterface {
@@ -75,6 +76,7 @@ export interface ChatBotRunRequest {
     mode: string;
     workspaceId?: string;
     modelKwargs?: Record<string, string | boolean | number>;
+    agentId?: string;
   };
 }
 

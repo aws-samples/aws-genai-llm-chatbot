@@ -1,1 +1,1 @@
-from .base import BedrockAgent
+from .base import BedrockAgent, AgentInputOutputAdapter

@@ -13,18 +13,25 @@ class AgentInputOutputAdapter:
 
     @classmethod
     def prepare_output_stream(
-        cls, response: Any, stop: Optional[List[str]] = None
+        cls, response: Any
     ) -> Iterator[str]:
         stream = response.get("completion")
 
         if stream is None:
-            []
+            yield ""
 
         for event in stream:
             print(event)
             chunk = event.get("chunk")
             # chunk obj format varies with provider
             yield chunk["bytes"].decode("utf8")
+
+    @classmethod
+    def prepare_agent_answer(
+        cls, chunk: Any
+    ) -> str:
+       
+       return chunk["bytes"].decode("utf8")
 
 
 class BedrockAgent(AgentAdapter, ABC):
@@ -104,7 +111,7 @@ class BedrockAgent(AgentAdapter, ABC):
     ) -> Iterator[str]:
         try:
             response = self.client.invoke_agent(
-                enableTrace = False,
+                enableTrace = True,
                 inputText=prompt,
                 agentId=self.agent_id,
                 agentAliasId=self.agent_alias_id,
@@ -113,6 +120,8 @@ class BedrockAgent(AgentAdapter, ABC):
         except Exception as e:
             raise ValueError(f"Error raised by bedrock service: {e}")
 
+        for event in response["completion"]:
+            yield event
         
-        for chunk in AgentInputOutputAdapter.prepare_output_stream(response):
-            yield chunk
+        # for chunk in AgentInputOutputAdapter.prepare_output_stream(response):
+        #     yield chunk

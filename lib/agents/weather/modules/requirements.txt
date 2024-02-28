@@ -1,0 +1,2 @@
+requests==2.29
+pandas==2.2

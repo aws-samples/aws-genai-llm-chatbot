@@ -53,7 +53,7 @@ class AgentStatus(Enum):
 
 
 class ModelInterface(Enum):
-    LANGCHIAN = "langchain"
+    LANGCHAIN = "langchain"
     IDEFICS = "idefics"
     AGENT = "agent"
 
@@ -72,6 +72,7 @@ class ChatbotAction(Enum):
     RUN = "run"
     LLM_NEW_TOKEN = "llm_new_token"
     FINAL_RESPONSE = "final_response"
+    AGENT_TRACE = "agent_trace"
 
 
 class ChatbotMessageType(Enum):

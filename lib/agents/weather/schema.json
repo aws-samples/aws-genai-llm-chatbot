@@ -51,6 +51,74 @@
           }
         }
       }
+    },
+    "/historical_weather": {
+      "get": {
+        "summary": "GET /historical_weather",
+        "description": "get the historical daily mean temperature and precipitation for a given place for a range of dates",
+        "operationId": "get_historical_weather_historical_weather_get",
+        "parameters": [
+          {
+            "description": "the name of the place",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Place",
+              "description": "the name of the place"
+            },
+            "name": "place",
+            "in": "query"
+          },
+          {
+            "description": "starting date in YYYY-MM-DD format",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fromdate",
+              "description": "starting date in YYYY-MM-DD format"
+            },
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "description": "ending date in YYYY-MM-DD format",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Todate",
+              "description": "ending date in YYYY-MM-DD format"
+            },
+            "name": "toDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Weather"
+                  },
+                  "type": "array",
+                  "title": "Return"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

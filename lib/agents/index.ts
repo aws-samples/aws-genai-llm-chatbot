@@ -23,9 +23,9 @@ export class BedrockWeatherAgent extends Construct {
       }:017000801446:layer:AWSLambdaPowertoolsPythonV2:58`
     );
 
-    new geo.CfnPlaceIndex(this, "place-index", {
+    const placeIndex = new geo.CfnPlaceIndex(this, "place-index", {
       dataSource: "Esri",
-      indexName: "Test",
+      indexName: "PlaceIndex",
       pricingPlan: "RequestBasedUsage",
     });
 
@@ -49,15 +49,26 @@ export class BedrockWeatherAgent extends Construct {
       ],
     });
 
+    const modulesLayer = new lambda.LayerVersion(this, "modules-layer", {
+      code: lambda.Code.fromDockerBuild(
+        path.join(__dirname, "weather/modules")
+      ),
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_12],
+      description: "Layer with required modules for the agent",
+    });
+
     const weather = new lambda.Function(this, "weather", {
-      runtime: lambda.Runtime.PYTHON_3_9,
+      runtime: lambda.Runtime.PYTHON_3_12,
       description:
         "Lambda function that implements APIs to retrieve weather data",
-      code: lambda.Code.fromDockerBuild(path.join(__dirname, "weather")),
+      code: lambda.Code.fromAsset(path.join(__dirname, "weather")),
       handler: "lambda.handler",
+      environment: {
+        LOCATION_INDEX: placeIndex.indexName,
+      },
       memorySize: 512,
       timeout: cdk.Duration.seconds(10),
-      layers: [powertools],
+      layers: [powertools, modulesLayer],
     });
 
     const policy = new iam.Policy(this, "weather-policy", {
@@ -74,6 +85,7 @@ export class BedrockWeatherAgent extends Construct {
       embeddingsModel: bedrock.BedrockFoundationModel.TITAN_EMBED_TEXT_V1,
       vectorField: "vector",
       vectorIndex: vectorIndex,
+      vectorStore: vectorStore,
       indexName: "weather",
       instruction: "answers questions about WMO and metereology",
     });
@@ -93,10 +105,12 @@ export class BedrockWeatherAgent extends Construct {
     const agent = new bedrock.Agent(this, "weather-agent", {
       foundationModel:
         bedrock.BedrockFoundationModel.ANTHROPIC_CLAUDE_INSTANT_V1_2,
-      instruction:
-        "You are a weather expert and answer user question about weather in different places. You answer the questions in the same language they have been asked.",
+      instruction: `You are a weather expert and answer user question about weather in different places. 
+If you are asked to provide historical date, you need to answer with a summary of the weather over the period. 
+You answer the questions in the same language they have been asked.`,
       description: "an agent to interact with a weather api",
       knowledgeBases: [kb],
+      name: "WeatherTeller",
     });
 
     agent.addActionGroup({
@@ -105,6 +119,12 @@ export class BedrockWeatherAgent extends Construct {
         path.join(__dirname, "weather", "schema.json")
       ),
       actionGroupState: "ENABLED",
+    });
+
+    agent.addActionGroup({
+      parentActionGroupSignature: "AMAZON.UserInput",
+      actionGroupState: "ENABLED",
+      actionGroupName: "UserInputAction",
     });
 
     new BucketDeployment(this, "my-docs-files", {

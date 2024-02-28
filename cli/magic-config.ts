@@ -174,7 +174,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "bedrockAgents",
       message: "Do you want to deploy a sample Bedrock Agent?",
-      initial: false,
+      initial: options.bedrockAgents ?? false,
       skip() {
         return !["us-east-1", "us-west-2"].includes(
           (this as any).state.answers.bedrockRegion

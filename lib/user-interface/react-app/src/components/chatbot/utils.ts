@@ -141,17 +141,7 @@ export function updateMessageHistoryRef(
       const lastMessage = messageHistory.at(-1)!;
       lastMessage.tokens = lastMessage.tokens ?? [];
       if (hasToken) {
-        // Workaround for text duplicates issue
-        if (
-          !lastMessage.tokens
-            .map((t) => t.sequenceNumber)
-            .includes(token.sequenceNumber)
-        ) {
-          lastMessage.tokens.push(token);
-        } else {
-          return;
-        }
-      } else {
+        lastMessage.tokens.push(token);
       }
 
       lastMessage.tokens.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
@@ -338,7 +328,6 @@ export function getSelectedModelMetadata(
     const targetModel = models?.find(
       (m) => m.name === name && m.provider === provider
     );
-
     if (targetModel) {
       selectedModelMetadata = targetModel;
     }
