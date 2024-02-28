@@ -1,9 +1,10 @@
 import { Popover } from "@cloudscape-design/components";
 import styles from "../../styles/chat.module.scss";
+import { ReactElement } from "react";
 
 export function Avatar(props: {
   readonly name?: string;
-  readonly icon?: string;
+  readonly content?: ReactElement;
   readonly role: "ai" | "human";
   readonly waiting?: boolean;
 }) {
@@ -32,28 +33,39 @@ export function Avatar(props: {
         </div>
       ) : (
         <>
-          {props?.name && (
-            <div
-              style={{
-                display: "block",
-                textAlign: "center",
-                position: "relative",
-                color: "#FFFFFF",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-              }}
-            >
+          <div
+            style={{
+              display: "block",
+              textAlign: "center",
+              position: "relative",
+              color: "#FFFFFF",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            {props.content ? (
+              <div
+                style={{
+                  width: "25px",
+                  height: "25px",
+                  color: "#FFFFFF",
+                  margin: "auto",
+                }}
+              >
+                {props.content}
+              </div>
+            ) : (
               <Popover
                 content={props.name}
                 dismissButton={false}
                 position="top"
                 size="small"
               >
-                <h3>{props.name[0].toUpperCase()}</h3>
+                <h3>{(props.name ?? "A")[0].toUpperCase()}</h3>
               </Popover>
-            </div>
-          )}
+            )}
+          </div>
         </>
       )}
     </div>
