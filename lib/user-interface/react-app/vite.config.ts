@@ -48,5 +48,9 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
+    cors: false,
+    headers: {
+      "Content-Security-Policy": "frame-ancestors 'self' http://localhost:5173 http://127.0.0.1:5173 https://kaipartners.com https://www.deltacollege.edu/",
+    },
   },
 });

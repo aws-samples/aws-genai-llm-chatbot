@@ -18,7 +18,7 @@ const subHeaderWrapperStyles = {
   display: 'block'
 }
 const Layout = () => (
-  <>
+  <div style={{ backgroundColor: "#f9c623" }}>
     <GlobalHeader />
     <div style={{ height: 56, backgroundColor: "#000716" }} />
     <div>
@@ -34,7 +34,7 @@ const Layout = () => (
       <Outlet />
       <GlobalFooter />
     </div>
-  </>
+  </div>
 )
 
 function App() {
@@ -44,7 +44,8 @@ function App() {
     <div
       style={{
         height: "100%",
-        backgroundColor: "#f9c623"
+        display: "flex",
+        alignItems: "flex-end",
       }}
     >
       <Router>
