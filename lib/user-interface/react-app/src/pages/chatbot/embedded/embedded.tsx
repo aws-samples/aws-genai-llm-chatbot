@@ -14,7 +14,8 @@ export default function Embedded() {
     <div
       style={{
         borderRadius: 10,
-        margin: 20
+        flexGrow: 1,
+        margin: 20,
       }}
     >
       <Chat sessionId={sessionId} />

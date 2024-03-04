@@ -92,7 +92,10 @@ export default function Chat(props: { sessionId?: string }) {
       </SpaceBetween>
       <div className={styles.welcome_text}>
         {messageHistory.length == 0 && !session?.loading && (
-          <center>{CHATBOT_NAME}</center>
+          <center>
+            What can we help you with today?
+            <div style={{fontSize: 12}}>© 2024 KAI Partners, Inc. All Rights Reserved.</div>
+          </center>
         )}
         {session?.loading && (
           <center>
