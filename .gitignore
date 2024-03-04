@@ -428,6 +428,7 @@ deploy-models
 cli/*.js
 bin/*.js
 lib/**/*.js
+!lib/**/public/*.js
 !lib/chatbot-api/functions/resolvers/**/*.js
 !jest.config.js
 *.d.ts
