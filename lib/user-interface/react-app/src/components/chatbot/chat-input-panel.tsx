@@ -66,7 +66,7 @@ export interface ChatInputPanelProps {
   setMessageHistory: (history: ChatBotHistoryItem[]) => void;
   configuration: ChatBotConfiguration;
   setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
-  setAgentTrace?: Dispatch<React.SetStateAction<AgentTrace | undefined>>;
+  setAgentTrace: Dispatch<React.SetStateAction<AgentTrace | undefined>>;
 }
 
 export abstract class ChatScrollState {
@@ -146,10 +146,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 response
               );
             }
-            if (
-              response.action === ChatBotAction.AgentTrace &&
-              props.setAgentTrace
-            ) {
+            if (response.action === ChatBotAction.AgentTrace) {
               props.setAgentTrace(JSON.parse(response.data.content!)["trace"]);
             }
             if (
@@ -157,6 +154,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               response.action === ChatBotAction.Error
             ) {
               console.log("Final message received");
+              props.setAgentTrace(undefined);
               props.setRunning(false);
             }
             props.setMessageHistory([...messageHistoryRef.current]);
