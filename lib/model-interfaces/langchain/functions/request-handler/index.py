@@ -23,9 +23,9 @@ API_KEYS_SECRETS_ARN = os.environ["API_KEYS_SECRETS_ARN"]
 sequence_number = 0
 
 
-def on_llm_new_token(
-    user_id, session_id, self, token, run_id, *args, **kwargs
-):
+def on_llm_new_token(user_id, session_id, self, token, run_id, *args, **kwargs):
+    if token is None or len(token) == 0:
+        return
     global sequence_number
     sequence_number += 1
     run_id = str(run_id)
