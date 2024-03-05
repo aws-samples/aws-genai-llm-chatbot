@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  Container,
-  ExpandableSection,
-  Popover,
-  Spinner,
-  StatusIndicator,
-  Tabs,
-  TextContent,
-  Textarea,
-} from "@cloudscape-design/components";
+import { SpaceBetween, Tabs, Textarea } from "@cloudscape-design/components";
 import { useEffect, useState } from "react";
 import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
@@ -27,6 +16,8 @@ import { getSignedUrl } from "./utils";
 
 import "react-json-view-lite/dist/index.css";
 import "../../styles/app.scss";
+import { BaseChatMessage } from "./BaseChatMessage";
+import { CopyWithPopoverButton } from "./CopyButton";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
@@ -36,13 +27,43 @@ export interface ChatMessageProps {
   onThumbsDown: () => void;
 }
 
+function PromptTabs(props: { prompts: string[] | string[][] }) {
+  const [promptIndex, setPromptIndex] = useState("0");
+  let promptList: string[] = [];
+  if (props.prompts[0][0].length > 1) {
+    promptList = (props.prompts as string[][]).map((p) => p[0]);
+  } else {
+    promptList = props.prompts as string[];
+  }
+  return (
+    <>
+      <div className={styles.btn_chabot_metadata_copy}>
+        <CopyWithPopoverButton
+          onCopy={() => {
+            navigator.clipboard.writeText(promptList[parseInt(promptIndex)]);
+          }}
+        />
+      </div>
+      <Tabs
+        tabs={promptList.map((p, i) => {
+          return {
+            id: `${i}`,
+            label: `Prompt ${promptList.length > 1 ? i + 1 : ""}`,
+            content: <Textarea value={p} readOnly={true} rows={8} />,
+          };
+        })}
+        activeTabId={promptIndex}
+        onChange={({ detail }) => setPromptIndex(detail.activeTabId)}
+      />
+    </>
+  );
+}
+
 export default function ChatMessage(props: ChatMessageProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [message] = useState<ChatBotHistoryItem>(props.message);
   const [files, setFiles] = useState<ImageFile[]>([] as ImageFile[]);
   const [documentIndex, setDocumentIndex] = useState("0");
-  const [promptIndex, setPromptIndex] = useState("0");
-  const [selectedIcon, setSelectedIcon] = useState<1 | 0 | null>(null);
 
   useEffect(() => {
     const getSignedUrls = async () => {
@@ -74,76 +95,103 @@ export default function ChatMessage(props: ChatMessageProps) {
 
   return (
     <div>
-      {props.message?.type === ChatBotMessageType.AI && (
-        <Container
-          footer={
-            ((props?.showMetadata && props.message.metadata) ||
-              (props.message.metadata &&
-                props.configuration?.showMetadata)) && (
-              <ExpandableSection variant="footer" headerText="Metadata">
-                <JsonView
-                  shouldInitiallyExpand={(level) => level < 2}
-                  data={JSON.parse(
-                    JSON.stringify(props.message.metadata).replace(
-                      /\\n/g,
-                      "\\\\n"
-                    )
-                  )}
-                  style={{
-                    ...darkStyles,
-                    stringValue: "jsonStrings",
-                    numberValue: "jsonNumbers",
-                    booleanValue: "jsonBool",
-                    nullValue: "jsonNull",
-                    container: "jsonContainer",
-                  }}
-                />
-                {props.message.metadata.documents && (
+      <BaseChatMessage
+        role={props.message?.type === ChatBotMessageType.AI ? "ai" : "human"}
+        onCopy={() => {
+          navigator.clipboard.writeText(props.message.content);
+        }}
+        waiting={props.message.content.length === 0}
+        onFeedback={(thumb) => {
+          thumb === "up" ? props.onThumbsUp() : props.onThumbsDown();
+        }}
+        name={
+          props.message?.type === ChatBotMessageType.Human ? "Human" : undefined
+        }
+        avatarElement={
+          props.message?.type === ChatBotMessageType.AI ? (
+            <svg
+              viewBox="0 0 16 16"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+            >
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g
+                id="SVGRepo_tracerCarrier"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></g>
+              <g id="SVGRepo_iconCarrier">
+                <path
+                  fill="#FFFFFF"
+                  fill-rule="evenodd"
+                  d="M.5 2.75a2.25 2.25 0 114.28.97l1.345 1.344.284-.284a2.25 2.25 0 013.182 0l.284.284 1.344-1.344a2.25 2.25 0 111.06 1.06l-1.343 1.345.284.284a2.25 2.25 0 010 3.182l-.284.284 1.344 1.344a2.25 2.25 0 11-1.06 1.06l-1.345-1.343-.284.284a2.25 2.25 0 01-3.182 0l-.284-.284-1.344 1.344a2.25 2.25 0 11-1.06-1.06l1.343-1.345-.284-.284a2.25 2.25 0 010-3.182l.284-.284L3.72 4.781A2.25 2.25 0 01.5 2.75zM2.75 2a.75.75 0 100 1.5.75.75 0 000-1.5zm0 10.5a.75.75 0 100 1.5.75.75 0 000-1.5zm9.75.75a.75.75 0 111.5 0 .75.75 0 01-1.5 0zM13.25 2a.75.75 0 100 1.5.75.75 0 000-1.5zM7.47 5.841a.75.75 0 011.06 0L10.16 7.47a.75.75 0 010 1.06L8.53 10.16a.75.75 0 01-1.06 0L5.84 8.53a.75.75 0 010-1.06L7.47 5.84z"
+                  clip-rule="evenodd"
+                ></path>
+              </g>
+            </svg>
+          ) : undefined
+        }
+        expandableContent={
+          props.message.type == ChatBotMessageType.AI &&
+          ((props?.showMetadata && props.message.metadata) ||
+            (props.message.metadata && props.configuration?.showMetadata)) ? (
+            <>
+              <JsonView
+                shouldInitiallyExpand={(level) => level < 2}
+                data={JSON.parse(
+                  JSON.stringify(props.message.metadata).replace(
+                    /\\n/g,
+                    "\\\\n"
+                  )
+                )}
+                style={{
+                  ...darkStyles,
+                  stringValue: "jsonStrings",
+                  numberValue: "jsonNumbers",
+                  booleanValue: "jsonBool",
+                  nullValue: "jsonNull",
+                  container: "jsonContainer",
+                }}
+              />
+              {props.message.metadata.documents &&
+                (props.message.metadata.documents as RagDocument[]).length >
+                  0 && (
                   <>
                     <div className={styles.btn_chabot_metadata_copy}>
-                      <Popover
-                        size="medium"
-                        position="top"
-                        triggerType="custom"
-                        dismissButton={false}
-                        content={
-                          <StatusIndicator type="success">
-                            Copied to clipboard
-                          </StatusIndicator>
-                        }
-                      >
-                        <Button
-                          variant="inline-icon"
-                          iconName="copy"
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              (
-                                props.message.metadata
-                                  .documents as RagDocument[]
-                              )[parseInt(documentIndex)].page_content
-                            );
-                          }}
-                        />
-                      </Popover>
+                      <CopyWithPopoverButton
+                        onCopy={() => {
+                          navigator.clipboard.writeText(
+                            (props.message.metadata.documents as RagDocument[])[
+                              parseInt(documentIndex)
+                            ].page_content
+                          );
+                        }}
+                      />
                     </div>
                     <Tabs
                       tabs={(
                         props.message.metadata.documents as RagDocument[]
-                      ).map((p: any, i) => {
-                        return {
-                          id: `${i}`,
-                          label: p.metadata.path,
-                          content: (
-                            <>
+                      ).map(
+                        (
+                          p: {
+                            metadata: { path: string };
+                            page_content: string;
+                          },
+                          i
+                        ) => {
+                          return {
+                            id: `${i}`,
+                            label: p.metadata.path,
+                            content: (
                               <Textarea
                                 value={p.page_content}
                                 readOnly={true}
                                 rows={8}
                               />
-                            </>
-                          ),
-                        };
-                      })}
+                            ),
+                          };
+                        }
+                      )}
                       activeTabId={documentIndex}
                       onChange={({ detail }) =>
                         setDocumentIndex(detail.activeTabId)
@@ -151,97 +199,19 @@ export default function ChatMessage(props: ChatMessageProps) {
                     />
                   </>
                 )}
-                {props.message.metadata.prompts && (
-                  <>
-                    <div className={styles.btn_chabot_metadata_copy}>
-                      <Popover
-                        size="medium"
-                        position="top"
-                        triggerType="custom"
-                        dismissButton={false}
-                        content={
-                          <StatusIndicator type="success">
-                            Copied to clipboard
-                          </StatusIndicator>
-                        }
-                      >
-                        <Button
-                          variant="inline-icon"
-                          iconName="copy"
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              (props.message.metadata.prompts as string[][])[
-                                parseInt(promptIndex)
-                              ][0]
-                            );
-                          }}
-                        />
-                      </Popover>
-                    </div>
-                    <Tabs
-                      tabs={(props.message.metadata.prompts as string[][]).map(
-                        (p, i) => {
-                          return {
-                            id: `${i}`,
-                            label: `Prompt ${
-                              (props.message.metadata.prompts as string[][])
-                                .length > 1
-                                ? i + 1
-                                : ""
-                            }`,
-                            content: (
-                              <>
-                                <Textarea
-                                  value={p[0]}
-                                  readOnly={true}
-                                  rows={8}
-                                />
-                              </>
-                            ),
-                          };
-                        }
-                      )}
-                      activeTabId={promptIndex}
-                      onChange={({ detail }) =>
-                        setPromptIndex(detail.activeTabId)
-                      }
-                    />
-                  </>
+              {props.message.metadata.prompts &&
+                (props.message.metadata.prompts as string[]).length > 0 && (
+                  <PromptTabs
+                    prompts={props.message.metadata.prompts as string[]}
+                  />
                 )}
-              </ExpandableSection>
-            )
-          }
-        >
-          {content?.length === 0 ? (
-            <Box>
-              <Spinner />
-            </Box>
-          ) : null}
-          {props.message.content.length > 0 ? (
-            <div className={styles.btn_chabot_message_copy}>
-              <Popover
-                size="medium"
-                position="top"
-                triggerType="custom"
-                dismissButton={false}
-                content={
-                  <StatusIndicator type="success">
-                    Copied to clipboard
-                  </StatusIndicator>
-                }
-              >
-                <Button
-                  variant="inline-icon"
-                  iconName="copy"
-                  onClick={() => {
-                    navigator.clipboard.writeText(props.message.content);
-                  }}
-                />
-              </Popover>
-            </div>
-          ) : null}
+            </>
+          ) : undefined
+        }
+      >
+        <>
           <ReactMarkdown
-            children={content}
+            className={styles.markdown}
             remarkPlugins={[remarkGfm]}
             components={{
               pre(props) {
@@ -277,60 +247,30 @@ export default function ChatMessage(props: ChatMessageProps) {
                 );
               },
             }}
-          />
-          <div className={styles.thumbsContainer}>
-            {(selectedIcon === 1 || selectedIcon === null) && (
-              <Button
-                variant="icon"
-                iconName={selectedIcon === 1 ? "thumbs-up-filled" : "thumbs-up"}
-                onClick={() => {
-                  props.onThumbsUp();
-                  setSelectedIcon(1);
-                }}
-              />
-            )}
-            {(selectedIcon === 0 || selectedIcon === null) && (
-              <Button
-                iconName={
-                  selectedIcon === 0 ? "thumbs-down-filled" : "thumbs-down"
-                }
-                variant="icon"
-                onClick={() => {
-                  props.onThumbsDown();
-                  setSelectedIcon(0);
-                }}
-              />
-            )}
-          </div>
-        </Container>
-      )}
-      {loading && (
-        <Box float="left">
-          <Spinner />
-        </Box>
-      )}
-      {files && !loading && (
-        <>
-          {files.map((file, idx) => (
-            <a
-              key={idx}
-              href={file.url as string}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img
-                src={file.url as string}
-                className={styles.img_chabot_message}
-              />
-            </a>
-          ))}
+          >
+            {props.message.content.trim()}
+          </ReactMarkdown>
+          {files && !loading && (
+            <div style={{ marginTop: "5px" }}>
+              <SpaceBetween size="s">
+                {files.map((file, idx) => (
+                  <a
+                    key={idx}
+                    href={file.url as string}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <img
+                      src={file.url as string}
+                      className={styles.img_chabot_message}
+                    />
+                  </a>
+                ))}
+              </SpaceBetween>
+            </div>
+          )}
         </>
-      )}
-      {props.message?.type === ChatBotMessageType.Human && (
-        <TextContent>
-          <strong>{props.message.content}</strong>
-        </TextContent>
-      )}
+      </BaseChatMessage>
     </div>
   );
 }
