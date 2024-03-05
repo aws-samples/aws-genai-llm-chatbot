@@ -87,9 +87,10 @@ class LLMInputOutputAdapter:
                 ):
                     return
                 if provider == "anthropic":
-                    yield GenerationChunk(
-                        text=chunk_obj.get("delta", {}).get("text", "")
-                    )
+                    if chunk_obj.get("type") == "content_block_delta":
+                        yield GenerationChunk(
+                            text=chunk_obj.get("delta", {}).get("text", "")
+                        )
                 else:
                     # chunk obj format varies with provider
                     yield GenerationChunk(
