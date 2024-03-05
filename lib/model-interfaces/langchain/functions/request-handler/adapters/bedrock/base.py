@@ -13,52 +13,6 @@ from langchain.utilities.anthropic import (
     get_token_ids_anthropic,
 )
 
-HUMAN_PROMPT = "\n\nHuman:"
-ASSISTANT_PROMPT = "\n\nAssistant:"
-ALTERNATION_ERROR = (
-    "Error: Prompt must alternate between '\n\nHuman:' and '\n\nAssistant:'."
-)
-
-
-def _add_newlines_before_ha(input_text: str) -> str:
-    new_text = input_text
-    for word in ["Human:", "Assistant:"]:
-        new_text = new_text.replace(word, "\n\n" + word)
-        for i in range(2):
-            new_text = new_text.replace("\n\n\n" + word, "\n\n" + word)
-    return new_text
-
-
-def _human_assistant_format(input_text: str) -> str:
-    if input_text.count("Human:") == 0 or (
-        input_text.find("Human:") > input_text.find("Assistant:")
-        and "Assistant:" in input_text
-    ):
-        input_text = HUMAN_PROMPT + " " + input_text  # SILENT CORRECTION
-    if input_text.count("Assistant:") == 0:
-        input_text = input_text + ASSISTANT_PROMPT  # SILENT CORRECTION
-    if input_text[: len("Human:")] == "Human:":
-        input_text = "\n\n" + input_text
-    input_text = _add_newlines_before_ha(input_text)
-    count = 0
-    # track alternation
-    for i in range(len(input_text)):
-        if input_text[i : i + len(HUMAN_PROMPT)] == HUMAN_PROMPT:
-            if count % 2 == 0:
-                count += 1
-            else:
-                warnings.warn(ALTERNATION_ERROR + f" Received {input_text}")
-        if input_text[i : i + len(ASSISTANT_PROMPT)] == ASSISTANT_PROMPT:
-            if count % 2 == 1:
-                count += 1
-            else:
-                warnings.warn(ALTERNATION_ERROR + f" Received {input_text}")
-
-    if count % 2 == 1:  # Only saw Human, no Assistant
-        input_text = input_text + ASSISTANT_PROMPT  # SILENT CORRECTION
-
-    return input_text
-
 
 class LLMInputOutputAdapter:
     """Adapter class to prepare the inputs from Langchain to a format
@@ -68,7 +22,6 @@ class LLMInputOutputAdapter:
     the generated text from the model response."""
 
     provider_to_output_key_map = {
-        "anthropic": "completion",
         "amazon": "outputText",
         "cohere": "text",
         "meta": "generation",
@@ -80,7 +33,7 @@ class LLMInputOutputAdapter:
     ) -> Dict[str, Any]:
         input_body = {**model_kwargs}
         if provider == "anthropic":
-            input_body["prompt"] = _human_assistant_format(prompt)
+            input_body["messages"] = [{"role": "user", "content": prompt}]
         elif provider == "ai21" or provider == "cohere" or provider == "meta":
             input_body["prompt"] = prompt
         elif provider == "amazon":
@@ -90,20 +43,17 @@ class LLMInputOutputAdapter:
         else:
             input_body["inputText"] = prompt
 
-        if provider == "anthropic" and "max_tokens_to_sample" not in input_body:
-            input_body["max_tokens_to_sample"] = 256
+        if provider == "anthropic" and "max_tokens" not in input_body:
+            input_body["max_tokens"] = 256
 
         return input_body
 
     @classmethod
     def prepare_output(cls, provider: str, response: Any) -> str:
+        response_body = json.loads(response.get("body").read())
         if provider == "anthropic":
-            response_body = json.loads(response.get("body").read().decode())
-            return response_body.get("completion")
-        else:
-            response_body = json.loads(response.get("body").read())
-
-        if provider == "ai21":
+            return response_body.get("content")[0]["text"]
+        elif provider == "ai21":
             return response_body.get("completions")[0].get("data").get("text")
         elif provider == "cohere":
             return response_body.get("generations")[0].get("text")
@@ -136,11 +86,15 @@ class LLMInputOutputAdapter:
                     == "<EOS_TOKEN>"
                 ):
                     return
-
-                # chunk obj format varies with provider
-                yield GenerationChunk(
-                    text=chunk_obj[cls.provider_to_output_key_map[provider]]
-                )
+                if provider == "anthropic":
+                    yield GenerationChunk(
+                        text=chunk_obj.get("delta", {}).get("text", "")
+                    )
+                else:
+                    # chunk obj format varies with provider
+                    yield GenerationChunk(
+                        text=chunk_obj[cls.provider_to_output_key_map[provider]]
+                    )
 
 
 class BedrockBase(BaseModel, ABC):
@@ -250,7 +204,6 @@ class BedrockBase(BaseModel, ABC):
         body = json.dumps(input_body)
         accept = "application/json"
         contentType = "application/json"
-
         try:
             response = self.client.invoke_model(
                 body=body, modelId=self.model_id, accept=accept, contentType=contentType
@@ -291,7 +244,6 @@ class BedrockBase(BaseModel, ABC):
         params = {**_model_kwargs, **kwargs}
         input_body = LLMInputOutputAdapter.prepare_input(provider, prompt, params)
         body = json.dumps(input_body)
-
         try:
             response = self.client.invoke_model_with_response_stream(
                 body=body,
