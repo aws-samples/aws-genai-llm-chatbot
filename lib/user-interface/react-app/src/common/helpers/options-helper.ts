@@ -89,8 +89,9 @@ export abstract class OptionsHelper {
 
   static getProviderLabel(provider: string) {
     let label = provider;
-    if (label === "sagemaker") label = "SageMaker";
-    else if (label === "bedrock") label = "Bedrock";
+    if (label.startsWith("sagemaker")) label = "SageMaker";
+    else if (label === "bedrock:langchain") label = "Bedrock";
+    else if (label === "bedrock:agent") label = "Bedrock Agents";
     else if (label === "openai") label = "OpenAI";
 
     return label;

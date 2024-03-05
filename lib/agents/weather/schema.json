@@ -52,6 +52,59 @@
         }
       }
     },
+    "/absolute_period_dates": {
+      "get": {
+        "summary": "GET /absolute_period_dates",
+        "description": "get the absolute start and end date for a period in YYYY-MM-DD format given the number of day difference from the today",
+        "operationId": "get_absolute_period_dates_absolute_period_dates_get",
+        "parameters": [
+          {
+            "description": "the difference in days from the today to the start date of the period",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Startperioddeltadays",
+              "description": "the difference in days from the today to the start date of the period"
+            },
+            "name": "startPeriodDeltaDays",
+            "in": "query"
+          },
+          {
+            "description": "the difference in days from the today to the end date of the period",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Endperioddeltadays",
+              "description": "the difference in days from the today to the end date of the period"
+            },
+            "name": "endPeriodDeltaDays",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Period"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/historical_weather": {
       "get": {
         "summary": "GET /historical_weather",
@@ -135,6 +188,24 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "Period": {
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start_date",
+          "end_date"
+        ],
+        "title": "Period"
       },
       "ValidationError": {
         "properties": {

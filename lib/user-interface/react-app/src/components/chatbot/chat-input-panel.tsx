@@ -56,6 +56,7 @@ import {
 } from "./utils";
 import { receiveMessages } from "../../graphql/subscriptions";
 import { Utils } from "../../common/utils";
+import { AgentTrace } from "./chat";
 
 export interface ChatInputPanelProps {
   running: boolean;
@@ -65,6 +66,7 @@ export interface ChatInputPanelProps {
   setMessageHistory: (history: ChatBotHistoryItem[]) => void;
   configuration: ChatBotConfiguration;
   setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
+  setAgentTrace?: Dispatch<React.SetStateAction<AgentTrace | undefined>>;
 }
 
 export abstract class ChatScrollState {
@@ -134,12 +136,22 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               console.log("Heartbeat pong!");
               return;
             }
-            updateMessageHistoryRef(
-              props.session.id,
-              messageHistoryRef.current,
-              response
-            );
-
+            if (
+              response.action === ChatBotAction.LLMNewToken ||
+              response.action === ChatBotAction.FinalResponse
+            ) {
+              updateMessageHistoryRef(
+                props.session.id,
+                messageHistoryRef.current,
+                response
+              );
+            }
+            if (
+              response.action === ChatBotAction.AgentTrace &&
+              props.setAgentTrace
+            ) {
+              props.setAgentTrace(JSON.parse(response.data.content!)["trace"]);
+            }
             if (
               response.action === ChatBotAction.FinalResponse ||
               response.action === ChatBotAction.Error
@@ -324,7 +336,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const { name, provider } = OptionsHelper.parseValue(
       state.selectedModel.value
     );
-
+    console.log(state.selectedModel.value);
     const value = state.value.trim();
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
@@ -336,6 +348,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         modelName: name,
         provider: provider,
         sessionId: props.session.id,
+        agentId: state.selectedModelMetadata!.agentId ?? undefined,
         workspaceId: state.selectedWorkspace?.value,
         modelKwargs: {
           streaming: props.configuration.streaming,
@@ -602,9 +615,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 readyState === ReadyState.OPEN
                   ? "success"
                   : readyState === ReadyState.CONNECTING ||
-                      readyState === ReadyState.UNINSTANTIATED
-                    ? "in-progress"
-                    : "error"
+                    readyState === ReadyState.UNINSTANTIATED
+                  ? "in-progress"
+                  : "error"
               }
             >
               {readyState === ReadyState.OPEN ? "Connected" : connectionStatus}
