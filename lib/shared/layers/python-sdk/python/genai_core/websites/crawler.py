@@ -110,7 +110,7 @@ def parse_url(url: str):
         raise Exception(
             f"Invalid content type {response.headers['Content-Type']}")
     soup = BeautifulSoup(response.content, "html.parser")
-    content = soup.text
+    content = soup.get_text(separator=' ')
     content = re.sub(r"[ \n]+", " ", content)
 
     links = list(set([a["href"] for a in soup.find_all("a", href=True)]))
@@ -119,6 +119,10 @@ def parse_url(url: str):
 
     for idx in range(len(links)):
         link = links[idx]
+        lowercase_link = link.lower().strip()
+        if lowercase_link.startswith("mailto:"):
+            continue
+
         current = urlparse(link)
         if not current.netloc:
             local_links.append(f"{base_url}{link}")
