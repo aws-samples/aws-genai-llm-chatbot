@@ -22,8 +22,6 @@ class LLMInputOutputAdapter:
     the generated text from the model response."""
 
     provider_to_output_key_map = {
-        "amazon": "outputText",
-        "cohere": "text",
         "meta": "generation",
     }
 
@@ -34,13 +32,7 @@ class LLMInputOutputAdapter:
         input_body = {**model_kwargs}
         if provider == "anthropic":
             input_body["messages"] = [{"role": "user", "content": prompt}]
-        elif provider == "ai21" or provider == "cohere" or provider == "meta":
-            input_body["prompt"] = prompt
-        elif provider == "amazon":
-            input_body = dict()
-            input_body["inputText"] = prompt
-            input_body["textGenerationConfig"] = {**model_kwargs}
-        else:
+        elif provider == "meta":
             input_body["inputText"] = prompt
 
         if provider == "anthropic" and "max_tokens" not in input_body:
@@ -53,14 +45,10 @@ class LLMInputOutputAdapter:
         response_body = json.loads(response.get("body").read())
         if provider == "anthropic":
             return response_body.get("content")[0]["text"]
-        elif provider == "ai21":
-            return response_body.get("completions")[0].get("data").get("text")
-        elif provider == "cohere":
-            return response_body.get("generations")[0].get("text")
         elif provider == "meta":
             return response_body.get("generation")
         else:
-            return response_body.get("results")[0].get("outputText")
+            raise Exception(f"provider {provider} not supported")
 
     @classmethod
     def prepare_output_stream(
@@ -71,7 +59,7 @@ class LLMInputOutputAdapter:
         if not stream:
             return
 
-        if provider not in cls.provider_to_output_key_map:
+        if provider not in ["anthropic"]:
             raise ValueError(
                 f"Unknown streaming response output key for provider: {provider}"
             )
@@ -80,12 +68,7 @@ class LLMInputOutputAdapter:
             chunk = event.get("chunk")
             if chunk:
                 chunk_obj = json.loads(chunk.get("bytes").decode())
-                if provider == "cohere" and (
-                    chunk_obj["is_finished"]
-                    or chunk_obj[cls.provider_to_output_key_map[provider]]
-                    == "<EOS_TOKEN>"
-                ):
-                    return
+
                 if provider == "anthropic":
                     if chunk_obj.get("type") == "content_block_delta":
                         yield GenerationChunk(
@@ -131,9 +114,6 @@ class BedrockBase(BaseModel, ABC):
 
     provider_stop_sequence_key_name_map: Mapping[str, str] = {
         "anthropic": "stop_sequences",
-        "amazon": "stopSequences",
-        "ai21": "stop_sequences",
-        "cohere": "stop_sequences",
     }
 
     @root_validator()
@@ -264,7 +244,7 @@ class BedrockBase(BaseModel, ABC):
 
 
 class Bedrock(LLM, BedrockBase):
-    """Bedrock models.
+    """Bedrock LLM for implementing features not yet supported by Langchain Bedrock LLM.
 
     To authenticate, the AWS client uses the following methods to
     automatically load credentials:
