@@ -27,7 +27,6 @@ import { getSignedUrl } from "./utils";
 
 import "react-json-view-lite/dist/index.css";
 import "../../styles/app.scss";
-import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
@@ -67,6 +66,11 @@ export default function ChatMessage(props: ChatMessageProps) {
       getSignedUrls();
     }
   }, [message]);
+
+  const content =
+    props.message.content && props.message.content.length > 0
+      ? props.message.content
+      : props.message.tokens?.map((v) => v.value).join("");
 
   return (
     <div>
@@ -208,7 +212,7 @@ export default function ChatMessage(props: ChatMessageProps) {
             )
           }
         >
-          {props.message.content.length === 0 ? (
+          {content?.length === 0 ? (
             <Box>
               <Spinner />
             </Box>
@@ -237,11 +241,11 @@ export default function ChatMessage(props: ChatMessageProps) {
             </div>
           ) : null}
           <ReactMarkdown
-            children={props.message.content}
+            children={content}
             remarkPlugins={[remarkGfm]}
             components={{
               pre(props) {
-                const { children, className, node, ...rest } = props;
+                const { children, ...rest } = props;
                 return (
                   <pre {...rest} className={styles.codeMarkdown}>
                     {children}
@@ -276,8 +280,9 @@ export default function ChatMessage(props: ChatMessageProps) {
           />
           <div className={styles.thumbsContainer}>
             {(selectedIcon === 1 || selectedIcon === null) && (
-              <FaThumbsUp
-                className={`${styles.thumbsIcon} ${styles.thumbsUp} ${selectedIcon === 1 ? styles.selected : ''}`}
+              <Button
+                variant="icon"
+                iconName={selectedIcon === 1 ? "thumbs-up-filled" : "thumbs-up"}
                 onClick={() => {
                   props.onThumbsUp();
                   setSelectedIcon(1);
@@ -285,8 +290,11 @@ export default function ChatMessage(props: ChatMessageProps) {
               />
             )}
             {(selectedIcon === 0 || selectedIcon === null) && (
-              <FaThumbsDown
-                className={`${styles.thumbsIcon} ${styles.thumbsDown} ${selectedIcon === 0 ? styles.selected : ''}`}
+              <Button
+                iconName={
+                  selectedIcon === 0 ? "thumbs-down-filled" : "thumbs-down"
+                }
+                variant="icon"
                 onClick={() => {
                   props.onThumbsDown();
                   setSelectedIcon(0);
