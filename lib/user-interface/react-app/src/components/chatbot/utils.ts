@@ -156,11 +156,11 @@ export function updateMessageHistoryRef(
         metadata = lastMessage.metadata;
       }
 
-      if (hasContent) {
+      if (hasContent || lastMessage.content.length > 0) {
         messageHistory[messageHistory.length - 1] = {
           ...lastMessage,
           type: ChatBotMessageType.AI,
-          content,
+          content: content ?? lastMessage.content,
           metadata,
           tokens: lastMessage.tokens,
         };
