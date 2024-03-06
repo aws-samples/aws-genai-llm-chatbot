@@ -4,6 +4,7 @@ import {
   Container,
   ExpandableSection,
   Popover,
+  SpaceBetween,
   Spinner,
   StatusIndicator,
   Tabs,
@@ -317,6 +318,7 @@ export default function ChatMessage(props: ChatMessageProps) {
               href={file.url as string}
               target="_blank"
               rel="noreferrer"
+              style={{ marginLeft: "5px", marginRight: "5px" }}
             >
               <img
                 src={file.url as string}
