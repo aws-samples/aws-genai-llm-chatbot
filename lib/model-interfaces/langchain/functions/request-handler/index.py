@@ -2,7 +2,7 @@ import os
 import json
 import uuid
 from datetime import datetime
-from adapters.registry import registry
+from genai_core.registry import registry
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
