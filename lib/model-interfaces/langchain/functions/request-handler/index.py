@@ -10,6 +10,7 @@ from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingErro
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
+import adapters
 from genai_core.utils.websocket import send_to_client
 from genai_core.types import ChatbotAction
 

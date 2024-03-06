@@ -4,7 +4,6 @@ import {
   Container,
   ExpandableSection,
   Popover,
-  SpaceBetween,
   Spinner,
   StatusIndicator,
   Tabs,
