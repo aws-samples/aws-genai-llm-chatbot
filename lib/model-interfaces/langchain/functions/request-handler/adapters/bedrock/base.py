@@ -21,10 +21,6 @@ class LLMInputOutputAdapter:
     It also provides helper function to extract
     the generated text from the model response."""
 
-    provider_to_output_key_map = {
-        "meta": "generation",
-    }
-
     @classmethod
     def prepare_input(
         cls, provider: str, prompt: str, model_kwargs: Dict[str, Any]
@@ -33,7 +29,9 @@ class LLMInputOutputAdapter:
         if provider == "anthropic":
             input_body["messages"] = [{"role": "user", "content": prompt}]
         elif provider == "meta":
-            input_body["inputText"] = prompt
+            input_body["prompt"] = prompt
+        elif provider == "mistral":
+            input_body["prompt"] = prompt
 
         if provider == "anthropic" and "max_tokens" not in input_body:
             input_body["max_tokens"] = 256
@@ -47,6 +45,8 @@ class LLMInputOutputAdapter:
             return response_body.get("content")[0]["text"]
         elif provider == "meta":
             return response_body.get("generation")
+        elif provider == "mistral":
+            return response_body.get("outputs")[0]["text"]
         else:
             raise Exception(f"provider {provider} not supported")
 
@@ -59,7 +59,7 @@ class LLMInputOutputAdapter:
         if not stream:
             return
 
-        if provider not in ["anthropic"]:
+        if provider not in ["anthropic", "meta", "mistral"]:
             raise ValueError(
                 f"Unknown streaming response output key for provider: {provider}"
             )
@@ -74,10 +74,16 @@ class LLMInputOutputAdapter:
                         yield GenerationChunk(
                             text=chunk_obj.get("delta", {}).get("text", "")
                         )
-                else:
-                    # chunk obj format varies with provider
+                elif provider == "mistral":
                     yield GenerationChunk(
-                        text=chunk_obj[cls.provider_to_output_key_map[provider]]
+                        text=chunk_obj.get("outputs", [{}])[0].get("text", "")
+                    )
+                elif provider == "meta":
+                    yield GenerationChunk(text=chunk_obj["generation"])
+
+                else:
+                    raise ValueError(
+                        f"Unknown streaming response output key for provider: {provider}"
                     )
 
 

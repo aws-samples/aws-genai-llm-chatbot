@@ -53,7 +53,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     });
 
     // Langchain Interface Construct
-    // This is the model interface recieving messages from the websocket interface via the message topic
+    // This is the model interface receiving messages from the websocket interface via the message topic
     // and interacting with the model via LangChain library
     const langchainModels = models.models.filter(
       (model) => model.interface === ModelInterface.LangChain
@@ -100,46 +100,45 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     }
 
     // IDEFICS Interface Construct
-    // This is the model interface recieving messages from the websocket interface via the message topic
+    // This is the model interface receiving messages from the websocket interface via the message topic
     // and interacting with IDEFICS visual language models
     const ideficsModels = models.models.filter(
-      (model) => model.interface === ModelInterface.Idefics
+      (model) => model.interface === ModelInterface.MultiModal
     );
 
     // check if any deployed model requires idefics interface
-    if (ideficsModels.length > 0) {
-      const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
-        shared,
-        config: props.config,
-        messagesTopic: chatBotApi.messagesTopic,
-        sessionsTable: chatBotApi.sessionsTable,
-        byUserIdIndex: chatBotApi.byUserIdIndex,
-        chatbotFilesBucket: chatBotApi.filesBucket,
-      });
 
-      // Route all incoming messages targeted to idefics to the idefics model interface queue
-      chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
-          filterPolicyWithMessageBody: {
-            direction: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [Direction.In],
-              })
-            ),
-            modelInterface: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [ModelInterface.Idefics],
-              })
-            ),
-          },
-        })
-      );
+    const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
+      shared,
+      config: props.config,
+      messagesTopic: chatBotApi.messagesTopic,
+      sessionsTable: chatBotApi.sessionsTable,
+      byUserIdIndex: chatBotApi.byUserIdIndex,
+      chatbotFilesBucket: chatBotApi.filesBucket,
+    });
 
-      for (const model of models.models) {
-        // if model name contains idefics then add to idefics interface
-        if (model.interface === ModelInterface.Idefics) {
-          ideficsInterface.addSageMakerEndpoint(model);
-        }
+    // Route all incoming messages targeted to idefics to the idefics model interface queue
+    chatBotApi.messagesTopic.addSubscription(
+      new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
+        filterPolicyWithMessageBody: {
+          direction: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [Direction.In],
+            })
+          ),
+          modelInterface: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [ModelInterface.MultiModal],
+            })
+          ),
+        },
+      })
+    );
+
+    for (const model of models.models) {
+      // if model name contains idefics then add to idefics interface
+      if (model.interface === ModelInterface.MultiModal) {
+        ideficsInterface.addSageMakerEndpoint(model);
       }
     }
 
@@ -415,38 +414,40 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         reason: "Not yet upgraded from Python 3.11 to 3.12.",
       },
     ]);
-    
+
     if (props.config.privateWebsite) {
       const paths = [];
-      for(let index = 0; index < shared.vpc.availabilityZones.length; index++) {
-        paths.push(`/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-${index}/CustomResourcePolicy/Resource`,)
+      for (
+        let index = 0;
+        index < shared.vpc.availabilityZones.length;
+        index++
+      ) {
+        paths.push(
+          `/${this.stackName}/UserInterface/PrivateWebsite/DescribeNetworkInterfaces-${index}/CustomResourcePolicy/Resource`
+        );
       }
-      paths.push(`/${this.stackName}/UserInterface/PrivateWebsite/describeVpcEndpoints/CustomResourcePolicy/Resource`,)
+      paths.push(
+        `/${this.stackName}/UserInterface/PrivateWebsite/describeVpcEndpoints/CustomResourcePolicy/Resource`
+      );
+      NagSuppressions.addResourceSuppressionsByPath(this, paths, [
+        {
+          id: "AwsSolutions-IAM5",
+          reason:
+            "Custom Resource requires permissions to Describe VPC Endpoint Network Interfaces",
+        },
+      ]);
       NagSuppressions.addResourceSuppressionsByPath(
         this,
-        paths,
+        [
+          `/${this.stackName}/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource`,
+        ],
         [
           {
-            id: "AwsSolutions-IAM5",
-            reason:
-              "Custom Resource requires permissions to Describe VPC Endpoint Network Interfaces",
+            id: "AwsSolutions-IAM4",
+            reason: "IAM role implicitly created by CDK.",
           },
         ]
       );
-      NagSuppressions.addResourceSuppressionsByPath(
-          this,
-          [
-            `/${this.stackName}/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource`
-          ],
-          [
-            {
-              id: "AwsSolutions-IAM4",
-              reason:
-                "IAM role implicitly created by CDK.",
-            },
-          ]
-      );
-      
     }
   }
 }

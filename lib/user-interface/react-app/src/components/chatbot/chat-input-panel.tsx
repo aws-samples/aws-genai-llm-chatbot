@@ -328,7 +328,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const value = state.value.trim();
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
-      modelInterface: state.selectedModelMetadata!.interface as ModelInterface,
+      modelInterface:
+        props.configuration.files && props.configuration.files.length > 0
+          ? "multimodal"
+          : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
         mode: ChatBotMode.Chain,
         text: value,
