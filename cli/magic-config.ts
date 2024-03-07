@@ -58,6 +58,9 @@ const embeddingModels = [
         fs.readFileSync("./bin/config.json").toString("utf8")
       );
       options.prefix = config.prefix;
+      options.vpc = config.vpc ? true : false;
+      options.vpcId = config.vpc?.vpcId;
+      options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
       options.privateWebsite = config.privateWebsite;
       options.certificate = config.certificate;
       options.domain = config.domain;
@@ -116,6 +119,34 @@ async function processCreateOptions(options: any): Promise<void> {
       message: "Prefix to differentiate this deployment",
       initial: options.prefix,
       askAnswered: false,
+    },
+    {
+      type: "confirm",
+      name: "existingVpc",
+      message: "Do you want to use existing vpc? (selecting false will create a new vpc)",
+      initial: options.vpc || false,
+    },
+    {
+      type: "input",
+      name: "vpcId",
+      message: "Specify existing VpcId (vpc-xxxxxxxxxxxxxxxxx)",
+      initial: options.vpcId,
+      validate: (vpcId: string) =>{
+        return RegExp(/^vpc-[0-9a-f]{8,17}$/i).test(vpcId) ? true
+         : "Enter a valid VpcId in vpc-0123456abdef format"
+      },
+      skip(): boolean {
+        return !(this as any).state.answers.existingVpc;
+      },
+    },
+    {
+      type: "confirm",
+      name: "createVpcEndpoints",
+      message: "Do you want create VPC Endpoints?",
+      initial: options.createVpcEndpoints || false,
+      skip(): boolean {
+        return !(this as any).state.answers.existingVpc;
+      },
     },
     {
       type: "confirm",
@@ -337,6 +368,12 @@ async function processCreateOptions(options: any): Promise<void> {
   // Create the config object
   const config = {
     prefix: answers.prefix,
+    vpc: answers.existingVpc
+      ? {
+          vpcId: answers.vpcId.toLowerCase(),
+          createVpcEndpoints: answers.createVpcEndpoints,
+      }
+      : undefined,
     privateWebsite: answers.privateWebsite,
     certificate: answers.certificate,
     domain: answers.domain,
