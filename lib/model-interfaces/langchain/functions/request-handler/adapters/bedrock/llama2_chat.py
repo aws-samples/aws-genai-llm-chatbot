@@ -61,4 +61,7 @@ class BedrockMetaLLama2ChatAdapter(ModelAdapter):
 
 
 # Register the adapter
-registry.register(r"(?i)^bedrock.meta.llama2-.*-chat.*", BedrockMetaLLama2ChatAdapter)
+registry.register(
+    r"(^bedrock.meta.llama2-.*-chat.*|^bedrock.mistral.mi.*)",
+    BedrockMetaLLama2ChatAdapter,
+)
