@@ -267,6 +267,45 @@ def create_workspace_kendra(
     return item
 
 
+def create_workspace_bedrock_kb(workspace_name: str, knowledge_base: dict):
+    workspace_id = str(uuid.uuid4())
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    knowledge_base_id = knowledge_base["id"]
+    external = knowledge_base["external"]
+
+    item = {
+        "workspace_id": workspace_id,
+        "object_type": WORKSPACE_OBJECT_TYPE,
+        "format_version": 1,
+        "name": workspace_name,
+        "engine": "bedrock_kb",
+        "status": "submitted",
+        "knowledge_base_id": knowledge_base_id,
+        "knowledge_base_external": external,
+        "documents": 0,
+        "vectors": 0,
+        "size_in_bytes": 0,
+        "created_at": timestamp,
+        "updated_at": timestamp,
+    }
+
+    response = table.put_item(Item=item)
+    print(response)
+
+    response = sfn_client.start_execution(
+        stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+            }
+        ),
+    )
+
+    print(response)
+
+    return item
+
+
 def delete_workspace(workspace_id: str):
     response = table.get_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}

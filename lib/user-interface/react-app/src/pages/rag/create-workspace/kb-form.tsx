@@ -38,7 +38,7 @@ export default function KBForm(props: KBFormProps) {
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.bedrockKB.listKnowledgeBases();
-
+        console.log(result);
         const data = result.data?.listBedrockKnowledgeBases.sort((a, b) =>
           a.name.localeCompare(b.name)
         );
@@ -51,7 +51,7 @@ export default function KBForm(props: KBFormProps) {
     })();
   }, [appContext]);
 
-  const kendraIndexOptions: SelectProps.Option[] = knowledgeBases
+  const kbOptions: SelectProps.Option[] = knowledgeBases
     ? knowledgeBases.map((item) => {
         return {
           label: item.name,
@@ -87,11 +87,11 @@ export default function KBForm(props: KBFormProps) {
           <Select
             disabled={props.submitting}
             selectedAriaLabel="Selected"
-            placeholder="Choose Kendra index"
+            placeholder="Choose Knowledge Base"
             statusType={status}
             loadingText="Loading indexes (might take few seconds)..."
             selectedOption={props.data.knowledgeBaseId}
-            options={kendraIndexOptions}
+            options={kbOptions}
             onChange={({ detail: { selectedOption } }) =>
               props.onChange({ knowledgeBaseId: selectedOption })
             }

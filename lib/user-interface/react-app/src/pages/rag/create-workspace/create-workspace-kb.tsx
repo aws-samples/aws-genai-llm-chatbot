@@ -5,7 +5,7 @@ import { Utils } from "../../../common/utils";
 import { useForm } from "../../../common/hooks/use-form";
 import { BedrockKBWorkspaceCreateInput } from "../../../common/types";
 import { AppContext } from "../../../common/app-context";
-//import { ApiClient } from "../../../common/api-client/api-client";
+import { ApiClient } from "../../../common/api-client/api-client";
 import RouterButton from "../../../components/wrappers/router-button";
 import KBForm from "./kb-form";
 
@@ -56,11 +56,16 @@ export default function CreateWorkspaceBedrockKB() {
     setGlobalError(undefined);
     setSubmitting(true);
 
-    //const apiClient = new ApiClient(appContext);
+    const apiClient = new ApiClient(appContext);
     try {
+      await apiClient.workspaces.createBedrockKBWorkspace({
+        name: data.name.trim(),
+        knowledgeBaseId: data.knowledgeBaseId?.value ?? "",
+      });
       navigate("/rag/workspaces");
       return;
     } catch (e) {
+      console.error(e);
       setSubmitting(false);
       setGlobalError("Something went wrong");
     }

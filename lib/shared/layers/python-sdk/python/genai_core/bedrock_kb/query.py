@@ -27,7 +27,6 @@ def query_workspace_bedrock_kb(
         retrievalConfiguration={
             "vectorSearchConfiguration": {
                 "numberOfResults": limit,
-                "overrideSearchType": search_type,
             }
         },
     )
@@ -50,6 +49,7 @@ def _convert_records(source: str, workspace_id: str, records: List[dict]):
 
         path = record.get("location", {}).get("s3Location", {}).get("uri", "")
         content = record.get("content", {}).get("text", "")
+        score = record.get("score", 0)
 
         converted = {
             "chunk_id": str(_id),
@@ -65,6 +65,7 @@ def _convert_records(source: str, workspace_id: str, records: List[dict]):
             "content_complement": None,
             "metadata": None,
             "sources": [source],
+            "vector_search_score": score,
             "score": None,
         }
         _id += 1

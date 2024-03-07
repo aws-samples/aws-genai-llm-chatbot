@@ -450,6 +450,10 @@ async function processCreateOptions(options: any): Promise<void> {
           external: [{}],
           enterprise: false,
         },
+        knowledgeBase: {
+          enabled: false,
+          external: [{}],
+        },
       },
       embeddingsModels: [{}],
       crossEncoderModels: [{}],
@@ -479,6 +483,9 @@ async function processCreateOptions(options: any): Promise<void> {
     config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.engines.kendra.enterprise = answers.kendraEnterprise;
+  config.rag.engines.knowledgeBase.enabled =
+    config.rag.engines.knowledgeBase.external.length > 0;
+  config.rag.engines.knowledgeBase.external = [...kbExternal];
 
   console.log("\n✨ This is the chosen configuration:\n");
   console.log(JSON.stringify(config, undefined, 2));

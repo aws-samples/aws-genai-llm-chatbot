@@ -300,6 +300,8 @@ type Workspace @aws_cognito_user_pools {
   kendraIndexId: String
   kendraIndexExternal: Boolean
   kendraUseAllData: Boolean
+  knowledgeBaseId: String
+  knowledgeBaseExternal: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
