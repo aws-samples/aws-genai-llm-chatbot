@@ -2,51 +2,41 @@ import os
 import re
 import genai_core.types
 from typing import List
-from .client import get_kendra_client_for_index
+from .client import get_kb_client_for_id
 
 s3_pattern = re.compile(r"(s3-|s3\.)?(.*)\.amazonaws\.com")
 
 
-def query_workspace_kendra(
+def query_workspace_bedrock_kb(
     workspace_id: str, workspace: dict, query: str, limit: int, full_response: bool
 ):
-    kendra_index_id = workspace.get("kendra_index_id")
-    kendra_index_external = workspace.get("kendra_index_external", True)
-    kendra_use_all_data = workspace.get("kendra_use_all_data", False)
+    knowledge_base_id = workspace.get("knowledge_base_id")
+    search_type = "HYBRID" if workspace.get("hybrid_search", False) else "SEMANTIC"
 
-    if not kendra_index_id:
+    if not knowledge_base_id:
         raise genai_core.types.CommonError(
-            f"Could not find kendra index for workspace {workspace_id}"
+            f"Could not find Amazon Bedrock KnowledgeBase ID for workspace {workspace_id}"
         )
 
-    kendra = get_kendra_client_for_index(kendra_index_id)
+    client = get_kb_client_for_id(knowledge_base_id)
     limit = max(1, min(100, limit))
 
-    if kendra_index_external or kendra_use_all_data:
-        result = kendra.retrieve(
-            IndexId=kendra_index_id, QueryText=query, PageSize=limit, PageNumber=1
-        )
-    else:
-        result = kendra.retrieve(
-            IndexId=kendra_index_id,
-            QueryText=query,
-            PageSize=limit,
-            PageNumber=1,
-            AttributeFilter={
-                "EqualsTo": {
-                    "Key": "workspace_id",
-                    "Value": {
-                        "StringValue": workspace_id,
-                    },
-                }
-            },
-        )
+    result = client.retrieve(
+        knowledgeBaseId=knowledge_base_id,
+        retrievalQuery={"text": query},
+        retrievalConfiguration={
+            "vectorSearchConfiguration": {
+                "numberOfResults": limit,
+                "overrideSearchType": search_type,
+            }
+        },
+    )
 
-    items = result["ResultItems"]
-    items = _convert_records("kendra", workspace_id, items)
+    items = result["retrievalResults"]
+    items = _convert_records("bedrock_kb", workspace_id, items)
 
     ret_value = {
-        "engine": "kendra",
+        "engine": "bedrock_kb",
         "items": items,
     }
 
@@ -55,44 +45,29 @@ def query_workspace_kendra(
 
 def _convert_records(source: str, workspace_id: str, records: List[dict]):
     converted_records = []
+    _id = 0
     for record in records:
-        document_uri = record["DocumentURI"]
-        is_s3 = s3_pattern.match(document_uri)
-        if is_s3:
-            path = os.path.basename(document_uri)
-        else:
-            path = document_uri
 
-        title = record.get("DocumentTitle")
-        content = record.get("Content")
-
-        document_attributes = record.get("DocumentAttributes", [])
-        document_type = None
-        for attribute in document_attributes:
-            if attribute["Key"] == "document_type":
-                document_type = attribute["Value"]["StringValue"]
-                break
-
-        if not document_type:
-            document_type = "file" if is_s3 else "website"
+        path = record.get("location", {}).get("s3Location", {}).get("uri", "")
+        content = record.get("content", {}).get("text", "")
 
         converted = {
-            "chunk_id": record.get("Id"),
+            "chunk_id": str(_id),
             "workspace_id": workspace_id,
-            "document_id": record.get("DocumentId"),
+            "document_id": "",
             "document_sub_id": None,
-            "document_type": document_type,
+            "document_type": "object",
             "document_sub_type": None,
             "path": path,
             "language": None,
-            "title": title,
+            "title": "",
             "content": content,
             "content_complement": None,
             "metadata": None,
             "sources": [source],
             "score": None,
         }
-
+        _id += 1
         converted_records.append(converted)
 
     return converted_records

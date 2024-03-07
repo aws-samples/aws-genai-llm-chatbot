@@ -88,3 +88,8 @@ export interface KendraWorkspaceCreateInput {
   kendraIndex: SelectProps.Option | null;
   useAllData: boolean;
 }
+
+export interface BedrockKBWorkspaceCreateInput {
+  name: string;
+  knowledgeBaseId: SelectProps.Option | null;
+}

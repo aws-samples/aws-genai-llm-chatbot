@@ -13,7 +13,7 @@ export function getConfig(): SystemConfig {
        createVpcEndpoints: true,
     },*/
     privateWebsite: false,
-    certificate : "",
+    certificate: "",
     bedrock: {
       enabled: true,
       region: SupportedRegion.US_EAST_1,
@@ -34,7 +34,10 @@ export function getConfig(): SystemConfig {
         kendra: {
           enabled: false,
           createIndex: false,
-          enterprise: false
+          enterprise: false,
+        },
+        knowledgeBase: {
+          enabled: false,
         },
       },
       embeddingsModels: [

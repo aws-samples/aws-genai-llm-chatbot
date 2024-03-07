@@ -277,7 +277,9 @@ export default function ChatMessage(props: ChatMessageProps) {
           <div className={styles.thumbsContainer}>
             {(selectedIcon === 1 || selectedIcon === null) && (
               <FaThumbsUp
-                className={`${styles.thumbsIcon} ${styles.thumbsUp} ${selectedIcon === 1 ? styles.selected : ''}`}
+                className={`${styles.thumbsIcon} ${styles.thumbsUp} ${
+                  selectedIcon === 1 ? styles.selected : ""
+                }`}
                 onClick={() => {
                   props.onThumbsUp();
                   setSelectedIcon(1);
@@ -286,7 +288,9 @@ export default function ChatMessage(props: ChatMessageProps) {
             )}
             {(selectedIcon === 0 || selectedIcon === null) && (
               <FaThumbsDown
-                className={`${styles.thumbsIcon} ${styles.thumbsDown} ${selectedIcon === 0 ? styles.selected : ''}`}
+                className={`${styles.thumbsIcon} ${styles.thumbsDown} ${
+                  selectedIcon === 0 ? styles.selected : ""
+                }`}
                 onClick={() => {
                   props.onThumbsDown();
                   setSelectedIcon(0);
