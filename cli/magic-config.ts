@@ -80,7 +80,7 @@ const embeddingModels = [
       ) {
         options.ragsToEnable.pop("kendra");
       }
-      options.auroraDefaultDBName = config.rag.engines?.aurora?.defaultDatabaseName
+      options.auroraDefaultDBName = config.rag.engines.aurora.defaultDatabaseName
       options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
       options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
         (m: any) => m.default
