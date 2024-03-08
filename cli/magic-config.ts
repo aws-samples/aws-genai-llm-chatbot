@@ -58,7 +58,6 @@ const embeddingModels = [
         fs.readFileSync("./bin/config.json").toString("utf8")
       );
       options.prefix = config.prefix;
-      options.vpc = config.vpc ? true : false;
       options.vpcId = config.vpc?.vpcId;
       options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
       options.privateWebsite = config.privateWebsite;
@@ -124,16 +123,16 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "existingVpc",
       message: "Do you want to use existing vpc? (selecting false will create a new vpc)",
-      initial: options.vpc || false,
+      initial: options.vpcId ? true : false,
     },
     {
       type: "input",
       name: "vpcId",
       message: "Specify existing VpcId (vpc-xxxxxxxxxxxxxxxxx)",
       initial: options.vpcId,
-      validate: (vpcId: string) =>{
-        return RegExp(/^vpc-[0-9a-f]{8,17}$/i).test(vpcId) ? true
-         : "Enter a valid VpcId in vpc-0123456abdef format"
+      validate(vpcId: string) {
+        return ((this as any).skipped || RegExp(/^vpc-[0-9a-f]{8,17}$/i).test(vpcId)) ?
+          true : 'Enter a valid VpcId in vpc-xxxxxxxxxxx format'
       },
       skip(): boolean {
         return !(this as any).state.answers.existingVpc;
