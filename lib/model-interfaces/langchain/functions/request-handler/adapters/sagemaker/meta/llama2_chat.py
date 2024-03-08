@@ -4,7 +4,7 @@ import os
 from langchain.llms.sagemaker_endpoint import LLMContentHandler, SagemakerEndpoint
 
 from ...base import ModelAdapter
-from ...registry import registry
+from genai_core.registry import registry
 
 from ...shared.meta.llama2_chat import (
     Llama2ChatPromptTemplate,
