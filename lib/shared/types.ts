@@ -42,7 +42,7 @@ export enum SupportedRegion {
   US_WEST_1 = "us-west-1",
   US_WEST_2 = "us-west-2",
 }
-    
+
 export enum SupportedBedrockRegion {
   AP_NORTHEAST_1 = "ap-northeast-1",
   AP_SOUTHEAST_1 = "ap-southeast-1",
@@ -53,7 +53,7 @@ export enum SupportedBedrockRegion {
 
 export enum ModelInterface {
   LangChain = "langchain",
-  Idefics = "idefics",
+  MultiModal = "multimodal",
 }
 
 export enum Modality {

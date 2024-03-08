@@ -126,12 +126,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         authMode: "AMAZON_COGNITO_USER_POOLS",
       }).subscribe({
         next: ({ value }) => {
-          console.log(`Graphql message:`);
-          console.log(value);
           const data = value.data!.receiveMessages?.data;
           if (data !== undefined && data !== null) {
             const response: ChatBotMessageResponse = JSON.parse(data);
-            console.log(response);
+            console.log("message data", response.data);
             if (response.action === ChatBotAction.Heartbeat) {
               console.log("Heartbeat pong!");
               return;
@@ -330,7 +328,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const value = state.value.trim();
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
-      modelInterface: state.selectedModelMetadata!.interface as ModelInterface,
+      modelInterface:
+        (props.configuration.files && props.configuration.files.length > 0) ||
+        messageHistoryRef.current.filter((x) => x.metadata?.files !== undefined)
+          .length > 0
+          ? "multimodal"
+          : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
         mode: ChatBotMode.Chain,
         text: value,
