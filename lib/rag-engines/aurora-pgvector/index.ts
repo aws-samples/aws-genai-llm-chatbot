@@ -9,6 +9,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as cr from "aws-cdk-lib/custom-resources";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { NagSuppressions } from "cdk-nag";
@@ -26,6 +27,11 @@ export class AuroraPgVector extends Construct {
   constructor(scope: Construct, id: string, props: AuroraPgVectorProps) {
     super(scope, id);
 
+    const rdsKey = new kms.Key(this, "RDSKey", {
+      enableKeyRotation: true,
+      description: "Key for RDS",
+    });
+
     const dbCluster = new rds.DatabaseCluster(this, "AuroraDatabase", {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_15_3,
@@ -35,6 +41,8 @@ export class AuroraPgVector extends Construct {
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       iamAuthentication: true,
+      defaultDatabaseName: props.config.rag.engines.aurora.defaultDatabaseName,
+      storageEncryptionKey:  rdsKey,
     });
 
     const databaseSetupFunction = new lambda.Function(
