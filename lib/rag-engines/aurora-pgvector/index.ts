@@ -27,11 +27,6 @@ export class AuroraPgVector extends Construct {
   constructor(scope: Construct, id: string, props: AuroraPgVectorProps) {
     super(scope, id);
 
-    const rdsKey = new kms.Key(this, "RDSKey", {
-      enableKeyRotation: true,
-      description: "Key for RDS",
-    });
-
     const dbCluster = new rds.DatabaseCluster(this, "AuroraDatabase", {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_15_3,
@@ -42,7 +37,6 @@ export class AuroraPgVector extends Construct {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       iamAuthentication: true,
       defaultDatabaseName: props.config.rag.engines.aurora.defaultDatabaseName,
-      storageEncryptionKey:  rdsKey,
     });
 
     const databaseSetupFunction = new lambda.Function(
