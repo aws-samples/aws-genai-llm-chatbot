@@ -97,7 +97,7 @@ class Claude3(MultiModalModelBase):
             if m["role"] == "user" and type(m["content"]) == type([]):
                 for c in m["content"]:
                     if c["type"] == "image":
-                        c["data"]["source"] = ""
+                        c["source"]["data"] = ""
         return json.dumps(p)
 
 
