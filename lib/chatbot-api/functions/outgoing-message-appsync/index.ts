@@ -58,7 +58,7 @@ export const handler = async (
     try {
       const x: number = JSON.parse(a.body).Message.data?.token?.sequenceNumber;
       const y: number = JSON.parse(b.body).Message.data?.token?.sequenceNumber;
-      return x > y ? 1 : x === y ? 0 : -1;
+      return x - y;
     } catch {
       return 0;
     }
