@@ -26,7 +26,7 @@ class AuroraConnection(object):
 
     def __enter__(self):
         db_conn_args = {
-             "host":self.dbhost,
+            "host":self.dbhost,
             "user":self.dbuser,
             "password":self.dbpass,
             "port":self.dbport,
