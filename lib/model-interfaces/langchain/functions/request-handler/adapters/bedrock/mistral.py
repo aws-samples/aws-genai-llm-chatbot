@@ -1,5 +1,5 @@
 from .llama2_chat import BedrockMetaLLama2ChatAdapter
-from ..registry import registry
+from genai_core.registry import registry
 import genai_core
 from .base import Bedrock
 

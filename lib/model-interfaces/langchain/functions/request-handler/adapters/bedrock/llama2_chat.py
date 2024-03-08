@@ -14,7 +14,7 @@ from ..shared.meta.llama2_chat import (
 from ..shared.meta.llama2_chat import Llama2ConversationBufferMemory
 
 from ..base import ModelAdapter
-from ..registry import registry
+from genai_core.registry import registry
 
 
 class BedrockMetaLLama2ChatAdapter(ModelAdapter):

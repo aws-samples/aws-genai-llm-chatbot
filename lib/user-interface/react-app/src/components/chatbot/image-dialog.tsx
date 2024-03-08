@@ -185,7 +185,7 @@ export default function ImageDialog(props: ImageDialogProps) {
                 limitShowMore: "Show more files",
                 errorIconAriaLabel: "Error",
               }}
-              multiple={false}
+              multiple={true}
               errorText={error}
               showFileThumbnail
               tokenLimit={3}
