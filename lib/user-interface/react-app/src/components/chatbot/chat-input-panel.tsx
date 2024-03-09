@@ -329,7 +329,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
       modelInterface:
-        props.configuration.files && props.configuration.files.length > 0
+        (props.configuration.files && props.configuration.files.length > 0) ||
+        messageHistoryRef.current.filter((x) => x.metadata?.files !== undefined)
+          .length > 0
           ? "multimodal"
           : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
