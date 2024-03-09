@@ -260,7 +260,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type:"input",
       name:"auroraDefaultDBName",
       message: "Enter a default database name for Aurora",
-      initial: options.auroraDefaultDBName,
+      initial: options.auroraDefaultDBName || undefined,
       validate(v: string) {
         return (v.length === 0 || (this as any).skipped || 
           RegExp(/^[a-zA-Z][a-zA-Z0-9_]{0,62}$/).test(v)) ? 
