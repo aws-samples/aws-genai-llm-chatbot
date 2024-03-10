@@ -19,8 +19,9 @@ const recordHandler = async (record: SQSRecord): Promise<void> => {
   const payload = record.body;
   if (payload) {
     const item = JSON.parse(payload);
-    logger.info("Processed item", { item });
+
     const req = JSON.parse(item.Message);
+    logger.debug("Processed message", req);
     /***
      * Payload format
      * 
@@ -42,9 +43,9 @@ const recordHandler = async (record: SQSRecord): Promise<void> => {
           }
         }
     `;
-    logger.info(query);
+    //logger.info(query);
     const resp = await graphQlQuery(query);
-    logger.info(resp);
+    //logger.info(resp);
   }
 };
 
@@ -52,6 +53,16 @@ export const handler = async (
   event: SQSEvent,
   context: Context
 ): Promise<SQSBatchResponse> => {
+  logger.debug("Event", { event });
+  event.Records = event.Records.sort((a, b) => {
+    try {
+      const x: number = JSON.parse(a.body).Message.data?.token?.sequenceNumber;
+      const y: number = JSON.parse(b.body).Message.data?.token?.sequenceNumber;
+      return x - y;
+    } catch {
+      return 0;
+    }
+  });
   return processPartialResponse(event, recordHandler, processor, {
     context,
   });
