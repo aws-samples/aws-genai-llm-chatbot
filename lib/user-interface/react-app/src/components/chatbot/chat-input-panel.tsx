@@ -190,6 +190,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         })
         .catch((err) => console.log(err));
     };
+    // eslint-disable-next-line
   }, [props.session.id]);
 
   useEffect(() => {
@@ -298,11 +299,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const getSignedUrls = async () => {
       if (props.configuration?.files as ImageFile[]) {
         const files: ImageFile[] = [];
-        for await (const file of props.configuration!.files as ImageFile[]) {
+        for await (const file of props.configuration?.files ?? []) {
           const signedUrl = await getSignedUrl(file.key);
           files.push({
             ...file,
-            url: signedUrl as string,
+            url: signedUrl,
           });
         }
 
@@ -330,14 +331,18 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       action: ChatBotAction.Run,
       modelInterface:
         (props.configuration.files && props.configuration.files.length > 0) ||
-        messageHistoryRef.current.filter((x) => x.metadata?.files !== undefined)
-          .length > 0
+        (messageHistoryRef.current.filter(
+          (x) => x.metadata?.files !== undefined
+        ).length > 0 &&
+          state.selectedModelMetadata?.inputModalities.includes(
+            ChabotInputModality.Image
+          ))
           ? "multimodal"
           : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
         mode: ChatBotMode.Chain,
         text: value,
-        files: props.configuration.files || [],
+        files: props.configuration.files ?? [],
         modelName: name,
         provider: provider,
         sessionId: props.session.id,
@@ -400,11 +405,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
-  const modelsOptions = OptionsHelper.getSelectOptionGroups(state.models || []);
+  const modelsOptions = OptionsHelper.getSelectOptionGroups(state.models ?? []);
 
   const workspaceOptions = [
     ...workspaceDefaultOptions,
-    ...OptionsHelper.getSelectOptions(state.workspaces || []),
+    ...OptionsHelper.getSelectOptions(state.workspaces ?? []),
   ];
 
   return (
