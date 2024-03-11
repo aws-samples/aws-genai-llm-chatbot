@@ -25,20 +25,22 @@ export class SageMakerRagModels extends Construct {
       .filter((c) => c.provider === "sagemaker")
       .map((c) => c.name);
 
-    const model = new SageMakerModel(this, "Model", {
-      vpc: props.shared.vpc,
-      region: cdk.Aws.REGION,
-      model: {
-        type: DeploymentType.CustomInferenceScript,
-        modelId: [
-          ...sageMakerEmbeddingsModelIds,
-          ...sageMakerCrossEncoderModelIds,
-        ],
-        codeFolder: path.join(__dirname, "./model"),
-        instanceType: "ml.g4dn.xlarge",
-      },
-    });
+    if (sageMakerEmbeddingsModelIds?.length > 0 || sageMakerCrossEncoderModelIds?.length > 0) {
+      const model = new SageMakerModel(this, "Model", {
+        vpc: props.shared.vpc,
+        region: cdk.Aws.REGION,
+        model: {
+          type: DeploymentType.CustomInferenceScript,
+          modelId: [
+            ...sageMakerEmbeddingsModelIds,
+            ...sageMakerCrossEncoderModelIds,
+          ],
+          codeFolder: path.join(__dirname, "./model"),
+          instanceType: "ml.g4dn.xlarge",
+        },
+      });
 
-    this.model = model;
+      this.model = model;
+    }
   }
 }

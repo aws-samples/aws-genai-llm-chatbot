@@ -22,21 +22,25 @@ const embeddingModels = [
     provider: "sagemaker",
     name: "intfloat/multilingual-e5-large",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "sagemaker",
     name: "sentence-transformers/all-MiniLM-L6-v2",
     dimensions: 384,
+    default: false,
   },
   {
     provider: "bedrock",
     name: "amazon.titan-embed-text-v1",
     dimensions: 1536,
+    default: false,
   },
   {
     provider: "openai",
     name: "text-embedding-ada-002",
     dimensions: 1536,
+    default: false,
   },
 ];
 
@@ -234,6 +238,15 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.enableRag || false,
     },
     {
+      type: "confirm",
+      name: "enableEmbeddingModelsViaSagemaker",
+      message: "Do you want to enable embedding models via SageMaker?",
+      initial: options.enableEmbeddingModelsViaSagemaker || false,
+      skip(): boolean {
+        return !(this as any).state.answers.enableRag;
+      },
+    },
+    {
       type: "multiselect",
       name: "ragsToEnable",
       hint: "SPACE to select, ENTER to confirm selection",
@@ -358,7 +371,7 @@ async function processCreateOptions(options: any): Promise<void> {
       choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
       initial: options.defaultEmbedding || undefined,
       skip(): boolean {
-        return !(this as any).state.answers.enableRag;
+        return !answers.enableRag;
       },
     },
   ];
@@ -385,10 +398,13 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     llms: {
+      enableSagemakerModels: answers.enableSagemakerModels,
       sagemaker: answers.sagemakerModels,
     },
     rag: {
       enabled: answers.enableRag,
+      enableEmbeddingModelsViaSagemaker:
+        answers.enableEmbeddingModelsViaSagemaker,
       engines: {
         aurora: {
           enabled: answers.ragsToEnable.includes("aurora"),
@@ -403,27 +419,43 @@ async function processCreateOptions(options: any): Promise<void> {
           enterprise: false,
         },
       },
+      crossEncodingEnabled: answers.enableEmbeddingModelsViaSagemaker,
       embeddingsModels: [{}],
       crossEncoderModels: [{}],
     },
   };
 
+  if (
+    answers.enableEmbeddingModelsViaSagemaker &&
+    answers.enableSagemakerModels
+  ) {
+    config.rag.crossEncoderModels[0] = {
+      provider: "sagemaker",
+      name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+      default: true,
+    };
+  } else {
+    config.rag.crossEncoderModels[0] = {
+      provider: "None",
+      name: "None",
+      default: true,
+    };
+  }
+  if (!config.rag.enableEmbeddingModelsViaSagemaker) {
+    config.rag.embeddingsModels = embeddingModels.filter(model => model.provider !== "sagemaker");
+  } else {
+    config.rag.embeddingsModels = embeddingModels;
+  }
   // If we have not enabled rag the default embedding is set to the first model
   if (!answers.enableRag) {
-    models.defaultEmbedding = embeddingModels[0].name;
+    (config.rag.embeddingsModels[0] as any).default = true;
+  } else {
+    config.rag.embeddingsModels.forEach((m: any) => {
+      if (m.name === models.defaultEmbedding) {
+        m.default = true;
+      }
+    });
   }
-
-  config.rag.crossEncoderModels[0] = {
-    provider: "sagemaker",
-    name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-    default: true,
-  };
-  config.rag.embeddingsModels = embeddingModels;
-  config.rag.embeddingsModels.forEach((m: any) => {
-    if (m.name === models.defaultEmbedding) {
-      m.default = true;
-    }
-  });
 
   config.rag.engines.kendra.createIndex =
     answers.ragsToEnable.includes("kendra");

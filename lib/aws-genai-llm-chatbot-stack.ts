@@ -150,10 +150,8 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       identityPool: authentication.identityPool,
       api: chatBotApi,
       chatbotFilesBucket: chatBotApi.filesBucket,
-      crossEncodersEnabled:
-        typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
-      sagemakerEmbeddingsEnabled:
-        typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
+      crossEncodersEnabled: props.config.rag.crossEncodingEnabled,
+      sagemakerEmbeddingsEnabled: props.config.rag.enableEmbeddingModelsViaSagemaker,
     });
 
     /**
@@ -265,10 +263,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         ]
       );
 
-      if (
-        props.config.rag.engines.aurora.enabled ||
-        props.config.rag.engines.opensearch.enabled
-      ) {
+      if (props.config.llms.enableSagemakerModels) {
         NagSuppressions.addResourceSuppressionsByPath(
           this,
           [
