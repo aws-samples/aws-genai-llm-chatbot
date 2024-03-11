@@ -191,6 +191,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/Resource`,
+        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
         `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
       ],
       [
