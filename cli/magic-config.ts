@@ -123,7 +123,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "existingVpc",
-      message: "Do you want to use existing vpc? (selecting false will create a new vpc)",
+      message:
+        "Do you want to use existing vpc? (selecting false will create a new vpc)",
       initial: options.vpcId ? true : false,
     },
     {
@@ -132,8 +133,10 @@ async function processCreateOptions(options: any): Promise<void> {
       message: "Specify existing VpcId (vpc-xxxxxxxxxxxxxxxxx)",
       initial: options.vpcId,
       validate(vpcId: string) {
-        return ((this as any).skipped || RegExp(/^vpc-[0-9a-f]{8,17}$/i).test(vpcId)) ?
-          true : 'Enter a valid VpcId in vpc-xxxxxxxxxxx format'
+        return (this as any).skipped ||
+          RegExp(/^vpc-[0-9a-f]{8,17}$/i).test(vpcId)
+          ? true
+          : "Enter a valid VpcId in vpc-xxxxxxxxxxx format";
       },
       skip(): boolean {
         return !(this as any).state.answers.existingVpc;
@@ -243,6 +246,7 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "Aurora", name: "aurora" },
         { message: "OpenSearch", name: "opensearch" },
         { message: "Kendra (managed)", name: "kendra" },
+        { message: "Bedrock KnowldgeBase", name: "knowledgeBase" },
       ],
       validate(choices: any) {
         return (this as any).skipped || choices.length > 0
@@ -353,15 +357,8 @@ async function processCreateOptions(options: any): Promise<void> {
   }
 
   // Knowledge Bases
-  const kbAnswer: any = await enquirer.prompt([
-    {
-      type: "confirm",
-      name: "kbEnable",
-      message: "Do you want to add Amazon Bedrock KnowledgeBases",
-      initial: options.kbExternal && options.kbExternal.length > 0,
-    },
-  ]);
-  let newKB = answers.enableRag && kbAnswer.kbEnable;
+  let newKB =
+    answers.enableRag && answers.ragsToEnable.includes("knowledgeBase");
   let kbExternal: any[] = [];
   const existingKBIndices = Array.from(options.kbExternal || []);
   while (newKB === true) {
@@ -455,7 +452,7 @@ async function processCreateOptions(options: any): Promise<void> {
       ? {
           vpcId: answers.vpcId.toLowerCase(),
           createVpcEndpoints: answers.createVpcEndpoints,
-      }
+        }
       : undefined,
     privateWebsite: answers.privateWebsite,
     certificate: answers.certificate,
