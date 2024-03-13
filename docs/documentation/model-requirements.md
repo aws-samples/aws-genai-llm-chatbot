@@ -46,3 +46,31 @@ For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Co
 N.B: In case of no keys needs, the secret value must be an empty JSON `{}`, NOT an empty string `''`.
 
 make sure that the environment variable matches what is expected by the framework in use, like Langchain ([see available langchain integrations](https://python.langchain.com/docs/integrations/llms/)).
+
+### Azure OpenAI integration as third party model
+
+- Open the SharedApiKeysSecretxyz in SecretManager
+- Update the Secrets by adding following keys to the JSON (or Key/values): 
+
+```
+{
+  "AZURE_OPENAI_MODELS": "Model1,Model2",
+  "AZURE_OPENAI_API_TYPE__Model1": "azure",
+  "AZURE_OPENAI_API_VERSION__Model1": "2023-05-15",
+  "AZURE_OPENAI_API_BASE__Model1": "https://model1.openai.azure.com/",
+  "AZURE_OPENAI_API_KEY__Model1": "7190a163395b42efb2bcb3d526ebf9a9",
+  "AZURE_OPENAI_API_DEPLOYMENT_NAME__Model1": "Model1DeploymentName",
+  "AZURE_OPENAI_API_TYPE__Model2": "azure",
+  "AZURE_OPENAI_API_VERSION__Model2": "2023-07-01-preview",
+  "AZURE_OPENAI_API_BASE__Model2": "https://model2.openai.azure.com/",
+  "AZURE_OPENAI_API_KEY__Model2": "ffee5ba7a00b42ee851722ea44cc1826",
+  "AZURE_OPENAI_API_DEPLOYMENT_NAME__Model2": "Model2DeploymentName"
+}
+```
+Here we are integrating 2 other models: Model1 and Model2. 
+For each one, we need to define following infos you will retrieve from your Azure OpenAI tenant. ${ModelIdentifier} is either Model1 and Model2 :
+ * `AZURE_OPENAI_API_TYPE__${ModelIdentifier}`
+ * `AZURE_OPENAI_API_VERSION__${ModelIdentifier}`
+ * `AZURE_OPENAI_API_BASE__${ModelIdentifier}`
+ * `AZURE_OPENAI_API_KEY__${ModelIdentifier}`
+ * `AZURE_OPENAI_API_DEPLOYMENT_NAME__${ModelIdentifier}`
