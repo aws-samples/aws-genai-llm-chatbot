@@ -337,6 +337,7 @@ def _create_workspace_bedrock_kb(
         genai_core.workspaces.create_workspace_bedrock_kb(
             workspace_name=workspace_name,
             knowledge_base=knowledge_base,
+            hybrid_search=request.hybridSearch,
         )
     )
 

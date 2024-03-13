@@ -2,7 +2,7 @@ import os
 import re
 import genai_core.types
 from typing import List
-from .client import get_kb_client_for_id
+from .client import get_kb_runtime_client_for_id
 
 s3_pattern = re.compile(r"(s3-|s3\.)?(.*)\.amazonaws\.com")
 
@@ -18,7 +18,7 @@ def query_workspace_bedrock_kb(
             f"Could not find Amazon Bedrock KnowledgeBase ID for workspace {workspace_id}"
         )
 
-    client = get_kb_client_for_id(knowledge_base_id)
+    client = get_kb_runtime_client_for_id(knowledge_base_id)
     limit = max(1, min(100, limit))
 
     result = client.retrieve(
