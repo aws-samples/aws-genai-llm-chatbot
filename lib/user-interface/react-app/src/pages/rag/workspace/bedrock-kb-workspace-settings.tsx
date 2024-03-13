@@ -59,6 +59,10 @@ export default function BedrockKBWorkspaceSettings(
                   <div>{props.workspace.knowledgeBaseId}</div>
                 </div>
               )}
+              <div>
+                <Box variant="awsui-key-label">Hybrid search</Box>
+                <div>{props.workspace.hybridSearch ? "yes" : "no"}</div>
+              </div>
               {typeof props.workspace.knowledgeBaseExternal !== "undefined" && (
                 <div>
                   <Box variant="awsui-key-label">External</Box>

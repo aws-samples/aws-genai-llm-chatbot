@@ -27,6 +27,7 @@ input CreateWorkspaceBedrockKBInput {
   name: String!
   kind: String!
   knowledgeBaseId: String!
+  hybridSearch: Boolean!
 }
 
 input CreateWorkspaceOpenSearchInput {

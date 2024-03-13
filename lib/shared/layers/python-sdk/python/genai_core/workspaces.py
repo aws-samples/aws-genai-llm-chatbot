@@ -272,6 +272,7 @@ def create_workspace_bedrock_kb(workspace_name: str, knowledge_base: dict):
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     knowledge_base_id = knowledge_base["id"]
     external = knowledge_base["external"]
+    hybrid_search = knowledge_base["hybridSearch"]
 
     item = {
         "workspace_id": workspace_id,
@@ -282,6 +283,7 @@ def create_workspace_bedrock_kb(workspace_name: str, knowledge_base: dict):
         "status": "submitted",
         "knowledge_base_id": knowledge_base_id,
         "knowledge_base_external": external,
+        "hybrid_search": hybrid_search,
         "documents": 0,
         "vectors": 0,
         "size_in_bytes": 0,
@@ -290,17 +292,6 @@ def create_workspace_bedrock_kb(workspace_name: str, knowledge_base: dict):
     }
 
     response = table.put_item(Item=item)
-    print(response)
-
-    response = sfn_client.start_execution(
-        stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
-        input=json.dumps(
-            {
-                "workspace_id": workspace_id,
-            }
-        ),
-    )
-
     print(response)
 
     return item

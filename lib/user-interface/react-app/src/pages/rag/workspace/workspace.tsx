@@ -99,37 +99,47 @@ export default function WorkspacePane() {
                   >
                     Semantic search
                   </RouterButton>
-                  <RouterButtonDropdown
-                    items={[
-                      {
-                        id: "upload-file",
-                        text: "Upload files",
-                        href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-text",
-                        text: "Add texts",
-                        href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-qna",
-                        text: "Add Q&A",
-                        href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "crawl-website",
-                        text: "Crawl website",
-                        href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-rss-subscription",
-                        text: "Add RSS subscription",
-                        href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
-                      },
-                    ]}
-                  >
-                    Add data
-                  </RouterButtonDropdown>
+                  {workspace?.kendraIndexExternal ||
+                  workspace?.knowledgeBaseExternal ? (
+                    <></>
+                  ) : (
+                    <RouterButtonDropdown
+                      disabled={
+                        (workspace?.kendraIndexExternal ||
+                          workspace?.knowledgeBaseExternal) ??
+                        false
+                      }
+                      items={[
+                        {
+                          id: "upload-file",
+                          text: "Upload files",
+                          href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-text",
+                          text: "Add texts",
+                          href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-qna",
+                          text: "Add Q&A",
+                          href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "crawl-website",
+                          text: "Crawl website",
+                          href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-rss-subscription",
+                          text: "Add RSS subscription",
+                          href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
+                        },
+                      ]}
+                    >
+                      Add data
+                    </RouterButtonDropdown>
+                  )}
                 </SpaceBetween>
               }
             >

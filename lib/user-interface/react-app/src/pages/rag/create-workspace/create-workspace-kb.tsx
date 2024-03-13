@@ -13,6 +13,7 @@ const nameRegex = /^[\w+_-]+$/;
 const defaults: BedrockKBWorkspaceCreateInput = {
   name: "",
   knowledgeBaseId: null,
+  hybridSearch: false,
 };
 
 export default function CreateWorkspaceBedrockKB() {
@@ -61,6 +62,7 @@ export default function CreateWorkspaceBedrockKB() {
       await apiClient.workspaces.createBedrockKBWorkspace({
         name: data.name.trim(),
         knowledgeBaseId: data.knowledgeBaseId?.value ?? "",
+        hybridSearch: data.hybridSearch ?? false,
       });
       navigate("/rag/workspaces");
       return;

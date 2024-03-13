@@ -115,6 +115,7 @@ export class WorkspacesClient {
   async createBedrockKBWorkspace(params: {
     name: string;
     knowledgeBaseId: string;
+    hybridSearch: boolean;
   }): Promise<GraphQLResult<GraphQLQuery<CreateBedrockKBWorkspaceMutation>>> {
     const result = API.graphql<GraphQLQuery<CreateBedrockKBWorkspaceMutation>>({
       query: createBedrockKBWorkspace,

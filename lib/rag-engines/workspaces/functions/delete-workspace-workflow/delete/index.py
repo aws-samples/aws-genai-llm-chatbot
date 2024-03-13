@@ -24,6 +24,6 @@ def lambda_handler(event, context: LambdaContext):
     elif workspace["engine"] == "kendra":
         genai_core.kendra.delete.delete_workspace(workspace)
     elif workspace["engine"] == "bedrock_kb":
-        genai_core.bedrock_kb.delete_workspace(workspace)
+        genai_core.bedrock_kb.delete.delete_workspace(workspace)
     else:
         raise genai_core.types.CommonError("Workspace engine not supported")

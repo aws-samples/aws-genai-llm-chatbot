@@ -27,6 +27,7 @@ def query_workspace_bedrock_kb(
         retrievalConfiguration={
             "vectorSearchConfiguration": {
                 "numberOfResults": limit,
+                "overrideSearchType": search_type,
             }
         },
     )

@@ -92,4 +92,5 @@ export interface KendraWorkspaceCreateInput {
 export interface BedrockKBWorkspaceCreateInput {
   name: string;
   knowledgeBaseId: SelectProps.Option | null;
+  hybridSearch: boolean;
 }

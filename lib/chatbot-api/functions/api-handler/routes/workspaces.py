@@ -60,6 +60,7 @@ class CreateWorkspaceBedrockKBRequest(BaseModel):
     kind: str
     name: str
     knowledgeBaseId: str
+    hybridSearch: bool
 
 
 @router.resolver(field_name="listWorkspaces")

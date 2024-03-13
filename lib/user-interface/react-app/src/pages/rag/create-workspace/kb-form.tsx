@@ -15,6 +15,7 @@ import {
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { BedrockKB } from "../../../API";
+import { HybridSearchField } from "./hybrid-search-field";
 
 export interface KBFormProps {
   data: BedrockKBWorkspaceCreateInput;
@@ -97,6 +98,12 @@ export default function KBForm(props: KBFormProps) {
             }
           />
         </FormField>
+        <HybridSearchField
+          submitting={props.submitting}
+          errors={props.errors}
+          checked={props.data.hybridSearch}
+          onChange={props.onChange}
+        />
       </SpaceBetween>
     </Container>
   );
