@@ -71,6 +71,7 @@ export class IdeficsInterface extends Construct {
         accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
         accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
       },
+      cloudWatchRole: true,
       binaryMediaTypes: ["*/*"],
       endpointConfiguration: {
         types: [apigateway.EndpointType.PRIVATE],
