@@ -24,12 +24,12 @@ def crawl_urls(
 ):
     workspace_id = workspace["workspace_id"]
     document_id = document["document_id"]
-    processed_urls = set(processed_urls)
+    batch_size = 20
 
-    current_limit = min(limit, 20)
     idx = 0
-    while idx < current_limit:
-        if len(priority_queue) == 0:
+    while True:
+        # break the loop when priority loop is empty or processed urls is equal to limit
+        if len(priority_queue) == 0 or len(processed_urls) == limit:
             break
 
         priority_queue = sorted(
@@ -43,7 +43,7 @@ def crawl_urls(
         idx += 1
 
         document_sub_id = str(uuid.uuid4())
-        processed_urls.add(current_url)
+        processed_urls.append(current_url)
         print(f"Processing url {document_sub_id}: {current_url}")
 
         try:
@@ -53,8 +53,8 @@ def crawl_urls(
             continue
 
         _store_content_on_s3(
-            workspace["workspace_id"],
-            document["document_id"],
+            workspace_id,
+            document_id,
             document_sub_id,
             current_url,
             content,
@@ -77,23 +77,22 @@ def crawl_urls(
                     priority_queue.append(
                         {"url": link, "priority": current_priority + 1}
                     )
+    
+        # update the status for every 20 (default batch size) links 
+        if idx == batch_size or len(priority_queue) == 0 or len(processed_urls) == limit:
+            sub_documents = len(processed_urls)
+            genai_core.documents.set_sub_documents(workspace_id, document_id, sub_documents)
+            idx = 0
 
-    sub_documents = len(processed_urls)
-    genai_core.documents.set_sub_documents(
-        workspace["workspace_id"], document["document_id"], sub_documents
-    )
-
-    limit = max(limit - idx, 0)
     return {
         "workspace_id": workspace_id,
         "document_id": document_id,
         "workspace": workspace,
         "document": document,
         "priority_queue": priority_queue,
-        "processed_urls": list(processed_urls),
+        "processed_urls": processed_urls,
         "follow_links": follow_links,
         "limit": limit,
-        "done": len(priority_queue) == 0 or limit == 0,
     }
 
 

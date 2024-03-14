@@ -63,13 +63,16 @@ Question: {input}"""
         return prompt_template
 
     def get_condense_question_prompt(self):
-        template = """
+        template = """<conv>
 {chat_history}
+</conv>
 
-Human: Given the above conversation and a follow up input, rephrase the follow up input to be a standalone question, in the same language as the follow up input.
-Follow Up Input: {question}
+<followup>
+{question}
+</followup>
 
-Assistant:"""
+Given the conversation inside the tags <conv></conv>, rephrase the follow up question you find inside <followup></followup> to be a standalone question, in the same language as the follow up question.
+"""
 
         return PromptTemplate(
             input_variables=["chat_history", "question"],

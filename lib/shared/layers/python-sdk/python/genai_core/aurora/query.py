@@ -7,6 +7,7 @@ from psycopg2 import sql
 from genai_core.aurora.connection import AuroraConnection
 from genai_core.aurora.utils import convert_types
 from aws_lambda_powertools import Logger
+from genai_core.types import CommonError, Task
 
 logger = Logger()
 
@@ -35,17 +36,17 @@ def query_workspace_aurora(
     )
 
     if selected_model is None:
-        raise genai_core.types.CommonError("Embeddings model not found")
+        raise CommonError("Embeddings model not found")
 
     cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
         cross_encoder_model_provider, cross_encoder_model_name
     )
 
     if cross_encoder_model is None:
-        raise genai_core.types.CommonError("Cross encoder model not found")
+        raise CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
-        selected_model, [query]
+        selected_model, [query], Task.RETRIEVE
     )[0]
 
     language_name, detected_languages = genai_core.utils.comprehend.get_query_language(
@@ -291,7 +292,7 @@ def _convert_records(source: str, records: List[dict]):
             converted["keyword_search_score"] = record[12]
             converted["vector_search_score"] = None
         else:
-            raise genai_core.types.CommonError("Unknown source")
+            raise CommonError("Unknown source")
 
         converted_records.append(converted)
 

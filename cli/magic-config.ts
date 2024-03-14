@@ -33,6 +33,22 @@ const embeddingModels = [
     name: "amazon.titan-embed-text-v1",
     dimensions: 1536,
   },
+  //Support for inputImage is not yet implemented for amazon.titan-embed-image-v1
+  {
+    provider: "bedrock",
+    name: "amazon.titan-embed-image-v1",
+    dimensions: 1024,
+  },
+  {
+    provider: "bedrock",
+    name: "cohere.embed-english-v3",
+    dimensions: 1024,
+  },
+  {
+    provider: "bedrock",
+    name: "cohere.embed-multilingual-v3",
+    dimensions: 1024,
+  },
   {
     provider: "openai",
     name: "text-embedding-ada-002",
@@ -372,15 +388,22 @@ async function processCreateOptions(options: any): Promise<void> {
   }
   const modelsPrompts = [
     {
-      type: "select",
+      type: "select", 
       name: "defaultEmbedding",
-      message: "Which is the default embedding model",
-      choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
-      initial: options.defaultEmbedding || undefined,
-      skip(): boolean {
-        return !(this as any).state.answers.enableRag;
+      message: "Select a default embedding model",
+      choices: embeddingModels.map(m => ({name: m.name, value: m})),
+      initial: options.defaultEmbedding,
+      validate(value: string) {
+        if ((this as any).state.answers.enableRag) {
+          return value ? true : 'Select a default embedding model'; 
+        }
+      
+        return true;
       },
-    },
+      skip() {
+        return !answers.enableRag || !(answers.ragsToEnable.includes("aurora") || answers.ragsToEnable.includes("opensearch"));
+      }
+    }
   ];
   const models: any = await enquirer.prompt(modelsPrompts);
 
