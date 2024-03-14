@@ -44,6 +44,7 @@ export default defineConfig({
       {
         text: 'Documentation',
         items: [
+          { text: 'Custom Public Domain', link: '/documentation/custom-public-domain' },
           { text: 'Private Chatbot', link: '/documentation/private-chatbot' },
           { text: 'Model Requirements', link: '/documentation/model-requirements' },
           { text: 'Self-hosted models', link: '/documentation/self-hosted-models' },
