@@ -316,6 +316,17 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     }
   }, [props.configuration]);
 
+  const hasImagesInChatHistory = function (): boolean {
+    return (
+      messageHistoryRef.current.filter(
+        (x) =>
+          x.type == ChatBotMessageType.Human &&
+          x.metadata?.files &&
+          (x.metadata.files as object[]).length > 0
+      ).length > 0
+    );
+  };
+
   const handleSendMessage = () => {
     if (!state.selectedModel) return;
     if (props.running) return;
@@ -331,9 +342,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       action: ChatBotAction.Run,
       modelInterface:
         (props.configuration.files && props.configuration.files.length > 0) ||
-        (messageHistoryRef.current.filter(
-          (x) => x.metadata?.files !== undefined
-        ).length > 0 &&
+        (hasImagesInChatHistory() &&
           state.selectedModelMetadata?.inputModalities.includes(
             ChabotInputModality.Image
           ))
@@ -355,7 +364,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         },
       },
     };
-
+    console.log(request);
     setState((state) => ({
       ...state,
       value: "",
