@@ -58,7 +58,9 @@ class CreateWorkspaceKendraRequest(BaseModel):
 @router.resolver(field_name="listWorkspaces")
 @tracer.capture_method
 def list_workspaces():
-    workspaces = genai_core.workspaces.list_workspaces()
+
+    user_id = genai_core.auth.get_user_id(router)
+    workspaces = genai_core.workspaces.list_workspaces_by_user(user_id)
 
     ret_value = [_convert_workspace(workspace) for workspace in workspaces]
 
@@ -68,10 +70,23 @@ def list_workspaces():
 @router.resolver(field_name="getWorkspace")
 @tracer.capture_method
 def get_workspace(workspaceId: str):
+
+    user_id = genai_core.auth.get_user_id(router)
+    #Check policy before to fetch a data of workspace
+    workspace_policy = genai_core.workspaces.is_workspace_readable(workspaceId, user_id)
+
+    if not workspace_policy:
+        return None
+
     workspace = genai_core.workspaces.get_workspace(workspaceId)
 
     if not workspace:
         return None
+
+    key_policies = ['is_owner', 'is_writable']
+
+    for key_policy in key_policies:
+        workspace[key_policy] = workspace_policy[key_policy]
 
     ret_value = _convert_workspace(workspace)
 
@@ -116,6 +131,7 @@ def create_kendra_workspace(input: dict):
 
 
 def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict):
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     embedding_models = config["rag"]["embeddingsModels"]
     cross_encoder_models = config["rag"]["crossEncoderModels"]
@@ -185,6 +201,7 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
             chunking_strategy=request.chunkingStrategy,
             chunk_size=request.chunkSize,
             chunk_overlap=request.chunkOverlap,
+            creator_id=user_id,
         )
     )
 
@@ -192,6 +209,7 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
 def _create_workspace_open_search(
     request: CreateWorkspaceOpenSearchRequest, config: dict
 ):
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     embedding_models = config["rag"]["embeddingsModels"]
     cross_encoder_models = config["rag"]["crossEncoderModels"]
@@ -256,11 +274,13 @@ def _create_workspace_open_search(
             chunking_strategy=request.chunkingStrategy,
             chunk_size=request.chunkSize,
             chunk_overlap=request.chunkOverlap,
+            creator_id=user_id,
         )
     )
 
 
 def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict):
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     kendra_indexes = genai_core.kendra.get_kendra_indexes()
 
@@ -287,6 +307,7 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
             workspace_name=workspace_name,
             kendra_index=kendra_index,
             use_all_data=request.useAllData,
+            creator_id=user_id,
         )
     )
 

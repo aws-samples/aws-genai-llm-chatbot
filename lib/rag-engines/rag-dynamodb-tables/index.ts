@@ -4,9 +4,12 @@ import { Construct } from "constructs";
 
 export class RagDynamoDBTables extends Construct {
   public readonly workspacesTable: dynamodb.Table;
+  public readonly workspacesPolicyTable: dynamodb.Table;
   public readonly documentsTable: dynamodb.Table;
   public readonly workspacesByObjectTypeIndexName: string =
     "by_object_type_idx";
+  public readonly workspacesPolicyByWorkspaceIdIndexName: string =
+      "by_workspace_idx";
   public readonly documentsByCompoundKeyIndexName: string =
     "by_compound_key_idx";
   public readonly documentsByStatusIndexName: string = "by_status_idx";
@@ -39,6 +42,29 @@ export class RagDynamoDBTables extends Construct {
         name: "created_at",
         type: dynamodb.AttributeType.STRING,
       },
+    });
+
+    const workspacesPolicyTable = new dynamodb.Table(this, "WorkspacesPolicy", {
+      partitionKey: {
+        name: "pk",
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "sk",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      pointInTimeRecovery: true,
+    });
+
+    workspacesPolicyTable.addGlobalSecondaryIndex({
+      indexName: this.workspacesPolicyByWorkspaceIdIndexName,
+      partitionKey: {
+        name: "workspace_id",
+        type: dynamodb.AttributeType.STRING,
+      }
     });
 
     const documentsTable = new dynamodb.Table(this, "Documents", {
@@ -81,6 +107,7 @@ export class RagDynamoDBTables extends Construct {
     });
 
     this.workspacesTable = workspacesTable;
+    this.workspacesPolicyTable = workspacesPolicyTable;
     this.documentsTable = documentsTable;
   }
 }
