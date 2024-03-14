@@ -224,21 +224,41 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.privateWebsite || false,
     },
     {
+      type: "confirm",
+      name: "customPublicDomain",
+      message:
+        "Do you want to provide a custom domain name and corresponding certificate arn for the public website ?",
+      initial: options.customPublicDomain || false,
+      skip(): boolean {
+        return (this as any).state.answers.privateWebsite ;
+      },
+    },
+    {
       type: "input",
       name: "certificate",
-      message: "ACM certificate ARN",
+      message(): string {
+        if ((this as any).state.answers.customPublicDomain) {
+          return "ACM certificate ARN with custom domain for public website. Note that the certificate must resides in us-east-1";
+        }
+        return "ACM certificate ARN";
+      },
       initial: options.certificate,
       skip(): boolean {
-        return !(this as any).state.answers.privateWebsite;
+        return !(this as any).state.answers.privateWebsite && !(this as any).state.answers.customPublicDomain;
       },
     },
     {
       type: "input",
       name: "domain",
-      message: "Domain for private website",
+      message(): string {
+        if ((this as any).state.answers.customPublicDomain) {
+          return "Custom Domain for public website";
+        }
+        return "Domain for private website";
+      },
       initial: options.domain,
       skip(): boolean {
-        return !(this as any).state.answers.privateWebsite;
+        return !(this as any).state.answers.privateWebsite && !(this as any).state.answers.customPublicDomain;
       },
     },
     {
