@@ -41,6 +41,7 @@ input CalculateEmbeddingsInput {
   provider: String!
   model: String!
   passages: [String]!
+  task: String!
 }
 
 type CrawlerProperties @aws_cognito_user_pools {

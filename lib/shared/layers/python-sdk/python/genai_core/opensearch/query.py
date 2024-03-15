@@ -3,6 +3,7 @@ import genai_core.cross_encoder
 from typing import List
 from .client import get_open_search_client
 from aws_lambda_powertools import Logger
+from genai_core.types import CommonError, Task
 
 logger = Logger()
 
@@ -34,17 +35,17 @@ def query_workspace_open_search(
     )
 
     if selected_model is None:
-        raise genai_core.types.CommonError("Embeddings model not found")
+        raise CommonError("Embeddings model not found")
 
     cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
         cross_encoder_model_provider, cross_encoder_model_name
     )
 
     if cross_encoder_model is None:
-        raise genai_core.types.CommonError("Cross encoder model not found")
+        raise CommonError("Cross encoder model not found")
 
     query_embeddings = genai_core.embeddings.generate_embeddings(
-        selected_model, [query]
+        selected_model, [query], Task.RETRIEVE
     )[0]
 
     items = []
@@ -182,7 +183,7 @@ def _convert_records(source: str, records: List[dict]):
             converted["keyword_search_score"] = current_score
             converted["vector_search_score"] = None
         else:
-            raise genai_core.types.CommonError("Unknown source")
+            raise CommonError("Unknown source")
 
         converted_records.append(converted)
 
