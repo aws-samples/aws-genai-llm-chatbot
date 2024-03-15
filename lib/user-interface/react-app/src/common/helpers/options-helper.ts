@@ -37,8 +37,8 @@ export abstract class OptionsHelper {
       provider: string;
       name: string;
       interface?: string;
-      isAgent?: boolean;
-      isAgentUpdated?: boolean;
+      isAgent?: boolean | null;
+      agentIsUpdated?: boolean | null;
     },
   >(data: T[]) {
     const modelsMap = new Map<string, T[]>();
@@ -65,7 +65,7 @@ export abstract class OptionsHelper {
           items?.map((item) => ({
             label:
               item.name +
-              (item.isAgent ? (item.isAgentUpdated! ? " ⭐️" : " ✅") : ""),
+              (item.isAgent ? (item.agentIsUpdated! ? " ⭐️" : " ✅") : ""),
             value: `${item.provider}::${item.name}`,
           })) ?? [],
       };
