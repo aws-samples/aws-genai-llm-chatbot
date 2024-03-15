@@ -37,6 +37,8 @@ class Provider(Enum):
     BEDROCK = "bedrock"
     OPENAI = "openai"
     SAGEMAKER = "sagemaker"
+    AMAZON = "amazon"
+    COHERE = "cohere"
 
 
 class Modality(Enum):
@@ -79,3 +81,9 @@ class ChatbotAction(Enum):
 class ChatbotMessageType(Enum):
     Human = "human"
     AI = "ai"
+
+class Task(Enum):
+    STORE = "store"
+    RETRIEVE = "retrieve"
+    SEARCH_QUERY = "search_query"
+    SEARCH_DOCUMENT = "search_document"
