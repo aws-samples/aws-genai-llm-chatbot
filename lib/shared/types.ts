@@ -53,8 +53,8 @@ export enum SupportedBedrockRegion {
 
 export enum ModelInterface {
   LangChain = "langchain",
-  Idefics = "idefics",
   BedrockAgent = "agent",
+  MultiModal = "multimodal",
 }
 
 export enum Modality {

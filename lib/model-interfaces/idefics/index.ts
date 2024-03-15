@@ -72,6 +72,7 @@ export class IdeficsInterface extends Construct {
         accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
         accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
       },
+      cloudWatchRole: true,
       binaryMediaTypes: ["*/*"],
       endpointConfiguration: {
         types: [apigateway.EndpointType.PRIVATE],
@@ -203,6 +204,13 @@ export class IdeficsInterface extends Construct {
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
     props.shared.configParameter.grantRead(requestHandler);
+    requestHandler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["bedrock:InvokeModel"],
+        resources: ["*"],
+        effect: iam.Effect.ALLOW,
+      })
+    );
 
     const deadLetterQueue = new sqs.Queue(this, "DLQ", {
       enforceSSL: true,
@@ -239,7 +247,7 @@ export class IdeficsInterface extends Construct {
           ),
           modelInterface: sns.FilterOrPolicy.filter(
             sns.SubscriptionFilter.stringFilter({
-              allowlist: [ModelInterface.Idefics],
+              allowlist: [ModelInterface.MultiModal],
             })
           ),
         },

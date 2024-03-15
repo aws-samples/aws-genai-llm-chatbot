@@ -5,7 +5,7 @@ from langchain.prompts.prompt import PromptTemplate
 
 from .base import Bedrock
 from ..base import ModelAdapter
-from ..registry import registry
+from genai_core.registry import registry
 
 
 class BedrockClaudeAdapter(ModelAdapter):
