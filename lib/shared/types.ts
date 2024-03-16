@@ -84,6 +84,18 @@ export interface SystemConfig {
   };
   llms: {
     sagemaker: SupportedSageMakerModels[];
+    sagemakerSchedule?: {
+      enabled?: boolean;
+      timezonePicker?: string;
+      enableCronFormat?: boolean;
+      sagemakerCronStartSchedule?: string;
+      sagemakerCronStopSchedule?: string;
+      daysForSchedule?: string;
+      scheduleStartTime?: string;
+      scheduleStopTime?: string;
+      enableScheduleEndDate?: boolean;
+      startScheduleEndDate?: string;
+    };
   };
   rag: {
     enabled: boolean;

@@ -13,6 +13,49 @@ import {
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
+import { AWSCronValidator } from "./aws-cron-validator"
+import { tz } from 'moment-timezone';
+
+function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
+    const timeZones = tz.names(); // Get a list of all timezones
+    const timeZoneData = timeZones.map(zone => {
+        // Get current time in each timezone
+        const currentTime = tz(zone).format('YYYY-MM-DD HH:mm');
+        return { message: `${zone}: ${currentTime}`, name: zone };
+    });
+    return timeZoneData;
+}
+
+function isValidDate(dateString: string): boolean {
+  // Check the pattern YYYY/MM/DD
+  const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+  if (!regex.test(dateString)) {
+    return false;
+  }
+
+  // Parse the date parts to integers
+  const parts = dateString.split("-");
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+  const day = parseInt(parts[2], 10);
+
+  // Check the date validity
+  const date = new Date(year, month, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
+    return false;
+  }
+  
+  // Check if the date is in the future compared to the current date at 00:00:00
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (date <= today) {
+    return false;
+  }
+
+  return true;
+}
+
+const timeZoneData = getTimeZonesWithCurrentTime();
 
 const iamRoleRegExp = RegExp(/arn:aws:iam::\d+:role\/[\w-_]+/);
 const kendraIdRegExp = RegExp(/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/);
@@ -86,6 +129,16 @@ const embeddingModels = [
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
         : false;
+      options.enableSagemakerModelsSchedule = config.llms?.sagemakerSchedule?.enabled;
+      options.timezonePicker = config.llms?.sagemakerSchedule?.timezonePicker;
+      options.enableCronFormat = config.llms?.sagemakerSchedule?.enableCronFormat;
+      options.cronSagemakerModelsScheduleStart = config.llms?.sagemakerSchedule?.sagemakerCronStartSchedule;
+      options.cronSagemakerModelsScheduleStop = config.llms?.sagemakerSchedule?.sagemakerCronStopSchedule;
+      options.daysForSchedule = config.llms?.sagemakerSchedule?.daysForSchedule;
+      options.scheduleStartTime = config.llms?.sagemakerSchedule?.scheduleStartTime;
+      options.scheduleStopTime = config.llms?.sagemakerSchedule?.scheduleStopTime;
+      options.enableScheduleEndDate = config.llms?.sagemakerSchedule?.enableScheduleEndDate;
+      options.startScheduleEndDate = config.llms?.sagemakerSchedule?.startScheduleEndDate;
       options.enableRag = config.rag.enabled;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
@@ -172,21 +225,41 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.privateWebsite || false,
     },
     {
+      type: "confirm",
+      name: "customPublicDomain",
+      message:
+        "Do you want to provide a custom domain name and corresponding certificate arn for the public website ?",
+      initial: options.customPublicDomain || false,
+      skip(): boolean {
+        return (this as any).state.answers.privateWebsite ;
+      },
+    },
+    {
       type: "input",
       name: "certificate",
-      message: "ACM certificate ARN",
+      message(): string {
+        if ((this as any).state.answers.customPublicDomain) {
+          return "ACM certificate ARN with custom domain for public website. Note that the certificate must resides in us-east-1";
+        }
+        return "ACM certificate ARN";
+      },
       initial: options.certificate,
       skip(): boolean {
-        return !(this as any).state.answers.privateWebsite;
+        return !(this as any).state.answers.privateWebsite && !(this as any).state.answers.customPublicDomain;
       },
     },
     {
       type: "input",
       name: "domain",
-      message: "Domain for private website",
+      message(): string {
+        if ((this as any).state.answers.customPublicDomain) {
+          return "Custom Domain for public website";
+        }
+        return "Domain for private website";
+      },
       initial: options.domain,
       skip(): boolean {
-        return !(this as any).state.answers.privateWebsite;
+        return !(this as any).state.answers.privateWebsite && !(this as any).state.answers.customPublicDomain;
       },
     },
     {
@@ -235,6 +308,8 @@ async function processCreateOptions(options: any): Promise<void> {
             .includes(m)
         ) || [],
       validate(choices: any) {
+        //Trap for new players, validate always runs even if skipped is true
+        // So need to handle validate bail out if skipped is true
         return (this as any).skipped || choices.length > 0
           ? true
           : "You need to select at least one model";
@@ -243,6 +318,181 @@ async function processCreateOptions(options: any): Promise<void> {
         (this as any).state._choices = (this as any).state.choices;
         return !(this as any).state.answers.enableSagemakerModels;
       },
+    },
+    {
+      type: "confirm",
+      name: "enableSagemakerModelsSchedule",
+      message: "Do you want to enable a start/stop schedule for sagemaker models?",
+      initial(): boolean {
+        return (options.enableSagemakerModelsSchedule && (this as any).state.answers.enableSagemakerModels) || false;
+      },
+      skip(): boolean {
+        return !(this as any).state.answers.enableSagemakerModels;
+      },
+    },
+    {
+      type: "AutoComplete",
+      name: "timezonePicker",
+      hint: "start typing to auto complete, ENTER to confirm selection",
+      message: "Which TimeZone do you want to run the schedule in?",
+      choices: timeZoneData,
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one time zone";
+      },
+      skip(): boolean {
+        return !(this as any).state.answers.enableSagemakerModelsSchedule;
+      },
+      initial: options.timezonePicker || [],
+    },
+    {
+      type: "select",
+      name: "enableCronFormat",
+      choices: [
+        { message: "Simple - Wizard lead", name: "simple" },
+        { message: "Advanced - Provide cron expression", name: "cron" },
+      ],
+      message: "How do you want to set the schedule?",
+      initial: options.enableCronFormat || "simple",
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.enableSagemakerModelsSchedule;
+      },
+    },
+    {
+      type: "input",
+      name: "sagemakerCronStartSchedule",
+      hint: "This cron format is using AWS eventbridge cron syntax see docs for more information",
+      message: "Start schedule for Sagmaker models expressed in UTC AWS cron format",
+      skip(): boolean {
+        return !(this as any).state.answers.enableCronFormat.includes("cron");
+      },
+      validate(v: string) {
+        if ((this as any).skipped) {
+          return true
+        }
+        try {
+          AWSCronValidator.validate(v)
+          return true
+        }
+        catch (error) {
+          if (error instanceof Error){
+            return error.message
+          }
+          return false
+        }
+      },
+      initial: options.cronSagemakerModelsScheduleStart,
+    },
+    {
+      type: "input",
+      name: "sagemakerCronStopSchedule",
+      hint: "This cron format is using AWS eventbridge cron syntax see docs for more information",
+      message: "Stop schedule for Sagmaker models expressed in AWS cron format",
+      skip(): boolean {
+        return !(this as any).state.answers.enableCronFormat.includes("cron");
+      },
+      validate(v: string) {
+        if ((this as any).skipped) {
+          return true
+        }
+        try {
+          AWSCronValidator.validate(v)
+          return true
+        }
+        catch (error) {
+          if (error instanceof Error){
+            return error.message
+          }
+          return false
+        }
+      },
+      initial: options.cronSagemakerModelsScheduleStop,
+    },
+    {
+      type: "multiselect",
+      name: "daysForSchedule",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which days of the week would you like to run the schedule on?",
+      choices: [
+        { message: "Sunday", name: "SUN" },
+        { message: "Monday", name: "MON" },
+        { message: "Tuesday", name: "TUE" },
+        { message: "Wednesday", name: "WED" },
+        { message: "Thursday", name: "THU" },
+        { message: "Friday", name: "FRI" },
+        { message: "Saturday", name: "SAT" },
+      ],
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one day";
+      },
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.enableCronFormat.includes("simple");
+      },
+      initial: options.daysForSchedule || [],
+    },
+    {
+      type: "input",
+      name: "scheduleStartTime",
+      message: "What time of day do you wish to run the start schedule? enter in HH:MM format",
+      validate(v: string) {
+        if ((this as any).skipped) {
+          return true
+        }
+        // Regular expression to match HH:MM format
+        const regex = /^([0-1]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
+        return regex.test(v) || 'Time must be in HH:MM format!';
+      },
+      skip(): boolean {
+        return !(this as any).state.answers.enableCronFormat.includes("simple");
+      },
+      initial: options.scheduleStartTime,
+    },
+    {
+      type: "input",
+      name: "scheduleStopTime",
+      message: "What time of day do you wish to run the stop schedule? enter in HH:MM format",
+      validate(v: string) {
+        if ((this as any).skipped) {
+          return true
+        }
+        // Regular expression to match HH:MM format
+        const regex = /^([0-1]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
+        return regex.test(v) || 'Time must be in HH:MM format!';
+      },
+      skip(): boolean {
+        return !(this as any).state.answers.enableCronFormat.includes("simple");
+      },
+      initial: options.scheduleStopTime,
+    },
+    {
+      type: "confirm",
+      name: "enableScheduleEndDate",
+      message: "Would you like to set an end data for the start schedule? (after this date the models would no longer start)",
+      initial: options.enableScheduleEndDate || false,
+      skip(): boolean {
+        return !(this as any).state.answers.enableSagemakerModelsSchedule;
+      },
+    },
+    {
+      type: "input",
+      name: "startScheduleEndDate",
+      message: "After this date the models will no longer start",
+      hint: "YYYY-MM-DD",
+      validate(v: string) {
+        if ((this as any).skipped) {
+          return true
+        }
+        return isValidDate(v) || 'The date must be in format YYYY/MM/DD and be in the future';
+      },
+      skip(): boolean {
+        return !(this as any).state.answers.enableScheduleEndDate;
+      },
+      initial: options.startScheduleEndDate || false,
     },
     {
       type: "confirm",
@@ -402,6 +652,22 @@ async function processCreateOptions(options: any): Promise<void> {
   ];
   const models: any = await enquirer.prompt(modelsPrompts);
 
+  // Convert simple time into cron format for schedule
+  if (answers.enableSagemakerModelsSchedule && answers.enableCronFormat == "simple")
+  {
+    const daysToRunSchedule = answers.daysForSchedule.join(",");
+    const startMinutes = answers.scheduleStartTime.split(":")[1];
+    const startHour = answers.scheduleStartTime.split(":")[0];
+    answers.sagemakerCronStartSchedule = `${startMinutes} ${startHour} ? * ${daysToRunSchedule} *`;
+    AWSCronValidator.validate(answers.sagemakerCronStartSchedule)
+
+    
+    const stopMinutes = answers.scheduleStopTime.split(":")[1];
+    const stopHour = answers.scheduleStopTime.split(":")[0];
+    answers.sagemakerCronStopSchedule = `${stopMinutes} ${stopHour} ? * ${daysToRunSchedule} *`;
+    AWSCronValidator.validate(answers.sagemakerCronStopSchedule)
+  }
+  
   // Create the config object
   const config = {
     prefix: answers.prefix,
@@ -424,6 +690,20 @@ async function processCreateOptions(options: any): Promise<void> {
       : undefined,
     llms: {
       sagemaker: answers.sagemakerModels,
+      sagemakerSchedule: answers.enableSagemakerModelsSchedule
+        ? {
+            enabled: answers.enableSagemakerModelsSchedule,
+            timezonePicker: answers.timezonePicker,
+            enableCronFormat: answers.enableCronFormat,
+            sagemakerCronStartSchedule: answers.sagemakerCronStartSchedule,
+            sagemakerCronStopSchedule: answers.sagemakerCronStopSchedule,
+            daysForSchedule: answers.daysForSchedule,
+            scheduleStartTime: answers.scheduleStartTime,
+            scheduleStopTime: answers.scheduleStopTime,
+            enableScheduleEndDate: answers.enableScheduleEndDate,
+            startScheduleEndDate: answers.startScheduleEndDate,
+          }
+        : undefined,
     },
     rag: {
       enabled: answers.enableRag,
