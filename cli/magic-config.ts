@@ -353,7 +353,7 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "Advanced - Provide cron expression", name: "cron" },
       ],
       message: "How do you want to set the schedule?",
-      initial: options.enableCronFormat || "simple",
+      initial: options.enableCronFormat || "",
       skip(): boolean {
         (this as any).state._choices = (this as any).state.choices;
         return !(this as any).state.answers.enableSagemakerModelsSchedule;
@@ -430,6 +430,9 @@ async function processCreateOptions(options: any): Promise<void> {
       },
       skip(): boolean {
         (this as any).state._choices = (this as any).state.choices;
+        if (!(this as any).state.answers.enableSagemakerModelsSchedule){
+          return true;
+        }
         return !(this as any).state.answers.enableCronFormat.includes("simple");
       },
       initial: options.daysForSchedule || [],
@@ -447,6 +450,9 @@ async function processCreateOptions(options: any): Promise<void> {
         return regex.test(v) || 'Time must be in HH:MM format!';
       },
       skip(): boolean {
+        if (!(this as any).state.answers.enableSagemakerModelsSchedule){
+          return true;
+        }
         return !(this as any).state.answers.enableCronFormat.includes("simple");
       },
       initial: options.scheduleStartTime,
@@ -464,6 +470,9 @@ async function processCreateOptions(options: any): Promise<void> {
         return regex.test(v) || 'Time must be in HH:MM format!';
       },
       skip(): boolean {
+        if (!(this as any).state.answers.enableSagemakerModelsSchedule){
+          return true;
+        }
         return !(this as any).state.answers.enableCronFormat.includes("simple");
       },
       initial: options.scheduleStopTime,
