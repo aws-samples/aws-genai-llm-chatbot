@@ -15,6 +15,7 @@ import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
 import { AWSCronValidator } from "./aws-cron-validator"
 import { tz } from 'moment-timezone';
+import { getData } from 'country-list';
 
 function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
     const timeZones = tz.names(); // Get a list of all timezones
@@ -24,6 +25,17 @@ function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
         return { message: `${zone}: ${currentTime}`, name: zone };
     });
     return timeZoneData;
+}
+
+function getCountryCodesAndNames(): { message: string; name: string }[] {
+    // Use country-list to get an array of countries with their codes and names
+    const countries = getData();
+
+    // Map the country data to match the desired output structure
+    const countryInfo = countries.map(({ code, name }) => {
+        return { message: `${name} (${code})`, name: code };
+    });
+    return countryInfo;
 }
 
 function isValidDate(dateString: string): boolean {
@@ -56,6 +68,7 @@ function isValidDate(dateString: string): boolean {
 }
 
 const timeZoneData = getTimeZonesWithCurrentTime();
+const cfCountries = getCountryCodesAndNames();
 
 const iamRoleRegExp = RegExp(/arn:aws:iam::\d+:role\/[\w-_]+/);
 const kendraIdRegExp = RegExp(/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/);
@@ -122,6 +135,8 @@ const embeddingModels = [
       options.privateWebsite = config.privateWebsite;
       options.certificate = config.certificate;
       options.domain = config.domain;
+      options.cfGeoRestrictEnable = config.cfGeoRestrictEnable;
+      options.cfGeoRestrictList = config.cfGeoRestrictList;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
       options.bedrockRoleArn = config.bedrock?.roleArn;
@@ -260,6 +275,29 @@ async function processCreateOptions(options: any): Promise<void> {
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite && !(this as any).state.answers.customPublicDomain;
       },
+    },
+    {
+      type: "confirm",
+      name: "cfGeoRestrictEnable",
+      message: "Do want to restrict access to the website (CF Distribution) to only a country or countries?",
+      initial: true,
+    },
+    {
+      type: "multiselect",
+      name: "cfGeoRestrictList",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which countries do you wish to ALLOW access?",
+      choices: cfCountries,
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one country";
+      },
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.cfGeoRestrictEnable;
+      },
+      initial: options.cfGeoRestrictList || [],
     },
     {
       type: "confirm",
@@ -665,6 +703,8 @@ async function processCreateOptions(options: any): Promise<void> {
     privateWebsite: answers.privateWebsite,
     certificate: answers.certificate,
     domain: answers.domain,
+    cfGeoRestrictEnable: answers.cfGeoRestrictEnable,
+    cfGeoRestrictList: answers.cfGeoRestrictList,
     bedrock: answers.bedrockEnable
       ? {
           enabled: answers.bedrockEnable,

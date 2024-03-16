@@ -76,6 +76,8 @@ export interface SystemConfig {
   certificate?: string;
   domain?: string;
   privateWebsite?: boolean;
+  cfGeoRestrictEnable: boolean;
+  cfGeoRestrictList: [];
   bedrock?: {
     enabled?: boolean;
     region?: SupportedRegion;
