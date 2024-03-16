@@ -26,6 +26,7 @@
     "@aws-sdk/protocol-http": "^3.374.0",
     "@aws-sdk/signature-v4": "^3.374.0",
     "@types/aws-lambda": "^8.10.125",
+    "@types/country-list": "^2.1.4",
     "@types/node": "20.1.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -47,6 +48,7 @@
     "cdk-nag": "2.27.170",
     "commander": "^11.0.0",
     "constructs": "^10.0.0",
+    "country-list": "^2.3.0",
     "enquirer": "^2.4.1",
     "moment-timezone": "^0.5.45",
     "source-map-support": "^0.5.21"

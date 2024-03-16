@@ -36,6 +36,8 @@ export class PublicWebsite extends Construct {
     const originAccessIdentity = new cf.OriginAccessIdentity(this, "S3OAI");
     props.websiteBucket.grantRead(originAccessIdentity);
     props.chatbotFilesBucket.grantRead(originAccessIdentity);
+    const cfGeoRestrictEnable = props.config.cfGeoRestrictEnable;
+    const cfGeoRestrictList = props.config.cfGeoRestrictList;
 
 
     const distributionLogsBucket = new s3.Bucket(
@@ -109,6 +111,7 @@ export class PublicWebsite extends Construct {
             },
           },
         ],
+        geoRestriction: cfGeoRestrictEnable ? cf.GeoRestriction.allowlist(...cfGeoRestrictList): undefined,
         errorConfigurations: [
           {
             errorCode: 404,
