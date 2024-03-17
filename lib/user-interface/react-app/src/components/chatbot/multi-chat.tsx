@@ -334,7 +334,10 @@ export default function MultiChat() {
     console.log("Message history: ", messageHistory);
     // metadata.prompts[0][0]
     if (message.metadata.sessionId) {
-      const prompt = (message.metadata.prompts === null || message.metadata.prompts === undefined) ? "" : message.metadata.prompts[0][0];
+      let prompt = "";
+      if (Array.isArray(message.metadata.prompts) && Array.isArray(message.metadata.prompts[0])) { 
+          prompt = message.metadata.prompts[0][0];
+      }
       const completion = message.content;
       const model = message.metadata.modelId;
       const feedbackData: FeedbackData = {
