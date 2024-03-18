@@ -30,6 +30,7 @@ class Workspace(BaseModel):
 class Provider(Enum):
     BEDROCK = "bedrock"
     OPENAI = "openai"
+    AZURE_OPENAI = "azure.openai"
     SAGEMAKER = "sagemaker"
     AMAZON = "amazon"
     COHERE = "cohere"
