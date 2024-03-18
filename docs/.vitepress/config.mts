@@ -52,6 +52,7 @@ export default defineConfig({
           { text: 'Document Retrieval', link: '/documentation/retriever' },
           { text: 'AppSync', link: '/documentation/appsync' },
           { text: 'SageMaker Schedule', link: '/documentation/sagemaker-schedule' },
+          { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },
           { text: 'Security', link: '/documentation/vulnerability-scanning' },
           { text: 'Precautions', link: '/documentation/precautions' }
         ]
