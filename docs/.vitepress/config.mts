@@ -51,6 +51,7 @@ export default defineConfig({
           { text: 'Inference Script', link: '/documentation/inference-script' },
           { text: 'Document Retrieval', link: '/documentation/retriever' },
           { text: 'AppSync', link: '/documentation/appsync' },
+          { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },
           { text: 'Security', link: '/documentation/vulnerability-scanning' },
           { text: 'Precautions', link: '/documentation/precautions' }
         ]
