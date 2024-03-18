@@ -58,12 +58,12 @@ make sure that the environment variable matches what is expected by the framewor
   "AZURE_OPENAI_API_TYPE__Model1": "azure",
   "AZURE_OPENAI_API_VERSION__Model1": "2023-05-15",
   "AZURE_OPENAI_API_BASE__Model1": "https://model1.openai.azure.com/",
-  "AZURE_OPENAI_API_KEY__Model1": "7190a163395b42efb2bcb3d526ebf9a9",
+  "AZURE_OPENAI_API_KEY__Model1": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "AZURE_OPENAI_API_DEPLOYMENT_NAME__Model1": "Model1DeploymentName",
   "AZURE_OPENAI_API_TYPE__Model2": "azure",
   "AZURE_OPENAI_API_VERSION__Model2": "2023-07-01-preview",
   "AZURE_OPENAI_API_BASE__Model2": "https://model2.openai.azure.com/",
-  "AZURE_OPENAI_API_KEY__Model2": "ffee5ba7a00b42ee851722ea44cc1826",
+  "AZURE_OPENAI_API_KEY__Model2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "AZURE_OPENAI_API_DEPLOYMENT_NAME__Model2": "Model2DeploymentName"
 }
 ```
