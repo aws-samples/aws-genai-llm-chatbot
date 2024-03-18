@@ -14,6 +14,8 @@ export function getConfig(): SystemConfig {
     },*/
     privateWebsite: false,
     certificate : "",
+    cfGeoRestrictEnable: false,
+    cfGeoRestrictList: [],
     bedrock: {
       enabled: true,
       region: SupportedRegion.US_EAST_1,
