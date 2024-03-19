@@ -281,7 +281,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "cfGeoRestrictEnable",
       message: "Do want to restrict access to the website (CF Distribution) to only a country or countries?",
-      initial: true,
+      initial: false,
     },
     {
       type: "multiselect",
