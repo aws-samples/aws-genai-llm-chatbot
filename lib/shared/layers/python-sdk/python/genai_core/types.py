@@ -36,6 +36,7 @@ class WorkspaceStatus(Enum):
 class Provider(Enum):
     BEDROCK = "bedrock"
     OPENAI = "openai"
+    AZURE_OPENAI = "azure.openai"
     SAGEMAKER = "sagemaker"
     AMAZON = "amazon"
     COHERE = "cohere"

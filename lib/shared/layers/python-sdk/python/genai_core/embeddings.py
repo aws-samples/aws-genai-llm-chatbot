@@ -43,9 +43,7 @@ def get_embeddings_models():
     return models
 
 
-def get_embeddings_model(
-    provider: Provider, name: str
-) -> Optional[EmbeddingsModel]:
+def get_embeddings_model(provider: Provider, name: str) -> Optional[EmbeddingsModel]:
     config = genai_core.parameters.get_config()
     models = config["rag"]["embeddingsModels"]
 
@@ -56,15 +54,11 @@ def get_embeddings_model(
     return None
 
 
-def _generate_embeddings_openai(
-    model: EmbeddingsModel, input: List[str]
-):
+def _generate_embeddings_openai(model: EmbeddingsModel, input: List[str]):
     openai = genai_core.clients.get_openai_client()
 
     if not openai:
-        raise CommonError(
-            "OpenAI API is not available. Please set OPENAI_API_KEY."
-        )
+        raise CommonError("OpenAI API is not available. Please set OPENAI_API_KEY.")
 
     data = openai.Embedding.create(input=input, model=model.name)["data"]
     ret_value = list(map(lambda x: x["embedding"], data))
@@ -72,9 +66,7 @@ def _generate_embeddings_openai(
     return ret_value
 
 
-def _generate_embeddings_bedrock(
-    model: EmbeddingsModel, input: List[str], task: Task
-):
+def _generate_embeddings_bedrock(model: EmbeddingsModel, input: List[str], task: Task):
     bedrock = genai_core.clients.get_bedrock_client()
 
     if not bedrock:
@@ -86,7 +78,7 @@ def _generate_embeddings_bedrock(
     elif model_provider == Provider.COHERE.value:
         return _generate_embeddings_cohere(model, input, task, bedrock)
     else:
-        raise CommonError(f"Unknown embeddings provider \"{model_provider}\"")
+        raise CommonError(f'Unknown embeddings provider "{model_provider}"')
 
 
 def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedrock):
@@ -110,8 +102,12 @@ def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedroc
     return ret_value
 
 
-def _generate_embeddings_cohere(model: EmbeddingsModel, input: List[str], task: Task, bedrock):
-    input_type = Task.SEARCH_QUERY if task == Task.RETRIEVE else Task.SEARCH_DOCUMENT
+def _generate_embeddings_cohere(
+    model: EmbeddingsModel, input: List[str], task: Task, bedrock
+):
+    input_type = (
+        Task.SEARCH_QUERY.value if task == Task.RETRIEVE else Task.SEARCH_DOCUMENT.value
+    )
     body = json.dumps({"texts": input, "input_type": input_type})
     response = bedrock.invoke_model(
         body=body,
@@ -124,9 +120,8 @@ def _generate_embeddings_cohere(model: EmbeddingsModel, input: List[str], task: 
 
     return embeddings
 
-def _generate_embeddings_sagemaker(
-    model: EmbeddingsModel, input: List[str]
-):
+
+def _generate_embeddings_sagemaker(model: EmbeddingsModel, input: List[str]):
     client = genai_core.clients.get_sagemaker_client()
 
     max_retries = 5
