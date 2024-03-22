@@ -21,15 +21,20 @@ class AuroraConnection(object):
         self.dbport = database_secrets["port"]
         self.dbuser = database_secrets["username"]
         self.dbpass = database_secrets["password"]
+        if "dbname" in database_secrets:
+            self.dbname = database_secrets["dbname"]
 
     def __enter__(self):
-        connection = psycopg2.connect(
-            host=self.dbhost,
-            user=self.dbuser,
-            password=self.dbpass,
-            port=self.dbport,
-            connect_timeout=10,
-        )
+        db_conn_args = {
+            "host":self.dbhost,
+            "user":self.dbuser,
+            "password":self.dbpass,
+            "port":self.dbport,
+            "connect_timeout":10,
+        }
+        if hasattr(self, "dbname"):
+            db_conn_args["dbname"] = self.dbname
+        connection = psycopg2.connect(**db_conn_args)
 
         connection.set_session(autocommit=self.autocommit)
         psycopg2.extras.register_uuid()

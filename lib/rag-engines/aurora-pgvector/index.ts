@@ -35,6 +35,7 @@ export class AuroraPgVector extends Construct {
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       iamAuthentication: true,
+      defaultDatabaseName: props.config.rag.engines.aurora.defaultDatabaseName,
     });
 
     const databaseSetupFunction = new lambda.Function(

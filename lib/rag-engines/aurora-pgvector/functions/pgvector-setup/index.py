@@ -20,15 +20,18 @@ def lambda_handler(event, context: LambdaContext):
         SecretId=AURORA_DB_SECRET_ID
     )
     database_secrets = json.loads(secret_response["SecretString"])
-    dbhost = database_secrets["host"]
-    dbport = database_secrets["port"]
-    dbuser = database_secrets["username"]
-    dbpass = database_secrets["password"]
 
     if request_type == "Create" or request_type == "Update":
-        dbconn = psycopg2.connect(
-            host=dbhost, user=dbuser, password=dbpass, port=dbport, connect_timeout=10
-        )
+        db_conn_args = {
+            "host": database_secrets["host"],
+            "user": database_secrets["username"],
+            "password": database_secrets["password"],
+            "port": database_secrets["port"],
+            "connect_timeout":10,
+        }
+        if "dbname" in database_secrets:
+            db_conn_args["dbname"] = database_secrets["dbname"]
+        dbconn = psycopg2.connect(**db_conn_args)
 
         dbconn.set_session(autocommit=True)
 
