@@ -12,6 +12,8 @@ export default function SessionPage() {
   return (
     <BaseAppLayout
       contentType="table"
+      toolsOpen={toolsOpen}
+      onToolsChange={(e) => setToolsOpen(e.detail.open)}
       breadcrumbs={
         <BreadcrumbGroup
           onFollow={onFollow}
