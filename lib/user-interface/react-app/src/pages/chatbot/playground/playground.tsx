@@ -1,4 +1,3 @@
-import { useState } from "react";
 import BaseAppLayout from "../../../components/base-app-layout";
 import Chat from "../../../components/chatbot/chat";
 
@@ -7,14 +6,10 @@ import { Header, HelpPanel } from "@cloudscape-design/components";
 
 export default function Playground() {
   const { sessionId } = useParams();
-  const [toolsOpen, setToolsOpen] = useState(false);
 
   return (
     <BaseAppLayout
-      toolsHide={false}
-      toolsOpen={toolsOpen}
-      onToolsChange={({ detail }) => setToolsOpen(detail.open)}
-      tools={
+      info={
         <HelpPanel header={<Header variant="h3">Using the chat</Header>}>
           <p>
             This chat playground allows user to interact with a chosen LLM and
