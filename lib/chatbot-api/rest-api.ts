@@ -186,6 +186,33 @@ export class ApiResolvers extends Construct {
           );
         }
 
+        if (props.config.rag.engines.knowledgeBase.enabled) {
+          for (const item of props.config.rag.engines.knowledgeBase.external ||
+            []) {
+            if (item.roleArn) {
+              apiHandler.addToRolePolicy(
+                new iam.PolicyStatement({
+                  actions: ["sts:AssumeRole"],
+                  resources: [item.roleArn],
+                })
+              );
+            } else {
+              apiHandler.addToRolePolicy(
+                new iam.PolicyStatement({
+                  actions: ["bedrock:Retrieve"],
+                  resources: [
+                    `arn:${cdk.Aws.PARTITION}:bedrock:${
+                      item.region ?? cdk.Aws.REGION
+                    }:${cdk.Aws.ACCOUNT_ID}:knowledge-base/${
+                      item.knowledgeBaseId
+                    }`,
+                  ],
+                })
+              );
+            }
+          }
+        }
+
         for (const item of props.config.rag.engines.kendra.external ?? []) {
           if (item.roleArn) {
             apiHandler.addToRolePolicy(

@@ -27,6 +27,12 @@ class Workspace(BaseModel):
     engine: str
 
 
+class WorkspaceStatus(Enum):
+    SUBMITTED = "submitted"
+    READY = "ready"
+    CREATING = "creating"
+
+
 class Provider(Enum):
     BEDROCK = "bedrock"
     OPENAI = "openai"

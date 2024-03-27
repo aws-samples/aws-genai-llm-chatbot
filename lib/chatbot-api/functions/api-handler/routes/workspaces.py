@@ -1,6 +1,7 @@
 import re
 import genai_core.types
 import genai_core.kendra
+import genai_core.bedrock_kb
 import genai_core.parameters
 import genai_core.workspaces
 from pydantic import BaseModel
@@ -53,6 +54,13 @@ class CreateWorkspaceKendraRequest(BaseModel):
     name: str
     kendraIndexId: str
     useAllData: bool
+
+
+class CreateWorkspaceBedrockKBRequest(BaseModel):
+    kind: str
+    name: str
+    knowledgeBaseId: str
+    hybridSearch: bool
 
 
 @router.resolver(field_name="listWorkspaces")
@@ -112,6 +120,16 @@ def create_kendra_workspace(input: dict):
 
     request = CreateWorkspaceKendraRequest(**input)
     ret_value = _create_workspace_kendra(request, config)
+    return ret_value
+
+
+@router.resolver(field_name="createBedrockKBWorkspace")
+@tracer.capture_method
+def create_bedrock_kb_workspace(input: dict):
+    config = genai_core.parameters.get_config()
+
+    request = CreateWorkspaceBedrockKBRequest(**input)
+    ret_value = _create_workspace_bedrock_kb(request, config)
     return ret_value
 
 
@@ -291,6 +309,39 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
     )
 
 
+def _create_workspace_bedrock_kb(
+    request: CreateWorkspaceBedrockKBRequest, config: dict
+):
+    workspace_name = request.name.strip()
+    kbs = genai_core.bedrock_kb.list_bedrock_kbs()
+
+    workspace_name_match = name_regex.match(workspace_name)
+    workspace_name_is_match = bool(workspace_name_match)
+    if (
+        len(workspace_name) == 0
+        or len(workspace_name) > 100
+        or not workspace_name_is_match
+    ):
+        raise genai_core.types.CommonError("Invalid workspace name")
+
+    knowledge_base = None
+    for current in kbs:
+        if current["id"] == request.knowledgeBaseId:
+            knowledge_base = current
+            break
+
+    if knowledge_base is None:
+        raise genai_core.types.CommonError("Knowledge Base id not found")
+
+    return _convert_workspace(
+        genai_core.workspaces.create_workspace_bedrock_kb(
+            workspace_name=workspace_name,
+            knowledge_base=knowledge_base,
+            hybrid_search=request.hybridSearch,
+        )
+    )
+
+
 def _convert_workspace(workspace: dict):
     kendra_index_external = workspace.get("kendra_index_external")
 
@@ -320,6 +371,8 @@ def _convert_workspace(workspace: dict):
         "kendraIndexId": workspace.get("kendra_index_id"),
         "kendraIndexExternal": kendra_index_external,
         "kendraUseAllData": workspace.get("kendra_use_all_data", kendra_index_external),
+        "knowledgeBaseId": workspace.get("knowledge_base_id"),
+        "knowledgeBaseExternal": workspace.get("knowledge_base_external"),
         "createdAt": workspace.get("created_at"),
         "updatedAt": workspace.get("updated_at"),
     }

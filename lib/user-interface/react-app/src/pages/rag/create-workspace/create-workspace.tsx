@@ -13,6 +13,7 @@ import useOnFollow from "../../../common/hooks/use-on-follow";
 import CreateWorkspaceOpenSearch from "./create-workspace-opensearch";
 import CreateWorkspaceAurora from "./create-workspace-aurora";
 import CreateWorkspaceKendra from "./create-workspace-kendra";
+import CreateWorkspaceBedrockKB from "./create-workspace-kb";
 import SelectEnginePanel from "./select-engine-panel";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Utils } from "../../../common/utils";
@@ -31,7 +32,7 @@ export default function CreateWorkspace() {
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.ragEngines.getRagEngines();
-
+        console.log(result);
         const engineMap = new Map<string, boolean>();
 
         result.data!.listRagEngines.forEach((engine) => {
@@ -98,6 +99,7 @@ export default function CreateWorkspace() {
             {engine === "aurora" && <CreateWorkspaceAurora />}
             {engine === "opensearch" && <CreateWorkspaceOpenSearch />}
             {engine === "kendra" && <CreateWorkspaceKendra />}
+            {engine === "bedrock_kb" && <CreateWorkspaceBedrockKB />}
           </SpaceBetween>
         </ContentLayout>
       }

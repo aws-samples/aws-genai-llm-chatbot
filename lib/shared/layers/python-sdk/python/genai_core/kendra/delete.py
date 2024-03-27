@@ -15,7 +15,7 @@ WORKSPACE_OBJECT_TYPE = "workspace"
 dynamodb = boto3.resource("dynamodb")
 
 
-def delete_kendra_workspace(workspace: dict):
+def delete_workspace(workspace: dict):
     workspace_id = workspace["workspace_id"]
     genai_core.utils.delete_files_with_prefix.delete_files_with_prefix(
         UPLOAD_BUCKET_NAME, workspace_id
