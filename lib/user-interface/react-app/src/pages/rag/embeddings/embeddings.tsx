@@ -16,6 +16,7 @@ import {
   Multiselect,
   Toggle,
   Popover,
+  HelpPanel,
 } from "@cloudscape-design/components";
 import BaseAppLayout from "../../../components/base-app-layout";
 import { useContext, useEffect, useState } from "react";
@@ -151,7 +152,8 @@ export default function Embeddings() {
       return apiClient.embeddings.getEmbeddings(
         provider,
         name,
-        data.input.map((input) => input.trim()), "store"
+        data.input.map((input) => input.trim()),
+        "store"
       );
     });
 
@@ -427,6 +429,35 @@ export default function Embeddings() {
             )}
           </SpaceBetween>
         </ContentLayout>
+      }
+      info={
+        <HelpPanel header={<Header variant="h3">Embeddings</Header>}>
+          <p>
+            You can select one or more models and enter several text chunks.
+          </p>
+          <p>
+            Semantic similarity via{" "}
+            <Link
+              external
+              href="https://en.wikipedia.org/wiki/Cosine_similarity"
+            >
+              Cosine distance
+            </Link>{" "}
+            and{" "}
+            <Link
+              external
+              href="https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm"
+            >
+              L2 Norm (aka Euclidean norm)
+            </Link>{" "}
+            will be calculated and displayed in matrix format for an easy
+            comparison.
+          </p>
+          <p>
+            The intensity of the color is relative to the similarity: the darker
+            the color, the more similar the text chunks.
+          </p>
+        </HelpPanel>
       }
     />
   );

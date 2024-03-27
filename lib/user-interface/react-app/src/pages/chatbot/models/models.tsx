@@ -1,9 +1,11 @@
 import {
   BreadcrumbGroup,
   Header,
+  HelpPanel,
   Pagination,
   PropertyFilter,
   Table,
+  Link,
 } from "@cloudscape-design/components";
 import useOnFollow from "../../../common/hooks/use-on-follow";
 import BaseAppLayout from "../../../components/base-app-layout";
@@ -119,6 +121,25 @@ export default function Models() {
           }
           pagination={<Pagination {...paginationProps} />}
         />
+      }
+      info={
+        <HelpPanel header={<Header variant="h3">Foundation Models</Header>}>
+          <p>
+            For Amazon Bedrock we display all models available in the selected
+            AWS Region.
+          </p>
+          <p>
+            You might need to request access to the models you want to use via
+            the Amazon Bedrock{" "}
+            <Link
+              external
+              href="https://console.aws.amazon.com/bedrock/home?#/modelaccess"
+            >
+              Model access
+            </Link>{" "}
+            page
+          </p>
+        </HelpPanel>
       }
     />
   );
