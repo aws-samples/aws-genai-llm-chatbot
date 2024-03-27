@@ -30,6 +30,7 @@ export default function Sessions(props: SessionsProps) {
   const [selectedItems, setSelectedItems] = useState<Session[]>([]);
   const [preferences, setPreferences] = useState({ pageSize: 20 });
   const [showModalDelete, setShowModalDelete] = useState(false);
+  const [deleteAllSessions, setDeleteAllSessions] = useState(false);
 
   const { items, collectionProps, paginationProps } = useCollection(sessions, {
     filtering: {
@@ -91,7 +92,6 @@ export default function Sessions(props: SessionsProps) {
 
   const deleteUserSessions = async () => {
     if (!appContext) return;
-    if (!confirm("Are you sure you want to delete all sessions?")) return;
 
     setIsLoading(true);
     const apiClient = new ApiClient(appContext);
@@ -124,6 +124,29 @@ export default function Sessions(props: SessionsProps) {
         {selectedItems.length == 1
           ? `session ${selectedItems[0].id}?`
           : `${selectedItems.length} sessions?`}
+      </Modal>
+      <Modal
+        onDismiss={() => setDeleteAllSessions(false)}
+        visible={deleteAllSessions}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              {" "}
+              <Button
+                variant="link"
+                onClick={() => setDeleteAllSessions(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={deleteUserSessions}>
+                Ok
+              </Button>
+            </SpaceBetween>{" "}
+          </Box>
+        }
+        header={"Delete all sessions"}
+      >
+        {`Do you want to delete ${sessions.length} sessions?`}
       </Modal>
       <Table
         {...collectionProps}
@@ -211,7 +234,7 @@ export default function Sessions(props: SessionsProps) {
                   iconAlt="Delete all sessions"
                   iconName="delete-marker"
                   variant="inline-link"
-                  onClick={() => deleteUserSessions()}
+                  onClick={() => setDeleteAllSessions(true)}
                 >
                   Delete all sessions
                 </Button>
