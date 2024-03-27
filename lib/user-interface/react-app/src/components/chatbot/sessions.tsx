@@ -6,6 +6,7 @@ import {
   Button,
   TableProps,
   Header,
+  CollectionPreferences,
 } from "@cloudscape-design/components";
 import { DateTime } from "luxon";
 import { useState, useEffect, useContext, useCallback } from "react";
@@ -25,6 +26,9 @@ export default function Sessions(props: SessionsProps) {
   const appContext = useContext(AppContext);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState<Session[]>([]);
+  const [preferences, setPreferences] = useState({ pageSize: 20 });
+
   const { items, collectionProps, paginationProps } = useCollection(sessions, {
     filtering: {
       empty: (
@@ -35,7 +39,7 @@ export default function Sessions(props: SessionsProps) {
         </Box>
       ),
     },
-    pagination: { pageSize: 18 },
+    pagination: { pageSize: preferences.pageSize },
     sorting: {
       defaultState: {
         sortingColumn: {
@@ -71,12 +75,14 @@ export default function Sessions(props: SessionsProps) {
     })();
   }, [appContext, getSessions, props.toolsOpen]);
 
-  const deleteSession = async (sessionId: string) => {
+  const deleteSelectedSessions = async () => {
     if (!appContext) return;
 
     setIsLoading(true);
     const apiClient = new ApiClient(appContext);
-    await apiClient.sessions.deleteSession(sessionId);
+    await Promise.all(
+      selectedItems.map((s) => apiClient.sessions.deleteSession(s.id))
+    );
     await getSessions();
     setIsLoading(false);
   };
@@ -97,12 +103,55 @@ export default function Sessions(props: SessionsProps) {
       {...collectionProps}
       variant="full-page"
       items={items}
+      onSelectionChange={({ detail }) => {
+        console.log(detail);
+        setSelectedItems(detail.selectedItems);
+      }}
+      selectedItems={selectedItems}
+      selectionType="multi"
+      trackBy="id"
+      empty={
+        <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
+          <SpaceBetween size="m">
+            <b>No sessions</b>
+          </SpaceBetween>
+        </Box>
+      }
+      ariaLabels={{
+        selectionGroupLabel: "Items selection",
+        allItemsSelectionLabel: ({ selectedItems }) =>
+          `${selectedItems.length} ${
+            selectedItems.length === 1 ? "item" : "items"
+          } selected`,
+        itemSelectionLabel: ({ selectedItems }, item) => item.title!, // eslint-disable-line @typescript-eslint/no-unused-vars
+      }}
       pagination={<Pagination {...paginationProps} />}
       loadingText="Loading history"
       loading={isLoading}
       resizableColumns
+      stickyHeader={true}
+      preferences={
+        <CollectionPreferences
+          onConfirm={({ detail }) =>
+            setPreferences({ pageSize: detail.pageSize ?? 20 })
+          }
+          title="Preferences"
+          confirmLabel="Confirm"
+          cancelLabel="Cancel"
+          preferences={preferences}
+          pageSizePreference={{
+            title: "Page size",
+            options: [
+              { value: 10, label: "10" },
+              { value: 20, label: "20" },
+              { value: 50, label: "50" },
+            ],
+          }}
+        />
+      }
       header={
         <Header
+          description="List of past sessions"
           variant="awsui-h1-sticky"
           actions={
             <SpaceBetween direction="horizontal" size="m" alignItems="center">
@@ -122,6 +171,14 @@ export default function Sessions(props: SessionsProps) {
                 Refresh
               </Button>
               <Button
+                iconAlt="Delete"
+                iconName="remove"
+                variant="inline-link"
+                onClick={() => deleteSelectedSessions()}
+              >
+                Delete
+              </Button>
+              <Button
                 iconAlt="Delete all sessions"
                 iconName="delete-marker"
                 variant="inline-link"
@@ -132,7 +189,7 @@ export default function Sessions(props: SessionsProps) {
             </SpaceBetween>
           }
         >
-          History
+          Session History
         </Header>
       }
       columnDefinitions={
@@ -162,20 +219,6 @@ export default function Sessions(props: SessionsProps) {
                 new Date(a.startTime).getTime()
               );
             },
-          },
-          {
-            id: "delete",
-            width: 20,
-            header: "",
-            cell: (item) => (
-              <Button
-                variant="inline-icon"
-                iconName="remove"
-                onClick={() => deleteSession(item.id)}
-              >
-                Delete
-              </Button>
-            ),
           },
         ] as TableProps.ColumnDefinition<Session>[]
       }
