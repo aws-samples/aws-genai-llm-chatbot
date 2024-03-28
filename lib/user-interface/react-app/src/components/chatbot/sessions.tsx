@@ -69,7 +69,6 @@ export default function Sessions(props: SessionsProps) {
 
   useEffect(() => {
     if (!appContext) return;
-    //if (!props.toolsOpen) return;
 
     (async () => {
       setIsLoading(true);
