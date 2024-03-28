@@ -31,9 +31,9 @@ export AWS_COGNITO_REGION="..."
 export AWS_USER_POOLS_ID="..."
 export AWS_USER_POOLS_WEB_CLIENT_ID="..."
 export API_DISTRIBUTION_DOMAIN_NAME="..."
-export RAG_ENABLED= 1 | 0
-export DEFAULT_EMBEDDINGS_MODEL = "..."
-export DEFAULT_CROSS_ENCODER_MODEL = "..."
+export RAG_ENABLED=1|0
+export DEFAULT_EMBEDDINGS_MODEL="..."
+export DEFAULT_CROSS_ENCODER_MODEL="..."
 npm run build:dev
 npm run dev
 ```
