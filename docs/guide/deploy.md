@@ -48,23 +48,22 @@ You have:
 1. An [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 2. `AdministratorAccess` policy granted to your AWS account (for production, we recommend restricting access as needed)
 3. Both console and programmatic access
-4. [NodeJS 16 or 18](https://nodejs.org/en/download/) installed
+4. [NodeJS 18 or 20](https://nodejs.org/en/download/) installed
 
    - If you are using [`nvm`](https://github.com/nvm-sh/nvm) you can run the following before proceeding
    - ```
-     nvm install 16 && nvm use 16
+     nvm install 18 && nvm use 18
 
      or
 
-     nvm install 18 && nvm use 18
+     nvm install 20 && nvm use 20
      ```
 
 5. [AWS CLI](https://aws.amazon.com/cli/) installed and configured to use with your AWS account
-6. [Typescript 3.8+](https://www.typescriptlang.org/download) installed
-7. [AWS CDK CLI](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed
-8. [Docker](https://docs.docker.com/get-docker/) installed
+6. [AWS CDK CLI](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed
+7. [Docker](https://docs.docker.com/get-docker/) installed
    - N.B. [`buildx`](https://github.com/docker/buildx) is also required. For Windows and macOS `buildx` [is included](https://github.com/docker/buildx#windows-and-macos) in [Docker Desktop](https://docs.docker.com/desktop/)
-9. [Python 3+](https://www.python.org/downloads/) installed
+8. [Python 3+](https://www.python.org/downloads/) installed
 
 ## Deployment
 
