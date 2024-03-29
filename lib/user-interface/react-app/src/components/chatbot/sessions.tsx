@@ -20,7 +20,7 @@ import RouterButton from "../wrappers/router-button";
 import { Session } from "../../API";
 
 export interface SessionsProps {
-  toolsOpen: boolean;
+  readonly toolsOpen: boolean;
 }
 
 export default function Sessions(props: SessionsProps) {
@@ -171,7 +171,8 @@ export default function Sessions(props: SessionsProps) {
             `${selectedItems.length} ${
               selectedItems.length === 1 ? "item" : "items"
             } selected`,
-          itemSelectionLabel: ({ selectedItems }, item) => item.title!, // eslint-disable-line @typescript-eslint/no-unused-vars
+          // @ts-expect-error no-unused-var
+          itemSelectionLabel: (e, item) => item.title!,
         }}
         pagination={<Pagination {...paginationProps} />}
         loadingText="Loading history"
