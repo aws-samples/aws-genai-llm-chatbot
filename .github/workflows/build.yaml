@@ -14,6 +14,7 @@ jobs:
         run: |
           npm install
           npm run build
+          npx cdk synth
       - name: Frontend
         working-directory: ./lib/user-interface/react-app
         run: |
