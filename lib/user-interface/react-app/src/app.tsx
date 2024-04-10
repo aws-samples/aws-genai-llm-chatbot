@@ -24,6 +24,7 @@ import WorkspacePane from "./pages/rag/workspace/workspace";
 import Workspaces from "./pages/rag/workspaces/workspaces";
 import Welcome from "./pages/welcome";
 import "./styles/app.scss";
+import SessionPage from "./pages/chatbot/sessions/sessions";
 
 function App() {
   const appContext = useContext(AppContext);
@@ -40,6 +41,7 @@ function App() {
             <Route path="/chatbot" element={<Outlet />}>
               <Route path="playground" element={<Playground />} />
               <Route path="playground/:sessionId" element={<Playground />} />
+              <Route path="sessions" element={<SessionPage />} />
               <Route path="multichat" element={<MultiChatPlayground />} />
               <Route path="models" element={<Models />} />
             </Route>

@@ -126,12 +126,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         authMode: "AMAZON_COGNITO_USER_POOLS",
       }).subscribe({
         next: ({ value }) => {
-          console.log(`Graphql message:`);
-          console.log(value);
           const data = value.data!.receiveMessages?.data;
           if (data !== undefined && data !== null) {
             const response: ChatBotMessageResponse = JSON.parse(data);
-            console.log(response);
+            console.log("message data", response.data);
             if (response.action === ChatBotAction.Heartbeat) {
               console.log("Heartbeat pong!");
               return;
@@ -192,6 +190,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         })
         .catch((err) => console.log(err));
     };
+    // eslint-disable-next-line
   }, [props.session.id]);
 
   useEffect(() => {
@@ -300,11 +299,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const getSignedUrls = async () => {
       if (props.configuration?.files as ImageFile[]) {
         const files: ImageFile[] = [];
-        for await (const file of props.configuration!.files as ImageFile[]) {
+        for await (const file of props.configuration?.files ?? []) {
           const signedUrl = await getSignedUrl(file.key);
           files.push({
             ...file,
-            url: signedUrl as string,
+            url: signedUrl,
           });
         }
 
@@ -316,6 +315,17 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       getSignedUrls();
     }
   }, [props.configuration]);
+
+  const hasImagesInChatHistory = function (): boolean {
+    return (
+      messageHistoryRef.current.filter(
+        (x) =>
+          x.type == ChatBotMessageType.Human &&
+          x.metadata?.files &&
+          (x.metadata.files as object[]).length > 0
+      ).length > 0
+    );
+  };
 
   const handleSendMessage = () => {
     if (!state.selectedModel) return;
@@ -330,11 +340,18 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const value = state.value.trim();
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
-      modelInterface: state.selectedModelMetadata!.interface as ModelInterface,
+      modelInterface:
+        (props.configuration.files && props.configuration.files.length > 0) ||
+        (hasImagesInChatHistory() &&
+          state.selectedModelMetadata?.inputModalities.includes(
+            ChabotInputModality.Image
+          ))
+          ? "multimodal"
+          : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
         mode: ChatBotMode.Chain,
         text: value,
-        files: props.configuration.files || [],
+        files: props.configuration.files ?? [],
         modelName: name,
         provider: provider,
         sessionId: props.session.id,
@@ -347,7 +364,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         },
       },
     };
-
+    console.log(request);
     setState((state) => ({
       ...state,
       value: "",
@@ -397,11 +414,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
-  const modelsOptions = OptionsHelper.getSelectOptionGroups(state.models || []);
+  const modelsOptions = OptionsHelper.getSelectOptionGroups(state.models ?? []);
 
   const workspaceOptions = [
     ...workspaceDefaultOptions,
-    ...OptionsHelper.getSelectOptions(state.workspaces || []),
+    ...OptionsHelper.getSelectOptions(state.workspaces ?? []),
   ];
 
   return (

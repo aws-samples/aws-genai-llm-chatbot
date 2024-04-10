@@ -6,6 +6,7 @@ import {
   Form,
   FormField,
   Header,
+  HelpPanel,
   Link,
   Select,
   SelectProps,
@@ -352,6 +353,11 @@ export default function CrossEncoders() {
             )}
           </SpaceBetween>
         </ContentLayout>
+      }
+      info={
+        <HelpPanel header={<Header variant="h3">Cross-Encoders</Header>}>
+          <p>Cross-encoders are ...</p>
+        </HelpPanel>
       }
     />
   );
