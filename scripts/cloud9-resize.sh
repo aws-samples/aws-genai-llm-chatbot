@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Specify the desired volume size in GiB as a command line argument. If not specified, default to 20 GiB.
-SIZE=${1:-120}
+SIZE=${2:-120}
 
 VERSIONID=$(awk /VERSION_ID=/ /etc/os-release |cut -d \" -f 2)
 
@@ -27,21 +27,30 @@ VOLUMES=$(aws ec2 describe-instances \
   --output text \
   --region $REGION)
 
-# Prompt for the volume to use.
-echo "EBS Volumes:"
-PS3='Please select the EBS volume to resize (e.g 1) : '
-select VOLUME_ID in $VOLUMES; do
-  break
-done
+
+if [ -z "$1" ]; then
+  # Prompt for the volume to use.
+  echo "EBS Volumes:"
+  PS3='Please select the EBS volume to resize (e.g 1) : '
+  select VOLUME_ID in $VOLUMES; do
+    break
+  done
+else
+  VOLUME_ID=${VOLUMES[0]}
+fi
 
 # verifying whether a valid EBS volume was selected.
 if [ -z "${VOLUME_ID}" ]; then
   echo "The selected volume is invalid.";
   exit 1;
-fi
+fi 
 
-# Prompting for the size in GiB to resize the EBS volume.
-read -p "Enter new EBS Storage in GiB (e.g '$SIZE') for '$VOLUME_ID': " SIZE
+if [ -z "$2" ]; then
+  # Prompting for the size in GiB to resize the EBS volume.
+  read -p "Enter new EBS Storage in GiB (e.g '$SIZE') for '$VOLUME_ID': " SIZE
+else
+  SIZE=$2
+fi
 
 # Verify whether the input is a number.
 if [[ -n ${SIZE//[0-9]/} ]]; then
@@ -55,11 +64,13 @@ if [ "$SIZE" -lt "100" ]; then
   exit 1
 fi
 
-# Confirm the input.
-read -p "Resizing EBS Storage to $SIZE (GiB), continue? (Y/N): " confirm
-if [[ $confirm != [yY] && $confirm != [yY][eE][sS] ]]; then
-  echo "Exiting..."
-  exit 1
+if [ -z "$1" ]; then
+  # Confirm the input.
+  read -p "Resizing EBS Storage to $SIZE (GiB), continue? (Y/N): " confirm
+  if [[ $confirm != [yY] && $confirm != [yY][eE][sS] ]]; then
+    echo "Exiting..."
+    exit 1
+  fi
 fi
 
 # Resize the EBS volume.
