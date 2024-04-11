@@ -72,6 +72,7 @@ const cfCountries = getCountryCodesAndNames();
 
 const iamRoleRegExp = RegExp(/arn:aws:iam::\d+:role\/[\w-_]+/);
 const acmCertRegExp = RegExp(/arn:aws:acm:[\w-_]+:\d+:certificate\/[\w-_]+/);
+const cfAcmCertRegExp = RegExp(/arn:aws:acm:us-east-1:\d+:certificate\/[\w-_]+/);
 const kendraIdRegExp = RegExp(/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/);
 
 const embeddingModels = [
@@ -253,10 +254,20 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "input",
       name: "certificate",
       validate(v: string) {
-        const valid = acmCertRegExp.test(v);
-        return (this as any).skipped || valid
-          ? true
-          : "You need to enter an ACM certificate arn";
+        if ((this as any).state.answers.privateWebsite)
+        {
+          const valid = acmCertRegExp.test(v);
+          return (this as any).skipped || valid
+            ? true
+            : "You need to enter an ACM certificate arn";
+        }
+        else
+        {
+          const valid = cfAcmCertRegExp.test(v);
+          return (this as any).skipped || valid
+            ? true
+            : "You need to enter an ACM certificate arn in us-east-1 for CF";
+        }
       },
       message(): string {
         if ((this as any).state.answers.customPublicDomain) {
@@ -292,7 +303,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "cfGeoRestrictEnable",
       message: "Do want to restrict access to the website (CF Distribution) to only a country or countries?",
-      initial: false,
+      initial: options.cfGeoRestrictEnable || false,
       skip(): boolean {
         return (this as any).state.answers.privateWebsite;
       },
