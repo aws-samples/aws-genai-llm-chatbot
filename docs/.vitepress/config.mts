@@ -38,7 +38,8 @@ export default defineConfig({
         text: 'Guide',
         items: [
           { text: 'Deploy', link: '/guide/deploy' },
-          { text: 'Developer Guide', link: '/guide/developers' }
+          { text: 'Developer Guide', link: '/guide/developers' },
+          { text: 'Development Prioritization', link: '/guide/prioritization' },
         ]
       },
       {
