@@ -189,6 +189,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/Resource`,
+        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
         `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
       ],
       [
@@ -230,10 +231,10 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         this,
         [
           `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportJobRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerJobRole/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/FileImportContainer/ExecutionRole/DefaultPolicy/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerContainer/ExecutionRole/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/FileImportWorkflow/FileImportStateMachine/Role/DefaultPolicy/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteParserFunction/ServiceRole/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/WebsiteCrawlingWorkflow/WebsiteCrawling/Role/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/Resource`,
           `/${this.stackName}/RagEngines/DataImport/UploadHandler/ServiceRole/DefaultPolicy/Resource`,
@@ -241,6 +242,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/Workspaces/DeleteWorkspace/DeleteWorkspace/Role/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
+          `/${this.stackName}/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/RssSubscription/RssIngestor/ServiceRole/Resource`,

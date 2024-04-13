@@ -6,6 +6,7 @@ import {
   Form,
   FormField,
   Header,
+  HelpPanel,
   Select,
   SelectProps,
   SpaceBetween,
@@ -282,6 +283,11 @@ export default function SemanticSearch() {
             )}
           </SpaceBetween>
         </ContentLayout>
+      }
+      info={
+        <HelpPanel header={<Header variant="h3">Semantic search</Header>}>
+          <p>Search in the workspace for the given query.</p>
+        </HelpPanel>
       }
     />
   );

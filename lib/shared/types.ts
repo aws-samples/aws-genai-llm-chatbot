@@ -46,7 +46,9 @@ export enum SupportedRegion {
 export enum SupportedBedrockRegion {
   AP_NORTHEAST_1 = "ap-northeast-1",
   AP_SOUTHEAST_1 = "ap-southeast-1",
+  AP_SOUTHEAST_2 = "ap-southeast-2",
   EU_CENTRAL_1 = "eu-central-1",
+  EU_WEST_3 = "eu-west-3",
   US_EAST_1 = "us-east-1",
   US_WEST_2 = "us-west-2",
 }
@@ -76,6 +78,8 @@ export interface SystemConfig {
   certificate?: string;
   domain?: string;
   privateWebsite?: boolean;
+  cfGeoRestrictEnable: boolean;
+  cfGeoRestrictList: [];
   bedrock?: {
     enabled?: boolean;
     region?: SupportedRegion;
@@ -85,6 +89,18 @@ export interface SystemConfig {
   llms: {
     enableSagemakerModels: boolean;
     sagemaker: SupportedSageMakerModels[];
+    sagemakerSchedule?: {
+      enabled?: boolean;
+      timezonePicker?: string;
+      enableCronFormat?: boolean;
+      sagemakerCronStartSchedule?: string;
+      sagemakerCronStopSchedule?: string;
+      daysForSchedule?: string;
+      scheduleStartTime?: string;
+      scheduleStopTime?: string;
+      enableScheduleEndDate?: boolean;
+      startScheduleEndDate?: string;
+    };
   };
   rag: {
     enabled: boolean;
