@@ -770,6 +770,10 @@ async function processCreateOptions(options: any): Promise<void> {
     name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
     default: true,
   };
+  config.rag.crossEncoderModels[1] = { 
+    provider: "cohere",
+    name: "rerank-english-v3.0",
+  };
   config.rag.embeddingsModels = embeddingModels;
   config.rag.embeddingsModels.forEach((m: any) => {
     if (m.name === models.defaultEmbedding) {
