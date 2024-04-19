@@ -16,6 +16,7 @@ import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { BedrockKB } from "../../../API";
 import { HybridSearchField } from "./hybrid-search-field";
+import { MetadataFilter } from "../../../components/rag/metadata-filter";
 
 export interface KBFormProps {
   data: BedrockKBWorkspaceCreateInput;
@@ -104,6 +105,7 @@ export default function KBForm(props: KBFormProps) {
           checked={props.data.hybridSearch}
           onChange={props.onChange}
         />
+        <MetadataFilter />
       </SpaceBetween>
     </Container>
   );
