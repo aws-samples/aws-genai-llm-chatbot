@@ -1,7 +1,11 @@
 import os
 import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 from .client import get_open_search_client
 import genai_core.utils.delete_files_with_prefix
+import genai_core.utils.delete_files_with_object_key
+import genai_core.types
+from datetime import datetime
 
 
 PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
@@ -70,3 +74,84 @@ def delete_open_search_workspace(workspace: dict):
     )
 
     print(f"Delete Item succeeded: {response}")
+
+
+def delete_open_search_document(workspace_id: str, document: dict):
+    index_name = workspace_id.replace("-", "")
+    document_id = document["document_id"]
+    document_vectors = document["vectors"]
+    documents_diff = 1
+    document_size_in_bytes = document["size_in_bytes"]
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    if document["path"]:
+        upload_bucket_key = workspace_id + "/" + document["path"]
+        genai_core.utils.delete_files_with_object_key.delete_files_with_object_key(
+            UPLOAD_BUCKET_NAME, upload_bucket_key
+        )
+
+    processing_bucket_key = workspace_id + "/" + document_id
+
+    genai_core.utils.delete_files_with_prefix.delete_files_with_prefix(
+        PROCESSING_BUCKET_NAME, processing_bucket_key
+    )
+
+    deleteOpenSearchDocument(document_id, index_name)
+
+    documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
+    workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
+
+    try:
+        response = documents_table.delete_item(
+            Key={
+                "workspace_id": workspace_id,
+                "document_id": document_id,
+            }
+        )
+        print(f"Delete document succeeded: {response}")
+
+        updateResponse = workspaces_table.update_item(
+            Key={"workspace_id": workspace_id,
+                 "object_type": WORKSPACE_OBJECT_TYPE},
+            UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+            ExpressionAttributeValues={
+                ":incrementValue": -document_size_in_bytes,
+                ":documentsIncrementValue": -documents_diff,
+                ":vectorsIncrementValue": -document_vectors,
+                ":timestampValue": timestamp,
+            },
+            ReturnValues="UPDATED_NEW",
+        )
+        print(f"Workspaces table updated for the document: {updateResponse}")
+
+    except (BotoCoreError, ClientError) as error:
+        print(f"An error occurred: {error}")
+
+
+
+def deleteOpenSearchDocument(document_id, index_name):
+    client = get_open_search_client()
+    if client.indices.exists(index_name):
+        search_query = {
+            "query": {
+                "match": {
+                    "document_id": document_id
+                }
+            }
+        }
+        from_ = 0
+        batch_size = 100
+        while True:
+            search_response = client.search(
+                index=index_name, body=search_query, from_=from_, size=batch_size)
+
+            hits = search_response['hits']['hits']
+            if not hits:
+                break
+
+            for hit in hits:
+                client.delete(index=index_name, id=hit['_id'])
+
+            from_ += batch_size
+
+        print(f"Record {document_id} deleted.")

@@ -12,6 +12,7 @@ import {
   addTextDocument,
   addWebsite,
   setDocumentSubscriptionStatus,
+  deleteDocument,
 } from "../../graphql/mutations";
 import {
   AddQnADocumentMutation,
@@ -24,6 +25,7 @@ import {
   GetRSSPostsQuery,
   GetUploadFileURLQuery,
   UpdateRssFeedMutation,
+  DeleteDocumentMutation,
 } from "../../API";
 import { RagDocumentType } from "../types";
 
@@ -232,6 +234,22 @@ export class DocumentsClient {
           documentId: feedId,
           followLinks,
           limit,
+        },
+      },
+    });
+    return result;
+  }
+
+  async deleteDocument(
+    workspaceId: string,
+    documentId: string
+  ): Promise<GraphQLResult<GraphQLQuery<DeleteDocumentMutation>>> {
+    const result = API.graphql<GraphQLQuery<DeleteDocumentMutation>>({
+      query: deleteDocument,
+      variables: {
+        input: {
+          workspaceId,
+          documentId,
         },
       },
     });
