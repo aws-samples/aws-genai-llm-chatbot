@@ -151,7 +151,8 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       api: chatBotApi,
       chatbotFilesBucket: chatBotApi.filesBucket,
       crossEncodersEnabled: props.config.rag.crossEncodingEnabled,
-      sagemakerEmbeddingsEnabled: props.config.rag.enableEmbeddingModelsViaSagemaker,
+      sagemakerEmbeddingsEnabled:
+        props.config.rag.enableEmbeddingModelsViaSagemaker,
     });
 
     /**
@@ -291,59 +292,59 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
             },
           ]
         );
-        if (props.config.rag.engines.aurora.enabled) {
-          NagSuppressions.addResourceSuppressionsByPath(
-            this,
-            `/${this.stackName}/RagEngines/AuroraPgVector/AuroraDatabase/Secret/Resource`,
-            [
-              {
-                id: "AwsSolutions-SMG4",
-                reason: "Secret created implicitly by CDK.",
-              },
-            ]
-          );
-          NagSuppressions.addResourceSuppressionsByPath(
-            this,
-            [
-              `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupFunction/ServiceRole/Resource`,
-              `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/Resource`,
-              `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
-              `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/Resource`,
-              `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
-              `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspace/Role/DefaultPolicy/Resource`,
-            ],
-            [
-              {
-                id: "AwsSolutions-IAM4",
-                reason: "IAM role implicitly created by CDK.",
-              },
-              {
-                id: "AwsSolutions-IAM5",
-                reason: "IAM role implicitly created by CDK.",
-              },
-            ]
-          );
-        }
-        if (props.config.rag.engines.opensearch.enabled) {
-          NagSuppressions.addResourceSuppressionsByPath(
-            this,
-            [
-              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/Resource`,
-              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
-              `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspace/Role/DefaultPolicy/Resource`,
-            ],
-            [
-              {
-                id: "AwsSolutions-IAM4",
-                reason: "IAM role implicitly created by CDK.",
-              },
-              {
-                id: "AwsSolutions-IAM5",
-                reason: "IAM role implicitly created by CDK.",
-              },
-            ]
-          );
-        }
+      }
+      if (props.config.rag.engines.aurora.enabled) {
+        NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          `/${this.stackName}/RagEngines/AuroraPgVector/AuroraDatabase/Secret/Resource`,
+          [
+            {
+              id: "AwsSolutions-SMG4",
+              reason: "Secret created implicitly by CDK.",
+            },
+          ]
+        );
+        NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupFunction/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/DatabaseSetupProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/AuroraPgVector/CreateAuroraWorkspace/CreateAuroraWorkspace/Role/DefaultPolicy/Resource`,
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM4",
+              reason: "IAM role implicitly created by CDK.",
+            },
+            {
+              id: "AwsSolutions-IAM5",
+              reason: "IAM role implicitly created by CDK.",
+            },
+          ]
+        );
+      }
+      if (props.config.rag.engines.opensearch.enabled) {
+        NagSuppressions.addResourceSuppressionsByPath(
+          this,
+          [
+            `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/Resource`,
+            `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspaceFunction/ServiceRole/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/OpenSearchVector/CreateOpenSearchWorkspace/CreateOpenSearchWorkspace/Role/DefaultPolicy/Resource`,
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM4",
+              reason: "IAM role implicitly created by CDK.",
+            },
+            {
+              id: "AwsSolutions-IAM5",
+              reason: "IAM role implicitly created by CDK.",
+            },
+          ]
+        );
       }
       if (props.config.rag.engines.kendra.enabled) {
         NagSuppressions.addResourceSuppressionsByPath(
