@@ -51,7 +51,8 @@
     "country-list": "^2.3.0",
     "enquirer": "^2.4.1",
     "moment-timezone": "^0.5.45",
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "turbocommons-ts": "^3.10.0"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.6.1"

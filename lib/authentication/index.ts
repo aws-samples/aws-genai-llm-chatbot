@@ -1,15 +1,25 @@
 import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
+import { SystemConfig } from "../shared/types";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
 import { NagSuppressions } from "cdk-nag";
+import { Utils } from "../shared/utils";
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as cr from 'aws-cdk-lib/custom-resources';
+import * as logs from "aws-cdk-lib/aws-logs";
 
 export class Authentication extends Construct {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
   public readonly identityPool: cognitoIdentityPool.IdentityPool;
-
-  constructor(scope: Construct, id: string) {
+  public readonly cognitoDomain: cognito.UserPoolDomain;
+  public readonly updateUserPoolClient: lambda.Function;
+  public readonly customOidcProvider: cognito.UserPoolIdentityProviderOidc;
+  public readonly customSamlProvider: cognito.UserPoolIdentityProviderSaml;
+  
+  constructor(scope: Construct, id: string, config: SystemConfig) {
     super(scope, id);
 
     const userPool = new cognito.UserPool(this, "UserPool", {
@@ -31,6 +41,16 @@ export class Authentication extends Construct {
         userSrp: true,
       },
     });
+    
+    if (config.cognitoFederation?.enabled && config.cognitoFederation?.cognitoDomain)
+    {
+      const userPooldomain = userPool.addDomain('CognitoDomain', {
+        cognitoDomain: {
+          domainPrefix: config.cognitoFederation.cognitoDomain
+        },
+      });
+      this.cognitoDomain = userPooldomain;
+    }
 
     const identityPool = new cognitoIdentityPool.IdentityPool(
       this,
@@ -46,6 +66,135 @@ export class Authentication extends Construct {
         },
       }
     );
+    
+    if (config.cognitoFederation?.enabled) {
+      
+      // Create an IAM Role for the Lambda function
+      const lambdaRoleUpdateClient = new iam.Role(this, 'lambdaRoleUpdateClient', {
+        assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      });
+  
+      // Attach the policy to the role that allows updating Cognito user pool client settings
+      lambdaRoleUpdateClient.addToPolicy(new iam.PolicyStatement({
+        actions: ['cognito-idp:UpdateUserPoolClient'],
+        resources: [
+          `arn:aws:cognito-idp:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:userpool/${userPool.userPoolId}`,
+          `arn:aws:cognito-idp:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:userpool/${userPool.userPoolId}/client/*`
+        ],
+      }));
+      
+      // Attach the policy to the role that allows logging to CloudWatch
+      lambdaRoleUpdateClient.addToPolicy(new iam.PolicyStatement({
+        actions: [
+          'logs:CreateLogGroup',
+          'logs:CreateLogStream',
+          'logs:PutLogEvents',
+        ],
+        resources: [
+          '*'
+        ],
+      }));
+
+      // Define a Lambda function to update the UserPoolClient
+      const updateUserPoolClientLambda = new lambda.Function(this, 'updateUserPoolClientLambda', {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        handler: 'index.handler',
+        code: lambda.Code.fromAsset('lib/authentication/lambda/updateUserPoolClient'),
+        role: lambdaRoleUpdateClient,
+        logRetention: logs.RetentionDays.ONE_WEEK,
+        environment: {
+          USER_POOL_ID: userPool.userPoolId,
+          USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+        },
+      });
+      
+      if (config.cognitoFederation?.customProviderType == "OIDC") {
+        const customProvider = new cognito.UserPoolIdentityProviderOidc(this, 'OIDCProvider', {
+          clientId: config.cognitoFederation?.customOIDC?.OIDCClient || "",
+          clientSecret: "secret",
+          issuerUrl: config.cognitoFederation?.customOIDC?.OIDCIssuerURL || "",
+          userPool: userPool,
+          name: config.cognitoFederation?.customProviderName,
+          scopes: ['openid','email'],
+        });
+        this.customOidcProvider = customProvider;
+        
+        // Unfortunately the above function does not support SecretValue for Client Secrets so updating with lamda
+        // Create an IAM Role for the Lambda function
+        const lambdaRoleUpdateOidcSecret = new iam.Role(this, 'lambdaRoleUpdateOidcSecret', {
+          assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+        });
+    
+        // Attach the policy to the role that allows updating Cognito user pool client settings
+        lambdaRoleUpdateOidcSecret.addToPolicy(new iam.PolicyStatement({
+          actions: ['cognito-idp:UpdateIdentityProvider','cognito-idp:DescribeIdentityProvider'],
+          resources: [
+            `arn:aws:cognito-idp:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:userpool/${userPool.userPoolId}`
+          ],
+        }));
+        
+        lambdaRoleUpdateOidcSecret.addToPolicy(new iam.PolicyStatement({
+          actions: ['secretsmanager:GetSecretValue'],
+          resources: [ config.cognitoFederation?.customOIDC?.OIDCSecret || ""]
+        }));
+        
+        // Attach the policy to the role that allows logging to CloudWatch
+        lambdaRoleUpdateOidcSecret.addToPolicy(new iam.PolicyStatement({
+          actions: [
+            'logs:CreateLogGroup',
+            'logs:CreateLogStream',
+            'logs:PutLogEvents',
+          ],
+          resources: [
+            '*'
+          ],
+        }));
+        
+        const oidcSecretlambdaFunction = new lambda.Function(this, 'OIDCSecretsHandler', {
+          runtime: lambda.Runtime.NODEJS_20_X,
+          handler: 'index.handler',
+          code: lambda.Code.fromAsset('lib/authentication/lambda/updateOidcSecret'),
+          role: lambdaRoleUpdateOidcSecret,
+          logRetention: logs.RetentionDays.ONE_WEEK,
+          environment: {
+            USER_POOL_ID: userPool.userPoolId,
+            USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+          },
+        });
+        
+        const providerDetailsUpdater = new cr.AwsCustomResource(this, 'UpdateSecret', {
+          onUpdate: {
+            service: 'Lambda',
+            action: 'invoke',
+            parameters: {
+              FunctionName: oidcSecretlambdaFunction.functionName,
+              Payload: JSON.stringify({
+                UserPoolId: userPool.userPoolId,
+                ProviderName: customProvider.providerName,
+                SecretId: config.cognitoFederation?.customOIDC?.OIDCSecret || ""
+              }),
+            },
+            physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()),
+          },
+          policy: cr.AwsCustomResourcePolicy.fromStatements([
+            new iam.PolicyStatement({
+              actions: ['lambda:InvokeFunction'],
+              resources: [oidcSecretlambdaFunction.functionArn],
+            }),
+          ]),
+        });
+          }
+      if (config.cognitoFederation?.customProviderType == "SAML") {
+        const customProvider = new cognito.UserPoolIdentityProviderSaml(this, 'SAMLProvider', {
+          metadata: cognito.UserPoolIdentityProviderSamlMetadata.url(config.cognitoFederation?.customSAML?.metadataDocumentUrl || ""),
+          userPool: userPool,
+          name: config.cognitoFederation?.customProviderName,
+        });
+        this.customSamlProvider = customProvider;
+      }
+  
+      this.updateUserPoolClient = updateUserPoolClientLambda;
+    }
 
     this.userPool = userPool;
     this.userPoolClient = userPoolClient;
@@ -82,5 +231,33 @@ export class Authentication extends Construct {
       },
       { id: "AwsSolutions-COG2", reason: "MFA not required for user usage." },
     ]);
+    if (config.cognitoFederation?.enabled) {
+      NagSuppressions.addResourceSuppressionsByPath(
+        cdk.Stack.of(this),
+        [
+          `/${cdk.Stack.of(this).stackName}/Authentication/lambdaRoleUpdateClient/DefaultPolicy/Resource`,
+        ],
+        [
+          {
+            id: "AwsSolutions-IAM5",
+            reason: "IAM role implicitly created by CDK.",
+          },
+        ]
+      );
+      if (config.cognitoFederation?.customProviderType == "OIDC") {
+        NagSuppressions.addResourceSuppressionsByPath(
+          cdk.Stack.of(this),
+          [
+            `/${cdk.Stack.of(this).stackName}/Authentication/lambdaRoleUpdateOidcSecret/DefaultPolicy/Resource`,
+          ],
+          [
+            {
+              id: "AwsSolutions-IAM5",
+              reason: "IAM role implicitly created by CDK.",
+            },
+          ]
+        );
+      }
+    }
   }
 }

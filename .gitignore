@@ -453,3 +453,7 @@ lib/user-interface/react-app/src/API.ts
 lib/user-interface/react-app/src/graphql/mutations.ts
 lib/user-interface/react-app/src/graphql/queries.ts
 lib/user-interface/react-app/src/graphql/subscriptions.ts
+
+# js function
+!lib/authentication/lambda/updateUserPoolClient/index.js
+!lib/authentication/lambda/updateOidcSecret/index.js
