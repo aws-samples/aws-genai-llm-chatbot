@@ -19,6 +19,18 @@ Note:
 
 ![sample](./assets/enable-models.gif "AWS GenAI Chatbot")
 
+## HuggingFace Authentication
+
+Some models hosted on HuggingFace require an API key for access, for example MistralAI and Meta models have now changed to be gated behind accepting their EULA
+
+If you wish to continue using these models or access other models on HuggingFace which require authentication you can now supply this HF token as part of the installer.
+
+When enabling sagemaker models in the installer it will now ask you for a Secrets Manager Secret ARN containing the HF API token.
+
+You can read more about setting up access tokens on the [HF website](https://huggingface.co/docs/hub/en/security-tokens) Once you've got a token you may need to also navigate to a models page such as mistral7B to accept their terms before you can then use your token to access the model.
+
+The secret you would create in secrets manager would be a plain text secret containing just the HF token itself.
+
 ## Third-party models requirements
 
 You can also interact with external providers via their API, such as AI21 Labs, Cohere, OpenAI, etc.
