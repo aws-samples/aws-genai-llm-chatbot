@@ -88,6 +88,7 @@ export interface SystemConfig {
   };
   llms: {
     sagemaker: SupportedSageMakerModels[];
+    huggingfaceApiSecretArn?: string;
     sagemakerSchedule?: {
       enabled?: boolean;
       timezonePicker?: string;

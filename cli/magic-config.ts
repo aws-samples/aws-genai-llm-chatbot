@@ -71,7 +71,10 @@ const timeZoneData = getTimeZonesWithCurrentTime();
 const cfCountries = getCountryCodesAndNames();
 
 const iamRoleRegExp = RegExp(/arn:aws:iam::\d+:role\/[\w-_]+/);
+const acmCertRegExp = RegExp(/arn:aws:acm:[\w-_]+:\d+:certificate\/[\w-_]+/);
+const cfAcmCertRegExp = RegExp(/arn:aws:acm:us-east-1:\d+:certificate\/[\w-_]+/);
 const kendraIdRegExp = RegExp(/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/);
+const secretManagerArnRegExp = RegExp(/arn:aws:secretsmanager:[\w-_]+:\d+:secret:[\w-_]+/);
 
 const embeddingModels = [
   {
@@ -144,6 +147,7 @@ const embeddingModels = [
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
         : false;
+      options.huggingfaceApiSecretArn = config.llms?.huggingfaceApiSecretArn;
       options.enableSagemakerModelsSchedule = config.llms?.sagemakerSchedule?.enabled;
       options.timezonePicker = config.llms?.sagemakerSchedule?.timezonePicker;
       options.enableCronFormat = config.llms?.sagemakerSchedule?.enableCronFormat;
@@ -251,6 +255,22 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "input",
       name: "certificate",
+      validate(v: string) {
+        if ((this as any).state.answers.privateWebsite)
+        {
+          const valid = acmCertRegExp.test(v);
+          return (this as any).skipped || valid
+            ? true
+            : "You need to enter an ACM certificate arn";
+        }
+        else
+        {
+          const valid = cfAcmCertRegExp.test(v);
+          return (this as any).skipped || valid
+            ? true
+            : "You need to enter an ACM certificate arn in us-east-1 for CF";
+        }
+      },
       message(): string {
         if ((this as any).state.answers.customPublicDomain) {
           return "ACM certificate ARN with custom domain for public website. Note that the certificate must resides in us-east-1";
@@ -267,9 +287,14 @@ async function processCreateOptions(options: any): Promise<void> {
       name: "domain",
       message(): string {
         if ((this as any).state.answers.customPublicDomain) {
-          return "Custom Domain for public website";
+          return "Custom Domain for public website i.e example.com";
         }
-        return "Domain for private website";
+        return "Domain for private website i.e example.com";
+      },
+      validate(v: any) {
+        return (this as any).skipped || v.length > 0
+          ? true
+          : "You need to enter a domain name";
       },
       initial: options.domain,
       skip(): boolean {
@@ -280,7 +305,10 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "cfGeoRestrictEnable",
       message: "Do want to restrict access to the website (CF Distribution) to only a country or countries?",
-      initial: false,
+      initial: options.cfGeoRestrictEnable || false,
+      skip(): boolean {
+        return (this as any).state.answers.privateWebsite;
+      },
     },
     {
       type: "multiselect",
@@ -295,7 +323,7 @@ async function processCreateOptions(options: any): Promise<void> {
       },
       skip(): boolean {
         (this as any).state._choices = (this as any).state.choices;
-        return !(this as any).state.answers.cfGeoRestrictEnable;
+        return (!(this as any).state.answers.cfGeoRestrictEnable || (this as any).state.answers.privateWebsite);
       },
       initial: options.cfGeoRestrictList || [],
     },
@@ -353,6 +381,22 @@ async function processCreateOptions(options: any): Promise<void> {
       },
       skip(): boolean {
         (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.enableSagemakerModels;
+      },
+    },
+    {
+      type: "input",
+      name: "huggingfaceApiSecretArn",
+      message:
+        "Some HuggingFace models including mistral now require an API key, Please enter an Secrets Manager Secret ARN (see docs: Model Requirements)",
+      validate: (v: string) => {
+        const valid = secretManagerArnRegExp.test(v);
+        return v.length === 0 || valid
+          ? true
+          : "If you are supplying a HF API key it needs to be a reference to a secrets manager secret ARN"
+      },
+      initial: options.huggingfaceApiSecretArn || "",
+      skip(): boolean {
         return !(this as any).state.answers.enableSagemakerModels;
       },
     },
@@ -724,6 +768,7 @@ async function processCreateOptions(options: any): Promise<void> {
       : undefined,
     llms: {
       sagemaker: answers.sagemakerModels,
+      huggingfaceApiSecretArn: answers.huggingfaceApiSecretArn,
       sagemakerSchedule: answers.enableSagemakerModelsSchedule
         ? {
             enabled: answers.enableSagemakerModelsSchedule,
