@@ -22,7 +22,7 @@ export class SageMakerRagModels extends Construct {
       .map((c) => c.name);
 
     const sageMakerCrossEncoderModelIds = props.config.rag.crossEncoderModels
-      .filter((c) => c.provider === "sagemaker")
+      .filter((c) => c.provider === "sagemaker" || c.provider === "cohere")
       .map((c) => c.name);
 
     const model = new SageMakerModel(this, "Model", {
