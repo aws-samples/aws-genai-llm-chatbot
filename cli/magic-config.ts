@@ -74,6 +74,7 @@ const iamRoleRegExp = RegExp(/arn:aws:iam::\d+:role\/[\w-_]+/);
 const acmCertRegExp = RegExp(/arn:aws:acm:[\w-_]+:\d+:certificate\/[\w-_]+/);
 const cfAcmCertRegExp = RegExp(/arn:aws:acm:us-east-1:\d+:certificate\/[\w-_]+/);
 const kendraIdRegExp = RegExp(/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/);
+const secretManagerArnRegExp = RegExp(/arn:aws:secretsmanager:[\w-_]+:\d+:secret:[\w-_]+/);
 
 const embeddingModels = [
   {
@@ -146,6 +147,7 @@ const embeddingModels = [
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
         : false;
+      options.huggingfaceApiSecretArn = config.llms?.huggingfaceApiSecretArn;
       options.enableSagemakerModelsSchedule = config.llms?.sagemakerSchedule?.enabled;
       options.timezonePicker = config.llms?.sagemakerSchedule?.timezonePicker;
       options.enableCronFormat = config.llms?.sagemakerSchedule?.enableCronFormat;
@@ -379,6 +381,22 @@ async function processCreateOptions(options: any): Promise<void> {
       },
       skip(): boolean {
         (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.enableSagemakerModels;
+      },
+    },
+    {
+      type: "input",
+      name: "huggingfaceApiSecretArn",
+      message:
+        "Some HuggingFace models including mistral now require an API key, Please enter an Secrets Manager Secret ARN (see docs: Model Requirements)",
+      validate: (v: string) => {
+        const valid = secretManagerArnRegExp.test(v);
+        return v.length === 0 || valid
+          ? true
+          : "If you are supplying a HF API key it needs to be a reference to a secrets manager secret ARN"
+      },
+      initial: options.huggingfaceApiSecretArn || "",
+      skip(): boolean {
         return !(this as any).state.answers.enableSagemakerModels;
       },
     },
@@ -750,6 +768,7 @@ async function processCreateOptions(options: any): Promise<void> {
       : undefined,
     llms: {
       sagemaker: answers.sagemakerModels,
+      huggingfaceApiSecretArn: answers.huggingfaceApiSecretArn,
       sagemakerSchedule: answers.enableSagemakerModelsSchedule
         ? {
             enabled: answers.enableSagemakerModelsSchedule,
