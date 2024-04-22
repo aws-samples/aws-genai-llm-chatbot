@@ -485,6 +485,7 @@ def _process_document(
 
             try:
                 urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(path)
+                limit = min(limit, len(urls_to_crawl))
 
                 if len(urls_to_crawl) == 0:
                     set_status(workspace_id, document_id, "error")
@@ -512,7 +513,7 @@ def _process_document(
                     "priority_queue": priority_queue,
                     "processed_urls": [],
                     "follow_links": follow_links,
-                    "limit": min(limit, len(urls_to_crawl)),
+                    "limit": limit,
                     "done": False,
                 },
                 cls=genai_core.utils.json.CustomEncoder,
