@@ -42,7 +42,7 @@ export class RealtimeResolvers extends Construct {
         SNS_TOPIC_ARN: props.topic.topicArn,
       },
       layers: [props.shared.powerToolsLayer],
-      vpc: props.shared.vpc
+      vpc: props.shared.vpc,
     });
 
     const outgoingMessageHandler = new NodejsFunction(
@@ -59,7 +59,7 @@ export class RealtimeResolvers extends Construct {
         environment: {
           GRAPHQL_ENDPOINT: props.api.graphqlUrl,
         },
-        vpc: props.shared.vpc
+        vpc: props.shared.vpc,
       }
     );
 

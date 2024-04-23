@@ -20,7 +20,11 @@ export interface WebsiteCrawlingWorkflowProps {
 export class WebsiteCrawlingWorkflow extends Construct {
   public readonly stateMachine: sfn.StateMachine;
 
-  constructor(scope: Construct, id: string, props: WebsiteCrawlingWorkflowProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: WebsiteCrawlingWorkflowProps
+  ) {
     super(scope, id);
 
     const setProcessing = new tasks.DynamoUpdateItem(this, "SetProcessing", {
@@ -119,8 +123,7 @@ export class WebsiteCrawlingWorkflow extends Construct {
         },
         ResultPath: "$.job",
       },
-    })
-    .addCatch(handleError, {
+    }).addCatch(handleError, {
       errors: ["States.ALL"],
       resultPath: "$.job",
     });
