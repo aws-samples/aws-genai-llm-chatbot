@@ -152,23 +152,22 @@ export default function ChatMessage(props: ChatMessageProps) {
                     <Tabs
                       tabs={(
                         props.message.metadata.documents as RagDocument[]
-                      ).map((p: any, i) => {
+                      ).map((p: RagDocument, i) => {
                         return {
                           id: `${i}`,
-                          label: p.metadata.path?.split("/").at(-1) ??
-                          p.metadata.title ??
-                          p.metadata.document_id.slice(-8),
+                          label:
+                            p.metadata.path?.split("/").at(-1) ??
+                            p.metadata.title ??
+                            p.metadata.document_id.slice(-8),
                           content: (
-                            <>
-                              <Textarea
-                                value={p.page_content}
-                                readOnly={true}
-                                rows={8}
-                              />
-                            ),
-                          };
-                        }
-                      )}
+                            <Textarea
+                              value={p.page_content}
+                              readOnly={true}
+                              rows={8}
+                            />
+                          ),
+                        };
+                      })}
                       activeTabId={documentIndex}
                       onChange={({ detail }) =>
                         setDocumentIndex(detail.activeTabId)
