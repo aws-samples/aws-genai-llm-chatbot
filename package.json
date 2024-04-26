@@ -5,8 +5,8 @@
     "aws-genai-llm-chatbot": "bin/aws-genai-llm-chatbot.js"
   },
   "scripts": {
-    "build": "npx @aws-amplify/cli codegen && tsc",
-    "watch": "tsc -w",
+    "build": "npx @aws-amplify/cli codegen && npx tsc",
+    "watch": "npx tsc -w",
     "cdk": "cdk",
     "gen": "npx @aws-amplify/cli codegen",
     "create": "node ./cli/magic.js config",
@@ -26,6 +26,7 @@
     "@aws-sdk/protocol-http": "^3.374.0",
     "@aws-sdk/signature-v4": "^3.374.0",
     "@types/aws-lambda": "^8.10.125",
+    "@types/country-list": "^2.1.4",
     "@types/node": "20.1.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -42,12 +43,14 @@
     "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.114.1-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.114.1-alpha.0",
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.114.1-alpha.0",
-    "@cdklabs/generative-ai-cdk-constructs": "^0.1.59",
+    "@cdklabs/generative-ai-cdk-constructs": "^0.1.122",
     "aws-cdk-lib": "2.126.0",
     "cdk-nag": "2.27.170",
     "commander": "^11.0.0",
     "constructs": "^10.0.0",
+    "country-list": "^2.3.0",
     "enquirer": "^2.4.1",
+    "moment-timezone": "^0.5.45",
     "source-map-support": "^0.5.21"
   },
   "optionalDependencies": {

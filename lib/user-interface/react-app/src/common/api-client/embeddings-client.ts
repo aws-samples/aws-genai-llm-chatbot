@@ -19,7 +19,8 @@ export class EmbeddingsClient {
   async getEmbeddings(
     provider: string,
     model: string,
-    input: string[]
+    input: string[],
+    task: "retrieve" | "store"
   ): Promise<GraphQLResult<GraphQLQuery<CalculateEmbeddingsQuery>>> {
     const result = API.graphql<GraphQLQuery<CalculateEmbeddingsQuery>>({
       query: calculateEmbeddings,
@@ -28,6 +29,7 @@ export class EmbeddingsClient {
           provider: provider,
           model: model,
           passages: input,
+          task: task,
         },
       },
     });

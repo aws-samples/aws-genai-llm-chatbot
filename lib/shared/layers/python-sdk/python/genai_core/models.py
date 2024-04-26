@@ -28,7 +28,12 @@ def list_models():
     if bedrock_agents:
         models.extend(bedrock_agents)
 
+    azure_openai_models = list_azure_openai_models()
+    if azure_openai_models:
+        models.extend(azure_openai_models)
+
     return models
+
 
 def list_bedrock_agents():
     try:
@@ -36,11 +41,12 @@ def list_bedrock_agents():
         if not bedrock:
             return None
 
-        response = bedrock.list_agents(
-        )
-        agents = [bedrock.get_agent(agentId = a["agentId"])["agent"] for a in response.get("agentSummaries", [])
-            if a.get("agentStatus", "")
-            == genai_core.types.AgentStatus.PREPARED.value]
+        response = bedrock.list_agents()
+        agents = [
+            bedrock.get_agent(agentId=a["agentId"])["agent"]
+            for a in response.get("agentSummaries", [])
+            if a.get("agentStatus", "") == genai_core.types.AgentStatus.PREPARED.value
+        ]
 
         bedrock_agents = [
             {
@@ -85,6 +91,24 @@ def list_openai_models():
         }
         for model in models.data
         if model["id"].startswith("gpt")
+    ]
+
+
+def list_azure_openai_models():
+    # azure openai model are listed, comma separated in AZURE_OPENAI_MODELS variable in external API secret
+    models = genai_core.parameters.get_external_api_key("AZURE_OPENAI_MODELS") or ""
+
+    return [
+        {
+            "provider": Provider.AZURE_OPENAI.value,
+            "name": model,
+            "streaming": True,
+            "inputModalities": [Modality.TEXT.value],
+            "outputModalities": [Modality.TEXT.value],
+            "interface": ModelInterface.LANGCHIAN.value,
+            "ragSupported": True,
+        }
+        for model in models.split(",")
     ]
 
 

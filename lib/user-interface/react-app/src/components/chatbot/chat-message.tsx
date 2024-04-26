@@ -152,18 +152,14 @@ export default function ChatMessage(props: ChatMessageProps) {
                     <Tabs
                       tabs={(
                         props.message.metadata.documents as RagDocument[]
-                      ).map(
-                        (
-                          p: {
-                            metadata: { path: string };
-                            page_content: string;
-                          },
-                          i
-                        ) => {
-                          return {
-                            id: `${i}`,
-                            label: p.metadata.path,
-                            content: (
+                      ).map((p: any, i) => {
+                        return {
+                          id: `${i}`,
+                          label: p.metadata.path?.split("/").at(-1) ??
+                          p.metadata.title ??
+                          p.metadata.document_id.slice(-8),
+                          content: (
+                            <>
                               <Textarea
                                 value={p.page_content}
                                 readOnly={true}
