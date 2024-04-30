@@ -98,18 +98,58 @@ export default function ChatMessage(props: ChatMessageProps) {
                     container: "jsonContainer",
                   }}
                 />
-                {props.message.metadata.documents && (
-                  <>
-                    <div className={styles.btn_chabot_metadata_copy}>
-                      <Popover
-                        size="medium"
-                        position="top"
-                        triggerType="custom"
-                        dismissButton={false}
-                        content={
-                          <StatusIndicator type="success">
-                            Copied to clipboard
-                          </StatusIndicator>
+                {props.message.metadata.documents &&
+                  (props.message.metadata.documents as RagDocument[]).length >
+                    0 && (
+                    <>
+                      <div className={styles.btn_chabot_metadata_copy}>
+                        <Popover
+                          size="medium"
+                          position="top"
+                          triggerType="custom"
+                          dismissButton={false}
+                          content={
+                            <StatusIndicator type="success">
+                              Copied to clipboard
+                            </StatusIndicator>
+                          }
+                        >
+                          <Button
+                            variant="inline-icon"
+                            iconName="copy"
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                (
+                                  props.message.metadata
+                                    .documents as RagDocument[]
+                                )[parseInt(documentIndex)].page_content
+                              );
+                            }}
+                          />
+                        </Popover>
+                      </div>
+                      <Tabs
+                        tabs={(
+                          props.message.metadata.documents as RagDocument[]
+                        ).map((p: RagDocument, i) => {
+                          return {
+                            id: `${i}`,
+                            label: p.metadata.path.split("/").at(-1),
+                            href: p.metadata.path,
+                            content: (
+                              <>
+                                <Textarea
+                                  value={p.page_content}
+                                  readOnly={true}
+                                  rows={8}
+                                />
+                              </>
+                            ),
+                          };
+                        })}
+                        activeTabId={documentIndex}
+                        onChange={({ detail }) =>
+                          setDocumentIndex(detail.activeTabId)
                         }
                       >
                         <Button

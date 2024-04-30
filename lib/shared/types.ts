@@ -122,6 +122,15 @@ export interface SystemConfig {
         }[];
         enterprise?: boolean;
       };
+      knowledgeBase: {
+        enabled: boolean;
+        external?: {
+          name: string;
+          knowledgeBaseId: string;
+          region?: SupportedRegion;
+          roleArn?: string;
+        }[];
+      };
     };
     embeddingsModels: {
       provider: ModelProvider;

@@ -13,7 +13,7 @@ export function getConfig(): SystemConfig {
        createVpcEndpoints: true,
     },*/
     privateWebsite: false,
-    certificate : "",
+    certificate: "",
     cfGeoRestrictEnable: false,
     cfGeoRestrictList: [],
     bedrock: {
@@ -36,7 +36,10 @@ export function getConfig(): SystemConfig {
         kendra: {
           enabled: false,
           createIndex: false,
-          enterprise: false
+          enterprise: false,
+        },
+        knowledgeBase: {
+          enabled: false,
         },
       },
       embeddingsModels: [

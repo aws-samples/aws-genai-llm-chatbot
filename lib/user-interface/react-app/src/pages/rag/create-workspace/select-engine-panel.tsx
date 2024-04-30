@@ -36,6 +36,13 @@ export default function SelectEnginePanel(props: {
                 "Uses Kendra Retrieve API as a retriever for retrieval augmented generation (RAG) systems.",
               disabled: props.engines.get("kendra") !== true,
             },
+            {
+              value: "bedrock_kb",
+              label: "Amazon Bedrock Knowledge Base",
+              description:
+                "Uses Bedrock Knowledge Base Retrieve API as a retriever for retrieval augmented generation (RAG) systems.",
+              disabled: props.engines.get("bedrock_kb") !== true,
+            },
           ]}
           value={props.engine}
           onChange={(e) => props.setEngine(e.detail.value)}
