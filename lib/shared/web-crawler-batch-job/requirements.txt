@@ -17,3 +17,4 @@ attrs==23.1.0
 feedparser==6.0.10
 aws_xray_sdk==2.12.1
 defusedxml==0.7.1
+pdfplumber==0.11.0
