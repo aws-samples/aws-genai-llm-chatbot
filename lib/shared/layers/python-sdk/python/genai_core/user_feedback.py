@@ -22,6 +22,7 @@ def add_user_feedback(
 ):
     feedbackId = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    prefix = datetime.utcnow().strftime("user_feedback/year=%Y/month=%m/")
     
     item = {
         "feedbackId": feedbackId,
@@ -37,7 +38,7 @@ def add_user_feedback(
     
     response = s3_client.put_object(
         Bucket=USER_FEEDBACK_BUCKET_NAME,
-        Key=feedbackId,
+        Key=f"{prefix}{feedbackId}.json",
         Body=json.dumps(item),
         ContentType="application/json",
         StorageClass='STANDARD_IA',

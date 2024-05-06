@@ -14,7 +14,7 @@ from ..shared.meta.llama2_chat import (
 from ..shared.meta.llama2_chat import Llama2ConversationBufferMemory
 
 from ..base import ModelAdapter
-from ..registry import registry
+from genai_core.registry import registry
 
 
 class BedrockMetaLLama2ChatAdapter(ModelAdapter):
@@ -61,4 +61,7 @@ class BedrockMetaLLama2ChatAdapter(ModelAdapter):
 
 
 # Register the adapter
-registry.register(r"(?i)^bedrock.meta.llama2-.*-chat.*", BedrockMetaLLama2ChatAdapter)
+registry.register(
+    r"^bedrock.meta.llama2-.*-chat.*",
+    BedrockMetaLLama2ChatAdapter,
+)

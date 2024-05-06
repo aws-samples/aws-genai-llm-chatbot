@@ -82,7 +82,11 @@ export default function Chat(props: { sessionId?: string }) {
 
   const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem) => {
     if (message.metadata.sessionId) {
-      const prompt = messageHistory[idx - 1]?.content;
+      
+      let prompt = "";
+      if (Array.isArray(message.metadata.prompts) && Array.isArray(message.metadata.prompts[0])) { 
+          prompt = message.metadata.prompts[0][0];
+      }
       const completion = message.content;
       const model = message.metadata.modelId;
       const feedbackData: FeedbackData = {

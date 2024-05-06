@@ -5,7 +5,7 @@ from langchain.llms.sagemaker_endpoint import LLMContentHandler, SagemakerEndpoi
 from langchain.prompts.prompt import PromptTemplate
 
 from ...base import ModelAdapter
-from ...registry import registry
+from genai_core.registry import registry
 
 
 class FalconLiteContentHandler(LLMContentHandler):

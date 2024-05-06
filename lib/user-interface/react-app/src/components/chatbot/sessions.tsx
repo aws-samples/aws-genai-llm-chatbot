@@ -5,6 +5,9 @@ import {
   Pagination,
   Button,
   TableProps,
+  Header,
+  CollectionPreferences,
+  Modal,
 } from "@cloudscape-design/components";
 import { DateTime } from "luxon";
 import { useState, useEffect, useContext, useCallback } from "react";
@@ -17,13 +20,18 @@ import RouterButton from "../wrappers/router-button";
 import { Session } from "../../API";
 
 export interface SessionsProps {
-  toolsOpen: boolean;
+  readonly toolsOpen: boolean;
 }
 
 export default function Sessions(props: SessionsProps) {
   const appContext = useContext(AppContext);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState<Session[]>([]);
+  const [preferences, setPreferences] = useState({ pageSize: 20 });
+  const [showModalDelete, setShowModalDelete] = useState(false);
+  const [deleteAllSessions, setDeleteAllSessions] = useState(false);
+
   const { items, collectionProps, paginationProps } = useCollection(sessions, {
     filtering: {
       empty: (
@@ -34,7 +42,7 @@ export default function Sessions(props: SessionsProps) {
         </Box>
       ),
     },
-    pagination: { pageSize: 18 },
+    pagination: { pageSize: preferences.pageSize },
     sorting: {
       defaultState: {
         sortingColumn: {
@@ -61,7 +69,6 @@ export default function Sessions(props: SessionsProps) {
 
   useEffect(() => {
     if (!appContext) return;
-    if (!props.toolsOpen) return;
 
     (async () => {
       setIsLoading(true);
@@ -70,19 +77,20 @@ export default function Sessions(props: SessionsProps) {
     })();
   }, [appContext, getSessions, props.toolsOpen]);
 
-  const deleteSession = async (sessionId: string) => {
+  const deleteSelectedSessions = async () => {
     if (!appContext) return;
 
     setIsLoading(true);
     const apiClient = new ApiClient(appContext);
-    await apiClient.sessions.deleteSession(sessionId);
+    await Promise.all(
+      selectedItems.map((s) => apiClient.sessions.deleteSession(s.id))
+    );
     await getSessions();
     setIsLoading(false);
   };
 
   const deleteUserSessions = async () => {
     if (!appContext) return;
-    if (!confirm("Are you sure you want to delete all sessions?")) return;
 
     setIsLoading(true);
     const apiClient = new ApiClient(appContext);
@@ -92,19 +100,109 @@ export default function Sessions(props: SessionsProps) {
   };
 
   return (
-    <div style={{ padding: "0px 14px" }}>
+    <>
+      <Modal
+        onDismiss={() => setShowModalDelete(false)}
+        visible={showModalDelete}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              {" "}
+              <Button variant="link" onClick={() => setShowModalDelete(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={deleteSelectedSessions}>
+                Ok
+              </Button>
+            </SpaceBetween>{" "}
+          </Box>
+        }
+        header={"Delete session" + (selectedItems.length > 1 ? "s" : "")}
+      >
+        Do you want to delete{" "}
+        {selectedItems.length == 1
+          ? `session ${selectedItems[0].id}?`
+          : `${selectedItems.length} sessions?`}
+      </Modal>
+      <Modal
+        onDismiss={() => setDeleteAllSessions(false)}
+        visible={deleteAllSessions}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              {" "}
+              <Button
+                variant="link"
+                onClick={() => setDeleteAllSessions(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={deleteUserSessions}>
+                Ok
+              </Button>
+            </SpaceBetween>{" "}
+          </Box>
+        }
+        header={"Delete all sessions"}
+      >
+        {`Do you want to delete ${sessions.length} sessions?`}
+      </Modal>
       <Table
         {...collectionProps}
-        variant="embedded"
+        variant="full-page"
         items={items}
+        onSelectionChange={({ detail }) => {
+          console.log(detail);
+          setSelectedItems(detail.selectedItems);
+        }}
+        selectedItems={selectedItems}
+        selectionType="multi"
+        trackBy="id"
+        empty={
+          <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
+            <SpaceBetween size="m">
+              <b>No sessions</b>
+            </SpaceBetween>
+          </Box>
+        }
+        ariaLabels={{
+          selectionGroupLabel: "Items selection",
+          allItemsSelectionLabel: ({ selectedItems }) =>
+            `${selectedItems.length} ${
+              selectedItems.length === 1 ? "item" : "items"
+            } selected`,
+          // @ts-expect-error no-unused-var
+          itemSelectionLabel: (e, item) => item.title!,
+        }}
         pagination={<Pagination {...paginationProps} />}
         loadingText="Loading history"
         loading={isLoading}
         resizableColumns
+        stickyHeader={true}
+        preferences={
+          <CollectionPreferences
+            onConfirm={({ detail }) =>
+              setPreferences({ pageSize: detail.pageSize ?? 20 })
+            }
+            title="Preferences"
+            confirmLabel="Confirm"
+            cancelLabel="Cancel"
+            preferences={preferences}
+            pageSizePreference={{
+              title: "Page size",
+              options: [
+                { value: 10, label: "10" },
+                { value: 20, label: "20" },
+                { value: 50, label: "50" },
+              ],
+            }}
+          />
+        }
         header={
-          <div style={{ paddingTop: "4px" }}>
-            <h2>History</h2>
-            <div>
+          <Header
+            description="List of past sessions"
+            variant="awsui-h1-sticky"
+            actions={
               <SpaceBetween direction="horizontal" size="m" alignItems="center">
                 <RouterButton
                   iconName="add-plus"
@@ -122,16 +220,29 @@ export default function Sessions(props: SessionsProps) {
                   Refresh
                 </Button>
                 <Button
+                  disabled={selectedItems.length == 0}
+                  iconAlt="Delete"
+                  iconName="remove"
+                  variant="inline-link"
+                  onClick={() => {
+                    if (selectedItems.length > 0) setShowModalDelete(true);
+                  }}
+                >
+                  Delete
+                </Button>
+                <Button
                   iconAlt="Delete all sessions"
                   iconName="delete-marker"
                   variant="inline-link"
-                  onClick={() => deleteUserSessions()}
+                  onClick={() => setDeleteAllSessions(true)}
                 >
                   Delete all sessions
                 </Button>
               </SpaceBetween>
-            </div>
-          </div>
+            }
+          >
+            Session History
+          </Header>
         }
         columnDefinitions={
           [
@@ -139,6 +250,8 @@ export default function Sessions(props: SessionsProps) {
               id: "title",
               header: "Title",
               sortingField: "title",
+              width: 800,
+              minWidth: 200,
               cell: (e) => (
                 <Link to={`/chatbot/playground/${e.id}`}>{e.title}</Link>
               ),
@@ -159,33 +272,9 @@ export default function Sessions(props: SessionsProps) {
                 );
               },
             },
-            {
-              id: "open",
-              header: "Open",
-              cell: (item) => (
-                <RouterButton
-                  variant="inline-link"
-                  href={`/chatbot/playground/${item.id}`}
-                >
-                  Open
-                </RouterButton>
-              ),
-            },
-            {
-              id: "delete",
-              header: "Delete",
-              cell: (item) => (
-                <Button
-                  variant="inline-link"
-                  onClick={() => deleteSession(item.id)}
-                >
-                  Delete
-                </Button>
-              ),
-            },
           ] as TableProps.ColumnDefinition<Session>[]
         }
       />
-    </div>
+    </>
   );
 }
