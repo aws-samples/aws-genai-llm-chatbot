@@ -10,5 +10,13 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
-      - run: npm install
-      - run: npm run build
+      - name: Backend
+        run: |
+          npm install
+          npm run build
+          npx cdk synth
+      - name: Frontend
+        working-directory: ./lib/user-interface/react-app
+        run: |
+          npm install
+          npm run build
