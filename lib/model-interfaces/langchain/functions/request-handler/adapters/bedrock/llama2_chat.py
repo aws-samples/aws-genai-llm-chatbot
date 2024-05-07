@@ -1,6 +1,6 @@
 import genai_core.clients
 
-# from langchain.llms import Bedrock (pending https://github.com/langchain-ai/langchain/issues/13316)
+# from langchain_community.llms import Bedrock (pending https://github.com/langchain-ai/langchain/issues/13316)
 from .base import Bedrock
 
 from langchain.prompts.prompt import PromptTemplate
