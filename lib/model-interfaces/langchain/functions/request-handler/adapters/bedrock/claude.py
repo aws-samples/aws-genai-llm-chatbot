@@ -1,6 +1,6 @@
 import genai_core.clients
 
-# from langchain.llms import Bedrock
+# from langchain_community.llms import Bedrock
 from langchain.prompts.prompt import PromptTemplate
 
 from .base import Bedrock
