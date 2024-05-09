@@ -630,7 +630,10 @@ async function processCreateOptions(options: any): Promise<void> {
           options.kendraExternal.length > 0) ||
         false,
       skip(): boolean {
-        return !(this as any).state.answers.enableRag;
+        if (!(this as any).state.answers.enableRag){
+          return true;
+        }
+        return !(this as any).state.answers.ragsToEnable.includes("kendra");
       },
     },
   ];
