@@ -5,7 +5,7 @@ import {
   SpaceBetween,
   FormField,
   Input,
-  ExpandableSection,
+  ExpandableSection, Toggle,
 } from "@cloudscape-design/components";
 import EmbeddingSelector from "./embeddings-selector-field";
 import { CrossEncoderSelectorField } from "./cross-encoder-selector-field";
@@ -43,6 +43,16 @@ export function OpenSearchForm(props: OpenSearchFormProps) {
               props.onChange({ name: value })
             }
           />
+        </FormField>
+        <FormField label="Public Access" errorText={props.errors.isPublic}>
+          <Toggle
+              disabled={props.submitting}
+              checked={props.data.isPublic}
+              onChange={({ detail: { checked } }) =>
+                  props.onChange({ isPublic: checked })
+              }
+          >
+          </Toggle>
         </FormField>
         <EmbeddingSelector
           submitting={props.submitting}

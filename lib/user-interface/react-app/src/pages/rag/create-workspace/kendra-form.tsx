@@ -82,6 +82,16 @@ export default function KendraForm(props: KendraFormProps) {
             }
           />
         </FormField>
+        <FormField label="Public Access" errorText={props.errors.isPublic}>
+          <Toggle
+              disabled={props.submitting}
+              checked={props.data.isPublic}
+              onChange={({ detail: { checked } }) =>
+                  props.onChange({ isPublic: checked })
+              }
+          >
+          </Toggle>
+        </FormField>
         <FormField label="Kendra Index" errorText={props.errors.kendraIndex}>
           <Select
             disabled={props.submitting}

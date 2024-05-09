@@ -1,4 +1,6 @@
 import { StatusIndicator, TableProps } from "@cloudscape-design/components";
+import Badge from "@cloudscape-design/components/badge";
+import SpaceBetween from "@cloudscape-design/components/space-between";
 import {
   PropertyFilterProperty,
   PropertyFilterOperator,
@@ -15,7 +17,12 @@ export const WorkspacesColumnDefinitions: TableProps.ColumnDefinition<Workspace>
       header: "Name",
       sortingField: "name",
       cell: (item: Workspace) => (
-        <RouterLink href={`/rag/workspaces/${item.id}`}>{item.name}</RouterLink>
+          <>
+            <SpaceBetween direction={"horizontal"} size={"xs"}>
+            <RouterLink href={`/rag/workspaces/${item.id}`}>{item.name}</RouterLink>
+            {item.isPublic == true ? <Badge color="red" >Public</Badge> : <Badge color="green" >Private</Badge>}
+            </SpaceBetween>
+          </>
       ),
       isRowHeader: true,
     },

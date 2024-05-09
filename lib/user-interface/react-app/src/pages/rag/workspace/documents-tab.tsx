@@ -13,10 +13,10 @@ import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { getColumnDefinition } from "./columns";
 import { Utils } from "../../../common/utils";
-import { DocumentsResult } from "../../../API";
+import {DocumentsResult, Workspace} from "../../../API";
 
 export interface DocumentsTabProps {
-  workspaceId?: string;
+  workspace: Workspace;
   documentType: RagDocumentType;
 }
 
@@ -29,14 +29,14 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const getDocuments = useCallback(
     async (params: { lastDocumentId?: string; pageIndex?: number }) => {
       if (!appContext) return;
-      if (!props.workspaceId) return;
+      if (!props.workspace.id) return;
 
       setLoading(true);
 
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.documents.getDocuments(
-          props.workspaceId,
+          props.workspace.id,
           props.documentType,
           params?.lastDocumentId
         );
@@ -65,7 +65,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
 
       setLoading(false);
     },
-    [appContext, props.documentType, props.workspaceId]
+    [appContext, props.documentType, props.workspace.id]
   );
 
   useEffect(() => {
@@ -104,6 +104,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const typeTitleStr = ragDocumentTypeToTitleString(props.documentType);
 
   const columnDefinitions = getColumnDefinition(props.documentType);
+  const isWritableWorkspace = props.workspace?.is_writable ?? false
 
   return (
     <Table
@@ -116,8 +117,8 @@ export default function DocumentsTab(props: DocumentsTabProps) {
           actions={
             <SpaceBetween direction="horizontal" size="xs">
               <Button iconName="refresh" onClick={refreshPage} />
-              <RouterButton
-                href={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
+              <RouterButton disabled={!isWritableWorkspace}
+                href={`/rag/workspaces/add-data?workspaceId=${props.workspace.id}&tab=${props.documentType}`}
               >
                 {typeAddStr}
               </RouterButton>
@@ -131,7 +132,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
       empty={
         <TableEmptyState
           resourceName={typeStr}
-          createHref={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
+          createHref={`/rag/workspaces/add-data?workspaceId=${props.workspace.id}&tab=${props.documentType}`}
           createText={typeAddStr}
         />
       }

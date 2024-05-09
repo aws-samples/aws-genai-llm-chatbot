@@ -6,6 +6,9 @@ import genai_core.embeddings
 from datetime import datetime
 from genai_core.types import Task
 
+from boto3.dynamodb.conditions import Key
+import genai_core.auth
+
 dynamodb = boto3.resource("dynamodb")
 sfn_client = boto3.client("stepfunctions")
 
@@ -13,6 +16,12 @@ WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME")
 WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ.get(
     "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME"
 )
+
+WORKSPACES_POLICY_TABLE_NAME = os.environ.get("WORKSPACES_POLICY_TABLE_NAME")
+WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME = os.environ.get(
+    "WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME"
+)
+
 CREATE_AURORA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
     "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN"
 )
@@ -29,6 +38,55 @@ WORKSPACE_OBJECT_TYPE = "workspace"
 if WORKSPACES_TABLE_NAME:
     table = dynamodb.Table(WORKSPACES_TABLE_NAME)
 
+
+if WORKSPACES_POLICY_TABLE_NAME:
+    workspacePolicyTable = dynamodb.Table(WORKSPACES_POLICY_TABLE_NAME)
+
+def list_workspaces_by_user(userId):
+    all_items = []
+    last_evaluated_key = None
+
+    while True:
+        if last_evaluated_key:
+            response = workspacePolicyTable.query(
+                KeyConditionExpression='pk = :pk AND begins_with ( sk, :sk )',
+                ExpressionAttributeValues={
+                    ':pk': f'#userid#{userId}#',
+                    ':sk': '#workspace#'
+                },
+                ExclusiveStartKey=last_evaluated_key,
+                ScanIndexForward=False
+            )
+        else:
+            response = workspacePolicyTable.query(
+                KeyConditionExpression='pk = :pk AND begins_with ( sk, :sk )',
+                ExpressionAttributeValues={
+                    ':pk': f'#userid#{userId}#',
+                    ':sk': '#workspace#'
+                },
+                ScanIndexForward=False
+            )
+
+        all_items.extend(response["Items"])
+
+        last_evaluated_key = response.get("LastEvaluatedKey")
+        if not last_evaluated_key:
+            break
+
+    workspaces = []
+    key_policies = ['is_owner', 'is_writable']
+
+    for item in all_items:
+        itemResponse = table.get_item(Key={"workspace_id": item['workspace_id'], "object_type": WORKSPACE_OBJECT_TYPE})
+
+        workspace = itemResponse.get('Item')
+
+        for key_policy in key_policies:
+            workspace[key_policy] = item[key_policy]
+
+        workspaces.append(workspace)
+
+    return workspaces
 
 def list_workspaces():
     all_items = []
@@ -62,6 +120,34 @@ def list_workspaces():
     return all_items
 
 
+def list_policy_workspace_by_id(workspaceId):
+
+    all_items = []
+    last_evaluated_key = None
+
+    while True:
+        if last_evaluated_key:
+            response = workspacePolicyTable.query(
+                IndexName=WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME,
+                KeyConditionExpression=boto3.dynamodb.conditions.Key("workspace_id").eq(workspaceId),
+                ExclusiveStartKey=last_evaluated_key,
+                ScanIndexForward=False
+            )
+        else:
+            response = workspacePolicyTable.query(
+                IndexName=WORKSPACES_POLICY_BY_WORKSPACE_ID_INDEX_NAME,
+                KeyConditionExpression=boto3.dynamodb.conditions.Key("workspace_id").eq(workspaceId),
+                ScanIndexForward=False
+            )
+
+        all_items.extend(response["Items"])
+
+        last_evaluated_key = response.get("LastEvaluatedKey")
+        if not last_evaluated_key:
+            break
+
+    return all_items
+
 def get_workspace(workspace_id: str):
     response = table.get_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE}
@@ -70,6 +156,56 @@ def get_workspace(workspace_id: str):
 
     return item
 
+def is_workspace_readable(workspaceId, userId):
+
+    response = workspacePolicyTable.get_item(
+        Key={"pk": f"#userid#{userId}#", "sk": f"#workspace#{workspaceId}#"}
+    )
+
+    item = response.get('Item')
+
+    if item:
+        print("Workspace policy find and it's readable.")
+        return item
+
+    #If user does not have explicit access then try to check if the workspace open publicly and readable
+    response = workspacePolicyTable.get_item(
+        Key={"pk": f"#userid#0#", "sk": f"#workspace#{workspaceId}#"}
+    )
+
+    item = response.get('Item')
+
+    if item:
+        print("Workspace policy find and it's readable.")
+        return item
+
+    return None
+
+def is_workspace_writable(workspaceId, userId):
+
+    response = workspacePolicyTable.get_item(
+        Key={"pk": f"#userid#{userId}#", "sk": f"#workspace#{workspaceId}#"}
+    )
+
+    item = response.get('Item')
+
+    if item and item['is_writable'] == True:
+        print("Workspace policy find and it's writable.")
+        return True
+
+    #If user does not have explicit access then try to check if the workspace open publicly and writeable
+    response = workspacePolicyTable.get_item(
+        Key={"pk": f"#userid#0#", "sk": f"#workspace#{workspaceId}#"}
+    )
+
+    item = response.get('Item')
+
+    if item and item['is_writable'] == True:
+      print("Workspace policy find and it's writable.")
+      return True
+
+
+    return False
 
 def set_status(workspace_id: str, status: str):
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -91,6 +227,7 @@ def set_status(workspace_id: str, status: str):
 
 def create_workspace_aurora(
     workspace_name: str,
+    is_public: bool,
     embeddings_model_provider: str,
     embeddings_model_name: str,
     embeddings_model_dimensions: int,
@@ -103,6 +240,7 @@ def create_workspace_aurora(
     chunking_strategy: str,
     chunk_size: int,
     chunk_overlap: int,
+    creator_id: str,
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -118,6 +256,7 @@ def create_workspace_aurora(
     item = {
         "workspace_id": workspace_id,
         "object_type": WORKSPACE_OBJECT_TYPE,
+        "is_public": is_public,
         "format_version": 1,
         "name": workspace_name,
         "engine": "aurora",
@@ -139,10 +278,37 @@ def create_workspace_aurora(
         "size_in_bytes": 0,
         "created_at": timestamp,
         "updated_at": timestamp,
+        "creator_id": creator_id,
     }
 
     response = table.put_item(Item=item)
     print(response)
+
+    #Create default workspace policy at least for creator
+    itemWorkspacePolicy = {
+        "pk": f"#userid#{creator_id}#",
+        "sk": f"#workspace#{workspace_id}#",
+        "is_owner": True,
+        "is_writable": True,
+        "workspace_id": workspace_id,
+        "created_at": timestamp,
+        "updated_at": timestamp
+    }
+
+    workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
+
+    if is_public == True:
+        #Create default workspace policy at least for creator
+        itemWorkspacePolicy = {
+            "pk": f"#userid#0#",
+            "sk": f"#workspace#{workspace_id}#",
+            "is_owner": False,
+            "is_writable": True,
+            "workspace_id": workspace_id,
+            "created_at": timestamp,
+            "updated_at": timestamp
+        }
+        workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,
@@ -160,6 +326,7 @@ def create_workspace_aurora(
 
 def create_workspace_open_search(
     workspace_name: str,
+    is_public: bool,
     embeddings_model_provider: str,
     embeddings_model_name: str,
     embeddings_model_dimensions: int,
@@ -170,6 +337,7 @@ def create_workspace_open_search(
     chunking_strategy: str,
     chunk_size: int,
     chunk_overlap: int,
+    creator_id: str,
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -185,6 +353,7 @@ def create_workspace_open_search(
     item = {
         "workspace_id": workspace_id,
         "object_type": WORKSPACE_OBJECT_TYPE,
+        "is_public": is_public,
         "format_version": 1,
         "name": workspace_name,
         "engine": "opensearch",
@@ -211,6 +380,32 @@ def create_workspace_open_search(
     response = table.put_item(Item=item)
     print(response)
 
+    #Create default workspace policy at least for creator
+    itemWorkspacePolicy = {
+        "pk": f"#userid#{creator_id}#",
+        "sk": f"#workspace#{workspace_id}#",
+        "is_owner": True,
+        "is_writable": True,
+        "workspace_id": workspace_id,
+        "created_at": timestamp,
+        "updated_at": timestamp
+    }
+
+    workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
+
+    if is_public == True:
+        #Create default workspace policy at least for creator
+        itemWorkspacePolicy = {
+            "pk": f"#userid#0#",
+            "sk": f"#workspace#{workspace_id}#",
+            "is_owner": False,
+            "is_writable": True,
+            "workspace_id": workspace_id,
+            "created_at": timestamp,
+            "updated_at": timestamp
+        }
+        workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
+
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,
         input=json.dumps(
@@ -226,7 +421,7 @@ def create_workspace_open_search(
 
 
 def create_workspace_kendra(
-    workspace_name: str, kendra_index: dict, use_all_data: bool
+    workspace_name: str, is_public: bool, kendra_index: dict, use_all_data: bool
 ):
     workspace_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -237,6 +432,7 @@ def create_workspace_kendra(
     item = {
         "workspace_id": workspace_id,
         "object_type": WORKSPACE_OBJECT_TYPE,
+        "is_public": is_public,
         "format_version": 1,
         "name": workspace_name,
         "engine": "kendra",
@@ -253,6 +449,34 @@ def create_workspace_kendra(
 
     response = table.put_item(Item=item)
     print(response)
+
+    #Create default workspace policy at least for creator
+    itemWorkspacePolicy = {
+        "pk": f"#userid#{creator_id}#",
+        "sk": f"#workspace#{workspace_id}#",
+        "is_owner": True,
+        "is_writable": True,
+        "workspace_id": workspace_id,
+        "created_at": timestamp,
+        "updated_at": timestamp
+    }
+
+    workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
+
+    workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
+
+    if is_public == True:
+        #Create default workspace policy at least for creator
+        itemWorkspacePolicy = {
+            "pk": f"#userid#0#",
+            "sk": f"#workspace#{workspace_id}#",
+            "is_owner": False,
+            "is_writable": True,
+            "workspace_id": workspace_id,
+            "created_at": timestamp,
+            "updated_at": timestamp
+        }
+        workspacePolicyTableResponse = workspacePolicyTable.put_item(Item=itemWorkspacePolicy)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,

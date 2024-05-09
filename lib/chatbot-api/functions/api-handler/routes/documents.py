@@ -2,6 +2,7 @@ import os
 import genai_core.types
 import genai_core.upload
 import genai_core.documents
+import genai_core.workspaces
 from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
@@ -103,6 +104,14 @@ allowed_extensions = set(
 @router.resolver(field_name="getUploadFileURL")
 @tracer.capture_method
 def file_upload(input: dict):
+
+    #Check policy for writable permission
+    user_id = genai_core.auth.get_user_id(router)
+    is_workspace_readable = genai_core.workspaces.is_workspace_readable(request.workspaceId, user_id)
+
+    if is_workspace_readable == False:
+        raise genai_core.types.CommonError("Due security policy you are not allowed to upload document into workspace.")
+
     request = FileUploadRequest(**input)
     _, extension = os.path.splitext(request.fileName)
     if extension not in allowed_extensions:
