@@ -31,6 +31,10 @@ def get_cross_encoder_models():
     if not SAGEMAKER_RAG_MODELS_ENDPOINT:
         models = list(filter(lambda x: x["provider"] != "sagemaker", models))
 
+    for model in models:
+        if 'default' not in model:
+            model['default'] = False
+
     return models
 
 
