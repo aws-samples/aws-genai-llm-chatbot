@@ -82,6 +82,7 @@ class ChatbotMessageType(Enum):
     Human = "human"
     AI = "ai"
 
+
 class Task(Enum):
     STORE = "store"
     RETRIEVE = "retrieve"

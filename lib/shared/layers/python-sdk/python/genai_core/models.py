@@ -105,7 +105,7 @@ def list_azure_openai_models():
             "streaming": True,
             "inputModalities": [Modality.TEXT.value],
             "outputModalities": [Modality.TEXT.value],
-            "interface": ModelInterface.LANGCHIAN.value,
+            "interface": ModelInterface.LANGCHAIN.value,
             "ragSupported": True,
         }
         for model in models.split(",")

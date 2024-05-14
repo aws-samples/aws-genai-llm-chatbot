@@ -27,7 +27,7 @@ export class KendraRetrieval extends Construct {
 
     const createWorkflow = new CreateKendraWorkspace(
       this,
-      "CreateAuroraWorkspace",
+      "CreateKendraWorkspace",
       {
         config: props.config,
         shared: props.shared,
