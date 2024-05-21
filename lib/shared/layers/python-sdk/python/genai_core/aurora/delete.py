@@ -132,6 +132,7 @@ def deleteAuroraDocument(document_id: str, table_name: str):
                 sql.SQL("DELETE FROM {table} WHERE document_id = %s").format(table=table_name),
                 (document_id,),
             )
+            cursor.connection.commit()
             print(f"Deleted document {document_id} from {table_name}")
     except psycopg2.Error as e:
         print(f"An error occurred while deleting document from Aurora table: {e}")
