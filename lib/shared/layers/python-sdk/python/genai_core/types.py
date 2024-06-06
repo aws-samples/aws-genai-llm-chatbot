@@ -53,7 +53,7 @@ class ModelStatus(Enum):
 
 
 class ModelInterface(Enum):
-    LANGCHIAN = "langchain"
+    LANGCHAIN = "langchain"
     IDEFICS = "idefics"
 
 
@@ -76,6 +76,7 @@ class ChatbotAction(Enum):
 class ChatbotMessageType(Enum):
     Human = "human"
     AI = "ai"
+
 
 class Task(Enum):
     STORE = "store"

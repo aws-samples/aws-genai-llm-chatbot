@@ -1,5 +1,5 @@
 import os
-from langchain.chat_models import AzureChatOpenAI
+from langchain_community.chat_models import AzureChatOpenAI
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
@@ -26,13 +26,17 @@ class AzureGptAdapter(ModelAdapter):
 
         return AzureChatOpenAI(
             openai_api_base=os.environ.get(f"AZURE_OPENAI_API_BASE__{self.model_id}"),
-            deployment_name=os.environ.get(f"AZURE_OPENAI_API_DEPLOYMENT_NAME__{self.model_id}"),
+            deployment_name=os.environ.get(
+                f"AZURE_OPENAI_API_DEPLOYMENT_NAME__{self.model_id}"
+            ),
             openai_api_key=os.environ.get(f"AZURE_OPENAI_API_KEY__{self.model_id}"),
             openai_api_type=os.environ.get(f"AZURE_OPENAI_API_TYPE__{self.model_id}"),
-            openai_api_version=os.environ.get(f"AZURE_OPENAI_API_VERSION__{self.model_id}"),
-            callbacks=[self.callback_handler], **params
+            openai_api_version=os.environ.get(
+                f"AZURE_OPENAI_API_VERSION__{self.model_id}"
+            ),
+            callbacks=[self.callback_handler],
+            **params,
         )
-
 
 
 # Register the adapter
