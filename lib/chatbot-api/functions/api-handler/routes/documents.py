@@ -35,6 +35,7 @@ class WebsiteDocumentRequest(BaseModel):
     address: str
     followLinks: bool
     limit: int
+    contentTypes: Optional[list]
 
 
 class RssFeedDocumentRequest(BaseModel):
@@ -44,12 +45,14 @@ class RssFeedDocumentRequest(BaseModel):
     limit: int
     title: Optional[str] = None
     followLinks: bool
+    contentTypes: Optional[list]
 
 
 class RssFeedCrawlerUpdateRequest(BaseModel):
     documentType: str
     followLinks: bool
     limit: int
+    contentTypes: Optional[str]
 
 
 class ListDocumentsRequest(BaseModel):
@@ -247,6 +250,7 @@ def add_website(input: dict):
         crawler_properties={
             "follow_links": request.followLinks,
             "limit": limit,
+            "content_types": request.contentTypes,
         },
     )
 
@@ -273,6 +277,7 @@ def add_rss_feed(
         crawler_properties={
             "follow_links": request.followLinks,
             "limit": request.limit,
+            "content_types": request.contentTypes,
         },
     )
 
@@ -292,6 +297,7 @@ def update_rss_feed(input: dict):
         document_type="rssfeed",
         follow_links=request.followLinks,
         limit=request.limit,
+        content_types=request.contentTypes,
     )
     return {
         "workspaceId": result["workspace_id"],
@@ -305,6 +311,7 @@ def _convert_document(document: dict):
         document["crawler_properties"] = {
             "followLinks": document["crawler_properties"]["follow_links"],
             "limit": document["crawler_properties"]["limit"],
+            "contentTypes": document["crawler_properties"]["content_types"],
         }
     return {
         "id": document["document_id"],
@@ -325,6 +332,7 @@ def _convert_document(document: dict):
         "crawlerProperties": {
             "followLinks": document.get("crawler_properties").get("follow_links", None),
             "limit": document.get("crawler_properties").get("limit", None),
+            "contentTypes": document.get("crawler_properties").get("content_types", None),
         }
         if document.get("crawler_properties", None) != None
         else None,

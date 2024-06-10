@@ -47,6 +47,11 @@ export default defineConfig({
         items: [
           { text: 'Custom Public Domain', link: '/documentation/custom-public-domain' },
           { text: 'Private Chatbot', link: '/documentation/private-chatbot' },
+          { text: 'Cognito Federation', items: [
+            { text: 'Cognito Overview', link: '/documentation/cognito/overview' },
+            { text: 'Keycloak SAML example', link: '/documentation/cognito/keycloak-saml' },
+            { text: 'Keycloak OIDC example', link: '/documentation/cognito/keycloak-oidc' },
+          ]},
           { text: 'Model Requirements', link: '/documentation/model-requirements' },
           { text: 'Self-hosted models', link: '/documentation/self-hosted-models' },
           { text: 'Inference Script', link: '/documentation/inference-script' },

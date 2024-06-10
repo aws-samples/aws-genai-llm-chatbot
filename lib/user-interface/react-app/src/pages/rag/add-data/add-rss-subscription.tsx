@@ -8,8 +8,10 @@ import {
   Input,
   SpaceBetween,
   Toggle,
+  Multiselect,
 } from "@cloudscape-design/components";
-import { AddDataData } from "./types";
+import { AddDataData, SelectOption, multiselectOptions } from "./types";
+import { generateSelectedOptions } from "./utils";
 import { useForm } from "../../../common/hooks/use-form";
 import { useContext, useState } from "react";
 import { AppContext } from "../../../common/app-context";
@@ -31,6 +33,7 @@ interface AddRssSubscriptionData {
   rssFeedTitle: string;
   linkLimit: number;
   followLinks: boolean;
+  contentTypes: (string | undefined)[];
 }
 
 export default function AddRssSubscription(props: AddRssSubscriptionProps) {
@@ -46,6 +49,7 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
         rssFeedTitle: "",
         linkLimit: 250,
         followLinks: true,
+        contentTypes: ["text/html"],
       };
     },
     validate: (form) => {
@@ -77,13 +81,15 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
     setGlobalError(undefined);
 
     const apiClient = new ApiClient(appContext);
+    const contentTypesToUse = data.contentTypes.filter((ct): ct is string => ct !== undefined);
     try {
       await apiClient.documents.addRssFeedSubscription(
         props.data.workspace.value,
         data.rssFeedUrl,
         data.rssFeedTitle,
         data.linkLimit,
-        data.followLinks
+        data.followLinks,
+        contentTypesToUse
       );
 
       setFlashbarItem({
@@ -107,6 +113,20 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
     }
 
     props.setSubmitting(false);
+  };
+
+  const handleContentTypeChange = (selectedOptions: ReadonlyArray<SelectOption>) => {
+    const options: SelectOption[] = selectedOptions.map(option => {
+      if (option.value === undefined) {
+        throw new Error(`Option value cannot be undefined`);
+      }
+      return {
+        label: option.label,
+        value: option.value,
+        description: option.description
+      };
+    });
+    onChange({ contentTypes: options.map(option => option.value) });
   };
 
   const hasReadyWorkspace =
@@ -190,6 +210,18 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
                   onChange({ linkLimit: parseInt(value) })
                 }
               />
+            </FormField>
+            <FormField
+              label="Enabled Content Types"
+              errorText={errors.contentTypes}
+              description="Content Types to Enable for crawlingl"
+            >
+            <Multiselect
+              disabled={props.submitting}
+              selectedOptions={generateSelectedOptions(data.contentTypes)}
+              options={multiselectOptions}
+              onChange={({ detail }) => handleContentTypeChange(detail.selectedOptions)}
+            />
             </FormField>
           </SpaceBetween>
         </Container>

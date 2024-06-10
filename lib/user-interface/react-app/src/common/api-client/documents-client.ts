@@ -121,7 +121,8 @@ export class DocumentsClient {
     sitemap: boolean,
     address: string,
     followLinks: boolean,
-    limit: number
+    limit: number,
+    contentTypes: string[]
   ): Promise<GraphQLResult<GraphQLQuery<AddWebsiteMutation>>> {
     const result = API.graphql<GraphQLQuery<AddWebsiteMutation>>({
       query: addWebsite,
@@ -132,6 +133,7 @@ export class DocumentsClient {
           address,
           followLinks,
           limit,
+          contentTypes,
         },
       },
     });
@@ -143,7 +145,8 @@ export class DocumentsClient {
     address: string,
     title: string,
     limit: number,
-    followLinks: boolean
+    followLinks: boolean,
+    contentTypes: string[]
   ): Promise<GraphQLResult<GraphQLQuery<AddRssFeedMutation>>> {
     const result = API.graphql<GraphQLQuery<AddRssFeedMutation>>({
       query: addRssFeed,
@@ -154,6 +157,7 @@ export class DocumentsClient {
           title,
           limit,
           followLinks,
+          contentTypes,
         },
       },
     });
@@ -224,7 +228,8 @@ export class DocumentsClient {
     workspaceId: string,
     feedId: string,
     followLinks: boolean,
-    limit: number
+    limit: number,
+    contentTypes: string[]
   ): Promise<GraphQLResult<GraphQLQuery<UpdateRssFeedMutation>>> {
     const result = API.graphql<GraphQLQuery<UpdateRssFeedMutation>>({
       query: addRssFeed,
@@ -234,6 +239,7 @@ export class DocumentsClient {
           documentId: feedId,
           followLinks,
           limit,
+          contentTypes,
         },
       },
     });

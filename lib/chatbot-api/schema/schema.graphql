@@ -47,6 +47,7 @@ input CalculateEmbeddingsInput {
 type CrawlerProperties @aws_cognito_user_pools {
   followLinks: Boolean
   limit: Int
+  contentTypes: [String!]!
 }
 
 type CrossEncoderData @aws_cognito_user_pools {
@@ -195,6 +196,7 @@ input RssFeedInput {
   limit: Int!
   title: String
   followLinks: Boolean!
+  contentTypes: [String!]!
 }
 
 input SemanticSearchInput {
@@ -271,6 +273,7 @@ input WebsiteInput {
   address: String!
   followLinks: Boolean!
   limit: Int!
+  contentTypes: [String!]!
 }
 
 type Workspace @aws_cognito_user_pools {

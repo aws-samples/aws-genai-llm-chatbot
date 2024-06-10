@@ -79,6 +79,21 @@ export interface SystemConfig {
   certificate?: string;
   domain?: string;
   privateWebsite?: boolean;
+  cognitoFederation?: {
+    enabled?: boolean;
+    autoRedirect?: boolean;
+    customProviderName?: string;
+    customProviderType?: string;
+    customSAML?: {
+      metadataDocumentUrl?: string;
+    }
+    customOIDC?: {
+      OIDCClient?: string;
+      OIDCSecret?: string;
+      OIDCIssuerURL?: string;
+    }
+    cognitoDomain?: string;
+  };
   cfGeoRestrictEnable: boolean;
   cfGeoRestrictList: [];
   bedrock?: {
