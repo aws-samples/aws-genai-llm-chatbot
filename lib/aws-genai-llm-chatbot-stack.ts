@@ -331,9 +331,18 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
             `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/Resource`,
             `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/framework-onTimeout/ServiceRole/DefaultPolicy/Resource`,
             `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/waiter-state-machine/Role/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/Provider/waiter-state-machine/Resource`,
             `/${this.stackName}/RagEngines/SageMaker/Model/MultiAB24A/SageMakerExecutionRole/DefaultPolicy/Resource`,
           ],
           [
+            {
+              id: "AwsSolutions-SF1",
+              reason: "SFN implicitly created by CDK.",
+            },
+            {
+              id: "AwsSolutions-SF2",
+              reason: "SFN implicitly created by CDK.",
+            },
             {
               id: "AwsSolutions-IAM4",
               reason: "IAM role implicitly created by CDK.",
