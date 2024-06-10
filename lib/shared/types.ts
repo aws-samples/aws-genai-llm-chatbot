@@ -74,6 +74,7 @@ export interface SystemConfig {
   vpc?: {
     vpcId?: string;
     createVpcEndpoints?: boolean;
+    vpcDefaultSecurityGroup?: string;
   };
   certificate?: string;
   domain?: string;

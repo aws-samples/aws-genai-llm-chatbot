@@ -2,13 +2,12 @@
 
 You can find examples of model adapters in [functions/request-handler/adapters/](./functions/request-handler/adapters/)
 
-
 1. Create your own adapter under [functions/request-handler/adapters/](./functions/request-handler/adapters/).
 
 ```python
 import os
 
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 
 from ..base import ModelAdapter
 from ..registry import registry
@@ -29,7 +28,7 @@ class GPTAdapter(ModelAdapter):
 
     # (OPTIONAL) 3.If you need to override the default prompt, override the get_prompt and get_qa_prompt methods.
     # The get_qa_prompt is only used when RAG is enabled.
-    # If not you can remove this and leverage the get_prompt and get_qa_prompts from the base adapater.
+    # If not you can remove this and leverage the get_prompt and get_qa_prompts from the base adapter.
     # must return a PromptTemplate
     def get_prompt(self):
         template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
@@ -69,8 +68,8 @@ registry.register(r"^openai*", GPTAdapter)
 ```
 
 2. Make sure the `__init__.py` files are updated so that your adapter is correctly imported.
-   - Example model adapter [__init__.py](./functions/request-handler/adapters/openai/gpt.py)
-   - Adapters [__init__.py](./functions/request-handler/adapters/__init__.py)
+   - Example model adapter [**init**.py](./functions/request-handler/adapters/openai/gpt.py)
+   - Adapters [**init**.py](./functions/request-handler/adapters/__init__.py)
 
 Ensure the registry regex
 
