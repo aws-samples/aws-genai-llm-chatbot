@@ -40,10 +40,10 @@ class WebsiteDocumentRequest(BaseModel):
 
 class RssFeedDocumentRequest(BaseModel):
     workspaceId: str
-    documentId: Optional[str]
-    address: Optional[str]
+    documentId: Optional[str] = None
+    address: Optional[str] = None
     limit: int
-    title: Optional[str]
+    title: Optional[str] = None
     followLinks: bool
     contentTypes: Optional[list]
 
@@ -58,7 +58,7 @@ class RssFeedCrawlerUpdateRequest(BaseModel):
 class ListDocumentsRequest(BaseModel):
     workspaceId: str
     documentType: str
-    lastDocumentId: Optional[str]
+    lastDocumentId: Optional[str] = None
 
 
 class GetDocumentRequest(BaseModel):
@@ -69,7 +69,7 @@ class GetDocumentRequest(BaseModel):
 class GetRssPostsRequest(BaseModel):
     workspaceId: str
     documentId: str
-    lastDocumentId: Optional[str]
+    lastDocumentId: Optional[str] = None
 
 
 class DocumentSubscriptionStatusRequest(BaseModel):

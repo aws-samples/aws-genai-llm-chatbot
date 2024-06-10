@@ -354,7 +354,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         NagSuppressions.addResourceSuppressionsByPath(
           this,
           [
-            `/${this.stackName}/RagEngines/KendraRetrieval/CreateAuroraWorkspace/CreateKendraWorkspace/Role/DefaultPolicy/Resource`,
+            `/${this.stackName}/RagEngines/KendraRetrieval/CreateKendraWorkspace/CreateKendraWorkspace/Role/DefaultPolicy/Resource`,
           ],
           [
             {
