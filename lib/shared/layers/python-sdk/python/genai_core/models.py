@@ -24,6 +24,10 @@ def list_models():
     if openai_models:
         models.extend(openai_models)
 
+    azure_openai_models = list_azure_openai_models()
+    if azure_openai_models:
+        models.extend(azure_openai_models)
+
     return models
 
 
@@ -41,11 +45,29 @@ def list_openai_models():
             "streaming": True,
             "inputModalities": [Modality.TEXT.value],
             "outputModalities": [Modality.TEXT.value],
-            "interface": ModelInterface.LANGCHIAN.value,
+            "interface": ModelInterface.LANGCHAIN.value,
             "ragSupported": True,
         }
         for model in models.data
         if model["id"].startswith("gpt")
+    ]
+
+
+def list_azure_openai_models():
+    # azure openai model are listed, comma separated in AZURE_OPENAI_MODELS variable in external API secret
+    models = genai_core.parameters.get_external_api_key("AZURE_OPENAI_MODELS") or ""
+
+    return [
+        {
+            "provider": Provider.AZURE_OPENAI.value,
+            "name": model,
+            "streaming": True,
+            "inputModalities": [Modality.TEXT.value],
+            "outputModalities": [Modality.TEXT.value],
+            "interface": ModelInterface.LANGCHAIN.value,
+            "ragSupported": True,
+        }
+        for model in models.split(",")
     ]
 
 
@@ -73,7 +95,7 @@ def list_bedrock_models():
                 "streaming": model.get("responseStreamingSupported", False),
                 "inputModalities": model["inputModalities"],
                 "outputModalities": model["outputModalities"],
-                "interface": ModelInterface.LANGCHIAN.value,
+                "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
             }
             for model in bedrock_models
@@ -106,7 +128,7 @@ def list_bedrock_finetuned_models():
                 "streaming": model.get("responseStreamingSupported", False),
                 "inputModalities": model["inputModalities"],
                 "outputModalities": model["outputModalities"],
-                "interface": ModelInterface.LANGCHIAN.value,
+                "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
             }
             for model in bedrock_custom_models

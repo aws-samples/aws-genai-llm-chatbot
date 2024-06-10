@@ -1,7 +1,7 @@
 import os
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from ..base import ModelAdapter
-from ..registry import registry
+from genai_core.registry import registry
 
 
 class GPTAdapter(ModelAdapter):

@@ -485,6 +485,7 @@ def _process_document(
 
             try:
                 urls_to_crawl = genai_core.websites.extract_urls_from_sitemap(path)
+                limit = min(limit, len(urls_to_crawl))
 
                 if len(urls_to_crawl) == 0:
                     set_status(workspace_id, document_id, "error")
@@ -530,7 +531,6 @@ def _process_document(
                     "document_id": document_id,
                     "bucket_name": PROCESSING_BUCKET_NAME,
                     "object_key": iteration_object_key,
-                    "done": False,
                 },
                 cls=genai_core.utils.json.CustomEncoder,
             ),

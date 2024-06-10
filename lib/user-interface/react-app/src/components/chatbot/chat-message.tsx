@@ -132,7 +132,10 @@ export default function ChatMessage(props: ChatMessageProps) {
                       ).map((p: any, i) => {
                         return {
                           id: `${i}`,
-                          label: p.metadata.path,
+                          label:
+                            p.metadata.path?.split("/").at(-1) ??
+                            p.metadata.title ??
+                            p.metadata.document_id.slice(-8),
                           content: (
                             <>
                               <Textarea
@@ -317,6 +320,7 @@ export default function ChatMessage(props: ChatMessageProps) {
               href={file.url as string}
               target="_blank"
               rel="noreferrer"
+              style={{ marginLeft: "5px", marginRight: "5px" }}
             >
               <img
                 src={file.url as string}

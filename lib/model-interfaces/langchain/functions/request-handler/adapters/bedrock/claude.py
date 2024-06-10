@@ -1,11 +1,11 @@
 import genai_core.clients
 
-# from langchain.llms import Bedrock
+# from langchain_community.llms import Bedrock
 from langchain.prompts.prompt import PromptTemplate
 
 from .base import Bedrock
 from ..base import ModelAdapter
-from ..registry import registry
+from genai_core.registry import registry
 
 
 class BedrockClaudeAdapter(ModelAdapter):
@@ -63,13 +63,16 @@ Question: {input}"""
         return prompt_template
 
     def get_condense_question_prompt(self):
-        template = """
+        template = """<conv>
 {chat_history}
+</conv>
 
-Human: Given the above conversation and a follow up input, rephrase the follow up input to be a standalone question, in the same language as the follow up input.
-Follow Up Input: {question}
+<followup>
+{question}
+</followup>
 
-Assistant:"""
+Given the conversation inside the tags <conv></conv>, rephrase the follow up question you find inside <followup></followup> to be a standalone question, in the same language as the follow up question.
+"""
 
         return PromptTemplate(
             input_variables=["chat_history", "question"],

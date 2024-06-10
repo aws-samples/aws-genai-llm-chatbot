@@ -1,0 +1,10 @@
+FROM python:3.10-alpine
+
+WORKDIR /app
+COPY web-crawler-batch-job/requirements.txt requirements.txt
+RUN pip install -r requirements.txt 
+
+COPY layers/python-sdk/python/ .
+COPY web-crawler-batch-job/index.py ./index.py
+
+CMD ["python3", "index.py"]

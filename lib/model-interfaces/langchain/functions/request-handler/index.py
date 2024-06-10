@@ -2,7 +2,7 @@ import os
 import json
 import uuid
 from datetime import datetime
-from adapters.registry import registry
+from genai_core.registry import registry
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
@@ -10,6 +10,7 @@ from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingErro
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
+import adapters
 from genai_core.utils.websocket import send_to_client
 from genai_core.types import ChatbotAction
 
