@@ -65,6 +65,9 @@ class GetDocumentRequest(BaseModel):
     workspaceId: str
     documentId: str
 
+class DeleteDocumentRequest(BaseModel):
+    workspaceId: str
+    documentId: str
 
 class GetRssPostsRequest(BaseModel):
     workspaceId: str
@@ -132,6 +135,13 @@ def get_documents(input: dict):
         "lastDocumentId": result["last_document_id"],
     }
 
+@router.resolver(field_name="deleteDocument")
+@tracer.capture_method
+def delete_document(input: dict):
+    request = DeleteDocumentRequest(**input)
+    result = genai_core.documents.delete_document(request.workspaceId, request.documentId)
+    
+    return result
 
 @router.resolver(field_name="getDocument")
 @tracer.capture_method

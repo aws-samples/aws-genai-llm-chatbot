@@ -13,7 +13,8 @@ import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { getColumnDefinition } from "./columns";
 import { Utils } from "../../../common/utils";
-import { DocumentsResult } from "../../../API";
+import { Document, DocumentsResult } from "../../../API";
+import DocumentDeleteModal from "../../../components/rag/document-delete-modal";
 
 export interface DocumentsTabProps {
   workspaceId?: string;
@@ -25,6 +26,14 @@ export default function DocumentsTab(props: DocumentsTabProps) {
   const [loading, setLoading] = useState(true);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pages, setPages] = useState<(DocumentsResult | undefined)[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<
+    Document | undefined
+  >();
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   const getDocuments = useCallback(
     async (params: { lastDocumentId?: string; pageIndex?: number }) => {
@@ -99,54 +108,97 @@ export default function DocumentsTab(props: DocumentsTabProps) {
     }
   };
 
+  const handleDelete = async (document: Document) => {
+    setDocumentToDelete(document);
+    setIsModalOpen(true);
+  };
+
+  const handleOnDeleteOfModal = () => {
+    if (documentToDelete?.id) {
+      handleConfirmDelete(documentToDelete.id);
+      setDocumentToDelete(undefined);
+      setIsModalOpen(false);
+    }
+  };
+
+  /* eslint-disable */
+  const handleConfirmDelete = async (documentId: string) => {
+    if (!appContext || !props.workspaceId) return;
+
+    const apiClient = new ApiClient(appContext);
+
+    try {
+      await apiClient.documents.deleteDocument(props.workspaceId, documentId);
+
+      setTimeout(async () => {
+        refreshPage();
+      }, 1500);
+    } catch (error) {
+      console.error("An error occurred while deleting the document:", error);
+    }
+  };
+
   const typeStr = ragDocumentTypeToString(props.documentType);
   const typeAddStr = ragDocumentTypeToAddString(props.documentType);
   const typeTitleStr = ragDocumentTypeToTitleString(props.documentType);
 
-  const columnDefinitions = getColumnDefinition(props.documentType);
+  const columnDefinitions = getColumnDefinition(
+    props.documentType,
+    handleDelete
+  );
 
   return (
-    <Table
-      loading={loading}
-      loadingText={`Loading ${typeStr}s`}
-      columnDefinitions={columnDefinitions}
-      items={pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items!}
-      header={
-        <Header
-          actions={
-            <SpaceBetween direction="horizontal" size="xs">
-              <Button iconName="refresh" onClick={refreshPage} />
-              <RouterButton
-                href={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
-              >
-                {typeAddStr}
-              </RouterButton>
-            </SpaceBetween>
-          }
-          description="Please expect a delay for your changes to be reflected. Press the refresh button to see the latest changes."
-        >
-          {typeTitleStr}
-        </Header>
-      }
-      empty={
-        <TableEmptyState
-          resourceName={typeStr}
-          createHref={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
-          createText={typeAddStr}
+    <>
+      {isModalOpen && (
+        <DocumentDeleteModal
+          visible={isModalOpen}
+          onDelete={handleOnDeleteOfModal}
+          onDiscard={handleCloseModal}
+          document={documentToDelete}
         />
-      }
-      pagination={
-        pages.length === 0 ? null : (
-          <Pagination
-            openEnd={true}
-            pagesCount={0}
-            currentPageIndex={currentPageIndex}
-            onNextPageClick={onNextPageClick}
-            onPreviousPageClick={onPreviousPageClick}
+      )}
+      <Table
+        loading={loading}
+        loadingText={`Loading ${typeStr}s`}
+        columnDefinitions={columnDefinitions}
+        items={pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items!}
+        header={
+          <Header
+            actions={
+              <SpaceBetween direction="horizontal" size="xs">
+                <Button iconName="refresh" onClick={refreshPage} />
+                <RouterButton
+                  href={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
+                >
+                  {typeAddStr}
+                </RouterButton>
+              </SpaceBetween>
+            }
+            description="Please expect a delay for your changes to be reflected. Press the refresh button to see the latest changes."
+          >
+            {typeTitleStr}
+          </Header>
+        }
+        empty={
+          <TableEmptyState
+            resourceName={typeStr}
+            createHref={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
+            createText={typeAddStr}
           />
-        )
-      }
-    />
+        }
+        pagination={
+          pages.length === 0 ? null : (
+            <Pagination
+              openEnd={true}
+              pagesCount={0}
+              currentPageIndex={currentPageIndex}
+              onNextPageClick={onNextPageClick}
+              onPreviousPageClick={onPreviousPageClick}
+            />
+          )
+        }
+      />
+    </>
   );
 }
 

@@ -33,6 +33,7 @@ export class RagEngines extends Construct {
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
   public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
+  public readonly deleteDocumentWorkflow?: sfn.StateMachine;
   public readonly dataImport: DataImport;
 
   constructor(scope: Construct, id: string, props: RagEnginesProps) {
@@ -118,6 +119,7 @@ export class RagEngines extends Construct {
     this.fileImportWorkflow = dataImport.fileImportWorkflow;
     this.websiteCrawlingWorkflow = dataImport.websiteCrawlingWorkflow;
     this.deleteWorkspaceWorkflow = workspaces.deleteWorkspaceWorkflow;
+    this.deleteDocumentWorkflow = workspaces.deleteDocumentWorkflow;
     this.dataImport = dataImport;
   }
 }

@@ -27,6 +27,7 @@ DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
     "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME"
 )
 
+DELETE_DOCUMENT_WORKFLOW_ARN = os.environ.get("DELETE_DOCUMENT_WORKFLOW_ARN")
 RSS_FEED_INGESTOR_FUNCTION = os.environ.get("RSS_FEED_INGESTOR_FUNCTION", "")
 RSS_FEED_SCHEDULE_ROLE_ARN = os.environ.get("RSS_FEED_SCHEDULE_ROLE_ARN", "")
 DOCUMENTS_BY_STATUS_INDEX = os.environ.get("DOCUMENTS_BY_STATUS_INDEX", "")
@@ -172,6 +173,31 @@ def get_document(workspace_id: str, document_id: str):
 
     return document
 
+def delete_document(workspace_id: str, document_id: str):
+    response = documents_table.get_item(
+        Key={"workspace_id": workspace_id, "document_id": document_id}
+    )
+
+    document = response.get("Item")
+
+    if not document:
+        raise genai_core.types.CommonError("Document not found")
+
+    if document["status"] != "processed" and document["status"] != "error":
+        raise genai_core.types.CommonError("Document not ready for deletion")
+
+    response = sfn_client.start_execution(
+        stateMachineArn=DELETE_DOCUMENT_WORKFLOW_ARN,
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+                "document_id": document_id,
+            }
+        ),
+    )
+
+    print(response)
+    return {"documentId": document_id, "deleted": True}
 
 def get_document_content(workspace_id: str, document_id: str):
     content_key = f"{workspace_id}/{document_id}/content.txt"
