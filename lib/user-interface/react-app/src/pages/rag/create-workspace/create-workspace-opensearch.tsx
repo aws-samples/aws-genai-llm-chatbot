@@ -20,6 +20,7 @@ const defaults: OpenSearchWorkspaceCreateInput = {
   hybridSearch: true,
   chunkSize: 1000,
   chunkOverlap: 200,
+  isPublic: false
 };
 
 export default function CreateWorkspaceOpenSearch() {
@@ -117,6 +118,7 @@ export default function CreateWorkspaceOpenSearch() {
         chunkingStrategy: "recursive",
         chunkSize: data.chunkSize,
         chunkOverlap: data.chunkOverlap,
+        isPublic: data.isPublic
       });
 
       navigate("/rag/workspaces");

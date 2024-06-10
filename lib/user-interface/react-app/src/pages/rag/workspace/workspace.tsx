@@ -22,6 +22,7 @@ import OpenSearchWorkspaceSettings from "./open-search-workspace-settings";
 import KendraWorkspaceSettings from "./kendra-workspace-settings";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Workspace } from "../../../API";
+import Badge from "@cloudscape-design/components/badge";
 
 export default function WorkspacePane() {
   const appContext = useContext(AppContext);
@@ -60,6 +61,8 @@ export default function WorkspacePane() {
   const disabledTabs =
     workspace?.engine === "kendra" ? ["qna", "website", "rssfeed"] : [];
 
+  const isWritableWorkspace = workspace?.is_writable ?? false
+
   return (
     <BaseAppLayout
       contentType="cards"
@@ -94,36 +97,37 @@ export default function WorkspacePane() {
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
                   <RouterButton
-                    href={`/rag/semantic-search?workspaceId=${workspaceId}`}
+                    href={`/rag/semantic-search?workspaceId=${workspace?.id}`}
                   >
                     Semantic search
                   </RouterButton>
                   <RouterButtonDropdown
+                    disabled={!isWritableWorkspace}
                     items={[
                       {
                         id: "upload-file",
                         text: "Upload files",
-                        href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
+                        href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspace?.id}`,
                       },
                       {
                         id: "add-text",
                         text: "Add texts",
-                        href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
+                        href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspace?.id}`,
                       },
                       {
                         id: "add-qna",
                         text: "Add Q&A",
-                        href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
+                        href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspace?.id}`,
                       },
                       {
                         id: "crawl-website",
                         text: "Crawl website",
-                        href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
+                        href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspace?.id}`,
                       },
                       {
                         id: "add-rss-subscription",
                         text: "Add RSS subscription",
-                        href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
+                        href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspace?.id}`,
                       },
                     ]}
                   >
@@ -135,7 +139,12 @@ export default function WorkspacePane() {
               {loading ? (
                 <StatusIndicator type="loading">Loading...</StatusIndicator>
               ) : (
-                workspace?.name
+                <>
+                    <SpaceBetween direction={"horizontal"} size={"s"}>
+                        <span>{workspace?.name}</span>
+                        {workspace?.is_writable == false ? <Badge color="red">ReadOnly</Badge> : ''}
+                    </SpaceBetween>
+                </>
               )}
             </Header>
           }
@@ -172,7 +181,7 @@ export default function WorkspacePane() {
                     id: "file",
                     content: (
                       <DocumentsTab
-                        workspaceId={workspaceId}
+                        workspace={workspace}
                         documentType="file"
                       />
                     ),
@@ -182,7 +191,7 @@ export default function WorkspacePane() {
                     id: "text",
                     content: (
                       <DocumentsTab
-                        workspaceId={workspaceId}
+                        workspace={workspace}
                         documentType="text"
                       />
                     ),
@@ -193,7 +202,7 @@ export default function WorkspacePane() {
                     disabled: disabledTabs.includes("qna"),
                     content: (
                       <DocumentsTab
-                        workspaceId={workspaceId}
+                        workspace={workspace}
                         documentType="qna"
                       />
                     ),
@@ -204,7 +213,7 @@ export default function WorkspacePane() {
                     disabled: disabledTabs.includes("website"),
                     content: (
                       <DocumentsTab
-                        workspaceId={workspaceId}
+                        workspace={workspace}
                         documentType="website"
                       />
                     ),
@@ -215,7 +224,7 @@ export default function WorkspacePane() {
                     disabled: disabledTabs.includes("rssfeed"),
                     content: (
                       <DocumentsTab
-                        workspaceId={workspaceId}
+                        workspace={workspace}
                         documentType="rssfeed"
                       />
                     ),

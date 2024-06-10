@@ -3,6 +3,7 @@
 input CreateWorkspaceAuroraInput {
   name: String!
   kind: String!
+  isPublic: Boolean!
   embeddingsModelProvider: String!
   embeddingsModelName: String!
   crossEncoderModelProvider: String!
@@ -19,6 +20,7 @@ input CreateWorkspaceAuroraInput {
 input CreateWorkspaceKendraInput {
   name: String!
   kind: String!
+  isPublic: Boolean!
   kendraIndexId: String!
   useAllData: Boolean!
 }
@@ -26,6 +28,7 @@ input CreateWorkspaceKendraInput {
 input CreateWorkspaceOpenSearchInput {
   name: String!
   kind: String!
+  isPublic: Boolean!
   embeddingsModelProvider: String!
   embeddingsModelName: String!
   crossEncoderModelProvider: String!
@@ -269,6 +272,7 @@ input WebsiteInput {
 type Workspace @aws_cognito_user_pools {
   id: String!
   name: String!
+  isPublic: Boolean
   formatVersion: Int
   engine: String!
   status: String
@@ -294,6 +298,8 @@ type Workspace @aws_cognito_user_pools {
   kendraUseAllData: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+  is_writable: Boolean
+  is_owner: Boolean
 }
 
 type Channel @aws_iam @aws_cognito_user_pools {

@@ -14,6 +14,7 @@ const defaults: KendraWorkspaceCreateInput = {
   name: "",
   kendraIndex: null,
   useAllData: false,
+  isPublic: false
 };
 
 export default function CreateWorkspaceKendra() {
@@ -63,6 +64,7 @@ export default function CreateWorkspaceKendra() {
         name: data.name.trim(),
         kendraIndexId: data.kendraIndex?.value ?? "",
         useAllData: data.useAllData,
+        isPublic: data.isPublic
       });
 
       navigate("/rag/workspaces");

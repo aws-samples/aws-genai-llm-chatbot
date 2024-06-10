@@ -79,6 +79,7 @@ export interface AuroraWorkspaceCreateInput {
   hybridSearch: boolean;
   chunkSize: number;
   chunkOverlap: number;
+  isPublic: boolean;
 }
 
 export interface OpenSearchWorkspaceCreateInput {
@@ -89,10 +90,12 @@ export interface OpenSearchWorkspaceCreateInput {
   hybridSearch: boolean;
   chunkSize: number;
   chunkOverlap: number;
+  isPublic: boolean;
 }
 
 export interface KendraWorkspaceCreateInput {
   name: string;
   kendraIndex: SelectProps.Option | null;
   useAllData: boolean;
+  isPublic: boolean;
 }

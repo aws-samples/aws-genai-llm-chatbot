@@ -52,6 +52,17 @@ export default function AuroraForm(props: AuroraFormProps) {
           />
         </FormField>
 
+        <FormField label="Public Access" errorText={props.errors.isPublic}>
+          <Toggle
+              disabled={props.submitting}
+              checked={props.data.isPublic}
+              onChange={({ detail: { checked } }) =>
+                  props.onChange({ isPublic: checked })
+              }
+          >
+          </Toggle>
+        </FormField>
+
         <EmbeddingSelector
           errors={props.errors}
           submitting={props.submitting}

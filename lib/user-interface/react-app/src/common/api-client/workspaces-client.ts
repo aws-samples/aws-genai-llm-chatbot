@@ -63,6 +63,7 @@ export class WorkspacesClient {
     chunkingStrategy: string;
     chunkSize: number;
     chunkOverlap: number;
+    isPublic: boolean;
   }): Promise<GraphQLResult<GraphQLQuery<CreateAuroraWorkspaceMutation>>> {
     const result = API.graphql<GraphQLQuery<CreateAuroraWorkspaceMutation>>({
       query: createAuroraWorkspace,
@@ -84,6 +85,7 @@ export class WorkspacesClient {
     chunkingStrategy: string;
     chunkSize: number;
     chunkOverlap: number;
+    isPublic: boolean;
   }): Promise<GraphQLResult<GraphQLQuery<CreateOpenSearchWorkspaceMutation>>> {
     const result = API.graphql<GraphQLQuery<CreateOpenSearchWorkspaceMutation>>(
       {
@@ -100,6 +102,7 @@ export class WorkspacesClient {
     name: string;
     kendraIndexId: string;
     useAllData: boolean;
+    isPublic: boolean;
   }): Promise<GraphQLResult<GraphQLQuery<CreateKendraWorkspaceMutation>>> {
     const result = API.graphql<GraphQLQuery<CreateKendraWorkspaceMutation>>({
       query: createKendraWorkspace,

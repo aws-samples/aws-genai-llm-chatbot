@@ -21,6 +21,7 @@ class GenericCreateWorkspaceRequest(BaseModel):
 class CreateWorkspaceAuroraRequest(BaseModel):
     kind: str
     name: str
+    isPublic: bool
     embeddingsModelProvider: str
     embeddingsModelName: str
     crossEncoderModelProvider: str
@@ -37,6 +38,7 @@ class CreateWorkspaceAuroraRequest(BaseModel):
 class CreateWorkspaceOpenSearchRequest(BaseModel):
     kind: str
     name: str
+    isPublic: bool
     embeddingsModelProvider: str
     embeddingsModelName: str
     crossEncoderModelProvider: str
@@ -51,6 +53,7 @@ class CreateWorkspaceOpenSearchRequest(BaseModel):
 class CreateWorkspaceKendraRequest(BaseModel):
     kind: str
     name: str
+    isPublic: bool
     kendraIndexId: str
     useAllData: bool
 
@@ -58,7 +61,21 @@ class CreateWorkspaceKendraRequest(BaseModel):
 @router.resolver(field_name="listWorkspaces")
 @tracer.capture_method
 def list_workspaces():
-    workspaces = genai_core.workspaces.list_workspaces()
+
+    user_id = genai_core.auth.get_user_id(router)
+
+    #Get Public workspace
+    publicWorkspace = genai_core.workspaces.list_workspaces_by_user(0)
+
+    #Get workspace affected to current user through policy
+    workspacesByUser = genai_core.workspaces.list_workspaces_by_user(user_id)
+
+    workspaces = []
+    processedItem = []
+    for workspaceItem in (workspacesByUser + publicWorkspace):
+      if not workspaceItem['workspace_id'] in processedItem:
+        workspaces.append(workspaceItem)
+        processedItem.append(workspaceItem['workspace_id'])
 
     ret_value = [_convert_workspace(workspace) for workspace in workspaces]
 
@@ -68,10 +85,23 @@ def list_workspaces():
 @router.resolver(field_name="getWorkspace")
 @tracer.capture_method
 def get_workspace(workspaceId: str):
+
+    user_id = genai_core.auth.get_user_id(router)
+    #Check policy before to fetch a data of workspace
+    workspace_policy = genai_core.workspaces.is_workspace_readable(workspaceId, user_id)
+
+    if not workspace_policy:
+        return None
+
     workspace = genai_core.workspaces.get_workspace(workspaceId)
 
     if not workspace:
         return None
+
+    key_policies = ['is_owner', 'is_writable']
+
+    for key_policy in key_policies:
+        workspace[key_policy] = workspace_policy[key_policy]
 
     ret_value = _convert_workspace(workspace)
 
@@ -116,6 +146,7 @@ def create_kendra_workspace(input: dict):
 
 
 def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict):
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     embedding_models = config["rag"]["embeddingsModels"]
     cross_encoder_models = config["rag"]["crossEncoderModels"]
@@ -170,28 +201,32 @@ def _create_workspace_aurora(request: CreateWorkspaceAuroraRequest, config: dict
     if request.chunkOverlap < 0 or request.chunkOverlap >= request.chunkSize:
         raise genai_core.types.CommonError("Invalid chunk overlap")
 
+    item = genai_core.workspaces.create_workspace_aurora(
+       workspace_name=workspace_name,
+       is_public=request.isPublic,
+       embeddings_model_provider=request.embeddingsModelProvider,
+       embeddings_model_name=request.embeddingsModelName,
+       embeddings_model_dimensions=embeddings_model_dimensions,
+       cross_encoder_model_provider=request.crossEncoderModelProvider,
+       cross_encoder_model_name=request.crossEncoderModelName,
+       languages=request.languages,
+       metric=request.metric,
+       has_index=request.index,
+       hybrid_search=request.hybridSearch,
+       chunking_strategy=request.chunkingStrategy,
+       chunk_size=request.chunkSize,
+       chunk_overlap=request.chunkOverlap,
+       creator_id=user_id,
+      )
     return _convert_workspace(
-        genai_core.workspaces.create_workspace_aurora(
-            workspace_name=workspace_name,
-            embeddings_model_provider=request.embeddingsModelProvider,
-            embeddings_model_name=request.embeddingsModelName,
-            embeddings_model_dimensions=embeddings_model_dimensions,
-            cross_encoder_model_provider=request.crossEncoderModelProvider,
-            cross_encoder_model_name=request.crossEncoderModelName,
-            languages=request.languages,
-            metric=request.metric,
-            has_index=request.index,
-            hybrid_search=request.hybridSearch,
-            chunking_strategy=request.chunkingStrategy,
-            chunk_size=request.chunkSize,
-            chunk_overlap=request.chunkOverlap,
-        )
+      get_workspace(item.workspace_id)
     )
 
 
 def _create_workspace_open_search(
     request: CreateWorkspaceOpenSearchRequest, config: dict
 ):
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     embedding_models = config["rag"]["embeddingsModels"]
     cross_encoder_models = config["rag"]["crossEncoderModels"]
@@ -246,6 +281,7 @@ def _create_workspace_open_search(
     return _convert_workspace(
         genai_core.workspaces.create_workspace_open_search(
             workspace_name=workspace_name,
+            is_public=request.isPublic,
             embeddings_model_provider=request.embeddingsModelProvider,
             embeddings_model_name=request.embeddingsModelName,
             embeddings_model_dimensions=embeddings_model_dimensions,
@@ -256,11 +292,14 @@ def _create_workspace_open_search(
             chunking_strategy=request.chunkingStrategy,
             chunk_size=request.chunkSize,
             chunk_overlap=request.chunkOverlap,
+            creator_id=user_id,
         )
     )
 
 
 def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict):
+
+    user_id = genai_core.auth.get_user_id(router)
     workspace_name = request.name.strip()
     kendra_indexes = genai_core.kendra.get_kendra_indexes()
 
@@ -285,8 +324,11 @@ def _create_workspace_kendra(request: CreateWorkspaceKendraRequest, config: dict
     return _convert_workspace(
         genai_core.workspaces.create_workspace_kendra(
             workspace_name=workspace_name,
+            is_public=request.isPublic,
             kendra_index=kendra_index,
             use_all_data=request.useAllData,
+            creator_id=user_id
+
         )
     )
 
@@ -297,6 +339,7 @@ def _convert_workspace(workspace: dict):
     return {
         "id": workspace["workspace_id"],
         "name": workspace["name"],
+        "isPublic": workspace["is_public"],
         "engine": workspace["engine"],
         "status": workspace["status"],
         "languages": workspace.get("languages"),
@@ -322,4 +365,6 @@ def _convert_workspace(workspace: dict):
         "kendraUseAllData": workspace.get("kendra_use_all_data", kendra_index_external),
         "createdAt": workspace.get("created_at"),
         "updatedAt": workspace.get("updated_at"),
+        "is_writable": workspace.get("is_writable"),
+        "is_owner": workspace.get("is_owner")
     }
