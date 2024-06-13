@@ -35,38 +35,44 @@ class WebsiteDocumentRequest(BaseModel):
     address: str
     followLinks: bool
     limit: int
+    contentTypes: Optional[list]
 
 
 class RssFeedDocumentRequest(BaseModel):
     workspaceId: str
-    documentId: Optional[str]
-    address: Optional[str]
+    documentId: Optional[str] = None
+    address: Optional[str] = None
     limit: int
-    title: Optional[str]
+    title: Optional[str] = None
     followLinks: bool
+    contentTypes: Optional[list]
 
 
 class RssFeedCrawlerUpdateRequest(BaseModel):
     documentType: str
     followLinks: bool
     limit: int
+    contentTypes: Optional[str]
 
 
 class ListDocumentsRequest(BaseModel):
     workspaceId: str
     documentType: str
-    lastDocumentId: Optional[str]
+    lastDocumentId: Optional[str] = None
 
 
 class GetDocumentRequest(BaseModel):
     workspaceId: str
     documentId: str
 
+class DeleteDocumentRequest(BaseModel):
+    workspaceId: str
+    documentId: str
 
 class GetRssPostsRequest(BaseModel):
     workspaceId: str
     documentId: str
-    lastDocumentId: Optional[str]
+    lastDocumentId: Optional[str] = None
 
 
 class DocumentSubscriptionStatusRequest(BaseModel):
@@ -129,6 +135,13 @@ def get_documents(input: dict):
         "lastDocumentId": result["last_document_id"],
     }
 
+@router.resolver(field_name="deleteDocument")
+@tracer.capture_method
+def delete_document(input: dict):
+    request = DeleteDocumentRequest(**input)
+    result = genai_core.documents.delete_document(request.workspaceId, request.documentId)
+    
+    return result
 
 @router.resolver(field_name="getDocument")
 @tracer.capture_method
@@ -237,6 +250,7 @@ def add_website(input: dict):
         crawler_properties={
             "follow_links": request.followLinks,
             "limit": limit,
+            "content_types": request.contentTypes,
         },
     )
 
@@ -263,6 +277,7 @@ def add_rss_feed(
         crawler_properties={
             "follow_links": request.followLinks,
             "limit": request.limit,
+            "content_types": request.contentTypes,
         },
     )
 
@@ -282,6 +297,7 @@ def update_rss_feed(input: dict):
         document_type="rssfeed",
         follow_links=request.followLinks,
         limit=request.limit,
+        content_types=request.contentTypes,
     )
     return {
         "workspaceId": result["workspace_id"],
@@ -295,6 +311,7 @@ def _convert_document(document: dict):
         document["crawler_properties"] = {
             "followLinks": document["crawler_properties"]["follow_links"],
             "limit": document["crawler_properties"]["limit"],
+            "contentTypes": document["crawler_properties"]["content_types"],
         }
     return {
         "id": document["document_id"],
@@ -315,6 +332,7 @@ def _convert_document(document: dict):
         "crawlerProperties": {
             "followLinks": document.get("crawler_properties").get("follow_links", None),
             "limit": document.get("crawler_properties").get("limit", None),
+            "contentTypes": document.get("crawler_properties").get("content_types", None),
         }
         if document.get("crawler_properties", None) != None
         else None,

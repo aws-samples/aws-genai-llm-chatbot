@@ -54,6 +54,7 @@ input CalculateEmbeddingsInput {
 type CrawlerProperties @aws_cognito_user_pools {
   followLinks: Boolean
   limit: Int
+  contentTypes: [String!]!
 }
 
 type CrossEncoderData @aws_cognito_user_pools {
@@ -95,6 +96,11 @@ type DocumentResult @aws_cognito_user_pools {
   workspaceId: String!
   documentId: String!
   status: String
+}
+
+type DeleteDocumentResult @aws_cognito_user_pools {
+  documentId: String!
+  deleted: Boolean!
 }
 
 type UserFeedbackResult @aws_cognito_user_pools {
@@ -203,6 +209,7 @@ input RssFeedInput {
   limit: Int!
   title: String
   followLinks: Boolean!
+  contentTypes: [String!]!
 }
 
 input SemanticSearchInput {
@@ -253,6 +260,11 @@ type SessionHistoryItem @aws_cognito_user_pools {
   metadata: String
 }
 
+input DeleteDocumentInput {
+  workspaceId: String!
+  documentId: String!
+}
+
 input UserFeedbackInput {
   sessionId: String!
   key: Int!
@@ -274,6 +286,7 @@ input WebsiteInput {
   address: String!
   followLinks: Boolean!
   limit: Int!
+  contentTypes: [String!]!
 }
 
 type Workspace @aws_cognito_user_pools {
@@ -325,6 +338,7 @@ type Mutation {
     @aws_cognito_user_pools
   startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools
   deleteWorkspace(workspaceId: String!): Boolean @aws_cognito_user_pools
+  deleteDocument(input: DeleteDocumentInput!): DeleteDocumentResult @aws_cognito_user_pools
   addTextDocument(input: TextDocumentInput!): DocumentResult
     @aws_cognito_user_pools
   addUserFeedback(input: UserFeedbackInput!): UserFeedbackResult

@@ -27,6 +27,7 @@ DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
     "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME"
 )
 
+DELETE_DOCUMENT_WORKFLOW_ARN = os.environ.get("DELETE_DOCUMENT_WORKFLOW_ARN")
 RSS_FEED_INGESTOR_FUNCTION = os.environ.get("RSS_FEED_INGESTOR_FUNCTION", "")
 RSS_FEED_SCHEDULE_ROLE_ARN = os.environ.get("RSS_FEED_SCHEDULE_ROLE_ARN", "")
 DOCUMENTS_BY_STATUS_INDEX = os.environ.get("DOCUMENTS_BY_STATUS_INDEX", "")
@@ -172,6 +173,31 @@ def get_document(workspace_id: str, document_id: str):
 
     return document
 
+def delete_document(workspace_id: str, document_id: str):
+    response = documents_table.get_item(
+        Key={"workspace_id": workspace_id, "document_id": document_id}
+    )
+
+    document = response.get("Item")
+
+    if not document:
+        raise genai_core.types.CommonError("Document not found")
+
+    if document["status"] != "processed" and document["status"] != "error":
+        raise genai_core.types.CommonError("Document not ready for deletion")
+
+    response = sfn_client.start_execution(
+        stateMachineArn=DELETE_DOCUMENT_WORKFLOW_ARN,
+        input=json.dumps(
+            {
+                "workspace_id": workspace_id,
+                "document_id": document_id,
+            }
+        ),
+    )
+
+    print(response)
+    return {"documentId": document_id, "deleted": True}
 
 def get_document_content(workspace_id: str, document_id: str):
     content_key = f"{workspace_id}/{document_id}/content.txt"
@@ -359,6 +385,7 @@ def update_document(workspace_id: str, document_id: str, document_type: str, **k
         if "limit" in kwargs and "follow_links" in kwargs:
             follow_links = kwargs["follow_links"]
             limit = kwargs["limit"]
+            content_types = kwargs["content_types"]
             response = documents_table.update_item(
                 Key={"workspace_id": workspace_id, "document_id": document_id},
                 UpdateExpression="SET #crawler_properties=:crawler_properties, updated_at=:timestampValue",
@@ -367,6 +394,7 @@ def update_document(workspace_id: str, document_id: str, document_type: str, **k
                     ":crawler_properties": {
                         "follow_links": follow_links,
                         "limit": limit,
+                        "content_types": content_types,
                     },
                     ":timestampValue": timestamp,
                 },
@@ -479,6 +507,7 @@ def _process_document(
         crawler_properties = kwargs["crawler_properties"]
         follow_links = crawler_properties["follow_links"]
         limit = crawler_properties["limit"]
+        content_types = crawler_properties["content_types"]
 
         if document_sub_type == "sitemap":
             follow_links = False
@@ -514,6 +543,7 @@ def _process_document(
                     "processed_urls": [],
                     "follow_links": follow_links,
                     "limit": limit,
+                    "content_types": content_types,
                     "done": False,
                 },
                 cls=genai_core.utils.json.CustomEncoder,
@@ -712,6 +742,9 @@ def batch_crawl_websites():
                     "limit": int(post["crawler_properties"]["M"]["limit"]["N"])
                     if "crawler_properties" in post
                     else 250,
+                    "content_types": post["crawler_properties"]["M"]["content_types"]["L"]
+                    if "crawler_properties" in post and "content_types" in post["crawler_properties"]["M"]
+                    else ["text/html"],
                 },
             )
             set_status(workspace_id, document_id, "processed")

@@ -3,6 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import * as cf from "aws-cdk-lib/aws-cloudfront";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
 import {
@@ -23,6 +24,7 @@ export interface UserInterfaceProps {
   readonly shared: Shared;
   readonly userPoolId: string;
   readonly userPoolClientId: string;
+  readonly userPoolClient: cognito.UserPoolClient;
   readonly identityPool: cognitoIdentityPool.IdentityPool;
   readonly api: ChatBotApi;
   readonly chatbotFilesBucket: s3.Bucket;
@@ -31,6 +33,8 @@ export interface UserInterfaceProps {
 }
 
 export class UserInterface extends Construct {
+  public readonly publishedDomain: string;
+
   constructor(scope: Construct, id: string, props: UserInterfaceProps) {
     super(scope, id);
 
@@ -59,6 +63,22 @@ export class UserInterface extends Construct {
     let apiEndpoint: string;
     let websocketEndpoint: string;
     let distribution;
+    let publishedDomain: string;
+
+    if (props.config.privateWebsite) {
+      const privateWebsite = new PrivateWebsite(this, "PrivateWebsite", {
+        ...props,
+        websiteBucket: websiteBucket,
+      });
+      this.publishedDomain = props.config.domain ? props.config.domain : "";
+    } else {
+      const publicWebsite = new PublicWebsite(this, "PublicWebsite", {
+        ...props,
+        websiteBucket: websiteBucket,
+      });
+      distribution = publicWebsite.distribution;
+      this.publishedDomain = distribution.distributionDomainName;
+    }
 
     if (props.config.privateWebsite) {
       const privateWebsite = new PrivateWebsite(this, "PrivateWebsite", {
@@ -85,6 +105,15 @@ export class UserInterface extends Construct {
         userPoolWebClientId: props.userPoolClientId,
         identityPoolId: props.identityPool.identityPoolId,
       },
+      oauth: props.config.cognitoFederation?.enabled
+        ? {
+            domain: `${props.config.cognitoFederation.cognitoDomain}.auth.${cdk.Aws.REGION}.amazoncognito.com`,
+            redirectSignIn: `https://${this.publishedDomain}`,
+            redirectSignOut: `https://${this.publishedDomain}`,
+            Scopes: ["email", "openid"],
+            responseType: "code",
+          }
+        : undefined,
       aws_appsync_graphqlEndpoint: props.api.graphqlApi.graphqlUrl,
       aws_appsync_region: cdk.Aws.REGION,
       aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
@@ -96,6 +125,13 @@ export class UserInterface extends Construct {
         },
       },
       config: {
+        auth_federated_provider: props.config.cognitoFederation?.enabled
+          ? {
+              auto_redirect: props.config.cognitoFederation?.autoRedirect,
+              custom: true,
+              name: props.config.cognitoFederation?.customProviderName,
+            }
+          : undefined,
         rag_enabled: props.config.rag.enabled,
         cross_encoders_enabled: props.crossEncodersEnabled,
         sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,
