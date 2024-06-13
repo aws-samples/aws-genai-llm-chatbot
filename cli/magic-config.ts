@@ -16,6 +16,8 @@ import * as fs from "fs";
 import { AWSCronValidator } from "./aws-cron-validator"
 import { tz } from 'moment-timezone';
 import { getData } from 'country-list';
+import { randomBytes } from 'crypto';
+import { StringUtils } from 'turbocommons-ts';
 
 function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
     const timeZones = tz.names(); // Get a list of all timezones
@@ -138,6 +140,15 @@ const embeddingModels = [
       options.privateWebsite = config.privateWebsite;
       options.certificate = config.certificate;
       options.domain = config.domain;
+      options.cognitoFederationEnabled = config.cognitoFederation?.enabled;
+      options.cognitoCustomProviderName = config.cognitoFederation?.customProviderName;
+      options.cognitoCustomProviderType = config.cognitoFederation?.customProviderType;
+      options.cognitoCustomProviderSAMLMetadata = config.cognitoFederation?.customSAML?.metadataDocumentUrl;
+      options.cognitoCustomProviderOIDCClient = config.cognitoFederation?.customOIDC?.OIDCClient;
+      options.cognitoCustomProviderOIDCSecret = config.cognitoFederation?.customOIDC?.OIDCSecret;
+      options.cognitoCustomProviderOIDCIssuerURL = config.cognitoFederation?.customOIDC?.OIDCIssuerURL;
+      options.cognitoAutoRedirect = config.cognitoFederation?.autoRedirect;
+      options.cognitoDomain = config.cognitoFederation?.cognitoDomain;
       options.cfGeoRestrictEnable = config.cfGeoRestrictEnable;
       options.cfGeoRestrictList = config.cfGeoRestrictList;
       options.bedrockEnable = config.bedrock?.enabled;
@@ -301,6 +312,123 @@ async function processCreateOptions(options: any): Promise<void> {
       skip(): boolean {
         return !(this as any).state.answers.privateWebsite && !(this as any).state.answers.customPublicDomain;
       },
+    },
+    {
+      type: "confirm",
+      name: "cognitoFederationEnabled",
+      message:
+        "Do you want to enable Federated (SSO) login with Cognito?",
+      initial: options.cognitoFederationEnabled || false,
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderName",
+      message:
+        "Please enter the name of the SAML/OIDC Federated identity provider that is or will be setup in Cognito",
+      skip(): boolean {
+        return !(this as any).state.answers.cognitoFederationEnabled;
+      },
+      initial: options.cognitoCustomProviderName || "",
+    },
+    {
+      type: "select",
+      name: "cognitoCustomProviderType",
+      choices: [
+        { message: "Custom Cognito SAML", name: "SAML" },
+        { message: "Custom Cognito OIDC", name: "OIDC" },
+        { message: "Setup in Cognito Later", name: "later" },
+      ],
+      message:
+        "Do you want to setup a SAML or OIDC provider? or choose to do this later after install",
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.cognitoFederationEnabled;
+      },
+      initial: options.cognitoCustomProviderType || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderSAMLMetadata",
+      message:
+        "Provide a URL to a SAML metadata document. This document is issued by your SAML provider.",
+      validate(v: string) {
+        return ((this as any).skipped || StringUtils.isUrl(v)) ?
+          true : 'That does not look like a valid URL'
+      },
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled){
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes("SAML");
+      },
+      initial: options.cognitoCustomProviderSAMLMetadata || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderOIDCClient",
+      message:
+        "Enter the client ID provided by OpenID Connect identity provider.",
+      validate(v: string) {
+        if ((this as any).skipped) {
+          return true
+        }
+        // Regular expression to match HH:MM format
+        const regex = /^[a-zA-Z0-9-_]{1,255}$/;
+        return regex.test(v) || 'Must only contain Alpha Numeric characters, "-" or "_" and be a maximum of 255 in length.';
+      },
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled){
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes("OIDC");
+      },
+      initial: options.cognitoCustomProviderOIDCClient || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderOIDCSecret",
+      validate(v: string) {
+        const valid = secretManagerArnRegExp.test(v);
+        return (this as any).skipped || valid
+          ? true
+          : "You need to enter an Secret Manager Secret arn";
+      },
+      message:
+        "Enter the secret manager ARN containing the OIDC client secret to use (see docs for info)",
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled){
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes("OIDC");
+      },
+      initial: options.cognitoCustomProviderOIDCSecret || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderOIDCIssuerURL",
+      message:
+        "Enter the issuer URL you received from the OIDC provider.",
+      validate(v: string) {
+        return ((this as any).skipped || StringUtils.isUrl(v)) ?
+          true : 'That does not look like a valid URL'
+      },
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled){
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes("OIDC");
+      },
+      initial: options.cognitoCustomProviderOIDCIssuerURL || "",
+    },
+    {
+      type: "confirm",
+      name: "cognitoAutoRedirect",
+      message:
+        "Would you like to automatically redirect users to this identity provider?",
+      skip(): boolean {
+        return !(this as any).state.answers.cognitoFederationEnabled;
+      },
+      initial: options.cognitoAutoRedirect || false,
     },
     {
       type: "confirm",
@@ -759,6 +887,8 @@ async function processCreateOptions(options: any): Promise<void> {
     AWSCronValidator.validate(answers.sagemakerCronStopSchedule)
   }
   
+  const randomSuffix = randomBytes(8).toString('hex');
+  
   // Create the config object
   const config = {
     prefix: answers.prefix,
@@ -771,6 +901,27 @@ async function processCreateOptions(options: any): Promise<void> {
     privateWebsite: answers.privateWebsite,
     certificate: answers.certificate,
     domain: answers.domain,
+    cognitoFederation: answers.cognitoFederationEnabled
+      ? {
+          enabled: answers.cognitoFederationEnabled,
+          autoRedirect: answers.cognitoAutoRedirect,
+          customProviderName: answers.cognitoCustomProviderName,
+          customProviderType: answers.cognitoCustomProviderType,
+          customSAML: answers.cognitoCustomProviderType == "SAML"
+            ? {
+                metadataDocumentUrl: answers.cognitoCustomProviderSAMLMetadata
+            }
+            : undefined,
+          customOIDC: answers.cognitoCustomProviderType == "OIDC"
+            ? {
+                OIDCClient: answers.cognitoCustomProviderOIDCClient,
+                OIDCSecret: answers.cognitoCustomProviderOIDCSecret,
+                OIDCIssuerURL: answers.cognitoCustomProviderOIDCIssuerURL,
+            }
+            : undefined,
+          cognitoDomain: options.cognitoDomain ? options.cognitoDomain : `llm-cb-${randomSuffix}`,
+        }
+      : undefined,
     cfGeoRestrictEnable: answers.cfGeoRestrictEnable,
     cfGeoRestrictList: answers.cfGeoRestrictList,
     bedrock: answers.bedrockEnable

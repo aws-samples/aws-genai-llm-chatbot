@@ -1,6 +1,8 @@
 import os
 import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 import genai_core.utils.delete_files_with_prefix
+from datetime import datetime
 
 PROCESSING_BUCKET_NAME = os.environ["PROCESSING_BUCKET_NAME"]
 UPLOAD_BUCKET_NAME = os.environ["UPLOAD_BUCKET_NAME"]
@@ -70,3 +72,68 @@ def delete_kendra_workspace(workspace: dict):
     )
 
     print(f"Delete Item succeeded: {response}")
+
+def delete_kendra_document(workspace_id: str, document: dict):
+    document_id = document["document_id"]
+    document_vectors = document["vectors"]
+    documents_diff = 1
+    document_size_in_bytes = document["size_in_bytes"]
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    document_type = document["document_type"]
+
+    if document["path"]:
+        upload_bucket_key = workspace_id + "/" + document["path"]
+        genai_core.utils.delete_files_with_object_key.delete_files_with_object_key(
+            UPLOAD_BUCKET_NAME, upload_bucket_key
+        )
+
+    processing_bucket_key = workspace_id + "/" + document_id
+
+    genai_core.utils.delete_files_with_prefix.delete_files_with_prefix(
+        PROCESSING_BUCKET_NAME, processing_bucket_key
+    )
+
+    deleteKendraDocument(workspace_id, document_id, document_type)
+
+    documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
+    workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
+
+    try:
+        response = documents_table.delete_item(
+            Key={
+                "workspace_id": workspace_id,
+                "document_id": document_id,
+            }
+        )
+        print(f"Delete document succeeded: {response}")
+
+        updateResponse = workspaces_table.update_item(
+            Key={"workspace_id": workspace_id,
+                 "object_type": WORKSPACE_OBJECT_TYPE},
+            UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+            ExpressionAttributeValues={
+                ":incrementValue": -document_size_in_bytes,
+                ":documentsIncrementValue": -documents_diff,
+                ":vectorsIncrementValue": -document_vectors,
+                ":timestampValue": timestamp,
+            },
+            ReturnValues="UPDATED_NEW",
+        )
+        print(f"Workspaces table updated for the document: {updateResponse}")
+
+    except (BotoCoreError, ClientError) as error:
+        print(f"An error occurred: {error}")
+
+def deleteKendraDocument(workspace_id, document_id, document_type):
+    if document_type == "text":
+        processing_object_key = f"{workspace_id}/{document_id}/content.txt"
+        kendra_object_key = f"documents/{processing_object_key}"
+        kendra_metadata_key = (
+            f"metadata/documents/{processing_object_key}.metadata.json"
+        )
+        genai_core.utils.delete_files_with_prefix.delete_files_with_prefix(
+            DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME, kendra_object_key
+        )
+        genai_core.utils.delete_files_with_prefix.delete_files_with_prefix(
+            DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME, kendra_metadata_key
+        )
