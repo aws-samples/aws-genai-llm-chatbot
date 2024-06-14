@@ -3,7 +3,7 @@ import genai_core.clients
 # from langchain_community.llms import Bedrock
 from langchain.prompts.prompt import PromptTemplate
 
-from .base import Bedrock
+from langchain_aws import BedrockLLM
 from ..base import ModelAdapter
 from genai_core.registry import registry
 
@@ -25,7 +25,7 @@ class BedrockClaudeAdapter(ModelAdapter):
             params["max_tokens"] = model_kwargs["maxTokens"]
 
         params["anthropic_version"] = "bedrock-2023-05-31"
-        return Bedrock(
+        return BedrockLLM(
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,

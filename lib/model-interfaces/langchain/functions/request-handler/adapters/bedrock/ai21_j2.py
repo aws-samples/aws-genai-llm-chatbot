@@ -1,5 +1,5 @@
 import genai_core.clients
-from langchain_community.llms import Bedrock
+from langchain_aws import BedrockLLM
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
@@ -23,7 +23,7 @@ class AI21J2Adapter(ModelAdapter):
         if "maxTokens" in model_kwargs:
             params["maxTokens"] = model_kwargs["maxTokens"]
 
-        return Bedrock(
+        return BedrockLLM(
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,
