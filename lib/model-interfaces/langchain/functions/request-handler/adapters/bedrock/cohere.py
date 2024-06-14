@@ -1,6 +1,6 @@
 import genai_core.clients
 
-from langchain_community.llms import Bedrock
+from langchain_aws import BedrockLLM
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
@@ -23,7 +23,7 @@ class BedrockCohereCommandAdapter(ModelAdapter):
             params["max_tokens"] = model_kwargs["maxTokens"]
         params["return_likelihoods"] = "GENERATION"
 
-        return Bedrock(
+        return BedrockLLM(
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,
@@ -56,5 +56,5 @@ Assistant:"""
 
 # Register the adapter
 registry.register(
-    r"^bedrock\.cohere\.command-(text|light-text).*", BedrockCohereCommandAdapter
+    r"^bedrock\.cohere\.command-(text|light-text|r).*", BedrockCohereCommandAdapter
 )
