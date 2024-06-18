@@ -4,6 +4,7 @@ from langchain.prompts.prompt import PromptTemplate
 from langchain_aws import BedrockLLM
 
 from ..base import ModelAdapter
+from .base import get_guardrails
 from genai_core.registry import registry
 
 
@@ -23,6 +24,11 @@ class BedrockTitanAdapter(ModelAdapter):
             params["topP"] = model_kwargs["topP"]
         if "maxTokens" in model_kwargs:
             params["maxTokenCount"] = model_kwargs["maxTokens"]
+
+        extra = {}
+        guardrails = get_guardrails()
+        if len(guardrails.keys()) > 0:
+            extra = {"guardrails": guardrails}
 
         return BedrockLLM(
             client=bedrock,
