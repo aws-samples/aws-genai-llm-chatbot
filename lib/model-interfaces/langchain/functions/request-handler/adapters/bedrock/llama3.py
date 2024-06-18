@@ -1,10 +1,7 @@
 import genai_core.clients
 
 # from langchain.llms import Bedrock (pending https://github.com/langchain-ai/langchain/issues/13316)
-from .base import Bedrock
-
-from langchain.prompts.prompt import PromptTemplate
-
+from langchain_aws import BedrockLLM
 
 from ..shared.meta.llama3_instruct import (
     Llama3PromptTemplate,
@@ -14,6 +11,7 @@ from ..shared.meta.llama3_instruct import (
 from ..shared.meta.llama3_instruct import Llama3ConversationBufferMemory
 
 from ..base import ModelAdapter
+from .base import get_guardrails
 from genai_core.registry import registry
 
 
@@ -42,12 +40,17 @@ class BedrockMetaLLama3InstructAdapter(ModelAdapter):
         if "maxTokens" in model_kwargs:
             params["max_gen_len"] = model_kwargs["maxTokens"]
 
-        return Bedrock(
+        extra = {}
+        guardrails = get_guardrails()
+        if len(guardrails.keys()) > 0:
+            extra = {"guardrails": guardrails}
+        return BedrockLLM(
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,
             streaming=model_kwargs.get("streaming", False),
             callbacks=[self.callback_handler],
+            **extra,
         )
 
     def get_prompt(self):
