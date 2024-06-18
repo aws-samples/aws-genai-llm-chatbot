@@ -4,7 +4,7 @@ from langchain_aws import BedrockLLM
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
-from .base import get_guardrails, Bedrock
+from .base import get_guardrails
 from genai_core.registry import registry
 
 
