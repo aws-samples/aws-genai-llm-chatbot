@@ -16,13 +16,10 @@ from langchain.utilities.anthropic import (
 
 
 def get_guardrails() -> dict:
-    if (
-        "BEDROCK_GUARDRAILS_ID" in os.environ
-        and "BEDROCK_GUARDRAILS_VERSION" in os.environ
-    ):
+    if "BEDROCK_GUARDRAILS_ID" in os.environ:
         return {
             "guardrailIdentifier": os.environ["BEDROCK_GUARDRAILS_ID"],
-            "guardrailVersion": os.environ["BEDROCK_GUARDRAILS_VERSION"],
+            "guardrailVersion": os.environ.get("BEDROCK_GUARDRAILS_VERSION", "DRAFT"),
         }
     return {}
 
