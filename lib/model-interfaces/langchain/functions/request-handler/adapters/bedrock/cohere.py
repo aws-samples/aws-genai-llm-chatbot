@@ -4,7 +4,7 @@ from langchain_aws import BedrockLLM
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
-from .base import get_guardrails
+from .base import get_guardrails, Bedrock
 from genai_core.registry import registry
 
 
@@ -62,5 +62,5 @@ Assistant:"""
 
 # Register the adapter
 registry.register(
-    r"^bedrock\.cohere\.command-(text|light-text|r).*", BedrockCohereCommandAdapter
+    r"^bedrock\.cohere\.command-(text|light-text).*", BedrockCohereCommandAdapter
 )
