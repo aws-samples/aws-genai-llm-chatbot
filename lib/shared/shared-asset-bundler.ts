@@ -50,6 +50,7 @@ export class SharedAssetBundler extends Construct {
   }
 
   bundleWithAsset(assetPath: string): Asset {
+    console.log(assetPath, calculateHash([assetPath, ...this.sharedAssets]));
     const asset = new aws_s3_assets.Asset(
       this,
       md5hash(assetPath).slice(0, 6),

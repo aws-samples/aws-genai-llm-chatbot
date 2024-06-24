@@ -86,12 +86,12 @@ export interface SystemConfig {
     customProviderType?: string;
     customSAML?: {
       metadataDocumentUrl?: string;
-    }
+    };
     customOIDC?: {
       OIDCClient?: string;
       OIDCSecret?: string;
       OIDCIssuerURL?: string;
-    }
+    };
     cognitoDomain?: string;
   };
   cfGeoRestrictEnable: boolean;
@@ -101,6 +101,11 @@ export interface SystemConfig {
     region?: SupportedRegion;
     endpointUrl?: string;
     roleArn?: string;
+    guardrails?: {
+      enabled: boolean;
+      identifier: string;
+      version: string;
+    };
   };
   llms: {
     sagemaker: SupportedSageMakerModels[];

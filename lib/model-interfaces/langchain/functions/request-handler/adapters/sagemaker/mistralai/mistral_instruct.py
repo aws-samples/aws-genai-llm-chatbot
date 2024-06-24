@@ -1,7 +1,10 @@
 import json
 import os
 
-from langchain.llms.sagemaker_endpoint import LLMContentHandler, SagemakerEndpoint
+from langchain_community.llms.sagemaker_endpoint import (
+    LLMContentHandler,
+    SagemakerEndpoint,
+)
 from langchain.prompts.prompt import PromptTemplate
 
 from ...base import ModelAdapter
