@@ -156,6 +156,8 @@ const embeddingModels = [
       options.huggingfaceApiSecretArn = config.llms?.huggingfaceApiSecretArn;
       options.enableSagemakerModelsSchedule =
         config.llms?.sagemakerSchedule?.enabled;
+      options.enableSagemakerModelsSchedule =
+        config.llms?.sagemakerSchedule?.enabled;
       options.timezonePicker = config.llms?.sagemakerSchedule?.timezonePicker;
       options.enableCronFormat =
         config.llms?.sagemakerSchedule?.enableCronFormat;
@@ -163,7 +165,21 @@ const embeddingModels = [
         config.llms?.sagemakerSchedule?.sagemakerCronStartSchedule;
       options.cronSagemakerModelsScheduleStop =
         config.llms?.sagemakerSchedule?.sagemakerCronStopSchedule;
+      options.enableCronFormat =
+        config.llms?.sagemakerSchedule?.enableCronFormat;
+      options.cronSagemakerModelsScheduleStart =
+        config.llms?.sagemakerSchedule?.sagemakerCronStartSchedule;
+      options.cronSagemakerModelsScheduleStop =
+        config.llms?.sagemakerSchedule?.sagemakerCronStopSchedule;
       options.daysForSchedule = config.llms?.sagemakerSchedule?.daysForSchedule;
+      options.scheduleStartTime =
+        config.llms?.sagemakerSchedule?.scheduleStartTime;
+      options.scheduleStopTime =
+        config.llms?.sagemakerSchedule?.scheduleStopTime;
+      options.enableScheduleEndDate =
+        config.llms?.sagemakerSchedule?.enableScheduleEndDate;
+      options.startScheduleEndDate =
+        config.llms?.sagemakerSchedule?.startScheduleEndDate;
       options.scheduleStartTime =
         config.llms?.sagemakerSchedule?.scheduleStartTime;
       options.scheduleStopTime =
