@@ -13,6 +13,7 @@ import { RagEngines } from "../../rag-engines";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
 import { NagSuppressions } from "cdk-nag";
+import { request } from "http";
 
 interface LangChainInterfaceProps {
   readonly shared: Shared;
@@ -93,6 +94,17 @@ export class LangChainInterface extends Construct {
           })
         );
       }
+    }
+
+    if (props.config.bedrock?.guardrails?.enabled) {
+      requestHandler.addEnvironment(
+        "BEDROCK_GUARDRAILS_ID",
+        props.config.bedrock.guardrails.identifier
+      );
+      requestHandler.addEnvironment(
+        "BEDROCK_GUARDRAILS_VERSION",
+        props.config.bedrock.guardrails.version
+      );
     }
 
     if (props.ragEngines?.auroraPgVector) {

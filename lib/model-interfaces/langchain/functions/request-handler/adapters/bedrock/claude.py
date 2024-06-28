@@ -2,7 +2,6 @@ import genai_core.clients
 
 # from langchain_community.llms import Bedrock
 from langchain.prompts.prompt import PromptTemplate
-
 from .base import Bedrock
 from ..base import ModelAdapter
 from genai_core.registry import registry

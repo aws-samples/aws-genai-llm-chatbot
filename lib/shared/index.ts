@@ -159,12 +159,13 @@ export class Shared extends Construct {
               }).`
             );
           }
+
           vpc.addInterfaceEndpoint("BedrockEndpoint", {
-            service: new ec2.InterfaceVpcEndpointService(
-              "com.amazonaws." + cdk.Aws.REGION + ".bedrock-runtime",
-              443
-            ),
-            privateDnsEnabled: true,
+            service: ec2.InterfaceVpcEndpointAwsService.BEDROCK,
+          });
+
+          vpc.addInterfaceEndpoint("BedrockRuntimeEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
           });
         }
 
