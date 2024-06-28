@@ -13,11 +13,11 @@ import {
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
-import { AWSCronValidator } from "./aws-cron-validator"
-import { tz } from 'moment-timezone';
-import { getData } from 'country-list';
-import { randomBytes } from 'crypto';
-import { StringUtils } from 'turbocommons-ts';
+import { AWSCronValidator } from "./aws-cron-validator";
+import { tz } from "moment-timezone";
+import { getData } from "country-list";
+import { randomBytes } from "crypto";
+import { StringUtils } from "turbocommons-ts";
 
 function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
   const timeZones = tz.names(); // Get a list of all timezones
@@ -144,24 +144,11 @@ const embeddingModels = [
       );
       options.prefix = config.prefix;
       options.vpcId = config.vpc?.vpcId;
-      options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
-      options.privateWebsite = config.privateWebsite;
-      options.certificate = config.certificate;
-      options.domain = config.domain;
-      options.cognitoFederationEnabled = config.cognitoFederation?.enabled;
-      options.cognitoCustomProviderName = config.cognitoFederation?.customProviderName;
-      options.cognitoCustomProviderType = config.cognitoFederation?.customProviderType;
-      options.cognitoCustomProviderSAMLMetadata = config.cognitoFederation?.customSAML?.metadataDocumentUrl;
-      options.cognitoCustomProviderOIDCClient = config.cognitoFederation?.customOIDC?.OIDCClient;
-      options.cognitoCustomProviderOIDCSecret = config.cognitoFederation?.customOIDC?.OIDCSecret;
-      options.cognitoCustomProviderOIDCIssuerURL = config.cognitoFederation?.customOIDC?.OIDCIssuerURL;
-      options.cognitoAutoRedirect = config.cognitoFederation?.autoRedirect;
-      options.cognitoDomain = config.cognitoFederation?.cognitoDomain;
-      options.cfGeoRestrictEnable = config.cfGeoRestrictEnable;
-      options.cfGeoRestrictList = config.cfGeoRestrictList;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
       options.bedrockRoleArn = config.bedrock?.roleArn;
+      options.guardrailsEnable = config.bedrock?.guardrails?.enabled;
+      options.guardrails = config.bedrock?.guardrails;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
@@ -202,6 +189,30 @@ const embeddingModels = [
       options.kendraExternal = config.rag.engines.kendra.external;
       options.kbExternal = config.rag.engines.knowledgeBase?.external ?? [];
       options.kendraEnterprise = config.rag.engines.kendra.enterprise;
+
+      // Advanced settings
+
+      options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
+      options.privateWebsite = config.privateWebsite;
+      options.certificate = config.certificate;
+      options.domain = config.domain;
+      options.cognitoFederationEnabled = config.cognitoFederation?.enabled;
+      options.cognitoCustomProviderName =
+        config.cognitoFederation?.customProviderName;
+      options.cognitoCustomProviderType =
+        config.cognitoFederation?.customProviderType;
+      options.cognitoCustomProviderSAMLMetadata =
+        config.cognitoFederation?.customSAML?.metadataDocumentUrl;
+      options.cognitoCustomProviderOIDCClient =
+        config.cognitoFederation?.customOIDC?.OIDCClient;
+      options.cognitoCustomProviderOIDCSecret =
+        config.cognitoFederation?.customOIDC?.OIDCSecret;
+      options.cognitoCustomProviderOIDCIssuerURL =
+        config.cognitoFederation?.customOIDC?.OIDCIssuerURL;
+      options.cognitoAutoRedirect = config.cognitoFederation?.autoRedirect;
+      options.cognitoDomain = config.cognitoFederation?.cognitoDomain;
+      options.cfGeoRestrictEnable = config.cfGeoRestrictEnable;
+      options.cfGeoRestrictList = config.cfGeoRestrictList;
     }
     try {
       await processCreateOptions(options);
@@ -259,231 +270,6 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
-      name: "createVpcEndpoints",
-      message: "Do you want create VPC Endpoints?",
-      initial: options.createVpcEndpoints || false,
-      skip(): boolean {
-        return !(this as any).state.answers.existingVpc;
-      },
-    },
-    {
-      type: "confirm",
-      name: "privateWebsite",
-      message:
-        "Do you want to deploy a private website? I.e only accessible in VPC",
-      initial: options.privateWebsite || false,
-    },
-    {
-      type: "confirm",
-      name: "customPublicDomain",
-      message:
-        "Do you want to provide a custom domain name and corresponding certificate arn for the public website ?",
-      initial: options.customPublicDomain || false,
-      skip(): boolean {
-        return (this as any).state.answers.privateWebsite;
-      },
-    },
-    {
-      type: "input",
-      name: "certificate",
-      validate(v: string) {
-        if ((this as any).state.answers.privateWebsite) {
-          const valid = acmCertRegExp.test(v);
-          return (this as any).skipped || valid
-            ? true
-            : "You need to enter an ACM certificate arn";
-        } else {
-          const valid = cfAcmCertRegExp.test(v);
-          return (this as any).skipped || valid
-            ? true
-            : "You need to enter an ACM certificate arn in us-east-1 for CF";
-        }
-      },
-      message(): string {
-        if ((this as any).state.answers.customPublicDomain) {
-          return "ACM certificate ARN with custom domain for public website. Note that the certificate must resides in us-east-1";
-        }
-        return "ACM certificate ARN";
-      },
-      initial: options.certificate,
-      skip(): boolean {
-        return (
-          !(this as any).state.answers.privateWebsite &&
-          !(this as any).state.answers.customPublicDomain
-        );
-      },
-    },
-    {
-      type: "input",
-      name: "domain",
-      message(): string {
-        if ((this as any).state.answers.customPublicDomain) {
-          return "Custom Domain for public website i.e example.com";
-        }
-        return "Domain for private website i.e example.com";
-      },
-      validate(v: any) {
-        return (this as any).skipped || v.length > 0
-          ? true
-          : "You need to enter a domain name";
-      },
-      initial: options.domain,
-      skip(): boolean {
-        return (
-          !(this as any).state.answers.privateWebsite &&
-          !(this as any).state.answers.customPublicDomain
-        );
-      },
-    },
-    {
-      type: "confirm",
-      name: "cognitoFederationEnabled",
-      message:
-        "Do you want to enable Federated (SSO) login with Cognito?",
-      initial: options.cognitoFederationEnabled || false,
-    },
-    {
-      type: "input",
-      name: "cognitoCustomProviderName",
-      message:
-        "Please enter the name of the SAML/OIDC Federated identity provider that is or will be setup in Cognito",
-      skip(): boolean {
-        return !(this as any).state.answers.cognitoFederationEnabled;
-      },
-      initial: options.cognitoCustomProviderName || "",
-    },
-    {
-      type: "select",
-      name: "cognitoCustomProviderType",
-      choices: [
-        { message: "Custom Cognito SAML", name: "SAML" },
-        { message: "Custom Cognito OIDC", name: "OIDC" },
-        { message: "Setup in Cognito Later", name: "later" },
-      ],
-      message:
-        "Do you want to setup a SAML or OIDC provider? or choose to do this later after install",
-      skip(): boolean {
-        (this as any).state._choices = (this as any).state.choices;
-        return !(this as any).state.answers.cognitoFederationEnabled;
-      },
-      initial: options.cognitoCustomProviderType || "",
-    },
-    {
-      type: "input",
-      name: "cognitoCustomProviderSAMLMetadata",
-      message:
-        "Provide a URL to a SAML metadata document. This document is issued by your SAML provider.",
-      validate(v: string) {
-        return ((this as any).skipped || StringUtils.isUrl(v)) ?
-          true : 'That does not look like a valid URL'
-      },
-      skip(): boolean {
-        if (!(this as any).state.answers.cognitoFederationEnabled){
-          return true;
-        }
-        return !(this as any).state.answers.cognitoCustomProviderType.includes("SAML");
-      },
-      initial: options.cognitoCustomProviderSAMLMetadata || "",
-    },
-    {
-      type: "input",
-      name: "cognitoCustomProviderOIDCClient",
-      message:
-        "Enter the client ID provided by OpenID Connect identity provider.",
-      validate(v: string) {
-        if ((this as any).skipped) {
-          return true
-        }
-        // Regular expression to match HH:MM format
-        const regex = /^[a-zA-Z0-9-_]{1,255}$/;
-        return regex.test(v) || 'Must only contain Alpha Numeric characters, "-" or "_" and be a maximum of 255 in length.';
-      },
-      skip(): boolean {
-        if (!(this as any).state.answers.cognitoFederationEnabled){
-          return true;
-        }
-        return !(this as any).state.answers.cognitoCustomProviderType.includes("OIDC");
-      },
-      initial: options.cognitoCustomProviderOIDCClient || "",
-    },
-    {
-      type: "input",
-      name: "cognitoCustomProviderOIDCSecret",
-      validate(v: string) {
-        const valid = secretManagerArnRegExp.test(v);
-        return (this as any).skipped || valid
-          ? true
-          : "You need to enter an Secret Manager Secret arn";
-      },
-      message:
-        "Enter the secret manager ARN containing the OIDC client secret to use (see docs for info)",
-      skip(): boolean {
-        if (!(this as any).state.answers.cognitoFederationEnabled){
-          return true;
-        }
-        return !(this as any).state.answers.cognitoCustomProviderType.includes("OIDC");
-      },
-      initial: options.cognitoCustomProviderOIDCSecret || "",
-    },
-    {
-      type: "input",
-      name: "cognitoCustomProviderOIDCIssuerURL",
-      message:
-        "Enter the issuer URL you received from the OIDC provider.",
-      validate(v: string) {
-        return ((this as any).skipped || StringUtils.isUrl(v)) ?
-          true : 'That does not look like a valid URL'
-      },
-      skip(): boolean {
-        if (!(this as any).state.answers.cognitoFederationEnabled){
-          return true;
-        }
-        return !(this as any).state.answers.cognitoCustomProviderType.includes("OIDC");
-      },
-      initial: options.cognitoCustomProviderOIDCIssuerURL || "",
-    },
-    {
-      type: "confirm",
-      name: "cognitoAutoRedirect",
-      message:
-        "Would you like to automatically redirect users to this identity provider?",
-      skip(): boolean {
-        return !(this as any).state.answers.cognitoFederationEnabled;
-      },
-      initial: options.cognitoAutoRedirect || false,
-    },
-    {
-      type: "confirm",
-      name: "cfGeoRestrictEnable",
-      message:
-        "Do want to restrict access to the website (CF Distribution) to only a country or countries?",
-      initial: options.cfGeoRestrictEnable || false,
-      skip(): boolean {
-        return (this as any).state.answers.privateWebsite;
-      },
-    },
-    {
-      type: "multiselect",
-      name: "cfGeoRestrictList",
-      hint: "SPACE to select, ENTER to confirm selection",
-      message: "Which countries do you wish to ALLOW access?",
-      choices: cfCountries,
-      validate(choices: any) {
-        return (this as any).skipped || choices.length > 0
-          ? true
-          : "You need to select at least one country";
-      },
-      skip(): boolean {
-        (this as any).state._choices = (this as any).state.choices;
-        return (
-          !(this as any).state.answers.cfGeoRestrictEnable ||
-          (this as any).state.answers.privateWebsite
-        );
-      },
-      initial: options.cfGeoRestrictList || [],
-    },
-    {
-      type: "confirm",
       name: "bedrockEnable",
       message: "Do you have access to Bedrock and want to enable it",
       initial: true,
@@ -507,7 +293,37 @@ async function processCreateOptions(options: any): Promise<void> {
         const valid = iamRoleRegExp.test(v);
         return v.length === 0 || valid;
       },
-      initial: options.bedrockRoleArn || "",
+      initial: options.bedrockRoleArn ?? "",
+      skip() {
+        return !(this as any).state.answers.bedrockEnable;
+      },
+    },
+    {
+      type: "confirm",
+      name: "guardrailsEnable",
+      message: "Do you want to enable Bedrock Guardrails",
+      initial: options.guardrailsEnable ?? false,
+    },
+    {
+      type: "input",
+      name: "guardrailsIdentifier",
+      message: "Bedrock Guardrail Identifier",
+      validate(v: string) {
+        return (this as any).skipped || (v && v.length === 12);
+      },
+      skip() {
+        return !(this as any).state.answers.guardrailsEnable;
+      },
+      initial: options.guardrails?.identifier ?? "",
+    },
+    {
+      type: "input",
+      name: "guardrailsVersion",
+      message: "Bedrock Guardrail Version",
+      skip() {
+        return !(this as any).state.answers.guardrailsEnable;
+      },
+      initial: options.guardrails?.version ?? "DRAFT",
     },
     {
       type: "confirm",
@@ -528,8 +344,6 @@ async function processCreateOptions(options: any): Promise<void> {
             .includes(m)
         ) || [],
       validate(choices: any) {
-        //Trap for new players, validate always runs even if skipped is true
-        // So need to handle validate bail out if skipped is true
         return (this as any).skipped || choices.length > 0
           ? true
           : "You need to select at least one model";
@@ -796,10 +610,7 @@ async function processCreateOptions(options: any): Promise<void> {
           options.kendraExternal.length > 0) ||
         false,
       skip(): boolean {
-        if (!(this as any).state.answers.enableRag){
-          return true;
-        }
-        return !(this as any).state.answers.ragsToEnable.includes("kendra");
+        return !(this as any).state.answers.enableRag;
       },
     },
   ];
@@ -979,6 +790,257 @@ async function processCreateOptions(options: any): Promise<void> {
   ];
   const models: any = await enquirer.prompt(modelsPrompts);
 
+  const advancedSettingsPrompts = [
+    {
+      type: "confirm",
+      name: "createVpcEndpoints",
+      message: "Do you want create VPC Endpoints?",
+      initial: options.createVpcEndpoints || false,
+      skip(): boolean {
+        return !(this as any).state.answers.existingVpc;
+      },
+    },
+    {
+      type: "confirm",
+      name: "privateWebsite",
+      message:
+        "Do you want to deploy a private website? I.e only accessible in VPC",
+      initial: options.privateWebsite || false,
+    },
+    {
+      type: "confirm",
+      name: "customPublicDomain",
+      message:
+        "Do you want to provide a custom domain name and corresponding certificate arn for the public website ?",
+      initial: options.customPublicDomain || false,
+      skip(): boolean {
+        return (this as any).state.answers.privateWebsite;
+      },
+    },
+    {
+      type: "input",
+      name: "certificate",
+      validate(v: string) {
+        if ((this as any).state.answers.privateWebsite) {
+          const valid = acmCertRegExp.test(v);
+          return (this as any).skipped || valid
+            ? true
+            : "You need to enter an ACM certificate arn";
+        } else {
+          const valid = cfAcmCertRegExp.test(v);
+          return (this as any).skipped || valid
+            ? true
+            : "You need to enter an ACM certificate arn in us-east-1 for CF";
+        }
+      },
+      message(): string {
+        if ((this as any).state.answers.customPublicDomain) {
+          return "ACM certificate ARN with custom domain for public website. Note that the certificate must resides in us-east-1";
+        }
+        return "ACM certificate ARN";
+      },
+      initial: options.certificate,
+      skip(): boolean {
+        return (
+          !(this as any).state.answers.privateWebsite &&
+          !(this as any).state.answers.customPublicDomain
+        );
+      },
+    },
+    {
+      type: "input",
+      name: "domain",
+      message(): string {
+        if ((this as any).state.answers.customPublicDomain) {
+          return "Custom Domain for public website i.e example.com";
+        }
+        return "Domain for private website i.e example.com";
+      },
+      validate(v: any) {
+        return (this as any).skipped || v.length > 0
+          ? true
+          : "You need to enter a domain name";
+      },
+      initial: options.domain,
+      skip(): boolean {
+        return (
+          !(this as any).state.answers.privateWebsite &&
+          !(this as any).state.answers.customPublicDomain
+        );
+      },
+    },
+    {
+      type: "confirm",
+      name: "cognitoFederationEnabled",
+      message: "Do you want to enable Federated (SSO) login with Cognito?",
+      initial: options.cognitoFederationEnabled || false,
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderName",
+      message:
+        "Please enter the name of the SAML/OIDC Federated identity provider that is or will be setup in Cognito",
+      skip(): boolean {
+        return !(this as any).state.answers.cognitoFederationEnabled;
+      },
+      initial: options.cognitoCustomProviderName || "",
+    },
+    {
+      type: "select",
+      name: "cognitoCustomProviderType",
+      choices: [
+        { message: "Custom Cognito SAML", name: "SAML" },
+        { message: "Custom Cognito OIDC", name: "OIDC" },
+        { message: "Setup in Cognito Later", name: "later" },
+      ],
+      message:
+        "Do you want to setup a SAML or OIDC provider? or choose to do this later after install",
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return !(this as any).state.answers.cognitoFederationEnabled;
+      },
+      initial: options.cognitoCustomProviderType || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderSAMLMetadata",
+      message:
+        "Provide a URL to a SAML metadata document. This document is issued by your SAML provider.",
+      validate(v: string) {
+        return (this as any).skipped || StringUtils.isUrl(v)
+          ? true
+          : "That does not look like a valid URL";
+      },
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled) {
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes(
+          "SAML"
+        );
+      },
+      initial: options.cognitoCustomProviderSAMLMetadata || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderOIDCClient",
+      message:
+        "Enter the client ID provided by OpenID Connect identity provider.",
+      validate(v: string) {
+        if ((this as any).skipped) {
+          return true;
+        }
+        // Regular expression to match HH:MM format
+        const regex = /^[a-zA-Z0-9-_]{1,255}$/;
+        return (
+          regex.test(v) ||
+          'Must only contain Alpha Numeric characters, "-" or "_" and be a maximum of 255 in length.'
+        );
+      },
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled) {
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes(
+          "OIDC"
+        );
+      },
+      initial: options.cognitoCustomProviderOIDCClient || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderOIDCSecret",
+      validate(v: string) {
+        const valid = secretManagerArnRegExp.test(v);
+        return (this as any).skipped || valid
+          ? true
+          : "You need to enter an Secret Manager Secret arn";
+      },
+      message:
+        "Enter the secret manager ARN containing the OIDC client secret to use (see docs for info)",
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled) {
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes(
+          "OIDC"
+        );
+      },
+      initial: options.cognitoCustomProviderOIDCSecret || "",
+    },
+    {
+      type: "input",
+      name: "cognitoCustomProviderOIDCIssuerURL",
+      message: "Enter the issuer URL you received from the OIDC provider.",
+      validate(v: string) {
+        return (this as any).skipped || StringUtils.isUrl(v)
+          ? true
+          : "That does not look like a valid URL";
+      },
+      skip(): boolean {
+        if (!(this as any).state.answers.cognitoFederationEnabled) {
+          return true;
+        }
+        return !(this as any).state.answers.cognitoCustomProviderType.includes(
+          "OIDC"
+        );
+      },
+      initial: options.cognitoCustomProviderOIDCIssuerURL || "",
+    },
+    {
+      type: "confirm",
+      name: "cognitoAutoRedirect",
+      message:
+        "Would you like to automatically redirect users to this identity provider?",
+      skip(): boolean {
+        return !(this as any).state.answers.cognitoFederationEnabled;
+      },
+      initial: options.cognitoAutoRedirect || false,
+    },
+    {
+      type: "confirm",
+      name: "cfGeoRestrictEnable",
+      message:
+        "Do want to restrict access to the website (CF Distribution) to only a country or countries?",
+      initial: options.cfGeoRestrictEnable || false,
+      skip(): boolean {
+        return (this as any).state.answers.privateWebsite;
+      },
+    },
+    {
+      type: "multiselect",
+      name: "cfGeoRestrictList",
+      hint: "SPACE to select, ENTER to confirm selection",
+      message: "Which countries do you wish to ALLOW access?",
+      choices: cfCountries,
+      validate(choices: any) {
+        return (this as any).skipped || choices.length > 0
+          ? true
+          : "You need to select at least one country";
+      },
+      skip(): boolean {
+        (this as any).state._choices = (this as any).state.choices;
+        return (
+          !(this as any).state.answers.cfGeoRestrictEnable ||
+          (this as any).state.answers.privateWebsite
+        );
+      },
+      initial: options.cfGeoRestrictList || [],
+    },
+  ];
+
+  const doAdvancedConfirm: any = await enquirer.prompt([
+    {
+      type: "confirm",
+      name: "doAdvancedSettings",
+      message: "Do you want to configure advanced settings?",
+      initial: false,
+    },
+  ]);
+  let advancedSettings: any = {};
+  if (doAdvancedConfirm.doAdvancedSettings) {
+    advancedSettings = await enquirer.prompt(advancedSettingsPrompts);
+  }
   // Convert simple time into cron format for schedule
   if (
     answers.enableSagemakerModelsSchedule &&
@@ -995,50 +1057,61 @@ async function processCreateOptions(options: any): Promise<void> {
     answers.sagemakerCronStopSchedule = `${stopMinutes} ${stopHour} ? * ${daysToRunSchedule} *`;
     AWSCronValidator.validate(answers.sagemakerCronStopSchedule);
   }
-  
-  const randomSuffix = randomBytes(8).toString('hex');
-  
+
+  const randomSuffix = randomBytes(8).toString("hex");
+
   // Create the config object
   const config = {
     prefix: answers.prefix,
     vpc: answers.existingVpc
       ? {
           vpcId: answers.vpcId.toLowerCase(),
-          createVpcEndpoints: answers.createVpcEndpoints,
+          createVpcEndpoints: advancedSettings.createVpcEndpoints,
         }
       : undefined,
-    privateWebsite: answers.privateWebsite,
-    certificate: answers.certificate,
-    domain: answers.domain,
-    cognitoFederation: answers.cognitoFederationEnabled
+    privateWebsite: advancedSettings.privateWebsite,
+    certificate: advancedSettings.certificate,
+    domain: advancedSettings.domain,
+    cognitoFederation: advancedSettings.cognitoFederationEnabled
       ? {
-          enabled: answers.cognitoFederationEnabled,
-          autoRedirect: answers.cognitoAutoRedirect,
-          customProviderName: answers.cognitoCustomProviderName,
-          customProviderType: answers.cognitoCustomProviderType,
-          customSAML: answers.cognitoCustomProviderType == "SAML"
-            ? {
-                metadataDocumentUrl: answers.cognitoCustomProviderSAMLMetadata
-            }
-            : undefined,
-          customOIDC: answers.cognitoCustomProviderType == "OIDC"
-            ? {
-                OIDCClient: answers.cognitoCustomProviderOIDCClient,
-                OIDCSecret: answers.cognitoCustomProviderOIDCSecret,
-                OIDCIssuerURL: answers.cognitoCustomProviderOIDCIssuerURL,
-            }
-            : undefined,
-          cognitoDomain: options.cognitoDomain ? options.cognitoDomain : `llm-cb-${randomSuffix}`,
+          enabled: advancedSettings.cognitoFederationEnabled,
+          autoRedirect: advancedSettings.cognitoAutoRedirect,
+          customProviderName: advancedSettings.cognitoCustomProviderName,
+          customProviderType: advancedSettings.cognitoCustomProviderType,
+          customSAML:
+            advancedSettings.cognitoCustomProviderType == "SAML"
+              ? {
+                  metadataDocumentUrl:
+                    advancedSettings.cognitoCustomProviderSAMLMetadata,
+                }
+              : undefined,
+          customOIDC:
+            advancedSettings.cognitoCustomProviderType == "OIDC"
+              ? {
+                  OIDCClient: advancedSettings.cognitoCustomProviderOIDCClient,
+                  OIDCSecret: advancedSettings.cognitoCustomProviderOIDCSecret,
+                  OIDCIssuerURL:
+                    advancedSettings.cognitoCustomProviderOIDCIssuerURL,
+                }
+              : undefined,
+          cognitoDomain: advancedSettings.cognitoDomain
+            ? advancedSettings.cognitoDomain
+            : `llm-cb-${randomSuffix}`,
         }
       : undefined,
-    cfGeoRestrictEnable: answers.cfGeoRestrictEnable,
-    cfGeoRestrictList: answers.cfGeoRestrictList,
+    cfGeoRestrictEnable: advancedSettings.cfGeoRestrictEnable,
+    cfGeoRestrictList: advancedSettings.cfGeoRestrictList,
     bedrock: answers.bedrockEnable
       ? {
           enabled: answers.bedrockEnable,
           region: answers.bedrockRegion,
           roleArn:
             answers.bedrockRoleArn === "" ? undefined : answers.bedrockRoleArn,
+          guardrails: {
+            enabled: answers.guardrailsEnable,
+            identifier: answers.guardrailsIdentifier,
+            version: answers.guardrailsVersion,
+          },
         }
       : undefined,
     llms: {

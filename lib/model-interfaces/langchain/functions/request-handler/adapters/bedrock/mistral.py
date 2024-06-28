@@ -1,7 +1,8 @@
 from .llama2_chat import BedrockMetaLLama2ChatAdapter
 from genai_core.registry import registry
 import genai_core
-from .base import Bedrock
+from langchain_aws import BedrockLLM
+from .base import get_guardrails
 
 
 class BedrockMistralAdapter(BedrockMetaLLama2ChatAdapter):
@@ -16,7 +17,11 @@ class BedrockMistralAdapter(BedrockMetaLLama2ChatAdapter):
         if "maxTokens" in model_kwargs:
             params["max_tokens"] = model_kwargs["maxTokens"]
 
-        return Bedrock(
+        extra = {}
+        guardrails = get_guardrails()
+        if len(guardrails.keys()) > 0:
+            extra = {"guardrails": guardrails}
+        return BedrockLLM(
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,
