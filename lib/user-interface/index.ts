@@ -80,19 +80,6 @@ export class UserInterface extends Construct {
       this.publishedDomain = distribution.distributionDomainName;
     }
 
-    if (props.config.privateWebsite) {
-      const privateWebsite = new PrivateWebsite(this, "PrivateWebsite", {
-        ...props,
-        websiteBucket: websiteBucket,
-      });
-    } else {
-      const publicWebsite = new PublicWebsite(this, "PublicWebsite", {
-        ...props,
-        websiteBucket: websiteBucket,
-      });
-      distribution = publicWebsite.distribution;
-    }
-
     const exportsAsset = s3deploy.Source.jsonData("aws-exports.json", {
       aws_project_region: cdk.Aws.REGION,
       aws_cognito_region: cdk.Aws.REGION,
