@@ -26,7 +26,7 @@ To do this, run the following command from the Cloud9 terminal:
 
 See the documentation for more details on [environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize).
 
-You can now proceed with the [deployment](#deployement)
+You can now proceed with the [deployment](#deployment)
 
 ### Github Codespaces
 
