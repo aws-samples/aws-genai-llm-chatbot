@@ -9,6 +9,7 @@ import { Utils } from "../../../common/utils";
 
 interface CrossEncoderSelectorProps {
   submitting: boolean;
+  disabled: boolean;
   onChange: (data: Partial<{ crossEncoderModel: SelectProps.Option }>) => void;
   selectedModel: SelectProps.Option | null;
   errors: Record<string, string | string[]>;
@@ -45,7 +46,7 @@ export function CrossEncoderSelectorField(props: CrossEncoderSelectorProps) {
 
   return (
     <Select
-      disabled={props.submitting}
+      disabled={props.submitting || props.disabled}
       selectedAriaLabel="Selected"
       placeholder="Choose a cross-encoder model"
       statusType={crossEncoderModelsStatus}

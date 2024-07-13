@@ -70,22 +70,20 @@ function OpenSearchFooter(props: {
   return (
     <ExpandableSection headerText="Additional settings" variant="footer">
       <SpaceBetween size="l">
-        {props.data.crossEncodingEnabled && (
-          <>
-            <HybridSearchField
-              submitting={props.submitting}
-              errors={props.errors}
-              checked={props.data.hybridSearch}
-              onChange={props.onChange}
-            />
-            <CrossEncoderSelectorField
-              errors={props.errors}
-              submitting={props.submitting}
-              selectedModel={props.data.crossEncoderModel}
-              onChange={props.onChange}
-            />
-          </>
-        )}
+        <HybridSearchField
+          submitting={props.submitting}
+          disabled={!props.data.crossEncodingEnabled}
+          errors={props.errors}
+          checked={props.data.hybridSearch}
+          onChange={props.onChange}
+        />
+        <CrossEncoderSelectorField
+          errors={props.errors}
+          submitting={props.submitting}
+          disabled={!props.data.crossEncodingEnabled}
+          selectedModel={props.data.crossEncoderModel}
+          onChange={props.onChange}
+        />
         <ChunkSelectorField
           submitting={props.submitting}
           onChange={props.onChange}

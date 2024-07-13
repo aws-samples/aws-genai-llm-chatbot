@@ -32,7 +32,6 @@ function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
 function getCountryCodesAndNames(): { message: string; name: string }[] {
   // Use country-list to get an array of countries with their codes and names
   const countries = getData();
-
   // Map the country data to match the desired output structure
   const countryInfo = countries.map(({ code, name }) => {
     return { message: `${name} (${code})`, name: code };
@@ -177,6 +176,8 @@ const embeddingModels = [
       options.startScheduleEndDate =
         config.llms?.sagemakerSchedule?.startScheduleEndDate;
       options.enableRag = config.rag.enabled;
+      options.enableEmbeddingModelsViaSagemaker =
+        config.rag.enableEmbeddingModelsViaSagemaker;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) => (config.rag.engines as any)[v].enabled
       );
@@ -575,7 +576,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "enableEmbeddingModelsViaSagemaker",
-      message: "Do you want to enable embedding models via SageMaker?",
+      message:
+        "Do you want to enable embedding and cross-encoder models via SageMaker?",
       initial: options.enableEmbeddingModelsViaSagemaker || false,
       skip(): boolean {
         return !(this as any).state.answers.enableRag;
@@ -1091,10 +1093,7 @@ async function processCreateOptions(options: any): Promise<void> {
     },
   };
 
-  if (
-    answers.enableEmbeddingModelsViaSagemaker &&
-    answers.enableSagemakerModels
-  ) {
+  if (config.rag.crossEncodingEnabled) {
     config.rag.crossEncoderModels[0] = {
       provider: "sagemaker",
       name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
@@ -1108,7 +1107,9 @@ async function processCreateOptions(options: any): Promise<void> {
     };
   }
   if (!config.rag.enableEmbeddingModelsViaSagemaker) {
-    config.rag.embeddingsModels = embeddingModels.filter(model => model.provider !== "sagemaker");
+    config.rag.embeddingsModels = embeddingModels.filter(
+      (model) => model.provider !== "sagemaker"
+    );
   } else {
     config.rag.embeddingsModels = embeddingModels;
   }

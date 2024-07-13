@@ -15,8 +15,8 @@ import { Shared } from "../shared";
 import { SystemConfig } from "../shared/types";
 import { Utils } from "../shared/utils";
 import { ChatBotApi } from "../chatbot-api";
-import { PrivateWebsite } from "./private-website"
-import { PublicWebsite } from "./public-website"
+import { PrivateWebsite } from "./private-website";
+import { PublicWebsite } from "./public-website";
 import { NagSuppressions } from "cdk-nag";
 
 export interface UserInterfaceProps {
@@ -52,13 +52,13 @@ export class UserInterface extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       autoDeleteObjects: true,
-      bucketName: props.config.privateWebsite ? props.config.domain : undefined, 
+      bucketName: props.config.privateWebsite ? props.config.domain : undefined,
       websiteIndexDocument: "index.html",
       websiteErrorDocument: "index.html",
       enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
     });
-    
+
     // Deploy either Private (only accessible within VPC) or Public facing website
     let apiEndpoint: string;
     let websocketEndpoint: string;
@@ -73,8 +73,6 @@ export class UserInterface extends Construct {
       distribution = publicWebsite.distribution
       this.publishedDomain = distribution.distributionDomainName;
     }
-
-      
 
     const exportsAsset = s3deploy.Source.jsonData("aws-exports.json", {
       aws_project_region: cdk.Aws.REGION,
@@ -118,6 +116,8 @@ export class UserInterface extends Construct {
         rag_enabled: props.config.rag.enabled,
         cross_encoders_enabled: props.crossEncodersEnabled,
         sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,
+        enable_embedding_models_via_sagemaker:
+          props.config.rag.enableEmbeddingModelsViaSagemaker,
         default_embeddings_model: Utils.getDefaultEmbeddingsModel(props.config),
         default_cross_encoder_model: Utils.getDefaultCrossEncoderModel(
           props.config
@@ -221,21 +221,17 @@ export class UserInterface extends Construct {
       prune: false,
       sources: [asset, exportsAsset],
       destinationBucket: websiteBucket,
-      distribution: props.config.privateWebsite ? undefined : distribution
+      distribution: props.config.privateWebsite ? undefined : distribution,
     });
 
-   
     /**
      * CDK NAG suppression
      */
-    NagSuppressions.addResourceSuppressions(
-      uploadLogsBucket, 
-      [
-        {
-          id: "AwsSolutions-S1",
-          reason: "Bucket is the server access logs bucket for websiteBucket.",
-        },
-      ]
-    );
+    NagSuppressions.addResourceSuppressions(uploadLogsBucket, [
+      {
+        id: "AwsSolutions-S1",
+        reason: "Bucket is the server access logs bucket for websiteBucket.",
+      },
+    ]);
   }
 }

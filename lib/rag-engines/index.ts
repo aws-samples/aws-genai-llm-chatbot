@@ -42,7 +42,7 @@ export class RagEngines extends Construct {
     const tables = new RagDynamoDBTables(this, "RagDynamoDBTables");
 
     let sageMakerRagModels: SageMakerRagModels | null = null;
-    if (props.config.llms.enableSagemakerModels) {
+    if (props.config.rag.crossEncodingEnabled) {
       sageMakerRagModels = new SageMakerRagModels(this, "SageMaker", {
         shared: props.shared,
         config: props.config,
