@@ -45,12 +45,13 @@ def list_openai_models():
             "streaming": True,
             "inputModalities": [Modality.TEXT.value],
             "outputModalities": [Modality.TEXT.value],
-            "interface": ModelInterface.LANGCHIAN.value,
+            "interface": ModelInterface.LANGCHAIN.value,
             "ragSupported": True,
         }
         for model in models.data
         if model["id"].startswith("gpt")
     ]
+
 
 def list_azure_openai_models():
     # azure openai model are listed, comma separated in AZURE_OPENAI_MODELS variable in external API secret
@@ -63,11 +64,12 @@ def list_azure_openai_models():
             "streaming": True,
             "inputModalities": [Modality.TEXT.value],
             "outputModalities": [Modality.TEXT.value],
-            "interface": ModelInterface.LANGCHIAN.value,
+            "interface": ModelInterface.LANGCHAIN.value,
             "ragSupported": True,
         }
-        for model in models.split(',')
+        for model in models.split(",")
     ]
+
 
 def list_bedrock_models():
     try:
@@ -93,7 +95,7 @@ def list_bedrock_models():
                 "streaming": model.get("responseStreamingSupported", False),
                 "inputModalities": model["inputModalities"],
                 "outputModalities": model["outputModalities"],
-                "interface": ModelInterface.LANGCHIAN.value,
+                "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
             }
             for model in bedrock_models
@@ -126,7 +128,7 @@ def list_bedrock_finetuned_models():
                 "streaming": model.get("responseStreamingSupported", False),
                 "inputModalities": model["inputModalities"],
                 "outputModalities": model["outputModalities"],
-                "interface": ModelInterface.LANGCHIAN.value,
+                "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
             }
             for model in bedrock_custom_models

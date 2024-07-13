@@ -74,10 +74,26 @@ export interface SystemConfig {
   vpc?: {
     vpcId?: string;
     createVpcEndpoints?: boolean;
+    vpcDefaultSecurityGroup?: string;
   };
   certificate?: string;
   domain?: string;
   privateWebsite?: boolean;
+  cognitoFederation?: {
+    enabled?: boolean;
+    autoRedirect?: boolean;
+    customProviderName?: string;
+    customProviderType?: string;
+    customSAML?: {
+      metadataDocumentUrl?: string;
+    };
+    customOIDC?: {
+      OIDCClient?: string;
+      OIDCSecret?: string;
+      OIDCIssuerURL?: string;
+    };
+    cognitoDomain?: string;
+  };
   cfGeoRestrictEnable: boolean;
   cfGeoRestrictList: [];
   bedrock?: {
@@ -85,10 +101,16 @@ export interface SystemConfig {
     region?: SupportedRegion;
     endpointUrl?: string;
     roleArn?: string;
+    guardrails?: {
+      enabled: boolean;
+      identifier: string;
+      version: string;
+    };
   };
   llms: {
     enableSagemakerModels: boolean;
     sagemaker: SupportedSageMakerModels[];
+    huggingfaceApiSecretArn?: string;
     sagemakerSchedule?: {
       enabled?: boolean;
       timezonePicker?: string;

@@ -22,8 +22,9 @@ Supported model providers:
 
 | Resource |Description|
 |:-------------|:-------------|
-| [AWS Generative AI CDK Constructs](https://github.com/awslabs/generative-ai-cdk-constructs/) | Open-source library extension of the [AWS Cloud Development Kit (AWS CDK)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)  aimed to help developers build generative AI solutions using pattern-based definitions for their architecture. |
+| [Secure Messenger GenAI Chatbot](https://github.com/aws-samples/secure-messenger-genai-chatbot) | A messenger built on Wickr that can interface with this chatbot to provide Q&A service in tightly regulated environments (i.e. HIPAA). |
 | [Project Lakechain](https://github.com/awslabs/project-lakechain) | A powerful cloud-native, AI-powered, document (docs, images, audios, videos) processing framework built on top of the AWS CDK. |
+| [AWS Generative AI CDK Constructs](https://github.com/awslabs/generative-ai-cdk-constructs/) | Open-source library extension of the [AWS Cloud Development Kit (AWS CDK)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)  aimed to help developers build generative AI solutions using pattern-based definitions for their architecture. |
 
 # Roadmap
 

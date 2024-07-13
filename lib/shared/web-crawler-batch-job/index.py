@@ -23,6 +23,7 @@ def main():
     processed_urls = data["processed_urls"]
     follow_links = data["follow_links"]
     limit = data["limit"]
+    content_types = data["content_types"]
 
     return genai_core.websites.crawler.crawl_urls(
         workspace=workspace,
@@ -31,6 +32,7 @@ def main():
         processed_urls=processed_urls,
         follow_links=follow_links,
         limit=limit,
+        content_types=content_types,
     )
 
 if __name__ == "__main__":

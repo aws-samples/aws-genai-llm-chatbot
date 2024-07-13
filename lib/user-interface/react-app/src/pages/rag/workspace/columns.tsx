@@ -1,8 +1,9 @@
-import { Link, StatusIndicator } from "@cloudscape-design/components";
+import { Button, Link, StatusIndicator } from "@cloudscape-design/components";
 import { RagDocumentType } from "../../../common/types";
 import { Labels } from "../../../common/constants";
 import { DateTime } from "luxon";
 import { Utils } from "../../../common/utils";
+import "../../../styles/app.scss";
 import { Document } from "../../../API";
 
 const FILES_COLUMN_DEFINITIONS = [
@@ -161,18 +162,34 @@ const WEBSITES_COLUMN_DEFINITIONS = [
   },
 ];
 
-export function getColumnDefinition(documentType: RagDocumentType) {
+export function getColumnDefinition(
+  documentType: RagDocumentType,
+  handleDelete: Function
+) {
+  const commonColumns = [
+    {
+      id: "deleteButton",
+      header: "Delete",
+      cell: (item: Document) => (
+        <Button
+          iconName="delete-marker"
+          variant="icon"
+          onClick={() => handleDelete(item)}
+        />
+      ),
+    },
+  ];
   switch (documentType) {
     case "file":
-      return FILES_COLUMN_DEFINITIONS;
+      return [...FILES_COLUMN_DEFINITIONS, ...commonColumns];
     case "text":
-      return TEXTS_COLUMN_DEFINITIONS;
+      return [...TEXTS_COLUMN_DEFINITIONS, ...commonColumns];
     case "qna":
-      return QNA_COLUMN_DEFINITIONS;
+      return [...QNA_COLUMN_DEFINITIONS, ...commonColumns];
     case "website":
-      return WEBSITES_COLUMN_DEFINITIONS;
+      return [...WEBSITES_COLUMN_DEFINITIONS, ...commonColumns];
     case "rssfeed":
-      return RSS_COLUMN_DEFINITIONS;
+      return [...RSS_COLUMN_DEFINITIONS, ...commonColumns];
     default:
       return [];
   }

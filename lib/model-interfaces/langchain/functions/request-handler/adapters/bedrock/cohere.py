@@ -1,9 +1,10 @@
 import genai_core.clients
 
-from langchain.llms import Bedrock
+from langchain_aws import BedrockLLM
 from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
+from .base import get_guardrails
 from genai_core.registry import registry
 
 
@@ -23,12 +24,17 @@ class BedrockCohereCommandAdapter(ModelAdapter):
             params["max_tokens"] = model_kwargs["maxTokens"]
         params["return_likelihoods"] = "GENERATION"
 
-        return Bedrock(
+        extra = {}
+        guardrails = get_guardrails()
+        if len(guardrails.keys()) > 0:
+            extra = {"guardrails": guardrails}
+        return BedrockLLM(
             client=bedrock,
             model_id=self.model_id,
             model_kwargs=params,
             streaming=model_kwargs.get("streaming", False),
             callbacks=[self.callback_handler],
+            **extra
         )
 
     def get_prompt(self):
