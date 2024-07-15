@@ -25,7 +25,6 @@ export interface AppConfig {
     rag_enabled: boolean;
     cross_encoders_enabled: boolean;
     sagemaker_embeddings_enabled: boolean;
-    enable_embedding_models_via_sagemaker: boolean;
     api_endpoint: string;
     websocket_endpoint: string;
     default_embeddings_model: string;

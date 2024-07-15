@@ -1093,19 +1093,12 @@ async function processCreateOptions(options: any): Promise<void> {
     },
   };
 
-  if (config.rag.crossEncodingEnabled) {
-    config.rag.crossEncoderModels[0] = {
-      provider: "sagemaker",
-      name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-      default: true,
-    };
-  } else {
-    config.rag.crossEncoderModels[0] = {
-      provider: "None",
-      name: "None",
-      default: true,
-    };
-  }
+  config.rag.crossEncoderModels[0] = {
+    provider: "sagemaker",
+    name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+    default: true,
+  };
+
   if (!config.rag.enableEmbeddingModelsViaSagemaker) {
     config.rag.embeddingsModels = embeddingModels.filter(
       (model) => model.provider !== "sagemaker"

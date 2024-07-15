@@ -116,8 +116,6 @@ export class UserInterface extends Construct {
         rag_enabled: props.config.rag.enabled,
         cross_encoders_enabled: props.crossEncodersEnabled,
         sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,
-        enable_embedding_models_via_sagemaker:
-          props.config.rag.enableEmbeddingModelsViaSagemaker,
         default_embeddings_model: Utils.getDefaultEmbeddingsModel(props.config),
         default_cross_encoder_model: Utils.getDefaultCrossEncoderModel(
           props.config

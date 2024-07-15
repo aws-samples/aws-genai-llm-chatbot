@@ -41,7 +41,7 @@ export abstract class EmbeddingsModelHelper {
     embeddingsModels.forEach((model) => {
       if (
         model.provider === "sagemaker" &&
-        !appContext?.config.enable_embedding_models_via_sagemaker
+        !appContext?.config.sagemaker_embeddings_enabled
       ) {
         return;
       }
