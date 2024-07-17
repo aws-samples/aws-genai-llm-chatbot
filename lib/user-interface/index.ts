@@ -64,14 +64,17 @@ export class UserInterface extends Construct {
     let websocketEndpoint: string;
     let distribution;
     let publishedDomain: string;
-    
+    let redirectSignIn: string;
+
     if (props.config.privateWebsite) {
       const privateWebsite = new PrivateWebsite(this, "PrivateWebsite", {...props, websiteBucket: websiteBucket });
       this.publishedDomain = props.config.domain? props.config.domain : "";
+      redirectSignIn =  `https://${this.publishedDomain}/index.html`
     } else {
       const publicWebsite = new PublicWebsite(this, "PublicWebsite", {...props, websiteBucket: websiteBucket });
       distribution = publicWebsite.distribution
       this.publishedDomain = distribution.distributionDomainName;
+      redirectSignIn =  `https://${this.publishedDomain}`
     }
 
       
@@ -91,7 +94,7 @@ export class UserInterface extends Construct {
       oauth: props.config.cognitoFederation?.enabled
           ?  {
               domain: `${props.config.cognitoFederation.cognitoDomain}.auth.${cdk.Aws.REGION}.amazoncognito.com`,
-              redirectSignIn: `https://${this.publishedDomain}`,
+              redirectSignIn: redirectSignIn,
               redirectSignOut: `https://${this.publishedDomain}`,
               Scopes: ["email","openid"],
               responseType: "code",
