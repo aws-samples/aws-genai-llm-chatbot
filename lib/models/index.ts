@@ -34,6 +34,7 @@ export class Models extends Construct {
     super(scope, id);
 
     const models: SageMakerModelEndpoint[] = [];
+    const bedrockEnabledModels: string[] = ['anthropic.claude-3-haiku-20240307-v1:0', 'anthropic.claude-3-sonnet-20240229-v1:0'];
 
     let hfTokenSecret: secretsmanager.Secret | undefined;
     if (props.config.llms.huggingfaceApiSecretArn) {
@@ -375,6 +376,12 @@ export class Models extends Construct {
           interface: model.interface,
           ragSupported: model.ragSupported,
         }))
+      ),
+    });
+
+    const bedrockEnabledModelsParameter = new ssm.StringParameter(this, "BedrockEnabledModelsParameter", {
+      stringValue: JSON.stringify(
+        bedrockEnabledModels
       ),
     });
 
