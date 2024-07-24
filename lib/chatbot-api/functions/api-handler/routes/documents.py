@@ -307,13 +307,7 @@ def update_rss_feed(input: dict):
 
 
 def _convert_document(document: dict):
-    if "crawler_properties" in document:
-        document["crawler_properties"] = {
-            "followLinks": document["crawler_properties"]["follow_links"],
-            "limit": document["crawler_properties"]["limit"],
-            "contentTypes": document["crawler_properties"]["content_types"],
-        }
-    return {
+    converted_document = {
         "id": document["document_id"],
         "workspaceId": document["workspace_id"],
         "type": document["document_type"],
@@ -328,12 +322,13 @@ def _convert_document(document: dict):
         "createdAt": document["created_at"],
         "updatedAt": document.get("updated_at", None),
         "rssFeedId": document.get("rss_feed_id", None),
-        "rssLastCheckedAt": document.get("rss_last_checked", None),
-        "crawlerProperties": {
+        "rssLastCheckedAt": document.get("rss_last_checked", None)
+    }
+    if "crawler_properties" in document:
+        converted_document['crawlerProperties'] = {
             "followLinks": document.get("crawler_properties").get("follow_links", None),
             "limit": document.get("crawler_properties").get("limit", None),
             "contentTypes": document.get("crawler_properties").get("content_types", None),
         }
-        if document.get("crawler_properties", None) != None
-        else None,
-    }
+    
+    return converted_document
