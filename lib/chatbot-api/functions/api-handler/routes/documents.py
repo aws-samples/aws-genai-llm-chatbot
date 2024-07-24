@@ -65,9 +65,11 @@ class GetDocumentRequest(BaseModel):
     workspaceId: str
     documentId: str
 
+
 class DeleteDocumentRequest(BaseModel):
     workspaceId: str
     documentId: str
+
 
 class GetRssPostsRequest(BaseModel):
     workspaceId: str
@@ -135,13 +137,17 @@ def get_documents(input: dict):
         "lastDocumentId": result["last_document_id"],
     }
 
+
 @router.resolver(field_name="deleteDocument")
 @tracer.capture_method
 def delete_document(input: dict):
     request = DeleteDocumentRequest(**input)
-    result = genai_core.documents.delete_document(request.workspaceId, request.documentId)
-    
+    result = genai_core.documents.delete_document(
+        request.workspaceId, request.documentId
+    )
+
     return result
+
 
 @router.resolver(field_name="getDocument")
 @tracer.capture_method
@@ -322,13 +328,15 @@ def _convert_document(document: dict):
         "createdAt": document["created_at"],
         "updatedAt": document.get("updated_at", None),
         "rssFeedId": document.get("rss_feed_id", None),
-        "rssLastCheckedAt": document.get("rss_last_checked", None)
+        "rssLastCheckedAt": document.get("rss_last_checked", None),
     }
     if "crawler_properties" in document:
-        converted_document['crawlerProperties'] = {
+        converted_document["crawlerProperties"] = {
             "followLinks": document.get("crawler_properties").get("follow_links", None),
             "limit": document.get("crawler_properties").get("limit", None),
-            "contentTypes": document.get("crawler_properties").get("content_types", None),
+            "contentTypes": document.get("crawler_properties").get(
+                "content_types", None
+            ),
         }
-    
+
     return converted_document
