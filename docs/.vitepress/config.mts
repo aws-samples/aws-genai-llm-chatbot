@@ -60,6 +60,7 @@ export default defineConfig({
           { text: 'SageMaker Schedule', link: '/documentation/sagemaker-schedule' },
           { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },
           { text: 'Security', link: '/documentation/vulnerability-scanning' },
+          { text: 'AWS Resources Overview', link: '/documentation/aws-resources-deployed' },
           { text: 'Precautions', link: '/documentation/precautions' }
         ]
       }
