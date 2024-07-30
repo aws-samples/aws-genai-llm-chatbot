@@ -29,6 +29,7 @@ export interface ModelsProps {
 export class Models extends Construct {
   public readonly models: SageMakerModelEndpoint[];
   public readonly modelsParameter: ssm.StringParameter;
+  public readonly bedrockEnabledModelsParameter: ssm.StringParameter;
 
   constructor(scope: Construct, id: string, props: ModelsProps) {
     super(scope, id);
@@ -387,6 +388,7 @@ export class Models extends Construct {
 
     this.models = models;
     this.modelsParameter = modelsParameter;
+    this.bedrockEnabledModelsParameter = bedrockEnabledModelsParameter;
     
     if (models.length > 0 && props.config.llms?.sagemakerSchedule?.enabled) {
 
