@@ -10,13 +10,17 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "20"
+      - name: Formatting
+        run: |
+          npm ci
+          npm run lint
       - name: Backend
         run: |
-          npm install
+          npm ci
           npm run build
           npx cdk synth
       - name: Frontend
         working-directory: ./lib/user-interface/react-app
         run: |
-          npm install
+          npm ci
           npm run build

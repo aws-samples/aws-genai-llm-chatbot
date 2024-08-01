@@ -80,7 +80,9 @@ export class ChatBotApi extends Construct {
         role: loggingRole,
       },
       xrayEnabled: true,
-      visibility: props.config.privateWebsite ? appsync.Visibility.PRIVATE : appsync.Visibility.GLOBAL
+      visibility: props.config.privateWebsite
+        ? appsync.Visibility.PRIVATE
+        : appsync.Visibility.GLOBAL,
     });
 
     new ApiResolvers(this, "RestApi", {

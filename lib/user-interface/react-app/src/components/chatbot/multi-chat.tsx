@@ -119,7 +119,9 @@ export default function MultiChat() {
     (async () => {
       const apiClient = new ApiClient(appContext);
       let workspaces: Workspace[] = [];
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let modelsResult: GraphQLResult<any>;
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
         if (appContext?.config.rag_enabled) {
@@ -137,6 +139,7 @@ export default function MultiChat() {
 
         const models = modelsResult.data
           ? modelsResult.data.listModels.filter(
+              /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
               (m: any) =>
                 m.inputModalities.includes(ChabotInputModality.Text) &&
                 m.outputModalities.includes(ChabotOutputModality.Text)
@@ -158,7 +161,7 @@ export default function MultiChat() {
       });
       refChatSessions.current = [];
     };
-  }, [appContext]);
+  }, [appContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const enabled =
     readyState === ReadyState.OPEN &&
@@ -330,13 +333,21 @@ export default function MultiChat() {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
-  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem, messageHistory: ChatBotHistoryItem[]) => {
+  const handleFeedback = (
+    feedbackType: 1 | 0,
+    idx: number,
+    message: ChatBotHistoryItem,
+    messageHistory: ChatBotHistoryItem[]
+  ) => {
     console.log("Message history: ", messageHistory);
     // metadata.prompts[0][0]
     if (message.metadata.sessionId) {
       let prompt = "";
-      if (Array.isArray(message.metadata.prompts) && Array.isArray(message.metadata.prompts[0])) { 
-          prompt = message.metadata.prompts[0][0];
+      if (
+        Array.isArray(message.metadata.prompts) &&
+        Array.isArray(message.metadata.prompts[0])
+      ) {
+        prompt = message.metadata.prompts[0][0];
       }
       const completion = message.content;
       const model = message.metadata.modelId;
@@ -346,7 +357,7 @@ export default function MultiChat() {
         feedback: feedbackType,
         prompt: prompt,
         completion: completion,
-        model: model as string
+        model: model as string,
       };
       addUserFeedback(feedbackData);
     }
@@ -356,7 +367,7 @@ export default function MultiChat() {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    await apiClient.userFeedback.addUserFeedback({feedbackData});
+    await apiClient.userFeedback.addUserFeedback({ feedbackData });
   };
 
   return (

@@ -29,6 +29,7 @@ export default function Dashboard() {
       try {
         const result = await apiClient.workspaces.getWorkspaces();
 
+        /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
         const data = result.data?.listWorkspaces!;
         setWorkspaces(data);
         console.log(data);

@@ -127,26 +127,26 @@ export default function ChatMessage(props: ChatMessageProps) {
                       </Popover>
                     </div>
                     <Tabs
-                      tabs={(
-                        props.message.metadata.documents as RagDocument[]
-                      ).map((p: any, i) => {
-                        return {
-                          id: `${i}`,
-                          label:
-                            p.metadata.path?.split("/").at(-1) ??
-                            p.metadata.title ??
-                            p.metadata.document_id.slice(-8),
-                          content: (
-                            <>
-                              <Textarea
-                                value={p.page_content}
-                                readOnly={true}
-                                rows={8}
-                              />
-                            </>
-                          ),
-                        };
-                      })}
+                      tabs={(props.message.metadata.documents as RagDocument[])
+                        /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
+                        .map((p: any, i) => {
+                          return {
+                            id: `${i}`,
+                            label:
+                              p.metadata.path?.split("/").at(-1) ??
+                              p.metadata.title ??
+                              p.metadata.document_id.slice(-8),
+                            content: (
+                              <>
+                                <Textarea
+                                  value={p.page_content}
+                                  readOnly={true}
+                                  rows={8}
+                                />
+                              </>
+                            ),
+                          };
+                        })}
                       activeTabId={documentIndex}
                       onChange={({ detail }) =>
                         setDocumentIndex(detail.activeTabId)

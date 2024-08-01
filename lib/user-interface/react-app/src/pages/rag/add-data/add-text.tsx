@@ -90,6 +90,7 @@ export default function AddText(props: AddTextProps) {
       });
 
       onChange({ title: "", content: "" }, true);
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       console.log(Utils.getErrorMessage(error));
       setGlobalError(Utils.getErrorMessage(error));

@@ -61,8 +61,10 @@ export default function KendraWorkspaceSettings(
       await apiClient.kendra.startKendraDataSync(props.workspace.id);
 
       setKendraIndexSyncing(true);
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       console.error(error);
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       setGlobalError(error.errors.map((e: any) => e.message).join(","));
     }
 
