@@ -151,9 +151,11 @@ export default function CreateWorkspaceAurora() {
 
       navigate(`/rag/workspaces/${result.data?.createAuroraWorkspace.id}`);
       return;
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     } catch (e: any) {
       setSubmitting(false);
       console.error(
+        /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
         `Invocation error: ${e.errors.map((x: any) => x.message).join("")}`
       );
       setGlobalError("Something went wrong");

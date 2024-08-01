@@ -89,6 +89,7 @@ export default function AddQnA(props: AddQnAProps) {
       });
 
       onChange({ question: "", answer: "" }, true);
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       console.error(Utils.getErrorMessage(error));
       setGlobalError(Utils.getErrorMessage(error));

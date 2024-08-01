@@ -5,7 +5,7 @@ import { Command } from "commander";
 import { LIB_VERSION } from "./version.js";
 
 (async () => {
-  let program = new Command();
+  const program = new Command();
   program
     .version(LIB_VERSION)
     .command("config", "📦 manage the chatbot configuration")

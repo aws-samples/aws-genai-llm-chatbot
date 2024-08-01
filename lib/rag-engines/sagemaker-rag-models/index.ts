@@ -4,7 +4,6 @@ import * as path from "path";
 import { DeploymentType, SageMakerModel } from "../../sagemaker-model";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { NagSuppressions } from "cdk-nag";
 
 export interface SageMakerRagModelsProps {
   readonly config: SystemConfig;
