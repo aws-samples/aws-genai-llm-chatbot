@@ -13,6 +13,9 @@ jobs:
       - name: Formatting
         run: |
           npm ci
+          cd ./lib/user-interface/react-app
+          npm ci
+          cd -
           npm run lint
       - name: Backend
         run: |
