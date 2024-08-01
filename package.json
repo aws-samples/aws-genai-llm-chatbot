@@ -30,6 +30,8 @@
     "@types/node": "20.1.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "aws-cdk": "2.145.0",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.2",
