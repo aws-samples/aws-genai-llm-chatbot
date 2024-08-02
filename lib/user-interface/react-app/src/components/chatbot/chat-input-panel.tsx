@@ -47,6 +47,7 @@ import {
   ChatInputState,
   ImageFile,
   ChatBotModelInterface,
+  ChatBotToken,
 } from "./types";
 import { sendQuery } from "../../graphql/mutations";
 import {
@@ -115,6 +116,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   useEffect(() => {
     async function subscribe() {
       console.log("Subscribing to AppSync");
+      const messageTokens: { [key: string]: ChatBotToken[] } = {};
       setReadyState(ReadyState.CONNECTING);
       const sub = await API.graphql<
         GraphQLSubscription<ReceiveMessagesSubscription>
@@ -134,10 +136,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               console.log("Heartbeat pong!");
               return;
             }
+
             updateMessageHistoryRef(
               props.session.id,
               messageHistoryRef.current,
-              response
+              response,
+              messageTokens
             );
 
             if (
