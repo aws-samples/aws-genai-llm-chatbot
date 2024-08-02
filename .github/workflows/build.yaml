@@ -21,7 +21,12 @@ jobs:
         run: |
           npm ci
           npm run build
+          npm run test
           npx cdk synth
+      - name: PyTests
+        run: |
+          pip install -r pytest_requirements.txt
+          pytest tests/
       - name: Frontend
         working-directory: ./lib/user-interface/react-app
         run: |

@@ -56,8 +56,10 @@ export const handler = async (
   logger.debug("Event", { event });
   event.Records = event.Records.sort((a, b) => {
     try {
-      const x: number = JSON.parse(a.body).Message.data?.token?.sequenceNumber;
-      const y: number = JSON.parse(b.body).Message.data?.token?.sequenceNumber;
+      const x: number = JSON.parse(JSON.parse(a.body).Message).data?.token
+        ?.sequenceNumber;
+      const y: number = JSON.parse(JSON.parse(b.body).Message).data?.token
+        ?.sequenceNumber;
       return x - y;
     } catch {
       return 0;

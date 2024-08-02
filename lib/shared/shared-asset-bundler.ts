@@ -57,9 +57,10 @@ export class SharedAssetBundler extends Construct {
       {
         path: assetPath,
         bundling: {
-          image: DockerImage.fromBuild(
-            path.posix.join(__dirname, "alpine-zip")
-          ),
+          image:
+            process.env.NODE_ENV === "test"
+              ? DockerImage.fromRegistry("dummy-skip-build-in-test")
+              : DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip")),
           command: [
             "zip",
             "-r",
