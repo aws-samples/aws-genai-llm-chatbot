@@ -1,4 +1,5 @@
 pytest==7.4.0
 pytest-mock==3.11.1
+gql==3.4.1
 aws_lambda_powertools==2.42.0
 -r lib/shared/layers/common/requirements.txt
