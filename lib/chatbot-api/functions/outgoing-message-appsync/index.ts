@@ -44,7 +44,7 @@ const recordHandler = async (record: SQSRecord): Promise<void> => {
         }
     `;
     //logger.info(query);
-    const resp = await graphQlQuery(query);
+    await graphQlQuery(query);
     //logger.info(resp);
   }
 };

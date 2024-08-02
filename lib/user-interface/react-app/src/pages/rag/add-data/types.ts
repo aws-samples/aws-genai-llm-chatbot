@@ -11,17 +11,21 @@ export interface SelectOption {
   description?: string;
 }
 
-export const ContentTypesOptionsConfig: { [key: string]: { description: string } } = {
+export const ContentTypesOptionsConfig: {
+  [key: string]: { description: string };
+} = {
   "text/html": {
-    description: "Crawl Websites"
+    description: "Crawl Websites",
   },
   "application/pdf": {
-    description: "Crawl PDFs"
-  }
+    description: "Crawl PDFs",
+  },
 };
 
-export const multiselectOptions: SelectOption[] = Object.entries(ContentTypesOptionsConfig).map(([value, { description }]) => ({
+export const multiselectOptions: SelectOption[] = Object.entries(
+  ContentTypesOptionsConfig
+).map(([value, { description }]) => ({
   label: value,
   value: value,
-  description: description
+  description: description,
 }));

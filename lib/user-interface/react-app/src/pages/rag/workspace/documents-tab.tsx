@@ -103,6 +103,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
     if (currentPageIndex <= 1) {
       await getDocuments({ pageIndex: currentPageIndex });
     } else {
+      /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
       const lastDocumentId = pages[currentPageIndex - 2]?.lastDocumentId!;
       await getDocuments({ lastDocumentId });
     }

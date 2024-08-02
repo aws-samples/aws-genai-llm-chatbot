@@ -149,6 +149,7 @@ export default function RssFeed() {
           setIsEditingCrawlerSettings(false);
 
           setRssSubscriptionStatus(
+            /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
             result.data?.setDocumentSubscriptionStatus!.status! == "enabled"
               ? DocumentSubscriptionStatus.ENABLED
               : DocumentSubscriptionStatus.DISABLED
@@ -164,6 +165,7 @@ export default function RssFeed() {
             feedId
           );
           setRssSubscriptionStatus(
+            /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
             result.data?.setDocumentSubscriptionStatus!.status! == "enabled"
               ? DocumentSubscriptionStatus.ENABLED
               : DocumentSubscriptionStatus.DISABLED
@@ -219,6 +221,7 @@ export default function RssFeed() {
     if (currentPageIndex <= 1) {
       await getRssSubscriptionPosts({ pageIndex: currentPageIndex });
     } else {
+      /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
       const lastDocumentId = pages[currentPageIndex - 2]?.lastDocumentId!;
       await getRssSubscriptionPosts({ lastDocumentId });
     }
@@ -485,6 +488,7 @@ export default function RssFeed() {
                 },
               ]}
               items={
+                /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
                 pages[Math.min(pages.length - 1, currentPageIndex - 1)]?.items!
               }
               empty={
@@ -622,7 +626,7 @@ export function RssFeedCrawlerForm(props: RssFeedEditorProps) {
         documentId: props.documentId,
         followLinks: props.data.followLinks,
         limit: props.data.limit,
-        contentTypes: props.data.contentTypes
+        contentTypes: props.data.contentTypes,
       };
     },
     validate: (form) => {
@@ -637,29 +641,31 @@ export function RssFeedCrawlerForm(props: RssFeedEditorProps) {
       return errors;
     },
   });
-  
-  
-  const handleContentTypeChange = (selectedOptions: ReadonlyArray<SelectOption>) => {
-    const options: SelectOption[] = selectedOptions.map(option => {
+
+  const handleContentTypeChange = (
+    selectedOptions: ReadonlyArray<SelectOption>
+  ) => {
+    const options: SelectOption[] = selectedOptions.map((option) => {
       if (option.value === undefined) {
         throw new Error(`Option value cannot be undefined`);
       }
       return {
         label: option.label,
         value: option.value,
-        description: option.description
+        description: option.description,
       };
     });
-    onChange({ contentTypes: options.map(option => option.value) });
+    onChange({ contentTypes: options.map((option) => option.value) });
   };
 
-  
   const onSubmit = async () => {
     if (!appContext) return;
     const validationResult = validate();
     if (!validationResult) return;
     props.setSubmitting(true);
-    const contentTypesToUse = data.contentTypes.filter((ct): ct is string => ct !== undefined);
+    const contentTypesToUse = data.contentTypes.filter(
+      (ct): ct is string => ct !== undefined
+    );
     const apiClient = new ApiClient(appContext);
     try {
       await apiClient.documents.updateRssSubscriptionCrawler(
@@ -728,18 +734,20 @@ export function RssFeedCrawlerForm(props: RssFeedEditorProps) {
             }
           />
         </FormField>
-            <FormField
-              label="Enabled Content Types"
-              errorText={errors.contentTypes}
-              description="Content Types to Enable for crawlingl"
-            >
-            <Multiselect
-              disabled={props.submitting}
-              selectedOptions={generateSelectedOptions(data.contentTypes)}
-              options={multiselectOptions}
-              onChange={({ detail }) => handleContentTypeChange(detail.selectedOptions)}
-            />
-            </FormField>
+        <FormField
+          label="Enabled Content Types"
+          errorText={errors.contentTypes}
+          description="Content Types to Enable for crawlingl"
+        >
+          <Multiselect
+            disabled={props.submitting}
+            selectedOptions={generateSelectedOptions(data.contentTypes)}
+            options={multiselectOptions}
+            onChange={({ detail }) =>
+              handleContentTypeChange(detail.selectedOptions)
+            }
+          />
+        </FormField>
       </SpaceBetween>
     </Form>
   );

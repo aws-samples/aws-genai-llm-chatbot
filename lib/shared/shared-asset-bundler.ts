@@ -14,7 +14,7 @@ import * as fs from "fs";
 function calculateHash(paths: string[]): string {
   return paths.reduce((mh, p) => {
     const dirs = fs.readdirSync(p);
-    let hash = calculateHash(
+    const hash = calculateHash(
       dirs
         .filter((d) => fs.statSync(path.join(p, d)).isDirectory())
         .map((v) => path.join(p, v))

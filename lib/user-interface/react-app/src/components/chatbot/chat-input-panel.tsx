@@ -206,7 +206,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       const apiClient = new ApiClient(appContext);
       let workspaces: Workspace[] = [];
       let workspacesStatus: LoadingStatus = "finished";
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let modelsResult: GraphQLResult<any>;
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
         if (appContext?.config.rag_enabled) {
