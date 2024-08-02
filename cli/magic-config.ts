@@ -182,6 +182,7 @@ const embeddingModels = [
       ) {
         options.ragsToEnable.pop("kendra");
       }
+      options.auroraDefaultDBName = config.rag.engines.aurora.defaultDatabaseName
       options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
       options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
         (m: any) => m.default
@@ -589,6 +590,20 @@ async function processCreateOptions(options: any): Promise<void> {
         return !(this as any).state.answers.enableRag;
       },
       initial: options.ragsToEnable || [],
+    },
+    {
+      type:"input",
+      name:"auroraDefaultDBName",
+      message: "Enter a default database name for Aurora",
+      initial: options.auroraDefaultDBName || undefined,
+      validate(v: string) {
+        return (v.length === 0 || (this as any).skipped || 
+          RegExp(/^[a-zA-Z][a-zA-Z0-9_]{0,62}$/).test(v)) ? 
+            true : "You need to enter a valid database name";
+      },
+      skip(): boolean {
+        return !(this as any).state.answers.ragsToEnable.includes("aurora");
+      },
     },
     {
       type: "confirm",
@@ -1059,6 +1074,8 @@ async function processCreateOptions(options: any): Promise<void> {
       engines: {
         aurora: {
           enabled: answers.ragsToEnable.includes("aurora"),
+          defaultDatabaseName: answers.ragsToEnable.includes("aurora") && answers.auroraDefaultDBName.length > 0 ? 
+            answers.auroraDefaultDBName : undefined
         },
         opensearch: {
           enabled: answers.ragsToEnable.includes("opensearch"),

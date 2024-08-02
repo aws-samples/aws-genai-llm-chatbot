@@ -128,6 +128,7 @@ export interface SystemConfig {
     engines: {
       aurora: {
         enabled: boolean;
+        defaultDatabaseName?: string;
       };
       opensearch: {
         enabled: boolean;

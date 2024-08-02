@@ -77,6 +77,7 @@ export class AuroraPgVector extends Construct {
         serviceToken: databaseSetupProvider.serviceToken,
         properties: {
           AURORA_DB_SECRET_ID: dbCluster.secret?.secretArn as string,
+          AURORA_DB_NAME: props.config.rag.engines.aurora.defaultDatabaseName,
         },
       }
     );

@@ -15,25 +15,44 @@ def lambda_handler(event, context: LambdaContext):
     request_type = event["RequestType"]
     resource_properties = event["ResourceProperties"]
     AURORA_DB_SECRET_ID = resource_properties["AURORA_DB_SECRET_ID"]
+    AURORA_DB_NAME= resource_properties["AURORA_DB_NAME"]
 
     secret_response = secretsmanager_client.get_secret_value(
         SecretId=AURORA_DB_SECRET_ID
     )
     database_secrets = json.loads(secret_response["SecretString"])
-    dbhost = database_secrets["host"]
-    dbport = database_secrets["port"]
-    dbuser = database_secrets["username"]
-    dbpass = database_secrets["password"]
 
     if request_type == "Create" or request_type == "Update":
-        dbconn = psycopg2.connect(
-            host=dbhost, user=dbuser, password=dbpass, port=dbport, connect_timeout=10
-        )
-
+        db_conn_args = {
+            "host": database_secrets["host"],
+            "user": database_secrets["username"],
+            "password": database_secrets["password"],
+            "port": database_secrets["port"],
+            "connect_timeout":10,
+        }
+        if "dbname" in database_secrets:
+            db_conn_args["dbname"] = database_secrets["dbname"]
+        dbconn = psycopg2.connect(**db_conn_args)
         dbconn.set_session(autocommit=True)
-
         cur = dbconn.cursor()
 
+        # Check if database exists, if not create it.
+        cur.execute(f"SELECT * FROM pg_database WHERE LOWER(datname) = LOWER('{AURORA_DB_NAME}')")
+        rows = cur.fetchall()
+        if len(rows) == 0:
+            cur.execute(f"CREATE DATABASE {AURORA_DB_NAME}")
+            logger.info(f"Created database {AURORA_DB_NAME}")
+            # close existing connection and re-open connect to the new database
+            cur.close()
+            db_conn_args["dbname"] = AURORA_DB_NAME
+            dbconn = psycopg2.connect(**db_conn_args)
+            dbconn.set_session(autocommit=True)
+            cur = dbconn.cursor()
+        else:
+            logger.info(f"Database {AURORA_DB_NAME} already exists")
+        cur.close()
+
+        # Create vector extension if not exists. This will create the vector type.
         cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
         register_vector(dbconn)
 
