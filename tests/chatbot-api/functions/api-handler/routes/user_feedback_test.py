@@ -1,5 +1,5 @@
 import pytest
-from genai_core.types import CommonError, EmbeddingsModel
+from genai_core.types import CommonError
 from routes.user_feedback import user_feedback
 
 input = {

@@ -1,5 +1,5 @@
 import pytest
-from genai_core.types import CommonError, EmbeddingsModel
+from genai_core.types import CommonError
 from routes.sessions import get_sessions
 from routes.sessions import get_session
 from routes.sessions import delete_user_sessions
