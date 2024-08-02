@@ -38,6 +38,7 @@ import {
   ChatBotHeartbeatRequest,
   ChatBotModelInterface,
   FeedbackData,
+  ChatBotToken,
 } from "./types";
 import { LoadingStatus, ModelInterface } from "../../common/types";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
@@ -232,6 +233,7 @@ export default function MultiChat() {
 
   function subscribe(sessionId: string): ZenObservable.Subscription {
     console.log("Subscribing to AppSync");
+    const messageTokens: { [key: string]: ChatBotToken[] } = {};
     const sub = API.graphql<GraphQLSubscription<ReceiveMessagesSubscription>>({
       query: receiveMessages,
       variables: {
@@ -243,7 +245,6 @@ export default function MultiChat() {
         const data = value.data!.receiveMessages?.data;
         if (data !== undefined && data !== null) {
           const response: ChatBotMessageResponse = JSON.parse(data);
-          console.log(JSON.stringify(response));
           if (response.action === ChatBotAction.Heartbeat) {
             console.log("Heartbeat pong!");
             return;
@@ -257,7 +258,8 @@ export default function MultiChat() {
             updateMessageHistoryRef(
               session.id,
               session.messageHistory,
-              response
+              response,
+              messageTokens
             );
             if ((response.action = ChatBotAction.FinalResponse)) {
               session.running = false;
