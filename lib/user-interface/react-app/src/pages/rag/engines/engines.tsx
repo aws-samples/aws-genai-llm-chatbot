@@ -51,6 +51,7 @@ export default function Engines() {
       try {
         const result = await apiClient.ragEngines.getRagEngines();
 
+        /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
         setData(result.data?.listRagEngines!);
       } catch (error) {
         console.error(error);

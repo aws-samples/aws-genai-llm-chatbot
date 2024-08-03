@@ -1,0 +1,4 @@
+lib/user-interface/react-app/src/graphql/mutations.ts
+lib/user-interface/react-app/src/graphql/queries.ts
+lib/user-interface/react-app/src/graphql/subscriptions.ts
+cdk.out

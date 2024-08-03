@@ -80,12 +80,18 @@ export default function Chat(props: { sessionId?: string }) {
     })();
   }, [appContext, props.sessionId]);
 
-  const handleFeedback = (feedbackType: 1 | 0, idx: number, message: ChatBotHistoryItem) => {
+  const handleFeedback = (
+    feedbackType: 1 | 0,
+    idx: number,
+    message: ChatBotHistoryItem
+  ) => {
     if (message.metadata.sessionId) {
-      
       let prompt = "";
-      if (Array.isArray(message.metadata.prompts) && Array.isArray(message.metadata.prompts[0])) { 
-          prompt = message.metadata.prompts[0][0];
+      if (
+        Array.isArray(message.metadata.prompts) &&
+        Array.isArray(message.metadata.prompts[0])
+      ) {
+        prompt = message.metadata.prompts[0][0];
       }
       const completion = message.content;
       const model = message.metadata.modelId;
@@ -95,7 +101,7 @@ export default function Chat(props: { sessionId?: string }) {
         feedback: feedbackType,
         prompt: prompt,
         completion: completion,
-        model: model as string
+        model: model as string,
       };
       addUserFeedback(feedbackData);
     }
@@ -105,7 +111,7 @@ export default function Chat(props: { sessionId?: string }) {
     if (!appContext) return;
 
     const apiClient = new ApiClient(appContext);
-    await apiClient.userFeedback.addUserFeedback({feedbackData});
+    await apiClient.userFeedback.addUserFeedback({ feedbackData });
   };
 
   return (

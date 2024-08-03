@@ -14,7 +14,7 @@ export function getConfig(): SystemConfig {
        vpcDefaultSecurityGroup: "sg-00000000000"
     },*/
     privateWebsite: false,
-    certificate : "",
+    certificate: "",
     cfGeoRestrictEnable: false,
     cfGeoRestrictList: [],
     bedrock: {
@@ -39,7 +39,7 @@ export function getConfig(): SystemConfig {
         kendra: {
           enabled: false,
           createIndex: false,
-          enterprise: false
+          enterprise: false,
         },
       },
       embeddingsModels: [

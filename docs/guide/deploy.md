@@ -101,7 +101,13 @@ cd aws-genai-llm-chatbot
 npm install && npm run build
 ```
 
-**Step 4.** Once done, run the configuration command to help you set up the solution with the features you need:
+**Step 4.** (Optional) Run the unit tests
+
+```bash
+npm run test && pip install -r pytest_requirements.txt && pytest tests
+```
+
+**Step 5.** Once done, run the configuration command to help you set up the solution with the features you need:
 
 ```bash
 npm run config
@@ -121,7 +127,7 @@ When done, answer `Y` to create or update your configuration.
 
 Your configuration is now stored under `bin/config.json`. You can re-run the `npm run config` command as needed to update your `config.json`
 
-**Step 5.** (Optional) Bootstrap AWS CDK on the target account and region
+**Step 6.** (Optional) Bootstrap AWS CDK on the target account and region
 
 > **Note**: This is required if you have never used AWS CDK on this account and region combination. ([More information on CDK bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/cli.html#cli-bootstrap)).
 
@@ -139,7 +145,7 @@ npx cdk deploy
 
 You can view the progress of your CDK deployment in the [CloudFormation console](https://console.aws.amazon.com/cloudformation/home) in the selected region.
 
-**Step 6.** Once deployed, take note of the `User Interface`, `User Pool` and, if you want to interact with [3P models providers](#3p-models-providers), the `Secret` where to store `API_KEYS` to access 3P model providers.
+**Step 7.** Once deployed, take note of the `User Interface`, `User Pool` and, if you want to interact with [3P models providers](#3p-models-providers), the `Secret` where to store `API_KEYS` to access 3P model providers.
 
 ```bash
 ...
@@ -150,13 +156,13 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 ...
 ```
 
-**Step 7.** Open the generated **Cognito User Pool** Link from outputs above i.e. `https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx`
+**Step 8.** Open the generated **Cognito User Pool** Link from outputs above i.e. `https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx`
 
-**Step 8.** Add a user that will be used to log into the web interface.
+**Step 9.** Add a user that will be used to log into the web interface.
 
-**Step 9.** Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`.
+**Step 10.** Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`.
 
-**Step 10.** Login with the user created in **Step 8** and follow the instructions.
+**Step 11.** Login with the user created in **Step 8** and follow the instructions.
 
 ## Run user interface locally
 

@@ -31,6 +31,7 @@ export function CrossEncoderSelectorField(props: CrossEncoderSelectorProps) {
       try {
         const result = await apiClient.crossEncoders.getModels();
 
+        /* eslint-disable-next-line  @typescript-eslint/no-non-null-asserted-optional-chain */
         setCrossEncoderModels(result.data?.listCrossEncoders!);
         setCrossEncoderModelsStatus("finished");
       } catch (error) {
