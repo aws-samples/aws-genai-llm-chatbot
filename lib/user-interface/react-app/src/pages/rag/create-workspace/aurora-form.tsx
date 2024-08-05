@@ -114,6 +114,7 @@ function AuroraFooter(props: {
         </FormField>
         <HybridSearchField
           submitting={props.submitting}
+          disabled={!props.data.crossEncodingEnabled}
           errors={props.errors}
           checked={props.data.hybridSearch}
           onChange={props.onChange}
@@ -121,6 +122,7 @@ function AuroraFooter(props: {
         <CrossEncoderSelectorField
           errors={props.errors}
           submitting={props.submitting}
+          disabled={!props.data.crossEncodingEnabled}
           selectedModel={props.data.crossEncoderModel}
           onChange={props.onChange}
         />

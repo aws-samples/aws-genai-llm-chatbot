@@ -186,6 +186,7 @@ export default function Embeddings() {
   };
 
   const embeddingsModelOptions = EmbeddingsModelHelper.getSelectOptions(
+    appContext,
     embeddingsModelsResults
   );
 

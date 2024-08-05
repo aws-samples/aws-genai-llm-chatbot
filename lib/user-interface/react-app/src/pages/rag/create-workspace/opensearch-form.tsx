@@ -72,6 +72,7 @@ function OpenSearchFooter(props: {
       <SpaceBetween size="l">
         <HybridSearchField
           submitting={props.submitting}
+          disabled={!props.data.crossEncodingEnabled}
           errors={props.errors}
           checked={props.data.hybridSearch}
           onChange={props.onChange}
@@ -79,6 +80,7 @@ function OpenSearchFooter(props: {
         <CrossEncoderSelectorField
           errors={props.errors}
           submitting={props.submitting}
+          disabled={!props.data.crossEncodingEnabled}
           selectedModel={props.data.crossEncoderModel}
           onChange={props.onChange}
         />

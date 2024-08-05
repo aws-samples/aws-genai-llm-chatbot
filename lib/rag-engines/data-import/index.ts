@@ -132,7 +132,7 @@ export class DataImport extends Construct {
         processingBucket,
         auroraDatabase: props.auroraDatabase,
         ragDynamoDBTables: props.ragDynamoDBTables,
-        sageMakerRagModelsEndpoint: props.sageMakerRagModels?.model.endpoint,
+        sageMakerRagModelsEndpoint: props.sageMakerRagModels?.model?.endpoint,
         openSearchVector: props.openSearchVector,
       }
     );

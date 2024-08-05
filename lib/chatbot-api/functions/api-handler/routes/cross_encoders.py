@@ -30,14 +30,19 @@ def models():
 @tracer.capture_method
 def cross_encoders(input: dict):
     request = CrossEncodersRequest(**input)
-    selected_model = genai_core.cross_encoder.get_cross_encoder_model(
-        request.provider, request.model
-    )
+    config = genai_core.parameters.get_config()
+    crossEncodingEnabled = config["rag"]["crossEncodingEnabled"]
+    if (crossEncodingEnabled):
+        selected_model = genai_core.cross_encoder.get_cross_encoder_model(
+            request.provider, request.model
+        )
 
-    if selected_model is None:
-        raise genai_core.types.CommonError("Model not found")
+        if selected_model is None:
+            raise genai_core.types.CommonError("Model not found")
 
-    ret_value = genai_core.cross_encoder.rank_passages(
-        selected_model, request.reference, request.passages
-    )
-    return [{"score": v, "passage": p} for v, p in zip(ret_value, request.passages)]
+        ret_value = genai_core.cross_encoder.rank_passages(
+            selected_model, request.reference, request.passages
+        )
+        return [{"score": v, "passage": p} for v, p in zip(ret_value, request.passages)]
+
+    return [{"score": 0, "passage": p} for p in request.passages]

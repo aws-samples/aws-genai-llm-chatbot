@@ -23,10 +23,12 @@ export function getConfig(): SystemConfig {
     },
     llms: {
       // sagemaker: [SupportedSageMakerModels.FalconLite]
+      enableSagemakerModels: false,
       sagemaker: [],
     },
     rag: {
       enabled: false,
+      enableEmbeddingModelsViaSagemaker: false,
       engines: {
         aurora: {
           enabled: false,
@@ -45,11 +47,13 @@ export function getConfig(): SystemConfig {
           provider: "sagemaker",
           name: "intfloat/multilingual-e5-large",
           dimensions: 1024,
+          default: false,
         },
         {
           provider: "sagemaker",
           name: "sentence-transformers/all-MiniLM-L6-v2",
           dimensions: 384,
+          default: false,
         },
         {
           provider: "bedrock",
@@ -77,8 +81,10 @@ export function getConfig(): SystemConfig {
           provider: "openai",
           name: "text-embedding-ada-002",
           dimensions: 1536,
+          default: false,
         },
       ],
+      crossEncodingEnabled: false,
       crossEncoderModels: [
         {
           provider: "sagemaker",
