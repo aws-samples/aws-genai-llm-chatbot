@@ -14,7 +14,7 @@ import * as fs from "fs";
 function calculateHash(paths: string[]): string {
   return paths.reduce((mh, p) => {
     const dirs = fs.readdirSync(p);
-    let hash = calculateHash(
+    const hash = calculateHash(
       dirs
         .filter((d) => fs.statSync(path.join(p, d)).isDirectory())
         .map((v) => path.join(p, v))
@@ -57,9 +57,10 @@ export class SharedAssetBundler extends Construct {
       {
         path: assetPath,
         bundling: {
-          image: DockerImage.fromBuild(
-            path.posix.join(__dirname, "alpine-zip")
-          ),
+          image:
+            process.env.NODE_ENV === "test"
+              ? DockerImage.fromRegistry("dummy-skip-build-in-test")
+              : DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip")),
           command: [
             "zip",
             "-r",

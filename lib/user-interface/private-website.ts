@@ -85,7 +85,7 @@ export class PrivateWebsite extends Construct {
     }
 
     // Then, retrieve the Private IP Addresses for each ENI of the VPC Endpoint
-    let s3IPs: IpTarget[] = [];
+    const s3IPs: IpTarget[] = [];
     for (let index = 0; index < vpc.availabilityZones.length; index++) {
       const sdkCall: AwsSdkCall = {
         service: "EC2",

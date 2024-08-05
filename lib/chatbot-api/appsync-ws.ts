@@ -1,6 +1,11 @@
 import * as cdk from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
-import { Code, Function, LayerVersion, Runtime } from "aws-cdk-lib/aws-lambda";
+import {
+  Code,
+  Function as LambdaFunction,
+  LayerVersion,
+  Runtime,
+} from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { Construct } from "constructs";
 import { Shared } from "../shared";
@@ -19,7 +24,7 @@ interface RealtimeResolversProps {
 }
 
 export class RealtimeResolvers extends Construct {
-  public readonly outgoingMessageHandler: Function;
+  public readonly outgoingMessageHandler: LambdaFunction;
 
   constructor(scope: Construct, id: string, props: RealtimeResolversProps) {
     super(scope, id);
@@ -32,7 +37,7 @@ export class RealtimeResolvers extends Construct {
       }:094274105915:layer:AWSLambdaPowertoolsTypeScript:22`
     );
 
-    const resolverFunction = new Function(this, "lambda-resolver", {
+    const resolverFunction = new LambdaFunction(this, "lambda-resolver", {
       code: Code.fromAsset(
         "./lib/chatbot-api/functions/resolvers/send-query-lambda-resolver"
       ),

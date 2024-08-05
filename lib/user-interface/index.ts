@@ -1,6 +1,5 @@
 import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
-import * as cf from "aws-cdk-lib/aws-cloudfront";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cognito from "aws-cdk-lib/aws-cognito";
@@ -60,17 +59,16 @@ export class UserInterface extends Construct {
     });
 
     // Deploy either Private (only accessible within VPC) or Public facing website
-    let apiEndpoint: string;
-    let websocketEndpoint: string;
     let distribution;
-    let publishedDomain: string;
+    let redirectSignIn: string;
 
     if (props.config.privateWebsite) {
-      const privateWebsite = new PrivateWebsite(this, "PrivateWebsite", {
+      new PrivateWebsite(this, "PrivateWebsite", {
         ...props,
         websiteBucket: websiteBucket,
       });
       this.publishedDomain = props.config.domain ? props.config.domain : "";
+      redirectSignIn = `https://${this.publishedDomain}/index.html`;
     } else {
       const publicWebsite = new PublicWebsite(this, "PublicWebsite", {
         ...props,
@@ -78,6 +76,7 @@ export class UserInterface extends Construct {
       });
       distribution = publicWebsite.distribution;
       this.publishedDomain = distribution.distributionDomainName;
+      redirectSignIn = `https://${this.publishedDomain}`;
     }
 
     const exportsAsset = s3deploy.Source.jsonData("aws-exports.json", {
@@ -95,7 +94,7 @@ export class UserInterface extends Construct {
       oauth: props.config.cognitoFederation?.enabled
         ? {
             domain: `${props.config.cognitoFederation.cognitoDomain}.auth.${cdk.Aws.REGION}.amazoncognito.com`,
-            redirectSignIn: `https://${this.publishedDomain}`,
+            redirectSignIn: redirectSignIn,
             redirectSignOut: `https://${this.publishedDomain}`,
             Scopes: ["email", "openid"],
             responseType: "code",

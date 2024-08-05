@@ -38,6 +38,7 @@ import {
   ChatBotHeartbeatRequest,
   ChatBotModelInterface,
   FeedbackData,
+  ChatBotToken,
 } from "./types";
 import { LoadingStatus, ModelInterface } from "../../common/types";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
@@ -119,7 +120,9 @@ export default function MultiChat() {
     (async () => {
       const apiClient = new ApiClient(appContext);
       let workspaces: Workspace[] = [];
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let modelsResult: GraphQLResult<any>;
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
         if (appContext?.config.rag_enabled) {
@@ -137,6 +140,7 @@ export default function MultiChat() {
 
         const models = modelsResult.data
           ? modelsResult.data.listModels.filter(
+              /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
               (m: any) =>
                 m.inputModalities.includes(ChabotInputModality.Text) &&
                 m.outputModalities.includes(ChabotOutputModality.Text)
@@ -158,7 +162,7 @@ export default function MultiChat() {
       });
       refChatSessions.current = [];
     };
-  }, [appContext]);
+  }, [appContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const enabled =
     readyState === ReadyState.OPEN &&
@@ -229,6 +233,7 @@ export default function MultiChat() {
 
   function subscribe(sessionId: string): ZenObservable.Subscription {
     console.log("Subscribing to AppSync");
+    const messageTokens: { [key: string]: ChatBotToken[] } = {};
     const sub = API.graphql<GraphQLSubscription<ReceiveMessagesSubscription>>({
       query: receiveMessages,
       variables: {
@@ -240,7 +245,6 @@ export default function MultiChat() {
         const data = value.data!.receiveMessages?.data;
         if (data !== undefined && data !== null) {
           const response: ChatBotMessageResponse = JSON.parse(data);
-          console.log(JSON.stringify(response));
           if (response.action === ChatBotAction.Heartbeat) {
             console.log("Heartbeat pong!");
             return;
@@ -254,7 +258,8 @@ export default function MultiChat() {
             updateMessageHistoryRef(
               session.id,
               session.messageHistory,
-              response
+              response,
+              messageTokens
             );
             if ((response.action = ChatBotAction.FinalResponse)) {
               session.running = false;

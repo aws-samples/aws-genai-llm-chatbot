@@ -1,4 +1,3 @@
-import * as cdk from "aws-cdk-lib";
 import * as scheduler from "aws-cdk-lib/aws-scheduler";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";

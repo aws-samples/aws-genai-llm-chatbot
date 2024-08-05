@@ -1,4 +1,3 @@
-import * as cdk from "aws-cdk-lib";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import { Construct } from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -391,7 +390,7 @@ export class Models extends Construct {
     this.modelsParameter = modelsParameter;
 
     if (models.length > 0 && props.config.llms?.sagemakerSchedule?.enabled) {
-      let schedulerRole: iam.Role = new iam.Role(this, "SchedulerRole", {
+      const schedulerRole: iam.Role = new iam.Role(this, "SchedulerRole", {
         assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
         description: "Role for Scheduler to interact with SageMaker",
       });

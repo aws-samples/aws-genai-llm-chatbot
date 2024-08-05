@@ -19,6 +19,8 @@ import { getData } from "country-list";
 import { randomBytes } from "crypto";
 import { StringUtils } from "turbocommons-ts";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
   const timeZones = tz.names(); // Get a list of all timezones
   const timeZoneData = timeZones.map((zone) => {
@@ -130,7 +132,7 @@ const embeddingModels = [
  */
 
 (async () => {
-  let program = new Command().description(
+  const program = new Command().description(
     "Creates a new chatbot configuration"
   );
   program.version(LIB_VERSION);
@@ -176,7 +178,12 @@ const embeddingModels = [
         config.llms?.sagemakerSchedule?.startScheduleEndDate;
       options.enableRag = config.rag.enabled;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
-        (v: string) => (config.rag.engines as any)[v].enabled
+        (v: string) =>
+          (
+            config.rag.engines as {
+              [key: string]: { enabled: boolean };
+            }
+          )[v].enabled
       );
       if (
         options.ragsToEnable.includes("kendra") &&
@@ -184,9 +191,9 @@ const embeddingModels = [
       ) {
         options.ragsToEnable.pop("kendra");
       }
-      options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
+      options.embeddings = config.rag.embeddingsModels.map((m) => m.name);
       options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
-        (m: any) => m.default
+        (m) => m.default
       )[0].name;
       options.kendraExternal = config.rag.engines.kendra.external;
       options.kbExternal = config.rag.engines.knowledgeBase?.external ?? [];
@@ -218,9 +225,11 @@ const embeddingModels = [
     }
     try {
       await processCreateOptions(options);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Could not complete the operation.");
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
       process.exit(1);
     }
   });
@@ -240,7 +249,7 @@ function createConfig(config: any): void {
  * @returns The complete options
  */
 async function processCreateOptions(options: any): Promise<void> {
-  let questions = [
+  const questions = [
     {
       type: "input",
       name: "prefix",
@@ -621,7 +630,7 @@ async function processCreateOptions(options: any): Promise<void> {
   let newKendra = answers.enableRag && answers.kendra;
   const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
-    let existingIndex: any = existingKendraIndices.pop();
+    const existingIndex: any = existingKendraIndices.pop();
     const kendraQ = [
       {
         type: "input",

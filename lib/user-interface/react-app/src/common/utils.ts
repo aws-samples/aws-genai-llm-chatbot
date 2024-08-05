@@ -78,6 +78,7 @@ export class Utils {
     return null;
   }
 
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
   static getErrorMessage(error: any) {
     if (error.errors) {
       return error.errors.map((e: any) => e.message).join(", ");
@@ -85,6 +86,7 @@ export class Utils {
 
     return "Unknown error";
   }
+  /* eslint-enable  @typescript-eslint/no-explicit-any */
 
   static urlSearchParamsToRecord(
     params: URLSearchParams
