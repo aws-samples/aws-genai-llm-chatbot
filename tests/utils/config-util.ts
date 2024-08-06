@@ -34,13 +34,7 @@ export function getTestConfig(): SystemConfig {
           enterprise: true,
         },
         knowledgeBase: {
-          enabled: true,
-          external: [
-            {
-              name: "test",
-              knowledgeBaseId: "ABCDEIWED",
-            },
-          ],
+          enabled: false,
         },
       },
       embeddingsModels: [
