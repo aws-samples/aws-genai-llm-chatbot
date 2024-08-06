@@ -40,7 +40,6 @@ export default function KBForm(props: KBFormProps) {
       const apiClient = new ApiClient(appContext);
       try {
         const result = await apiClient.bedrockKB.listKnowledgeBases();
-        console.log(result);
         const data = result.data?.listBedrockKnowledgeBases.sort((a, b) =>
           a.name.localeCompare(b.name)
         );
