@@ -33,6 +33,15 @@ export function getTestConfig(): SystemConfig {
           createIndex: true,
           enterprise: true,
         },
+        knowledgeBase: {
+          enabled: true,
+          external: [
+            {
+              name: "test",
+              knowledgeBaseId: "ABCDEIWED",
+            },
+          ],
+        },
       },
       embeddingsModels: [
         {

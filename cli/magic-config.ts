@@ -702,10 +702,10 @@ async function processCreateOptions(options: any): Promise<void> {
   // Knowledge Bases
   let newKB =
     answers.enableRag && answers.ragsToEnable.includes("knowledgeBase");
-  let kbExternal: any[] = [];
+  const kbExternal: any[] = [];
   const existingKBIndices = Array.from(options.kbExternal || []);
   while (newKB === true) {
-    let existingIndex: any = existingKBIndices.pop();
+    const existingIndex: any = existingKBIndices.pop();
     const kbQ = [
       {
         type: "input",
