@@ -104,7 +104,6 @@ export default function KBForm(props: KBFormProps) {
           checked={props.data.hybridSearch}
           onChange={props.onChange}
         />
-        <MetadataFilter />
       </SpaceBetween>
     </Container>
   );
