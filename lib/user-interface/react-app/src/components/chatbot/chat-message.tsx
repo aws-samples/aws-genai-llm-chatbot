@@ -90,6 +90,7 @@ export default function ChatMessage(props: ChatMessageProps) {
     <div>
       {props.message?.type === ChatBotMessageType.AI && (
         <Container
+          data-locator='chatbot-ai-container'
           footer={
             ((props?.showMetadata && props.message.metadata) ||
               (props.message.metadata &&
@@ -237,6 +238,7 @@ export default function ChatMessage(props: ChatMessageProps) {
           {props.message.content.length > 0 ? (
             <div className={styles.btn_chabot_message_copy}>
               <Popover
+                data-locator='copy-clipboard'
                 size="medium"
                 position="top"
                 triggerType="custom"
