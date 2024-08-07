@@ -164,6 +164,14 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 **Step 11.** Login with the user created in **Step 8** and follow the instructions.
 
+**Step 12.** (Optional) Run the integration tests
+The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` which needs to be enabled in Bedrock.
+
+To run the tests (Replace the url with the one you used in the steps above)
+```bash
+REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/
+```
+
 ## Run user interface locally
 
 To experiment with changes to the the user interface, you can run the interface locally. See the instructions in the README file of the [`lib/user-interface/react-app`](https://github.com/aws-samples/aws-genai-llm-chatbot/blob/main/lib/user-interface/react-app/README.md) folder.
