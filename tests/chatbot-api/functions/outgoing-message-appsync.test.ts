@@ -18,16 +18,16 @@ const validEvent: SQSEvent = {
     {
       body: JSON.stringify({
         Message: JSON.stringify({
-          userId: "userId9999",
-          data: { sessionId: "sessionId9999", token: { sequenceNumber: 9999 } },
+          userId: "userId1",
+          data: { sessionId: "sessionId1", token: { sequenceNumber: 1 } },
         }),
       }),
     } as SQSRecord,
     {
       body: JSON.stringify({
         Message: JSON.stringify({
-          userId: "userId1",
-          data: { sessionId: "sessionId1", token: { sequenceNumber: 1 } },
+          userId: "userId9999",
+          data: { sessionId: "sessionId9999", token: { sequenceNumber: 9999 } },
         }),
       }),
     } as SQSRecord,
