@@ -103,7 +103,6 @@ export class UserInterface extends Construct {
       aws_appsync_graphqlEndpoint: props.api.graphqlApi.graphqlUrl,
       aws_appsync_region: cdk.Aws.REGION,
       aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
-      aws_appsync_apiKey: props.api.graphqlApi?.apiKey,
       Storage: {
         AWSS3: {
           bucket: props.chatbotFilesBucket.bucketName,
