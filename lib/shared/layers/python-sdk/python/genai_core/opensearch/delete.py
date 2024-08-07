@@ -18,7 +18,7 @@ WORKSPACE_OBJECT_TYPE = "workspace"
 dynamodb = boto3.resource("dynamodb")
 
 
-def delete_open_search_workspace(workspace: dict):
+def delete_workspace(workspace: dict):
     workspace_id = workspace["workspace_id"]
     index_name = workspace_id.replace("-", "")
 
@@ -66,7 +66,7 @@ def delete_open_search_workspace(workspace: dict):
                         "document_id": item["document_id"],
                     }
                 )
-                
+
     print(f"Deleted {len(items_to_delete)} items.")
 
     response = workspaces_table.delete_item(
