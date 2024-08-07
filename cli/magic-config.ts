@@ -158,6 +158,8 @@ const embeddingModels = [
       options.huggingfaceApiSecretArn = config.llms?.huggingfaceApiSecretArn;
       options.enableSagemakerModelsSchedule =
         config.llms?.sagemakerSchedule?.enabled;
+      options.enableSagemakerModelsSchedule =
+        config.llms?.sagemakerSchedule?.enabled;
       options.timezonePicker = config.llms?.sagemakerSchedule?.timezonePicker;
       options.enableCronFormat =
         config.llms?.sagemakerSchedule?.enableCronFormat;
@@ -194,6 +196,7 @@ const embeddingModels = [
         (m) => m.default
       )[0].name;
       options.kendraExternal = config.rag.engines.kendra.external;
+      options.kbExternal = config.rag.engines.knowledgeBase?.external ?? [];
       options.kendraEnterprise = config.rag.engines.kendra.enterprise;
 
       // Advanced settings
@@ -586,6 +589,7 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "Aurora", name: "aurora" },
         { message: "OpenSearch", name: "opensearch" },
         { message: "Kendra (managed)", name: "kendra" },
+        { message: "Bedrock KnowldgeBase", name: "knowledgeBase" },
       ],
       validate(choices: any) {
         return (this as any).skipped || choices.length > 0
@@ -694,6 +698,82 @@ async function processCreateOptions(options: any): Promise<void> {
     });
     newKendra = kendraInstance.newKendra;
   }
+
+  // Knowledge Bases
+  let newKB =
+    answers.enableRag && answers.ragsToEnable.includes("knowledgeBase");
+  const kbExternal: any[] = [];
+  const existingKBIndices = Array.from(options.kbExternal || []);
+  while (newKB === true) {
+    const existingIndex: any = existingKBIndices.pop();
+    const kbQ = [
+      {
+        type: "input",
+        name: "name",
+        message: "KnowledgeBase source name",
+        validate(v: string) {
+          return RegExp(/^\w[\w-_]*\w$/).test(v);
+        },
+        initial: existingIndex?.name,
+      },
+      {
+        type: "autocomplete",
+        limit: 8,
+        name: "region",
+        choices: ["us-east-1", "us-west-2"],
+        message: `Region of the Bedrock Knowledge Base index${
+          existingIndex?.region ? " (" + existingIndex?.region + ")" : ""
+        }`,
+        initial: ["us-east-1", "us-west-2"].indexOf(existingIndex?.region),
+      },
+      {
+        type: "input",
+        name: "roleArn",
+        message:
+          "Cross account role Arn to assume to call the Bedrock KnowledgeBase, leave empty if not needed",
+        validate: (v: string) => {
+          const valid = iamRoleRegExp.test(v);
+          return v.length === 0 || valid;
+        },
+        initial: existingIndex?.roleArn ?? "",
+      },
+      {
+        type: "input",
+        name: "knowledgeBaseId",
+        message: "Bedrock KnowledgeBase ID",
+        validate(v: string) {
+          return /[A-Z0-9]{10}/.test(v);
+        },
+        initial: existingIndex?.knowledgeBaseId,
+      },
+      {
+        type: "confirm",
+        name: "enabled",
+        message: "Enable this knowledge base",
+        initial: existingIndex?.enabled ?? true,
+      },
+      {
+        type: "confirm",
+        name: "newKB",
+        message: "Do you want to add another Bedrock KnowledgeBase source",
+        initial: false,
+      },
+    ];
+    const kbInstance: any = await enquirer.prompt(kbQ);
+    const ext = (({ enabled, name, roleArn, knowledgeBaseId, region }) => ({
+      enabled,
+      name,
+      roleArn,
+      knowledgeBaseId,
+      region,
+    }))(kbInstance);
+    if (ext.roleArn === "") ext.roleArn = undefined;
+    kbExternal.push({
+      ...ext,
+    });
+    newKB = kbInstance.newKB;
+  }
+
   const modelsPrompts = [
     {
       type: "select",
@@ -1078,6 +1158,10 @@ async function processCreateOptions(options: any): Promise<void> {
           external: [{}],
           enterprise: false,
         },
+        knowledgeBase: {
+          enabled: false,
+          external: [{}],
+        },
       },
       embeddingsModels: [{}],
       crossEncoderModels: [{}],
@@ -1107,6 +1191,9 @@ async function processCreateOptions(options: any): Promise<void> {
     config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.engines.kendra.enterprise = answers.kendraEnterprise;
+  config.rag.engines.knowledgeBase.enabled =
+    config.rag.engines.knowledgeBase.external.length > 0;
+  config.rag.engines.knowledgeBase.external = [...kbExternal];
 
   console.log("\n✨ This is the chosen configuration:\n");
   console.log(JSON.stringify(config, undefined, 2));

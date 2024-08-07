@@ -4,6 +4,7 @@ import uuid
 import boto3
 import genai_core.embeddings
 from datetime import datetime
+from .types import WorkspaceStatus
 from genai_core.types import Task
 
 dynamodb = boto3.resource("dynamodb")
@@ -120,7 +121,7 @@ def create_workspace_aurora(
         "object_type": WORKSPACE_OBJECT_TYPE,
         "format_version": 1,
         "name": workspace_name,
-        "engine": "aurora",
+        "engine": WorkspaceStatus.SUBMITTED.value,
         "status": "submitted",
         "embeddings_model_provider": embeddings_model_provider,
         "embeddings_model_name": embeddings_model_name,
@@ -188,7 +189,7 @@ def create_workspace_open_search(
         "format_version": 1,
         "name": workspace_name,
         "engine": "opensearch",
-        "status": "submitted",
+        "status": WorkspaceStatus.SUBMITTED,
         "embeddings_model_provider": embeddings_model_provider,
         "embeddings_model_name": embeddings_model_name,
         "embeddings_model_dimensions": embeddings_model_dimensions,
@@ -240,7 +241,7 @@ def create_workspace_kendra(
         "format_version": 1,
         "name": workspace_name,
         "engine": "kendra",
-        "status": "submitted",
+        "status": WorkspaceStatus.SUBMITTED.value,
         "kendra_index_id": kendra_index_id,
         "kendra_index_external": kendra_index_external,
         "kendra_use_all_data": use_all_data,
@@ -263,6 +264,37 @@ def create_workspace_kendra(
         ),
     )
 
+    print(response)
+
+    return item
+
+
+def create_workspace_bedrock_kb(
+    workspace_name: str, knowledge_base: dict, hybrid_search: bool
+):
+    workspace_id = str(uuid.uuid4())
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    knowledge_base_id = knowledge_base["id"]
+    external = knowledge_base["external"]
+
+    item = {
+        "workspace_id": workspace_id,
+        "object_type": WORKSPACE_OBJECT_TYPE,
+        "format_version": 1,
+        "name": workspace_name,
+        "engine": "bedrock_kb",
+        "status": WorkspaceStatus.READY.value,
+        "knowledge_base_id": knowledge_base_id,
+        "knowledge_base_external": external,
+        "hybrid_search": hybrid_search,
+        "documents": 0,
+        "vectors": 0,
+        "size_in_bytes": 0,
+        "created_at": timestamp,
+        "updated_at": timestamp,
+    }
+
+    response = table.put_item(Item=item)
     print(response)
 
     return item

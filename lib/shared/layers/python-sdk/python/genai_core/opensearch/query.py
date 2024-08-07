@@ -128,7 +128,14 @@ def query_workspace_open_search(
         ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[
             :limit
         ]
-        if len(ret_items) < limit:
+        if len(ret_items) < limit and len(unique_items) > len(ret_items):
+            unique_items = list(
+                filter(
+                    lambda record: record["chunk_id"]
+                    not in [r["chunk_id"] for r in ret_items],
+                    unique_items,
+                )
+            )
             unique_items = sorted(
                 unique_items, key=lambda x: x["vector_search_score"] or -1, reverse=True
             )
