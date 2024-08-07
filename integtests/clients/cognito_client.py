@@ -1,13 +1,13 @@
-
 import boto3
 import string
 import random
+
 
 class CognitoClient:
     def __init__(self, region: str, user_pool_id: str, client_id: str) -> None:
         self.user_pool_id = user_pool_id
         self.client_id = client_id
-        self.cognito_idp_client = boto3.client('cognito-idp', region_name=region)
+        self.cognito_idp_client = boto3.client("cognito-idp", region_name=region)
 
     def get_token(self, email: str) -> None:
         try:
@@ -20,42 +20,33 @@ class CognitoClient:
                 UserPoolId=self.user_pool_id,
                 Username=email,
                 UserAttributes=[
-                    {
-                        'Name': 'email',
-                        'Value': email
-                    },
-                    {
-                        'Name': 'email_verified',
-                        'Value': 'True'
-                    }
+                    {"Name": "email", "Value": email},
+                    {"Name": "email_verified", "Value": "True"},
                 ],
                 MessageAction="SUPPRESS",
             )
-            
+
         password = self.get_password()
         self.cognito_idp_client.admin_set_user_password(
             UserPoolId=self.user_pool_id,
             Username=email,
             Password=password,
-            Permanent=True
+            Permanent=True,
         )
-        
+
         response = self.cognito_idp_client.admin_initiate_auth(
             UserPoolId=self.user_pool_id,
             ClientId=self.client_id,
             AuthFlow="ADMIN_NO_SRP_AUTH",
-            AuthParameters={
-                "USERNAME": email,
-                "PASSWORD": password
-            }
+            AuthParameters={"USERNAME": email, "PASSWORD": password},
         )
-        
+
         return response["AuthenticationResult"]["IdToken"]
-        
+
     def get_password(self):
         return "".join(
-            random.choices(string.ascii_uppercase, k=10) +
-            random.choices(string.ascii_lowercase, k=10) +
-            random.choices(string.digits, k=5) +
-            random.choices(string.punctuation, k=3)
+            random.choices(string.ascii_uppercase, k=10)
+            + random.choices(string.ascii_lowercase, k=10)
+            + random.choices(string.digits, k=5)
+            + random.choices(string.punctuation, k=3)
         )
