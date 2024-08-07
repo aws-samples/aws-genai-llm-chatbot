@@ -7,9 +7,7 @@ from graphql import print_ast
 
 class AppSyncClient:
     def __init__(self, endpoint: str, id_token: str) -> None:
-        self.transport = AIOHTTPTransport(
-            url=endpoint
-        )
+        self.transport = AIOHTTPTransport(url=endpoint)
         if id_token is not None:
             self.transport.headers = {"Authorization": id_token}
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -30,6 +28,34 @@ class AppSyncClient:
     def send_query(self, data: str):
         query = dsl_gql(DSLMutation(self.schema.Mutation.sendQuery.args(data=data)))
         return self.client.execute(query)
+
+    def list_models(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listModels.select(
+                    self.schema.Model.name,
+                    self.schema.Model.provider,
+                    self.schema.Model.interface,
+                    self.schema.Model.ragSupported,
+                    self.schema.Model.inputModalities,
+                    self.schema.Model.outputModalities,
+                    self.schema.Model.streaming,
+                )
+            )
+        )
+        return self.client.execute(query).get("listModels")
+
+    def list_rag_engines(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listRagEngines.select(
+                    self.schema.RagEngine.id,
+                    self.schema.RagEngine.name,
+                    self.schema.RagEngine.enabled,
+                )
+            )
+        )
+        return self.client.execute(query).get("listRagEngines")
 
     def delete_session(self, id: str):
         query = dsl_gql(
@@ -86,3 +112,33 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("getSession")
+
+    def create_opensearch_workspace(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.createOpenSearchWorkspace.args(input=input).select(
+                    self.schema.Workspace.id,
+                )
+            )
+        )
+        return self.client.execute(query).get("createOpenSearchWorkspace")
+    
+    def list_workspaces(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listWorkspaces.select(
+                    self.schema.Workspace.id,
+                    self.schema.Workspace.name,
+                )
+            )
+        )
+        return self.client.execute(query).get("listWorkspaces")
+    
+    def delete_workspace(self, id):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.deleteWorkspace.args(workspaceId=id)
+            )
+        )
+        return self.client.execute(query)
+    

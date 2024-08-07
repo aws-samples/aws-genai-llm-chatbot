@@ -189,7 +189,7 @@ def create_workspace_open_search(
         "format_version": 1,
         "name": workspace_name,
         "engine": "opensearch",
-        "status": WorkspaceStatus.SUBMITTED,
+        "status": WorkspaceStatus.SUBMITTED.value,
         "embeddings_model_provider": embeddings_model_provider,
         "embeddings_model_name": embeddings_model_name,
         "embeddings_model_dimensions": embeddings_model_dimensions,
