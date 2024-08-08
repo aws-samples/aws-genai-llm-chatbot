@@ -1,14 +1,12 @@
+import json
 import time
+import uuid
 import pytest
 from clients.appsync_client import AppSyncClient
 
+
 @pytest.fixture(scope="module", autouse=True)
 def run_before_and_after_tests(client: AppSyncClient):
-    rag_engines = client.list_rag_engines()
-    engine = next(i for i in rag_engines if i.get("id") == "opensearch")
-    if engine.get("enabled") == False:
-        pytest.skip("Open search is not enabled.", allow_module_level=True)
-
     for workspace in client.list_workspaces():
         if (
             workspace.get("name") == "INTEG_TEST_OPEN_SEARCH"
@@ -18,6 +16,12 @@ def run_before_and_after_tests(client: AppSyncClient):
 
 
 def test_create(client: AppSyncClient, default_embed_model):
+    rag_engines = client.list_rag_engines()
+    engine = next(i for i in rag_engines if i.get("id") == "opensearch")
+    pytest.skip_flag = False
+    if engine.get("enabled") == False:
+        pytest.skip_flag = True
+        pytest.skip("Open search is not enabled.")
     pytest.workspace = client.create_opensearch_workspace(
         input={
             "kind": "aoss",
@@ -49,11 +53,13 @@ def test_create(client: AppSyncClient, default_embed_model):
 
 
 def test_add_text(client: AppSyncClient):
+    if pytest.skip_flag == True:
+        pytest.skip("Open search is not enabled.")
     pytest.document = client.add_text(
         input={
             "workspaceId": pytest.workspace.get("id"),
             "title": "INTEG_TEST_OPEN_SEARCH_TITLE",
-            "content": "INTEG_TEST_OPEN_SERCH_CONTENT",
+            "content": "The Integ Test flower is green.",
         }
     )
     # This test can take several minutes because it's waiting for AWSBatch to start a host
@@ -77,8 +83,11 @@ def test_add_text(client: AppSyncClient):
 
 
 def test_search_document(client: AppSyncClient):
+    if pytest.skip_flag == True:
+        pytest.skip("Open search is not enabled.")
     ready = False
     retries = 0
+    # wait for the open search index update
     while not ready and retries < 50:
         time.sleep(15)
         retries += 1
@@ -91,20 +100,58 @@ def test_search_document(client: AppSyncClient):
         if len(result.get("items")) == 1:
             ready = True
             assert result.get("engine") == "opensearch"
-            assert result.get("items")[0].get("content") == "INTEG_TEST_OPEN_SERCH_CONTENT"
-            break
+            assert result.get("items")[0].get("documentId") == pytest.document.get("documentId")
     assert ready == True
-    
+
+
+def test_query_llm(client, default_model, default_provider):
+    session_id = str(uuid.uuid4())
+    request = {
+        "action": "run",
+        "modelInterface": "langchain",
+        "data": {
+            "mode": "chain",
+            "text": "What is the integ test flower color?",
+            "files": [],
+            "modelName": default_model,
+            "provider": default_provider,
+            "workspaceId": pytest.workspace.get("id"),
+            "sessionId": session_id,
+            "modelKwargs": {"temperature": 0},
+        },
+    }
+
+    client.send_query(json.dumps(request))
+
+    found = False
+    retries = 0
+    while not found and retries < 15:
+        time.sleep(1)
+        retries += 1
+        session = client.get_session(session_id)
+        if (
+            session != None
+            and len(session.get("history")) == 2
+            and "green" in session.get("history")[1].get("content").lower()
+        ):
+            found = True
+            break
+    client.delete_session(session_id)
+    assert found == True
+
+
 def test_delete_document(client: AppSyncClient):
+    if pytest.skip_flag == True:
+        pytest.skip("Open search is not enabled.")
     client.delete_document(
         input={
             "workspaceId": pytest.workspace.get("id"),
             "documentId": pytest.document.get("documentId"),
         }
     )
-    # This test can take several minutes because it's waiting for AWSBatch to start a host
     ready = False
     retries = 0
+    # Wait for the removal (step function)
     while not ready and retries < 50:
         time.sleep(15)
         retries += 1
@@ -118,10 +165,13 @@ def test_delete_document(client: AppSyncClient):
             ready = True
             break
     assert ready == True
-    
-def test_delete_document(client: AppSyncClient):
+
+
+def test_delete_workspace(client: AppSyncClient):
+    if pytest.skip_flag == True:
+        pytest.skip("Open search is not enabled.")
     client.delete_workspace(pytest.workspace.get("id"))
-    # This test can take several minutes because it's waiting for AWSBatch to start a host
+    # Wait for the removal (step function)
     ready = False
     retries = 0
     while not ready and retries < 50:

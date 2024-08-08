@@ -209,8 +209,34 @@ class AppSyncClient:
     def delete_document(self, input):
         query = dsl_gql(
             DSLMutation(
-                self.schema.Mutation.deleteDocument.args(input=input)
+                self.schema.Mutation.deleteDocument.args(input=input).select(
+                    self.schema.DeleteDocumentResult.deleted,
+                    self.schema.DeleteDocumentResult.documentId,
+                )
             )
         )
         return self.client.execute(query)
+    
+    def calculate_embeding(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.calculateEmbeddings.args(input=input).select(
+                    self.schema.Embedding.passage,
+                    self.schema.Embedding.vector,
+                )
+            )
+        )
+        return self.client.execute(query).get("calculateEmbeddings")
+    
+    
+    def rank_passages(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.rankPassages.args(input=input).select(
+                    self.schema.PassageRank.score,
+                    self.schema.PassageRank.passage,
+                )
+            )
+        )
+        return self.client.execute(query).get("rankPassages")
     
