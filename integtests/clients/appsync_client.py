@@ -134,10 +134,82 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("listWorkspaces")
     
+    def list_workspaces(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listWorkspaces.select(
+                    self.schema.Workspace.id,
+                    self.schema.Workspace.name,
+                    self.schema.Workspace.status,
+                )
+            )
+        )
+        return self.client.execute(query).get("listWorkspaces")
+    
+    def get_workspace(self, id):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.getWorkspace.args(workspaceId=id).select(
+                    self.schema.Workspace.id,
+                    self.schema.Workspace.name,
+                    self.schema.Workspace.status,
+                )
+            )
+        )
+        return self.client.execute(query).get("getWorkspace")
+    
     def delete_workspace(self, id):
         query = dsl_gql(
             DSLMutation(
                 self.schema.Mutation.deleteWorkspace.args(workspaceId=id)
+            )
+        )
+        return self.client.execute(query)
+    
+    def add_text(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.addTextDocument.args(input=input).select(
+                    self.schema.DocumentResult.documentId,
+                    self.schema.DocumentResult.status
+                )
+            )
+        )
+        return self.client.execute(query).get("addTextDocument")
+    
+    
+    def get_document(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.getDocument.args(input=input).select(
+                    self.schema.Document.workspaceId,
+                    self.schema.Document.id,
+                    self.schema.Document.status
+                )
+            )
+        )
+        return self.client.execute(query).get("getDocument")
+    
+    def semantic_search(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.performSemanticSearch.args(input=input).select(
+                    self.schema.SemanticSearchResult.engine,
+                    self.schema.SemanticSearchResult.workspaceId,
+                    self.schema.SemanticSearchResult.items.select(
+                        self.schema.SemanticSearchItem.content,
+                        self.schema.SemanticSearchItem.documentId,
+                        self.schema.SemanticSearchItem.score
+                        ),
+                )
+            )
+        )
+        return self.client.execute(query).get("performSemanticSearch")
+    
+    def delete_document(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.deleteDocument.args(input=input)
             )
         )
         return self.client.execute(query)
