@@ -165,7 +165,7 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 **Step 11.** Login with the user created in **Step 8** and follow the instructions.
 
 **Step 12.** (Optional) Run the integration tests
-The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` which needs to be enabled in Bedrock.
+The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` and `amazon.titan-embed-text-v1` which need to be enabled in Bedrock.
 
 To run the tests (Replace the url with the one you used in the steps above)
 ```bash
