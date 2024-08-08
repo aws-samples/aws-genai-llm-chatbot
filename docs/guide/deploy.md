@@ -169,7 +169,7 @@ The tests require to be authenticated against your AWS Account because it will c
 
 To run the tests (Replace the url with the one you used in the steps above)
 ```bash
-REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/
+REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/ --ignore integtests/user_interface
 ```
 
 ## Run user interface locally

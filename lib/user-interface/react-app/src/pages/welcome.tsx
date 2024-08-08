@@ -33,6 +33,7 @@ export default function Welcome() {
           header={
             <Header
               variant="h1"
+              data-locator="welcome-header"
               description="An opensource, modular and comprehensive solution to deploy a multi-model and multi-RAG powered chatbot using AWS CDK on AWS."
               actions={
                 <RouterButton
