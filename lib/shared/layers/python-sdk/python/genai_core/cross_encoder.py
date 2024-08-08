@@ -18,6 +18,8 @@ def rank_passages(
 
     if model.provider == "sagemaker":
         return _rank_passages_sagemaker(model, input, passages)
+    elif model.provider == "cohere":
+        return _rank_passages_cohere(model, input, passages)
 
     raise genai_core.typesCommonError(f"Unknown provider")
 
@@ -28,6 +30,10 @@ def get_cross_encoder_models():
 
     if not SAGEMAKER_RAG_MODELS_ENDPOINT:
         models = list(filter(lambda x: x["provider"] != "sagemaker", models))
+
+    for model in models:
+        if 'default' not in model:
+            model['default'] = False
 
     return models
 
@@ -66,3 +72,24 @@ def _rank_passages_sagemaker(
     ret_value = json.loads(response["Body"].read().decode())
 
     return ret_value
+
+def _rank_passages_cohere(
+    model: genai_core.types.CrossEncoderModel, input: str, passages: List[str]
+):
+    cohere_client = genai_core.clients.get_cohere_client()
+    if not cohere_client:
+        raise genai_core.types.CommonError("Cohere API key not set")
+
+    results = cohere_client.rerank(
+        query=input,
+        documents=passages,
+        model=model.name,
+    )
+
+    return [
+        genai_core.types.RankedPassage(
+            passage=passage,
+            score=result.relevance_score,
+        )
+        for passage, result in zip(passages, results)
+    ]

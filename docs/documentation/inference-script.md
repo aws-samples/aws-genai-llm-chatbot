@@ -30,3 +30,19 @@ The API is JSON body based:
   "passages": ["I love Paris", "I love London"]
 }
 ```
+
+## Cohere Rerank 3
+
+To use the Cohere Rerank 3 model, get an API key from Cohere, and include the following in the JSON request body:
+
+```json
+{
+  "type": "cross-encoder",
+  "model": "rerank-english-v3.0",
+  "input": "What is the capital of the United States?",
+  "passages": [
+    "Carson City is the capital city of the American state of Nevada.",
+    "Washington, D.C. is the capital of the United States.",
+    ...
+  ]
+}

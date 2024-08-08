@@ -141,7 +141,7 @@ export class IdeficsInterface extends Construct {
       new iam.PolicyStatement({
         actions: ["kms:Decrypt", "kms:ReEncryptFrom"],
         effect: iam.Effect.ALLOW,
-        resources: ["arn:aws:kms:*"],
+        resources: ["*"],
       })
     );
 

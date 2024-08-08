@@ -88,6 +88,11 @@ export function getConfig(): SystemConfig {
           name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
           default: true,
         },
+        {
+          provider: "cohere",
+          name: "rerank-english-v3.0",
+          default: false,
+        },
       ],
     },
   };

@@ -1,4 +1,5 @@
 import boto3
+import cohere
 import openai
 import genai_core.types
 import genai_core.parameters
@@ -52,3 +53,12 @@ def get_bedrock_client(service_name="bedrock-runtime"):
         bedrock_config_data["aws_session_token"] = credentials["SessionToken"]
 
     return boto3.client(**bedrock_config_data)
+
+def get_cohere_client():
+    api_key = genai_core.parameters.get_external_api_key("COHERE_API_KEY")
+    if not api_key:
+        return None
+
+    cohere_client = cohere.Client(api_key)
+
+    return cohere_client

@@ -27,7 +27,7 @@ embeddings_models = [
     "intfloat/multilingual-e5-large",
     "sentence-transformers/all-MiniLM-L6-v2",
 ]
-cross_encoder_models = ["cross-encoder/ms-marco-MiniLM-L-12-v2"]
+cross_encoder_models = ["cross-encoder/ms-marco-MiniLM-L-12-v2", "rerank-english-v3.0"]
 
 
 def process_model_list(model_list):
@@ -130,21 +130,26 @@ def predict_fn(input_object, config):
         passages = input_object["passages"]
         data = [[current_input, passage] for passage in passages]
 
-        with torch.inference_mode():
-            features = current_tokenizer(
-                data, padding=True, truncation=True, return_tensors="pt"
-            )
-
-            features = features.to(device)
-
-            scores = current_model(**features).logits.cpu().numpy()
-            ret_value = list(
-                map(
-                    lambda val: val[-1] if isinstance(val, list) else val,
-                    scores.tolist(),
+        if current_model_id == "rerank-english-v3.0":
+            # Use Cohere Rerank 3 API
+            co = cohere.Client(os.environ["COHERE_API_KEY"])
+            results = co.rerank(query=current_input, documents=passages, top_n=len(passages), model='rerank-english-v3.0')
+            ret_value = [result.relevance_score for result in results]
+        else:
+            with torch.inference_mode():
+                features = current_tokenizer(
+                    data, padding=True, truncation=True, return_tensors="pt"
                 )
-            )
-
-            return ret_value
+    
+                features = features.to(device)
+    
+                scores = current_model(**features).logits.cpu().numpy()
+                ret_value = list(
+                    map(
+                        lambda val: val[-1] if isinstance(val, list) else val,
+                        scores.tolist(),
+                    )
+                )
+        return ret_value
 
     return []
