@@ -62,15 +62,15 @@ export class ChatBotApi extends Construct {
         path.join(__dirname, "schema/schema.graphql")
       ),
       authorizationConfig: {
+        defaultAuthorization: {
+          authorizationType: appsync.AuthorizationType.USER_POOL,
+          userPoolConfig: {
+            userPool: props.userPool,
+          },
+        },
         additionalAuthorizationModes: [
           {
             authorizationType: appsync.AuthorizationType.IAM,
-          },
-          {
-            authorizationType: appsync.AuthorizationType.USER_POOL,
-            userPoolConfig: {
-              userPool: props.userPool,
-            },
           },
         ],
       },
