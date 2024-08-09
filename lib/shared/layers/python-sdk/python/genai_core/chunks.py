@@ -5,7 +5,7 @@ import genai_core.documents
 import genai_core.embeddings
 import genai_core.aurora.chunks
 import genai_core.opensearch.chunks
-from genai_core.types import CommonError,Task
+from genai_core.types import CommonError, Task
 from typing import List, Optional
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 

@@ -19,7 +19,7 @@ def rank_passages(
     if model.provider == "sagemaker":
         return _rank_passages_sagemaker(model, input, passages)
 
-    raise genai_core.typesCommonError(f"Unknown provider")
+    raise genai_core.typesCommonError("Unknown provider")
 
 
 def get_cross_encoder_models():

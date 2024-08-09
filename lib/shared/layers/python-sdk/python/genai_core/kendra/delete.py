@@ -73,6 +73,7 @@ def delete_workspace(workspace: dict):
 
     print(f"Delete Item succeeded: {response}")
 
+
 def delete_kendra_document(workspace_id: str, document: dict):
     document_id = document["document_id"]
     document_vectors = document["vectors"]
@@ -108,9 +109,10 @@ def delete_kendra_document(workspace_id: str, document: dict):
         print(f"Delete document succeeded: {response}")
 
         updateResponse = workspaces_table.update_item(
-            Key={"workspace_id": workspace_id,
-                 "object_type": WORKSPACE_OBJECT_TYPE},
-            UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+            Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
+            UpdateExpression="ADD size_in_bytes :incrementValue, "
+            + "documents :documentsIncrementValue, "
+            + "vectors :vectorsIncrementValue SET updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":incrementValue": -document_size_in_bytes,
                 ":documentsIncrementValue": -documents_diff,
@@ -123,6 +125,7 @@ def delete_kendra_document(workspace_id: str, document: dict):
 
     except (BotoCoreError, ClientError) as error:
         print(f"An error occurred: {error}")
+
 
 def deleteKendraDocument(workspace_id, document_id, document_type):
     if document_type == "text":

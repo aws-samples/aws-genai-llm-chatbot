@@ -14,7 +14,7 @@ def generate_presigned_post(workspace_id: str, file_name: str, expiration=3600):
     file_name = unicodedata.normalize("NFC", file_name)
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
-        raise genai_core.types.CommonError(f"Workspace not found")
+        raise genai_core.types.CommonError("Workspace not found")
 
     file_name = os.path.basename(file_name)
     object_name = f"{workspace_id}/{file_name}"

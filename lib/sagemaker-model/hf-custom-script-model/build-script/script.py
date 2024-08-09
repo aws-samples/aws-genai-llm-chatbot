@@ -66,7 +66,7 @@ print(f"Moving back to: {current_folder}")
 os.chdir(current_folder)
 
 print(f"Uploading the model to S3 bucket: {bucket}")
-s3_client.upload_file(out_folder.joinpath("model.tar.gz"), bucket, f"out/model.tar.gz")
+s3_client.upload_file(out_folder.joinpath("model.tar.gz"), bucket, "out/model.tar.gz")
 model_data = f"s3://{bucket}/out/model.tar.gz"
 
 print(f"Model archive uploaded to: {model_data}")

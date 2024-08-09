@@ -4,6 +4,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler import (
     AppSyncResolver,
 )
+
 from routes.health import router as health_router
 from routes.embeddings import router as embeddings_router
 from routes.cross_encoders import router as cross_encoders_router

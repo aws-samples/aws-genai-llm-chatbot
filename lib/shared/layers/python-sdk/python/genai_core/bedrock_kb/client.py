@@ -1,4 +1,3 @@
-import os
 import boto3
 import genai_core.types
 import genai_core.parameters

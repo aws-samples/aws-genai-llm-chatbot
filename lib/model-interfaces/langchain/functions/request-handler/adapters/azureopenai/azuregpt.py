@@ -1,6 +1,5 @@
 import os
 from langchain_community.chat_models import AzureChatOpenAI
-from langchain.prompts.prompt import PromptTemplate
 
 from ..base import ModelAdapter
 from genai_core.registry import registry

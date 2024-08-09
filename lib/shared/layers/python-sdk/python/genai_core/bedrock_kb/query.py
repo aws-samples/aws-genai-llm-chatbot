@@ -1,4 +1,3 @@
-import os
 import re
 import genai_core.types
 from typing import List
@@ -15,7 +14,8 @@ def query_workspace_bedrock_kb(
 
     if not knowledge_base_id:
         raise genai_core.types.CommonError(
-            f"Could not find Amazon Bedrock KnowledgeBase ID for workspace {workspace_id}"
+            "Could not find Amazon Bedrock KnowledgeBase"
+            + f" ID for workspace {workspace_id}"
         )
 
     client = get_kb_runtime_client_for_id(knowledge_base_id)

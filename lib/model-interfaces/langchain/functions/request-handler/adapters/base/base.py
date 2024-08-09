@@ -83,7 +83,7 @@ class ModelAdapter:
         Current conversation:
         {chat_history}
 
-        Question: {input}"""
+        Question: {input}"""  # noqa: E501
 
         return PromptTemplate.from_template(template)
 

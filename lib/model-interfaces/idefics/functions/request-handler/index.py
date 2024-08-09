@@ -2,8 +2,6 @@ import os
 import json
 import uuid
 from datetime import datetime
-from urllib.parse import urljoin
-from adapters import Idefics, Claude3
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
@@ -11,14 +9,11 @@ from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingErro
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-from langchain.llms import SagemakerEndpoint
-
+import adapters  # noqa: F401 Needed to register the adapters
 from genai_core.langchain import DynamoDBChatMessageHistory
 from genai_core.utils.websocket import send_to_client
-from genai_core.types import ChatbotAction, ChatbotMessageType
+from genai_core.types import ChatbotAction
 from genai_core.registry import registry
-
-from content_handler import ContentHandler
 
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()

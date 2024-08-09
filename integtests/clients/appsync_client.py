@@ -2,14 +2,11 @@ import os
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from gql.dsl import DSLMutation, DSLSchema, DSLQuery, dsl_gql
-from graphql import print_ast
 
 
 class AppSyncClient:
     def __init__(self, endpoint: str, id_token: str) -> None:
-        self.transport = AIOHTTPTransport(
-            url=endpoint
-        )
+        self.transport = AIOHTTPTransport(url=endpoint)
         if id_token is not None:
             self.transport.headers = {"Authorization": id_token}
         dir_path = os.path.dirname(os.path.realpath(__file__))

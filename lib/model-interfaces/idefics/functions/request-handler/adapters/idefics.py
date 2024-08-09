@@ -1,5 +1,5 @@
 from .base import MultiModalModelBase
-from genai_core.types import ChatbotAction, ChatbotMessageType
+from genai_core.types import ChatbotMessageType
 from urllib.parse import urljoin
 import os
 from langchain.llms import SagemakerEndpoint
@@ -26,10 +26,13 @@ class Idefics(MultiModalModelBase):
                 if not message_files:
                     prompts.append(human_prompt_template.format(prompt=message.content))
                 for message_file in message_files:
+                    image = urljoin(
+                        os.environ["CHATBOT_FILES_PRIVATE_API"], message_file["key"]
+                    )
                     prompts.append(
                         human_prompt_with_image.format(
                             prompt=message.content,
-                            image=f"{urljoin(os.environ['CHATBOT_FILES_PRIVATE_API'], message_file['key'])}",
+                            image=image,
                         )
                     )
             if message.type.lower() == ChatbotMessageType.AI.value.lower():

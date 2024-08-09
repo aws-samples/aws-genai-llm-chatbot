@@ -1,6 +1,7 @@
 import genai_core.clients
 
-# from langchain.llms import Bedrock (pending https://github.com/langchain-ai/langchain/issues/13316)
+# from langchain.llms import Bedrock
+# (pending https://github.com/langchain-ai/langchain/issues/13316)
 from langchain_aws import BedrockLLM
 
 from ..shared.meta.llama3_instruct import (

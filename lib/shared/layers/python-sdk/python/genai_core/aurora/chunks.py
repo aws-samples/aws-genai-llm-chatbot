@@ -25,7 +25,7 @@ def add_chunks_aurora(
         if replace:
             cursor.execute(
                 sql.SQL(
-                    """DELETE FROM {table} WHERE 
+                    """DELETE FROM {table} WHERE
                         workspace_id = %s AND document_id = %s;"""
                 ).format(table=table_name),
                 [workspace_id, document_id],
@@ -43,10 +43,10 @@ def add_chunks_aurora(
             cursor.execute(
                 sql.SQL(
                     """INSERT INTO {table} (
-                        chunk_id, 
+                        chunk_id,
                         workspace_id,
-                        document_id, 
-                        document_sub_id, 
+                        document_id,
+                        document_sub_id,
                         document_type,
                         document_sub_type,
                         path,
@@ -83,7 +83,7 @@ def clean_chunks_aurora(workspace_id: str, document_id: str):
     with AuroraConnection() as cursor:
         cursor.execute(
             sql.SQL(
-                """DELETE FROM {table} WHERE 
+                """DELETE FROM {table} WHERE
                     workspace_id = %s AND document_id = %s;"""
             ).format(table=table_name),
             [workspace_id, document_id],

@@ -2,7 +2,6 @@ import os
 import uuid
 import boto3
 import json
-from pydantic import BaseModel
 from datetime import datetime
 
 dynamodb = boto3.resource("dynamodb")
@@ -18,12 +17,12 @@ def add_user_feedback(
     prompt: str,
     completion: str,
     model: str,
-    userId: str
+    userId: str,
 ):
     feedbackId = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     prefix = datetime.utcnow().strftime("user_feedback/year=%Y/month=%m/")
-    
+
     item = {
         "feedbackId": feedbackId,
         "sessionId": sessionId,
@@ -33,20 +32,16 @@ def add_user_feedback(
         "completion": completion,
         "model": model,
         "feedback": feedback,
-        "createdAt": timestamp
+        "createdAt": timestamp,
     }
-    
+
     response = s3_client.put_object(
         Bucket=USER_FEEDBACK_BUCKET_NAME,
         Key=f"{prefix}{feedbackId}.json",
         Body=json.dumps(item),
         ContentType="application/json",
-        StorageClass='STANDARD_IA',
+        StorageClass="STANDARD_IA",
     )
     print(response)
-    
-    return {
-        "feedback_id": feedbackId
-    }
-    
-    
+
+    return {"feedback_id": feedbackId}

@@ -37,7 +37,7 @@ class BedrockClaudeAdapter(ModelAdapter):
 
 {context}
 
-Question: {question}"""
+Question: {question}"""  # noqa: E501
 
         return PromptTemplate(
             template=template, input_variables=["context", "question"]
@@ -49,7 +49,7 @@ Question: {question}"""
 Current conversation:
 {chat_history}
 
-Question: {input}"""
+Question: {input}"""  # noqa: E501
 
         input_variables = ["input", "chat_history"]
         prompt_template_args = {
@@ -71,7 +71,7 @@ Question: {input}"""
 </followup>
 
 Given the conversation inside the tags <conv></conv>, rephrase the follow up question you find inside <followup></followup> to be a standalone question, in the same language as the follow up question.
-"""
+"""  # noqa: E501
 
         return PromptTemplate(
             input_variables=["chat_history", "question"],
