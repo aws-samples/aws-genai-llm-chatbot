@@ -182,7 +182,7 @@ export class LangChainInterface extends Construct {
       }
     }
 
-    if (props.config.rag.engines.knowledgeBase.enabled) {
+    if (props.config.rag.engines.knowledgeBase?.enabled) {
       for (const item of props.config.rag.engines.knowledgeBase.external ||
         []) {
         if (item.roleArn) {
