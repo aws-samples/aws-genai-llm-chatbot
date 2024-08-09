@@ -59,7 +59,9 @@ export class RssSubscription extends Construct {
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(
       this.rssIngestorFunction
     );
-    props.ragDynamoDBTables.workspacesTable.grantReadData(this.rssIngestorFunction);
+    props.ragDynamoDBTables.workspacesTable.grantReadData(
+      this.rssIngestorFunction
+    );
 
     const triggerRssIngestorsFunction = new lambda.Function(
       this,
