@@ -22,6 +22,7 @@ interface RealtimeGraphqlApiBackendProps {
 export class RealtimeGraphqlApiBackend extends Construct {
   public readonly messagesTopic: sns.Topic;
   public readonly resolvers: RealtimeResolvers;
+  public readonly queue: sqs.Queue;
 
   constructor(
     scope: Construct,
@@ -80,6 +81,7 @@ export class RealtimeGraphqlApiBackend extends Construct {
 
     this.messagesTopic = messagesTopic;
     this.resolvers = resolvers;
+    this.queue = queue;
 
     /**
      * CDK NAG suppression

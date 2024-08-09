@@ -172,6 +172,11 @@ To run the tests (Replace the url with the one you used in the steps above)
 REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/
 ```
 
+## Monitoring
+
+Once the deployment is complete, a [CloudWatch Dashboard](https://console.aws.amazon.com/cloudwatch) will be available in the selected region to monitor the usage of the resources.
+
+
 ## Run user interface locally
 
 To experiment with changes to the the user interface, you can run the interface locally. See the instructions in the README file of the [`lib/user-interface/react-app`](https://github.com/aws-samples/aws-genai-llm-chatbot/blob/main/lib/user-interface/react-app/README.md) folder.
