@@ -3400,7 +3400,12 @@ schema {
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
-            "RSS_FEED_INGESTOR_FUNCTION": "",
+            "RSS_FEED_INGESTOR_FUNCTION": {
+              "Fn::GetAtt": [
+                "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                "Arn",
+              ],
+            },
             "SAGEMAKER_RAG_MODELS_ENDPOINT": {
               "Fn::GetAtt": [
                 "RagEnginesSageMakerModelMultiAB24AEndpoint6DA7D681",
@@ -3653,6 +3658,32 @@ schema {
                         ],
                       },
                       "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
                     ],
                   ],
                 },
