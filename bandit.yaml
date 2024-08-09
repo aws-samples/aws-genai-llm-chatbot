@@ -1,0 +1,1 @@
+exclude_dirs: ['tests', 'cdk.out', 'dist', 'node_modules', 'lib/user-interface/react-app']
