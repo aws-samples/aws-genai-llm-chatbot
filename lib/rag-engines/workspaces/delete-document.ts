@@ -26,7 +26,7 @@ export interface DeleteDocumentProps {
 }
 
 export class DeleteDocument extends Construct {
-  public readonly stateMachine?: sfn.StateMachine;
+  public readonly stateMachine: sfn.StateMachine;
 
   constructor(scope: Construct, id: string, props: DeleteDocumentProps) {
     super(scope, id);

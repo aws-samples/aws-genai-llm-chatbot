@@ -21,8 +21,8 @@ export interface WorkkspacesProps {
 }
 
 export class Workspaces extends Construct {
-  public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
-  public readonly deleteDocumentWorkflow?: sfn.StateMachine;
+  public readonly deleteWorkspaceWorkflow: sfn.StateMachine;
+  public readonly deleteDocumentWorkflow: sfn.StateMachine;
 
   constructor(scope: Construct, id: string, props: WorkkspacesProps) {
     super(scope, id);
