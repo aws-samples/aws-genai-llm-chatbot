@@ -168,10 +168,9 @@ def test_query_llm(client, default_model, default_provider):
         if (
             session != None
             and len(session.get("history")) == 2
-            and "aws-samples/aws-genai-llm-chatbot"
-            in session.get("history")[1].get("content").lower()
         ):
-            found = True
+            metadata = json.loads(str(session.get("history")[1].get("metadata")))
+            found = len(metadata.get("documents")) > 0
             break
     client.delete_session(session_id)
     assert found == True

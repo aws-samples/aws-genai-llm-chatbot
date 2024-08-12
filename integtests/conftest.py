@@ -19,7 +19,7 @@ def client(config, worker_id):
     cognito = CognitoClient(
         region=region, user_pool_id=user_pool_id, client_id=user_pool_client_id
     )
-    email = "integ-test-user@example.local"
+    email = "integ-test-user@example.local-" + worker_id
 
     return AppSyncClient(endpoint=endpoint, id_token=cognito.get_token(email=email))
 
