@@ -60,7 +60,8 @@ def test_add_rss(client: AppSyncClient):
         input={
             "workspaceId": pytest.workspace.get("id"),
             "title": "INTEG_TEST_AURORA_TITLE",
-            "address": "https://github.com/aws-samples/aws-genai-llm-chatbot/releases.atom",
+            "address": "https://github.com/aws-samples/aws-genai-llm-chatbot/"
+            + "releases.atom",
             "contentTypes": ["text/html"],
             "followLinks": True,
             "limit": 2,

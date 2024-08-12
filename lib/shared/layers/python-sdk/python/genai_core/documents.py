@@ -178,7 +178,6 @@ def get_document(workspace_id: str, document_id: str):
     return document
 
 
-
 def delete_document(workspace_id: str, document_id: str):
     response = documents_table.get_item(
         Key={"workspace_id": workspace_id, "document_id": document_id}
@@ -192,7 +191,7 @@ def delete_document(workspace_id: str, document_id: str):
     if (
         document["status"] != "processed"
         and document["status"] != "error"
-        and document["status"] != "enabled" # rss feed final status
+        and document["status"] != "enabled"  # rss feed final status
     ):
         raise genai_core.types.CommonError("Document not ready for deletion")
 

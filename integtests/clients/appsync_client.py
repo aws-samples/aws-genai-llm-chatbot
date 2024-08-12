@@ -56,34 +56,6 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("listRagEngines")
 
-    def list_models(self):
-        query = dsl_gql(
-            DSLQuery(
-                self.schema.Query.listModels.select(
-                    self.schema.Model.name,
-                    self.schema.Model.provider,
-                    self.schema.Model.interface,
-                    self.schema.Model.ragSupported,
-                    self.schema.Model.inputModalities,
-                    self.schema.Model.outputModalities,
-                    self.schema.Model.streaming,
-                )
-            )
-        )
-        return self.client.execute(query).get("listModels")
-
-    def list_rag_engines(self):
-        query = dsl_gql(
-            DSLQuery(
-                self.schema.Query.listRagEngines.select(
-                    self.schema.RagEngine.id,
-                    self.schema.RagEngine.name,
-                    self.schema.RagEngine.enabled,
-                )
-            )
-        )
-        return self.client.execute(query).get("listRagEngines")
-
     def delete_session(self, id: str):
         query = dsl_gql(
             DSLMutation(

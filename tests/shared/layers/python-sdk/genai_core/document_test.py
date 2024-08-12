@@ -38,7 +38,8 @@ def test_batch_crawl_websites(mocker):
             "content_types": ["text/html", "pdf"],
         },
     )
-    
+
+
 def test_batch_crawl_websites_not_set(mocker):
     mocker.patch(
         "genai_core.documents._get_batch_pending_posts",
@@ -48,10 +49,7 @@ def test_batch_crawl_websites_not_set(mocker):
                 {
                     "workspace_id": {"S": "123"},
                     "document_id": {"S": "123"},
-                    "crawler_properties": {
-                        "M": {
-                        }
-                    },
+                    "crawler_properties": {"M": {}},
                     "path": {"S": "https://example"},
                     "rss_feed_id": {"S": "123"},
                 }

@@ -6,7 +6,6 @@ import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { OpenSearchVector } from "../opensearch-vector";
 import * as batch from "aws-cdk-lib/aws-batch";
 import * as ecs from "aws-cdk-lib/aws-ecs";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as aws_ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as iam from "aws-cdk-lib/aws-iam";

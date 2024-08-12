@@ -121,4 +121,3 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
                 "chunkOverlap": 200,
             }
         )
-   
