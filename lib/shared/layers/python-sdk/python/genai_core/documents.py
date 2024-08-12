@@ -173,6 +173,7 @@ def get_document(workspace_id: str, document_id: str):
 
     return document
 
+
 def delete_document(workspace_id: str, document_id: str):
     response = documents_table.get_item(
         Key={"workspace_id": workspace_id, "document_id": document_id}
@@ -183,7 +184,11 @@ def delete_document(workspace_id: str, document_id: str):
     if not document:
         raise genai_core.types.CommonError("Document not found")
 
-    if document["status"] != "processed" and document["status"] != "error":
+    if (
+        document["status"] != "processed"
+        and document["status"] != "error"
+        and document["status"] != "enabled" # rss feed final status
+    ):
         raise genai_core.types.CommonError("Document not ready for deletion")
 
     response = sfn_client.start_execution(
@@ -198,6 +203,7 @@ def delete_document(workspace_id: str, document_id: str):
 
     print(response)
     return {"documentId": document_id, "deleted": True}
+
 
 def get_document_content(workspace_id: str, document_id: str):
     content_key = f"{workspace_id}/{document_id}/content.txt"
@@ -729,22 +735,47 @@ def batch_crawl_websites():
             feed_id = post["rss_feed_id"]["S"]
             document_id = post["document_id"]["S"]
             path = post["path"]["S"]
+
+            properties = post["crawler_properties"]
+
+            follow_links = True
+            if (
+                properties
+                and properties["M"]
+                and properties["M"]["follow_links"]
+                and properties["M"]["follow_links"]["BOOL"] == False
+            ):
+                follow_links = False
+
+            limit = 250
+            if (
+                properties
+                and properties["M"]
+                and properties["M"]["limit"]
+                and properties["M"]["limit"]["N"]
+            ):
+                limit = int(post["crawler_properties"]["M"]["limit"]["N"])
+
+            content_types = []
+            if (
+                properties
+                and properties["M"]
+                and properties["M"]["content_types"]
+                and properties["M"]["content_types"]["L"]
+            ):
+                for type in post["crawler_properties"]["M"]["content_types"]["L"]:
+                    content_types.append(type["S"])
+            else:
+                content_types.append("text/html")
+
             create_document(
                 workspace_id,
                 "website",
                 path=path,
                 crawler_properties={
-                    "follow_links": post["crawler_properties"]["M"]["follow_links"][
-                        "BOOL"
-                    ]
-                    if "crawler_properties" in post
-                    else True,
-                    "limit": int(post["crawler_properties"]["M"]["limit"]["N"])
-                    if "crawler_properties" in post
-                    else 250,
-                    "content_types": post["crawler_properties"]["M"]["content_types"]["L"]
-                    if "crawler_properties" in post and "content_types" in post["crawler_properties"]["M"]
-                    else ["text/html"],
+                    "follow_links": follow_links,
+                    "limit": limit,
+                    "content_types": content_types,
                 },
             )
             set_status(workspace_id, document_id, "processed")
