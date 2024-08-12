@@ -62,15 +62,15 @@ export class ChatBotApi extends Construct {
         path.join(__dirname, "schema/schema.graphql")
       ),
       authorizationConfig: {
+        defaultAuthorization: {
+          authorizationType: appsync.AuthorizationType.USER_POOL,
+          userPoolConfig: {
+            userPool: props.userPool,
+          },
+        },
         additionalAuthorizationModes: [
           {
             authorizationType: appsync.AuthorizationType.IAM,
-          },
-          {
-            authorizationType: appsync.AuthorizationType.USER_POOL,
-            userPoolConfig: {
-              userPool: props.userPool,
-            },
           },
         ],
       },
@@ -80,7 +80,9 @@ export class ChatBotApi extends Construct {
         role: loggingRole,
       },
       xrayEnabled: true,
-      visibility: props.config.privateWebsite ? appsync.Visibility.PRIVATE : appsync.Visibility.GLOBAL
+      visibility: props.config.privateWebsite
+        ? appsync.Visibility.PRIVATE
+        : appsync.Visibility.GLOBAL,
     });
 
     new ApiResolvers(this, "RestApi", {

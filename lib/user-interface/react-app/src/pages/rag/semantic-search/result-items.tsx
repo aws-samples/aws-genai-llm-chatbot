@@ -67,6 +67,7 @@ function ItemDetails(props: {
             <Box variant="awsui-key-label">Sources</Box>
             <div>
               {item
+                /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
                 .sources!.map((c: any) => Labels.sourceTypeMap[c])
                 .join(", ")}
             </div>
@@ -100,7 +101,10 @@ function ItemDetails(props: {
         <div>
           <Box variant="awsui-key-label">Sources</Box>
           <div>
-            {item.sources!.map((c: any) => Labels.sourceTypeMap[c]).join(", ")}
+            {
+              /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
+              item.sources!.map((c: any) => Labels.sourceTypeMap[c]).join(", ")
+            }
           </div>
         </div>
         <div>

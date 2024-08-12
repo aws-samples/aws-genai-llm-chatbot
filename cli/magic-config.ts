@@ -19,6 +19,8 @@ import { getData } from "country-list";
 import { randomBytes } from "crypto";
 import { StringUtils } from "turbocommons-ts";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
   const timeZones = tz.names(); // Get a list of all timezones
   const timeZoneData = timeZones.map((zone) => {
@@ -130,7 +132,7 @@ const embeddingModels = [
  */
 
 (async () => {
-  let program = new Command().description(
+  const program = new Command().description(
     "Creates a new chatbot configuration"
   );
   program.version(LIB_VERSION);
@@ -156,6 +158,8 @@ const embeddingModels = [
       options.huggingfaceApiSecretArn = config.llms?.huggingfaceApiSecretArn;
       options.enableSagemakerModelsSchedule =
         config.llms?.sagemakerSchedule?.enabled;
+      options.enableSagemakerModelsSchedule =
+        config.llms?.sagemakerSchedule?.enabled;
       options.timezonePicker = config.llms?.sagemakerSchedule?.timezonePicker;
       options.enableCronFormat =
         config.llms?.sagemakerSchedule?.enableCronFormat;
@@ -174,7 +178,12 @@ const embeddingModels = [
         config.llms?.sagemakerSchedule?.startScheduleEndDate;
       options.enableRag = config.rag.enabled;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
-        (v: string) => (config.rag.engines as any)[v].enabled
+        (v: string) =>
+          (
+            config.rag.engines as {
+              [key: string]: { enabled: boolean };
+            }
+          )[v].enabled
       );
       if (
         options.ragsToEnable.includes("kendra") &&
@@ -182,11 +191,12 @@ const embeddingModels = [
       ) {
         options.ragsToEnable.pop("kendra");
       }
-      options.embeddings = config.rag.embeddingsModels.map((m: any) => m.name);
+      options.embeddings = config.rag.embeddingsModels.map((m) => m.name);
       options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
-        (m: any) => m.default
+        (m) => m.default
       )[0].name;
       options.kendraExternal = config.rag.engines.kendra.external;
+      options.kbExternal = config.rag.engines.knowledgeBase?.external ?? [];
       options.kendraEnterprise = config.rag.engines.kendra.enterprise;
 
       // Advanced settings
@@ -215,9 +225,11 @@ const embeddingModels = [
     }
     try {
       await processCreateOptions(options);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Could not complete the operation.");
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
       process.exit(1);
     }
   });
@@ -237,7 +249,7 @@ function createConfig(config: any): void {
  * @returns The complete options
  */
 async function processCreateOptions(options: any): Promise<void> {
-  let questions = [
+  const questions = [
     {
       type: "input",
       name: "prefix",
@@ -577,6 +589,7 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "Aurora", name: "aurora" },
         { message: "OpenSearch", name: "opensearch" },
         { message: "Kendra (managed)", name: "kendra" },
+        { message: "Bedrock KnowldgeBase", name: "knowledgeBase" },
       ],
       validate(choices: any) {
         return (this as any).skipped || choices.length > 0
@@ -617,7 +630,7 @@ async function processCreateOptions(options: any): Promise<void> {
   let newKendra = answers.enableRag && answers.kendra;
   const existingKendraIndices = Array.from(options.kendraExternal || []);
   while (newKendra === true) {
-    let existingIndex: any = existingKendraIndices.pop();
+    const existingIndex: any = existingKendraIndices.pop();
     const kendraQ = [
       {
         type: "input",
@@ -685,6 +698,82 @@ async function processCreateOptions(options: any): Promise<void> {
     });
     newKendra = kendraInstance.newKendra;
   }
+
+  // Knowledge Bases
+  let newKB =
+    answers.enableRag && answers.ragsToEnable.includes("knowledgeBase");
+  const kbExternal: any[] = [];
+  const existingKBIndices = Array.from(options.kbExternal || []);
+  while (newKB === true) {
+    const existingIndex: any = existingKBIndices.pop();
+    const kbQ = [
+      {
+        type: "input",
+        name: "name",
+        message: "KnowledgeBase source name",
+        validate(v: string) {
+          return RegExp(/^\w[\w-_]*\w$/).test(v);
+        },
+        initial: existingIndex?.name,
+      },
+      {
+        type: "autocomplete",
+        limit: 8,
+        name: "region",
+        choices: ["us-east-1", "us-west-2"],
+        message: `Region of the Bedrock Knowledge Base index${
+          existingIndex?.region ? " (" + existingIndex?.region + ")" : ""
+        }`,
+        initial: ["us-east-1", "us-west-2"].indexOf(existingIndex?.region),
+      },
+      {
+        type: "input",
+        name: "roleArn",
+        message:
+          "Cross account role Arn to assume to call the Bedrock KnowledgeBase, leave empty if not needed",
+        validate: (v: string) => {
+          const valid = iamRoleRegExp.test(v);
+          return v.length === 0 || valid;
+        },
+        initial: existingIndex?.roleArn ?? "",
+      },
+      {
+        type: "input",
+        name: "knowledgeBaseId",
+        message: "Bedrock KnowledgeBase ID",
+        validate(v: string) {
+          return /[A-Z0-9]{10}/.test(v);
+        },
+        initial: existingIndex?.knowledgeBaseId,
+      },
+      {
+        type: "confirm",
+        name: "enabled",
+        message: "Enable this knowledge base",
+        initial: existingIndex?.enabled ?? true,
+      },
+      {
+        type: "confirm",
+        name: "newKB",
+        message: "Do you want to add another Bedrock KnowledgeBase source",
+        initial: false,
+      },
+    ];
+    const kbInstance: any = await enquirer.prompt(kbQ);
+    const ext = (({ enabled, name, roleArn, knowledgeBaseId, region }) => ({
+      enabled,
+      name,
+      roleArn,
+      knowledgeBaseId,
+      region,
+    }))(kbInstance);
+    if (ext.roleArn === "") ext.roleArn = undefined;
+    kbExternal.push({
+      ...ext,
+    });
+    newKB = kbInstance.newKB;
+  }
+
   const modelsPrompts = [
     {
       type: "select",
@@ -1069,6 +1158,10 @@ async function processCreateOptions(options: any): Promise<void> {
           external: [{}],
           enterprise: false,
         },
+        knowledgeBase: {
+          enabled: false,
+          external: [{}],
+        },
       },
       embeddingsModels: [{}],
       crossEncoderModels: [{}],
@@ -1098,6 +1191,9 @@ async function processCreateOptions(options: any): Promise<void> {
     config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.engines.kendra.enterprise = answers.kendraEnterprise;
+  config.rag.engines.knowledgeBase.enabled =
+    config.rag.engines.knowledgeBase.external.length > 0;
+  config.rag.engines.knowledgeBase.external = [...kbExternal];
 
   console.log("\n✨ This is the chosen configuration:\n");
   console.log(JSON.stringify(config, undefined, 2));

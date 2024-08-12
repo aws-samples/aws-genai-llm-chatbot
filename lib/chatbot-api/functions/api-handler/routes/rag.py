@@ -35,6 +35,11 @@ def engines():
             "name": "Amazon Kendra",
             "enabled": engines.get("kendra", {}).get("enabled", False) == True,
         },
+        {
+            "id": "bedrock_kb",
+            "name": "Bedrock Knowledge Bases",
+            "enabled": engines.get("knowledgeBase", {}).get("enabled", False) == True,
+        },
     ]
 
     return ret_value

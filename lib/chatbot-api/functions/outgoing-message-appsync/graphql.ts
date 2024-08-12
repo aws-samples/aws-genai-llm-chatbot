@@ -30,13 +30,7 @@ export const graphQlQuery = async (query: string) => {
   const signed = await signer.sign(requestToBeSigned);
   const request = new Request(endpoint, signed);
 
-  let body;
-
-  try {
-    const response = await fetch(request);
-    body = await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await fetch(request);
+  const body = await response.json();
   return body;
 };

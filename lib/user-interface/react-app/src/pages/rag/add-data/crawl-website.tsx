@@ -77,7 +77,7 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
       if (form.limit < 1 || form.limit > 1000) {
         errors.limit = "Page limit should be between 1 and 1000";
       }
-      
+
       if (form.contentTypes.length === 0) {
         errors.contentTypes = "At least one content type must be selected.";
       }
@@ -99,7 +99,9 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
 
     const apiClient = new ApiClient(appContext);
     const isSitemap = data.urlType === "sitemap";
-    const contentTypesToUse = data.contentTypes.filter((ct): ct is string => ct !== undefined);
+    const contentTypesToUse = data.contentTypes.filter(
+      (ct): ct is string => ct !== undefined
+    );
     try {
       await apiClient.documents.addWebsiteDocument(
         props.data.workspace.value,
@@ -124,6 +126,7 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
       });
 
       onChange({ websiteUrl: "", sitemapUrl: "" }, true);
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       setGlobalError(Utils.getErrorMessage(error));
       console.error(Utils.getErrorMessage(error));
@@ -131,19 +134,21 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
 
     props.setSubmitting(false);
   };
-  
-  const handleContentTypeChange = (selectedOptions: ReadonlyArray<SelectOption>) => {
-    const options: SelectOption[] = selectedOptions.map(option => {
+
+  const handleContentTypeChange = (
+    selectedOptions: ReadonlyArray<SelectOption>
+  ) => {
+    const options: SelectOption[] = selectedOptions.map((option) => {
       if (option.value === undefined) {
         throw new Error(`Option value cannot be undefined`);
       }
       return {
         label: option.label,
         value: option.value,
-        description: option.description
+        description: option.description,
       };
     });
-    onChange({ contentTypes: options.map(option => option.value) });
+    onChange({ contentTypes: options.map((option) => option.value) });
   };
 
   const hasReadyWorkspace =
@@ -249,12 +254,14 @@ export default function CrawlWebsite(props: CrawlWebsiteProps) {
               errorText={errors.contentTypes}
               description="Content Types to Enable for crawlingl"
             >
-            <Multiselect
-              disabled={props.submitting}
-              selectedOptions={generateSelectedOptions(data.contentTypes)}
-              options={multiselectOptions}
-              onChange={({ detail }) => handleContentTypeChange(detail.selectedOptions)}
-            />
+              <Multiselect
+                disabled={props.submitting}
+                selectedOptions={generateSelectedOptions(data.contentTypes)}
+                options={multiselectOptions}
+                onChange={({ detail }) =>
+                  handleContentTypeChange(detail.selectedOptions)
+                }
+              />
             </FormField>
           </SpaceBetween>
         </Container>
