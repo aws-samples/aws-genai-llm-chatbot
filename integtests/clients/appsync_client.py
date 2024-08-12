@@ -2,7 +2,6 @@ import os
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from gql.dsl import DSLMutation, DSLSchema, DSLQuery, dsl_gql
-from graphql import print_ast
 
 
 class AppSyncClient:
@@ -122,18 +121,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("createOpenSearchWorkspace")
-    
-    def list_workspaces(self):
-        query = dsl_gql(
-            DSLQuery(
-                self.schema.Query.listWorkspaces.select(
-                    self.schema.Workspace.id,
-                    self.schema.Workspace.name,
-                )
-            )
-        )
-        return self.client.execute(query).get("listWorkspaces")
-    
+
     def list_workspaces(self):
         query = dsl_gql(
             DSLQuery(
@@ -145,7 +133,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("listWorkspaces")
-    
+
     def get_workspace(self, id):
         query = dsl_gql(
             DSLQuery(
@@ -157,39 +145,36 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("getWorkspace")
-    
+
     def delete_workspace(self, id):
         query = dsl_gql(
-            DSLMutation(
-                self.schema.Mutation.deleteWorkspace.args(workspaceId=id)
-            )
+            DSLMutation(self.schema.Mutation.deleteWorkspace.args(workspaceId=id))
         )
         return self.client.execute(query)
-    
+
     def add_text(self, input):
         query = dsl_gql(
             DSLMutation(
                 self.schema.Mutation.addTextDocument.args(input=input).select(
                     self.schema.DocumentResult.documentId,
-                    self.schema.DocumentResult.status
+                    self.schema.DocumentResult.status,
                 )
             )
         )
         return self.client.execute(query).get("addTextDocument")
-    
-    
+
     def get_document(self, input):
         query = dsl_gql(
             DSLQuery(
                 self.schema.Query.getDocument.args(input=input).select(
                     self.schema.Document.workspaceId,
                     self.schema.Document.id,
-                    self.schema.Document.status
+                    self.schema.Document.status,
                 )
             )
         )
         return self.client.execute(query).get("getDocument")
-    
+
     def semantic_search(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -199,13 +184,13 @@ class AppSyncClient:
                     self.schema.SemanticSearchResult.items.select(
                         self.schema.SemanticSearchItem.content,
                         self.schema.SemanticSearchItem.documentId,
-                        self.schema.SemanticSearchItem.score
-                        ),
+                        self.schema.SemanticSearchItem.score,
+                    ),
                 )
             )
         )
         return self.client.execute(query).get("performSemanticSearch")
-    
+
     def delete_document(self, input):
         query = dsl_gql(
             DSLMutation(
@@ -216,7 +201,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query)
-    
+
     def calculate_embeding(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -227,8 +212,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("calculateEmbeddings")
-    
-    
+
     def rank_passages(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -239,4 +223,3 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("rankPassages")
-    

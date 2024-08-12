@@ -9,6 +9,8 @@ from selenium.webdriver.common.by import By
 from clients.cognito_client import CognitoClient, Credentials
 from clients.appsync_client import AppSyncClient
 
+
+
 @pytest.fixture(scope="session")
 def client(cognito_credentials: Credentials, config):
     endpoint = config.get("aws_appsync_graphqlEndpoint")
@@ -20,28 +22,35 @@ def cognito_credentials(config) -> Credentials:
     region = config.get("aws_cognito_region")
     user_pool_client_id = config.get("aws_user_pools_web_client_id")
 
-    
-    cognito = CognitoClient(region=region, user_pool_id=user_pool_id, client_id=user_pool_client_id)
+
+    cognito = CognitoClient(
+        region=region, user_pool_id=user_pool_id, client_id=user_pool_client_id
+    )
     email = "integ-test-user@example.local"
-    
+
     return cognito.get_credentials(email=email)
 
+
 @pytest.fixture(scope="session")
-def unauthenticated_client(config):    
+def unauthenticated_client(config):
     endpoint = config.get("aws_appsync_graphqlEndpoint")
     return AppSyncClient(endpoint=endpoint, id_token=None)
+
 
 @pytest.fixture(scope="session")
 def default_model():
     return "anthropic.claude-instant-v1"
 
+
 @pytest.fixture(scope="session")
 def default_embed_model():
     return "amazon.titan-embed-text-v1"
 
+
 @pytest.fixture(scope="session")
 def default_provider():
     return "bedrock"
+
 
 @pytest.fixture(scope="session")
 def config(react_url):
@@ -52,7 +61,7 @@ def config(react_url):
 def react_url():
     if "REACT_APP_URL" not in os.environ:
         raise IndexError("Please set the environment variable REACT_APP_URL")
-    return os.environ['REACT_APP_URL']
+    return os.environ["REACT_APP_URL"]
 
 @pytest.fixture(scope="class")
 def selenium_driver(react_url):
