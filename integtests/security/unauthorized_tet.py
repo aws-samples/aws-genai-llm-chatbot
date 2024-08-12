@@ -2,7 +2,6 @@ import pytest
 from gql.transport.exceptions import TransportQueryError
 
 
-
 def test_unauthenticated(unauthenticated_client):
     match = "UnauthorizedException"
     with pytest.raises(TransportQueryError, match=match):
@@ -84,4 +83,3 @@ def test_unauthenticated(unauthenticated_client):
                 "passages": ["A cat is an animal.", "A car is a vehicle."],
             }
         )
-

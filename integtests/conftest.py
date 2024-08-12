@@ -39,6 +39,7 @@ def default_model():
 def default_embed_model():
     return "amazon.titan-embed-text-v1"
 
+
 @pytest.fixture(scope="session")
 def default_provider():
     return "bedrock"
