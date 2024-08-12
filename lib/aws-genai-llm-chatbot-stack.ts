@@ -70,17 +70,13 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
 
     if (props.config.bedrock?.enabled) {
-      const bedrockAgentInterface = new BedrockAgentInterface(
-        this,
-        "IBedrockAgent",
-        {
-          shared,
-          config: props.config,
-          messagesTopic: chatBotApi.messagesTopic,
-          sessionsTable: chatBotApi.sessionsTable,
-          byUserIdIndex: chatBotApi.byUserIdIndex,
-        }
-      );
+      new BedrockAgentInterface(this, "IBedrockAgent", {
+        shared,
+        config: props.config,
+        messagesTopic: chatBotApi.messagesTopic,
+        sessionsTable: chatBotApi.sessionsTable,
+        byUserIdIndex: chatBotApi.byUserIdIndex,
+      });
     }
 
     // check if any deployed model requires langchain interface or if bedrock is enabled from config

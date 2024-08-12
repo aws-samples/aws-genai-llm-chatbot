@@ -3,6 +3,7 @@ import { AgentTrace } from "./chat";
 
 export function Trace(props: { agentTrace: AgentTrace }) {
   const [progress, setProgress] = useState<AgentTrace>();
+  const [text, setText] = useState("");
   const preProcessingLabels: { [key: string]: string } = {
     input: "elaborating query...",
     output: "parsing results...",
@@ -13,59 +14,36 @@ export function Trace(props: { agentTrace: AgentTrace }) {
     rationale: "thinking what to do...",
     invocationinput: "calling the tools...",
     observation: "processing tool response",
+    sdk_unknown_member: "working...",
   };
-  // const labels: { [key: string]: string } = {
-  //   "preProcessingTrace:modelInvocationInput": "🤔 Input",
-  //   "preProcessingTrace:modelInvocationOutput": "🤔 Output",
-  //   "orchestrationTrace:modelInvocationInput": "⚙️ Input",
-  //   "orchestrationTrace:modelInvocationOutput": "Orchestration Output",
-  //   "orchestrationTrace:rationale:": "Orchestration Rationale",
-  //   "orchestrationTrace:observation:actionGroupInvocationOutput":
-  //     "Orchestration ActionGroup Output",
-  //   "orchestrationTrace:observation:finalResponse:":
-  //     "Orchestration Final Response",
-  // };
-
-  function walk(object: { [key: string]: any }) {
-    let trace = "";
-    Object.keys(object).forEach((key) => {
-      if (typeof object[key] === "object") {
-        if (!key.includes("Input") && !key.includes("Output")) {
-          trace += `${key}:${walk(object[key])}`;
-        } else {
-          trace += `${key}`;
-        }
-      }
-    });
-    return trace;
-  }
 
   useEffect(() => {
-    const trace = walk(props.agentTrace);
-    console.log(trace);
-    //const traceMapped = labels[trace] ?? trace;
+    console.log(props.agentTrace);
     setProgress({ ...progress, ...props.agentTrace });
     if (props.agentTrace === undefined) {
       setProgress({});
     }
   }, [props.agentTrace]);
 
-  let t = "";
-  if (progress?.preProcessingTrace) {
-    const text = Object.keys(progress.preProcessingTrace)[0].replace(
-      "modelInvocation",
-      ""
-    );
-    t = `🤔 ${preProcessingLabels[text.toLowerCase()] ?? text}`;
-  }
-  if (progress?.orchestrationTrace) {
-    const text = Object.keys(progress.orchestrationTrace)[0].replace(
-      "modelInvocation",
-      ""
-    );
-    // If the key is Invocation input we can determine if the target
-    // was the KB or the ActionGroup
-    t = `🛠️ ${orchestrationLabels[text.toLowerCase()] ?? text}`;
-  }
-  return <div style={{ fontSize: "1.2em" }}>{t}</div>;
+  useEffect(() => {
+    console.log(progress);
+    if (progress?.preProcessingTrace) {
+      const t = Object.keys(progress.preProcessingTrace)[0].replace(
+        "modelInvocation",
+        ""
+      );
+      setText(`🤔 ${preProcessingLabels[t.toLowerCase()] ?? t}`);
+    }
+    if (progress?.orchestrationTrace) {
+      const t = Object.keys(progress.orchestrationTrace)[0].replace(
+        "modelInvocation",
+        ""
+      );
+      // If the key is Invocation input we can determine if the target
+      // was the KB or the ActionGroup
+      setText(`🛠️ ${orchestrationLabels[t.toLowerCase()] ?? t}`);
+    }
+  }, [progress]);
+
+  return <div style={{ fontSize: "0.9em" }}>{text}</div>;
 }
