@@ -14,7 +14,7 @@ Llama3Prompt = f"""{BEGIN_OF_TEXT}{SYSTEM_HEADER}
 
 You are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.{EOD}{{chat_history}}{USER_HEADER}
 
-{{input}}{EOD}{ASSISTANT_HEADER}"""
+Context: {{input}}{EOD}{ASSISTANT_HEADER}"""
 
 Llama3QAPrompt = f"""{BEGIN_OF_TEXT}{SYSTEM_HEADER}
 

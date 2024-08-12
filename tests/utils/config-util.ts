@@ -33,6 +33,9 @@ export function getTestConfig(): SystemConfig {
           createIndex: true,
           enterprise: true,
         },
+        knowledgeBase: {
+          enabled: false,
+        },
       },
       embeddingsModels: [
         {

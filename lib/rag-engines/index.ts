@@ -31,8 +31,8 @@ export class RagEngines extends Construct {
   public readonly documentsByStatusIndexName: string;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
-  public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
-  public readonly deleteDocumentWorkflow?: sfn.StateMachine;
+  public readonly deleteWorkspaceWorkflow: sfn.StateMachine;
+  public readonly deleteDocumentWorkflow: sfn.StateMachine;
   public readonly dataImport: DataImport;
 
   constructor(scope: Construct, id: string, props: RagEnginesProps) {

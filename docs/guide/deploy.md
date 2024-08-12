@@ -165,12 +165,17 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 **Step 11.** Login with the user created in **Step 8** and follow the instructions.
 
 **Step 12.** (Optional) Run the integration tests
-The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` which needs to be enabled in Bedrock.
+The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` and `amazon.titan-embed-text-v1` which need to be enabled in Bedrock.
 
 To run the tests (Replace the url with the one you used in the steps above)
 ```bash
 REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/ --ignore integtests/user_interface
 ```
+
+## Monitoring
+
+Once the deployment is complete, a [CloudWatch Dashboard](https://console.aws.amazon.com/cloudwatch) will be available in the selected region to monitor the usage of the resources.
+
 
 ## Run user interface locally
 
