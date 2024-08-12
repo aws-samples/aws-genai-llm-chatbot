@@ -28,6 +28,7 @@ jobs:
         # Suppression of pip audit failure until langchain is upgraded.
         run: |
           pip install -r pytest_requirements.txt
+          flake8 .
           bandit -r .
           pip-audit -r pytest_requirements.txt || true 
           pip-audit -r lib/shared/web-crawler-batch-job/requirements.txt || true 

@@ -62,7 +62,8 @@ def test_add_text(client: AppSyncClient):
             "content": "The Integ Test flower is green.",
         }
     )
-    # This test can take several minutes because it's waiting for AWSBatch to start a host
+    # This test can take several minutes because it's waiting for
+    # AWSBatch to start a host
     ready = False
     retries = 0
     while not ready and retries < 50:
@@ -100,7 +101,9 @@ def test_search_document(client: AppSyncClient):
         if len(result.get("items")) == 1:
             ready = True
             assert result.get("engine") == "opensearch"
-            assert result.get("items")[0].get("documentId") == pytest.document.get("documentId")
+            assert result.get("items")[0].get("documentId") == pytest.document.get(
+                "documentId"
+            )
     assert ready == True
 
 

@@ -1,7 +1,5 @@
 import os
 import boto3
-import genai_core.utils.delete_files_with_prefix
-
 
 WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
 DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
