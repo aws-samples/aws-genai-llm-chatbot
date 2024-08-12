@@ -5,7 +5,7 @@ import {
   Box,
   StatusIndicator,
 } from "@cloudscape-design/components";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useMemo, useState } from "react";
 import { Avatar } from "@cloudscape-design/chat-components";
 
 export function BaseChatMessage({
@@ -29,55 +29,52 @@ export function BaseChatMessage({
 }) {
   const [thumb, setThumb] = useState<"up" | "down" | undefined>(undefined);
 
-  const buttonGroupItems: ButtonGroupProps.Group[] = [];
+  const buttonGroupItems = useMemo(() => {
+    const bg: ButtonGroupProps.Group[] = [];
+    if (onFeedback && role === "ai") {
+      bg.push({
+        type: "group",
+        text: "Feedback",
+        items: [
+          {
+            type: "icon-button",
+            id: "thumbs-up",
+            iconName: thumb == "up" ? "thumbs-up-filled" : "thumbs-up",
+            text: "Thumbs Up",
+          },
+          {
+            type: "icon-button",
+            id: "thumbs-down",
+            iconName: thumb == "down" ? "thumbs-down-filled" : "thumbs-down",
+            text: "Thumbs Down",
+          },
+        ],
+      });
+    }
 
-  if (onFeedback && role === "ai") {
-    buttonGroupItems.push({
-      type: "group",
-      text: "Feedback",
-      items: [
-        {
-          type: "icon-button",
-          id: "thumbs-up",
-          iconName: thumb == "up" ? "thumbs-up-filled" : "thumbs-up",
-          text: "Thumbs Up",
-        },
-        {
-          type: "icon-button",
-          id: "thumbs-down",
-          iconName: thumb == "down" ? "thumbs-down-filled" : "thumbs-down",
-          text: "Thumbs Down",
-        },
-      ],
-    });
-  }
-
-  if (onCopy) {
-    buttonGroupItems.push({
-      type: "group",
-      text: "Actions",
-      items: [
-        {
-          type: "icon-button",
-          id: "copy",
-          iconName: "copy",
-          text: "Copy",
-          popoverFeedback: (
-            <StatusIndicator type="success">Message copied</StatusIndicator>
-          ),
-        },
-      ],
-    });
-  }
+    if (onCopy) {
+      bg.push({
+        type: "group",
+        text: "Actions",
+        items: [
+          {
+            type: "icon-button",
+            id: "copy",
+            iconName: "copy",
+            text: "Copy",
+            popoverFeedback: (
+              <StatusIndicator type="success">Message copied</StatusIndicator>
+            ),
+          },
+        ],
+      });
+    }
+    return bg;
+  }, [thumb, role, onCopy, onFeedback]);
 
   useEffect(() => {
-    if (role !== "ai") return;
-    (buttonGroupItems[0].items[0] as ButtonGroupProps.IconButton).iconName =
-      thumb == "up" ? "thumbs-up-filled" : "thumbs-up";
-    (buttonGroupItems[0].items[1] as ButtonGroupProps.IconButton).iconName =
-      thumb == "down" ? "thumbs-down-filled" : "thumbs-down";
     if (onFeedback) onFeedback(thumb);
-  }, [thumb, onFeedback, buttonGroupItems, role]);
+  }, [thumb, onFeedback]);
 
   return (
     <div

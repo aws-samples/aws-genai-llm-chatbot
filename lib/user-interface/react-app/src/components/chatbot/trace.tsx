@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
 import { AgentTrace } from "./chat";
 
-export function Trace({ agentTrace }: { agentTrace: AgentTrace }) {
+const orchestrationLabels: { [key: string]: string } = {
+  input: "processing task...",
+  output: "processing results...",
+  rationale: "thinking what to do...",
+  invocationinput: "calling the tools...",
+  observation: "processing tool response",
+  sdk_unknown_member: "working...",
+};
+
+const preProcessingLabels: { [key: string]: string } = {
+  input: "elaborating query...",
+  output: "parsing results...",
+};
+
+export function Trace({ agentTrace }: { readonly agentTrace: AgentTrace }) {
   const [progress, setProgress] = useState<AgentTrace>();
   const [text, setText] = useState("");
-  const preProcessingLabels: { [key: string]: string } = {
-    input: "elaborating query...",
-    output: "parsing results...",
-  };
-  const orchestrationLabels: { [key: string]: string } = {
-    input: "processing task...",
-    output: "processing results...",
-    rationale: "thinking what to do...",
-    invocationinput: "calling the tools...",
-    observation: "processing tool response",
-    sdk_unknown_member: "working...",
-  };
 
   useEffect(() => {
-    console.log(agentTrace);
-    setProgress({ ...progress, ...agentTrace });
+    setProgress((currentProcess) => ({ ...currentProcess, ...agentTrace }));
     if (agentTrace === undefined) {
       setProgress({});
     }
