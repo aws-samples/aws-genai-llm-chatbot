@@ -188,6 +188,33 @@ export class ApiResolvers extends Construct {
           );
         }
 
+        if (props.config.rag.engines.knowledgeBase?.enabled) {
+          for (const item of props.config.rag.engines.knowledgeBase.external ||
+            []) {
+            if (item.roleArn) {
+              apiHandler.addToRolePolicy(
+                new iam.PolicyStatement({
+                  actions: ["sts:AssumeRole"],
+                  resources: [item.roleArn],
+                })
+              );
+            } else {
+              apiHandler.addToRolePolicy(
+                new iam.PolicyStatement({
+                  actions: ["bedrock:Retrieve"],
+                  resources: [
+                    `arn:${cdk.Aws.PARTITION}:bedrock:${
+                      item.region ?? cdk.Aws.REGION
+                    }:${cdk.Aws.ACCOUNT_ID}:knowledge-base/${
+                      item.knowledgeBaseId
+                    }`,
+                  ],
+                })
+              );
+            }
+          }
+        }
+
         for (const item of props.config.rag.engines.kendra.external ?? []) {
           if (item.roleArn) {
             apiHandler.addToRolePolicy(
@@ -313,11 +340,13 @@ export class ApiResolvers extends Construct {
     );
 
     function addResolvers(operationType: string) {
+      /* eslint-disable  @typescript-eslint/no-explicit-any */
       const fieldNames = (
         schema.definitions
           .filter((x) => x.kind == "ObjectTypeDefinition")
           .filter((y: any) => y.name.value == operationType)[0] as any
       ).fields.map((z: any) => z.name.value);
+      /* eslint-enable  @typescript-eslint/no-explicit-any */
 
       for (const fieldName of fieldNames) {
         // These resolvers are added by the Realtime API

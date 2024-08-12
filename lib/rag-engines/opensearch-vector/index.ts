@@ -1,7 +1,6 @@
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as oss from "aws-cdk-lib/aws-opensearchserverless";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";

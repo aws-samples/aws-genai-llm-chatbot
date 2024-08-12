@@ -91,10 +91,24 @@ export default function ChatMessage(props: ChatMessageProps) {
     }
   }, [message]);
 
-  const content =
-    props.message.content && props.message.content.length > 0
-      ? props.message.content
-      : props.message.tokens?.map((v) => v.value).join("");
+  let content = "";
+  if (props.message.content && props.message.content.length > 0) {
+    // Message is final
+    content = props.message.content;
+  } else if (props.message.tokens && props.message.tokens.length > 0) {
+    // Streaming in progess. Hides the tokens out of sequence
+    // If I have 1,2,4, it would only display 1,2.
+    let currentSequence: number | undefined = undefined;
+    for (const token of props.message.tokens) {
+      if (
+        currentSequence === undefined ||
+        currentSequence + 1 == token.sequenceNumber
+      ) {
+        currentSequence = token.sequenceNumber;
+        content += token.value;
+      }
+    }
+  }
 
   return (
     <div>

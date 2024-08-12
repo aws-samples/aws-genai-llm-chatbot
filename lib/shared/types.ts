@@ -87,12 +87,12 @@ export interface SystemConfig {
     customProviderType?: string;
     customSAML?: {
       metadataDocumentUrl?: string;
-    }
+    };
     customOIDC?: {
       OIDCClient?: string;
       OIDCSecret?: string;
       OIDCIssuerURL?: string;
-    }
+    };
     cognitoDomain?: string;
   };
   cfGeoRestrictEnable: boolean;
@@ -102,6 +102,11 @@ export interface SystemConfig {
     region?: SupportedRegion;
     endpointUrl?: string;
     roleArn?: string;
+    guardrails?: {
+      enabled: boolean;
+      identifier: string;
+      version: string;
+    };
     bedrockAgentAliasId?: string;
     bedrockAgentId?: string;
     agents?: boolean;
@@ -142,6 +147,15 @@ export interface SystemConfig {
           roleArn?: string;
         }[];
         enterprise?: boolean;
+      };
+      knowledgeBase: {
+        enabled: boolean;
+        external?: {
+          name: string;
+          knowledgeBaseId: string;
+          region?: SupportedRegion;
+          roleArn?: string;
+        }[];
       };
     };
     embeddingsModels: {

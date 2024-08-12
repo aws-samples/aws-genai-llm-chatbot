@@ -16,7 +16,7 @@ import { Provider } from "aws-cdk-lib/custom-resources";
 function calculateHash(paths: string[]): string {
   return paths.reduce((mh, p) => {
     const dirs = fs.readdirSync(p);
-    let hash = calculateHash(
+    const hash = calculateHash(
       dirs
         .filter((d) => fs.statSync(path.join(p, d)).isDirectory())
         .map((v) => path.join(p, v))
@@ -53,13 +53,17 @@ export class SharedAssetBundler extends Construct {
   }
 
   bundleWithAsset(assetPath: string): Asset {
+    console.log(assetPath, calculateHash([assetPath, ...this.sharedAssets]));
     const asset = new aws_s3_assets.Asset(
       this,
       md5hash(assetPath).slice(0, 6),
       {
         path: assetPath,
         bundling: {
-          image: BuildImageProvider.getOrCreate(this),
+          image:
+            process.env.NODE_ENV === "test"
+              ? DockerImage.fromRegistry("dummy-skip-build-in-test")
+              : BuildImageProvider.getOrCreate(this),
           command: [
             "zip",
             "-r",

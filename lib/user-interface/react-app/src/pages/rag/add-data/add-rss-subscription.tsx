@@ -81,7 +81,9 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
     setGlobalError(undefined);
 
     const apiClient = new ApiClient(appContext);
-    const contentTypesToUse = data.contentTypes.filter((ct): ct is string => ct !== undefined);
+    const contentTypesToUse = data.contentTypes.filter(
+      (ct): ct is string => ct !== undefined
+    );
     try {
       await apiClient.documents.addRssFeedSubscription(
         props.data.workspace.value,
@@ -107,6 +109,7 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
 
       onChange({ rssFeedUrl: "" }, true);
       onChange({ rssFeedTitle: "" }, true);
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       console.error(Utils.getErrorMessage(error));
       setGlobalError(Utils.getErrorMessage(error));
@@ -115,18 +118,20 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
     props.setSubmitting(false);
   };
 
-  const handleContentTypeChange = (selectedOptions: ReadonlyArray<SelectOption>) => {
-    const options: SelectOption[] = selectedOptions.map(option => {
+  const handleContentTypeChange = (
+    selectedOptions: ReadonlyArray<SelectOption>
+  ) => {
+    const options: SelectOption[] = selectedOptions.map((option) => {
       if (option.value === undefined) {
         throw new Error(`Option value cannot be undefined`);
       }
       return {
         label: option.label,
         value: option.value,
-        description: option.description
+        description: option.description,
       };
     });
-    onChange({ contentTypes: options.map(option => option.value) });
+    onChange({ contentTypes: options.map((option) => option.value) });
   };
 
   const hasReadyWorkspace =
@@ -216,12 +221,14 @@ export default function AddRssSubscription(props: AddRssSubscriptionProps) {
               errorText={errors.contentTypes}
               description="Content Types to Enable for crawlingl"
             >
-            <Multiselect
-              disabled={props.submitting}
-              selectedOptions={generateSelectedOptions(data.contentTypes)}
-              options={multiselectOptions}
-              onChange={({ detail }) => handleContentTypeChange(detail.selectedOptions)}
-            />
+              <Multiselect
+                disabled={props.submitting}
+                selectedOptions={generateSelectedOptions(data.contentTypes)}
+                options={multiselectOptions}
+                onChange={({ detail }) =>
+                  handleContentTypeChange(detail.selectedOptions)
+                }
+              />
             </FormField>
           </SpaceBetween>
         </Container>

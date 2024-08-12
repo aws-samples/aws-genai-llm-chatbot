@@ -1,4 +1,5 @@
 import json
+import os
 import warnings
 from abc import ABC
 from typing import Any, Dict, Iterator, List, Mapping, Optional
@@ -12,6 +13,15 @@ from langchain.utilities.anthropic import (
     get_num_tokens_anthropic,
     get_token_ids_anthropic,
 )
+
+
+def get_guardrails() -> dict:
+    if "BEDROCK_GUARDRAILS_ID" in os.environ:
+        return {
+            "guardrailIdentifier": os.environ["BEDROCK_GUARDRAILS_ID"],
+            "guardrailVersion": os.environ.get("BEDROCK_GUARDRAILS_VERSION", "DRAFT"),
+        }
+    return {}
 
 
 class LLMInputOutputAdapter:
@@ -191,9 +201,14 @@ class BedrockBase(BaseModel, ABC):
         body = json.dumps(input_body)
         accept = "application/json"
         contentType = "application/json"
+        guardrails = get_guardrails()
         try:
             response = self.client.invoke_model(
-                body=body, modelId=self.model_id, accept=accept, contentType=contentType
+                body=body,
+                modelId=self.model_id,
+                accept=accept,
+                contentType=contentType,
+                **guardrails,
             )
             text = LLMInputOutputAdapter.prepare_output(provider, response)
 
@@ -231,12 +246,14 @@ class BedrockBase(BaseModel, ABC):
         params = {**_model_kwargs, **kwargs}
         input_body = LLMInputOutputAdapter.prepare_input(provider, prompt, params)
         body = json.dumps(input_body)
+        guardrails = get_guardrails()
         try:
             response = self.client.invoke_model_with_response_stream(
                 body=body,
                 modelId=self.model_id,
                 accept="application/json",
                 contentType="application/json",
+                **guardrails,
             )
         except Exception as e:
             raise ValueError(f"Error raised by bedrock service: {e}")

@@ -14,14 +14,13 @@ export interface AppConfig {
           custom: false;
           name: CognitoHostedUIIdentityProvider;
         };
-    oauth?:
-      {
-        domain: string;
-        redirectSignIn: string;
-        redirectSignOut: string;
-        Scopes: [];
-        responseType: string;
-      };
+    oauth?: {
+      domain: string;
+      redirectSignIn: string;
+      redirectSignOut: string;
+      Scopes: [];
+      responseType: string;
+    };
     rag_enabled: boolean;
     cross_encoders_enabled: boolean;
     sagemaker_embeddings_enabled: boolean;
@@ -95,4 +94,10 @@ export interface KendraWorkspaceCreateInput {
   name: string;
   kendraIndex: SelectProps.Option | null;
   useAllData: boolean;
+}
+
+export interface BedrockKBWorkspaceCreateInput {
+  name: string;
+  knowledgeBaseId: SelectProps.Option | null;
+  hybridSearch: boolean;
 }

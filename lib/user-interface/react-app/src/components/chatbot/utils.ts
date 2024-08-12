@@ -5,6 +5,7 @@ import {
   ChatBotHistoryItem,
   ChatBotMessageResponse,
   ChatBotMessageType,
+  ChatBotToken,
 } from "./types";
 import { ChatSession } from "./multi-chat";
 import { SelectProps } from "@cloudscape-design/components";
@@ -116,7 +117,8 @@ export function updateMessageHistory(
 export function updateMessageHistoryRef(
   sessionId: string,
   messageHistory: ChatBotHistoryItem[],
-  response: ChatBotMessageResponse
+  response: ChatBotMessageResponse,
+  messageTokens: { [key: string]: ChatBotToken[] }
 ) {
   if (response.data?.sessionId !== sessionId) {
     console.error("Invalid sessionId");
@@ -138,8 +140,12 @@ export function updateMessageHistoryRef(
       messageHistory.length > 0 &&
       messageHistory.at(-1)?.type !== ChatBotMessageType.Human
     ) {
-      const lastMessage = messageHistory.at(-1)!;
-      lastMessage.tokens = lastMessage.tokens ?? [];
+      const lastMessageIndex = messageHistory.length - 1;
+      const lastMessage = messageHistory[lastMessageIndex]!;
+      if (messageTokens[lastMessageIndex] === undefined) {
+        messageTokens[lastMessageIndex] = [];
+      }
+      lastMessage.tokens = messageTokens[lastMessageIndex];
       if (hasToken) {
         lastMessage.tokens.push(token);
       }

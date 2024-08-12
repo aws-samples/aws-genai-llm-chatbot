@@ -47,6 +47,7 @@ import {
   ChatInputState,
   ImageFile,
   ChatBotModelInterface,
+  ChatBotToken,
 } from "./types";
 import { sendQuery } from "../../graphql/mutations";
 import {
@@ -117,6 +118,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   useEffect(() => {
     async function subscribe() {
       console.log("Subscribing to AppSync");
+      const messageTokens: { [key: string]: ChatBotToken[] } = {};
       setReadyState(ReadyState.CONNECTING);
       const sub = await API.graphql<
         GraphQLSubscription<ReceiveMessagesSubscription>
@@ -143,12 +145,14 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               updateMessageHistoryRef(
                 props.session.id,
                 messageHistoryRef.current,
-                response
+                response,
+                messageTokens
               );
             }
             if (response.action === ChatBotAction.AgentTrace) {
               props.setAgentTrace(JSON.parse(response.data.content!)["trace"]);
             }
+
             if (
               response.action === ChatBotAction.FinalResponse ||
               response.action === ChatBotAction.Error
@@ -216,7 +220,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       const apiClient = new ApiClient(appContext);
       let workspaces: Workspace[] = [];
       let workspacesStatus: LoadingStatus = "finished";
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let modelsResult: GraphQLResult<any>;
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
         if (appContext?.config.rag_enabled) {

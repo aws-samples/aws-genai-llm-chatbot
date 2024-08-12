@@ -164,7 +164,7 @@ const WEBSITES_COLUMN_DEFINITIONS = [
 
 export function getColumnDefinition(
   documentType: RagDocumentType,
-  handleDelete: Function
+  handleDelete: (document: Document) => Promise<void>
 ) {
   const commonColumns = [
     {
