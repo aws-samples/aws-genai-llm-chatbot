@@ -26,7 +26,7 @@ export interface DeleteWorkspaceProps {
 }
 
 export class DeleteWorkspace extends Construct {
-  public readonly stateMachine?: sfn.StateMachine;
+  public readonly stateMachine: sfn.StateMachine;
 
   constructor(scope: Construct, id: string, props: DeleteWorkspaceProps) {
     super(scope, id);

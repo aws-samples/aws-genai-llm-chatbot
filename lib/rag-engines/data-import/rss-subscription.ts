@@ -25,6 +25,7 @@ export class RssSubscription extends Construct {
     super(scope, id);
 
     this.rssIngestorFunction = new lambda.Function(this, "RssIngestor", {
+    this.rssIngestorFunction = new lambda.Function(this, "RssIngestor", {
       code: props.shared.sharedCode.bundleWithLambdaAsset(
         path.join(__dirname, "./functions/rss-ingestor")
       ),
@@ -59,7 +60,10 @@ export class RssSubscription extends Construct {
     props.ragDynamoDBTables.documentsTable.grantReadWriteData(
       this.rssIngestorFunction
     );
-    props.ragDynamoDBTables.workspacesTable.grantReadData(this.rssIngestorFunction);
+    props.ragDynamoDBTables.workspacesTable.grantReadData(
+      this.this.rssIngestorFunction
+    );
+
 
     const triggerRssIngestorsFunction = new lambda.Function(
       this,
@@ -92,10 +96,12 @@ export class RssSubscription extends Construct {
             props.ragDynamoDBTables.documentsByStatusIndexName ?? "",
           PROCESSING_BUCKET_NAME: props.processingBucket.bucketName,
           RSS_FEED_INGESTOR_FUNCTION: this.rssIngestorFunction.functionName,
+          RSS_FEED_INGESTOR_FUNCTION: this.rssIngestorFunction.functionName,
         },
       }
     );
 
+    this.rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction);
     this.rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction);
     props.shared.configParameter.grantRead(triggerRssIngestorsFunction);
 

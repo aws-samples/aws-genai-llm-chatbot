@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig, ModelInterface, Direction } from "./shared/types";
 import { Authentication } from "./authentication";
+import { Monitoring } from "./monitoring";
 import { UserInterface } from "./user-interface";
 import { Shared } from "./shared";
 import { ChatBotApi } from "./chatbot-api";
@@ -66,19 +67,16 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
 
     // check if any deployed model requires langchain interface or if bedrock is enabled from config
+    let langchainInterface: LangChainInterface | undefined;
     if (langchainModels.length > 0 || props.config.bedrock?.enabled) {
-      const langchainInterface = new LangChainInterface(
-        this,
-        "LangchainInterface",
-        {
-          shared,
-          config: props.config,
-          ragEngines,
-          messagesTopic: chatBotApi.messagesTopic,
-          sessionsTable: chatBotApi.sessionsTable,
-          byUserIdIndex: chatBotApi.byUserIdIndex,
-        }
-      );
+      langchainInterface = new LangChainInterface(this, "LangchainInterface", {
+        shared,
+        config: props.config,
+        ragEngines,
+        messagesTopic: chatBotApi.messagesTopic,
+        sessionsTable: chatBotApi.sessionsTable,
+        byUserIdIndex: chatBotApi.byUserIdIndex,
+      });
 
       // Route all incoming messages targeted to langchain to the langchain model interface queue
       chatBotApi.messagesTopic.addSubscription(
@@ -217,6 +215,43 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         customResource.node.addDependency(authentication.customSamlProvider);
       }
     }
+
+    const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
+    new Monitoring(monitoringStack, "Monitoring", {
+      appsycnApi: chatBotApi.graphqlApi,
+      cognito: {
+        userPoolId: authentication.userPool.userPoolId,
+        clientId: authentication.userPoolClient.userPoolClientId,
+      },
+      tables: [
+        chatBotApi.sessionsTable,
+        ...(ragEngines
+          ? [ragEngines.workspacesTable, ragEngines.documentsTable]
+          : []),
+      ],
+      sqs: [
+        chatBotApi.outBoundQueue,
+        ideficsInterface.ingestionQueue,
+        ...(langchainInterface ? [langchainInterface.ingestionQueue] : []),
+      ],
+      aurora: ragEngines?.auroraPgVector?.database,
+      opensearch: ragEngines?.openSearchVector?.openSearchCollection,
+      kendra: ragEngines?.kendraRetrieval?.kendraIndex,
+      buckets: [chatBotApi.filesBucket],
+      ragFunctionProcessing: [
+        ...(ragEngines ? [ragEngines.dataImport.rssIngestorFunction] : []),
+      ],
+      ragStateMachineProcessing: [
+        ...(ragEngines
+          ? [
+              ragEngines.dataImport.fileImportWorkflow,
+              ragEngines.dataImport.websiteCrawlingWorkflow,
+              ragEngines.deleteDocumentWorkflow,
+              ragEngines.deleteWorkspaceWorkflow,
+            ]
+          : []),
+      ],
+    });
 
     /**
      * CDK NAG suppression

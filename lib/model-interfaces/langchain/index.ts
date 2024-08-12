@@ -182,7 +182,7 @@ export class LangChainInterface extends Construct {
       }
     }
 
-    if (props.config.rag.engines.knowledgeBase.enabled) {
+    if (props.config.rag.engines.knowledgeBase?.enabled) {
       for (const item of props.config.rag.engines.knowledgeBase.external ||
         []) {
         if (item.roleArn) {
@@ -234,7 +234,7 @@ export class LangChainInterface extends Construct {
       enforceSSL: true,
     });
 
-    const queue = new sqs.Queue(this, "Queue", {
+    const queue = new sqs.Queue(this, "LangChainIngestionQueue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(15 * 6),

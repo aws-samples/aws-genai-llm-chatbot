@@ -1352,19 +1352,8 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           {
             "AuthenticationType": "AWS_IAM",
           },
-          {
-            "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
-            "UserPoolConfig": {
-              "AwsRegion": {
-                "Ref": "AWS::Region",
-              },
-              "UserPoolId": {
-                "Ref": "AuthenticationUserPool28698864",
-              },
-            },
-          },
         ],
-        "AuthenticationType": "API_KEY",
+        "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
         "LogConfig": {
           "CloudWatchLogsRoleArn": {
             "Fn::GetAtt": [
@@ -1375,24 +1364,19 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "FieldLogLevel": "ALL",
         },
         "Name": "ChatbotGraphqlApi",
+        "UserPoolConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region",
+          },
+          "DefaultAction": "ALLOW",
+          "UserPoolId": {
+            "Ref": "AuthenticationUserPool28698864",
+          },
+        },
         "Visibility": "PRIVATE",
         "XrayEnabled": true,
       },
       "Type": "AWS::AppSync::GraphQLApi",
-    },
-    "ChatBotApiConstructChatbotApiDefaultApiKeyB909A7CF": {
-      "DependsOn": [
-        "ChatBotApiConstructChatbotApiSchema07900657",
-      ],
-      "Properties": {
-        "ApiId": {
-          "Fn::GetAtt": [
-            "ChatBotApiConstructChatbotApi21E23C68",
-            "ApiId",
-          ],
-        },
-      },
-      "Type": "AWS::AppSync::ApiKey",
     },
     "ChatBotApiConstructChatbotApiLogRetentionCF5F6908": {
       "Properties": {
@@ -3416,7 +3400,12 @@ schema {
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
-            "RSS_FEED_INGESTOR_FUNCTION": "",
+            "RSS_FEED_INGESTOR_FUNCTION": {
+              "Fn::GetAtt": [
+                "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                "Arn",
+              ],
+            },
             "SAGEMAKER_RAG_MODELS_ENDPOINT": {
               "Fn::GetAtt": [
                 "RagEnginesSageMakerModelMultiAB24AEndpoint6DA7D681",
@@ -3669,6 +3658,32 @@ schema {
                         ],
                       },
                       "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
                     ],
                   ],
                 },

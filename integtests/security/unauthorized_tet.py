@@ -20,24 +20,6 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
     with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.delete_user_sessions()
     with pytest.raises(TransportQueryError, match=match):
-        unauthenticated_client.create_opensearch_workspace(
-            input={
-                "kind": "auro2",
-                "name": "INTEG_TEST_AURORA",
-                "embeddingsModelProvider": "bedrock",
-                "embeddingsModelName": "model",
-                "crossEncoderModelName": "cross-encoder/ms-marco-MiniLM-L-12-v2",
-                "crossEncoderModelProvider": "sagemaker",
-                "languages": ["english"],
-                "index": True,
-                "hybridSearch": True,
-                "metric": "inner",
-                "chunkingStrategy": "recursive",
-                "chunkSize": 1000,
-                "chunkOverlap": 200,
-            }
-        )
-    with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.create_aurora_workspace(
             input={
                 "kind": "aoss",
@@ -121,3 +103,22 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
                 "passages": ["A cat is an animal.", "A car is a vehicle."],
             }
         )
+
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.create_opensearch_workspace(
+            input={
+                "kind": "aoss",
+                "name": "INTEG_TEST_OPEN_SEARCH",
+                "embeddingsModelProvider": "bedrock",
+                "embeddingsModelName": "model",
+                "crossEncoderModelName": "cross-encoder/ms-marco-MiniLM-L-12-v2",
+                "crossEncoderModelProvider": "sagemaker",
+                "languages": ["english"],
+                "index": True,
+                "hybridSearch": False,
+                "chunkingStrategy": "recursive",
+                "chunkSize": 1000,
+                "chunkOverlap": 200,
+            }
+        )
+   

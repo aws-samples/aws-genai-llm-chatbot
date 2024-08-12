@@ -1,6 +1,5 @@
 import json
 import boto3
-import logging
 from typing import List
 from decimal import Decimal
 from datetime import datetime
