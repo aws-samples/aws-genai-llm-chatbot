@@ -74,12 +74,14 @@ export function BaseChatMessage(props: {
             color="gen-ai"
             iconName="gen-ai"
             iconSvg={props.avatarElement}
+            loading={props.waiting ?? false}
           />
         ) : (
           <Avatar
             ariaLabel={props.name!}
             initials={props.name?.substring(0, 2)}
             iconSvg={props.avatarElement}
+            loading={props.waiting ?? false}
           />
         )}
       </div>

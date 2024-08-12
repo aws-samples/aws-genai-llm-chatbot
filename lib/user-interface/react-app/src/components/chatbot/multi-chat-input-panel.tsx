@@ -101,13 +101,6 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
             maxRows={6}
             minRows={1}
             onChange={({ detail }) => setValue(detail.value)}
-            onKeyDown={(e) => {
-              if (e.detail.key == "Enter" && !e.detail.shiftKey) {
-                e.preventDefault();
-                props.onSendMessage(value);
-                setValue("");
-              }
-            }}
             onAction={() => {
               props.onSendMessage(value);
               setValue("");
