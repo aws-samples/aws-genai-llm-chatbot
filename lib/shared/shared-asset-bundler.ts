@@ -11,7 +11,6 @@ import { md5hash } from "aws-cdk-lib/core/lib/helpers-internal";
 import { Construct, Node } from "constructs";
 import * as path from "path";
 import * as fs from "fs";
-import { Provider } from "aws-cdk-lib/custom-resources";
 
 function calculateHash(paths: string[]): string {
   return paths.reduce((mh, p) => {

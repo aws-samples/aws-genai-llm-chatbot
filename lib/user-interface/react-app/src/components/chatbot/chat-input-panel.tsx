@@ -1,12 +1,13 @@
 import {
+  Box,
   Button,
-  Container,
+  PromptInput,
   Icon,
   Select,
   SelectProps,
   SpaceBetween,
-  Spinner,
   StatusIndicator,
+  Container,
 } from "@cloudscape-design/components";
 import {
   Dispatch,
@@ -21,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import TextareaAutosize from "react-textarea-autosize";
+import { LoadingBar } from "@cloudscape-design/chat-components";
 import { ReadyState } from "react-use-websocket";
 import { ApiClient } from "../../common/api-client/api-client";
 import { AppContext } from "../../common/app-context";
@@ -440,7 +441,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
   return (
     <SpaceBetween direction="vertical" size="l">
-      <Container>
+      <Box>
         <div className={styles.input_textarea_container}>
           <SpaceBetween size="xxs" direction="horizontal" alignItems="center">
             {browserSupportsSpeechRecognition ? (
@@ -486,24 +487,43 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             configuration={props.configuration}
             setConfiguration={props.setConfiguration}
           />
-          <TextareaAutosize
-            className={styles.input_textarea}
-            maxRows={6}
-            minRows={1}
-            spellCheck={true}
-            autoFocus
-            onChange={(e) =>
-              setState((state) => ({ ...state, value: e.target.value }))
-            }
-            onKeyDown={(e) => {
-              if (e.key == "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
+          {props.running ? (
+            <div aria-live="polite">
+              <Box
+                margin={{ bottom: "xs", left: "l" }}
+                color="text-body-secondary"
+              >
+                Generating a response
+              </Box>
+              <LoadingBar variant="gen-ai" />
+            </div>
+          ) : (
+            <PromptInput
+              value={state.value}
+              placeholder={listening ? "Listening..." : "Send a message"}
+              maxRows={6}
+              minRows={1}
+              onChange={(e) =>
+                setState((state) => ({ ...state, value: e.detail.value }))
               }
-            }}
-            value={state.value}
-            placeholder={listening ? "Listening..." : "Send a message"}
-          />
+              onKeyDown={(e) => {
+                if (e.detail.key == "Enter" && !e.detail.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              onAction={handleSendMessage}
+              actionButtonIconName="send"
+              disableActionButton={
+                readyState !== ReadyState.OPEN ||
+                !state.models?.length ||
+                !state.selectedModel ||
+                props.running ||
+                state.value.trim().length === 0 ||
+                props.session.loading
+              }
+            />
+          )}
           <div style={{ marginLeft: "8px" }}>
             {state.selectedModelMetadata?.inputModalities.includes(
               ChabotInputModality.Image
@@ -523,129 +543,110 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                   }}
                 />
               ))}
-            <Button
-              disabled={
-                readyState !== ReadyState.OPEN ||
-                !state.models?.length ||
-                !state.selectedModel ||
-                props.running ||
-                state.value.trim().length === 0 ||
-                props.session.loading
+          </div>
+        </div>
+      </Box>
+      <Container>
+        <div className={styles.input_controls}>
+          <div
+            className={
+              appContext?.config.rag_enabled
+                ? styles.input_controls_selects_2
+                : styles.input_controls_selects_1
+            }
+          >
+            <Select
+              disabled={props.running}
+              statusType={state.modelsStatus}
+              loadingText="Loading models (might take few seconds)..."
+              placeholder="Select a model"
+              empty={
+                <div>
+                  No models available. Please make sure you have access to
+                  Amazon Bedrock or alternatively deploy a self hosted model on
+                  SageMaker or add API_KEY to Secrets Manager
+                </div>
               }
-              onClick={handleSendMessage}
-              iconAlign="right"
-              iconName={!props.running ? "angle-right-double" : undefined}
-              variant="primary"
-            >
-              {props.running ? (
-                <>
-                  Loading&nbsp;&nbsp;
-                  <Spinner />
-                </>
-              ) : (
-                "Send"
-              )}
-            </Button>
+              filteringType="auto"
+              selectedOption={state.selectedModel}
+              onChange={({ detail }) => {
+                setState((state) => ({
+                  ...state,
+                  selectedModel: detail.selectedOption,
+                  selectedModelMetadata: getSelectedModelMetadata(
+                    state.models,
+                    detail.selectedOption
+                  ),
+                }));
+                if (detail.selectedOption?.value) {
+                  StorageHelper.setSelectedLLM(detail.selectedOption.value);
+                }
+              }}
+              options={modelsOptions}
+            />
+            {appContext?.config.rag_enabled && (
+              <Select
+                disabled={
+                  props.running || !state.selectedModelMetadata?.ragSupported
+                }
+                loadingText="Loading workspaces (might take few seconds)..."
+                statusType={state.workspacesStatus}
+                placeholder="Select a workspace (RAG data source)"
+                filteringType="auto"
+                selectedOption={state.selectedWorkspace}
+                options={workspaceOptions}
+                onChange={({ detail }) => {
+                  if (detail.selectedOption?.value === "__create__") {
+                    navigate("/rag/workspaces/create");
+                  } else {
+                    setState((state) => ({
+                      ...state,
+                      selectedWorkspace: detail.selectedOption,
+                    }));
+
+                    StorageHelper.setSelectedWorkspaceId(
+                      detail.selectedOption?.value ?? ""
+                    );
+                  }
+                }}
+                empty={"No Workspaces available"}
+              />
+            )}
+          </div>
+          <div className={styles.input_controls_right}>
+            <SpaceBetween direction="horizontal" size="xxs" alignItems="center">
+              <div style={{ paddingTop: "1px" }}>
+                <ConfigDialog
+                  sessionId={props.session.id}
+                  visible={configDialogVisible}
+                  setVisible={setConfigDialogVisible}
+                  configuration={props.configuration}
+                  setConfiguration={props.setConfiguration}
+                />
+                <Button
+                  iconName="settings"
+                  variant="icon"
+                  onClick={() => setConfigDialogVisible(true)}
+                />
+              </div>
+              <StatusIndicator
+                type={
+                  readyState === ReadyState.OPEN
+                    ? "success"
+                    : readyState === ReadyState.CONNECTING ||
+                      readyState === ReadyState.UNINSTANTIATED
+                    ? "in-progress"
+                    : "error"
+                }
+              >
+                {readyState === ReadyState.OPEN
+                  ? "Connected"
+                  : connectionStatus}
+              </StatusIndicator>
+            </SpaceBetween>
           </div>
         </div>
       </Container>
-      <div className={styles.input_controls}>
-        <div
-          className={
-            appContext?.config.rag_enabled
-              ? styles.input_controls_selects_2
-              : styles.input_controls_selects_1
-          }
-        >
-          <Select
-            disabled={props.running}
-            statusType={state.modelsStatus}
-            loadingText="Loading models (might take few seconds)..."
-            placeholder="Select a model"
-            empty={
-              <div>
-                No models available. Please make sure you have access to Amazon
-                Bedrock or alternatively deploy a self hosted model on SageMaker
-                or add API_KEY to Secrets Manager
-              </div>
-            }
-            filteringType="auto"
-            selectedOption={state.selectedModel}
-            onChange={({ detail }) => {
-              setState((state) => ({
-                ...state,
-                selectedModel: detail.selectedOption,
-                selectedModelMetadata: getSelectedModelMetadata(
-                  state.models,
-                  detail.selectedOption
-                ),
-              }));
-              if (detail.selectedOption?.value) {
-                StorageHelper.setSelectedLLM(detail.selectedOption.value);
-              }
-            }}
-            options={modelsOptions}
-          />
-          {appContext?.config.rag_enabled && (
-            <Select
-              disabled={
-                props.running || !state.selectedModelMetadata?.ragSupported
-              }
-              loadingText="Loading workspaces (might take few seconds)..."
-              statusType={state.workspacesStatus}
-              placeholder="Select a workspace (RAG data source)"
-              filteringType="auto"
-              selectedOption={state.selectedWorkspace}
-              options={workspaceOptions}
-              onChange={({ detail }) => {
-                if (detail.selectedOption?.value === "__create__") {
-                  navigate("/rag/workspaces/create");
-                } else {
-                  setState((state) => ({
-                    ...state,
-                    selectedWorkspace: detail.selectedOption,
-                  }));
-
-                  StorageHelper.setSelectedWorkspaceId(
-                    detail.selectedOption?.value ?? ""
-                  );
-                }
-              }}
-              empty={"No Workspaces available"}
-            />
-          )}
-        </div>
-        <div className={styles.input_controls_right}>
-          <SpaceBetween direction="horizontal" size="xxs" alignItems="center">
-            <div style={{ paddingTop: "1px" }}>
-              <ConfigDialog
-                sessionId={props.session.id}
-                visible={configDialogVisible}
-                setVisible={setConfigDialogVisible}
-                configuration={props.configuration}
-                setConfiguration={props.setConfiguration}
-              />
-              <Button
-                iconName="settings"
-                variant="icon"
-                onClick={() => setConfigDialogVisible(true)}
-              />
-            </div>
-            <StatusIndicator
-              type={
-                readyState === ReadyState.OPEN
-                  ? "success"
-                  : readyState === ReadyState.CONNECTING ||
-                    readyState === ReadyState.UNINSTANTIATED
-                  ? "in-progress"
-                  : "error"
-              }
-            >
-              {readyState === ReadyState.OPEN ? "Connected" : connectionStatus}
-            </StatusIndicator>
-          </SpaceBetween>
-        </div>
-      </div>
     </SpaceBetween>
   );
 }

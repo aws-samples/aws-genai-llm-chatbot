@@ -1,12 +1,12 @@
 import {
-  Button,
   ExpandableSection,
-  SpaceBetween,
+  ButtonGroup,
+  ButtonGroupProps,
+  Box,
+  StatusIndicator,
 } from "@cloudscape-design/components";
-import { ReactElement, useState } from "react";
-import styles from "../../styles/chat.module.scss";
-import { CopyWithPopoverButton } from "./CopyButton";
-import { Avatar } from "./Avatar";
+import { ReactElement, useEffect, useState } from "react";
+import { Avatar } from "@cloudscape-design/chat-components";
 
 export function BaseChatMessage(props: {
   readonly role: "ai" | "human";
@@ -15,10 +15,48 @@ export function BaseChatMessage(props: {
   readonly avatarElement?: ReactElement;
   readonly children?: ReactElement;
   readonly expandableContent?: ReactElement;
-  readonly onFeedback?: (thumb: "up" | "down") => void;
+  readonly onFeedback?: (thumb: "up" | "down" | undefined) => void;
   readonly onCopy?: () => void;
 }) {
   const [thumb, setThumbs] = useState<"up" | "down" | undefined>(undefined);
+
+  const buttonGroupItems: ButtonGroupProps.IconButton[] = [];
+
+  if (props.onFeedback) {
+    buttonGroupItems.push({
+      type: "icon-button",
+      id: "thumbs-up",
+      iconName: thumb == "up" ? "thumbs-up-filled" : "thumbs-up",
+      text: "Thumbs Up",
+    });
+    buttonGroupItems.push({
+      type: "icon-button",
+      id: "thumbs-down",
+      iconName: thumb == "down" ? "thumbs-down-filled" : "thumbs-down",
+      text: "Thumbs Down",
+    });
+  }
+
+  if (props.onCopy) {
+    buttonGroupItems.push({
+      type: "icon-button",
+      id: "copy",
+      iconName: "copy",
+      text: "Copy",
+      popoverFeedback: (
+        <StatusIndicator type="success">Message copied</StatusIndicator>
+      ),
+    });
+  }
+
+  useEffect(() => {
+    buttonGroupItems[0].iconName =
+      thumb == "up" ? "thumbs-up-filled" : "thumbs-up";
+    buttonGroupItems[1].iconName =
+      thumb == "down" ? "thumbs-down-filled" : "thumbs-down";
+    if (props.onFeedback) props.onFeedback(thumb);
+  }, [thumb]);
+
   return (
     <div
       style={{
@@ -29,20 +67,31 @@ export function BaseChatMessage(props: {
         alignItems: "flex-start",
       }}
     >
-      <Avatar
-        name={props.name}
-        content={props.avatarElement}
-        waiting={props.waiting}
-        role={props.role}
-      />
+      <div style={{ marginTop: "0.5em" }}>
+        {props.role === "ai" ? (
+          <Avatar
+            ariaLabel="Assistant"
+            color="gen-ai"
+            iconName="gen-ai"
+            iconSvg={props.avatarElement}
+          />
+        ) : (
+          <Avatar
+            ariaLabel={props.name!}
+            initials={props.name?.substring(0, 2)}
+            iconSvg={props.avatarElement}
+          />
+        )}
+      </div>
 
       <div
         style={{
           flexDirection: "column",
           flexGrow: 1,
           backgroundColor: props.role === "ai" ? "#F1F1F1" : "white",
-          borderRadius: "0.1em",
+          borderRadius: "0.4em",
           padding: "0.5em",
+          marginLeft: "0.5em",
         }}
       >
         <div
@@ -56,63 +105,25 @@ export function BaseChatMessage(props: {
           {props.children}
         </div>
         {(props.onCopy || props.onFeedback) && (
-          <div className={styles.btn_chabot_message_copy}>
-            <SpaceBetween direction="horizontal" size="xxs">
-              {props.role === "ai" && props.onFeedback && (
-                <>
-                  {thumb != "down" && (
-                    <Button
-                      variant="icon"
-                      iconName={
-                        thumb == "up" ? "thumbs-up-filled" : "thumbs-up"
-                      }
-                      disabled={props.waiting}
-                      onClick={() => {
-                        props.onFeedback!("up");
-                        thumb != "up" ? setThumbs("up") : setThumbs(undefined);
-                      }}
-                    />
-                  )}
-                  {thumb != "up" && (
-                    <div style={{ fontSize: "0.9em" }}>
-                      <Button
-                        variant="icon"
-                        disabled={props.waiting}
-                        iconName={
-                          thumb == "down" ? "thumbs-down-filled" : "thumbs-down"
-                        }
-                        onClick={() => {
-                          props.onFeedback!("down");
-                          thumb != "down"
-                            ? setThumbs("down")
-                            : setThumbs(undefined);
-                        }}
-                      />
-                      {thumb === "down" ? "Not helpful" : null}
-                    </div>
-                  )}
-                  <div
-                    style={{
-                      borderRightColor: "#D0D0D0",
-                      borderRightStyle: "solid",
-                      borderRightWidth: "1px",
-                      height: "80%",
-                      marginTop: "auto",
-                      marginBottom: "auto",
-                    }}
-                  />
-                </>
-              )}
-              {props.onCopy ? (
-                <CopyWithPopoverButton
-                  disabled={props.waiting}
-                  onCopy={props.onCopy}
-                />
-              ) : (
-                <></>
-              )}
-            </SpaceBetween>
-          </div>
+          <Box float="right">
+            <ButtonGroup
+              variant="icon"
+              items={buttonGroupItems}
+              onItemClick={(e) => {
+                if (e.detail.id === "thumbs-up") {
+                  if (thumb === "up") {
+                    setThumbs(undefined);
+                  } else setThumbs("up");
+                } else if (e.detail.id === "thumbs-down") {
+                  if (thumb === "down") {
+                    setThumbs(undefined);
+                  } else setThumbs("down");
+                } else if (e.detail.id === "copy") {
+                  props.onCopy?.();
+                }
+              }}
+            />
+          </Box>
         )}
         {!props.waiting && props.expandableContent && (
           <ExpandableSection variant="footer" headerText="Metadata">

@@ -119,7 +119,7 @@ export default function ChatMessage(props: ChatMessageProps) {
         }}
         waiting={props.message.content.length === 0}
         onFeedback={(thumb) => {
-          thumb === "up" ? props.onThumbsUp() : props.onThumbsDown();
+          thumb && thumb === "up" ? props.onThumbsUp() : props.onThumbsDown();
         }}
         name={
           props.message?.type === ChatBotMessageType.Human
