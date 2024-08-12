@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AgentTrace } from "./chat";
 
-export function Trace(props: { agentTrace: AgentTrace }) {
+export function Trace({ agentTrace }: { agentTrace: AgentTrace }) {
   const [progress, setProgress] = useState<AgentTrace>();
   const [text, setText] = useState("");
   const preProcessingLabels: { [key: string]: string } = {
@@ -18,12 +18,12 @@ export function Trace(props: { agentTrace: AgentTrace }) {
   };
 
   useEffect(() => {
-    console.log(props.agentTrace);
-    setProgress({ ...progress, ...props.agentTrace });
-    if (props.agentTrace === undefined) {
+    console.log(agentTrace);
+    setProgress({ ...progress, ...agentTrace });
+    if (agentTrace === undefined) {
       setProgress({});
     }
-  }, [props.agentTrace]);
+  }, [agentTrace]);
 
   useEffect(() => {
     console.log(progress);

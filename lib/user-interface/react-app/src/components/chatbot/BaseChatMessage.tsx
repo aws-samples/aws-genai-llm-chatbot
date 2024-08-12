@@ -8,7 +8,16 @@ import {
 import { ReactElement, useEffect, useState } from "react";
 import { Avatar } from "@cloudscape-design/chat-components";
 
-export function BaseChatMessage(props: {
+export function BaseChatMessage({
+  role,
+  waiting,
+  name,
+  avatarElement,
+  children,
+  expandableContent,
+  onFeedback,
+  onCopy,
+}: {
   readonly role: "ai" | "human";
   readonly waiting?: boolean;
   readonly name?: string;
@@ -18,11 +27,11 @@ export function BaseChatMessage(props: {
   readonly onFeedback?: (thumb: "up" | "down" | undefined) => void;
   readonly onCopy?: () => void;
 }) {
-  const [thumb, setThumbs] = useState<"up" | "down" | undefined>(undefined);
+  const [thumb, setThumb] = useState<"up" | "down" | undefined>(undefined);
 
   const buttonGroupItems: ButtonGroupProps.Group[] = [];
 
-  if (props.onFeedback && props.role === "ai") {
+  if (onFeedback && role === "ai") {
     buttonGroupItems.push({
       type: "group",
       text: "Feedback",
@@ -43,7 +52,7 @@ export function BaseChatMessage(props: {
     });
   }
 
-  if (props.onCopy) {
+  if (onCopy) {
     buttonGroupItems.push({
       type: "group",
       text: "Actions",
@@ -62,13 +71,13 @@ export function BaseChatMessage(props: {
   }
 
   useEffect(() => {
-    if (props.role !== "ai") return;
+    if (role !== "ai") return;
     (buttonGroupItems[0].items[0] as ButtonGroupProps.IconButton).iconName =
       thumb == "up" ? "thumbs-up-filled" : "thumbs-up";
     (buttonGroupItems[0].items[1] as ButtonGroupProps.IconButton).iconName =
       thumb == "down" ? "thumbs-down-filled" : "thumbs-down";
-    if (props.onFeedback) props.onFeedback(thumb);
-  }, [thumb]);
+    if (onFeedback) onFeedback(thumb);
+  }, [thumb, onFeedback, buttonGroupItems, role]);
 
   return (
     <div
@@ -81,20 +90,20 @@ export function BaseChatMessage(props: {
       }}
     >
       <div style={{ marginTop: "0.5em" }}>
-        {props.role === "ai" ? (
+        {role === "ai" ? (
           <Avatar
             ariaLabel="Assistant"
             color="gen-ai"
             iconName="gen-ai"
-            iconSvg={props.avatarElement}
-            loading={props.waiting ?? false}
+            iconSvg={avatarElement}
+            loading={waiting ?? false}
           />
         ) : (
           <Avatar
-            ariaLabel={props.name!}
-            initials={props.name?.substring(0, 2)}
-            iconSvg={props.avatarElement}
-            loading={props.waiting ?? false}
+            ariaLabel={name!}
+            initials={name?.substring(0, 2)}
+            iconSvg={avatarElement}
+            loading={waiting ?? false}
           />
         )}
       </div>
@@ -103,7 +112,7 @@ export function BaseChatMessage(props: {
         style={{
           flexDirection: "column",
           flexGrow: 1,
-          backgroundColor: props.role === "ai" ? "#F1F1F1" : "white",
+          backgroundColor: role === "ai" ? "#F1F1F1" : "white",
           borderRadius: "0.4em",
           padding: "0.5em",
           marginLeft: "0.5em",
@@ -117,9 +126,9 @@ export function BaseChatMessage(props: {
             alignItems: "flex-start",
           }}
         >
-          {props.children}
+          {children}
         </div>
-        {(props.onCopy || props.onFeedback) && (
+        {(onCopy || onFeedback) && (
           <Box float="right">
             <ButtonGroup
               variant="icon"
@@ -127,22 +136,22 @@ export function BaseChatMessage(props: {
               onItemClick={(e) => {
                 if (e.detail.id === "thumbs-up") {
                   if (thumb === "up") {
-                    setThumbs(undefined);
-                  } else setThumbs("up");
+                    setThumb(undefined);
+                  } else setThumb("up");
                 } else if (e.detail.id === "thumbs-down") {
                   if (thumb === "down") {
-                    setThumbs(undefined);
-                  } else setThumbs("down");
+                    setThumb(undefined);
+                  } else setThumb("down");
                 } else if (e.detail.id === "copy") {
-                  props.onCopy?.();
+                  onCopy?.();
                 }
               }}
             />
           </Box>
         )}
-        {!props.waiting && props.expandableContent && (
+        {!waiting && expandableContent && (
           <ExpandableSection variant="footer" headerText="Metadata">
-            {props.expandableContent}
+            {expandableContent}
           </ExpandableSection>
         )}
       </div>
