@@ -4904,9 +4904,9 @@ schema {
       },
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
-    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup83AAAE44IndirectPort4B2D0B28": {
+    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupB72DF80DIndirectPort533F0865": {
       "Properties": {
-        "Description": "from RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup83AAAE44:{IndirectPort}",
+        "Description": "from RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupB72DF80D:{IndirectPort}",
         "FromPort": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -4922,7 +4922,7 @@ schema {
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
           "Fn::GetAtt": [
-            "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup1D51AC8A",
+            "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupDBC1F0DD",
             "GroupId",
           ],
         },
@@ -4935,9 +4935,9 @@ schema {
       },
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
-    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup3E85B007IndirectPort088D32B1": {
+    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup485782FFIndirectPort3EC7335D": {
       "Properties": {
-        "Description": "from RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup3E85B007:{IndirectPort}",
+        "Description": "from RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup485782FF:{IndirectPort}",
         "FromPort": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -4953,7 +4953,7 @@ schema {
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
           "Fn::GetAtt": [
-            "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup9851CDD2",
+            "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup1141A545",
             "GroupId",
           ],
         },
@@ -5915,8 +5915,8 @@ schema {
         "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromChatBotApiConstructRestApiApiSecurityGroup5956F387IndirectPort6F9024AE",
         "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceFunctionSecurityGroup90937669IndirectPortF35F96D5",
         "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesAuroraPgVectorDatabaseSetupFunctionSecurityGroup868747A2IndirectPort6045707A",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup83AAAE44IndirectPort4B2D0B28",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup3E85B007IndirectPort088D32B1",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupB72DF80DIndirectPort533F0865",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup485782FFIndirectPort3EC7335D",
         "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionSecurityGroup6310BD77IndirectPortCDECACF4",
         "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionSecurityGroup631ABE4DIndirectPort8FC2076C",
         "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroup333F94D8",
@@ -5936,6 +5936,54 @@ schema {
       },
       "Type": "AWS::CloudFormation::CustomResource",
       "UpdateReplacePolicy": "Delete",
+    },
+    "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentA4E537F2": {
+      "Properties": {
+        "ComputeResources": {
+          "MaxvCpus": 256,
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupDBC1F0DD",
+                "GroupId",
+              ],
+            },
+          ],
+          "Subnets": [
+            {
+              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
+            },
+          ],
+          "Type": "FARGATE",
+          "UpdateToLatestImageVersion": true,
+        },
+        "ReplaceComputeEnvironment": true,
+        "State": "ENABLED",
+        "Type": "managed",
+        "UpdatePolicy": {
+          "JobExecutionTimeoutMinutes": 30,
+        },
+      },
+      "Type": "AWS::Batch::ComputeEnvironment",
+    },
+    "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupDBC1F0DD": {
+      "Properties": {
+        "GroupDescription": "Default/RagEngines/DataImport/FileImportBatchJob/FargateComputeEnvironment/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "SharedVPC6716DA5E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "RagEnginesDataImportFileImportBatchJobFileImportContainerExecutionRoleDEA643AB": {
       "Properties": {
@@ -6106,12 +6154,16 @@ schema {
               },
             },
           ],
+          "EphemeralStorage": {
+            "SizeInGiB": 40,
+          },
           "ExecutionRoleArn": {
             "Fn::GetAtt": [
               "RagEnginesDataImportFileImportBatchJobFileImportContainerExecutionRoleDEA643AB",
               "Arn",
             ],
           },
+          "FargatePlatformConfiguration": {},
           "Image": [
             "Dummy",
           ],
@@ -6121,20 +6173,24 @@ schema {
               "Arn",
             ],
           },
+          "NetworkConfiguration": {
+            "AssignPublicIp": "DISABLED",
+          },
           "ReadonlyRootFilesystem": false,
           "ResourceRequirements": [
             {
               "Type": "MEMORY",
-              "Value": "2048",
+              "Value": "4096",
             },
             {
               "Type": "VCPU",
               "Value": "2",
             },
           ],
+          "RuntimePlatform": {},
         },
         "PlatformCapabilities": [
-          "EC2",
+          "FARGATE",
         ],
         "RetryStrategy": {
           "Attempts": 3,
@@ -6463,7 +6519,7 @@ schema {
           {
             "ComputeEnvironment": {
               "Fn::GetAtt": [
-                "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentB41D1F13",
+                "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentA4E537F2",
                 "ComputeEnvironmentArn",
               ],
             },
@@ -6474,107 +6530,6 @@ schema {
         "State": "ENABLED",
       },
       "Type": "AWS::Batch::JobQueue",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentB41D1F13": {
-      "Properties": {
-        "ComputeResources": {
-          "AllocationStrategy": "BEST_FIT_PROGRESSIVE",
-          "InstanceRole": {
-            "Fn::GetAtt": [
-              "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileB38E049C",
-              "Arn",
-            ],
-          },
-          "InstanceTypes": [
-            "m6a.large",
-            "optimal",
-          ],
-          "MaxvCpus": 4,
-          "MinvCpus": 0,
-          "SecurityGroupIds": [
-            {
-              "Fn::GetAtt": [
-                "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup1D51AC8A",
-                "GroupId",
-              ],
-            },
-          ],
-          "Subnets": [
-            {
-              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
-            },
-            {
-              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
-            },
-          ],
-          "Type": "EC2",
-          "UpdateToLatestImageVersion": true,
-        },
-        "ReplaceComputeEnvironment": true,
-        "State": "ENABLED",
-        "Type": "managed",
-        "UpdatePolicy": {
-          "JobExecutionTimeoutMinutes": 30,
-        },
-      },
-      "Type": "AWS::Batch::ComputeEnvironment",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileB38E049C": {
-      "Properties": {
-        "Roles": [
-          {
-            "Ref": "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileRole6292FF8B",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::InstanceProfile",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileRole6292FF8B": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "ec2.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
-              ],
-            ],
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup1D51AC8A": {
-      "Properties": {
-        "GroupDescription": "Default/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/SecurityGroup",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow all outbound traffic by default",
-            "IpProtocol": "-1",
-          },
-        ],
-        "VpcId": {
-          "Ref": "SharedVPC6716DA5E",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
     },
     "RagEnginesDataImportFileImportWorkflowFileImportSMLogGroupACEA6D66": {
       "DeletionPolicy": "Delete",
@@ -7184,7 +7139,7 @@ schema {
     },
     "RagEnginesDataImportRssSubscriptionCrawlQueuedRssPostsScheduleRuleD709D79A": {
       "Properties": {
-        "ScheduleExpression": "rate(10 minutes)",
+        "ScheduleExpression": "rate(5 minutes)",
         "State": "ENABLED",
         "Targets": [
           {
@@ -9056,6 +9011,54 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentC972B00C": {
+      "Properties": {
+        "ComputeResources": {
+          "MaxvCpus": 256,
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup1141A545",
+                "GroupId",
+              ],
+            },
+          ],
+          "Subnets": [
+            {
+              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
+            },
+          ],
+          "Type": "FARGATE",
+          "UpdateToLatestImageVersion": true,
+        },
+        "ReplaceComputeEnvironment": true,
+        "State": "ENABLED",
+        "Type": "managed",
+        "UpdatePolicy": {
+          "JobExecutionTimeoutMinutes": 30,
+        },
+      },
+      "Type": "AWS::Batch::ComputeEnvironment",
+    },
+    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup1141A545": {
+      "Properties": {
+        "GroupDescription": "Default/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerFargateComputeEnvironment/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "SharedVPC6716DA5E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
     "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerJobDC22C303": {
       "Properties": {
         "ContainerProperties": {
@@ -9135,6 +9138,7 @@ schema {
               "Arn",
             ],
           },
+          "FargatePlatformConfiguration": {},
           "Image": [
             "Dummy",
           ],
@@ -9144,20 +9148,24 @@ schema {
               "Arn",
             ],
           },
+          "NetworkConfiguration": {
+            "AssignPublicIp": "DISABLED",
+          },
           "ReadonlyRootFilesystem": false,
           "ResourceRequirements": [
             {
               "Type": "MEMORY",
-              "Value": "2048",
+              "Value": "4096",
             },
             {
               "Type": "VCPU",
               "Value": "2",
             },
           ],
+          "RuntimePlatform": {},
         },
         "PlatformCapabilities": [
-          "EC2",
+          "FARGATE",
         ],
         "RetryStrategy": {
           "Attempts": 3,
@@ -9183,7 +9191,7 @@ schema {
           {
             "ComputeEnvironment": {
               "Fn::GetAtt": [
-                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentA32238DF",
+                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentC972B00C",
                 "ComputeEnvironmentArn",
               ],
             },
@@ -9495,107 +9503,6 @@ schema {
         ],
       },
       "Type": "AWS::IAM::Role",
-    },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentA32238DF": {
-      "Properties": {
-        "ComputeResources": {
-          "AllocationStrategy": "BEST_FIT_PROGRESSIVE",
-          "InstanceRole": {
-            "Fn::GetAtt": [
-              "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfile38D79E54",
-              "Arn",
-            ],
-          },
-          "InstanceTypes": [
-            "m6a.large",
-            "optimal",
-          ],
-          "MaxvCpus": 4,
-          "MinvCpus": 0,
-          "SecurityGroupIds": [
-            {
-              "Fn::GetAtt": [
-                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup9851CDD2",
-                "GroupId",
-              ],
-            },
-          ],
-          "Subnets": [
-            {
-              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
-            },
-            {
-              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
-            },
-          ],
-          "Type": "EC2",
-          "UpdateToLatestImageVersion": true,
-        },
-        "ReplaceComputeEnvironment": true,
-        "State": "ENABLED",
-        "Type": "managed",
-        "UpdatePolicy": {
-          "JobExecutionTimeoutMinutes": 30,
-        },
-      },
-      "Type": "AWS::Batch::ComputeEnvironment",
-    },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfile38D79E54": {
-      "Properties": {
-        "Roles": [
-          {
-            "Ref": "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfileRole951949EE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::InstanceProfile",
-    },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfileRole951949EE": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "ec2.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
-              ],
-            ],
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup9851CDD2": {
-      "Properties": {
-        "GroupDescription": "Default/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerManagedEc2EcsComputeEnvironment/SecurityGroup",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow all outbound traffic by default",
-            "IpProtocol": "-1",
-          },
-        ],
-        "VpcId": {
-          "Ref": "SharedVPC6716DA5E",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
     },
     "RagEnginesDataImportWebsiteCrawlingWorkflowWebsiteCrawling9B1CEC96": {
       "DeletionPolicy": "Delete",
