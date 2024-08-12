@@ -20,39 +20,52 @@ export function BaseChatMessage(props: {
 }) {
   const [thumb, setThumbs] = useState<"up" | "down" | undefined>(undefined);
 
-  const buttonGroupItems: ButtonGroupProps.IconButton[] = [];
+  const buttonGroupItems: ButtonGroupProps.Group[] = [];
 
-  if (props.onFeedback) {
+  if (props.onFeedback && props.role === "ai") {
     buttonGroupItems.push({
-      type: "icon-button",
-      id: "thumbs-up",
-      iconName: thumb == "up" ? "thumbs-up-filled" : "thumbs-up",
-      text: "Thumbs Up",
-    });
-    buttonGroupItems.push({
-      type: "icon-button",
-      id: "thumbs-down",
-      iconName: thumb == "down" ? "thumbs-down-filled" : "thumbs-down",
-      text: "Thumbs Down",
+      type: "group",
+      text: "Feedback",
+      items: [
+        {
+          type: "icon-button",
+          id: "thumbs-up",
+          iconName: thumb == "up" ? "thumbs-up-filled" : "thumbs-up",
+          text: "Thumbs Up",
+        },
+        {
+          type: "icon-button",
+          id: "thumbs-down",
+          iconName: thumb == "down" ? "thumbs-down-filled" : "thumbs-down",
+          text: "Thumbs Down",
+        },
+      ],
     });
   }
 
   if (props.onCopy) {
     buttonGroupItems.push({
-      type: "icon-button",
-      id: "copy",
-      iconName: "copy",
-      text: "Copy",
-      popoverFeedback: (
-        <StatusIndicator type="success">Message copied</StatusIndicator>
-      ),
+      type: "group",
+      text: "Actions",
+      items: [
+        {
+          type: "icon-button",
+          id: "copy",
+          iconName: "copy",
+          text: "Copy",
+          popoverFeedback: (
+            <StatusIndicator type="success">Message copied</StatusIndicator>
+          ),
+        },
+      ],
     });
   }
 
   useEffect(() => {
-    buttonGroupItems[0].iconName =
+    if (props.role !== "ai") return;
+    (buttonGroupItems[0].items[0] as ButtonGroupProps.IconButton).iconName =
       thumb == "up" ? "thumbs-up-filled" : "thumbs-up";
-    buttonGroupItems[1].iconName =
+    (buttonGroupItems[0].items[1] as ButtonGroupProps.IconButton).iconName =
       thumb == "down" ? "thumbs-down-filled" : "thumbs-down";
     if (props.onFeedback) props.onFeedback(thumb);
   }, [thumb]);
