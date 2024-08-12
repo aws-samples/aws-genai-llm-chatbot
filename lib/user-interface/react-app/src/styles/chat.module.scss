@@ -136,7 +136,8 @@
 }
 
 .markdown {
-  font-size: 1em;
+  font-size: 0.9em;
+  font-family: awsui.$font-family-base;
 }
 
 .markdown p {
@@ -164,39 +165,4 @@
 
 .markdownTable tr:nth-child(even) {
   background-color: awsui.$color-background-container-content;
-}
-
-.wave {
-  position: relative;
-  width: 29px;
-  height: 29px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-.wave .dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-right: 3px;
-  background: #fff;
-  animation: wave 1.3s linear infinite;
-}
-.wave .dot:nth-child(2) {
-  animation-delay: -1.1s;
-}
-.wave .dot:nth-child(3) {
-  animation-delay: -0.9s;
-}
-
-@keyframes wave {
-  0%,
-  60%,
-  100% {
-    transform: initial;
-  }
-  30% {
-    transform: translateY(-10px);
-  }
 }

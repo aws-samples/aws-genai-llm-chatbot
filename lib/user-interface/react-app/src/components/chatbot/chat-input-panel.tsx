@@ -506,12 +506,6 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               onChange={(e) =>
                 setState((state) => ({ ...state, value: e.detail.value }))
               }
-              // onKeyDown={(e) => {
-              //   if (e.detail.key == "Enter" && !e.detail.shiftKey) {
-              //     e.preventDefault();
-              //     handleSendMessage();
-              //   }
-              // }}
               onAction={handleSendMessage}
               actionButtonIconName="send"
               disableActionButton={
