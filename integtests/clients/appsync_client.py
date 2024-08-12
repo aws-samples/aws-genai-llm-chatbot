@@ -122,7 +122,17 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("createOpenSearchWorkspace")
-    
+
+    def create_aurora_workspace(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.createAuroraWorkspace.args(input=input).select(
+                    self.schema.Workspace.id,
+                )
+            )
+        )
+        return self.client.execute(query).get("createAuroraWorkspace")
+
     def list_workspaces(self):
         query = dsl_gql(
             DSLQuery(
@@ -133,7 +143,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("listWorkspaces")
-    
+
     def list_workspaces(self):
         query = dsl_gql(
             DSLQuery(
@@ -145,7 +155,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("listWorkspaces")
-    
+
     def get_workspace(self, id):
         query = dsl_gql(
             DSLQuery(
@@ -157,39 +167,62 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("getWorkspace")
-    
+
     def delete_workspace(self, id):
         query = dsl_gql(
-            DSLMutation(
-                self.schema.Mutation.deleteWorkspace.args(workspaceId=id)
-            )
+            DSLMutation(self.schema.Mutation.deleteWorkspace.args(workspaceId=id))
         )
         return self.client.execute(query)
-    
+
     def add_text(self, input):
         query = dsl_gql(
             DSLMutation(
                 self.schema.Mutation.addTextDocument.args(input=input).select(
                     self.schema.DocumentResult.documentId,
-                    self.schema.DocumentResult.status
+                    self.schema.DocumentResult.status,
                 )
             )
         )
         return self.client.execute(query).get("addTextDocument")
-    
-    
+
+    def add_rss_feed(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.addRssFeed.args(input=input).select(
+                    self.schema.DocumentResult.documentId,
+                    self.schema.DocumentResult.status,
+                )
+            )
+        )
+        return self.client.execute(query).get("addRssFeed")
+
     def get_document(self, input):
         query = dsl_gql(
             DSLQuery(
                 self.schema.Query.getDocument.args(input=input).select(
                     self.schema.Document.workspaceId,
                     self.schema.Document.id,
-                    self.schema.Document.status
+                    self.schema.Document.status,
                 )
             )
         )
         return self.client.execute(query).get("getDocument")
-    
+
+    def get_rss_posts(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.getRSSPosts.args(input=input).select(
+                    self.schema.DocumentsResult.lastDocumentId,
+                    self.schema.DocumentsResult.items.select(
+                        self.schema.Document.workspaceId,
+                        self.schema.Document.id,
+                        self.schema.Document.status,
+                    ),
+                )
+            )
+        )
+        return self.client.execute(query).get("getRSSPosts")
+
     def semantic_search(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -199,13 +232,15 @@ class AppSyncClient:
                     self.schema.SemanticSearchResult.items.select(
                         self.schema.SemanticSearchItem.content,
                         self.schema.SemanticSearchItem.documentId,
-                        self.schema.SemanticSearchItem.score
-                        ),
+                        self.schema.SemanticSearchItem.score,
+                        self.schema.SemanticSearchItem.path,
+                        self.schema.SemanticSearchItem.documentType,
+                    ),
                 )
             )
         )
         return self.client.execute(query).get("performSemanticSearch")
-    
+
     def delete_document(self, input):
         query = dsl_gql(
             DSLMutation(
@@ -216,7 +251,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query)
-    
+
     def calculate_embeding(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -227,8 +262,7 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("calculateEmbeddings")
-    
-    
+
     def rank_passages(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -239,4 +273,3 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("rankPassages")
-    

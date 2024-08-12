@@ -9,15 +9,14 @@ from clients.cognito_client import CognitoClient
 from clients.appsync_client import AppSyncClient
 
 @pytest.fixture(scope="session")
-def client(config):
+def client(config, worker_id):
     user_pool_id = config.get("aws_user_pools_id")
     region = config.get("aws_cognito_region")
     user_pool_client_id = config.get("aws_user_pools_web_client_id")
     endpoint = config.get("aws_appsync_graphqlEndpoint")
     
     cognito = CognitoClient(region=region, user_pool_id=user_pool_id, client_id=user_pool_client_id)
-    email = "integ-test-user@example.local"
-    
+    email = "integ-test-user@example.local-" + worker_id
     return AppSyncClient(endpoint=endpoint, id_token=cognito.get_token(email=email))
 
 @pytest.fixture(scope="session")

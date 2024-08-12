@@ -1,5 +1,7 @@
 pytest==7.4.0
+pytest-xdist==3.6.1
 pytest-mock==3.11.1
 gql==3.4.1
 aws_lambda_powertools==2.42.0
+pdfplumber==0.11.0
 -r lib/shared/layers/common/requirements.txt

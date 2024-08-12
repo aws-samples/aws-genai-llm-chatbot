@@ -1,8 +1,9 @@
 import pytest
 from gql.transport.exceptions import TransportQueryError
+from clients.appsync_client import AppSyncClient
 
 
-def test_unauthenticated(unauthenticated_client):
+def test_unauthenticated(unauthenticated_client: AppSyncClient):
     match = "UnauthorizedException"
     with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.send_query("")
@@ -20,6 +21,24 @@ def test_unauthenticated(unauthenticated_client):
         unauthenticated_client.delete_user_sessions()
     with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.create_opensearch_workspace(
+            input={
+                "kind": "auro2",
+                "name": "INTEG_TEST_AURORA",
+                "embeddingsModelProvider": "bedrock",
+                "embeddingsModelName": "model",
+                "crossEncoderModelName": "cross-encoder/ms-marco-MiniLM-L-12-v2",
+                "crossEncoderModelProvider": "sagemaker",
+                "languages": ["english"],
+                "index": True,
+                "hybridSearch": True,
+                "metric": "inner",
+                "chunkingStrategy": "recursive",
+                "chunkSize": 1000,
+                "chunkOverlap": 200,
+            }
+        )
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.create_aurora_workspace(
             input={
                 "kind": "aoss",
                 "name": "INTEG_TEST_OPEN_SEARCH",
@@ -50,7 +69,26 @@ def test_unauthenticated(unauthenticated_client):
             }
         )
     with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.add_rss_feed(
+            input={
+                "workspaceId": "id",
+                "title": "INTEG_TEST_OPEN_SEARCH_TITLE",
+                "content": "The Integ Test flower is green.",
+                "address": "address",
+                "limit": 1,
+                "followLinks": True,
+                "contentTypes": ["type"],
+            }
+        )
+    with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.get_document(
+            input={
+                "workspaceId": "id",
+                "documentId": "id",
+            }
+        )
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.get_rss_post(
             input={
                 "workspaceId": "id",
                 "documentId": "id",

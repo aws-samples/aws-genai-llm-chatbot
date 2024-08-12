@@ -150,7 +150,7 @@ export class RssSubscription extends Construct {
       crawlQueuedRssPostsFunction
     );
     new events.Rule(this, "CrawlQueuedRssPostsScheduleRule", {
-      schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
+      schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
       targets: [new targets.LambdaFunction(crawlQueuedRssPostsFunction)],
     });
 
