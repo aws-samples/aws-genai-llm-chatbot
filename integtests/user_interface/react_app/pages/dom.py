@@ -2,7 +2,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 
-class DomOperator():
+
+class DomOperator:
     def __init__(self, driver):
         self.driver = driver
 
@@ -10,7 +11,8 @@ class DomOperator():
         try:
             driver = self.driver
             WebDriverWait(driver, wait).until(
-                lambda driver: driver.find_element(type, locator))
+                lambda driver: driver.find_element(type, locator)
+            )
             element = driver.find_element(type, locator)
             return element
         except TimeoutException:
@@ -22,6 +24,6 @@ class DomOperator():
 
     def getByPath(self, path, wait):
         return self.getBy(By.XPATH, path, wait)
-    
+
     def getByName(self, name, wait):
         return self.getBy(By.NAME, name, wait)

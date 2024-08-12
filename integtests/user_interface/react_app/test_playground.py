@@ -11,6 +11,5 @@ def test_message(selenium_driver, cognito_credentials, default_model):
     assert home_page.is_visible() == True
     layout.expand_navigation()
     layout.navigate_to("/chatbot/playground")
-    playground.send_prompt("repeat \"STRING_DETECT_TEST\"", default_model)
+    playground.send_prompt('repeat "STRING_DETECT_TEST"', default_model)
     playground.wait_for_reply("STRING_DETECT_TEST")
-    
