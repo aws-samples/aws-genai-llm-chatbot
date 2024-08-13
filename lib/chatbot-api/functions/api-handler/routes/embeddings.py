@@ -1,8 +1,9 @@
+from common.constant import MAX_STR_INPUT_LENGTH, SAFE_STR_REGEX
 import genai_core.types
 import genai_core.parameters
 import genai_core.embeddings
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import Annotated, List, Optional
+from pydantic import BaseModel, Field
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
 from genai_core.types import CommonError, Task
@@ -13,9 +14,11 @@ logger = Logger()
 
 
 class EmbeddingsRequest(BaseModel):
-    provider: str
-    model: str
-    passages: List[str]
+    provider: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    model: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    passages: List[
+        Annotated[str, Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)]
+    ]
     task: Optional[Task] = Task.STORE
 
 
@@ -31,6 +34,9 @@ def models():
 @tracer.capture_method
 def embeddings(input: dict):
     request = EmbeddingsRequest(**input)
+    if len(request.passages) == 0:
+        raise genai_core.types.CommonError("Passages is empty")
+
     selected_model = genai_core.embeddings.get_embeddings_model(
         request.provider, request.model
     )

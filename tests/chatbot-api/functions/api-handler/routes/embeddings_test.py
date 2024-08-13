@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import pytest
 from genai_core.types import CommonError, EmbeddingsModel
 from routes.embeddings import models
@@ -26,3 +27,29 @@ def test_embedings_not_found(mocker):
     mocker.patch("genai_core.embeddings.get_embeddings_model", return_value=None)
     with pytest.raises(CommonError):
         embeddings(input)
+
+
+def test_embedings_invalid_input(mocker):
+    with pytest.raises(ValidationError, match="3 validation errors"):
+        embeddings({})
+    with pytest.raises(ValidationError, match="3 validation errors"):
+        invalid = input.copy()
+        invalid["model"] = "<"
+        invalid["provider"] = "<"
+        invalid["task"] = "invalid"
+        embeddings(invalid)
+    with pytest.raises(ValidationError, match="2 validation error"):
+        invalid = input.copy()
+        invalid["model"] = ""
+        invalid["provider"] = ""
+        invalid["passages"] = []
+        invalid["task"] = "store"
+        embeddings(invalid)
+    with pytest.raises(CommonError, match="Passages is empty"):
+        invalid = input.copy()
+        invalid["passages"] = []
+        embeddings(invalid)
+    with pytest.raises(ValidationError, match="1 validation error"):
+        invalid = input.copy()
+        invalid["passages"] = [""]
+        embeddings(invalid)

@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import pytest
 from genai_core.types import CommonError
 from routes.sessions import get_sessions
@@ -50,6 +51,13 @@ def test_get_session(mocker):
     assert get_session("id") == expected
 
 
+def test_get_session_invalid_input():
+    with pytest.raises(ValidationError, match="1 validation error"):
+        get_session("")
+    with pytest.raises(ValidationError, match="1 validation error"):
+        get_session(None)
+
+
 def test_get_session_user_not_found(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value=None)
     with pytest.raises(CommonError):
@@ -82,6 +90,13 @@ def test_delete_session(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value="userId")
     mocker.patch("genai_core.sessions.delete_session", return_value=service_response)
     assert delete_session("id") == service_response
+
+
+def test_delete_session_invalid_input():
+    with pytest.raises(ValidationError, match="1 validation error"):
+        delete_session("")
+    with pytest.raises(ValidationError, match="1 validation error"):
+        delete_session(None)
 
 
 def test_delete_session_user_not_found(mocker):

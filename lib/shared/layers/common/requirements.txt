@@ -16,5 +16,5 @@ openai==0.28.1
 beautifulsoup4==4.12.2
 requests==2.32.0
 attrs==23.1.0
-feedparser==6.0.10
+feedparser==6.0.11
 defusedxml==0.7.1
