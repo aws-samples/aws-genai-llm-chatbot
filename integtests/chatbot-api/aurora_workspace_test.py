@@ -165,10 +165,7 @@ def test_query_llm(client, default_model, default_provider):
         retries += 1
         session = client.get_session(session_id)
 
-        if (
-            session != None
-            and len(session.get("history")) == 2
-        ):
+        if session != None and len(session.get("history")) == 2:
             metadata = json.loads(str(session.get("history")[1].get("metadata")))
             found = len(metadata.get("documents")) > 0
             break

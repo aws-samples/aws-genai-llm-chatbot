@@ -30,6 +30,6 @@ class PlaygroundPage(object):
     def wait_for_reply(self, expected_str):
         self.dom_operator.getByPath(
             "//div[@data-locator='chatbot-ai-container']//p[contains(text()"
-            + +f",'{expected_str}')]",
+            + f",'{expected_str}')]",
             wait=25,
         )

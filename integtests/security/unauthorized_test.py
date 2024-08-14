@@ -34,6 +34,7 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
                 "chunkingStrategy": "recursive",
                 "chunkSize": 1000,
                 "chunkOverlap": 200,
+                "metric": "value",
             }
         )
     with pytest.raises(TransportQueryError, match=match):
@@ -70,7 +71,7 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
             }
         )
     with pytest.raises(TransportQueryError, match=match):
-        unauthenticated_client.get_rss_post(
+        unauthenticated_client.get_rss_posts(
             input={
                 "workspaceId": "id",
                 "documentId": "id",
