@@ -58,7 +58,7 @@ def list_azure_openai_models():
     # AZURE_OPENAI_MODELS variable in external API secret
     models = genai_core.parameters.get_external_api_key("AZURE_OPENAI_MODELS") or ""
     if not models:
-        return []
+        return None
     return [
         {
             "provider": Provider.AZURE_OPENAI.value,

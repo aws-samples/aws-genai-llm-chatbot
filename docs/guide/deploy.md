@@ -112,11 +112,10 @@ npm run test && pip install -r pytest_requirements.txt && pytest tests
 ```bash
 npm run config
 ```
-Note, that `anthropic.claude-instant-v1` (Claude Instant) and `amazon.titan-embed-text-v1` (Titan Embeddings G1 - Text) need to be enabled in Bedrock before you run the command.
 
 You'll be prompted to configure the different aspects of the solution, such as:
 
-- The LLMs or MLMs to enable (we support all models provided by Bedrock along with SageMaker hosted Idefics, FalconLite, Mistral and more to come).
+- The LLMs or MLMs to enable (we support all models provided by Bedrock that [were enabled](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) along with SageMaker hosted Idefics, FalconLite, Mistral and more to come).
 - Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra).
 - Embeddings selection.
 - Limit accessibility to website and backend to VPC (private chatbot).
