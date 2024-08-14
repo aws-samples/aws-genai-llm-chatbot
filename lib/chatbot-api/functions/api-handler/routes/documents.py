@@ -44,6 +44,7 @@ class WebsiteDocumentRequest(BaseModel):
     limit: int = Field(gt=-1)
     contentTypes: Optional[List[Annotated[str, SAFE_SHORT_STR_VALIDATION]]]
 
+
 class RssFeedDocumentRequest(BaseModel):
     workspaceId: str = ID_FIELD_VALIDATION
     documentId: Optional[str] = Field(

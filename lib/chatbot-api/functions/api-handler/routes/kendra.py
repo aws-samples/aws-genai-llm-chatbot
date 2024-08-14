@@ -1,5 +1,3 @@
-from typing import Annotated
-from common.constant import ID_FIELD_VALIDATION
 from common.validation import WorkspaceIdValidation
 import genai_core.parameters
 import genai_core.kendra

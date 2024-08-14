@@ -17,16 +17,19 @@ MAX_STR_INPUT_LENGTH = 1000000
 SAFE_STR_REGEX = r"^[A-Za-z0-9-_. ]*$"
 SAFE_SHORT_STR_VALIDATION = Field(min_length=0, max_length=500, pattern=SAFE_STR_REGEX)
 
+
 class ModelKwargsFieldValidation(BaseModel):
-    streaming: Optional[bool] 
+    streaming: Optional[bool]
     maxTokens: Optional[int] = Field(gt=0, lt=1000000)
     temperature: Optional[float] = Field(ge=0, le=1)
     topP: Optional[float] = Field(ge=0, le=1)
-  
+
+
 class FileFieldValidation(BaseModel):
     provider: Optional[str] = SAFE_SHORT_STR_VALIDATION
     key: Optional[str] = SAFE_SHORT_STR_VALIDATION
-  
+
+
 class DataFieldValidation(BaseModel):
     modelName: Optional[str] = SAFE_SHORT_STR_VALIDATION
     provider: Optional[str] = SAFE_SHORT_STR_VALIDATION
@@ -35,13 +38,15 @@ class DataFieldValidation(BaseModel):
     mode: Optional[str] = SAFE_SHORT_STR_VALIDATION
     text: Optional[str] = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
     files: Optional[List[FileFieldValidation]]
-    modelKwargs: Optional[ModelKwargsFieldValidation]  
+    modelKwargs: Optional[ModelKwargsFieldValidation]
+
 
 class InputValidation(BaseModel):
     action: str = SAFE_SHORT_STR_VALIDATION
     modelInterface: str = SAFE_SHORT_STR_VALIDATION
     data: DataFieldValidation
-    
+
+
 @tracer.capture_lambda_handler
 @logger.inject_lambda_context(log_event=True)
 def handler(event, context: LambdaContext):
@@ -63,7 +68,6 @@ def handler(event, context: LambdaContext):
         response = sns.publish(TopicArn=TOPIC_ARN, Message=json.dumps(message))
         return response
     except Exception as e:
-        # Do not return an unknown exception to the end user. Instead return a generic message
-        # This is to prevent leaking internal information.
+        # Do not return an unknown exception to the end user.
         logger.exception(e)
         raise RuntimeError("Something went wrong")

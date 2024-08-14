@@ -16,9 +16,7 @@ class CrossEncodersRequest(BaseModel):
     provider: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
     model: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
     reference: str = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
-    passages: List[
-        Annotated[str, Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)]
-    ]
+    passages: List[Annotated[str, Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)]]
 
 
 @router.resolver(field_name="listCrossEncoders")

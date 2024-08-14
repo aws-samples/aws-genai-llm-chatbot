@@ -1,6 +1,5 @@
 from typing import Annotated, List
 from common.constant import (
-    ID_FIELD_VALIDATION,
     SAFE_SHORT_STR_VALIDATION,
 )
 from common.validation import WorkspaceIdValidation

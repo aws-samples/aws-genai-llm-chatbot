@@ -5,8 +5,6 @@ import genai_core.auth
 import genai_core.utils.json
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
-from typing import Annotated
-from common.constant import ID_FIELD_VALIDATION
 import json
 
 tracer = Tracer()
@@ -81,7 +79,7 @@ def delete_user_sessions():
 
 @router.resolver(field_name="deleteSession")
 @tracer.capture_method
-def delete_session(id:str):
+def delete_session(id: str):
     WorkspaceIdValidation(**{"workspaceId": id})
     user_id = genai_core.auth.get_user_id(router)
     if user_id is None:

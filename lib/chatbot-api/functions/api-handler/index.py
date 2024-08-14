@@ -53,7 +53,8 @@ def handler(event: dict, context: LambdaContext) -> dict:
         logger.warning(str(e))
         raise e
     except Exception as e:
-        # Do not return an unknown exception to the end user. Instead return a generic message
+        # Do not return an unknown exception to the end user.
+        # Instead return a generic message
         # This is to prevent leaking internal information.
         logger.exception(e)
         raise RuntimeError("Something went wrong")
