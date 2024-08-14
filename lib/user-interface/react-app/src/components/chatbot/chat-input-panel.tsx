@@ -66,6 +66,7 @@ export interface ChatInputPanelProps {
   setMessageHistory: (history: ChatBotHistoryItem[]) => void;
   configuration: ChatBotConfiguration;
   setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
+  setInitErrorMessage?: (error?: string) => void;
 }
 
 export abstract class ChatScrollState {
@@ -215,6 +216,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
+        if(props.setInitErrorMessage) props.setInitErrorMessage(undefined);
         if (appContext?.config.rag_enabled) {
           [modelsResult, workspacesResult] = await Promise.all([
             apiClient.models.getModels(),
@@ -250,13 +252,15 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         }));
       } catch (error) {
         console.log(Utils.getErrorMessage(error));
+        if(props.setInitErrorMessage) props.setInitErrorMessage(Utils.getErrorMessage(error));
         setState((state) => ({
           ...state,
           modelsStatus: "error",
         }));
+        setReadyState(ReadyState.CLOSED);
       }
     })();
-  }, [appContext, state.modelsStatus]);
+  }, [appContext, state.modelsStatus, props.setInitErrorMessage]);
 
   useEffect(() => {
     const onWindowScroll = () => {

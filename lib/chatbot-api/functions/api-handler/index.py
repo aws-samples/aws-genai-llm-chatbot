@@ -45,7 +45,8 @@ app.include_router(bedrock_kb_router)
 @tracer.capture_lambda_handler
 def handler(event: dict, context: LambdaContext) -> dict:
     try:
-        return app.resolve(event, context)
+        raise RuntimeError("Example error")
+        #return app.resolve(event, context)
     except ValidationError as e:
         logger.warning(e.errors())
         raise e
@@ -56,4 +57,4 @@ def handler(event: dict, context: LambdaContext) -> dict:
         # Do not return an unknown exception to the end user. Instead return a generic message
         # This is to prevent leaking internal information.
         logger.exception(e)
-        raise RuntimeError("Something went wrong")
+        raise RuntimeError("Something went wrong. Example")
