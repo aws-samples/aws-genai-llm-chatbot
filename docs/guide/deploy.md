@@ -98,7 +98,7 @@ cd aws-genai-llm-chatbot
 **Step 3.** <a id="deployment-dependencies-installation"></a> Install the project dependencies and build the project.
 
 ```bash
-npm install && npm run build
+npm ci && npm run build
 ```
 
 **Step 4.** (Optional) Run the unit tests
@@ -115,7 +115,7 @@ npm run config
 
 You'll be prompted to configure the different aspects of the solution, such as:
 
-- The LLMs or MLMs to enable (we support all models provided by Bedrock along with SageMaker hosted Idefics, FalconLite, Mistral and more to come).
+- The LLMs or MLMs to enable (we support all models provided by Bedrock that [were enabled](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) along with SageMaker hosted Idefics, FalconLite, Mistral and more to come).
 - Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra).
 - Embeddings selection.
 - Limit accessibility to website and backend to VPC (private chatbot).
@@ -165,7 +165,7 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 **Step 11.** Login with the user created in **Step 8** and follow the instructions.
 
 **Step 12.** (Optional) Run the integration tests
-The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` and `amazon.titan-embed-text-v1` which need to be enabled in Bedrock.
+The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` (Claude Instant) and `amazon.titan-embed-text-v1` (Titan Embeddings G1 - Text) which need to be enabled in Bedrock.
 
 To run the tests (Replace the url with the one you used in the steps above)
 ```bash
