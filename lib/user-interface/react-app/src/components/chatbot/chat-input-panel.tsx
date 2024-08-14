@@ -491,6 +491,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             setConfiguration={props.setConfiguration}
           />
           <TextareaAutosize
+            data-locator='prompt-input'
             className={styles.input_textarea}
             maxRows={6}
             minRows={1}
@@ -528,6 +529,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 />
               ))}
             <Button
+              data-locator="submit-prompt"
               disabled={
                 readyState !== ReadyState.OPEN ||
                 !state.models?.length ||
@@ -563,6 +565,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         >
           <Select
             disabled={props.running}
+            data-locator='select-model'
             statusType={state.modelsStatus}
             loadingText="Loading models (might take few seconds)..."
             placeholder="Select a model"
