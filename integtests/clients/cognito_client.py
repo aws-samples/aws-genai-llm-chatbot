@@ -3,13 +3,22 @@ import string
 import random
 
 
+from pydantic import BaseModel
+
+
+class Credentials(BaseModel):
+    id_token: str
+    email: str
+    password: str
+
+
 class CognitoClient:
     def __init__(self, region: str, user_pool_id: str, client_id: str) -> None:
         self.user_pool_id = user_pool_id
         self.client_id = client_id
         self.cognito_idp_client = boto3.client("cognito-idp", region_name=region)
 
-    def get_token(self, email: str) -> None:
+    def get_credentials(self, email: str) -> Credentials:
         try:
             self.cognito_idp_client.admin_get_user(
                 UserPoolId=self.user_pool_id,
@@ -41,7 +50,13 @@ class CognitoClient:
             AuthParameters={"USERNAME": email, "PASSWORD": password},
         )
 
-        return response["AuthenticationResult"]["IdToken"]
+        return Credentials(
+            **{
+                "id_token": response["AuthenticationResult"]["IdToken"],
+                "email": email,
+                "password": password,
+            }
+        )
 
     def get_password(self):
         return "".join(
