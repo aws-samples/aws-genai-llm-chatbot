@@ -260,7 +260,7 @@ async function processCreateOptions(options: any): Promise<void> {
         const regex = /^[a-zA-Z0-9-]{0,10}$/;
         return regex.test(value)
           ? true
-          : "Only letters, number and dashes are allowed. The max length is 10 characters.";
+          : "Only letters, numbers, and dashes are allowed. The max length is 10 characters.";
       },
     },
     {

@@ -218,6 +218,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
 
     const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
     new Monitoring(monitoringStack, "Monitoring", {
+      prefix: props.config.prefix,
       appsycnApi: chatBotApi.graphqlApi,
       cognito: {
         userPoolId: authentication.userPool.userPoolId,
@@ -276,8 +277,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
-        `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/ChatbotApi/proxyResolverFunction/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/ChatBotApi/ChatbotApi/realtimeResolverFunction/ServiceRole/DefaultPolicy/Resource`,
@@ -290,6 +290,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/Resource`,
         `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
         `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
+        ...(langchainInterface
+          ? [
+              `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
+              `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+            ]
+          : []),
       ],
       [
         {
