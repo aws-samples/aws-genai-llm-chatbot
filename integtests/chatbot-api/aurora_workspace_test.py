@@ -175,7 +175,7 @@ def test_query_llm(client, default_model, default_provider):
 
 def test_delete_document(client: AppSyncClient):
     if pytest.skip_flag == True:
-        pytest.skip("Open search is not enabled.")
+        pytest.skip("Aurora is not enabled.")
     client.delete_document(
         input={
             "workspaceId": pytest.workspace.get("id"),
