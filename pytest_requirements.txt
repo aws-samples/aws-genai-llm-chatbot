@@ -9,4 +9,5 @@ black==24.8.0
 flake8==7.1.0
 selenium==4.16
 pdfplumber==0.11.0
+pyopenssl==23.3.0
 -r lib/shared/layers/common/requirements.txt
