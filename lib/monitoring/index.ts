@@ -13,6 +13,7 @@ import { IDatabaseCluster } from "aws-cdk-lib/aws-rds";
 import { Queue } from "aws-cdk-lib/aws-sqs";
 
 export interface MonitoringProps {
+  prefix: string;
   appsycnApi: IGraphqlApi;
   cognito: { userPoolId: string; clientId: string };
   tables: ITable[];
@@ -35,7 +36,7 @@ export class Monitoring extends Construct {
 
     const monitoring = new MonitoringFacade(
       this,
-      "GenAI-Chatbot-Dashboard",
+      props.prefix + "GenAI-Chatbot-Dashboard",
       {}
     );
 

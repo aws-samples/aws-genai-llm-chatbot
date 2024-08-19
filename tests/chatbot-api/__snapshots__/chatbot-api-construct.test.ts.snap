@@ -10284,7 +10284,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicycreateworkflowCF675858": {
       "Properties": {
-        "Name": "prefix-access-policy-create-work",
+        "Name": "prefix-create-workflow-access-po",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10306,7 +10306,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicydeletedocumentE38B92A9": {
       "Properties": {
-        "Name": "prefix-access-policy-delete-docu",
+        "Name": "prefix-delete-document-access-po",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10328,7 +10328,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicydeleteworkspaceB7671EBB": {
       "Properties": {
-        "Name": "prefix-access-policy-delete-work",
+        "Name": "prefix-delete-workspace-access-p",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10350,7 +10350,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicyfileimportjob36E505CB": {
       "Properties": {
-        "Name": "prefix-access-policy-file-import",
+        "Name": "prefix-file-import-job-access-po",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10372,7 +10372,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicygraphqlapi1D6DC8C2": {
       "Properties": {
-        "Name": "prefix-access-policy-graphql-api",
+        "Name": "prefix-graphql-api-access-policy",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10394,7 +10394,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicywebcrawlerjobBB1BFE70": {
       "Properties": {
-        "Name": "prefix-access-policy-web-crawler",
+        "Name": "prefix-web-crawler-job-access-po",
         "Policy": {
           "Fn::Join": [
             "",
