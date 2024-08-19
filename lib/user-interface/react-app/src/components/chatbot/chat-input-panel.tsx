@@ -47,6 +47,7 @@ import {
   ChatInputState,
   ImageFile,
   ChatBotModelInterface,
+  ChatBotToken,
 } from "./types";
 import { sendQuery } from "../../graphql/mutations";
 import {
@@ -115,6 +116,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   useEffect(() => {
     async function subscribe() {
       console.log("Subscribing to AppSync");
+      const messageTokens: { [key: string]: ChatBotToken[] } = {};
       setReadyState(ReadyState.CONNECTING);
       const sub = await API.graphql<
         GraphQLSubscription<ReceiveMessagesSubscription>
@@ -134,10 +136,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               console.log("Heartbeat pong!");
               return;
             }
+
             updateMessageHistoryRef(
               props.session.id,
               messageHistoryRef.current,
-              response
+              response,
+              messageTokens
             );
 
             if (
@@ -206,7 +210,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       const apiClient = new ApiClient(appContext);
       let workspaces: Workspace[] = [];
       let workspacesStatus: LoadingStatus = "finished";
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let modelsResult: GraphQLResult<any>;
+      /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
         if (appContext?.config.rag_enabled) {
@@ -470,6 +476,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             setConfiguration={props.setConfiguration}
           />
           <TextareaAutosize
+            data-locator='prompt-input'
             className={styles.input_textarea}
             maxRows={6}
             minRows={1}
@@ -507,6 +514,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 />
               ))}
             <Button
+              data-locator="submit-prompt"
               disabled={
                 readyState !== ReadyState.OPEN ||
                 !state.models?.length ||
@@ -542,6 +550,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         >
           <Select
             disabled={props.running}
+            data-locator='select-model'
             statusType={state.modelsStatus}
             loadingText="Loading models (might take few seconds)..."
             placeholder="Select a model"

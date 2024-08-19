@@ -1,6 +1,4 @@
-import json
-
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
+from langchain.schema import AIMessage, HumanMessage
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 
@@ -14,7 +12,7 @@ Llama3Prompt = f"""{BEGIN_OF_TEXT}{SYSTEM_HEADER}
 
 You are an helpful assistant that provides concise answers to user questions with as little sentences as possible and at maximum 3 sentences. You do not repeat yourself. You avoid bulleted list or emojis.{EOD}{{chat_history}}{USER_HEADER}
 
-{{input}}{EOD}{ASSISTANT_HEADER}"""
+Context: {{input}}{EOD}{ASSISTANT_HEADER}"""  # noqa:E501
 
 Llama3QAPrompt = f"""{BEGIN_OF_TEXT}{SYSTEM_HEADER}
 
@@ -22,13 +20,13 @@ Use the following conversation history and pieces of context to answer the quest
 
 Context: {{context}}
 
-{{question}}{EOD}{ASSISTANT_HEADER}"""
+{{question}}{EOD}{ASSISTANT_HEADER}"""  # noqa:E501
 
 Llama3CondensedQAPrompt = f"""{BEGIN_OF_TEXT}{SYSTEM_HEADER}
 
 Given the following conversation and the question at the end, rephrase the follow up input to be a standalone question, in the same language as the follow up input. You do not repeat yourself. You avoid bulleted list or emojis.{EOD}{{chat_history}}{USER_HEADER}
 
-{{question}}{EOD}{ASSISTANT_HEADER}"""
+{{question}}{EOD}{ASSISTANT_HEADER}"""  # noqa:E501
 
 
 Llama3PromptTemplate = PromptTemplate.from_template(Llama3Prompt)

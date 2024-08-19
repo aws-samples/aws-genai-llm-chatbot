@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { SystemConfig, ModelInterface, Direction } from "./shared/types";
 import { Authentication } from "./authentication";
+import { Monitoring } from "./monitoring";
 import { UserInterface } from "./user-interface";
 import { Shared } from "./shared";
 import { ChatBotApi } from "./chatbot-api";
@@ -12,9 +13,8 @@ import { IdeficsInterface } from "./model-interfaces/idefics";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as cr from 'aws-cdk-lib/custom-resources';
+import * as cr from "aws-cdk-lib/custom-resources";
 import { NagSuppressions } from "cdk-nag";
-import * as cognito from "aws-cdk-lib/aws-cognito";
 
 export interface AwsGenAILLMChatbotStackProps extends cdk.StackProps {
   readonly config: SystemConfig;
@@ -32,7 +32,11 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     });
 
     const shared = new Shared(this, "Shared", { config: props.config });
-    const authentication = new Authentication(this, "Authentication", props.config);
+    const authentication = new Authentication(
+      this,
+      "Authentication",
+      props.config
+    );
     const models = new Models(this, "Models", {
       config: props.config,
       shared,
@@ -63,19 +67,16 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
 
     // check if any deployed model requires langchain interface or if bedrock is enabled from config
+    let langchainInterface: LangChainInterface | undefined;
     if (langchainModels.length > 0 || props.config.bedrock?.enabled) {
-      const langchainInterface = new LangChainInterface(
-        this,
-        "LangchainInterface",
-        {
-          shared,
-          config: props.config,
-          ragEngines,
-          messagesTopic: chatBotApi.messagesTopic,
-          sessionsTable: chatBotApi.sessionsTable,
-          byUserIdIndex: chatBotApi.byUserIdIndex,
-        }
-      );
+      langchainInterface = new LangChainInterface(this, "LangchainInterface", {
+        shared,
+        config: props.config,
+        ragEngines,
+        messagesTopic: chatBotApi.messagesTopic,
+        sessionsTable: chatBotApi.sessionsTable,
+        byUserIdIndex: chatBotApi.byUserIdIndex,
+      });
 
       // Route all incoming messages targeted to langchain to the langchain model interface queue
       chatBotApi.messagesTopic.addSubscription(
@@ -105,7 +106,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     // IDEFICS Interface Construct
     // This is the model interface receiving messages from the websocket interface via the message topic
     // and interacting with IDEFICS visual language models
-    const ideficsModels = models.models.filter(
+    models.models.filter(
       (model) => model.interface === ModelInterface.MultiModal
     );
 
@@ -159,50 +160,98 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       sagemakerEmbeddingsEnabled:
         typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
     });
-    
+
     if (props.config.cognitoFederation?.enabled) {
-      
       const oAuthParams = {
-        scopes: ["email", "phone", "profile", "openid", "aws.cognito.signin.user.admin"],
+        scopes: [
+          "email",
+          "phone",
+          "profile",
+          "openid",
+          "aws.cognito.signin.user.admin",
+        ],
         customProviderName: props.config.cognitoFederation?.customProviderName,
         customProviderType: props.config.cognitoFederation?.customProviderType,
         callbackUrls: [`https://${userInterface.publishedDomain}`],
-        logoutUrls: [`https://${userInterface.publishedDomain}`] 
-      }
-  
+        logoutUrls: [`https://${userInterface.publishedDomain}`],
+      };
+
       const lambdaInvokePolicyStatement = new iam.PolicyStatement({
-        actions: ['lambda:InvokeFunction'],
-        resources: [authentication.updateUserPoolClient.functionArn], 
+        actions: ["lambda:InvokeFunction"],
+        resources: [authentication.updateUserPoolClient.functionArn],
       });
-      
+
       // Create a Custom Resource to trigger the Lambda function
-      const customResource = new cr.AwsCustomResource(this, 'UpdateUserPoolClientCustomResource', {
-        onUpdate: {
-          service: 'Lambda',
-          action: 'invoke',
-          parameters: {
-            FunctionName: authentication.updateUserPoolClient.functionName,
-            Payload: JSON.stringify({
-              oAuthV: oAuthParams,
-            }),
+      const customResource = new cr.AwsCustomResource(
+        this,
+        "UpdateUserPoolClientCustomResource",
+        {
+          onUpdate: {
+            service: "Lambda",
+            action: "invoke",
+            parameters: {
+              FunctionName: authentication.updateUserPoolClient.functionName,
+              Payload: JSON.stringify({
+                oAuthV: oAuthParams,
+              }),
+            },
+            physicalResourceId: cr.PhysicalResourceId.of(
+              authentication.userPoolClient.userPoolClientId
+            ),
           },
-          physicalResourceId: cr.PhysicalResourceId.of(authentication.userPoolClient.userPoolClientId),
-        },
-        policy: cr.AwsCustomResourcePolicy.fromStatements([lambdaInvokePolicyStatement]),
-      });
-  
+          policy: cr.AwsCustomResourcePolicy.fromStatements([
+            lambdaInvokePolicyStatement,
+          ]),
+        }
+      );
+
       // Ensure the custom resource is created after the UserPoolClient and userInterface and federated provider setup
       customResource.node.addDependency(authentication.updateUserPoolClient);
       customResource.node.addDependency(userInterface);
-      if (props.config.cognitoFederation?.customProviderType == "OIDC")
-      {
+      if (props.config.cognitoFederation?.customProviderType == "OIDC") {
         customResource.node.addDependency(authentication.customOidcProvider);
       }
-      if (props.config.cognitoFederation?.customProviderType == "SAML")
-      {
+      if (props.config.cognitoFederation?.customProviderType == "SAML") {
         customResource.node.addDependency(authentication.customSamlProvider);
       }
     }
+
+    const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
+    new Monitoring(monitoringStack, "Monitoring", {
+      appsycnApi: chatBotApi.graphqlApi,
+      cognito: {
+        userPoolId: authentication.userPool.userPoolId,
+        clientId: authentication.userPoolClient.userPoolClientId,
+      },
+      tables: [
+        chatBotApi.sessionsTable,
+        ...(ragEngines
+          ? [ragEngines.workspacesTable, ragEngines.documentsTable]
+          : []),
+      ],
+      sqs: [
+        chatBotApi.outBoundQueue,
+        ideficsInterface.ingestionQueue,
+        ...(langchainInterface ? [langchainInterface.ingestionQueue] : []),
+      ],
+      aurora: ragEngines?.auroraPgVector?.database,
+      opensearch: ragEngines?.openSearchVector?.openSearchCollection,
+      kendra: ragEngines?.kendraRetrieval?.kendraIndex,
+      buckets: [chatBotApi.filesBucket],
+      ragFunctionProcessing: [
+        ...(ragEngines ? [ragEngines.dataImport.rssIngestorFunction] : []),
+      ],
+      ragStateMachineProcessing: [
+        ...(ragEngines
+          ? [
+              ragEngines.dataImport.fileImportWorkflow,
+              ragEngines.dataImport.websiteCrawlingWorkflow,
+              ragEngines.deleteDocumentWorkflow,
+              ragEngines.deleteWorkspaceWorkflow,
+            ]
+          : []),
+      ],
+    });
 
     /**
      * CDK NAG suppression

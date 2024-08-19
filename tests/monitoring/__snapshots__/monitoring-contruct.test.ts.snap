@@ -1,0 +1,894 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshot test 1`] = `
+{
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "Collection": {
+      "Properties": {
+        "Name": "name",
+      },
+      "Type": "AWS::OpenSearchServerless::Collection",
+    },
+    "DLQ581697C4": {
+      "DeletionPolicy": "Delete",
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "Index": {
+      "Properties": {
+        "Edition": "edition",
+        "Name": "name",
+        "RoleArn": "roleArn",
+      },
+      "Type": "AWS::Kendra::Index",
+    },
+    "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardDashboardsDashboard32FE3B68": {
+      "Properties": {
+        "DashboardBody": {
+          "Fn::Join": [
+            "",
+            [
+              "{"start":"-PT8H","periodOverride":"inherit","widgets":[{"type":"text","width":24,"height":1,"x":0,"y":0,"properties":{"markdown":"# APIs"}},{"type":"text","width":24,"height":1,"x":0,"y":1,"properties":{"markdown":"### AppSync GraphQL API **AppSync**"}},{"type":"metric","width":6,"height":5,"x":0,"y":2,"properties":{"view":"timeSeries","title":"TPS","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[[{"label":"TPS (min: \${MIN}, max: \${MAX}, avg: \${AVG})","expression":"FILL(requests,0) / PERIOD(requests)"}],["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"Requests","stat":"SampleCount","visible":false,"id":"requests"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":2,"properties":{"view":"timeSeries","title":"Latency","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P50","stat":"p50"}],["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P90","stat":"p90"}],["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":2,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/AppSync","4XXError","GraphQLAPIId","graphqlApiId",{"label":"4XX Error","stat":"Sum"}],["AWS/AppSync","5XXError","GraphQLAPIId","graphqlApiId",{"label":"5XX Fault","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":2,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/AppSync","4XXError","GraphQLAPIId","graphqlApiId",{"label":"4XX Error (avg)"}],["AWS/AppSync","5XXError","GraphQLAPIId","graphqlApiId",{"label":"5XX Fault (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":7,"properties":{"markdown":"### Cognito [**UserPool**](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cognito/v2/idp/user-pools/userPoolId/users?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              ")"}},{"type":"metric","width":24,"height":5,"x":0,"y":8,"properties":{"view":"timeSeries","title":"SignIn","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Cognito","SignInSuccesses","UserPool","userPoolId","UserPoolClient","clientId",{"stat":"Sum"}],["AWS/Cognito","FederationSuccesses","UserPool","userPoolId","UserPoolClient","clientId",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":13,"properties":{"markdown":"# Storage"}},{"type":"text","width":24,"height":1,"x":0,"y":14,"properties":{"markdown":"### Dynamo Table **[Table](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/dynamodb/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#tables:selected=Name)**"}},{"type":"metric","width":6,"height":3,"x":0,"y":15,"properties":{"view":"timeSeries","title":"Read Usage","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[[{"label":"Consumed","expression":"consumed_rcu_sum/PERIOD(consumed_rcu_sum)","id":"consumed_read_cap"}],["AWS/DynamoDB","ConsumedReadCapacityUnits","TableName","Name",{"stat":"Sum","visible":false,"id":"consumed_rcu_sum"}],["AWS/DynamoDB","ProvisionedReadCapacityUnits","TableName","Name",{"label":"Provisioned","id":"provisioned_read_cap"}],[{"label":"Utilization","expression":"100*(consumed_read_cap/provisioned_read_cap)","yAxis":"right"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false},"right":{"min":0,"max":100,"label":"%","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":6,"height":3,"x":0,"y":18,"properties":{"view":"timeSeries","title":"Write Usage","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[[{"label":"Consumed","expression":"consumed_wcu_sum/PERIOD(consumed_wcu_sum)","id":"consumed_write_cap"}],["AWS/DynamoDB","ConsumedWriteCapacityUnits","TableName","Name",{"stat":"Sum","visible":false,"id":"consumed_wcu_sum"}],["AWS/DynamoDB","ProvisionedWriteCapacityUnits","TableName","Name",{"label":"Provisioned","id":"provisioned_write_cap"}],[{"label":"Utilization","expression":"100*(consumed_write_cap/provisioned_write_cap)","yAxis":"right"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false},"right":{"min":0,"max":100,"label":"%","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":9,"height":6,"x":6,"y":15,"properties":{"view":"timeSeries","title":"Latency (Average)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[[{"label":" ","expression":"SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\\"Name\\" MetricName=\\"SuccessfulRequestLatency\\"', 'Average', 300)"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":3,"height":6,"x":15,"y":15,"properties":{"view":"timeSeries","title":"Throttles","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[[{"label":"Read","expression":"FILL(readThrottles,0)"}],["AWS/DynamoDB","ReadThrottleEvents","TableName","Name",{"label":"Read","stat":"Sum","visible":false,"id":"readThrottles"}],[{"label":"Write","expression":"FILL(writeThrottles,0)"}],["AWS/DynamoDB","WriteThrottleEvents","TableName","Name",{"label":"Write","stat":"Sum","visible":false,"id":"writeThrottles"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":6,"x":18,"y":15,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[[{"label":"System Errors","expression":"systemErrorGetItem+systemErrorBatchGetItem+systemErrorScan+systemErrorQuery+systemErrorGetRecords+systemErrorPutItem+systemErrorDeleteItem+systemErrorUpdateItem+systemErrorBatchWriteItem"}],["AWS/DynamoDB","SystemErrors","Operation","GetItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorGetItem"}],["AWS/DynamoDB","SystemErrors","Operation","BatchGetItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorBatchGetItem"}],["AWS/DynamoDB","SystemErrors","Operation","Scan","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorScan"}],["AWS/DynamoDB","SystemErrors","Operation","Query","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorQuery"}],["AWS/DynamoDB","SystemErrors","Operation","GetRecords","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorGetRecords"}],["AWS/DynamoDB","SystemErrors","Operation","PutItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorPutItem"}],["AWS/DynamoDB","SystemErrors","Operation","DeleteItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorDeleteItem"}],["AWS/DynamoDB","SystemErrors","Operation","UpdateItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorUpdateItem"}],["AWS/DynamoDB","SystemErrors","Operation","BatchWriteItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorBatchWriteItem"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":21,"properties":{"markdown":"### S3 Bucket **[Bucket](https://s3.console.aws.amazon.com/s3/buckets/",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "&tab=metrics)**"}},{"type":"metric","width":12,"height":5,"x":0,"y":22,"properties":{"view":"timeSeries","title":"Bucket Size","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/S3","BucketSizeBytes","BucketName","",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","StorageType","StandardStorage",{"label":"BucketSizeBytes"}]],"yAxis":{"left":{"min":0,"label":"bytes","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":12,"y":22,"properties":{"view":"timeSeries","title":"Object Count","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/S3","NumberOfObjects","BucketName","",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","StorageType","AllStorageTypes",{"label":"NumberOfObjects"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":27,"properties":{"markdown":"### Aurora Cluster **[Cluster](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/rds/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#database:id=clusterIdentifier;is-cluster=true;tab=monitoring)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":28,"properties":{"view":"timeSeries","title":"CPU Usage","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/RDS","CPUUtilization","DBClusterIdentifier","clusterIdentifier",{"label":"CPU Usage"}]],"yAxis":{"left":{"min":0,"max":100,"label":"%","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":28,"properties":{"view":"timeSeries","title":"Connections","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/RDS","DatabaseConnections","DBClusterIdentifier","clusterIdentifier",{"label":"Connections"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":12,"y":28,"properties":{"view":"timeSeries","title":"Query Duration","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/RDS","SelectLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Select","stat":"p90"}],["AWS/RDS","InsertLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Insert","stat":"p90"}],["AWS/RDS","UpdateLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Update","stat":"p90"}],["AWS/RDS","DeleteLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Delete","stat":"p90"}],["AWS/RDS","CommitLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Commit","stat":"p90"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":0,"y":33,"properties":{"view":"timeSeries","title":"Serverless Database Capacity","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/RDS","ServerlessDatabaseCapacity","DBClusterIdentifier","clusterIdentifier",{"label":"Serverless Database Capacity"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":38,"properties":{"markdown":"### OpenSearch [**Collection**](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/aos/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#opensearch/collections/name)"}},{"type":"metric","width":12,"height":5,"x":0,"y":39,"properties":{"view":"timeSeries","title":"Search","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/AOSS","SearchRequestRate","ClientId","",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "","CollectionId","",
+              {
+                "Ref": "Collection",
+              },
+              "","CollectionName","name",{"stat":"Sum"}],["AWS/AOSS","SearchRequestLatency","ClientId","",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "","CollectionId","",
+              {
+                "Ref": "Collection",
+              },
+              "","CollectionName","name",{"yAxis":"right"}]],"yAxis":{}}},{"type":"metric","width":12,"height":5,"x":12,"y":39,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/AOSS","IngestionRequestErrors","ClientId","",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "","CollectionId","",
+              {
+                "Ref": "Collection",
+              },
+              "","CollectionName","name",{"stat":"Sum"}],["AWS/AOSS","SearchRequestErrors","ClientId","",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "","CollectionId","",
+              {
+                "Ref": "Collection",
+              },
+              "","CollectionName","name",{"stat":"Sum"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":44,"properties":{"markdown":"### Kendra [**Index**](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/kendra/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#indexes/",
+              {
+                "Ref": "Index",
+              },
+              ")"}},{"type":"metric","width":24,"height":5,"x":0,"y":45,"properties":{"view":"timeSeries","title":"Search","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kendra","IndexQueryCount","IndexId","",
+              {
+                "Ref": "Index",
+              },
+              "",{"stat":"Sum"}],["AWS/Kendra","IndexDocumentCount","IndexId","",
+              {
+                "Ref": "Index",
+              },
+              "",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":50,"properties":{"markdown":"# Requests Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":51,"properties":{"markdown":"# RAG Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":52,"properties":{"markdown":"### State Machine **[StateMachine](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/states/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/statemachines/view/arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":53,"properties":{"view":"timeSeries","title":"Duration","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"P50","stat":"p50"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"P90","stat":"p90"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":6,"y":53,"properties":{"view":"timeSeries","title":"Executions","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionsStarted","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"Started","stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"Succeeded","stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"Failed","stat":"Sum"}],["AWS/States","ExecutionsAborted","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"Aborted","stat":"Sum"}],["AWS/States","ExecutionThrottled","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"Throttled","stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"Timeout","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":53,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionsFailed","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name",{"label":"Failed (avg)"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":58,"properties":{"markdown":"### Lambda Function **[Function](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/lambda/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/functions/",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              ")**"}},{"type":"metric","width":6,"height":5,"x":0,"y":59,"properties":{"view":"timeSeries","title":"TPS","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[[{"label":"TPS","expression":"FILL(requests,0) / PERIOD(requests)"}],["AWS/Lambda","Invocations","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Invocations","stat":"Sum","visible":false,"id":"requests"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":59,"properties":{"view":"timeSeries","title":"Latency","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"P50 (avg: \${AVG})","stat":"p50"}],["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"P90 (avg: \${AVG})","stat":"p90"}],["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"P99 (avg: \${AVG})","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":59,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Errors","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Faults (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":59,"properties":{"view":"timeSeries","title":"Rates","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Throttles","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Throttles (avg)"}],["AWS/Lambda","ProvisionedConcurrencySpilloverInvocations","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Provisioned Concurrency Spillovers (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":0,"y":64,"properties":{"view":"timeSeries","title":"Invocations","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Invocations","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Invocations","stat":"Sum"}],["AWS/Lambda","Throttles","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Throttles","stat":"Sum"}],["AWS/Lambda","ConcurrentExecutions","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Concurrent","stat":"Maximum"}],["AWS/Lambda","ProvisionedConcurrencySpilloverInvocations","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Provisioned Concurrency Spillovers","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":8,"y":64,"properties":{"view":"timeSeries","title":"Iterator","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","IteratorAge","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Iterator Age","stat":"Maximum"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":16,"y":64,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Errors","FunctionName","",
+              {
+                "Fn::Select": [
+                  6,
+                  {
+                    "Fn::Split": [
+                      ":",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition",
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region",
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId",
+                            },
+                            ":function:Name",
+                          ],
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "",{"label":"Faults","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}}]}",
+            ],
+          ],
+        },
+        "DashboardName": "GenAI-Chatbot-Dashboard",
+      },
+      "Type": "AWS::CloudWatch::Dashboard",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DLQ581697C4",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 1,
+        },
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

@@ -3,6 +3,7 @@
     "target": "ES2020",
     "module": "commonjs",
     "lib": ["es2020", "dom"],
+    "allowJs": true,
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -17,11 +18,8 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "outDir": "dist"
   },
-  "exclude": [
-    "node_modules",
-    "cdk.out",
-    "lib/user-interface/react-app",
-  ]
+  "exclude": ["dist", "node_modules", "cdk.out", "lib/user-interface/react-app"]
 }

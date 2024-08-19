@@ -1,0 +1,37 @@
+import pytest
+from genai_core.types import CommonError
+from routes.user_feedback import user_feedback
+
+input = {
+    "sessionId": "sessionId",
+    "key": "key",
+    "feedback": "feedback",
+    "prompt": "prompt",
+    "completion": "completion",
+    "model": "model",
+}
+
+
+def test_user_feedback(mocker):
+    mocker.patch("genai_core.auth.get_user_id", return_value="userId")
+    mock = mocker.patch(
+        "genai_core.user_feedback.add_user_feedback",
+        return_value={"feedback_id": "feedback_id"},
+    )
+    assert user_feedback(input) == {"feedback_id": "feedback_id"}
+
+    mock.assert_called_once_with(
+        input.get("sessionId"),
+        input.get("key"),
+        input.get("feedback"),
+        input.get("prompt"),
+        input.get("completion"),
+        input.get("model"),
+        "userId",
+    )
+
+
+def test_user_feedback_user_not_found(mocker):
+    mocker.patch("genai_core.auth.get_user_id", return_value=None)
+    with pytest.raises(CommonError):
+        user_feedback(input)

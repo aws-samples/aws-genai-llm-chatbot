@@ -44,7 +44,7 @@ Current conversation:
 
 Question: {input}
 
-Assistant:"""
+Assistant:"""  # noqa: E501
 
         input_variables = ["input", "chat_history"]
         prompt_template_args = {

@@ -10,6 +10,7 @@ DOCUMENT_ID = os.environ["DOCUMENT_ID"]
 OBJECT_KEY = os.environ["INPUT_OBJECT_KEY"]
 s3_client = boto3.client("s3")
 
+
 def main():
 
     response = s3_client.get_object(Bucket=PROCESSING_BUCKET_NAME, Key=OBJECT_KEY)
@@ -34,6 +35,7 @@ def main():
         limit=limit,
         content_types=content_types,
     )
+
 
 if __name__ == "__main__":
     main()

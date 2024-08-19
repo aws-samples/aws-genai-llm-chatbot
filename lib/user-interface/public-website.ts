@@ -9,7 +9,6 @@ import { SystemConfig } from "../shared/types";
 import { ChatBotApi } from "../chatbot-api";
 import { NagSuppressions } from "cdk-nag";
 
-
 export interface PublicWebsiteProps {
   readonly config: SystemConfig;
   readonly shared: Shared;
@@ -24,7 +23,7 @@ export interface PublicWebsiteProps {
 }
 
 export class PublicWebsite extends Construct {
-    readonly distribution: cf.CloudFrontWebDistribution;
+  readonly distribution: cf.CloudFrontWebDistribution;
 
   constructor(scope: Construct, id: string, props: PublicWebsiteProps) {
     super(scope, id);
@@ -38,7 +37,6 @@ export class PublicWebsite extends Construct {
     props.chatbotFilesBucket.grantRead(originAccessIdentity);
     const cfGeoRestrictEnable = props.config.cfGeoRestrictEnable;
     const cfGeoRestrictList = props.config.cfGeoRestrictList;
-
 
     const distributionLogsBucket = new s3.Bucket(
       this,
@@ -63,13 +61,19 @@ export class PublicWebsite extends Construct {
         //    "certificate" : "arn:aws:acm:us-east-1:1234567890:certificate/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX",
         //    "domain" : "sub.example.com"
         // 2. After the deployment, in your Route53 Hosted Zone, add an "A Record" that points to the Cloudfront Alias (https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-to-cloudfront-distribution.html)
-        ...(props.config.certificate && props.config.domain && {
-          viewerCertificate: cf.ViewerCertificate.fromAcmCertificate(
-            acm.Certificate.fromCertificateArn(this,'CloudfrontAcm', props.config.certificate),
-            {
-              aliases: [props.config.domain]
-            })
-        }),
+        ...(props.config.certificate &&
+          props.config.domain && {
+            viewerCertificate: cf.ViewerCertificate.fromAcmCertificate(
+              acm.Certificate.fromCertificateArn(
+                this,
+                "CloudfrontAcm",
+                props.config.certificate
+              ),
+              {
+                aliases: [props.config.domain],
+              }
+            ),
+          }),
         viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         priceClass: cf.PriceClass.PRICE_CLASS_ALL,
         httpVersion: cf.HttpVersion.HTTP2_AND_3,
@@ -111,7 +115,9 @@ export class PublicWebsite extends Construct {
             },
           },
         ],
-        geoRestriction: cfGeoRestrictEnable ? cf.GeoRestriction.allowlist(...cfGeoRestrictList): undefined,
+        geoRestriction: cfGeoRestrictEnable
+          ? cf.GeoRestriction.allowlist(...cfGeoRestrictList)
+          : undefined,
         errorConfigurations: [
           {
             errorCode: 404,
@@ -132,15 +138,12 @@ export class PublicWebsite extends Construct {
       value: `https://${distribution.distributionDomainName}`,
     });
 
-    NagSuppressions.addResourceSuppressions(
-      distributionLogsBucket,
-      [
-        {
-          id: "AwsSolutions-S1",
-          reason: "Bucket is the server access logs bucket for websiteBucket.",
-        },
-      ]
-    );
+    NagSuppressions.addResourceSuppressions(distributionLogsBucket, [
+      {
+        id: "AwsSolutions-S1",
+        reason: "Bucket is the server access logs bucket for websiteBucket.",
+      },
+    ]);
 
     NagSuppressions.addResourceSuppressions(props.websiteBucket, [
       { id: "AwsSolutions-S5", reason: "OAI is configured for read." },
@@ -154,6 +157,5 @@ export class PublicWebsite extends Construct {
       },
       { id: "AwsSolutions-CFR4", reason: "TLS 1.2 is the default." },
     ]);
-    }
-
   }
+}

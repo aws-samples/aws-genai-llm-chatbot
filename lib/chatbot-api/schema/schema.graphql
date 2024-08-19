@@ -23,6 +23,13 @@ input CreateWorkspaceKendraInput {
   useAllData: Boolean!
 }
 
+input CreateWorkspaceBedrockKBInput {
+  name: String!
+  kind: String!
+  knowledgeBaseId: String!
+  hybridSearch: Boolean!
+}
+
 input CreateWorkspaceOpenSearchInput {
   name: String!
   kind: String!
@@ -145,6 +152,12 @@ input GetRSSPostsInput {
 }
 
 type KendraIndex @aws_cognito_user_pools {
+  id: String!
+  name: String!
+  external: Boolean!
+}
+
+type BedrockKB @aws_cognito_user_pools {
   id: String!
   name: String!
   external: Boolean!
@@ -302,6 +315,8 @@ type Workspace @aws_cognito_user_pools {
   kendraIndexId: String
   kendraIndexExternal: Boolean
   kendraUseAllData: Boolean
+  knowledgeBaseId: String
+  knowledgeBaseExternal: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -314,6 +329,8 @@ type Channel @aws_iam @aws_cognito_user_pools {
 
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
+    @aws_cognito_user_pools
+  createBedrockKBWorkspace(input: CreateWorkspaceBedrockKBInput!): Workspace!
     @aws_cognito_user_pools
   createOpenSearchWorkspace(input: CreateWorkspaceOpenSearchInput!): Workspace!
     @aws_cognito_user_pools
@@ -358,6 +375,7 @@ type Query {
     @aws_cognito_user_pools
   getSession(id: String!): Session @aws_cognito_user_pools
   listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools
+  listBedrockKnowledgeBases: [BedrockKB!]! @aws_cognito_user_pools
   isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools
   listDocuments(input: ListDocumentsInput!): DocumentsResult!
     @aws_cognito_user_pools
