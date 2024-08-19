@@ -1,6 +1,5 @@
 import json
 import os
-import warnings
 from abc import ABC
 from typing import Any, Dict, Iterator, List, Mapping, Optional
 
@@ -93,7 +92,8 @@ class LLMInputOutputAdapter:
 
                 else:
                     raise ValueError(
-                        f"Unknown streaming response output key for provider: {provider}"
+                        "Unknown streaming response output key "
+                        + f"for provider: {provider}"
                     )
 
 

@@ -2,7 +2,6 @@ import os
 import json
 import uuid
 import boto3
-from boto3.dynamodb.conditions import Attr, Key
 import botocore
 import feedparser
 import genai_core.types
@@ -73,7 +72,8 @@ def list_documents(
 
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression="workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)",
+            KeyConditionExpression="workspace_id = :workspace_id AND "
+            + "begins_with(compound_sort_key, :sort_key_prefix)",
             ExclusiveStartKey={
                 "workspace_id": workspace_id,
                 "document_id": last_document_id,
@@ -89,7 +89,8 @@ def list_documents(
     else:
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression="workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)",
+            KeyConditionExpression="workspace_id = :workspace_id AND "
+            + "begins_with(compound_sort_key, :sort_key_prefix)",
             ExpressionAttributeValues={
                 ":workspace_id": workspace_id,
                 ":sort_key_prefix": sort_key_prefix,
@@ -127,7 +128,8 @@ def set_document_vectors(
     if replace:
         response = documents_table.update_item(
             Key={"workspace_id": workspace_id, "document_id": document_id},
-            UpdateExpression="SET vectors=:vectorsValue, updated_at=:timestampValue",
+            UpdateExpression="SET vectors=:vectorsValue, "
+            + "updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":vectorsValue": vectors,
                 ":timestampValue": timestamp,
@@ -136,7 +138,8 @@ def set_document_vectors(
     else:
         response = documents_table.update_item(
             Key={"workspace_id": workspace_id, "document_id": document_id},
-            UpdateExpression="ADD vectors :incrementValue SET updated_at=:timestampValue",
+            UpdateExpression="ADD vectors :incrementValue SET "
+            + "updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":incrementValue": vectors,
                 ":timestampValue": timestamp,
@@ -153,7 +156,8 @@ def set_sub_documents(workspace_id: str, document_id: str, sub_documents: int):
 
     response = documents_table.update_item(
         Key={"workspace_id": workspace_id, "document_id": document_id},
-        UpdateExpression="SET sub_documents=:subDocumentsValue, updated_at=:timestampValue",
+        UpdateExpression="SET sub_documents=:subDocumentsValue, "
+        + "updated_at=:timestampValue",
         ExpressionAttributeValues={
             ":subDocumentsValue": sub_documents,
             ":timestampValue": timestamp,
@@ -172,6 +176,7 @@ def get_document(workspace_id: str, document_id: str):
     document = response.get("Item")
 
     return document
+
 
 def delete_document(workspace_id: str, document_id: str):
     response = documents_table.get_item(
@@ -198,6 +203,7 @@ def delete_document(workspace_id: str, document_id: str):
 
     print(response)
     return {"documentId": document_id, "deleted": True}
+
 
 def get_document_content(workspace_id: str, document_id: str):
     content_key = f"{workspace_id}/{document_id}/content.txt"
@@ -268,7 +274,8 @@ def create_document(
     if unique_path_document:
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression="workspace_id=:workspaceValue AND compound_sort_key=:compoundKeyValue",
+            KeyConditionExpression="workspace_id=:workspaceValue AND "
+            + "compound_sort_key=:compoundKeyValue",
             ExpressionAttributeValues={
                 ":workspaceValue": workspace_id,
                 ":compoundKeyValue": f"{document_type}/{path}",
@@ -292,7 +299,9 @@ def create_document(
                 "workspace_id": workspace_id,
                 "document_id": document_id,
             },
-            UpdateExpression="SET compound_sort_key=:compoundKeyValue, #status=:statusValue, size_in_bytes=:sizeValue, vectors=:vectorsValue, updated_at=:timestampValue",
+            UpdateExpression="SET compound_sort_key=:compoundKeyValue, "
+            + "#status=:statusValue, size_in_bytes=:sizeValue, "
+            + "vectors=:vectorsValue, updated_at=:timestampValue",
             ExpressionAttributeNames={"#status": "status"},
             ExpressionAttributeValues={
                 ":compoundKeyValue": f"{document_type}/{path}",
@@ -339,7 +348,9 @@ def create_document(
     size_diff = size_in_bytes - current_size_in_bytes
     response = workspaces_table.update_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
-        UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+        UpdateExpression="ADD size_in_bytes :incrementValue, "
+        + "documents :documentsIncrementValue, "
+        + "vectors :vectorsIncrementValue SET updated_at=:timestampValue",
         ExpressionAttributeValues={
             ":incrementValue": size_diff,
             ":documentsIncrementValue": documents_diff,
@@ -388,7 +399,8 @@ def update_document(workspace_id: str, document_id: str, document_type: str, **k
             content_types = kwargs["content_types"]
             response = documents_table.update_item(
                 Key={"workspace_id": workspace_id, "document_id": document_id},
-                UpdateExpression="SET #crawler_properties=:crawler_properties, updated_at=:timestampValue",
+                UpdateExpression="SET #crawler_properties=:crawler_properties, "
+                + "updated_at=:timestampValue",
                 ExpressionAttributeNames={"#crawler_properties": "crawler_properties"},
                 ExpressionAttributeValues={
                     ":crawler_properties": {
@@ -734,17 +746,22 @@ def batch_crawl_websites():
                 "website",
                 path=path,
                 crawler_properties={
-                    "follow_links": post["crawler_properties"]["M"]["follow_links"][
-                        "BOOL"
-                    ]
-                    if "crawler_properties" in post
-                    else True,
-                    "limit": int(post["crawler_properties"]["M"]["limit"]["N"])
-                    if "crawler_properties" in post
-                    else 250,
-                    "content_types": post["crawler_properties"]["M"]["content_types"]["L"]
-                    if "crawler_properties" in post and "content_types" in post["crawler_properties"]["M"]
-                    else ["text/html"],
+                    "follow_links": (
+                        post["crawler_properties"]["M"]["follow_links"]["BOOL"]
+                        if "crawler_properties" in post
+                        else True
+                    ),
+                    "limit": (
+                        int(post["crawler_properties"]["M"]["limit"]["N"])
+                        if "crawler_properties" in post
+                        else 250
+                    ),
+                    "content_types": (
+                        post["crawler_properties"]["M"]["content_types"]["L"]
+                        if "crawler_properties" in post
+                        and "content_types" in post["crawler_properties"]["M"]
+                        else ["text/html"]
+                    ),
                 },
             )
             set_status(workspace_id, document_id, "processed")

@@ -1,6 +1,5 @@
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as iam from "aws-cdk-lib/aws-iam";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { Construct } from "constructs";
 import { Shared } from "../shared";
@@ -32,8 +31,8 @@ export class RagEngines extends Construct {
   public readonly documentsByStatusIndexName: string;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
-  public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
-  public readonly deleteDocumentWorkflow?: sfn.StateMachine;
+  public readonly deleteWorkspaceWorkflow: sfn.StateMachine;
+  public readonly deleteDocumentWorkflow: sfn.StateMachine;
   public readonly dataImport: DataImport;
 
   constructor(scope: Construct, id: string, props: RagEnginesProps) {

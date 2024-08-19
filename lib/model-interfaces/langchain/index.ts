@@ -12,8 +12,6 @@ import * as path from "path";
 import { RagEngines } from "../../rag-engines";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { NagSuppressions } from "cdk-nag";
-import { request } from "http";
 
 interface LangChainInterfaceProps {
   readonly shared: Shared;
@@ -184,6 +182,31 @@ export class LangChainInterface extends Construct {
       }
     }
 
+    if (props.config.rag.engines.knowledgeBase?.enabled) {
+      for (const item of props.config.rag.engines.knowledgeBase.external ||
+        []) {
+        if (item.roleArn) {
+          requestHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["sts:AssumeRole"],
+              resources: [item.roleArn],
+            })
+          );
+        } else {
+          requestHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["bedrock:Retrieve"],
+              resources: [
+                `arn:${cdk.Aws.PARTITION}:bedrock:${
+                  item.region ?? cdk.Aws.REGION
+                }:${cdk.Aws.ACCOUNT_ID}:knowledge-base/${item.knowledgeBaseId}`,
+              ],
+            })
+          );
+        }
+      }
+    }
+
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
     props.shared.apiKeysSecret.grantRead(requestHandler);
@@ -211,7 +234,7 @@ export class LangChainInterface extends Construct {
       enforceSSL: true,
     });
 
-    const queue = new sqs.Queue(this, "Queue", {
+    const queue = new sqs.Queue(this, "LangChainIngestionQueue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(15 * 6),

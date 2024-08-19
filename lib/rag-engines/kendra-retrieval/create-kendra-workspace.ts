@@ -20,7 +20,7 @@ export class CreateKendraWorkspace extends Construct {
   constructor(scope: Construct, id: string, props: CreateKendraWorkspaceProps) {
     super(scope, id);
 
-    const handleError = new tasks.DynamoUpdateItem(this, "HandleError", {
+    new tasks.DynamoUpdateItem(this, "HandleError", {
       table: props.ragDynamoDBTables.workspacesTable,
       key: {
         workspace_id: tasks.DynamoAttributeValue.fromString(

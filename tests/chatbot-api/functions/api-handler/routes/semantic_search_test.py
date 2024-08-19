@@ -1,0 +1,61 @@
+import pytest
+from genai_core.types import CommonError
+from routes.semantic_search import semantic_search
+
+
+def test_semantic_search(mocker):
+    dummy_item = {
+        "sources": ["source"],
+        "chunk_id": "chunk_id",
+        "document_id": "document_id",
+        "workspace_id": "workspace_id",
+        "document_sub_id": "document_sub_id",
+        "document_type": "document_type",
+        "document_sub_type": "document_sub_type",
+        "document_sub_type": "document_sub_type",
+        "path": "path",
+        "language": "language",
+        "title": "title",
+        "content": "content",
+        "content_complement": "content_complement",
+        "vector_search_score": 1,
+        "keyword_search_score": 1,
+        "score": 1,
+    }
+
+    search_response = {
+        "engine": "opensearch",
+        "supported_languages": ["en"],
+        "items": [dummy_item.copy()],
+        "vector_search_metric": "l2",
+        "vector_search_items": [dummy_item.copy()],
+        "keyword_search_items": [dummy_item.copy()],
+    }
+    mock = mocker.patch(
+        "genai_core.semantic_search.semantic_search", return_value=search_response
+    )
+    input = {"query": "query", "workspaceId": "id"}
+    response = semantic_search(input)
+    mock.assert_called_once_with(
+        workspace_id=input.get("workspaceId"),
+        limit=25,
+        query=input.get("query"),
+        full_response=True,
+    )
+
+    assert response.get("engine") == search_response.get("engine")
+    assert response.get("workspaceId") == "id"
+    assert response.get("supportedLanguages") == search_response.get(
+        "supported_languages"
+    )
+    assert response.get("vectorSearchMetric") == search_response.get(
+        "vector_search_metric"
+    )
+    assert len(response.get("items")) == 1
+    assert len(response.get("vectorSearchItems")) == 1
+    assert len(response.get("keywordSearchItems")) == 1
+
+
+def test_semantic_search_without_query(mocker):
+    with pytest.raises(CommonError):
+        semantic_search({"query": "", "workspaceId": "id"})

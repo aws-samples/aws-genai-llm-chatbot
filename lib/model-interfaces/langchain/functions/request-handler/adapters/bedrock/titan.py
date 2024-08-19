@@ -36,6 +36,7 @@ class BedrockTitanAdapter(ModelAdapter):
             model_kwargs=params,
             streaming=model_kwargs.get("streaming", False),
             callbacks=[self.callback_handler],
+            **extra
         )
 
     def get_prompt(self):
@@ -46,7 +47,7 @@ Current conversation:
 
 Question: {input}
 
-Assistant:"""
+Assistant:"""  # noqa: E501
 
         input_variables = ["input", "chat_history"]
         prompt_template_args = {

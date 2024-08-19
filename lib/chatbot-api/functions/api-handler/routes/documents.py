@@ -156,6 +156,9 @@ def get_document_details(input: dict):
 
     result = genai_core.documents.get_document(request.workspaceId, request.documentId)
 
+    if not result:
+        return None
+
     return _convert_document(result)
 
 

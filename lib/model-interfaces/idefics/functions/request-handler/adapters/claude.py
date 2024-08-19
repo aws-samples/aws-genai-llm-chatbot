@@ -1,5 +1,5 @@
 from .base import MultiModalModelBase
-from genai_core.types import ChatbotAction, ChatbotMessageType
+from genai_core.types import ChatbotMessageType
 from urllib.parse import urljoin
 import os
 from genai_core.clients import get_bedrock_client
@@ -94,7 +94,7 @@ class Claude3(MultiModalModelBase):
     def clean_prompt(self, prompt: str) -> str:
         p = json.loads(prompt)
         for m in p["messages"]:
-            if m["role"] == "user" and type(m["content"]) == type([]):
+            if m["role"] == "user" and type(m["content"]) == type([]):  # noqa: E721
                 for c in m["content"]:
                     if c["type"] == "image":
                         c["source"]["data"] = ""

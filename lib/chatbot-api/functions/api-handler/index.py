@@ -4,6 +4,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler import (
     AppSyncResolver,
 )
+
 from routes.health import router as health_router
 from routes.embeddings import router as embeddings_router
 from routes.cross_encoders import router as cross_encoders_router
@@ -15,6 +16,7 @@ from routes.semantic_search import router as semantic_search_router
 from routes.documents import router as documents_router
 from routes.kendra import router as kendra_router
 from routes.user_feedback import router as user_feedback_router
+from routes.bedrock_kb import router as bedrock_kb_router
 
 tracer = Tracer()
 logger = Logger()
@@ -32,6 +34,7 @@ app.include_router(semantic_search_router)
 app.include_router(documents_router)
 app.include_router(kendra_router)
 app.include_router(user_feedback_router)
+app.include_router(bedrock_kb_router)
 
 
 @logger.inject_lambda_context(

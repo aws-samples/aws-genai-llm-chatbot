@@ -1,6 +1,7 @@
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -30,6 +31,7 @@ export interface ChatBotApiProps {
 
 export class ChatBotApi extends Construct {
   public readonly messagesTopic: sns.Topic;
+  public readonly outBoundQueue: sqs.Queue;
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
   public readonly filesBucket: s3.Bucket;
@@ -63,15 +65,15 @@ export class ChatBotApi extends Construct {
         path.join(__dirname, "schema/schema.graphql")
       ),
       authorizationConfig: {
+        defaultAuthorization: {
+          authorizationType: appsync.AuthorizationType.USER_POOL,
+          userPoolConfig: {
+            userPool: props.userPool,
+          },
+        },
         additionalAuthorizationModes: [
           {
             authorizationType: appsync.AuthorizationType.IAM,
-          },
-          {
-            authorizationType: appsync.AuthorizationType.USER_POOL,
-            userPoolConfig: {
-              userPool: props.userPool,
-            },
           },
         ],
       },
@@ -81,7 +83,9 @@ export class ChatBotApi extends Construct {
         role: loggingRole,
       },
       xrayEnabled: true,
-      visibility: props.config.privateWebsite ? appsync.Visibility.PRIVATE : appsync.Visibility.GLOBAL
+      visibility: props.config.privateWebsite
+        ? appsync.Visibility.PRIVATE
+        : appsync.Visibility.GLOBAL,
     });
 
     new ApiResolvers(this, "RestApi", {
@@ -115,6 +119,7 @@ export class ChatBotApi extends Construct {
     });
 
     this.messagesTopic = realtimeBackend.messagesTopic;
+    this.outBoundQueue = realtimeBackend.queue;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
     this.userFeedbackBucket = chatBuckets.userFeedbackBucket;

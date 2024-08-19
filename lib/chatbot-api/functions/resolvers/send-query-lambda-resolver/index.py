@@ -9,11 +9,12 @@ tracer = Tracer()
 logger = Logger(log_uncaught_exceptions=True)
 
 sns = boto3.client("sns")
-TOPIC_ARN=os.environ.get("SNS_TOPIC_ARN", "")
+TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN", "")
+
 
 @tracer.capture_lambda_handler
 @logger.inject_lambda_context(log_event=True)
-def handler(event, context: LambdaContext): 
+def handler(event, context: LambdaContext):
     print(event["arguments"]["data"])
     print(event["identity"])
     request = json.loads(event["arguments"]["data"])
@@ -27,9 +28,6 @@ def handler(event, context: LambdaContext):
     }
     print(message)
 
-    response = sns.publish(
-        TopicArn=TOPIC_ARN, Message=json.dumps(message)
-        )
-    
+    response = sns.publish(TopicArn=TOPIC_ARN, Message=json.dumps(message))
+
     return response
-    

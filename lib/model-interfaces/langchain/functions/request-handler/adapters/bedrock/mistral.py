@@ -27,6 +27,7 @@ class BedrockMistralAdapter(BedrockMetaLLama2ChatAdapter):
             model_kwargs=params,
             streaming=model_kwargs.get("streaming", False),
             callbacks=[self.callback_handler],
+            **extra
         )
 
 

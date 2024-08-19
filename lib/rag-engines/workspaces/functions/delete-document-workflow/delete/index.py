@@ -21,7 +21,7 @@ def lambda_handler(event, context: LambdaContext):
     document = genai_core.documents.get_document(workspace_id, document_id)
     if document is None:
         raise genai_core.types.CommonError("Document not found")
-    
+
     if workspace["engine"] == "opensearch":
         genai_core.opensearch.delete.delete_open_search_document(workspace_id, document)
     elif workspace["engine"] == "aurora":

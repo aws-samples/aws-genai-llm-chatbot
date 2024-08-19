@@ -91,7 +91,7 @@ export class Shared extends Construct {
         privateDnsEnabled: true,
         open: true,
       });
-      
+
       this.s3vpcEndpoint = s3vpcEndpoint;
 
       s3vpcEndpoint.node.addDependency(s3GatewayEndpoint);
@@ -116,86 +116,96 @@ export class Shared extends Construct {
       if (props.config.privateWebsite) {
         // Create VPC Endpoint for AppSync
         vpc.addInterfaceEndpoint("AppSyncEndpoint", {
-            service: ec2.InterfaceVpcEndpointAwsService.APP_SYNC,
+          service: ec2.InterfaceVpcEndpointAwsService.APP_SYNC,
         });
 
         // Create VPC Endpoint for Lambda
         vpc.addInterfaceEndpoint("LambdaEndpoint", {
-            service: ec2.InterfaceVpcEndpointAwsService.LAMBDA,
+          service: ec2.InterfaceVpcEndpointAwsService.LAMBDA,
         });
 
         // Create VPC Endpoint for SNS
         vpc.addInterfaceEndpoint("SNSEndpoint", {
-            service: ec2.InterfaceVpcEndpointAwsService.SNS,
+          service: ec2.InterfaceVpcEndpointAwsService.SNS,
         });
 
         // Create VPC Endpoint for Step Functions
         vpc.addInterfaceEndpoint("StepFunctionsEndpoint", {
-            service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
+          service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
         });
 
         // Create VPC Endpoint for SSM
         vpc.addInterfaceEndpoint("SSMEndpoint", {
-            service: ec2.InterfaceVpcEndpointAwsService.SSM,
+          service: ec2.InterfaceVpcEndpointAwsService.SSM,
         });
 
         // Create VPC Endpoint for KMS
         vpc.addInterfaceEndpoint("KMSEndpoint", {
-            service: ec2.InterfaceVpcEndpointAwsService.KMS,
+          service: ec2.InterfaceVpcEndpointAwsService.KMS,
         });
 
         // Create VPC Endpoint for Bedrock
-        if (props.config.bedrock?.enabled && Object.values(SupportedBedrockRegion).some(val => val === cdk.Stack.of(this).region)){
+        if (
+          props.config.bedrock?.enabled &&
+          Object.values(SupportedBedrockRegion).some(
+            (val) => val === cdk.Stack.of(this).region
+          )
+        ) {
           if (props.config.bedrock?.region !== cdk.Stack.of(this).region) {
-            throw new Error(`Bedrock is only supported in the same region as the stack when using private website (Bedrock region: ${props.config.bedrock?.region}, Stack region: ${cdk.Stack.of(this).region}).`);
+            throw new Error(
+              `Bedrock is only supported in the same region as the stack when using private website (Bedrock region: ${props
+                .config.bedrock?.region}, Stack region: ${
+                cdk.Stack.of(this).region
+              }).`
+            );
           }
-          
+
           vpc.addInterfaceEndpoint("BedrockEndpoint", {
             service: ec2.InterfaceVpcEndpointAwsService.BEDROCK,
           });
-          
+
           vpc.addInterfaceEndpoint("BedrockRuntimeEndpoint", {
             service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
           });
-          
-          
         }
 
         // Create VPC Endpoint for Kendra
-        if (props.config.rag.engines.kendra.enabled){
+        if (props.config.rag.engines.kendra.enabled) {
           vpc.addInterfaceEndpoint("KendraEndpoint", {
-              service: ec2.InterfaceVpcEndpointAwsService.KENDRA,
+            service: ec2.InterfaceVpcEndpointAwsService.KENDRA,
           });
         }
 
         // Create VPC Endpoint for RDS/Aurora
         if (props.config.rag.engines.aurora.enabled) {
           vpc.addInterfaceEndpoint("RDSEndpoint", {
-              service: ec2.InterfaceVpcEndpointAwsService.RDS,
+            service: ec2.InterfaceVpcEndpointAwsService.RDS,
           });
 
           // Create VPC Endpoint for RDS Data
           vpc.addInterfaceEndpoint("RDSDataEndpoint", {
-              service: ec2.InterfaceVpcEndpointAwsService.RDS_DATA,
+            service: ec2.InterfaceVpcEndpointAwsService.RDS_DATA,
           });
         }
 
         // Create VPC Endpoints needed for Aurora & Opensearch Indexing
-        if (props.config.rag.engines.aurora.enabled ||
-          props.config.rag.engines.opensearch.enabled) {
+        if (
+          props.config.rag.engines.aurora.enabled ||
+          props.config.rag.engines.opensearch.enabled
+        ) {
           // Create VPC Endpoint for ECS
           vpc.addInterfaceEndpoint("ECSEndpoint", {
-              service: ec2.InterfaceVpcEndpointAwsService.ECS,
+            service: ec2.InterfaceVpcEndpointAwsService.ECS,
           });
 
           // Create VPC Endpoint for Batch
           vpc.addInterfaceEndpoint("BatchEndpoint", {
-              service: ec2.InterfaceVpcEndpointAwsService.BATCH,
+            service: ec2.InterfaceVpcEndpointAwsService.BATCH,
           });
 
           // Create VPC Endpoint for EC2
           vpc.addInterfaceEndpoint("EC2Endpoint", {
-              service: ec2.InterfaceVpcEndpointAwsService.EC2,
+            service: ec2.InterfaceVpcEndpointAwsService.EC2,
           });
         }
       }
