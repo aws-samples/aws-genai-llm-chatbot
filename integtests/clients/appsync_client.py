@@ -132,6 +132,16 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("createAuroraWorkspace")
 
+    def create_kendra_workspace(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.createKendraWorkspace.args(input=input).select(
+                    self.schema.Workspace.id,
+                )
+            )
+        )
+        return self.client.execute(query).get("createKendraWorkspace")
+
     def list_workspaces(self):
         query = dsl_gql(
             DSLQuery(
@@ -184,6 +194,17 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("addRssFeed")
 
+    def add_file(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.getUploadFileURL.args(input=input).select(
+                    self.schema.FileUploadResult.url,
+                    self.schema.FileUploadResult.fields,
+                )
+            )
+        )
+        return self.client.execute(query).get("getUploadFileURL")
+
     def get_document(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -210,6 +231,21 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("getRSSPosts")
+
+    def list_documents(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listDocuments.args(input=input).select(
+                    self.schema.DocumentsResult.items.select(
+                        self.schema.Document.workspaceId,
+                        self.schema.Document.id,
+                        self.schema.Document.status,
+                    ),
+                    self.schema.DocumentsResult.lastDocumentId,
+                )
+            )
+        )
+        return self.client.execute(query).get("listDocuments")
 
     def semantic_search(self, input):
         query = dsl_gql(
@@ -261,3 +297,27 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("rankPassages")
+
+    def start_kendra_data_sync(self, id):
+        query = dsl_gql(
+            DSLMutation(self.schema.Mutation.startKendraDataSync.args(workspaceId=id))
+        )
+        return self.client.execute(query)
+
+    def is_kendra_data_synching(self, id):
+        query = dsl_gql(
+            DSLQuery(self.schema.Query.isKendraDataSynching.args(workspaceId=id))
+        )
+        return self.client.execute(query)
+
+    def list_kendra_indexes(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listKendraIndexes.select(
+                self.schema.KendraIndex.id,
+                self.schema.KendraIndex.name,
+                self.schema.KendraIndex.external,
+                )
+            )
+        )
+        return self.client.execute(query).get("listKendraIndexes")
