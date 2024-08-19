@@ -47,6 +47,7 @@ def test_create(client: AppSyncClient, default_embed_model):
             break
     assert ready == True
 
+
 def test_add_file(client: AppSyncClient):
     if pytest.skip_flag == True:
         pytest.skip("Kendra is not enabled.")
@@ -60,12 +61,16 @@ def test_add_file(client: AppSyncClient):
     s3_client = boto3.client("s3")
     fields = result.get("fields")
 
-    #"fields" string format:
-    #{key=544aeaa9-3f3d-4995-843d-e66a993bf5e8/context.txt, AWSAccessKeyId=XXX, x-amz-security-token=YYY
+    # "fields" string format:
+    # {key=544aeaa9-3f3d-4995-843d-e66a993bf5e8/context.txt, AWSAccessKeyId=XXX
     pairs = [pair.strip() for pair in fields.replace("{", "").split(',')]
     fields_dict = dict(pair.split('=', 1) for pair in pairs)
     bucket_name = result.get("url").split("//")[1].split(".")[0]
-    s3_client.put_object(Body=b"The Integ Test flower is yellow.", Bucket=bucket_name, Key=fields_dict.get("key"))
+    s3_client.put_object(
+        Body=b"The Integ Test flower is yellow.",
+        Bucket=bucket_name,
+        Key=fields_dict.get("key")
+    )
 
     client.start_kendra_data_sync(pytest.workspace.get("id"))
 
@@ -73,7 +78,8 @@ def test_add_file(client: AppSyncClient):
     syncRetries = 0
     while syncInProgress and syncRetries < 50:
         time.sleep(10)
-        syncInProgress = client.is_kendra_data_synching(pytest.workspace.get("id")).get("isKendraDataSynching")
+        syncStatus = client.is_kendra_data_synching(pytest.workspace.get("id"))
+        syncInProgress = syncStatus.get("isKendraDataSynching")
         syncRetries += 1
     assert syncInProgress == False
 
@@ -86,6 +92,7 @@ def test_add_file(client: AppSyncClient):
     pytest.document = documents.get("items")[0]
     assert pytest.document.get("status") == "processed"
     assert pytest.document.get("workspaceId") == pytest.workspace.get("id")
+
 
 def test_semantic_search(client: AppSyncClient):
     if pytest.skip_flag == True:
@@ -105,7 +112,8 @@ def test_semantic_search(client: AppSyncClient):
         if len(result.get("items")) == 1:
             ready = True
             assert result.get("engine") == "kendra"
-            assert result.get("items")[0].get("content") == "The Integ Test flower is yellow."
+            fileContent = result.get("items")[0].get("content")
+            assert fileContent == "The Integ Test flower is yellow."
     assert ready == True
 
 
@@ -144,6 +152,7 @@ def test_query_llm(client, default_model, default_provider):
     client.delete_session(session_id)
     assert found == True
 
+
 def test_delete_document(client: AppSyncClient):
     if pytest.skip_flag == True:
         pytest.skip("Kendra is not enabled.")
@@ -170,6 +179,7 @@ def test_delete_document(client: AppSyncClient):
             ready = True
             break
     assert ready == True
+
 
 def test_delete_workspace(client: AppSyncClient):
     if pytest.skip_flag == True:

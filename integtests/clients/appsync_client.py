@@ -314,9 +314,9 @@ class AppSyncClient:
         query = dsl_gql(
             DSLQuery(
                 self.schema.Query.listKendraIndexes.select(
-                self.schema.KendraIndex.id,
-                self.schema.KendraIndex.name,
-                self.schema.KendraIndex.external,
+                    self.schema.KendraIndex.id,
+                    self.schema.KendraIndex.name,
+                    self.schema.KendraIndex.external,
                 )
             )
         )
