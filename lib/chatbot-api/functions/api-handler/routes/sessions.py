@@ -1,3 +1,4 @@
+from common.validation import WorkspaceIdValidation
 import genai_core.sessions
 import genai_core.types
 import genai_core.auth
@@ -35,6 +36,7 @@ def get_sessions():
 @router.resolver(field_name="getSession")
 @tracer.capture_method
 def get_session(id: str):
+    WorkspaceIdValidation(**{"workspaceId": id})
     user_id = genai_core.auth.get_user_id(router)
     if user_id is None:
         raise genai_core.types.CommonError("User not found")
@@ -78,6 +80,7 @@ def delete_user_sessions():
 @router.resolver(field_name="deleteSession")
 @tracer.capture_method
 def delete_session(id: str):
+    WorkspaceIdValidation(**{"workspaceId": id})
     user_id = genai_core.auth.get_user_id(router)
     if user_id is None:
         raise genai_core.types.CommonError("User not found")

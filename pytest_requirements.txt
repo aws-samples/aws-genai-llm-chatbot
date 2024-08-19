@@ -2,4 +2,9 @@ pytest==7.4.0
 pytest-mock==3.11.1
 gql==3.4.1
 aws_lambda_powertools==2.42.0
+bandit==0.17.3
+pip-audit==2.7.3
+black==24.8.0
+flake8==7.1.0
+selenium==4.16
 -r lib/shared/layers/common/requirements.txt

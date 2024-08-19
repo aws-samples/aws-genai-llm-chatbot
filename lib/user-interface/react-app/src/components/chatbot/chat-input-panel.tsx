@@ -69,6 +69,7 @@ export interface ChatInputPanelProps {
   configuration: ChatBotConfiguration;
   setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
   setAgentTrace: Dispatch<React.SetStateAction<AgentTrace | undefined>>;
+  setInitErrorMessage?: (error?: string) => void;
 }
 
 export abstract class ChatScrollState {
@@ -190,7 +191,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         });
         Promise.all([result])
           .then((x) => console.log(`Query successful`, x))
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            console.log(Utils.getErrorMessage(err));
+          });
       })
       .catch((err) => {
         console.log(err);
@@ -226,6 +229,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
+        if (props.setInitErrorMessage) props.setInitErrorMessage(undefined);
         if (appContext?.config.rag_enabled) {
           [modelsResult, workspacesResult] = await Promise.all([
             apiClient.models.getModels(),
@@ -261,13 +265,15 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         }));
       } catch (error) {
         console.log(Utils.getErrorMessage(error));
+        if (props.setInitErrorMessage) props.setInitErrorMessage(Utils.getErrorMessage(error));
         setState((state) => ({
           ...state,
           modelsStatus: "error",
         }));
+        setReadyState(ReadyState.CLOSED);
       }
     })();
-  }, [appContext, state.modelsStatus]);
+  }, [appContext, state.modelsStatus, props]);
 
   useEffect(() => {
     const onWindowScroll = () => {
@@ -279,8 +285,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       const isScrollToTheEnd =
         Math.abs(
           window.innerHeight +
-            window.scrollY -
-            document.documentElement.scrollHeight
+          window.scrollY -
+          document.documentElement.scrollHeight
         ) <= 10;
 
       if (!isScrollToTheEnd) {
@@ -344,7 +350,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     );
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async (): Promise<void> => {
     if (!state.selectedModel) return;
     if (props.running) return;
     if (readyState !== ReadyState.OPEN) return;
@@ -359,10 +365,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       action: ChatBotAction.Run,
       modelInterface:
         (props.configuration.files && props.configuration.files.length > 0) ||
-        (hasImagesInChatHistory() &&
-          state.selectedModelMetadata?.inputModalities.includes(
-            ChabotInputModality.Image
-          ))
+          (hasImagesInChatHistory() &&
+            state.selectedModelMetadata?.inputModalities.includes(
+              ChabotInputModality.Image
+            ))
           ? "multimodal"
           : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
@@ -416,12 +422,21 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     props.setMessageHistory(messageHistoryRef.current);
 
-    API.graphql({
-      query: sendQuery,
-      variables: {
-        data: JSON.stringify(request),
-      },
-    });
+    try {
+      await API.graphql({
+        query: sendQuery,
+        variables: {
+          data: JSON.stringify(request),
+        },
+      });
+    } catch (err) {
+      console.log(Utils.getErrorMessage(err));
+      props.setRunning(false);
+      messageHistoryRef.current[messageHistoryRef.current.length - 1].content =
+         "**Error**, Unable to process the request: " + Utils.getErrorMessage(err);
+      props.setMessageHistory(messageHistoryRef.current);
+    }
+
   };
 
   const connectionStatus = {
@@ -460,25 +475,25 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             {state.selectedModelMetadata?.inputModalities.includes(
               ChabotInputModality.Image
             ) && (
-              <Button
-                variant="icon"
-                onClick={() => setImageDialogVisible(true)}
-                iconSvg={
-                  <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
-                    <rect
-                      x="2"
-                      y="2"
-                      width="19"
-                      height="19"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21 15 16 10 5 21"></polyline>
-                  </svg>
-                }
-              ></Button>
-            )}
+                <Button
+                  variant="icon"
+                  onClick={() => setImageDialogVisible(true)}
+                  iconSvg={
+                    <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                      <rect
+                        x="2"
+                        y="2"
+                        width="19"
+                        height="19"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                  }
+                ></Button>
+              )}
           </SpaceBetween>
           <ImageDialog
             sessionId={props.session.id}
@@ -499,6 +514,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             </div>
           ) : (
             <PromptInput
+              data-locator="prompt-input"
               value={state.value}
               placeholder={listening ? "Listening..." : "Send a message"}
               maxRows={6}
@@ -550,6 +566,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             }
           >
             <Select
+            data-locator='select-model'
               disabled={props.running}
               statusType={state.modelsStatus}
               loadingText="Loading models (might take few seconds)..."
@@ -629,8 +646,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                     ? "success"
                     : readyState === ReadyState.CONNECTING ||
                       readyState === ReadyState.UNINSTANTIATED
-                    ? "in-progress"
-                    : "error"
+                      ? "in-progress"
+                      : "error"
                 }
               >
                 {readyState === ReadyState.OPEN

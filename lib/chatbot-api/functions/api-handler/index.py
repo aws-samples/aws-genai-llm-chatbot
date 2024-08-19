@@ -4,6 +4,9 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler import (
     AppSyncResolver,
 )
+from pydantic import ValidationError
+
+from genai_core.types import CommonError
 from routes.health import router as health_router
 from routes.embeddings import router as embeddings_router
 from routes.cross_encoders import router as cross_encoders_router
@@ -18,7 +21,7 @@ from routes.user_feedback import router as user_feedback_router
 from routes.bedrock_kb import router as bedrock_kb_router
 
 tracer = Tracer()
-logger = Logger()
+logger = Logger(serialize_stacktrace=True)
 
 app = AppSyncResolver()
 
@@ -41,4 +44,17 @@ app.include_router(bedrock_kb_router)
 )
 @tracer.capture_lambda_handler
 def handler(event: dict, context: LambdaContext) -> dict:
-    return app.resolve(event, context)
+    try:
+        return app.resolve(event, context)
+    except ValidationError as e:
+        logger.warning(e.errors())
+        raise e
+    except CommonError as e:
+        logger.warning(str(e))
+        raise e
+    except Exception as e:
+        # Do not return an unknown exception to the end user.
+        # Instead return a generic message
+        # This is to prevent leaking internal information.
+        logger.exception(e)
+        raise RuntimeError("Something went wrong")

@@ -5,7 +5,7 @@ import {
   ChatBotMessageType,
   FeedbackData,
 } from "./types";
-import { SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
+import { Alert, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
 import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
@@ -33,6 +33,7 @@ export default function Chat(props: { sessionId?: string }) {
     id: props.sessionId ?? uuidv4(),
     loading: typeof props.sessionId !== "undefined",
   });
+  const [initError, setInitError] = useState<string | undefined>(undefined);
   const [configuration, setConfiguration] = useState<ChatBotConfiguration>(
     () => ({
       streaming: true,
@@ -132,6 +133,13 @@ export default function Chat(props: { sessionId?: string }) {
 
   return (
     <div className={styles.chat_container}>
+      {initError && <Alert
+        statusIconAriaLabel="Error"
+        type="error"
+        header="Unable to initalize the Chatbot."
+      >
+        {initError}
+      </Alert>}
       <SpaceBetween direction="vertical" size="m">
         {messageHistory.map((message, idx) => (
           <ChatMessage
@@ -161,6 +169,7 @@ export default function Chat(props: { sessionId?: string }) {
           setRunning={setRunning}
           messageHistory={messageHistory}
           setMessageHistory={(history) => setMessageHistory(history)}
+          setInitErrorMessage={(error) => setInitError(error)}
           configuration={configuration}
           setConfiguration={setConfiguration}
           setAgentTrace={setAgentTrace}

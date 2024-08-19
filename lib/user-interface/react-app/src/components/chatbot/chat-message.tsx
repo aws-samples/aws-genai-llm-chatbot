@@ -113,6 +113,7 @@ export default function ChatMessage(props: ChatMessageProps) {
   return (
     <div>
       <BaseChatMessage
+        data-locator="chatbot-ai-container"
         role={props.message?.type === ChatBotMessageType.AI ? "ai" : "human"}
         onCopy={() => {
           navigator.clipboard.writeText(props.message.content);

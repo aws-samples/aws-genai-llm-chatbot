@@ -1,11 +1,18 @@
 import os
+from common.constant import (
+    ID_FIELD_VALIDATION,
+    SAFE_HTTP_STR_REGEX,
+    SAFE_STR_REGEX,
+    MAX_STR_INPUT_LENGTH,
+    SAFE_SHORT_STR_VALIDATION,
+)
 import genai_core.types
 import genai_core.upload
 import genai_core.documents
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
-from typing import Optional
+from typing import Annotated, List, Optional
 
 tracer = Tracer()
 router = Router()
@@ -13,74 +20,88 @@ logger = Logger()
 
 
 class FileUploadRequest(BaseModel):
-    workspaceId: str
-    fileName: str
+    workspaceId: str = ID_FIELD_VALIDATION
+    fileName: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
 
 
 class TextDocumentRequest(BaseModel):
-    workspaceId: str
-    title: str
-    content: str
+    workspaceId: str = ID_FIELD_VALIDATION
+    title: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    content: str = Field(min_length=1, max_length=500)
 
 
 class QnADocumentRequest(BaseModel):
-    workspaceId: str
-    question: str
-    answer: str
+    workspaceId: str = ID_FIELD_VALIDATION
+    question: str = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
+    answer: str = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
 
 
 class WebsiteDocumentRequest(BaseModel):
-    workspaceId: str
+    workspaceId: str = ID_FIELD_VALIDATION
     sitemap: bool
-    address: str
+    address: str = Field(min_length=1, max_length=500, pattern=SAFE_HTTP_STR_REGEX)
     followLinks: bool
-    limit: int
-    contentTypes: Optional[list]
+    limit: int = Field(gt=-1)
+    contentTypes: Optional[List[Annotated[str, SAFE_SHORT_STR_VALIDATION]]]
 
 
 class RssFeedDocumentRequest(BaseModel):
-    workspaceId: str
-    documentId: Optional[str] = None
-    address: Optional[str] = None
-    limit: int
-    title: Optional[str] = None
+    workspaceId: str = ID_FIELD_VALIDATION
+    documentId: Optional[str] = Field(
+        default=None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
+    address: Optional[str] = Field(
+        default=None, min_length=1, max_length=500, pattern=SAFE_HTTP_STR_REGEX
+    )
+    limit: int = Field(gt=-1)
+    title: Optional[str] = Field(
+        default=None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
     followLinks: bool
-    contentTypes: Optional[list]
+    contentTypes: Optional[List[Annotated[str, SAFE_SHORT_STR_VALIDATION]]]
 
 
 class RssFeedCrawlerUpdateRequest(BaseModel):
-    documentType: str
+    documentType: str = SAFE_SHORT_STR_VALIDATION
     followLinks: bool
-    limit: int
-    contentTypes: Optional[str]
+    limit: int = Field(lt=500)
+    contentTypes: Optional[Annotated[str, SAFE_SHORT_STR_VALIDATION]] = Field(
+        min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
 
 
 class ListDocumentsRequest(BaseModel):
-    workspaceId: str
-    documentType: str
-    lastDocumentId: Optional[str] = None
+    workspaceId: str = ID_FIELD_VALIDATION
+    documentType: str = SAFE_SHORT_STR_VALIDATION
+    lastDocumentId: Optional[str] = Field(
+        default=None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
 
 
 class GetDocumentRequest(BaseModel):
-    workspaceId: str
-    documentId: str
+    workspaceId: str = ID_FIELD_VALIDATION
+    documentId: str = ID_FIELD_VALIDATION
 
 
 class DeleteDocumentRequest(BaseModel):
-    workspaceId: str
-    documentId: str
+    workspaceId: str = ID_FIELD_VALIDATION
+    documentId: str = ID_FIELD_VALIDATION
 
 
 class GetRssPostsRequest(BaseModel):
-    workspaceId: str
-    documentId: str
-    lastDocumentId: Optional[str] = None
+    workspaceId: str = ID_FIELD_VALIDATION
+    documentId: str = ID_FIELD_VALIDATION
+    lastDocumentId: Optional[str] = Field(
+        default=None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
 
 
 class DocumentSubscriptionStatusRequest(BaseModel):
-    workspaceId: str
-    documentId: str
-    status: str
+    workspaceId: str = ID_FIELD_VALIDATION
+    documentId: str = ID_FIELD_VALIDATION
+    status: str = Field(
+        default=None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
 
 
 allowed_extensions = set(
@@ -155,6 +176,9 @@ def get_document_details(input: dict):
     request = GetDocumentRequest(**input)
 
     result = genai_core.documents.get_document(request.workspaceId, request.documentId)
+
+    if not result:
+        return None
 
     return _convert_document(result)
 
@@ -272,8 +296,12 @@ def add_rss_feed(
     input: dict,
 ):
     request = RssFeedDocumentRequest(**input)
+    if request.address == None:
+        raise genai_core.types.CommonError("address is not set")
     address = request.address.strip()[:10000]
     path = address
+
+    limit = min(max(request.limit, 1), 1000)
 
     result = genai_core.documents.create_document(
         workspace_id=request.workspaceId,
@@ -282,7 +310,7 @@ def add_rss_feed(
         title=request.title,
         crawler_properties={
             "follow_links": request.followLinks,
-            "limit": request.limit,
+            "limit": limit,
             "content_types": request.contentTypes,
         },
     )
@@ -297,12 +325,17 @@ def add_rss_feed(
 @tracer.capture_method
 def update_rss_feed(input: dict):
     request = RssFeedDocumentRequest(**input)
+    if request.documentId == None:
+        raise genai_core.types.CommonError("documentId is not set")
+    if request.limit == None:
+        raise genai_core.types.CommonError("limit is not set")
+    limit = min(max(request.limit, 1), 1000)
     result = genai_core.documents.update_document(
         workspace_id=request.workspaceId,
         document_id=request.documentId,
         document_type="rssfeed",
         follow_links=request.followLinks,
-        limit=request.limit,
+        limit=limit,
         content_types=request.contentTypes,
     )
     return {

@@ -227,7 +227,7 @@ export class IdeficsInterface extends Construct {
     const deadLetterQueue = new sqs.Queue(this, "DLQ", {
       enforceSSL: true,
     });
-    const queue = new sqs.Queue(this, "Queue", {
+    const queue = new sqs.Queue(this, "IdeficsIngestionQueue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(lambdaDurationInMinutes * 6),

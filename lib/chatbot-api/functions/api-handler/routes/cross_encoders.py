@@ -1,8 +1,9 @@
+from common.constant import MAX_STR_INPUT_LENGTH, SAFE_STR_REGEX
 import genai_core.types
 import genai_core.parameters
 import genai_core.cross_encoder
-from typing import List
-from pydantic import BaseModel
+from typing import Annotated, List
+from pydantic import BaseModel, Field
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
 
@@ -12,10 +13,10 @@ logger = Logger()
 
 
 class CrossEncodersRequest(BaseModel):
-    provider: str
-    model: str
-    reference: str
-    passages: List[str]
+    provider: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    model: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    reference: str = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
+    passages: List[Annotated[str, Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)]]
 
 
 @router.resolver(field_name="listCrossEncoders")
@@ -30,6 +31,9 @@ def models():
 @tracer.capture_method
 def cross_encoders(input: dict):
     request = CrossEncodersRequest(**input)
+    if len(request.passages) < 1:
+        raise genai_core.types.CommonError("Passages is empty")
+
     selected_model = genai_core.cross_encoder.get_cross_encoder_model(
         request.provider, request.model
     )

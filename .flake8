@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 88
+# Based on https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
+# E711 and E711 flags the assert in the tests
+extend-ignore = E203,E701,E711,E712
+exclude =
+    lib/user-interface/react-app/node_modules/
+    cdk.out/
+    dist/
+    node_modules/
