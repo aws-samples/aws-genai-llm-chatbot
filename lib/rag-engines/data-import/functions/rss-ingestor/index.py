@@ -7,7 +7,7 @@ tracer = Tracer()
 
 
 @tracer.capture_lambda_handler()
-@logger.inject_lambda_context(log_event=True)
+@logger.inject_lambda_context(log_event=False)
 def lambda_handler(event, context: LambdaContext):
     logger.info("Starting scheduled RSS Feed poll")
     workspace_id = event["workspace_id"]

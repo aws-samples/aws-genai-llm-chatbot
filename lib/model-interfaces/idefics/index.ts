@@ -191,6 +191,7 @@ export class IdeficsInterface extends Construct {
         code: props.shared.sharedCode.bundleWithLambdaAsset(
           path.join(__dirname, "./functions/request-handler")
         ),
+        description: "Idefics request handler",
         runtime: props.shared.pythonRuntime,
         handler: "index.handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
@@ -198,7 +199,8 @@ export class IdeficsInterface extends Construct {
         tracing: lambda.Tracing.ACTIVE,
         timeout: cdk.Duration.minutes(lambdaDurationInMinutes),
         memorySize: 1024,
-        logRetention: logs.RetentionDays.ONE_WEEK,
+        logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+        loggingFormat: lambda.LoggingFormat.JSON,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
           CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,

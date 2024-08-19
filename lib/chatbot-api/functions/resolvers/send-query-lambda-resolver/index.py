@@ -48,7 +48,7 @@ class InputValidation(BaseModel):
 
 
 @tracer.capture_lambda_handler
-@logger.inject_lambda_context(log_event=True)
+@logger.inject_lambda_context(log_event=False)
 def handler(event, context: LambdaContext):
     print(event["arguments"]["data"])
     print(event["identity"])

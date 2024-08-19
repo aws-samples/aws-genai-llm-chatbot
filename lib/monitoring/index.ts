@@ -1,19 +1,21 @@
 import { Stack } from "aws-cdk-lib";
 import { IGraphqlApi } from "aws-cdk-lib/aws-appsync";
-import { Metric } from "aws-cdk-lib/aws-cloudwatch";
+import { LogQueryWidget, Metric } from "aws-cdk-lib/aws-cloudwatch";
 import { ITable } from "aws-cdk-lib/aws-dynamodb";
 import { IFunction as ILambdaFunction } from "aws-cdk-lib/aws-lambda";
 import { CfnCollection } from "aws-cdk-lib/aws-opensearchserverless";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { IStateMachine } from "aws-cdk-lib/aws-stepfunctions";
-import { AxisPosition, MonitoringFacade } from "cdk-monitoring-constructs";
+import { AxisPosition, MonitoringFacade, SingleWidgetDashboardSegment } from "cdk-monitoring-constructs";
 import { Construct } from "constructs";
 import { CfnIndex } from "aws-cdk-lib/aws-kendra";
 import { IDatabaseCluster } from "aws-cdk-lib/aws-rds";
 import { Queue } from "aws-cdk-lib/aws-sqs";
+import { ILogGroup, LogGroup } from "aws-cdk-lib/aws-logs";
 
 export interface MonitoringProps {
   appsycnApi: IGraphqlApi;
+  appsyncResolversLogGroups: ILogGroup[];
   cognito: { userPoolId: string; clientId: string };
   tables: ITable[];
   buckets: Bucket[];
@@ -45,6 +47,12 @@ export class Monitoring extends Construct {
       api: props.appsycnApi,
       alarmFriendlyName: "AppSync",
     });
+
+    monitoring.addSegment(new SingleWidgetDashboardSegment(this.getLogsWidget(
+      "Add",
+      props.appsyncResolversLogGroups,
+    )));
+
     const link = `https://${region}.console.aws.amazon.com/cognito/v2/idp/user-pools/${props.cognito.userPoolId}/users?region=${region}`;
     const title = `Cognito [**UserPool**](${link})`;
     this.addCognitoMetrics(
@@ -274,5 +282,25 @@ export class Monitoring extends Construct {
         },
       ],
     });
+  }
+
+  private getLogsWidget(title: string, logGroups: ILogGroup[]): LogQueryWidget {
+        // Log Query Results
+        return new LogQueryWidget({
+          logGroupNames: logGroups.map(i => i.logGroupName),
+          height: 15,
+          width: 24, // Full width
+          title: title,
+          /**
+           * https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html
+           */
+          queryLines: [
+            "fields @timestamp, message, level, location",
+         //   `filter @message like /${this.pattern}/`,
+            "sort @timestamp desc",
+            `limit 200`,
+          ],
+        });
+
   }
 }

@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 
-@logger.inject_lambda_context(log_event=True)
+@logger.inject_lambda_context(log_event=False)
 def lambda_handler(event, context: LambdaContext):
     workspace_id = event["workspace_id"]
     document_id = event["document_id"]

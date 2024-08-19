@@ -45,6 +45,7 @@ app.include_router(bedrock_kb_router)
 @tracer.capture_lambda_handler
 def handler(event: dict, context: LambdaContext) -> dict:
     try:
+        logger.info("Incoming request", request_id="1123")
         return app.resolve(event, context)
     except ValidationError as e:
         logger.warning(e.errors())
