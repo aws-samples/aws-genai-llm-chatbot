@@ -64,8 +64,11 @@ def react_url():
 
 @pytest.fixture(scope="class")
 def selenium_driver(react_url):
+    options = webdriver.FirefoxOptions()
+    if os.environ["HEADLESS"]:
+        options.add_argument("--headless")
     driver = webdriver.Remote(
-        command_executor="http://127.0.0.1:4444", options=webdriver.FirefoxOptions()
+        command_executor="http://127.0.0.1:4444", options=options
     )
     driver.set_window_size(1600, 800)
     driver.get(react_url)
