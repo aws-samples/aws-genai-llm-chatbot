@@ -108,7 +108,7 @@ export class Shared extends Construct {
       });
 
       // Create VPC Endpoint for SageMaker Runtime
-      if (props.config.llms.sagemaker.length > 0){
+      if (props.config.llms.sagemaker.length > 0) {
         vpc.addInterfaceEndpoint("SageMakerRuntimeEndpoint", {
           service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
           open: true,
@@ -131,7 +131,7 @@ export class Shared extends Construct {
           service: ec2.InterfaceVpcEndpointAwsService.SNS,
         });
 
-        if(props.config.rag.enabled) {
+        if (props.config.rag.enabled) {
           vpc.addInterfaceEndpoint("StepFunctionsEndpoint", {
             service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
           });
