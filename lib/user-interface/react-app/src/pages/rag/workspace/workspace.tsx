@@ -1,4 +1,5 @@
 import {
+  Alert,
   BreadcrumbGroup,
   ContentLayout,
   Flashbar,
@@ -35,12 +36,14 @@ export default function WorkspacePane() {
   const [workspace, setWorkspace] = useState<Workspace | undefined | null>(
     null
   );
+  const [globalError, setGlobalError] = useState<string | undefined>(undefined);
 
   const getWorkspace = useCallback(async () => {
     if (!appContext || !workspaceId) return;
 
     const apiClient = new ApiClient(appContext);
     try {
+      setGlobalError(undefined)
       const result = await apiClient.workspaces.getWorkspace(workspaceId);
       if (!result.data?.getWorkspace) {
         navigate("/rag/workspaces");
@@ -48,7 +51,8 @@ export default function WorkspacePane() {
       }
       setWorkspace(result.data!.getWorkspace);
     } catch (error) {
-      console.error(error);
+      console.error(Utils.getErrorMessage(error));
+      setGlobalError(Utils.getErrorMessage(error));
     }
     setLoading(false);
   }, [appContext, navigate, workspaceId]);
@@ -152,6 +156,13 @@ export default function WorkspacePane() {
           }
         >
           <SpaceBetween size="l">
+            {globalError && <Alert
+              statusIconAriaLabel="Error"
+              type="error"
+              header="Unable to load the workspace."
+            >
+              {globalError}
+            </Alert>}
             {workspace && workspace.engine === "aurora" && (
               <AuroraWorkspaceSettings workspace={workspace} />
             )}

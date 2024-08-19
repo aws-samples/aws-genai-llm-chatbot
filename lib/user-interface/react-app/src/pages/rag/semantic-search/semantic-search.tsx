@@ -122,9 +122,8 @@ export default function SemanticSearch() {
         setWorkspaces(result.data?.listWorkspaces!);
         /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       } catch (error: any) {
-        console.error(error);
-        /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-        setGlobalError(error.errors?.map((x: any) => x.error).join(","));
+        console.error(Utils.getErrorMessage(error));
+        setGlobalError(Utils.getErrorMessage(error));
       }
       setWorkspacesLoadingStatus("finished");
     })();

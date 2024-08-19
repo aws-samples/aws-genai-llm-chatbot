@@ -1,7 +1,8 @@
+from common.constant import SAFE_STR_REGEX, ID_FIELD_VALIDATION, MAX_STR_INPUT_LENGTH
 import genai_core.types
 import genai_core.auth
 import genai_core.user_feedback
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
 
@@ -11,12 +12,12 @@ logger = Logger()
 
 
 class CreateUserFeedbackRequest(BaseModel):
-    sessionId: str
-    key: str
-    feedback: str
-    prompt: str
-    completion: str
-    model: str
+    sessionId: str = ID_FIELD_VALIDATION
+    key: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    feedback: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    prompt: str = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
+    completion: str = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
+    model: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
 
 
 @router.resolver(field_name="addUserFeedback")
