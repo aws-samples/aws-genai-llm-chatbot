@@ -75,7 +75,9 @@ export class UserInterface extends Construct {
         websiteBucket: websiteBucket,
       });
       distribution = publicWebsite.distribution;
-      this.publishedDomain = distribution.distributionDomainName;
+      this.publishedDomain = props.config.domain
+        ? props.config.domain
+        : publicWebsite.distribution.distributionDomainName;
       redirectSignIn = `https://${this.publishedDomain}`;
     }
 
