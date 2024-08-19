@@ -16,17 +16,17 @@ def create_workspace_table(workspace: dict):
         cursor.execute(
             sql.SQL(
                 """CREATE TABLE {table} (
-                    chunk_id UUID PRIMARY KEY, 
+                    chunk_id UUID PRIMARY KEY,
                     workspace_id UUID,
                     document_id UUID,
                     document_sub_id UUID,
                     document_type VARCHAR(50),
                     document_sub_type VARCHAR(50),
-                    path TEXT, 
+                    path TEXT,
                     language VARCHAR(15),
                     title TEXT,
-                    content TEXT, 
-                    content_complement TEXT, 
+                    content TEXT,
+                    content_complement TEXT,
                     content_embeddings vector(%s),
                     metadata JSONB,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -49,7 +49,8 @@ def create_workspace_table(workspace: dict):
             for language in languages:
                 cursor.execute(
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING GIN (to_tsvector('{language}', content));"
+                        "CREATE INDEX ON {table} USING "
+                        + " GIN (to_tsvector('{language}', content));"
                     ).format(table=table_name, language=sql.Identifier(language))
                 )
 
@@ -57,19 +58,22 @@ def create_workspace_table(workspace: dict):
             if metric == "cosine":
                 cursor.execute(
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING ivfflat (content_embeddings vector_cosine_ops) WITH (lists = 100);"
+                        "CREATE INDEX ON {table} USING ivfflat "
+                        + "(content_embeddings vector_cosine_ops) WITH (lists = 100);"
                     ).format(table=table_name)
                 )
             elif metric == "l2":
                 cursor.execute(
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING ivfflat (content_embeddings vector_l2_ops) WITH (lists = 100);"
+                        "CREATE INDEX ON {table} USING ivfflat "
+                        + "(content_embeddings vector_l2_ops) WITH (lists = 100);"
                     ).format(table=table_name)
                 )
             elif metric == "inner":
                 cursor.execute(
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING ivfflat (content_embeddings vector_ip_ops) WITH (lists = 100);"
+                        "CREATE INDEX ON {table} USING ivfflat "
+                        + "(content_embeddings vector_ip_ops) WITH (lists = 100);"
                     ).format(table=table_name)
                 )
 

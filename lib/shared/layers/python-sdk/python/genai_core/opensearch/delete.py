@@ -111,9 +111,10 @@ def delete_open_search_document(workspace_id: str, document: dict):
         print(f"Delete document succeeded: {response}")
 
         updateResponse = workspaces_table.update_item(
-            Key={"workspace_id": workspace_id,
-                 "object_type": WORKSPACE_OBJECT_TYPE},
-            UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+            Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
+            UpdateExpression="ADD size_in_bytes :incrementValue, "
+            + "documents :documentsIncrementValue, vectors :vectorsIncrementValue "
+            + "SET updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":incrementValue": -document_size_in_bytes,
                 ":documentsIncrementValue": -documents_diff,
@@ -128,29 +129,23 @@ def delete_open_search_document(workspace_id: str, document: dict):
         print(f"An error occurred: {error}")
 
 
-
 def deleteOpenSearchDocument(document_id, index_name):
     client = get_open_search_client()
     if client.indices.exists(index_name):
-        search_query = {
-            "query": {
-                "match": {
-                    "document_id": document_id
-                }
-            }
-        }
+        search_query = {"query": {"match": {"document_id": document_id}}}
         from_ = 0
         batch_size = 100
         while True:
             search_response = client.search(
-                index=index_name, body=search_query, from_=from_, size=batch_size)
+                index=index_name, body=search_query, from_=from_, size=batch_size
+            )
 
-            hits = search_response['hits']['hits']
+            hits = search_response["hits"]["hits"]
             if not hits:
                 break
 
             for hit in hits:
-                client.delete(index=index_name, id=hit['_id'])
+                client.delete(index=index_name, id=hit["_id"])
 
             from_ += batch_size
 
