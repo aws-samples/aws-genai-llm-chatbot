@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import pytest
 from genai_core.types import CommonError
 from routes.workspaces import list_workspaces
@@ -35,7 +36,7 @@ workspace = {
 
 create_base_input = {
     "kind": "kind",
-    "name": " name ",
+    "name": "name",
     "embeddingsModelProvider": "bedrock",
     "embeddingsModelName": "embded",
     "crossEncoderModelProvider": "bedrock",
@@ -88,6 +89,13 @@ def test_get_workspace(mocker):
     assert response.get("id") == workspace.get("workspace_id")
 
 
+def test_get_workspace_invalid_input():
+    with pytest.raises(ValidationError, match="1 validation error"):
+        get_workspace("")
+    with pytest.raises(ValidationError, match="1 validation error"):
+        get_workspace(None)
+
+
 def test_get_workspace_not_found(mocker):
     mocker.patch("genai_core.workspaces.get_workspace", return_value=None)
     assert get_workspace("id") == None
@@ -97,6 +105,13 @@ def test_delete_workspace(mocker):
     mock = mocker.patch("genai_core.workspaces.delete_workspace")
     delete_workspace("id")
     assert mock.call_count == 1
+
+
+def test_delete_workspace_invalid_input():
+    with pytest.raises(ValidationError, match="1 validation error"):
+        delete_workspace("")
+    with pytest.raises(ValidationError, match="1 validation error"):
+        delete_workspace(None)
 
 
 def test_create_aurora_workspace(mocker):
@@ -150,7 +165,7 @@ def test_create_kendra_workspace_invalid_input(mocker):
     mocker.patch("genai_core.kendra.get_kendra_indexes", return_value=[])
     input = create_base_input.copy()
     input["name"] = ""
-    with pytest.raises(CommonError, match="Invalid workspace name"):
+    with pytest.raises(ValidationError, match="1 validation error"):
         create_kendra_workspace(input)
     input = create_base_input.copy()
     with pytest.raises(CommonError, match="Kendra index not found"):
@@ -168,21 +183,30 @@ def verifiy_common_invalid_inputs(method):
         method(input)
     input = create_base_input.copy()
     input["name"] = ""
-    with pytest.raises(CommonError, match="Invalid workspace name"):
+    with pytest.raises(ValidationError, match="1 validation error"):
         method(input)
     input = create_base_input.copy()
     input["languages"] = ["a", "b", "c", "d"]
-    with pytest.raises(CommonError, match="Invalid language"):
+    with pytest.raises(CommonError, match="Invalid languages"):
+        method(input)
+    input = create_base_input.copy()
+    input["languages"] = []
+    with pytest.raises(CommonError, match="Invalid languages"):
         method(input)
     input = create_base_input.copy()
     input["chunkingStrategy"] = "invalid"
     with pytest.raises(CommonError, match="Invalid chunking strategy"):
         method(input)
     input = create_base_input.copy()
-    input["chunkSize"] = 1
-    with pytest.raises(CommonError, match="Invalid chunk size"):
+    input["chunkSize"] = -1
+    with pytest.raises(ValidationError, match="1 validation error"):
         method(input)
     input = create_base_input.copy()
     input["chunkOverlap"] = -1
+    with pytest.raises(ValidationError, match="1 validation error"):
+        method(input)
+    input = create_base_input.copy()
+    input["chunkSize"] = 101
+    input["chunkOverlap"] = 102
     with pytest.raises(CommonError, match="Invalid chunk overlap"):
         method(input)
