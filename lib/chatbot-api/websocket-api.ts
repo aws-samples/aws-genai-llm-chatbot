@@ -65,7 +65,7 @@ export class RealtimeGraphqlApiBackend extends Construct {
       userPool: props.userPool,
       shared: props.shared,
       api: props.api,
-      logRetention: props.logRetention
+      logRetention: props.logRetention,
     });
 
     // Route all outgoing messages to the websocket interface queue

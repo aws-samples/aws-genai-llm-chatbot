@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+from aws_lambda_powertools import Logger
 import boto3
 import botocore
 import feedparser
@@ -43,6 +44,7 @@ lambda_client = boto3.client("lambda")
 
 documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
 workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
+logger = Logger()
 
 
 def list_documents(
@@ -123,8 +125,6 @@ def set_document_vectors(
         },
     )
 
-    print(response)
-
     if replace:
         response = documents_table.update_item(
             Key={"workspace_id": workspace_id, "document_id": document_id},
@@ -146,7 +146,7 @@ def set_document_vectors(
             },
         )
 
-    print(response)
+    logger.info("Response for set_document_vectors", response=response)
 
     return response
 
@@ -164,7 +164,7 @@ def set_sub_documents(workspace_id: str, document_id: str, sub_documents: int):
         },
     )
 
-    print(response)
+    logger.info("Response for set_sub_documents", response=response)
 
     return response
 
@@ -201,7 +201,7 @@ def delete_document(workspace_id: str, document_id: str):
         ),
     )
 
-    print(response)
+    logger.info("Response for delete_document", response=response)
     return {"documentId": document_id, "deleted": True}
 
 
@@ -249,7 +249,7 @@ def update_subscription_timestamp(workspace_id: str, document_id: str):
             ":timestampValue": timestamp,
         },
     )
-    print(response)
+    logger.info("Response for update_subscription_timestamp", response=response)
 
 
 def create_document(
@@ -343,7 +343,6 @@ def create_document(
             document["crawler_properties"] = kwargs["crawler_properties"]
 
         response = documents_table.put_item(Item=document)
-        print(response)
 
     size_diff = size_in_bytes - current_size_in_bytes
     response = workspaces_table.update_item(
@@ -360,7 +359,7 @@ def create_document(
         ReturnValues="UPDATED_NEW",
     )
 
-    print(response)
+    logger.info("Response for create_document", response=response)
 
     _upload_document_content(
         workspace_id,
@@ -495,7 +494,7 @@ def _process_document(
             ),
         )
 
-        print(response)
+        logger.info("Response for _process_document", response=response)
     elif document_type == "qna":
         chunk_complements = None
         if content_complement is not None:
@@ -532,7 +531,7 @@ def _process_document(
                     set_status(workspace_id, document_id, "error")
                     raise genai_core.types.CommonError("No urls found in sitemap")
             except Exception as e:
-                print(e)
+                logger.exception(e)
                 set_status(workspace_id, document_id, "error")
                 raise genai_core.types.CommonError("Error extracting urls from sitemap")
 
@@ -578,7 +577,7 @@ def _process_document(
             ),
         )
 
-        print(response)
+        logger.info("Response for _process_document", response=response)
     elif document_type == "rssfeed":
         set_status(workspace_id, document_id, "enabled")
         _trigger_rss_feed_ingestor(workspace_id, document_id)
@@ -645,9 +644,9 @@ def _trigger_rss_feed_ingestor(
                 }
             ),
         )
-        print(response)
+        logger.info("Response for _trigger_rss_feed_ingestor", response=response)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 def _toggle_document_subscription(
@@ -683,7 +682,7 @@ def check_rss_feed_for_posts(workspace_id, document_id):
         raise genai_core.types.CommonError("Document not found")
 
     feed_path = rss_document["path"]
-    print(f"Parsing RSS Feed for {feed_path}")
+    logger.info(f"Parsing RSS Feed for {feed_path}")
     try:
         feed_contents = feedparser.parse(feed_path)
         if feed_contents:
@@ -716,7 +715,7 @@ def check_rss_feed_for_posts(workspace_id, document_id):
                     )
                 except botocore.exceptions.ClientError as e:
                     if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
-                        print(f"Post already exists: {feed_entry['link']}")
+                        logger.info(f"Post already exists: {feed_entry['link']}")
                         continue
                     else:
                         raise e

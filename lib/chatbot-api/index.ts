@@ -102,7 +102,7 @@ export class ChatBotApi extends Construct {
     const realtimeBackend = new RealtimeGraphqlApiBackend(this, "Realtime", {
       ...props,
       api,
-      logRetention: props.config.logRetention
+      logRetention: props.config.logRetention,
     });
 
     this.resolvers.push(realtimeBackend.resolvers.sendQueryHandler);

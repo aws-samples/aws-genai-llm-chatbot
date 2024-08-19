@@ -254,7 +254,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         }));
       } catch (error) {
         console.log(Utils.getErrorMessage(error));
-        if (props.setInitErrorMessage) props.setInitErrorMessage(Utils.getErrorMessage(error));
+        if (props.setInitErrorMessage)
+          props.setInitErrorMessage(Utils.getErrorMessage(error));
         setState((state) => ({
           ...state,
           modelsStatus: "error",
@@ -274,8 +275,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       const isScrollToTheEnd =
         Math.abs(
           window.innerHeight +
-          window.scrollY -
-          document.documentElement.scrollHeight
+            window.scrollY -
+            document.documentElement.scrollHeight
         ) <= 10;
 
       if (!isScrollToTheEnd) {
@@ -354,10 +355,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       action: ChatBotAction.Run,
       modelInterface:
         (props.configuration.files && props.configuration.files.length > 0) ||
-          (hasImagesInChatHistory() &&
-            state.selectedModelMetadata?.inputModalities.includes(
-              ChabotInputModality.Image
-            ))
+        (hasImagesInChatHistory() &&
+          state.selectedModelMetadata?.inputModalities.includes(
+            ChabotInputModality.Image
+          ))
           ? "multimodal"
           : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
@@ -421,10 +422,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       console.log(Utils.getErrorMessage(err));
       props.setRunning(false);
       messageHistoryRef.current[messageHistoryRef.current.length - 1].content =
-         "**Error**, Unable to process the request: " + Utils.getErrorMessage(err);
+        "**Error**, Unable to process the request: " +
+        Utils.getErrorMessage(err);
       props.setMessageHistory(messageHistoryRef.current);
     }
-
   };
 
   const connectionStatus = {
@@ -463,25 +464,25 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             {state.selectedModelMetadata?.inputModalities.includes(
               ChabotInputModality.Image
             ) && (
-                <Button
-                  variant="icon"
-                  onClick={() => setImageDialogVisible(true)}
-                  iconSvg={
-                    <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
-                      <rect
-                        x="2"
-                        y="2"
-                        width="19"
-                        height="19"
-                        rx="2"
-                        ry="2"
-                      ></rect>
-                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                      <polyline points="21 15 16 10 5 21"></polyline>
-                    </svg>
-                  }
-                ></Button>
-              )}
+              <Button
+                variant="icon"
+                onClick={() => setImageDialogVisible(true)}
+                iconSvg={
+                  <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                    <rect
+                      x="2"
+                      y="2"
+                      width="19"
+                      height="19"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                }
+              ></Button>
+            )}
           </SpaceBetween>
           <ImageDialog
             sessionId={props.session.id}
@@ -491,7 +492,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             setConfiguration={props.setConfiguration}
           />
           <TextareaAutosize
-            data-locator='prompt-input'
+            data-locator="prompt-input"
             className={styles.input_textarea}
             maxRows={6}
             minRows={1}
@@ -565,7 +566,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         >
           <Select
             disabled={props.running}
-            data-locator='select-model'
+            data-locator="select-model"
             statusType={state.modelsStatus}
             loadingText="Loading models (might take few seconds)..."
             placeholder="Select a model"
@@ -644,8 +645,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                   ? "success"
                   : readyState === ReadyState.CONNECTING ||
                     readyState === ReadyState.UNINSTANTIATED
-                    ? "in-progress"
-                    : "error"
+                  ? "in-progress"
+                  : "error"
               }
             >
               {readyState === ReadyState.OPEN ? "Connected" : connectionStatus}

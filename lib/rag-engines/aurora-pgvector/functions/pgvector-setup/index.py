@@ -10,7 +10,7 @@ logger = Logger()
 secretsmanager_client = boto3.client("secretsmanager")
 
 
-@logger.inject_lambda_context(log_event=False)
+@logger.inject_lambda_context(log_event=True)
 def lambda_handler(event, context: LambdaContext):
     request_type = event["RequestType"]
     resource_properties = event["ResourceProperties"]

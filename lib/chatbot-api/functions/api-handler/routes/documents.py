@@ -141,7 +141,7 @@ def file_upload(input: dict):
         request.workspaceId, request.fileName
     )
 
-    print(result)
+    logger.info("Generated pre-signed for " + request.fileName)
     return result
 
 

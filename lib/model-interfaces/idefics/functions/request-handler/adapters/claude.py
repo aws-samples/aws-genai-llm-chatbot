@@ -1,3 +1,4 @@
+from aws_lambda_powertools import Logger
 from .base import MultiModalModelBase
 from genai_core.types import ChatbotMessageType
 from urllib.parse import urljoin
@@ -7,6 +8,8 @@ import json
 import requests
 from base64 import b64encode
 from genai_core.registry import registry
+
+logger = Logger()
 
 
 def get_image_message(
@@ -69,7 +72,7 @@ class Claude3(MultiModalModelBase):
         )
 
     def handle_run(self, prompt: str, model_kwargs: dict):
-        print(model_kwargs)
+        logger.info("Incoming request for claude", model_kwargs=model_kwargs)
         body = json.loads(prompt)
 
         if "temperature" in model_kwargs:

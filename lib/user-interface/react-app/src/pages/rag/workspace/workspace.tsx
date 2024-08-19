@@ -43,7 +43,7 @@ export default function WorkspacePane() {
 
     const apiClient = new ApiClient(appContext);
     try {
-      setGlobalError(undefined)
+      setGlobalError(undefined);
       const result = await apiClient.workspaces.getWorkspace(workspaceId);
       if (!result.data?.getWorkspace) {
         navigate("/rag/workspaces");
@@ -156,13 +156,15 @@ export default function WorkspacePane() {
           }
         >
           <SpaceBetween size="l">
-            {globalError && <Alert
-              statusIconAriaLabel="Error"
-              type="error"
-              header="Unable to load the workspace."
-            >
-              {globalError}
-            </Alert>}
+            {globalError && (
+              <Alert
+                statusIconAriaLabel="Error"
+                type="error"
+                header="Unable to load the workspace."
+              >
+                {globalError}
+              </Alert>
+            )}
             {workspace && workspace.engine === "aurora" && (
               <AuroraWorkspaceSettings workspace={workspace} />
             )}

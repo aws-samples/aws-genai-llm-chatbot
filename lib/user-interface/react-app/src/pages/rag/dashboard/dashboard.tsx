@@ -1,4 +1,8 @@
-import { Alert, ContentLayout, SpaceBetween } from "@cloudscape-design/components";
+import {
+  Alert,
+  ContentLayout,
+  SpaceBetween,
+} from "@cloudscape-design/components";
 import { BreadcrumbGroup } from "@cloudscape-design/components";
 import { useContext, useEffect, useState } from "react";
 import { ApiClient } from "../../../common/api-client/api-client";
@@ -72,22 +76,22 @@ export default function Dashboard() {
       }
       content={
         <>
-          {globalError && <Alert
-            statusIconAriaLabel="Error"
-            type="error"
-            header="Unable to load the statistics."
-          >
-            {globalError}
-          </Alert>}
+          {globalError && (
+            <Alert
+              statusIconAriaLabel="Error"
+              type="error"
+              header="Unable to load the statistics."
+            >
+              {globalError}
+            </Alert>
+          )}
           <ContentLayout header={<DashboardHeader />}>
             <SpaceBetween size="l">
-
               <GeneralConfig statistics={statistics} />
               <WorkspacesTable loading={loading} workspaces={workspaces} />
             </SpaceBetween>
           </ContentLayout>
         </>
-
       }
     />
   );

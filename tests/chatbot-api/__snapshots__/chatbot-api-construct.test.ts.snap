@@ -2916,6 +2916,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Appsync resolver handling LLM Queries",
         "Environment": {
           "Variables": {
             "SNS_TOPIC_ARN": {
@@ -2942,6 +2943,9 @@ schema {
             ],
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "ChatBotApiConstructRealtimeResolverslambdaresolverServiceRoleB83D9D98",
@@ -3111,6 +3115,9 @@ schema {
             ],
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "ChatBotApiConstructRealtimeResolversoutgoingmessagehandlerServiceRoleBD2EC7CC",
@@ -3334,6 +3341,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Main Appsync resolver",
         "Environment": {
           "Variables": {
             "API_KEYS_SECRETS_ARN": {
@@ -3456,6 +3464,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -5157,6 +5168,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Creates Aurora workspace",
         "Environment": {
           "Variables": {
             "AURORA_DB_SECRET_ID": {
@@ -5194,6 +5206,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceFunctionServiceRole11C35928",
@@ -5539,6 +5554,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "PGVector setup",
         "Environment": {
           "Variables": {
             "LOG_LEVEL": "INFO",
@@ -5569,6 +5585,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorDatabaseSetupFunctionServiceRole09B67CA3",
@@ -7258,6 +7277,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -7525,6 +7547,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -7557,6 +7582,35 @@ schema {
         },
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "RagEnginesDataImportRssSubscriptioncrawlQueuedRssPostsFunctionLogRetention98BE58FB": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+      ],
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "RagEnginesDataImportRssSubscriptioncrawlQueuedRssPostsFunction7348FF25",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 7,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
     },
     "RagEnginesDataImportRssSubscriptioncrawlQueuedRssPostsFunctionSecurityGroupF06E23E0": {
       "DependsOn": [
@@ -7877,6 +7931,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -8319,6 +8376,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Data Import upload handler",
         "Environment": {
           "Variables": {
             "API_KEYS_SECRETS_ARN": {
@@ -8381,6 +8439,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -10604,6 +10665,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Creates the Open Search workspace",
         "Environment": {
           "Variables": {
             "LOG_LEVEL": "INFO",
@@ -10646,6 +10708,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesOpenSearchVectorCreateOpenSearchWorkspaceCreateOpenSearchWorkspaceFunctionServiceRole61F3024C",
@@ -11734,7 +11799,11 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Checks the completion of an HuggingFace build request",
         "Handler": "index.is_complete",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerServiceRole01E1EAD7",
@@ -11744,6 +11813,29 @@ schema {
         "Runtime": "python3.11",
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerLogRetention65A63A01": {
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerDF048AE3",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 7,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
     },
     "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerServiceRole01E1EAD7": {
       "Properties": {
@@ -12054,7 +12146,11 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Manages HuggingFace model build requests",
         "Handler": "index.on_event",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AOnEventHandlerServiceRole0D576031",
@@ -12064,6 +12160,29 @@ schema {
         "Runtime": "python3.11",
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "RagEnginesSageMakerModelMultiAB24AOnEventHandlerLogRetentionF204D605": {
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "RagEnginesSageMakerModelMultiAB24AOnEventHandler3AAD1104",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 7,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
     },
     "RagEnginesSageMakerModelMultiAB24AOnEventHandlerServiceRole0D576031": {
       "Properties": {
@@ -12984,6 +13103,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Deletes document added to a workspace",
         "Environment": {
           "Variables": {
             "AURORA_DB_SECRET_ID": {
@@ -13040,6 +13160,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionServiceRole3BBCBEE9",
@@ -13619,6 +13742,7 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Deletes a workspace",
         "Environment": {
           "Variables": {
             "AURORA_DB_SECRET_ID": {
@@ -13676,6 +13800,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionServiceRoleD99F8BAF",

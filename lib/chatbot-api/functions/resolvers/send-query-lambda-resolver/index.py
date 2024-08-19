@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.logging import correlation_paths
 from pydantic import BaseModel, Field
 
 tracer = Tracer()
@@ -48,10 +49,15 @@ class InputValidation(BaseModel):
 
 
 @tracer.capture_lambda_handler
-@logger.inject_lambda_context(log_event=False)
+@logger.inject_lambda_context(
+    log_event=False, correlation_id_path=correlation_paths.APPSYNC_RESOLVER
+)
 def handler(event, context: LambdaContext):
-    print(event["arguments"]["data"])
-    print(event["identity"])
+    logger.info(
+        "Incoming request for " + event["info"]["fieldName"],
+        arguments=event["arguments"],
+        identify=event["identity"],
+    )
     request = json.loads(event["arguments"]["data"])
     message = {
         "action": request["action"],
@@ -61,7 +67,6 @@ def handler(event, context: LambdaContext):
         "userId": event["identity"]["sub"],
         "data": request.get("data", {}),
     }
-    print(message)
     InputValidation(**message)
 
     try:

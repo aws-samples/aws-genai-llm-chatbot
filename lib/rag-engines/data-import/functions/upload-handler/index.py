@@ -22,7 +22,7 @@ DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
 
 
 @tracer.capture_lambda_handler
-@logger.inject_lambda_context(log_event=False)
+@logger.inject_lambda_context(log_event=True)
 @event_source(data_class=SQSEvent)
 def lambda_handler(event: SQSEvent, context: LambdaContext):
     for sqs_record in event.records:

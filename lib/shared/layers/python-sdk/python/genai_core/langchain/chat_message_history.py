@@ -1,4 +1,5 @@
 import json
+from aws_lambda_powertools import Logger
 import boto3
 from typing import List
 from decimal import Decimal
@@ -14,6 +15,7 @@ from langchain.schema.messages import (
 )
 
 client = boto3.resource("dynamodb")
+logger = Logger()
 
 
 class DynamoDBChatMessageHistory(BaseChatMessageHistory):
@@ -37,9 +39,9 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             )
         except ClientError as error:
             if error.response["Error"]["Code"] == "ResourceNotFoundException":
-                print("No record found with session id: %s", self.session_id)
+                logger.warning("No record found with session id: %s", self.session_id)
             else:
-                print(error)
+                logger.exception(error)
 
         if response and "Item" in response:
             items = response["Item"]["History"]
@@ -65,7 +67,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 }
             )
         except ClientError as err:
-            print(err)
+            logger.exception(err)
 
     def add_metadata(self, metadata: dict) -> None:
         """Add additional metadata to the last message"""
@@ -87,7 +89,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             )
 
         except Exception as err:
-            print(err)
+            logger.exception(err)
 
     def clear(self) -> None:
         """Clear session memory from DynamoDB"""
@@ -96,4 +98,4 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 Key={"SessionId": self.session_id, "UserId": self.user_id}
             )
         except ClientError as err:
-            print(err)
+            logger.exception(err)

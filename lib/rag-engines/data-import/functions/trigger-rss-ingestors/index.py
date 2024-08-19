@@ -7,7 +7,7 @@ tracer = Tracer()
 
 
 @tracer.capture_lambda_handler()
-@logger.inject_lambda_context(log_event=False)
+@logger.inject_lambda_context(log_event=True)
 def lambda_handler(event, context: LambdaContext):
     logger.info("Triggering daily checks for RSS Feed Posts")
     try:

@@ -21,7 +21,7 @@ logger = Logger()
 
 
 def handle_run(record):
-    print(record)
+    logger.info("Incoming request", record=record)
     user_id = record["userId"]
     data = record["data"]
     provider = data["provider"]
@@ -128,7 +128,7 @@ def handle_failed_records(records):
         )
 
 
-@logger.inject_lambda_context(log_event=False)
+@logger.inject_lambda_context(log_event=True)
 @tracer.capture_lambda_handler
 def handler(event, context: LambdaContext):
     batch = event["Records"]

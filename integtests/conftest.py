@@ -15,7 +15,7 @@ def client(cognito_credentials: Credentials, config):
 
 
 @pytest.fixture(scope="session")
-def cognito_credentials(config) -> Credentials:
+def cognito_credentials(config, worker_id) -> Credentials:
     user_pool_id = config.get("aws_user_pools_id")
     region = config.get("aws_cognito_region")
     user_pool_client_id = config.get("aws_user_pools_web_client_id")
@@ -23,7 +23,7 @@ def cognito_credentials(config) -> Credentials:
     cognito = CognitoClient(
         region=region, user_pool_id=user_pool_id, client_id=user_pool_client_id
     )
-    email = "integ-test-user@example.local"
+    email = "integ-test-user@example.local-" + worker_id
 
     return cognito.get_credentials(email=email)
 
@@ -65,11 +65,9 @@ def react_url():
 @pytest.fixture(scope="class")
 def selenium_driver(react_url):
     options = webdriver.FirefoxOptions()
-    if os.environ["HEADLESS"]:
+    if "HEADLESS" in os.environ and os.environ["HEADLESS"]:
         options.add_argument("--headless")
-    driver = webdriver.Remote(
-        command_executor="http://127.0.0.1:4444", options=options
-    )
+    driver = webdriver.Remote(command_executor="http://127.0.0.1:4444", options=options)
     driver.set_window_size(1600, 800)
     driver.get(react_url)
     yield driver

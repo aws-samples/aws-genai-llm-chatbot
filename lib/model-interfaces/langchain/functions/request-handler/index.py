@@ -151,7 +151,7 @@ def handle_failed_records(records):
         )
 
 
-@logger.inject_lambda_context(log_event=False)
+@logger.inject_lambda_context(log_event=True)
 @tracer.capture_lambda_handler
 def handler(event, context: LambdaContext):
     batch = event["Records"]

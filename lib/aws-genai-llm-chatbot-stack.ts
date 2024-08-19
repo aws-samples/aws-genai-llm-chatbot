@@ -220,8 +220,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
     new Monitoring(monitoringStack, "Monitoring", {
       appsycnApi: chatBotApi.graphqlApi,
-      appsyncResolversLogGroups: chatBotApi.resolvers.map(r => {
-        return LogGroup.fromLogGroupName(monitoringStack, "Log" + r.node.id, "/aws/lambda/" + r.functionName);
+      appsyncResolversLogGroups: chatBotApi.resolvers.map((r) => {
+        return LogGroup.fromLogGroupName(
+          monitoringStack,
+          "Log" + r.node.id,
+          "/aws/lambda/" + r.functionName
+        );
       }),
       cognito: {
         userPoolId: authentication.userPool.userPoolId,
