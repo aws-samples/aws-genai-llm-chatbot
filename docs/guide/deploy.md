@@ -132,13 +132,13 @@ Your configuration is now stored under `bin/config.json`. You can re-run the `np
 > **Note**: This is required if you have never used AWS CDK on this account and region combination. ([More information on CDK bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/cli.html#cli-bootstrap)).
 
 ```bash
-npx cdk bootstrap aws://{targetAccountId}/{targetRegion}
+npm run cdk bootstrap aws://{targetAccountId}/{targetRegion}
 ```
 
 You can now deploy by running:
 
 ```bash
-npx cdk deploy
+npm run cdk deploy
 ```
 
 > **Note**: This step duration can vary greatly, depending on the Constructs you are deploying.

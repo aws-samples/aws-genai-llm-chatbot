@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import pytest
 from genai_core.types import CommonError
 from routes.user_feedback import user_feedback
@@ -35,3 +36,30 @@ def test_user_feedback_user_not_found(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value=None)
     with pytest.raises(CommonError):
         user_feedback(input)
+
+
+def test_user_feedback_invalid_input(mocker):
+    with pytest.raises(ValidationError, match="6 validation error"):
+        user_feedback({})
+    with pytest.raises(ValidationError, match="6 validation error"):
+        user_feedback(
+            {
+                "sessionId": "",
+                "key": "",
+                "feedback": "",
+                "prompt": "",
+                "completion": "",
+                "model": "",
+            }
+        )
+    with pytest.raises(ValidationError, match="4 validation error"):
+        user_feedback(
+            {
+                "sessionId": "<",
+                "key": "<",
+                "feedback": "<",
+                "prompt": "<",
+                "completion": "<",
+                "model": "<",
+            }
+        )

@@ -1,5 +1,5 @@
+from pydantic import ValidationError
 import pytest
-from genai_core.types import CommonError
 from routes.semantic_search import semantic_search
 
 
@@ -56,6 +56,10 @@ def test_semantic_search(mocker):
     assert len(response.get("keywordSearchItems")) == 1
 
 
-def test_semantic_search_without_query(mocker):
-    with pytest.raises(CommonError):
-        semantic_search({"query": "", "workspaceId": "id"})
+def test_semantic_search_invalid_input(mocker):
+    with pytest.raises(ValidationError, match="2 validation error"):
+        semantic_search({})
+    with pytest.raises(ValidationError, match="2 validation error"):
+        semantic_search({"query": "<", "workspaceId": "<"})
+    with pytest.raises(ValidationError, match="2 validation error"):
+        semantic_search({"query": "<", "workspaceId": "<"})

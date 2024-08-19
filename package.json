@@ -8,6 +8,7 @@
     "build": "npx @aws-amplify/cli codegen && npx tsc",
     "watch": "npx tsc -w",
     "cdk": "cdk",
+    "hotswap": "cdk deploy --hotswap",
     "test": "jest",
     "pytest": "pytest tests/",
     "integtest": "pytest integtests/",

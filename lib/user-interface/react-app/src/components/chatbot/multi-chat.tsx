@@ -14,6 +14,7 @@ import {
   Toggle,
   StatusIndicator,
   Container,
+  Alert,
 } from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
 import { AppContext } from "../../common/app-context";
@@ -109,6 +110,7 @@ export default function MultiChat() {
   const [readyState, setReadyState] = useState<ReadyState>(
     ReadyState.UNINSTANTIATED
   );
+  const [initError, setInitError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!appContext) return;
@@ -140,18 +142,20 @@ export default function MultiChat() {
 
         const models = modelsResult.data
           ? modelsResult.data.listModels.filter(
-              /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-              (m: any) =>
-                m.inputModalities.includes(ChabotInputModality.Text) &&
-                m.outputModalities.includes(ChabotOutputModality.Text)
-            )
+            /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
+            (m: any) =>
+              m.inputModalities.includes(ChabotInputModality.Text) &&
+              m.outputModalities.includes(ChabotOutputModality.Text)
+          )
           : [];
         setModels(models);
         setWorkspaces(workspaces);
         setModelsStatus("finished");
       } catch (error) {
         console.error(Utils.getErrorMessage(error));
+        setInitError(Utils.getErrorMessage(error));
         setModelsStatus("error");
+        setReadyState(ReadyState.CLOSED);
       }
     })();
 
@@ -375,16 +379,25 @@ export default function MultiChat() {
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
+        {initError && <Alert
+          statusIconAriaLabel="Error"
+          type="error"
+          header="Unable to initalize the Chatbots."
+        >
+          {initError}
+        </Alert>}
         <SpaceBetween size="m" alignItems="end">
+
           <SpaceBetween size="m" direction="horizontal" alignItems="center">
+
             <StatusIndicator
               type={
                 readyState === ReadyState.OPEN
                   ? "success"
                   : readyState === ReadyState.CONNECTING ||
                     readyState === ReadyState.UNINSTANTIATED
-                  ? "in-progress"
-                  : "error"
+                    ? "in-progress"
+                    : "error"
               }
             >
               {readyState === ReadyState.OPEN ? "Connected" : connectionStatus}
