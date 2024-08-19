@@ -122,6 +122,16 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("createOpenSearchWorkspace")
 
+    def create_aurora_workspace(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.createAuroraWorkspace.args(input=input).select(
+                    self.schema.Workspace.id,
+                )
+            )
+        )
+        return self.client.execute(query).get("createAuroraWorkspace")
+
     def list_workspaces(self):
         query = dsl_gql(
             DSLQuery(
@@ -163,6 +173,17 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("addTextDocument")
 
+    def add_rss_feed(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.addRssFeed.args(input=input).select(
+                    self.schema.DocumentResult.documentId,
+                    self.schema.DocumentResult.status,
+                )
+            )
+        )
+        return self.client.execute(query).get("addRssFeed")
+
     def get_document(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -175,6 +196,21 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("getDocument")
 
+    def get_rss_posts(self, input):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.getRSSPosts.args(input=input).select(
+                    self.schema.DocumentsResult.lastDocumentId,
+                    self.schema.DocumentsResult.items.select(
+                        self.schema.Document.workspaceId,
+                        self.schema.Document.id,
+                        self.schema.Document.status,
+                    ),
+                )
+            )
+        )
+        return self.client.execute(query).get("getRSSPosts")
+
     def semantic_search(self, input):
         query = dsl_gql(
             DSLQuery(
@@ -185,6 +221,8 @@ class AppSyncClient:
                         self.schema.SemanticSearchItem.content,
                         self.schema.SemanticSearchItem.documentId,
                         self.schema.SemanticSearchItem.score,
+                        self.schema.SemanticSearchItem.path,
+                        self.schema.SemanticSearchItem.documentType,
                     ),
                 )
             )

@@ -50,7 +50,8 @@ def crawl_urls(
 
         try:
             content, local_links, _ = parse_url(current_url, content_types)
-        except:  # noqa: E722
+        except Exception as e:
+            print(e)
             print(f"Failed to parse url: {current_url}")
             continue
 

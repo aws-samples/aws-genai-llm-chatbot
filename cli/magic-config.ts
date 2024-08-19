@@ -257,6 +257,12 @@ async function processCreateOptions(options: any): Promise<void> {
       message: "Prefix to differentiate this deployment",
       initial: options.prefix,
       askAnswered: false,
+      validate(value: string) {
+        const regex = /^[a-zA-Z0-9-]{0,10}$/;
+        return regex.test(value)
+          ? true
+          : "Only letters, numbers, and dashes are allowed. The max length is 10 characters.";
+      },
     },
     {
       type: "confirm",

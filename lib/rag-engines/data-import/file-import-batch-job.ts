@@ -6,7 +6,6 @@ import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import { OpenSearchVector } from "../opensearch-vector";
 import * as batch from "aws-cdk-lib/aws-batch";
 import * as ecs from "aws-cdk-lib/aws-ecs";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as aws_ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -32,16 +31,11 @@ export class FileImportBatchJob extends Construct {
   constructor(scope: Construct, id: string, props: FileImportBatchJobProps) {
     super(scope, id);
 
-    const computeEnvironment = new batch.ManagedEc2EcsComputeEnvironment(
+    const computeEnvironment = new batch.FargateComputeEnvironment(
       this,
-      "ManagedEc2EcsComputeEnvironment",
+      "FargateComputeEnvironment",
       {
         vpc: props.shared.vpc,
-        instanceTypes: [
-          ec2.InstanceType.of(ec2.InstanceClass.M6A, ec2.InstanceSize.LARGE),
-        ],
-        maxvCpus: 4,
-        minvCpus: 0,
         replaceComputeEnvironment: true,
         updateTimeout: cdk.Duration.minutes(30),
         updateToLatestImageVersion: true,
@@ -67,12 +61,15 @@ export class FileImportBatchJob extends Construct {
       ],
     });
 
-    const fileImportContainer = new batch.EcsEc2ContainerDefinition(
+    const fileImportContainer = new batch.EcsFargateContainerDefinition(
       this,
       "FileImportContainer",
       {
+        // Possible values
+        // https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html
         cpu: 2,
-        memory: cdk.Size.mebibytes(2048),
+        memory: cdk.Size.mebibytes(4096),
+        ephemeralStorageSize: cdk.Size.gibibytes(40),
         image: ecs.ContainerImage.fromAsset("lib/shared", {
           platform: aws_ecr_assets.Platform.LINUX_AMD64,
           file: "file-import-dockerfile",
