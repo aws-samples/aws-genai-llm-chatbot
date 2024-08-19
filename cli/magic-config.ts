@@ -43,7 +43,7 @@ function getCountryCodesAndNames(): { message: string; name: string }[] {
 }
 
 function isValidDate(dateString: string): boolean {
-  // Check the pattern YYYY/MM/DD
+  // Check the pattern YYYY-MM-DD
   const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
   if (!regex.test(dateString)) {
     return false;
@@ -549,7 +549,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "enableScheduleEndDate",
       message:
-        "Would you like to set an end data for the start schedule? (after this date the models would no longer start)",
+        "Would you like to set an end date for the start schedule? (after this date the models would no longer start)",
       initial: options.enableScheduleEndDate || false,
       skip(): boolean {
         return !(this as any).state.answers.enableSagemakerModelsSchedule;
@@ -566,7 +566,7 @@ async function processCreateOptions(options: any): Promise<void> {
         }
         return (
           isValidDate(v) ||
-          "The date must be in format YYYY/MM/DD and be in the future"
+          "The date must be in format YYYY-MM-DD and be in the future"
         );
       },
       skip(): boolean {
