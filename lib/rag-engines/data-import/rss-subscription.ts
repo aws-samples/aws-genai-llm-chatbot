@@ -99,6 +99,7 @@ export class RssSubscription extends Construct {
     );
 
     this.rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction);
+    this.rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction);
     props.shared.configParameter.grantRead(triggerRssIngestorsFunction);
 
     props.ragDynamoDBTables.documentsTable.grantReadData(
@@ -152,7 +153,7 @@ export class RssSubscription extends Construct {
       crawlQueuedRssPostsFunction
     );
     new events.Rule(this, "CrawlQueuedRssPostsScheduleRule", {
-      schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
+      schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
       targets: [new targets.LambdaFunction(crawlQueuedRssPostsFunction)],
     });
 

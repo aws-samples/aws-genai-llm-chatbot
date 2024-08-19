@@ -343,8 +343,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           `/${this.stackName}/RagEngines/Workspaces/DeleteDocument/DeleteDocumentFunction/ServiceRole/Resource`,
           `/${this.stackName}/RagEngines/Workspaces/DeleteDocument/DeleteDocumentFunction/ServiceRole/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/Workspaces/DeleteDocument/DeleteDocument/Role/DefaultPolicy/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/RssSubscription/RssIngestor/ServiceRole/Resource`,
