@@ -144,7 +144,7 @@ def handle_failed_records(records):
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {
                     "sessionId": session_id,
-                    # Log a vague message because the error can contain 
+                    # Log a vague message because the error can contain
                     # internal information
                     "content": "Something went wrong",
                     "type": "text",
