@@ -8,6 +8,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as cr from "aws-cdk-lib/custom-resources";
+import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { NagSuppressions } from "cdk-nag";
 
@@ -25,6 +26,7 @@ export interface HuggingFaceCustomScriptModelProps {
   env?: { [key: string]: string };
   architecture?: lambda.Architecture;
   runtime?: lambda.Runtime;
+  logRetention?: number;
 }
 
 export class HuggingFaceCustomScriptModel extends Construct {
@@ -176,8 +178,11 @@ export class HuggingFaceCustomScriptModel extends Construct {
 
     // custom resource lamdba handlers
     const onEventHandler = new lambda.Function(this, "OnEventHandler", {
+      description: "Manages HuggingFace model build requests",
       runtime: lambda.Runtime.PYTHON_3_11,
       architecture: lambda.Architecture.ARM_64,
+      loggingFormat: lambda.LoggingFormat.JSON,
+      logRetention: props.logRetention ?? logs.RetentionDays.ONE_WEEK,
       code: lambda.Code.fromAsset(path.join(__dirname, "./build-function")),
       handler: "index.on_event",
     });
@@ -192,8 +197,11 @@ export class HuggingFaceCustomScriptModel extends Construct {
 
     // custom resource lamdba handlers
     const isCompleteHandler = new lambda.Function(this, "IsCompleteHandler", {
+      description: "Checks the completion of an HuggingFace build request",
       runtime: lambda.Runtime.PYTHON_3_11,
       architecture: lambda.Architecture.ARM_64,
+      loggingFormat: lambda.LoggingFormat.JSON,
+      logRetention: props.logRetention ?? logs.RetentionDays.ONE_WEEK,
       code: lambda.Code.fromAsset(path.join(__dirname, "./build-function")),
       handler: "index.is_complete",
     });

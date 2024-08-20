@@ -1,4 +1,5 @@
 import os
+from aws_lambda_powertools import Logger
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 from .client import get_open_search_client
@@ -16,6 +17,7 @@ DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 WORKSPACE_OBJECT_TYPE = "workspace"
 
 dynamodb = boto3.resource("dynamodb")
+logger = Logger()
 
 
 def delete_workspace(workspace: dict):
@@ -32,7 +34,7 @@ def delete_workspace(workspace: dict):
     client = get_open_search_client()
     if client.indices.exists(index_name):
         client.indices.delete(index=index_name)
-        print(f"Index {index_name} deleted.")
+        logger.info(f"Index {index_name} deleted.")
 
     workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
     documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
@@ -67,13 +69,13 @@ def delete_workspace(workspace: dict):
                     }
                 )
 
-    print(f"Deleted {len(items_to_delete)} items.")
+    logger.info(f"Deleted {len(items_to_delete)} items.")
 
     response = workspaces_table.delete_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
     )
 
-    print(f"Delete Item succeeded: {response}")
+    logger.info(f"Delete Item succeeded: {response}")
 
 
 def delete_open_search_document(workspace_id: str, document: dict):
@@ -108,7 +110,7 @@ def delete_open_search_document(workspace_id: str, document: dict):
                 "document_id": document_id,
             }
         )
-        print(f"Delete document succeeded: {response}")
+        logger.info(f"Delete document succeeded: {response}")
 
         updateResponse = workspaces_table.update_item(
             Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
@@ -123,10 +125,10 @@ def delete_open_search_document(workspace_id: str, document: dict):
             },
             ReturnValues="UPDATED_NEW",
         )
-        print(f"Workspaces table updated for the document: {updateResponse}")
+        logger.info(f"Workspaces table updated for the document: {updateResponse}")
 
     except (BotoCoreError, ClientError) as error:
-        print(f"An error occurred: {error}")
+        logger.error(f"An error occurred: {error}")
 
 
 def deleteOpenSearchDocument(document_id, index_name):
@@ -149,4 +151,4 @@ def deleteOpenSearchDocument(document_id, index_name):
 
             from_ += batch_size
 
-        print(f"Record {document_id} deleted.")
+        logger.info(f"Record {document_id} deleted.")

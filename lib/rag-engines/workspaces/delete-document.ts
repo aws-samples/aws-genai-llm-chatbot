@@ -36,12 +36,14 @@ export class DeleteDocument extends Construct {
       code: props.shared.sharedCode.bundleWithLambdaAsset(
         path.join(__dirname, "./functions/delete-document-workflow/delete")
       ),
+      description: "Deletes document added to a workspace",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
       handler: "index.lambda_handler",
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       timeout: cdk.Duration.minutes(15),
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+      loggingFormat: lambda.LoggingFormat.JSON,
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         AURORA_DB_SECRET_ID: props.auroraPgVector?.database.secret

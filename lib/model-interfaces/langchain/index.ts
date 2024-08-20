@@ -35,12 +35,14 @@ export class LangChainInterface extends Construct {
         path.join(__dirname, "./functions/request-handler")
       ),
       handler: "index.handler",
+      description: "Langchain request handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
       tracing: lambda.Tracing.ACTIVE,
       timeout: cdk.Duration.minutes(15),
       memorySize: 1024,
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+      loggingFormat: lambda.LoggingFormat.JSON,
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       environment: {
         ...props.shared.defaultEnvironmentVariables,

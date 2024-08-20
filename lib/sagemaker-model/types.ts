@@ -7,6 +7,7 @@ export interface SageMakerModelProps extends cdk.NestedStackProps {
   vpc: ec2.Vpc;
   region: string;
   model: ModelConfig;
+  logRetention?: number;
 }
 
 export enum DeploymentType {

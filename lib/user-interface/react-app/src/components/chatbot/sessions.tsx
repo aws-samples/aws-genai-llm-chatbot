@@ -152,13 +152,15 @@ export default function Sessions(props: SessionsProps) {
       >
         {`Do you want to delete ${sessions.length} sessions?`}
       </Modal>
-      {globalError && <Alert
-        statusIconAriaLabel="Error"
-        type="error"
-        header="Unable to load the sessions."
-      >
-        {globalError}
-      </Alert>}
+      {globalError && (
+        <Alert
+          statusIconAriaLabel="Error"
+          type="error"
+          header="Unable to load the sessions."
+        >
+          {globalError}
+        </Alert>
+      )}
       <Table
         {...collectionProps}
         variant="full-page"
