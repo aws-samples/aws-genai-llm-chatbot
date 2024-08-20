@@ -1,8 +1,8 @@
-import boto3
 import json
 import time
 import uuid
 import pytest
+import requests
 from clients.appsync_client import AppSyncClient
 
 
@@ -58,19 +58,12 @@ def test_add_file(client: AppSyncClient):
         }
     )
 
-    s3_client = boto3.client("s3")
     fields = result.get("fields")
-
-    # "fields" string format:
-    # {key=544aeaa9-3f3d-4995-843d-e66a993bf5e8/context.txt, AWSAccessKeyId=XXX
-    pairs = [pair.strip() for pair in fields.replace("{", "").split(',')]
+    pairs = [pair.strip() for pair in fields.replace("{", "").replace("}", "").split(',')]
     fields_dict = dict(pair.split('=', 1) for pair in pairs)
-    bucket_name = result.get("url").split("//")[1].split(".")[0]
-    s3_client.put_object(
-        Body=b"The Integ Test flower is yellow.",
-        Bucket=bucket_name,
-        Key=fields_dict.get("key")
-    )
+    files={ "file": b"The Integ Test flower is yellow."}
+    response = requests.post(result.get("url"), data=fields_dict, files=files)
+    assert response.status_code == 204
 
     client.start_kendra_data_sync(pytest.workspace.get("id"))
 
