@@ -252,21 +252,17 @@ export class Models extends Construct {
     ) {
       const DOLLY_v2_3B_ENDPOINT_NAME = "dolly-v2-3b";
 
-      const dolly_v2_3b = new JumpStartSageMakerEndpoint(
-        this,
-        "Dolly_v2_3b",
-        {
-          model: JumpStartModel.HUGGINGFACE_TEXTGENERATION_DOLLY_V2_3B_BF16_2_1_0,
-          instanceType: SageMakerInstanceType.ML_G5_2XLARGE,
-          vpcConfig: {
-            securityGroupIds: [props.shared.vpc.vpcDefaultSecurityGroup],
-            subnets: props.shared.vpc.privateSubnets.map(
-              (subnet) => subnet.subnetId
-            ),
-          },
-          endpointName: DOLLY_v2_3B_ENDPOINT_NAME,
-        }
-      );
+      const dolly_v2_3b = new JumpStartSageMakerEndpoint(this, "Dolly_v2_3b", {
+        model: JumpStartModel.HUGGINGFACE_TEXTGENERATION_DOLLY_V2_3B_BF16_2_1_0,
+        instanceType: SageMakerInstanceType.ML_G5_2XLARGE,
+        vpcConfig: {
+          securityGroupIds: [props.shared.vpc.vpcDefaultSecurityGroup],
+          subnets: props.shared.vpc.privateSubnets.map(
+            (subnet) => subnet.subnetId
+          ),
+        },
+        endpointName: DOLLY_v2_3B_ENDPOINT_NAME,
+      });
 
       this.suppressCdkNagWarningForEndpointRole(dolly_v2_3b.role);
 
@@ -280,7 +276,7 @@ export class Models extends Construct {
         ragSupported: true,
       });
     }
-    
+
     if (
       props.config.llms?.sagemaker.includes(
         SupportedSageMakerModels.Llama2_13b_Chat

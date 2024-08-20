@@ -48,7 +48,7 @@ class Dolly2BAdapter(ModelAdapter):
             params["max_new_tokens"] = model_kwargs["maxTokens"]
 
         return SagemakerEndpoint(
-            # Prefix added here 
+            # Prefix added here
             # https://github.com/awslabs/generative-ai-cdk-constructs/blob/main/src/patterns/gen-ai/aws-model-deployment-sagemaker/jumpstart-sagemaker-endpoint.ts#L130
             endpoint_name="jumpstart-" + self.model_id,
             region_name=os.environ["AWS_REGION"],
@@ -56,7 +56,6 @@ class Dolly2BAdapter(ModelAdapter):
             model_kwargs=params,
             callbacks=[self.callback_handler],
         )
-
 
     def get_prompt(self):
         template = """You are an AI assistant. If the assistant does not know the answer to a question, it truthfully says it does not know.
