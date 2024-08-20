@@ -27,6 +27,7 @@ export class SageMakerRagModels extends Construct {
     const model = new SageMakerModel(this, "Model", {
       vpc: props.shared.vpc,
       region: cdk.Aws.REGION,
+      logRetention: props.config.logRetention,
       model: {
         type: DeploymentType.CustomInferenceScript,
         modelId: [

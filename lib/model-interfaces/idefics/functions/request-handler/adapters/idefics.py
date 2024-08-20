@@ -1,3 +1,4 @@
+from aws_lambda_powertools import Logger
 from .base import MultiModalModelBase
 from genai_core.types import ChatbotMessageType
 from urllib.parse import urljoin
@@ -5,6 +6,8 @@ import os
 from langchain.llms import SagemakerEndpoint
 from content_handler import ContentHandler
 from genai_core.registry import registry
+
+logger = Logger()
 
 
 class Idefics(MultiModalModelBase):
@@ -53,11 +56,11 @@ class Idefics(MultiModalModelBase):
         prompts.append("<end_of_utterance>\nAssistant:")
 
         prompt_template = "".join(prompts)
-        print(prompt_template)
+        logger.info(prompt_template)
         return prompt_template
 
     def handle_run(self, prompt: str, model_kwargs: dict):
-        print(model_kwargs)
+        logger.info("Incoming request for idefics", model_kwargs=model_kwargs)
         params = {
             "do_sample": True,
             "top_p": 0.2,

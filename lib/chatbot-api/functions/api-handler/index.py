@@ -40,11 +40,16 @@ app.include_router(bedrock_kb_router)
 
 
 @logger.inject_lambda_context(
-    log_event=True, correlation_id_path=correlation_paths.APPSYNC_RESOLVER
+    log_event=False, correlation_id_path=correlation_paths.APPSYNC_RESOLVER
 )
 @tracer.capture_lambda_handler
 def handler(event: dict, context: LambdaContext) -> dict:
     try:
+        logger.info(
+            "Incoming request for " + event["info"]["fieldName"],
+            arguments=event["arguments"],
+            identify=event["identity"],
+        )
         return app.resolve(event, context)
     except ValidationError as e:
         logger.warning(e.errors())

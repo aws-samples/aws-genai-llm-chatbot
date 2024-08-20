@@ -111,8 +111,10 @@ export class Authentication extends Construct {
           code: lambda.Code.fromAsset(
             "lib/authentication/lambda/updateUserPoolClient"
           ),
+          description: "Updates the user pool client",
           role: lambdaRoleUpdateClient,
-          logRetention: logs.RetentionDays.ONE_WEEK,
+          logRetention: config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+          loggingFormat: lambda.LoggingFormat.JSON,
           environment: {
             USER_POOL_ID: userPool.userPoolId,
             USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
@@ -136,7 +138,7 @@ export class Authentication extends Construct {
         );
         this.customOidcProvider = customProvider;
 
-        // Unfortunately the above function does not support SecretValue for Client Secrets so updating with lamda
+        // Unfortunately the above function does not support SecretValue for Client Secrets so updating with lambda
         // Create an IAM Role for the Lambda function
         const lambdaRoleUpdateOidcSecret = new iam.Role(
           this,
@@ -187,8 +189,10 @@ export class Authentication extends Construct {
             code: lambda.Code.fromAsset(
               "lib/authentication/lambda/updateOidcSecret"
             ),
+            description: "Updates OIDC secret",
             role: lambdaRoleUpdateOidcSecret,
-            logRetention: logs.RetentionDays.ONE_WEEK,
+            logRetention: config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+            loggingFormat: lambda.LoggingFormat.JSON,
             environment: {
               USER_POOL_ID: userPool.userPoolId,
               USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,

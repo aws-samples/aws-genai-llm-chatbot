@@ -9,7 +9,7 @@ export function deployCustomScriptModel(
   props: SageMakerModelProps,
   modelConfig: ModelCustomScriptConfig
 ) {
-  const { vpc, region } = props;
+  const { vpc, region, logRetention } = props;
   const { modelId, instanceType, codeFolder, container, env } = modelConfig;
 
   const endpointName = (
@@ -31,6 +31,7 @@ export function deployCustomScriptModel(
     codeFolder,
     container,
     env,
+    logRetention,
   });
 
   return { model: llmModel.model, endpoint: llmModel.endpoint };

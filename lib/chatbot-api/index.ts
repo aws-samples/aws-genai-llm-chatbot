@@ -16,6 +16,7 @@ import { ChatBotS3Buckets } from "./chatbot-s3-buckets";
 import { ApiResolvers } from "./rest-api";
 import { RealtimeGraphqlApiBackend } from "./websocket-api";
 import * as appsync from "aws-cdk-lib/aws-appsync";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { NagSuppressions } from "cdk-nag";
 
@@ -36,6 +37,7 @@ export class ChatBotApi extends Construct {
   public readonly filesBucket: s3.Bucket;
   public readonly userFeedbackBucket: s3.Bucket;
   public readonly graphqlApi: appsync.GraphqlApi;
+  public readonly resolvers: lambda.Function[] = [];
 
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
     super(scope, id);
@@ -87,7 +89,7 @@ export class ChatBotApi extends Construct {
         : appsync.Visibility.GLOBAL,
     });
 
-    new ApiResolvers(this, "RestApi", {
+    const apiResolvers = new ApiResolvers(this, "RestApi", {
       ...props,
       sessionsTable: chatTables.sessionsTable,
       byUserIdIndex: chatTables.byUserIdIndex,
@@ -95,10 +97,16 @@ export class ChatBotApi extends Construct {
       userFeedbackBucket: chatBuckets.userFeedbackBucket,
     });
 
+    this.resolvers.push(apiResolvers.appSyncLambdaResolver);
+
     const realtimeBackend = new RealtimeGraphqlApiBackend(this, "Realtime", {
       ...props,
       api,
+      logRetention: props.config.logRetention,
     });
+
+    this.resolvers.push(realtimeBackend.resolvers.sendQueryHandler);
+    this.resolvers.push(realtimeBackend.resolvers.outgoingMessageHandler);
 
     realtimeBackend.resolvers.outgoingMessageHandler.addEnvironment(
       "GRAPHQL_ENDPOINT",

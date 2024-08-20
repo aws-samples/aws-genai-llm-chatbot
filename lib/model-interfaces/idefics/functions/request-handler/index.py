@@ -21,7 +21,7 @@ logger = Logger()
 
 
 def handle_run(record):
-    print(record)
+    logger.info("Incoming request", record=record)
     user_id = record["userId"]
     data = record["data"]
     provider = data["provider"]

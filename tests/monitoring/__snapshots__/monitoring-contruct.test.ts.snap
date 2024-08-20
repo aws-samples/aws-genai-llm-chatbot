@@ -56,7 +56,11 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/AppSync","4XXError","GraphQLAPIId","graphqlApiId",{"label":"4XX Error (avg)"}],["AWS/AppSync","5XXError","GraphQLAPIId","graphqlApiId",{"label":"5XX Fault (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":7,"properties":{"markdown":"### Cognito [**UserPool**](https://",
+              "","metrics":[["AWS/AppSync","4XXError","GraphQLAPIId","graphqlApiId",{"label":"4XX Error (avg)"}],["AWS/AppSync","5XXError","GraphQLAPIId","graphqlApiId",{"label":"5XX Fault (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"log","width":24,"height":5,"x":0,"y":7,"properties":{"view":"table","title":"Resolvers Logs:","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","query":"SOURCE 'Test' | fields @timestamp, message, level, location, identify.claims.sub as cognito_user,  correlation_id\\n| filter ispresent(level)\\n| sort @timestamp desc\\n| limit 200"}},{"type":"text","width":24,"height":1,"x":0,"y":12,"properties":{"markdown":"### Cognito [**UserPool**](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -64,11 +68,11 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              ")"}},{"type":"metric","width":24,"height":5,"x":0,"y":8,"properties":{"view":"timeSeries","title":"SignIn","region":"",
+              ")"}},{"type":"metric","width":24,"height":5,"x":0,"y":13,"properties":{"view":"timeSeries","title":"SignIn","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/Cognito","SignInSuccesses","UserPool","userPoolId","UserPoolClient","clientId",{"stat":"Sum"}],["AWS/Cognito","FederationSuccesses","UserPool","userPoolId","UserPoolClient","clientId",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":13,"properties":{"markdown":"# Storage"}},{"type":"text","width":24,"height":1,"x":0,"y":14,"properties":{"markdown":"### Dynamo Table **[Table](https://",
+              "","metrics":[["AWS/Cognito","SignInSuccesses","UserPool","userPoolId","UserPoolClient","clientId",{"stat":"Sum"}],["AWS/Cognito","FederationSuccesses","UserPool","userPoolId","UserPoolClient","clientId",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":18,"properties":{"markdown":"# Storage"}},{"type":"text","width":24,"height":1,"x":0,"y":19,"properties":{"markdown":"### Dynamo Table **[Table](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -76,27 +80,27 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "#tables:selected=Name)**"}},{"type":"metric","width":6,"height":3,"x":0,"y":15,"properties":{"view":"timeSeries","title":"Read Usage","region":"",
+              "#tables:selected=Name)**"}},{"type":"metric","width":6,"height":3,"x":0,"y":20,"properties":{"view":"timeSeries","title":"Read Usage","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[[{"label":"Consumed","expression":"consumed_rcu_sum/PERIOD(consumed_rcu_sum)","id":"consumed_read_cap"}],["AWS/DynamoDB","ConsumedReadCapacityUnits","TableName","Name",{"stat":"Sum","visible":false,"id":"consumed_rcu_sum"}],["AWS/DynamoDB","ProvisionedReadCapacityUnits","TableName","Name",{"label":"Provisioned","id":"provisioned_read_cap"}],[{"label":"Utilization","expression":"100*(consumed_read_cap/provisioned_read_cap)","yAxis":"right"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false},"right":{"min":0,"max":100,"label":"%","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":6,"height":3,"x":0,"y":18,"properties":{"view":"timeSeries","title":"Write Usage","region":"",
+              "","metrics":[[{"label":"Consumed","expression":"consumed_rcu_sum/PERIOD(consumed_rcu_sum)","id":"consumed_read_cap"}],["AWS/DynamoDB","ConsumedReadCapacityUnits","TableName","Name",{"stat":"Sum","visible":false,"id":"consumed_rcu_sum"}],["AWS/DynamoDB","ProvisionedReadCapacityUnits","TableName","Name",{"label":"Provisioned","id":"provisioned_read_cap"}],[{"label":"Utilization","expression":"100*(consumed_read_cap/provisioned_read_cap)","yAxis":"right"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false},"right":{"min":0,"max":100,"label":"%","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":6,"height":3,"x":0,"y":23,"properties":{"view":"timeSeries","title":"Write Usage","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[[{"label":"Consumed","expression":"consumed_wcu_sum/PERIOD(consumed_wcu_sum)","id":"consumed_write_cap"}],["AWS/DynamoDB","ConsumedWriteCapacityUnits","TableName","Name",{"stat":"Sum","visible":false,"id":"consumed_wcu_sum"}],["AWS/DynamoDB","ProvisionedWriteCapacityUnits","TableName","Name",{"label":"Provisioned","id":"provisioned_write_cap"}],[{"label":"Utilization","expression":"100*(consumed_write_cap/provisioned_write_cap)","yAxis":"right"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false},"right":{"min":0,"max":100,"label":"%","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":9,"height":6,"x":6,"y":15,"properties":{"view":"timeSeries","title":"Latency (Average)","region":"",
+              "","metrics":[[{"label":"Consumed","expression":"consumed_wcu_sum/PERIOD(consumed_wcu_sum)","id":"consumed_write_cap"}],["AWS/DynamoDB","ConsumedWriteCapacityUnits","TableName","Name",{"stat":"Sum","visible":false,"id":"consumed_wcu_sum"}],["AWS/DynamoDB","ProvisionedWriteCapacityUnits","TableName","Name",{"label":"Provisioned","id":"provisioned_write_cap"}],[{"label":"Utilization","expression":"100*(consumed_write_cap/provisioned_write_cap)","yAxis":"right"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false},"right":{"min":0,"max":100,"label":"%","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":9,"height":6,"x":6,"y":20,"properties":{"view":"timeSeries","title":"Latency (Average)","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[[{"label":" ","expression":"SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\\"Name\\" MetricName=\\"SuccessfulRequestLatency\\"', 'Average', 300)"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":3,"height":6,"x":15,"y":15,"properties":{"view":"timeSeries","title":"Throttles","region":"",
+              "","metrics":[[{"label":" ","expression":"SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\\"Name\\" MetricName=\\"SuccessfulRequestLatency\\"', 'Average', 300)"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}},"legend":{"position":"right"}}},{"type":"metric","width":3,"height":6,"x":15,"y":20,"properties":{"view":"timeSeries","title":"Throttles","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[[{"label":"Read","expression":"FILL(readThrottles,0)"}],["AWS/DynamoDB","ReadThrottleEvents","TableName","Name",{"label":"Read","stat":"Sum","visible":false,"id":"readThrottles"}],[{"label":"Write","expression":"FILL(writeThrottles,0)"}],["AWS/DynamoDB","WriteThrottleEvents","TableName","Name",{"label":"Write","stat":"Sum","visible":false,"id":"writeThrottles"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":6,"x":18,"y":15,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              "","metrics":[[{"label":"Read","expression":"FILL(readThrottles,0)"}],["AWS/DynamoDB","ReadThrottleEvents","TableName","Name",{"label":"Read","stat":"Sum","visible":false,"id":"readThrottles"}],[{"label":"Write","expression":"FILL(writeThrottles,0)"}],["AWS/DynamoDB","WriteThrottleEvents","TableName","Name",{"label":"Write","stat":"Sum","visible":false,"id":"writeThrottles"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":6,"x":18,"y":20,"properties":{"view":"timeSeries","title":"Errors","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[[{"label":"System Errors","expression":"systemErrorGetItem+systemErrorBatchGetItem+systemErrorScan+systemErrorQuery+systemErrorGetRecords+systemErrorPutItem+systemErrorDeleteItem+systemErrorUpdateItem+systemErrorBatchWriteItem"}],["AWS/DynamoDB","SystemErrors","Operation","GetItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorGetItem"}],["AWS/DynamoDB","SystemErrors","Operation","BatchGetItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorBatchGetItem"}],["AWS/DynamoDB","SystemErrors","Operation","Scan","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorScan"}],["AWS/DynamoDB","SystemErrors","Operation","Query","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorQuery"}],["AWS/DynamoDB","SystemErrors","Operation","GetRecords","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorGetRecords"}],["AWS/DynamoDB","SystemErrors","Operation","PutItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorPutItem"}],["AWS/DynamoDB","SystemErrors","Operation","DeleteItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorDeleteItem"}],["AWS/DynamoDB","SystemErrors","Operation","UpdateItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorUpdateItem"}],["AWS/DynamoDB","SystemErrors","Operation","BatchWriteItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorBatchWriteItem"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":21,"properties":{"markdown":"### S3 Bucket **[Bucket](https://s3.console.aws.amazon.com/s3/buckets/",
+              "","metrics":[[{"label":"System Errors","expression":"systemErrorGetItem+systemErrorBatchGetItem+systemErrorScan+systemErrorQuery+systemErrorGetRecords+systemErrorPutItem+systemErrorDeleteItem+systemErrorUpdateItem+systemErrorBatchWriteItem"}],["AWS/DynamoDB","SystemErrors","Operation","GetItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorGetItem"}],["AWS/DynamoDB","SystemErrors","Operation","BatchGetItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorBatchGetItem"}],["AWS/DynamoDB","SystemErrors","Operation","Scan","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorScan"}],["AWS/DynamoDB","SystemErrors","Operation","Query","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorQuery"}],["AWS/DynamoDB","SystemErrors","Operation","GetRecords","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorGetRecords"}],["AWS/DynamoDB","SystemErrors","Operation","PutItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorPutItem"}],["AWS/DynamoDB","SystemErrors","Operation","DeleteItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorDeleteItem"}],["AWS/DynamoDB","SystemErrors","Operation","UpdateItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorUpdateItem"}],["AWS/DynamoDB","SystemErrors","Operation","BatchWriteItem","TableName","Name",{"stat":"Sum","visible":false,"id":"systemErrorBatchWriteItem"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":26,"properties":{"markdown":"### S3 Bucket **[Bucket](https://s3.console.aws.amazon.com/s3/buckets/",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -104,7 +108,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "&tab=metrics)**"}},{"type":"metric","width":12,"height":5,"x":0,"y":22,"properties":{"view":"timeSeries","title":"Bucket Size","region":"",
+              "&tab=metrics)**"}},{"type":"metric","width":12,"height":5,"x":0,"y":27,"properties":{"view":"timeSeries","title":"Bucket Size","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -112,7 +116,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","StorageType","StandardStorage",{"label":"BucketSizeBytes"}]],"yAxis":{"left":{"min":0,"label":"bytes","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":12,"y":22,"properties":{"view":"timeSeries","title":"Object Count","region":"",
+              "","StorageType","StandardStorage",{"label":"BucketSizeBytes"}]],"yAxis":{"left":{"min":0,"label":"bytes","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":12,"y":27,"properties":{"view":"timeSeries","title":"Object Count","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -120,7 +124,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","StorageType","AllStorageTypes",{"label":"NumberOfObjects"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":27,"properties":{"markdown":"### Aurora Cluster **[Cluster](https://",
+              "","StorageType","AllStorageTypes",{"label":"NumberOfObjects"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":32,"properties":{"markdown":"### Aurora Cluster **[Cluster](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -128,23 +132,23 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "#database:id=clusterIdentifier;is-cluster=true;tab=monitoring)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":28,"properties":{"view":"timeSeries","title":"CPU Usage","region":"",
+              "#database:id=clusterIdentifier;is-cluster=true;tab=monitoring)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":33,"properties":{"view":"timeSeries","title":"CPU Usage","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/RDS","CPUUtilization","DBClusterIdentifier","clusterIdentifier",{"label":"CPU Usage"}]],"yAxis":{"left":{"min":0,"max":100,"label":"%","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":28,"properties":{"view":"timeSeries","title":"Connections","region":"",
+              "","metrics":[["AWS/RDS","CPUUtilization","DBClusterIdentifier","clusterIdentifier",{"label":"CPU Usage"}]],"yAxis":{"left":{"min":0,"max":100,"label":"%","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":33,"properties":{"view":"timeSeries","title":"Connections","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/RDS","DatabaseConnections","DBClusterIdentifier","clusterIdentifier",{"label":"Connections"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":12,"y":28,"properties":{"view":"timeSeries","title":"Query Duration","region":"",
+              "","metrics":[["AWS/RDS","DatabaseConnections","DBClusterIdentifier","clusterIdentifier",{"label":"Connections"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":12,"y":33,"properties":{"view":"timeSeries","title":"Query Duration","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/RDS","SelectLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Select","stat":"p90"}],["AWS/RDS","InsertLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Insert","stat":"p90"}],["AWS/RDS","UpdateLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Update","stat":"p90"}],["AWS/RDS","DeleteLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Delete","stat":"p90"}],["AWS/RDS","CommitLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Commit","stat":"p90"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":0,"y":33,"properties":{"view":"timeSeries","title":"Serverless Database Capacity","region":"",
+              "","metrics":[["AWS/RDS","SelectLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Select","stat":"p90"}],["AWS/RDS","InsertLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Insert","stat":"p90"}],["AWS/RDS","UpdateLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Update","stat":"p90"}],["AWS/RDS","DeleteLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Delete","stat":"p90"}],["AWS/RDS","CommitLatency","DBClusterIdentifier","clusterIdentifier",{"label":"Commit","stat":"p90"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":0,"y":38,"properties":{"view":"timeSeries","title":"Serverless Database Capacity","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/RDS","ServerlessDatabaseCapacity","DBClusterIdentifier","clusterIdentifier",{"label":"Serverless Database Capacity"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":38,"properties":{"markdown":"### OpenSearch [**Collection**](https://",
+              "","metrics":[["AWS/RDS","ServerlessDatabaseCapacity","DBClusterIdentifier","clusterIdentifier",{"label":"Serverless Database Capacity"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"text","width":24,"height":1,"x":0,"y":43,"properties":{"markdown":"### OpenSearch [**Collection**](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -152,7 +156,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "#opensearch/collections/name)"}},{"type":"metric","width":12,"height":5,"x":0,"y":39,"properties":{"view":"timeSeries","title":"Search","region":"",
+              "#opensearch/collections/name)"}},{"type":"metric","width":12,"height":5,"x":0,"y":44,"properties":{"view":"timeSeries","title":"Search","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -172,7 +176,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "Collection",
               },
-              "","CollectionName","name",{"yAxis":"right"}]],"yAxis":{}}},{"type":"metric","width":12,"height":5,"x":12,"y":39,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              "","CollectionName","name",{"yAxis":"right"}]],"yAxis":{}}},{"type":"metric","width":12,"height":5,"x":12,"y":44,"properties":{"view":"timeSeries","title":"Errors","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -192,7 +196,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "Collection",
               },
-              "","CollectionName","name",{"stat":"Sum"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":44,"properties":{"markdown":"### Kendra [**Index**](https://",
+              "","CollectionName","name",{"stat":"Sum"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":49,"properties":{"markdown":"### Kendra [**Index**](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -204,7 +208,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "Index",
               },
-              ")"}},{"type":"metric","width":24,"height":5,"x":0,"y":45,"properties":{"view":"timeSeries","title":"Search","region":"",
+              ")"}},{"type":"metric","width":24,"height":5,"x":0,"y":50,"properties":{"view":"timeSeries","title":"Search","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -216,7 +220,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "Index",
               },
-              "",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":50,"properties":{"markdown":"# Requests Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":51,"properties":{"markdown":"# RAG Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":52,"properties":{"markdown":"### State Machine **[StateMachine](https://",
+              "",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":55,"properties":{"markdown":"# Requests Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":56,"properties":{"markdown":"# RAG Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":57,"properties":{"markdown":"### State Machine **[StateMachine](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -236,7 +240,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":53,"properties":{"view":"timeSeries","title":"Duration","region":"",
+              ":stateMachine:Name)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":58,"properties":{"view":"timeSeries","title":"Duration","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -276,7 +280,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":6,"y":53,"properties":{"view":"timeSeries","title":"Executions","region":"",
+              ":stateMachine:Name",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":6,"y":58,"properties":{"view":"timeSeries","title":"Executions","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -352,7 +356,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Timeout","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":53,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              ":stateMachine:Name",{"label":"Timeout","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":58,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -368,7 +372,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Failed (avg)"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":58,"properties":{"markdown":"### Lambda Function **[Function](https://",
+              ":stateMachine:Name",{"label":"Failed (avg)"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":63,"properties":{"markdown":"### Lambda Function **[Function](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -407,7 +411,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              ")**"}},{"type":"metric","width":6,"height":5,"x":0,"y":59,"properties":{"view":"timeSeries","title":"TPS","region":"",
+              ")**"}},{"type":"metric","width":6,"height":5,"x":0,"y":64,"properties":{"view":"timeSeries","title":"TPS","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -442,7 +446,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Invocations","stat":"Sum","visible":false,"id":"requests"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":59,"properties":{"view":"timeSeries","title":"Latency","region":"",
+              "",{"label":"Invocations","stat":"Sum","visible":false,"id":"requests"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":64,"properties":{"view":"timeSeries","title":"Latency","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -539,7 +543,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"P99 (avg: \${AVG})","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":59,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              "",{"label":"P99 (avg: \${AVG})","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":64,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -574,7 +578,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Faults (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":59,"properties":{"view":"timeSeries","title":"Rates","region":"",
+              "",{"label":"Faults (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":64,"properties":{"view":"timeSeries","title":"Rates","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -640,7 +644,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Provisioned Concurrency Spillovers (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":0,"y":64,"properties":{"view":"timeSeries","title":"Invocations","region":"",
+              "",{"label":"Provisioned Concurrency Spillovers (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":0,"y":69,"properties":{"view":"timeSeries","title":"Invocations","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -768,7 +772,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Provisioned Concurrency Spillovers","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":8,"y":64,"properties":{"view":"timeSeries","title":"Iterator","region":"",
+              "",{"label":"Provisioned Concurrency Spillovers","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":8,"y":69,"properties":{"view":"timeSeries","title":"Iterator","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -803,7 +807,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Iterator Age","stat":"Maximum"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":16,"y":64,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              "",{"label":"Iterator Age","stat":"Maximum"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":16,"y":69,"properties":{"view":"timeSeries","title":"Errors","region":"",
               {
                 "Ref": "AWS::Region",
               },
