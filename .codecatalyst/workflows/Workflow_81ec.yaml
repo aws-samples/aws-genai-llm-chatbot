@@ -1,0 +1,29 @@
+Name: Workflow_81ec
+SchemaVersion: "1.0"
+
+# Optional - Set automatic triggers.
+Triggers:
+  - Type: Push
+    Branches:
+      - feat_appsync
+
+# Required - Define action configurations.
+Actions:
+  AWSCDKDeploy_46:
+    # Identifies the action. Do not modify this value.
+    Identifier: aws/cdk-deploy@v1.0.13
+    # Required; You can use an environment, AWS account connection, and role to access AWS resources.
+    Environment:
+      Connections:
+        - Role: quokka-web-app-dphgs
+          Name: codeaws-prod-acc
+      Name: Dev
+    # Specifies the source and/or artifacts to pass to the action as input.
+    Inputs:
+      # Optional
+      Sources:
+        - WorkflowSource # This specifies that the action requires this Workflow as a source
+    Compute:
+      Type: EC2 # Defines the action's properties.
+    Configuration:
+      StackName: GenAI

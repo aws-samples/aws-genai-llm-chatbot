@@ -2,9 +2,7 @@ import os
 from enum import Enum
 from aws_lambda_powertools import Logger
 from typing import Optional, Iterator
-import boto3
-from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
-from genai_core.types import ChatbotMode
+from genai_core.langchain import DynamoDBChatMessageHistory
 from pydantic import BaseModel
 from abc import abstractmethod
 
@@ -30,11 +28,9 @@ class AgentAdapter(BaseModel):
         )
 
     def run(self, prompt: str) -> Iterator[str]:
-
         return self._invoke_agent(
             prompt=prompt,
-            )
-        
+        )
+
     @abstractmethod
-    def _invoke_agent(self, prompt: str, session_id: str) -> Iterator[str]:
-        ...
+    def _invoke_agent(self, prompt: str, session_id: str) -> Iterator[str]: ...

@@ -42,7 +42,10 @@ def get_current_weather(
         Text=place,
     )
     [lon, lat] = resp["Results"][0]["Place"]["Geometry"]["Point"]
-    q = "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,precipitation"
+    q = (
+        "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+        + "&current=temperature_2m,precipitation"
+    )
     w = requests.get(q.format(lat=lat, lon=lon)).json()
 
     return Weather(
@@ -54,19 +57,22 @@ def get_current_weather(
 
 @app.get(
     "/absolute_period_dates",
-    description="get the absolute start and end date for a period in YYYY-MM-DD format given the number of day difference from the today",
+    description="get the absolute start and end date for a period in YYYY-MM-DD"
+    + " format given the number of day difference from the today",
 )
 def get_absolute_period_dates(
     startPeriodDeltaDays: Annotated[
         int,
         Query(
-            description="the difference in days from the today to the start date of the period"
+            description="the difference in days from the today"
+            + " to the start date of the period"
         ),
     ],
     endPeriodDeltaDays: Annotated[
         int,
         Query(
-            description="the difference in days from the today to the end date of the period"
+            description="the difference in days from the today"
+            + " to the end date of the period"
         ),
     ],
 ) -> Period:
@@ -79,7 +85,8 @@ def get_absolute_period_dates(
 
 @app.get(
     "/historical_weather",
-    description="get the historical daily mean temperature and precipitation for a given place for a range of dates",
+    description="get the historical daily mean temperature and precipitation"
+    + " for a given place for a range of dates",
 )
 def get_historical_weather(
     place: Annotated[str, Query(description="the name of the place")],
@@ -93,7 +100,10 @@ def get_historical_weather(
         Text=place,
     )
     [lon, lat] = resp["Results"][0]["Place"]["Geometry"]["Point"]
-    q = "https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={fromDate}&end_date={toDate}&hourly=temperature_2m,precipitation"
+    q = (
+        "https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}"
+        + "&start_date={fromDate}&end_date={toDate}&hourly=temperature_2m,precipitation"
+    )
     resp = requests.get(
         q.format(lat=lat, lon=lon, fromDate=fromDate, toDate=toDate)
     ).json()

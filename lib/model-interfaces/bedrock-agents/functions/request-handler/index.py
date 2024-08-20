@@ -2,7 +2,6 @@ import os
 import json
 import uuid
 from datetime import datetime
-from adapters.registry import registry
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
@@ -39,7 +38,12 @@ def handle_run(record):
     # get the adapter from the registry
 
     # create an agent adapter to invoke a Bedrock Agent using agentId and agentAliasId
-    agent = BedrockAgent(agent_id=agent_id, user_id=user_id, session_id=session_id, region_name=config.get("bedrock", {}).get("region", AWS_REGION))
+    agent = BedrockAgent(
+        agent_id=agent_id,
+        user_id=user_id,
+        session_id=session_id,
+        region_name=config.get("bedrock", {}).get("region", AWS_REGION),
+    )
     # call the agent
     response = agent.run(
         prompt,
@@ -49,7 +53,8 @@ def handle_run(record):
     sequence_number = 0
     run_id = str(uuid.uuid4())
     for r in response:
-        # this is specific to Bedrock agents, would need a way to generalize it if we are to introduce other agents
+        # this is specific to Bedrock agents, would need a way to generalize
+        # it if we are to introduce other agents
         if "chunk" in list(r.keys()):
             send_to_client(
                 {
@@ -60,7 +65,9 @@ def handle_run(record):
                     "data": {
                         "sessionId": session_id,
                         "type": "text",
-                        "content": AgentInputOutputAdapter.prepare_agent_answer(r["chunk"]),
+                        "content": AgentInputOutputAdapter.prepare_agent_answer(
+                            r["chunk"]
+                        ),
                         "metadata": {
                             "modelId": agent_id,
                             "modelKwargs": None,
@@ -68,9 +75,9 @@ def handle_run(record):
                             "sessionId": session_id,
                             "userId": user_id,
                             "documents": [],
-                            "prompts": [prompt]
-                        }
-                    }
+                            "prompts": [prompt],
+                        },
+                    },
                 }
             )
         if "trace" in list(r.keys()):
@@ -90,13 +97,11 @@ def handle_run(record):
                             "modelId": agent_id,
                             "modelKwargs": None,
                             "mode": "agent",
-                        }
-                    }
+                        },
+                    },
                 }
             )
             sequence_number += 1
-
-    
 
 
 @tracer.capture_method
@@ -109,12 +114,12 @@ def record_handler(record: SQSRecord):
     if detail["action"] == ChatbotAction.RUN.value:
         handle_run(detail)
     elif detail["action"] == ChatbotAction.HEARTBEAT.value:
-        handle_heartbeat(detail)
+        pass
 
 
 def handle_failed_records(records):
     for triplet in records:
-        status, error, record = triplet
+        _, error, record = triplet
         payload: str = record.body
         message: dict = json.loads(payload)
         detail: dict = json.loads(message["Message"])
@@ -143,10 +148,6 @@ def handle_failed_records(records):
 @tracer.capture_lambda_handler
 def handler(event, context: LambdaContext):
     batch = event["Records"]
-
-    # api_keys = parameters.get_secret(API_KEYS_SECRETS_ARN, transform="json")
-    # for key in api_keys:
-    #     os.environ[key] = api_keys[key]
 
     try:
         with processor(records=batch, handler=record_handler):

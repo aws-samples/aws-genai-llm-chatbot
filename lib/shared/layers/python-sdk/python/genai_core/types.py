@@ -57,6 +57,7 @@ class ModelStatus(Enum):
     ACTIVE = "ACTIVE"
     LEGACY = "LEGACY"
 
+
 class AgentStatus(Enum):
     PREPARED = "PREPARED"
 

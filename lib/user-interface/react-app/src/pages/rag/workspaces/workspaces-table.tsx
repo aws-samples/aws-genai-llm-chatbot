@@ -84,13 +84,15 @@ export default function WorkspacesTable() {
 
   return (
     <>
-      {globalError && <Alert
-        statusIconAriaLabel="Error"
-        type="error"
-        header="Unable to load the workspaces."
-      >
-        {globalError}
-      </Alert>}
+      {globalError && (
+        <Alert
+          statusIconAriaLabel="Error"
+          type="error"
+          header="Unable to load the workspaces."
+        >
+          {globalError}
+        </Alert>
+      )}
       <Table
         {...collectionProps}
         items={items}
@@ -107,9 +109,9 @@ export default function WorkspacesTable() {
               loading
                 ? undefined
                 : TextHelper.getHeaderCounterText(
-                  workspaces,
-                  collectionProps.selectedItems
-                )
+                    workspaces,
+                    collectionProps.selectedItems
+                  )
             }
           />
         }

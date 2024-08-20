@@ -103,13 +103,15 @@ export default function Models() {
       }
       content={
         <>
-          {globalError && <Alert
-            statusIconAriaLabel="Error"
-            type="error"
-            header="Unable to load the models."
-          >
-            {globalError}
-          </Alert>}
+          {globalError && (
+            <Alert
+              statusIconAriaLabel="Error"
+              type="error"
+              header="Unable to load the models."
+            >
+              {globalError}
+            </Alert>
+          )}
           <Table
             {...collectionProps}
             items={items}

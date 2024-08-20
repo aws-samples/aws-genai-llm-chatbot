@@ -21,5 +21,6 @@ class AdapterRegistry:
                 return adapter
         # If no match is found, returns None
         raise ValueError(
-            f"Adapter for model {agent_id} not found in registry. Available adapters: {self.registry}"
+            f"Adapter for model {agent_id} not found in registry."
+            + " Available adapters: {self.registry}"
         )

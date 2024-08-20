@@ -201,10 +201,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "start_date",
-          "end_date"
-        ],
+        "required": ["start_date", "end_date"],
         "title": "Period"
       },
       "ValidationError": {
@@ -233,11 +230,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       },
       "Weather": {
@@ -256,11 +249,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "time",
-          "temperature",
-          "precipitation"
-        ],
+        "required": ["time", "temperature", "precipitation"],
         "title": "Weather"
       }
     }

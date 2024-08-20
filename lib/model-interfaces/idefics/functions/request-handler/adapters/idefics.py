@@ -14,7 +14,6 @@ class Idefics(MultiModalModelBase):
         self.model_id = model_id
 
     def format_prompt(self, prompt: str, messages: list, files: list) -> str:
-
         human_prompt_template = "User:{prompt}"
         human_prompt_with_image = "User:{prompt}![]({image})"
         ai_prompt_template = "Assistant:{prompt}"

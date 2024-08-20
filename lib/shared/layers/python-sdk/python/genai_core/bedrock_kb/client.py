@@ -6,7 +6,6 @@ sts_client = boto3.client("sts")
 
 
 def get_kb_runtime_client_for_id(knowledge_base_id: str):
-
     config = genai_core.parameters.get_config()
     kb_config = config.get("rag", {}).get("engines", {}).get("knowledgeBase", {})
     external = kb_config.get("external", [])

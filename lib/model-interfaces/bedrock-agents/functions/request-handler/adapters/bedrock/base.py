@@ -1,6 +1,6 @@
 from abc import ABC
-from typing import Any, Dict, Iterator, List, Optional
-from pydantic import BaseModel, root_validator, Extra
+from typing import Any, Dict, Iterator, Optional
+from pydantic import root_validator, Extra
 from ..base import AgentAdapter
 
 
@@ -12,9 +12,7 @@ class AgentInputOutputAdapter:
     the generated text from the model response."""
 
     @classmethod
-    def prepare_output_stream(
-        cls, response: Any
-    ) -> Iterator[str]:
+    def prepare_output_stream(cls, response: Any) -> Iterator[str]:
         stream = response.get("completion")
 
         if stream is None:
@@ -27,11 +25,8 @@ class AgentInputOutputAdapter:
             yield chunk["bytes"].decode("utf8")
 
     @classmethod
-    def prepare_agent_answer(
-        cls, chunk: Any
-    ) -> str:
-       
-       return chunk["bytes"].decode("utf8")
+    def prepare_agent_answer(cls, chunk: Any) -> str:
+        return chunk["bytes"].decode("utf8")
 
 
 class BedrockAgent(AgentAdapter, ABC):
@@ -57,7 +52,7 @@ class BedrockAgent(AgentAdapter, ABC):
 
     agent_alias_id: str = "TSTALIASID"
     """The alias id for the agent. Defaults to the draft version."""
-    
+
     @property
     def _llm_type(self) -> str:
         """Return type of llm."""
@@ -111,7 +106,7 @@ class BedrockAgent(AgentAdapter, ABC):
     ) -> Iterator[str]:
         try:
             response = self.client.invoke_agent(
-                enableTrace = True,
+                enableTrace=True,
                 inputText=prompt,
                 agentId=self.agent_id,
                 agentAliasId=self.agent_alias_id,
@@ -122,6 +117,6 @@ class BedrockAgent(AgentAdapter, ABC):
 
         for event in response["completion"]:
             yield event
-        
+
         # for chunk in AgentInputOutputAdapter.prepare_output_stream(response):
         #     yield chunk

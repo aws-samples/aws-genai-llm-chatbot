@@ -1,0 +1,84 @@
+{
+  "prefix": "",
+  "privateWebsite": false,
+  "certificate": "",
+  "domain": "",
+  "bedrock": {
+    "enabled": true,
+    "region": "us-east-1"
+  },
+  "llms": {
+    "sagemaker": []
+  },
+  "rag": {
+    "enabled": true,
+    "engines": {
+      "aurora": {
+        "enabled": true
+      },
+      "opensearch": {
+        "enabled": true
+      },
+      "kendra": {
+        "enabled": true,
+        "createIndex": true,
+        "external": [
+          {
+            "enabled": true,
+            "name": "proto",
+            "kendraId": "2e847295-f40c-46c4-9948-001c23eee36d",
+            "region": "eu-west-1"
+          }
+        ],
+        "enterprise": false
+      },
+      "knowledgeBase": {
+        "enabled": true,
+        "external": [
+          {
+            "enabled": true,
+            "name": "Weather",
+            "knowledgeBaseId": "WHI7GHERR8",
+            "region": "us-west-2"
+          },
+          {
+            "enabled": true,
+            "name": "Climate",
+            "knowledgeBaseId": "JCXAYD6AZA",
+            "region": "us-east-1"
+          }
+        ]
+      }
+    },
+    "embeddingsModels": [
+      {
+        "provider": "sagemaker",
+        "name": "intfloat/multilingual-e5-large",
+        "dimensions": 1024,
+        "default": true
+      },
+      {
+        "provider": "sagemaker",
+        "name": "sentence-transformers/all-MiniLM-L6-v2",
+        "dimensions": 384
+      },
+      {
+        "provider": "bedrock",
+        "name": "amazon.titan-embed-text-v1",
+        "dimensions": 1536
+      },
+      {
+        "provider": "openai",
+        "name": "text-embedding-ada-002",
+        "dimensions": 1536
+      }
+    ],
+    "crossEncoderModels": [
+      {
+        "provider": "sagemaker",
+        "name": "cross-encoder/ms-marco-MiniLM-L-12-v2",
+        "default": true
+      }
+    ]
+  }
+}
