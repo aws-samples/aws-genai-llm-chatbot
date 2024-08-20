@@ -122,3 +122,32 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
                 "chunkOverlap": 200,
             }
         )
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.start_kendra_data_sync("id")
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.is_kendra_data_synching("id")
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.list_kendra_indexes()
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.list_documents(
+            input={
+                "workspaceId": "id",
+                "documentType": "file",
+            }
+        )
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.add_file(
+            input={
+                "workspaceId": "id",
+                "fileName": "file.txt",
+            }
+        )
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.create_kendra_workspace(
+            input={
+                "name": "workspace1",
+                "kind": "kendra",
+                "kendraIndexId": "kendra-id-1",
+                "useAllData": True,
+            }
+        )
