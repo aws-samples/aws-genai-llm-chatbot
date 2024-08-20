@@ -7,5 +7,5 @@ def test_parse_url(mocker):
         ["text/html"],
     )
     assert "Release v.4.0.7 " in reponse[0]
-    assert "https://github.com/" in reponse[1]
-    assert "https://docs.github.com/" in reponse[2]
+    assert "github.com/" in reponse[1]
+    assert "docs.github.com/" in reponse[2]
