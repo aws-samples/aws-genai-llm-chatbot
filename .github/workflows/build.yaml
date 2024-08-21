@@ -29,7 +29,7 @@ jobs:
         run: |
           pip install -r pytest_requirements.txt
           flake8 .
-          bandit -r .
+          bandit -c bandit.yaml -r .
           pip-audit -r pytest_requirements.txt || true 
           pip-audit -r lib/shared/web-crawler-batch-job/requirements.txt || true 
           pip-audit -r lib/shared/file-import-batch-job/requirements.txt || true 

@@ -13,7 +13,8 @@ def get_image_message(
     file: dict,
 ):
     img = requests.get(
-        f"{urljoin(os.environ['CHATBOT_FILES_PRIVATE_API'], file['key'])}"
+        f"{urljoin(os.environ['CHATBOT_FILES_PRIVATE_API'], file['key'])}",
+        timeout=15,  # seconds
     ).content
     return {
         "type": "image",

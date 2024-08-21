@@ -146,7 +146,9 @@ def _generate_embeddings_sagemaker(model: EmbeddingsModel, input: List[str]):
                 or error_code == "InternalServerError"
             ):
                 print(f"Attempt {attempt + 1} failed with a 500 error.")
-                time.sleep(random.uniform(0.3, 1.5))
+                time.sleep(
+                    random.uniform(0.3, 1.5)
+                )  # nosec B311 Random value not used for cyptographic purposes
                 continue
             else:
                 # If the exception was due to another reason, raise it.
