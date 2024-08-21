@@ -1,11 +1,13 @@
 import os
 import uuid
+from aws_lambda_powertools import Logger
 import boto3
 import json
 from datetime import datetime
 
 dynamodb = boto3.resource("dynamodb")
 s3_client = boto3.client("s3")
+logger = Logger()
 
 USER_FEEDBACK_BUCKET_NAME = os.environ.get("USER_FEEDBACK_BUCKET_NAME")
 
@@ -42,6 +44,6 @@ def add_user_feedback(
         ContentType="application/json",
         StorageClass="STANDARD_IA",
     )
-    print(response)
+    logger.info("Response for add_user_feedback", response=response)
 
     return {"feedback_id": feedbackId}

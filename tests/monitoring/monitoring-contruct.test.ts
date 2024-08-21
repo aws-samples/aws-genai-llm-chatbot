@@ -11,6 +11,7 @@ import { CfnIndex } from "aws-cdk-lib/aws-kendra";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Function } from "aws-cdk-lib/aws-lambda";
 import { StateMachine } from "aws-cdk-lib/aws-stepfunctions";
+import { LogGroup } from "aws-cdk-lib/aws-logs";
 
 jest.spyOn(console, "log").mockImplementation(() => {});
 
@@ -29,9 +30,11 @@ new Queue(stack, "Queue", {
 });
 
 new Monitoring(stack, "Monitoring", {
+  prefix: "",
   appsycnApi: GraphqlApi.fromGraphqlApiAttributes(stack, "GraphQL", {
     graphqlApiId: "graphqlApiId",
   }),
+  appsyncResolversLogGroups: [LogGroup.fromLogGroupName(stack, "Test", "Test")],
   cognito: { userPoolId: "userPoolId", clientId: "clientId" },
   tables: [Table.fromTableName(stack, "Table", "Name")],
   sqs: [],

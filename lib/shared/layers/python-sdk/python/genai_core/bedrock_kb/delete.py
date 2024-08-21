@@ -1,4 +1,5 @@
 import os
+from aws_lambda_powertools import Logger
 import boto3
 
 WORKSPACES_TABLE_NAME = os.environ["WORKSPACES_TABLE_NAME"]
@@ -8,6 +9,7 @@ DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 WORKSPACE_OBJECT_TYPE = "workspace"
 
 dynamodb = boto3.resource("dynamodb")
+logger = Logger()
 
 
 def delete_workspace(workspace: dict):
@@ -19,4 +21,4 @@ def delete_workspace(workspace: dict):
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
     )
 
-    print(f"Delete Item succeeded: {response}")
+    logger.info(f"Delete Item succeeded: {response}")

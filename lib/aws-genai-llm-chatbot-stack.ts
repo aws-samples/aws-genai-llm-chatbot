@@ -15,6 +15,7 @@ import { BedrockWeatherAgent } from "./agents";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { NagSuppressions } from "cdk-nag";
+import { LogGroup } from "aws-cdk-lib/aws-logs";
 
 export interface AwsGenAILLMChatbotStackProps extends cdk.StackProps {
   readonly config: SystemConfig;
@@ -196,7 +197,15 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
 
     const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
     new Monitoring(monitoringStack, "Monitoring", {
+      prefix: props.config.prefix,
       appsycnApi: chatBotApi.graphqlApi,
+      appsyncResolversLogGroups: chatBotApi.resolvers.map((r) => {
+        return LogGroup.fromLogGroupName(
+          monitoringStack,
+          "Log" + r.node.id,
+          "/aws/lambda/" + r.functionName
+        );
+      }),
       cognito: {
         userPoolId: authentication.userPool.userPoolId,
         clientId: authentication.userPoolClient.userPoolClientId,
@@ -254,8 +263,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
-        `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/ChatbotApi/proxyResolverFunction/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/ChatBotApi/ChatbotApi/realtimeResolverFunction/ServiceRole/DefaultPolicy/Resource`,
@@ -268,6 +276,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/Resource`,
         `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
         `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
+        ...(langchainInterface
+          ? [
+              `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
+              `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+            ]
+          : []),
       ],
       [
         {
@@ -339,8 +353,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           `/${this.stackName}/RagEngines/Workspaces/DeleteDocument/DeleteDocumentFunction/ServiceRole/Resource`,
           `/${this.stackName}/RagEngines/Workspaces/DeleteDocument/DeleteDocumentFunction/ServiceRole/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/Workspaces/DeleteDocument/DeleteDocument/Role/DefaultPolicy/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
-          `/${this.stackName}/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerManagedEc2EcsComputeEnvironment/InstanceProfileRole/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource`,
           `/${this.stackName}/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource`,
           `/${this.stackName}/RagEngines/DataImport/RssSubscription/RssIngestor/ServiceRole/Resource`,

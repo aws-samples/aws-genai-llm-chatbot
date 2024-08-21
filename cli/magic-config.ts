@@ -203,6 +203,7 @@ const embeddingModels = [
       // Advanced settings
 
       options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
+      options.logRetention = config.logRetention;
       options.privateWebsite = config.privateWebsite;
       options.certificate = config.certificate;
       options.domain = config.domain;
@@ -257,6 +258,12 @@ async function processCreateOptions(options: any): Promise<void> {
       message: "Prefix to differentiate this deployment",
       initial: options.prefix,
       askAnswered: false,
+      validate(value: string) {
+        const regex = /^[a-zA-Z0-9-]{0,10}$/;
+        return regex.test(value)
+          ? true
+          : "Only letters, numbers, and dashes are allowed. The max length is 10 characters.";
+      },
     },
     {
       type: "confirm",
@@ -827,6 +834,24 @@ async function processCreateOptions(options: any): Promise<void> {
 
   const advancedSettingsPrompts = [
     {
+      type: "input",
+      name: "logRetention",
+      message: "For how long do you want to store the logs (in days)?",
+      initial: options.logRetention ? String(options.logRetention) : "7",
+      validate(value: string) {
+        // https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-logs-loggroup.html#cfn-logs-loggroup-retentionindays
+        const allowed = [
+          1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096,
+          1827, 2192, 2557, 2922, 3288, 3653,
+        ];
+        if (allowed.includes(Number(value))) {
+          return true;
+        } else {
+          return "Allowed values are: " + allowed.join(", ");
+        }
+      },
+    },
+    {
       type: "confirm",
       name: "createVpcEndpoints",
       message: "Do you want create VPC Endpoints?",
@@ -1105,6 +1130,9 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     privateWebsite: advancedSettings.privateWebsite,
+    logRetention: advancedSettings.logRetention
+      ? Number(advancedSettings.logRetention)
+      : undefined,
     certificate: advancedSettings.certificate,
     domain: advancedSettings.domain,
     cognitoFederation: advancedSettings.cognitoFederationEnabled

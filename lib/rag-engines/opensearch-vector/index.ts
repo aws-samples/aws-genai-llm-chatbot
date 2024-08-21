@@ -157,7 +157,7 @@ export class OpenSearchVector extends Construct {
     permission: string[]
   ) {
     new oss.CfnAccessPolicy(this, `AccessPolicy-${name}`, {
-      name: Utils.getName(config, `access-policy-${name}`, 32),
+      name: Utils.getName(config, `${name}-access-policy`, 32),
       type: "data",
       policy: JSON.stringify([
         {

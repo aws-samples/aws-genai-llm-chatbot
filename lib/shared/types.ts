@@ -77,6 +77,7 @@ export interface SystemConfig {
     createVpcEndpoints?: boolean;
     vpcDefaultSecurityGroup?: string;
   };
+  logRetention?: number;
   certificate?: string;
   domain?: string;
   privateWebsite?: boolean;

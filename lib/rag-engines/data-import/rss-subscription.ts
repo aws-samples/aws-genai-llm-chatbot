@@ -37,8 +37,8 @@ export class RssSubscription extends Construct {
       handler: "index.lambda_handler",
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       timeout: cdk.Duration.minutes(15),
-      logRetention: logs.RetentionDays.ONE_WEEK,
-
+      logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+      loggingFormat: lambda.LoggingFormat.JSON,
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
@@ -78,7 +78,8 @@ export class RssSubscription extends Construct {
         handler: "index.lambda_handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         timeout: cdk.Duration.seconds(15),
-        logRetention: logs.RetentionDays.ONE_WEEK,
+        logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+        loggingFormat: lambda.LoggingFormat.JSON,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
           CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
@@ -98,6 +99,7 @@ export class RssSubscription extends Construct {
       }
     );
 
+    this.rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction);
     this.rssIngestorFunction.grantInvoke(triggerRssIngestorsFunction);
     props.shared.configParameter.grantRead(triggerRssIngestorsFunction);
 
@@ -127,6 +129,8 @@ export class RssSubscription extends Construct {
         handler: "index.lambda_handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         timeout: cdk.Duration.minutes(5),
+        logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+        loggingFormat: lambda.LoggingFormat.JSON,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
           CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
@@ -152,7 +156,7 @@ export class RssSubscription extends Construct {
       crawlQueuedRssPostsFunction
     );
     new events.Rule(this, "CrawlQueuedRssPostsScheduleRule", {
-      schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
+      schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
       targets: [new targets.LambdaFunction(crawlQueuedRssPostsFunction)],
     });
 

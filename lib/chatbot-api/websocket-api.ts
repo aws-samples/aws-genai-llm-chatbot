@@ -17,6 +17,7 @@ interface RealtimeGraphqlApiBackendProps {
   readonly shared: Shared;
   readonly userPool: UserPool;
   readonly api: appsync.GraphqlApi;
+  readonly logRetention?: number;
 }
 
 export class RealtimeGraphqlApiBackend extends Construct {
@@ -64,6 +65,7 @@ export class RealtimeGraphqlApiBackend extends Construct {
       userPool: props.userPool,
       shared: props.shared,
       api: props.api,
+      logRetention: props.logRetention,
     });
 
     // Route all outgoing messages to the websocket interface queue
