@@ -14,6 +14,6 @@ def test_login(selenium_driver, cognito_credentials):
 def test_invalid_credentials(selenium_driver):
     page = LoginPage(selenium_driver)
     page.login(
-        Credentials(**{"id_token": "", "email": "invalid", "password": "invalid"})
+        Credentials(**{"id_token": "", "email": "invalid", "password": "invalid"}) #NOSONAR
     )
     assert page.get_error() != None

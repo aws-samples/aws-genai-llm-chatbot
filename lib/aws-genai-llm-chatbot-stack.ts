@@ -106,12 +106,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     // IDEFICS Interface Construct
     // This is the model interface receiving messages from the websocket interface via the message topic
     // and interacting with IDEFICS visual language models
-    models.models.filter(
-      (model) => model.interface === ModelInterface.MultiModal
-    );
-
-    // check if any deployed model requires idefics interface
-
     const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
       shared,
       config: props.config,

@@ -95,13 +95,13 @@ export class IdeficsInterface extends Construct {
             actions: ["execute-api:Invoke"],
             effect: iam.Effect.ALLOW,
             resources: ["execute-api:/*/*/*"],
-            principals: [new iam.AnyPrincipal()],
+            principals: [new iam.AccountPrincipal(cdk.Stack.of(scope).account)],
           }),
           new iam.PolicyStatement({
             actions: ["execute-api:Invoke"],
             effect: iam.Effect.DENY,
             resources: ["execute-api:/*/*/*"],
-            principals: [new iam.AnyPrincipal()],
+            principals: [new iam.AccountPrincipal(cdk.Stack.of(scope).account)],
             conditions: {
               StringNotEquals: {
                 "aws:SourceVpce": vpcEndpoint.vpcEndpointId,
@@ -169,6 +169,7 @@ export class IdeficsInterface extends Construct {
 
     const fileResource = api.root.addResource("{object}");
     fileResource.addMethod("ANY", s3Integration, {
+      authorizationType: apigateway.AuthorizationType.IAM,
       methodResponses: [
         {
           statusCode: "200",

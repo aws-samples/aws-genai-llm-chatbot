@@ -4,7 +4,7 @@ import { removeAssetHashes } from "../utils/template-util";
 import { Monitoring } from "../../lib/monitoring";
 import { GraphqlApi } from "aws-cdk-lib/aws-appsync";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
-import { Queue } from "aws-cdk-lib/aws-sqs";
+import { Queue, QueueEncryption } from "aws-cdk-lib/aws-sqs";
 import { DatabaseCluster } from "aws-cdk-lib/aws-rds";
 import { CfnCollection } from "aws-cdk-lib/aws-opensearchserverless";
 import { CfnIndex } from "aws-cdk-lib/aws-kendra";
@@ -22,8 +22,9 @@ const app = new App({
 const stack = new Stack(app);
 
 new Queue(stack, "Queue", {
+  encryption: QueueEncryption.KMS_MANAGED,
   deadLetterQueue: {
-    queue: new Queue(stack, "DLQ"),
+    queue: new Queue(stack, "DLQ", {encryption: QueueEncryption.KMS_MANAGED}),
     maxReceiveCount: 1,
   },
 });
@@ -45,7 +46,7 @@ new Monitoring(stack, "Monitoring", {
     edition: "edition",
     name: "name",
   }),
-  buckets: [new Bucket(stack, "Bucket", {})],
+  buckets: [new Bucket(stack, "Bucket", {publicReadAccess: false, versioned: true})],
   ragFunctionProcessing: [Function.fromFunctionName(stack, "Function", "Name")],
   ragStateMachineProcessing: [
     StateMachine.fromStateMachineName(stack, "StateMachine", "Name"),
