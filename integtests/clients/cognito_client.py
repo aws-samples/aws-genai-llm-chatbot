@@ -60,7 +60,9 @@ class CognitoClient:
 
     def get_password(self):
         return "".join(
-            random.choices(string.ascii_uppercase, k=10) # NOSONAR Only used for testing. Temporary password
+            random.choices(
+                string.ascii_uppercase, k=10
+            )  # NOSONAR Only used for testing. Temporary password
             + random.choices(string.ascii_lowercase, k=10)  # NOSONAR
             + random.choices(string.digits, k=5)  # NOSONAR
             + random.choices(string.punctuation, k=3)  # NOSONAR

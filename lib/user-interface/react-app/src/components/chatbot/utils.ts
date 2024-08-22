@@ -1,4 +1,5 @@
 import { Storage } from "aws-amplify";
+import { StorageAccessLevel } from "@aws-amplify/storage";
 import { Dispatch, SetStateAction } from "react";
 import {
   ChatBotAction,
@@ -309,8 +310,8 @@ export function updateChatSessions(
   }
 }
 
-export async function getSignedUrl(key: string) {
-  const signedUrl = await Storage.get(key as string);
+export async function getSignedUrl(key: string, level?: StorageAccessLevel) {
+  const signedUrl = await Storage.get(key as string, {level: level});
   return signedUrl;
 }
 

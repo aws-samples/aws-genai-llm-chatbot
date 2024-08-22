@@ -13,6 +13,7 @@ import { IdeficsInterface } from "./model-interfaces/idefics";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { NagSuppressions } from "cdk-nag";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
@@ -222,6 +223,14 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           "/aws/lambda/" + r.functionName
         );
       }),
+      llmRequestHandlersLogGroups: [ideficsInterface.requestHandler, langchainInterface?.requestHandler]
+        .filter(i => i).map((r) => {
+        return LogGroup.fromLogGroupName(
+          monitoringStack,
+          "Log" + (r as lambda.Function).node.id,
+          "/aws/lambda/" + (r as lambda.Function).functionName
+        );
+      }),
       cognito: {
         userPoolId: authentication.userPool.userPoolId,
         clientId: authentication.userPoolClient.userPoolClientId,
@@ -290,8 +299,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/Resource`,
-        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
-        `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
         ...(langchainInterface
           ? [
               `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
@@ -308,27 +315,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           id: "AwsSolutions-IAM5",
           reason: "IAM role implicitly created by CDK.",
         },
-      ]
-    );
-    NagSuppressions.addResourceSuppressionsByPath(
-      this,
-      `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/DeploymentStage.prod/Resource`,
-      [
-        {
-          id: "AwsSolutions-APIG3",
-          reason: "WAF not required due to configured Cognito auth.",
-        },
-      ]
-    );
-    NagSuppressions.addResourceSuppressionsByPath(
-      this,
-      [
-        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
-        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
-      ],
-      [
-        { id: "AwsSolutions-APIG4", reason: "Private API within a VPC." },
-        { id: "AwsSolutions-COG4", reason: "Private API within a VPC." },
       ]
     );
 

@@ -139,7 +139,12 @@ def handler(event, context: LambdaContext):
     except BatchProcessingError as e:
         logger.error(e)
 
-    logger.info(processed_messages)
+    for message in processed_messages:
+        logger.info(
+            "Request compelte with status " + message[0],
+            status=message[0],
+            cause=message[1],
+        )
     handle_failed_records(
         message for message in processed_messages if message[0] == "fail"
     )

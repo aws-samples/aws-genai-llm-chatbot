@@ -1,5 +1,6 @@
 import os
 import shutil
+
 # Needed since it is a build script
 # that runs during deployment.
 import subprocess  # nosec B404

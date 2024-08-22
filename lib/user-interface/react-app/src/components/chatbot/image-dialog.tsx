@@ -135,6 +135,7 @@ export default function ImageDialog(props: ImageDialogProps) {
 
     const response = await Storage.put(`${shortId}.${extension}`, file, {
       contentType,
+      level: "private"
     });
     return {
       ...response,
