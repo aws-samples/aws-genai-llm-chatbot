@@ -5,7 +5,11 @@ import {
   ChatBotMessageType,
   FeedbackData,
 } from "./types";
-import { Alert, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
+import {
+  Alert,
+  SpaceBetween,
+  StatusIndicator,
+} from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
 import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
@@ -117,13 +121,15 @@ export default function Chat(props: { sessionId?: string }) {
 
   return (
     <div className={styles.chat_container}>
-      {initError && <Alert
-        statusIconAriaLabel="Error"
-        type="error"
-        header="Unable to initalize the Chatbot."
-      >
-        {initError}
-      </Alert>}
+      {initError && (
+        <Alert
+          statusIconAriaLabel="Error"
+          type="error"
+          header="Unable to initalize the Chatbot."
+        >
+          {initError}
+        </Alert>
+      )}
       <SpaceBetween direction="vertical" size="m">
         {messageHistory.map((message, idx) => (
           <ChatMessage

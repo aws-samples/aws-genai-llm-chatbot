@@ -90,13 +90,15 @@ export default function Engines() {
       }
       content={
         <>
-          {globalError && <Alert
-            statusIconAriaLabel="Error"
-            type="error"
-            header="Unable to load the engines."
-          >
-            {globalError}
-          </Alert>}
+          {globalError && (
+            <Alert
+              statusIconAriaLabel="Error"
+              type="error"
+              header="Unable to load the engines."
+            >
+              {globalError}
+            </Alert>
+          )}
           <Cards
             stickyHeader={true}
             cardDefinition={CARD_DEFINITIONS}
@@ -107,7 +109,6 @@ export default function Engines() {
             header={<EnginesPageHeader />}
           />
         </>
-
       }
     />
   );

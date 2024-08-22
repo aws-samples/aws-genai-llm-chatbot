@@ -142,11 +142,11 @@ export default function MultiChat() {
 
         const models = modelsResult.data
           ? modelsResult.data.listModels.filter(
-            /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-            (m: any) =>
-              m.inputModalities.includes(ChabotInputModality.Text) &&
-              m.outputModalities.includes(ChabotOutputModality.Text)
-          )
+              /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
+              (m: any) =>
+                m.inputModalities.includes(ChabotInputModality.Text) &&
+                m.outputModalities.includes(ChabotOutputModality.Text)
+            )
           : [];
         setModels(models);
         setWorkspaces(workspaces);
@@ -379,25 +379,25 @@ export default function MultiChat() {
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
-        {initError && <Alert
-          statusIconAriaLabel="Error"
-          type="error"
-          header="Unable to initalize the Chatbots."
-        >
-          {initError}
-        </Alert>}
+        {initError && (
+          <Alert
+            statusIconAriaLabel="Error"
+            type="error"
+            header="Unable to initalize the Chatbots."
+          >
+            {initError}
+          </Alert>
+        )}
         <SpaceBetween size="m" alignItems="end">
-
           <SpaceBetween size="m" direction="horizontal" alignItems="center">
-
             <StatusIndicator
               type={
                 readyState === ReadyState.OPEN
                   ? "success"
                   : readyState === ReadyState.CONNECTING ||
                     readyState === ReadyState.UNINSTANTIATED
-                    ? "in-progress"
-                    : "error"
+                  ? "in-progress"
+                  : "error"
               }
             >
               {readyState === ReadyState.OPEN ? "Connected" : connectionStatus}

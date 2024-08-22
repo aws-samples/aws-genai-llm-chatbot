@@ -30,6 +30,7 @@ export interface ApiResolversProps {
 }
 
 export class ApiResolvers extends Construct {
+  readonly appSyncLambdaResolver: lambda.Function;
   constructor(scope: Construct, id: string, props: ApiResolversProps) {
     super(scope, id);
 
@@ -45,12 +46,14 @@ export class ApiResolvers extends Construct {
           path.join(__dirname, "./functions/api-handler")
         ),
         handler: "index.handler",
+        description: "Main Appsync resolver",
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         timeout: cdk.Duration.minutes(10),
         memorySize: 512,
         tracing: lambda.Tracing.ACTIVE,
-        logRetention: logs.RetentionDays.ONE_WEEK,
+        logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+        loggingFormat: lambda.LoggingFormat.JSON,
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         vpc: props.shared.vpc,
         securityGroups: [apiSecurityGroup],
@@ -117,6 +120,7 @@ export class ApiResolvers extends Construct {
         },
       }
     );
+    this.appSyncLambdaResolver = appSyncLambdaResolver;
 
     function addPermissions(apiHandler: lambda.Function) {
       if (props.ragEngines?.workspacesTable) {

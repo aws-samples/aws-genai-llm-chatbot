@@ -4,6 +4,7 @@ import {
   Code,
   Function as LambdaFunction,
   LayerVersion,
+  LoggingFormat,
   Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
@@ -21,9 +22,11 @@ interface RealtimeResolversProps {
   readonly userPool: UserPool;
   readonly shared: Shared;
   readonly api: appsync.GraphqlApi;
+  readonly logRetention?: number;
 }
 
 export class RealtimeResolvers extends Construct {
+  public readonly sendQueryHandler: LambdaFunction;
   public readonly outgoingMessageHandler: LambdaFunction;
 
   constructor(scope: Construct, id: string, props: RealtimeResolversProps) {
@@ -42,10 +45,13 @@ export class RealtimeResolvers extends Construct {
         "./lib/chatbot-api/functions/resolvers/send-query-lambda-resolver"
       ),
       handler: "index.handler",
+      description: "Appsync resolver handling LLM Queries",
       runtime: Runtime.PYTHON_3_11,
       environment: {
         SNS_TOPIC_ARN: props.topic.topicArn,
       },
+      logRetention: props.logRetention,
+      loggingFormat: LoggingFormat.JSON,
       layers: [props.shared.powerToolsLayer],
       vpc: props.shared.vpc,
     });
@@ -61,6 +67,7 @@ export class RealtimeResolvers extends Construct {
         layers: [powertoolsLayerJS],
         handler: "index.handler",
         runtime: Runtime.NODEJS_18_X,
+        loggingFormat: LoggingFormat.JSON,
         environment: {
           GRAPHQL_ENDPOINT: props.api.graphqlUrl,
         },
@@ -106,6 +113,7 @@ export class RealtimeResolvers extends Construct {
       dataSource: noneDataSource,
     });
 
+    this.sendQueryHandler = resolverFunction;
     this.outgoingMessageHandler = outgoingMessageHandler;
   }
 }

@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+from aws_lambda_powertools import Logger
 import boto3
 import genai_core.embeddings
 from datetime import datetime
@@ -9,6 +10,7 @@ from genai_core.types import Task
 
 dynamodb = boto3.resource("dynamodb")
 sfn_client = boto3.client("stepfunctions")
+logger = Logger()
 
 WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME")
 WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ.get(
@@ -142,8 +144,7 @@ def create_workspace_aurora(
         "updated_at": timestamp,
     }
 
-    response = table.put_item(Item=item)
-    print(response)
+    ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,
@@ -154,7 +155,11 @@ def create_workspace_aurora(
         ),
     )
 
-    print(response)
+    logger.info(
+        "Response for create_workspace_aurora",
+        response=response,
+        ddb_response=ddb_response,
+    )
 
     return item
 
@@ -209,8 +214,7 @@ def create_workspace_open_search(
         "updated_at": timestamp,
     }
 
-    response = table.put_item(Item=item)
-    print(response)
+    ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,
@@ -221,7 +225,11 @@ def create_workspace_open_search(
         ),
     )
 
-    print(response)
+    logger.info(
+        "Response for create_workspace_open_search",
+        response=response,
+        ddb_response=ddb_response,
+    )
 
     return item
 
@@ -252,8 +260,7 @@ def create_workspace_kendra(
         "updated_at": timestamp,
     }
 
-    response = table.put_item(Item=item)
-    print(response)
+    ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
@@ -264,7 +271,11 @@ def create_workspace_kendra(
         ),
     )
 
-    print(response)
+    logger.info(
+        "Response for create_workspace_kendra",
+        response=response,
+        ddb_response=ddb_response,
+    )
 
     return item
 
@@ -295,7 +306,7 @@ def create_workspace_bedrock_kb(
     }
 
     response = table.put_item(Item=item)
-    print(response)
+    logger.info("Response for create_workspace_bedrock_kb", response=response)
 
     return item
 
@@ -322,4 +333,4 @@ def delete_workspace(workspace_id: str):
         ),
     )
 
-    print(response)
+    logger.info("Response for delete_workspace", response=response)
