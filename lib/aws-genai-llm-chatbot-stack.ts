@@ -268,11 +268,11 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       ragStateMachineProcessing: [
         ...(ragEngines
           ? [
-            ragEngines.dataImport.fileImportWorkflow,
-            ragEngines.dataImport.websiteCrawlingWorkflow,
-            ragEngines.deleteDocumentWorkflow,
-            ragEngines.deleteWorkspaceWorkflow,
-          ]
+              ragEngines.dataImport.fileImportWorkflow,
+              ragEngines.dataImport.websiteCrawlingWorkflow,
+              ragEngines.deleteDocumentWorkflow,
+              ragEngines.deleteWorkspaceWorkflow,
+            ]
           : []),
       ],
     });
@@ -313,15 +313,15 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/Resource`,
         ...(langchainInterface
           ? [
-            `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
-            `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
-          ]
+              `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
+              `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+            ]
           : []),
         ...(ideficsModels.length > 0
           ? [
-            `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
-            `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
-          ]
+              `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
+              `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
+            ]
           : []),
       ],
       [
