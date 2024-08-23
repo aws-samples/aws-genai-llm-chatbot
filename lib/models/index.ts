@@ -247,28 +247,32 @@ export class Models extends Construct {
 
     if (
       props.config.llms?.sagemaker.includes(
-        SupportedSageMakerModels.Dolly_v2_3b
+        SupportedSageMakerModels.Mistral7b_Instruct3
       )
     ) {
-      const DOLLY_v2_3B_ENDPOINT_NAME = "dolly-v2-3b";
+      const MISTRACL_7B_3_ENDPOINT_NAME = "mistralai/Mistral-7B-Instruct-v0.3";
 
-      const dolly_v2_3b = new JumpStartSageMakerEndpoint(this, "Dolly_v2_3b", {
-        model: JumpStartModel.HUGGINGFACE_TEXTGENERATION_DOLLY_V2_3B_BF16_2_1_0,
-        instanceType: SageMakerInstanceType.ML_G5_2XLARGE,
-        vpcConfig: {
-          securityGroupIds: [props.shared.vpc.vpcDefaultSecurityGroup],
-          subnets: props.shared.vpc.privateSubnets.map(
-            (subnet) => subnet.subnetId
-          ),
-        },
-        endpointName: DOLLY_v2_3B_ENDPOINT_NAME,
-      });
+      const mistral7BInstruct3 = new JumpStartSageMakerEndpoint(
+        this,
+        "Mistral7b_Instruct3",
+        {
+          model: JumpStartModel.HUGGINGFACE_LLM_MISTRAL_7B_INSTRUCT_3_0_0,
+          instanceType: SageMakerInstanceType.ML_G5_2XLARGE,
+          vpcConfig: {
+            securityGroupIds: [props.shared.vpc.vpcDefaultSecurityGroup],
+            subnets: props.shared.vpc.privateSubnets.map(
+              (subnet) => subnet.subnetId
+            ),
+          },
+          endpointName: "Mistral-7B-Instruct-v0-3",
+        }
+      );
 
-      this.suppressCdkNagWarningForEndpointRole(dolly_v2_3b.role);
+      this.suppressCdkNagWarningForEndpointRole(mistral7BInstruct3.role);
 
       models.push({
-        name: DOLLY_v2_3B_ENDPOINT_NAME,
-        endpoint: dolly_v2_3b.cfnEndpoint,
+        name: MISTRACL_7B_3_ENDPOINT_NAME,
+        endpoint: mistral7BInstruct3.cfnEndpoint,
         responseStreamingSupported: false,
         inputModalities: [Modality.Text],
         outputModalities: [Modality.Text],

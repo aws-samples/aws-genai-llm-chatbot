@@ -55,7 +55,7 @@ class SMMistralInstructAdapter(ModelAdapter):
             params["max_new_tokens"] = model_kwargs["maxTokens"]
 
         return SagemakerEndpoint(
-            endpoint_name=self.model_id,
+            endpoint_name=self.get_endpoint(self.model_id),
             region_name=os.environ["AWS_REGION"],
             content_handler=content_handler,
             model_kwargs=params,
@@ -89,3 +89,4 @@ class SMMistralInstructAdapter(ModelAdapter):
 
 # Register the adapter
 registry.register(r"(?i)sagemaker\.mistralai-Mistral*", SMMistralInstructAdapter)
+registry.register(r"(?i)sagemaker\.mistralai/Mistral*", SMMistralInstructAdapter)
