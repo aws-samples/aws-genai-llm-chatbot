@@ -15,7 +15,14 @@ def test_invalid_credentials(selenium_driver):
     page = LoginPage(selenium_driver)
     page.login(
         Credentials(
-            **{"id_token": "", "email": "invalid", "password": "invalid"}
+            **{
+                "id_token": "",
+                "email": "invalid",
+                "password": "invalid",
+                "aws_access_key": "",
+                "aws_secret_key": "",
+                "aws_token": "",
+            }
         )  # NOSONAR
     )
     assert page.get_error() != None
