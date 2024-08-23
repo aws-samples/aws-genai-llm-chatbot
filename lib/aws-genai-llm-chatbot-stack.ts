@@ -71,14 +71,19 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       (model) => model.interface === ModelInterface.LangChain
     );
 
+    let bedrockAgentsInterface: BedrockAgentInterface | undefined;
     if (props.config.bedrock?.enabled) {
-      new BedrockAgentInterface(this, "IBedrockAgent", {
-        shared,
-        config: props.config,
-        messagesTopic: chatBotApi.messagesTopic,
-        sessionsTable: chatBotApi.sessionsTable,
-        byUserIdIndex: chatBotApi.byUserIdIndex,
-      });
+      bedrockAgentsInterface = new BedrockAgentInterface(
+        this,
+        "IBedrockAgent",
+        {
+          shared,
+          config: props.config,
+          messagesTopic: chatBotApi.messagesTopic,
+          sessionsTable: chatBotApi.sessionsTable,
+          byUserIdIndex: chatBotApi.byUserIdIndex,
+        }
+      );
     }
 
     // check if any deployed model requires langchain interface or if bedrock is enabled from config
@@ -220,6 +225,9 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         chatBotApi.outBoundQueue,
         ideficsInterface.ingestionQueue,
         ...(langchainInterface ? [langchainInterface.ingestionQueue] : []),
+        ...(bedrockAgentsInterface
+          ? [bedrockAgentsInterface.ingestionQueue]
+          : []),
       ],
       aurora: ragEngines?.auroraPgVector?.database,
       opensearch: ragEngines?.openSearchVector?.openSearchCollection,

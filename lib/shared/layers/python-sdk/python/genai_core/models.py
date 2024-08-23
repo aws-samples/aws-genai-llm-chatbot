@@ -70,7 +70,7 @@ def list_bedrock_agents():
 
         return bedrock_agents
     except Exception as e:
-        print(f"Error listing Bedrock agents: {e}")
+        logger.error("Error listing Bedrock agents:", e)
         return None
 
 

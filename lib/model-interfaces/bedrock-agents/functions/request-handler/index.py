@@ -18,7 +18,6 @@ tracer = Tracer()
 logger = Logger()
 
 AWS_REGION = os.environ["AWS_REGION"]
-API_KEYS_SECRETS_ARN = os.environ["API_KEYS_SECRETS_ARN"]
 CONFIG_PARAMETER_NAME = os.environ["CONFIG_PARAMETER_NAME"]
 
 sequence_number = 0
@@ -49,7 +48,7 @@ def handle_run(record):
         prompt,
     )
 
-    logger.info(response)
+    logger.info("Bedrock Agent response", response=response)
     sequence_number = 0
     run_id = str(uuid.uuid4())
     for r in response:
@@ -109,7 +108,7 @@ def record_handler(record: SQSRecord):
     payload: str = record.body
     message: dict = json.loads(payload)
     detail: dict = json.loads(message["Message"])
-    logger.info(detail)
+    logger.info("Incoming event", detail=detail)
 
     if detail["action"] == ChatbotAction.RUN.value:
         handle_run(detail)
@@ -123,7 +122,7 @@ def handle_failed_records(records):
         payload: str = record.body
         message: dict = json.loads(payload)
         detail: dict = json.loads(message["Message"])
-        logger.info(detail)
+        logger.info("Failed event", detail=detail)
         user_id = detail["userId"]
         data = detail.get("data", {})
         session_id = data.get("sessionId", "")
@@ -137,7 +136,7 @@ def handle_failed_records(records):
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {
                     "sessionId": session_id,
-                    "content": str(error),
+                    "content": "Something went wrong",
                     "type": "text",
                 },
             }
@@ -155,7 +154,12 @@ def handler(event, context: LambdaContext):
     except BatchProcessingError as e:
         logger.error(e)
 
-    logger.info(processed_messages)
+    for message in processed_messages:
+        logger.info(
+            "Request complete with status " + message[0],
+            status=message[0],
+            cause=message[1],
+        )
     handle_failed_records(
         message for message in processed_messages if message[0] == "fail"
     )

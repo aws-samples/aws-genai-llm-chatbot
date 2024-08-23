@@ -39,14 +39,14 @@ export class BedrockAgentInterface extends Construct {
       tracing: lambda.Tracing.ACTIVE,
       timeout: cdk.Duration.minutes(15),
       memorySize: 1024,
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+      loggingFormat: lambda.LoggingFormat.JSON,
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
         SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
         SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
-        API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
         MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
       },
     });

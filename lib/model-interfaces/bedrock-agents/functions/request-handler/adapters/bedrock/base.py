@@ -2,6 +2,9 @@ from abc import ABC
 from typing import Any, Dict, Iterator, Optional
 from pydantic import root_validator, Extra
 from ..base import AgentAdapter
+from aws_lambda_powertools import Logger
+
+logger = Logger()
 
 
 class AgentInputOutputAdapter:
@@ -19,7 +22,7 @@ class AgentInputOutputAdapter:
             yield ""
 
         for event in stream:
-            print(event)
+            logger.info("Stream event", event=event)
             chunk = event.get("chunk")
             # chunk obj format varies with provider
             yield chunk["bytes"].decode("utf8")
@@ -117,6 +120,3 @@ class BedrockAgent(AgentAdapter, ABC):
 
         for event in response["completion"]:
             yield event
-
-        # for chunk in AgentInputOutputAdapter.prepare_output_stream(response):
-        #     yield chunk
