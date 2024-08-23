@@ -313,7 +313,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       if (props.configuration?.files as ImageFile[]) {
         const files: ImageFile[] = [];
         for await (const file of props.configuration?.files ?? []) {
-          const signedUrl = await getSignedUrl(file.key, 'private');
+          const signedUrl = await getSignedUrl(file.key);
           files.push({
             ...file,
             url: signedUrl,

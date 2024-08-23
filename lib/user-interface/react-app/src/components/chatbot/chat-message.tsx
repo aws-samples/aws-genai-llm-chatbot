@@ -50,7 +50,7 @@ export default function ChatMessage(props: ChatMessageProps) {
       if (message.metadata?.files as ImageFile[]) {
         const files: ImageFile[] = [];
         for await (const file of message.metadata?.files as ImageFile[]) {
-          const signedUrl = await getSignedUrl(file.key, "private");
+          const signedUrl = await getSignedUrl(file.key);
           files.push({
             ...file,
             url: signedUrl as string,

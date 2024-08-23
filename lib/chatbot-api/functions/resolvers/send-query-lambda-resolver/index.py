@@ -68,13 +68,7 @@ def handler(event, context: LambdaContext):
         "data": request.get("data", {}),
     }
     InputValidation(**message)
-    
-    # Add the user id as a prefix for each file preventing 1 user to use someone else's image.
-    if "files" in message.get("data"):
-        for file in message.get("data").get("files"):
-            file.update({"key":  event["identity"]["sub"] + "/" + file.get("key")}) 
 
-    logger.info(message)
     try:
         response = sns.publish(TopicArn=TOPIC_ARN, Message=json.dumps(message))
         return response

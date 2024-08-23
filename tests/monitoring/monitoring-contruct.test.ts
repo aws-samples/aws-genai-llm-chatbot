@@ -25,7 +25,7 @@ const stack = new Stack(app);
 new Queue(stack, "Queue", {
   encryption: QueueEncryption.KMS_MANAGED,
   deadLetterQueue: {
-    queue: new Queue(stack, "DLQ", {encryption: QueueEncryption.KMS_MANAGED}),
+    queue: new Queue(stack, "DLQ", { encryption: QueueEncryption.KMS_MANAGED }),
     maxReceiveCount: 1,
   },
 });
@@ -36,7 +36,9 @@ new Monitoring(stack, "Monitoring", {
     graphqlApiId: "graphqlApiId",
   }),
   appsyncResolversLogGroups: [LogGroup.fromLogGroupName(stack, "Test", "Test")],
-  llmRequestHandlersLogGroups: [LogGroup.fromLogGroupName(stack, "Test2", "Test2")],
+  llmRequestHandlersLogGroups: [
+    LogGroup.fromLogGroupName(stack, "Test2", "Test2"),
+  ],
   cognito: { userPoolId: "userPoolId", clientId: "clientId" },
   tables: [Table.fromTableName(stack, "Table", "Name")],
   sqs: [],
@@ -49,7 +51,9 @@ new Monitoring(stack, "Monitoring", {
     edition: "edition",
     name: "name",
   }),
-  buckets: [new Bucket(stack, "Bucket", {publicReadAccess: false, versioned: true})],
+  buckets: [
+    new Bucket(stack, "Bucket", { publicReadAccess: false, versioned: true }),
+  ],
   ragFunctionProcessing: [Function.fromFunctionName(stack, "Function", "Name")],
   ragStateMachineProcessing: [
     StateMachine.fromStateMachineName(stack, "StateMachine", "Name"),

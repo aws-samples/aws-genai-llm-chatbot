@@ -24,175 +24,36 @@ interface IdeficsInterfaceProps {
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
   readonly chatbotFilesBucket: s3.Bucket;
+  readonly createPrivateGateway: boolean;
 }
 
 export class IdeficsInterface extends Construct {
   public readonly ingestionQueue: sqs.Queue;
   public readonly requestHandler: lambda.Function;
 
-  constructor(scope: Construct, id: string, props: IdeficsInterfaceProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    private props: IdeficsInterfaceProps
+  ) {
     super(scope, id);
 
     const lambdaDurationInMinutes = 15;
 
-    // Create a private API to serve images and other files from S3
-    // in order to avoid using signed URLs and run out of input tokens
-    // with the idefics model
-    const defaultSecurityGroup =
-      props.config.vpc?.vpcId && props.config.vpc.vpcDefaultSecurityGroup
-        ? props.config.vpc.vpcDefaultSecurityGroup
-        : props.shared.vpc.vpcDefaultSecurityGroup;
-
-    const vpcDefaultSecurityGroup = defaultSecurityGroup
-      ? ec2.SecurityGroup.fromSecurityGroupId(
-          this,
-          "VPCDefaultSecurityGroup",
-          defaultSecurityGroup
-        )
-      : ec2.SecurityGroup.fromLookupByName(
-          this,
-          "VPCDefaultSecurityGroup",
-          "default",
-          props.shared.vpc
-        );
-
-    const vpcEndpoint = props.shared.vpc.addInterfaceEndpoint(
-      "PrivateApiEndpoint",
-      {
-        service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
-        privateDnsEnabled: true,
-        open: true,
-        securityGroups: [vpcDefaultSecurityGroup],
-      }
-    );
-
-    const logGroup = new logs.LogGroup(
-      this,
-      "ChatbotFilesPrivateApiAccessLogs",
-      {
-        removalPolicy: RemovalPolicy.DESTROY,
-      }
-    );
-
-    const api = new apigateway.RestApi(this, "ChatbotFilesPrivateApi", {
-      deployOptions: {
-        stageName: "prod",
-        loggingLevel: apigateway.MethodLoggingLevel.INFO,
-        tracingEnabled: true,
-        metricsEnabled: true,
-        accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
-        accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
-      },
-      cloudWatchRole: true,
-      binaryMediaTypes: ["*/*"],
-      endpointConfiguration: {
-        types: [apigateway.EndpointType.PRIVATE],
-        vpcEndpoints: [vpcEndpoint],
-      },
-      policy: new iam.PolicyDocument({
-        statements: [
-          new iam.PolicyStatement({
-            actions: ["execute-api:Invoke"],
-            effect: iam.Effect.ALLOW,
-            resources: ["execute-api:/*/*/*"],
-            principals: [new iam.AccountPrincipal(cdk.Stack.of(scope).account)],
-          }),
-          new iam.PolicyStatement({
-            actions: ["execute-api:Invoke"],
-            effect: iam.Effect.DENY,
-            resources: ["execute-api:/*/*/*"],
-            principals: [new iam.AccountPrincipal(cdk.Stack.of(scope).account)],
-            conditions: {
-              StringNotEquals: {
-                "aws:SourceVpce": vpcEndpoint.vpcEndpointId,
-              },
-            },
-          }),
-        ],
-      }),
-    });
-
-    api.addRequestValidator("ValidateRequest", {
-      requestValidatorName: "chatbot-files-private-api-validator",
-      validateRequestBody: true,
-      validateRequestParameters: true,
-    });
-
-    // Create an API Gateway resource that proxies to the S3 bucket:
-    const integrationRole = new iam.Role(this, "S3IntegrationRole", {
-      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com"),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-        ),
-      ],
-    });
-    integrationRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ["s3:Get*", "s3:List*"],
-        effect: iam.Effect.ALLOW,
-        resources: [
-          `${props.chatbotFilesBucket.bucketArn}/*`,
-          `${props.chatbotFilesBucket.bucketArn}/*/*`,
-        ],
-      })
-    );
-    integrationRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ["kms:Decrypt", "kms:ReEncryptFrom"],
-        effect: iam.Effect.ALLOW,
-        resources: ["arn:aws:kms:*"],
-      })
-    );
-
-    const s3Integration = new apigateway.AwsIntegration({
-      service: "s3",
-      integrationHttpMethod: "GET",
-      region: cdk.Aws.REGION,
-      path: `${props.chatbotFilesBucket.bucketName}/public/{object}`,
-      options: {
-        credentialsRole: integrationRole,
-        requestParameters: {
-          "integration.request.path.object": "method.request.path.object",
-        },
-        integrationResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Content-Type":
-                "integration.response.header.Content-Type",
-            },
-          },
-        ],
-      },
-    });
-
-    const fileResource = api.root.addResource("{object}");
-    fileResource.addMethod("ANY", s3Integration, {
-      authorizationType: apigateway.AuthorizationType.IAM,
-      methodResponses: [
-        {
-          statusCode: "200",
-          responseParameters: {
-            "method.response.header.Content-Type": true,
-          },
-        },
-      ],
-      requestParameters: {
-        "method.request.path.object": true,
-        "method.request.header.Content-Type": true,
-      },
-    });
+    let api;
+    if (props.createPrivateGateway) {
+      api = this.createAPIGW();
+    }
 
     const requestHandler = new lambda.Function(
       this,
-      "IdeficsInterfaceRequestHandler",
+      "MultiModalInterfaceRequestHandler",
       {
         vpc: props.shared.vpc,
         code: props.shared.sharedCode.bundleWithLambdaAsset(
           path.join(__dirname, "./functions/request-handler")
         ),
-        description: "Idefics request handler",
+        description: "Multi modal request handler",
         runtime: props.shared.pythonRuntime,
         handler: "index.handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
@@ -209,7 +70,7 @@ export class IdeficsInterface extends Construct {
           SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
           MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
           CHATBOT_FILES_BUCKET_NAME: props.chatbotFilesBucket.bucketName,
-          CHATBOT_FILES_PRIVATE_API: api.url,
+          CHATBOT_FILES_PRIVATE_API: api?.url ?? "",
         },
       }
     );
@@ -255,18 +116,6 @@ export class IdeficsInterface extends Construct {
 
     this.ingestionQueue = queue;
     this.requestHandler = requestHandler;
-
-    /**
-     * CDK NAG suppression
-     */
-    NagSuppressions.addResourceSuppressions(integrationRole, [
-      {
-        id: "AwsSolutions-IAM4",
-        reason:
-          "Access to all log groups required for CloudWatch log group creation.",
-      },
-      { id: "AwsSolutions-IAM5", reason: "Access limited to KMS resources." },
-    ]);
   }
 
   public addSageMakerEndpoint({
@@ -287,5 +136,168 @@ export class IdeficsInterface extends Construct {
       `SAGEMAKER_ENDPOINT_${cleanName}`,
       endpoint.attrEndpointName
     );
+  }
+
+  private createAPIGW(): apigateway.RestApi {
+    // Create a private API to serve images and other files from S3
+    // in order to avoid using signed URLs and run out of input tokens
+    // with the idefics model
+    const defaultSecurityGroup =
+      this.props.config.vpc?.vpcId &&
+      this.props.config.vpc.vpcDefaultSecurityGroup
+        ? this.props.config.vpc.vpcDefaultSecurityGroup
+        : this.props.shared.vpc.vpcDefaultSecurityGroup;
+
+    const vpcDefaultSecurityGroup = defaultSecurityGroup
+      ? ec2.SecurityGroup.fromSecurityGroupId(
+          this,
+          "VPCDefaultSecurityGroup",
+          defaultSecurityGroup
+        )
+      : ec2.SecurityGroup.fromLookupByName(
+          this,
+          "VPCDefaultSecurityGroup",
+          "default",
+          this.props.shared.vpc
+        );
+
+    const vpcEndpoint = this.props.shared.vpc.addInterfaceEndpoint(
+      "PrivateApiEndpoint",
+      {
+        service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
+        privateDnsEnabled: true,
+        open: true,
+        securityGroups: [vpcDefaultSecurityGroup],
+      }
+    );
+
+    const logGroup = new logs.LogGroup(
+      this,
+      "ChatbotFilesPrivateApiAccessLogs",
+      {
+        removalPolicy: RemovalPolicy.DESTROY,
+      }
+    );
+
+    const api = new apigateway.RestApi(this, "ChatbotFilesPrivateApi", {
+      deployOptions: {
+        stageName: "prod",
+        loggingLevel: apigateway.MethodLoggingLevel.INFO,
+        tracingEnabled: true,
+        metricsEnabled: true,
+        accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
+        accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
+      },
+      cloudWatchRole: true,
+      binaryMediaTypes: ["*/*"],
+      endpointConfiguration: {
+        types: [apigateway.EndpointType.PRIVATE],
+        vpcEndpoints: [vpcEndpoint],
+      },
+      policy: new iam.PolicyDocument({
+        statements: [
+          new iam.PolicyStatement({
+            actions: ["execute-api:Invoke"],
+            effect: iam.Effect.ALLOW,
+            resources: ["execute-api:/*/*/*"],
+            principals: [new iam.AnyPrincipal()],
+          }),
+          new iam.PolicyStatement({
+            actions: ["execute-api:Invoke"],
+            effect: iam.Effect.DENY,
+            resources: ["execute-api:/*/*/*"],
+            principals: [new iam.AnyPrincipal()],
+            conditions: {
+              StringNotEquals: {
+                "aws:SourceVpce": vpcEndpoint.vpcEndpointId,
+              },
+            },
+          }),
+        ],
+      }),
+    });
+
+    api.addRequestValidator("ValidateRequest", {
+      requestValidatorName: "chatbot-files-private-api-validator",
+      validateRequestBody: true,
+      validateRequestParameters: true,
+    });
+
+    // Create an API Gateway resource that proxies to the S3 bucket:
+    const integrationRole = new iam.Role(this, "S3IntegrationRole", {
+      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+        ),
+      ],
+    });
+    integrationRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:Get*", "s3:List*"],
+        effect: iam.Effect.ALLOW,
+        resources: [
+          `${this.props.chatbotFilesBucket.bucketArn}/*`,
+          `${this.props.chatbotFilesBucket.bucketArn}/*/*`,
+        ],
+      })
+    );
+    integrationRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ["kms:Decrypt", "kms:ReEncryptFrom"],
+        effect: iam.Effect.ALLOW,
+        resources: ["arn:aws:kms:*"],
+      })
+    );
+
+    const s3Integration = new apigateway.AwsIntegration({
+      service: "s3",
+      integrationHttpMethod: "GET",
+      region: cdk.Aws.REGION,
+      path: `${this.props.chatbotFilesBucket.bucketName}/public/{object}`,
+      options: {
+        credentialsRole: integrationRole,
+        requestParameters: {
+          "integration.request.path.object": "method.request.path.object",
+        },
+        integrationResponses: [
+          {
+            statusCode: "200",
+            responseParameters: {
+              "method.response.header.Content-Type":
+                "integration.response.header.Content-Type",
+            },
+          },
+        ],
+      },
+    });
+
+    const fileResource = api.root.addResource("{object}");
+    fileResource.addMethod("ANY", s3Integration, {
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseParameters: {
+            "method.response.header.Content-Type": true,
+          },
+        },
+      ],
+      requestParameters: {
+        "method.request.path.object": true,
+        "method.request.header.Content-Type": true,
+      },
+    });
+    /**
+     * CDK NAG suppression
+     */
+    NagSuppressions.addResourceSuppressions(integrationRole, [
+      {
+        id: "AwsSolutions-IAM4",
+        reason:
+          "Access to all log groups required for CloudWatch log group creation.",
+      },
+      { id: "AwsSolutions-IAM5", reason: "Access limited to KMS resources." },
+    ]);
+    return api;
   }
 }

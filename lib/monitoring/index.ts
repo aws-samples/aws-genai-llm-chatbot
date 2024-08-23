@@ -56,12 +56,19 @@ export class Monitoring extends Construct {
 
     monitoring.addSegment(
       new SingleWidgetDashboardSegment(
-        this.getLogsWidget("Resolvers Logs:", props.appsyncResolversLogGroups, ['identify.claims.sub as cognito_user', 'correlation_id'])
+        this.getLogsWidget("Resolvers Logs:", props.appsyncResolversLogGroups, [
+          "identify.claims.sub as cognito_user",
+          "correlation_id",
+        ])
       )
     );
     monitoring.addSegment(
       new SingleWidgetDashboardSegment(
-        this.getLogsWidget("LLM Request Handlers Logs:", props.llmRequestHandlersLogGroups, [])
+        this.getLogsWidget(
+          "LLM Request Handlers Logs:",
+          props.llmRequestHandlersLogGroups,
+          []
+        )
       )
     );
 
@@ -296,7 +303,11 @@ export class Monitoring extends Construct {
     });
   }
 
-  private getLogsWidget(title: string, logGroups: ILogGroup[], extraFields: string[]): LogQueryWidget {
+  private getLogsWidget(
+    title: string,
+    logGroups: ILogGroup[],
+    extraFields: string[]
+  ): LogQueryWidget {
     // Log Query Results
     return new LogQueryWidget({
       logGroupNames: logGroups.map((i) => i.logGroupName),
@@ -307,7 +318,8 @@ export class Monitoring extends Construct {
        * https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html
        */
       queryLines: [
-        "fields @timestamp, message, level, location" + (extraFields ? "," + extraFields.join(','): ""),
+        "fields @timestamp, message, level, location" +
+          (extraFields.length > 0 ? "," + extraFields.join(",") : ""),
         `filter ispresent(level)`, // only includes messages using the logger
         "sort @timestamp desc",
         `limit 200`,
