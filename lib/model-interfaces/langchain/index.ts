@@ -277,7 +277,7 @@ export class LangChainInterface extends Construct {
         resources: [endpoint.ref],
       })
     );
-    const cleanName = name.replace(/[\s.\-_]/g, "").toUpperCase();
+    const cleanName = name.replace(/[\s./\-_]/g, "").toUpperCase();
     this.requestHandler.addEnvironment(
       `SAGEMAKER_ENDPOINT_${cleanName}`,
       endpoint.attrEndpointName

@@ -60,8 +60,8 @@ def test_add_file(client: AppSyncClient):
 
     fields = result.get("fields")
     cleaned_fields = fields.replace("{", "").replace("}", "")
-    pairs = [pair.strip() for pair in cleaned_fields.split(',')]
-    fields_dict = dict(pair.split('=', 1) for pair in pairs)
+    pairs = [pair.strip() for pair in cleaned_fields.split(",")]
+    fields_dict = dict(pair.split("=", 1) for pair in pairs)
     files = {"file": b"The Integ Test flower is yellow."}
     response = requests.post(result.get("url"), data=fields_dict, files=files)
     assert response.status_code == 204
@@ -78,10 +78,7 @@ def test_add_file(client: AppSyncClient):
     assert syncInProgress == False
 
     documents = client.list_documents(
-        input={
-            "workspaceId": pytest.workspace.get("id"),
-            "documentType": "file"
-        }
+        input={"workspaceId": pytest.workspace.get("id"), "documentType": "file"}
     )
     pytest.document = documents.get("items")[0]
     assert pytest.document.get("status") == "processed"
