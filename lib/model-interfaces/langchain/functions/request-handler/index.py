@@ -144,7 +144,9 @@ def handle_failed_records(records):
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {
                     "sessionId": session_id,
-                    "content": str(error),
+                    # Log a vague message because the error can contain
+                    # internal information
+                    "content": "Something went wrong",
                     "type": "text",
                 },
             }
@@ -166,7 +168,12 @@ def handler(event, context: LambdaContext):
     except BatchProcessingError as e:
         logger.error(e)
 
-    logger.info(processed_messages)
+    for message in processed_messages:
+        logger.info(
+            "Request compelte with status " + message[0],
+            status=message[0],
+            cause=message[1],
+        )
     handle_failed_records(
         message for message in processed_messages if message[0] == "fail"
     )

@@ -4,8 +4,8 @@ numpy==1.26.0
 cfnresponse==1.1.2
 aws_requests_auth==0.4.3
 requests-aws4auth==1.2.3
-langchain==0.2.3
-langchain-community==0.2.4
+langchain==0.2.14
+langchain-community==0.2.12
 langchain-aws==0.1.6
 opensearch-py==2.4.2
 psycopg2-binary==2.9.7

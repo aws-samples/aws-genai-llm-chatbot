@@ -29,10 +29,10 @@ jobs:
         run: |
           pip install -r pytest_requirements.txt
           flake8 .
-          bandit -r .
-          pip-audit -r pytest_requirements.txt || true 
-          pip-audit -r lib/shared/web-crawler-batch-job/requirements.txt || true 
-          pip-audit -r lib/shared/file-import-batch-job/requirements.txt || true 
+          bandit -c bandit.yaml -r .
+          pip-audit -r pytest_requirements.txt
+          pip-audit -r lib/shared/web-crawler-batch-job/requirements.txt
+          pip-audit -r lib/shared/file-import-batch-job/requirements.txt
           pytest tests/
       - name: Frontend
         working-directory: ./lib/user-interface/react-app

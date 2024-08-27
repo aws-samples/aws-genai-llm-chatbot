@@ -1,4 +1,5 @@
 import os
+import re
 from enum import Enum
 from aws_lambda_powertools import Logger
 from langchain.callbacks.base import BaseCallbackHandler
@@ -55,6 +56,13 @@ class ModelAdapter:
         for method in callback_methods:
             if method in valid_callback_names:
                 setattr(self.callback_handler, method, getattr(self, method))
+
+    def get_endpoint(self, model_id):
+        clean_name = "SAGEMAKER_ENDPOINT_" + re.sub(r"[\s.\/\-_]", "", model_id).upper()
+        if os.getenv(clean_name):
+            return os.getenv(clean_name)
+        else:
+            return model_id
 
     def get_llm(self, model_kwargs={}):
         raise ValueError("llm must be implemented")

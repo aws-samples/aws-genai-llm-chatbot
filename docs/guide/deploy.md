@@ -165,11 +165,15 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 **Step 11.** Login with the user created in **Step 8** and follow the instructions.
 
 **Step 12.** (Optional) Run the integration tests
-The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` (Claude Instant) and `amazon.titan-embed-text-v1` (Titan Embeddings G1 - Text) which need to be enabled in Bedrock.
+The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` (Claude Instant), `anthropic.claude-3-haiku-20240307-v1:0` (Claude 3 Haiku) and `amazon.titan-embed-text-v1` (Titan Embeddings G1 - Text) which need to be enabled in Bedrock.
 
 To run the tests (Replace the url with the one you used in the steps above)
 ```bash
 REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/ --ignore integtests/user_interface -n 3 --dist=loadfile 
+```
+To run the UI tests, you will fist need to download and run [geckodriver](https://github.com/mozilla/geckodriver)
+```bash
+REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/user_interface 
 ```
 
 ## Monitoring

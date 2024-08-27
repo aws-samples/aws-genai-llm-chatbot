@@ -1,3 +1,4 @@
+import tempfile
 import requests
 import defusedxml.ElementTree as ET
 import gzip
@@ -5,7 +6,8 @@ import os
 
 
 def decompress_gzip_data(response):
-    filename = f"/tmp/{hash(response.url)}.gzip"
+    tmpdir = tempfile.gettempdir()
+    filename = f"{tmpdir}/{hash(response.url)}.gzip"
     with open(filename, "wb") as file:
         file.write(response.content)
     with gzip.open(filename, "rb") as f:
@@ -17,7 +19,7 @@ def decompress_gzip_data(response):
 def extract_urls_from_sitemap(sitemap_url: str):
     urls = []
     try:
-        response = requests.get(sitemap_url)
+        response = requests.get(sitemap_url, timeout=15)  # seconds
         if response.status_code != 200:
             print(f"Error while fetching sitemap data: {sitemap_url}")
             return []

@@ -108,6 +108,8 @@ def test_search_document(client: AppSyncClient):
 
 
 def test_query_llm(client, default_model, default_provider):
+    if pytest.skip_flag == True:
+        pytest.skip("Open search is not enabled.")
     session_id = str(uuid.uuid4())
     request = {
         "action": "run",
