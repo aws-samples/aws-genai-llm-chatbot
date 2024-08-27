@@ -58,9 +58,14 @@ class ModelStatus(Enum):
     LEGACY = "LEGACY"
 
 
+class AgentStatus(Enum):
+    PREPARED = "PREPARED"
+
+
 class ModelInterface(Enum):
     LANGCHAIN = "langchain"
     IDEFICS = "idefics"
+    AGENT = "agent"
 
 
 class Direction(Enum):
@@ -77,6 +82,7 @@ class ChatbotAction(Enum):
     RUN = "run"
     LLM_NEW_TOKEN = "llm_new_token"
     FINAL_RESPONSE = "final_response"
+    AGENT_TRACE = "agent_trace"
 
 
 class ChatbotMessageType(Enum):

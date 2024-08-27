@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { SystemConfig, ModelInterface, Direction } from "./shared/types";
+import { SystemConfig, ModelInterface } from "./shared/types";
 import { Authentication } from "./authentication";
 import { Monitoring } from "./monitoring";
 import { UserInterface } from "./user-interface";
@@ -10,8 +10,8 @@ import { RagEngines } from "./rag-engines";
 import { Models } from "./models";
 import { LangChainInterface } from "./model-interfaces/langchain";
 import { IdeficsInterface } from "./model-interfaces/idefics";
-import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
-import * as sns from "aws-cdk-lib/aws-sns";
+import { BedrockAgentInterface } from "./model-interfaces/bedrock-agents";
+import { BedrockWeatherAgent } from "./agents";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { NagSuppressions } from "cdk-nag";
@@ -51,6 +51,10 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       });
     }
 
+    if (props.config.bedrock?.agents) {
+      new BedrockWeatherAgent(this, "weather-agent");
+    }
+
     const chatBotApi = new ChatBotApi(this, "ChatBotApi", {
       shared,
       config: props.config,
@@ -67,6 +71,21 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       (model) => model.interface === ModelInterface.LangChain
     );
 
+    let bedrockAgentsInterface: BedrockAgentInterface | undefined;
+    if (props.config.bedrock?.enabled) {
+      bedrockAgentsInterface = new BedrockAgentInterface(
+        this,
+        "IBedrockAgent",
+        {
+          shared,
+          config: props.config,
+          messagesTopic: chatBotApi.messagesTopic,
+          sessionsTable: chatBotApi.sessionsTable,
+          byUserIdIndex: chatBotApi.byUserIdIndex,
+        }
+      );
+    }
+
     // check if any deployed model requires langchain interface or if bedrock is enabled from config
     let langchainInterface: LangChainInterface | undefined;
     if (langchainModels.length > 0 || props.config.bedrock?.enabled) {
@@ -78,24 +97,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         sessionsTable: chatBotApi.sessionsTable,
         byUserIdIndex: chatBotApi.byUserIdIndex,
       });
-
-      // Route all incoming messages targeted to langchain to the langchain model interface queue
-      chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(langchainInterface.ingestionQueue, {
-          filterPolicyWithMessageBody: {
-            direction: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [Direction.In],
-              })
-            ),
-            modelInterface: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: [ModelInterface.LangChain],
-              })
-            ),
-          },
-        })
-      );
 
       for (const model of models.models) {
         if (model.interface === ModelInterface.LangChain) {
@@ -121,24 +122,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       byUserIdIndex: chatBotApi.byUserIdIndex,
       chatbotFilesBucket: chatBotApi.filesBucket,
     });
-
-    // Route all incoming messages targeted to idefics to the idefics model interface queue
-    chatBotApi.messagesTopic.addSubscription(
-      new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
-        filterPolicyWithMessageBody: {
-          direction: sns.FilterOrPolicy.filter(
-            sns.SubscriptionFilter.stringFilter({
-              allowlist: [Direction.In],
-            })
-          ),
-          modelInterface: sns.FilterOrPolicy.filter(
-            sns.SubscriptionFilter.stringFilter({
-              allowlist: [ModelInterface.MultiModal],
-            })
-          ),
-        },
-      })
-    );
 
     for (const model of models.models) {
       // if model name contains idefics then add to idefics interface
@@ -242,6 +225,9 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         chatBotApi.outBoundQueue,
         ideficsInterface.ingestionQueue,
         ...(langchainInterface ? [langchainInterface.ingestionQueue] : []),
+        ...(bedrockAgentsInterface
+          ? [bedrockAgentsInterface.ingestionQueue]
+          : []),
       ],
       aurora: ragEngines?.auroraPgVector?.database,
       opensearch: ragEngines?.openSearchVector?.openSearchCollection,
@@ -335,6 +321,24 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       [
         { id: "AwsSolutions-APIG4", reason: "Private API within a VPC." },
         { id: "AwsSolutions-COG4", reason: "Private API within a VPC." },
+      ]
+    );
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      this,
+      [
+        `/${this.stackName}/IBedrockAgent/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/IBedrockAgent/RequestHandler/ServiceRole/Resource`,
+      ],
+      [
+        {
+          id: "AwsSolutions-IAM4",
+          reason: "IAM role implicitly created by CDK.",
+        },
+        {
+          id: "AwsSolutions-IAM5",
+          reason: "IAM role implicitly created by CDK.",
+        },
       ]
     );
 
@@ -505,6 +509,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         }
       }
     }
+
     // Implicitly created resources with changing paths
     NagSuppressions.addStackSuppressions(this, [
       {

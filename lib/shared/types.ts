@@ -56,6 +56,7 @@ export enum SupportedBedrockRegion {
 
 export enum ModelInterface {
   LangChain = "langchain",
+  BedrockAgent = "agent",
   MultiModal = "multimodal",
 }
 
@@ -108,7 +109,11 @@ export interface SystemConfig {
       identifier: string;
       version: string;
     };
+    bedrockAgentAliasId?: string;
+    bedrockAgentId?: string;
+    agents?: boolean;
   };
+
   llms: {
     sagemaker: SupportedSageMakerModels[];
     huggingfaceApiSecretArn?: string;

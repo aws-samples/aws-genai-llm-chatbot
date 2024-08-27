@@ -120,7 +120,10 @@ export function updateMessageHistoryRef(
   response: ChatBotMessageResponse,
   messageTokens: { [key: string]: ChatBotToken[] }
 ) {
-  if (response.data?.sessionId !== sessionId) return;
+  if (response.data?.sessionId !== sessionId) {
+    console.error("Invalid sessionId");
+    return;
+  }
 
   if (
     response.action === ChatBotAction.LLMNewToken ||
@@ -327,7 +330,6 @@ export function getSelectedModelMetadata(
     const targetModel = models?.find(
       (m) => m.name === name && m.provider === provider
     );
-
     if (targetModel) {
       selectedModelMetadata = targetModel;
     }

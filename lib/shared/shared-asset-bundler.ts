@@ -2,12 +2,13 @@ import {
   AssetHashType,
   BundlingOutput,
   DockerImage,
+  Stack,
   aws_s3_assets,
 } from "aws-cdk-lib";
 import { Code, S3Code } from "aws-cdk-lib/aws-lambda";
 import { Asset } from "aws-cdk-lib/aws-s3-assets";
 import { md5hash } from "aws-cdk-lib/core/lib/helpers-internal";
-import { Construct } from "constructs";
+import { Construct, Node } from "constructs";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -33,6 +34,7 @@ function calculateHash(paths: string[]): string {
 export class SharedAssetBundler extends Construct {
   private readonly sharedAssets: string[];
   private readonly WORKING_PATH = "/asset-input/";
+
   /**
    * Instantiate a new SharedAssetBundler. You then invoke `bundleWithAsset(pathToAsset)` to
    * bundle your asset code with the common code.
@@ -60,7 +62,7 @@ export class SharedAssetBundler extends Construct {
           image:
             process.env.NODE_ENV === "test"
               ? DockerImage.fromRegistry("dummy-skip-build-in-test")
-              : DockerImage.fromBuild(path.posix.join(__dirname, "alpine-zip")),
+              : BuildImageProvider.getOrCreate(this),
           command: [
             "zip",
             "-r",
@@ -84,5 +86,26 @@ export class SharedAssetBundler extends Construct {
   bundleWithLambdaAsset(assetPath: string): S3Code {
     const asset = this.bundleWithAsset(assetPath);
     return Code.fromBucket(asset.bucket, asset.s3ObjectKey);
+  }
+}
+
+class BuildImageProvider extends Construct {
+  public static getOrCreate(scope: Construct): DockerImage {
+    const stack = Stack.of(scope);
+    const id = "build-image-provider";
+    const x =
+      (Node.of(stack).tryFindChild(id) as BuildImageProvider) ||
+      new BuildImageProvider(stack, id);
+    return x.buildImage;
+  }
+
+  private readonly buildImage: DockerImage;
+
+  constructor(scope: Construct, id: string) {
+    super(scope, id);
+
+    this.buildImage = DockerImage.fromBuild(
+      path.posix.join(__dirname, "alpine-zip")
+    );
   }
 }

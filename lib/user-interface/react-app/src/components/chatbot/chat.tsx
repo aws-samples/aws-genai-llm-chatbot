@@ -18,6 +18,18 @@ import ChatInputPanel, { ChatScrollState } from "./chat-input-panel";
 import styles from "../../styles/chat.module.scss";
 import { CHATBOT_NAME } from "../../common/constants";
 
+export interface AgentTrace {
+  preProcessingTrace?: {
+    modelInvocationInput?: { [key: string]: unknown };
+    modelInvocationOutput?: { [key: string]: unknown };
+  };
+  orchestrationTrace?: {
+    modelInvocationInput?: { [key: string]: unknown };
+    modelInvocationOutput?: { [key: string]: unknown };
+    rationale?: { [key: string]: unknown };
+  };
+}
+
 export default function Chat(props: { sessionId?: string }) {
   const appContext = useContext(AppContext);
   const [running, setRunning] = useState<boolean>(false);
@@ -39,6 +51,10 @@ export default function Chat(props: { sessionId?: string }) {
 
   const [messageHistory, setMessageHistory] = useState<ChatBotHistoryItem[]>(
     []
+  );
+
+  const [agentTrace, setAgentTrace] = useState<AgentTrace | undefined>(
+    undefined
   );
 
   useEffect(() => {
@@ -138,6 +154,7 @@ export default function Chat(props: { sessionId?: string }) {
             showMetadata={configuration.showMetadata}
             onThumbsUp={() => handleFeedback(1, idx, message)}
             onThumbsDown={() => handleFeedback(0, idx, message)}
+            agentTrace={agentTrace}
           />
         ))}
       </SpaceBetween>
@@ -161,6 +178,7 @@ export default function Chat(props: { sessionId?: string }) {
           setInitErrorMessage={(error) => setInitError(error)}
           configuration={configuration}
           setConfiguration={setConfiguration}
+          setAgentTrace={setAgentTrace}
         />
       </div>
     </div>

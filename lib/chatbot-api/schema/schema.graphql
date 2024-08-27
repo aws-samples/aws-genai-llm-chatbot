@@ -177,6 +177,10 @@ type Model @aws_cognito_user_pools {
   inputModalities: [String!]!
   outputModalities: [String!]!
   streaming: Boolean!
+  isAgent: Boolean
+  agentId: String
+  agentVersion: String
+  agentIsUpdated: Boolean
 }
 
 type PassageRank @aws_cognito_user_pools {

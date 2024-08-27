@@ -27,11 +27,51 @@ def list_models():
     if openai_models:
         models.extend(openai_models)
 
+    bedrock_agents = list_bedrock_agents()
+    if bedrock_agents:
+        models.extend(bedrock_agents)
+
     azure_openai_models = list_azure_openai_models()
     if azure_openai_models:
         models.extend(azure_openai_models)
 
     return models
+
+
+def list_bedrock_agents():
+    try:
+        bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock-agent")
+        if not bedrock:
+            return None
+
+        response = bedrock.list_agents()
+        agents = [
+            bedrock.get_agent(agentId=a["agentId"])["agent"]
+            for a in response.get("agentSummaries", [])
+            if a.get("agentStatus", "") == genai_core.types.AgentStatus.PREPARED.value
+        ]
+
+        bedrock_agents = [
+            {
+                "provider": Provider.BEDROCK.value,
+                "name": a["agentName"],
+                "streaming": True,
+                "inputModalities": [Modality.TEXT.value],
+                "outputModalities": [Modality.TEXT.value],
+                "interface": ModelInterface.AGENT.value,
+                "ragSupported": False,
+                "agentId": a["agentId"],
+                "agentVersion": "TSTALIASID",
+                "agentIsUpdated": a["preparedAt"] < a["updatedAt"],
+                "isAgent": True,
+            }
+            for a in agents
+        ]
+
+        return bedrock_agents
+    except Exception as e:
+        logger.error("Error listing Bedrock agents:", e)
+        return None
 
 
 def list_openai_models():
@@ -50,6 +90,7 @@ def list_openai_models():
             "outputModalities": [Modality.TEXT.value],
             "interface": ModelInterface.LANGCHAIN.value,
             "ragSupported": True,
+            "isAgent": False,
         }
         for model in models.data
         if model["id"].startswith("gpt")
@@ -102,6 +143,7 @@ def list_bedrock_models():
                 "outputModalities": model["outputModalities"],
                 "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
+                "isAgent": False,
             }
             for model in bedrock_models
             # Exclude embeddings and stable diffusion models
@@ -135,6 +177,7 @@ def list_bedrock_finetuned_models():
                 "outputModalities": model["outputModalities"],
                 "interface": ModelInterface.LANGCHAIN.value,
                 "ragSupported": True,
+                "isAgent": False,
             }
             for model in bedrock_custom_models
             # Exclude embeddings and stable diffusion models
@@ -162,6 +205,7 @@ def list_sagemaker_models():
             "outputModalities": model["outputModalities"],
             "interface": model["interface"],
             "ragSupported": model["ragSupported"],
+            "isAgent": False,
         }
         for model in models
     ]

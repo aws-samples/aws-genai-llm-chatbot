@@ -1,16 +1,16 @@
 import {
   Button,
   SpaceBetween,
-  Container,
-  Spinner,
   Icon,
+  PromptInput,
+  Box,
 } from "@cloudscape-design/components";
 import { useEffect, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import TextareaAutosize from "react-textarea-autosize";
 import styles from "../../styles/chat.module.scss";
+import { LoadingBar } from "@cloudscape-design/chat-components";
 
 export interface MultiChatInputPanelProps {
   running: boolean;
@@ -68,67 +68,48 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
       <div
         style={{ display: "flex", justifyContent: "end", paddingRight: "4px" }}
       ></div>
-      <Container>
-        <div className={styles.input_textarea_container}>
-          <span>
-            {browserSupportsSpeechRecognition ? (
-              <Button
-                iconName={listening ? "microphone-off" : "microphone"}
-                variant="icon"
-                onClick={() =>
-                  listening
-                    ? SpeechRecognition.stopListening()
-                    : SpeechRecognition.startListening()
-                }
-              />
-            ) : (
-              <Icon name="microphone-off" variant="disabled" />
-            )}
-          </span>
-
-          <TextareaAutosize
-            className={styles.input_textarea}
-            style={{ width: "100%" }}
-            maxRows={6}
-            minRows={1}
-            maxLength={10000}
-            spellCheck={true}
-            autoFocus
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (!props.enabled) return;
-              if (e.key == "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                props.onSendMessage(value);
-                setValue("");
+      <div className={styles.input_textarea_container}>
+        <span>
+          {browserSupportsSpeechRecognition ? (
+            <Button
+              iconName={listening ? "microphone-off" : "microphone"}
+              variant="icon"
+              onClick={() =>
+                listening
+                  ? SpeechRecognition.stopListening()
+                  : SpeechRecognition.startListening()
               }
-            }}
+            />
+          ) : (
+            <Icon name="microphone-off" variant="disabled" />
+          )}
+        </span>
+        {props.running ? (
+          <div aria-live="polite">
+            <Box
+              margin={{ bottom: "xs", left: "l" }}
+              color="text-body-secondary"
+            >
+              Generating a response
+            </Box>
+            <LoadingBar variant="gen-ai" />
+          </div>
+        ) : (
+          <PromptInput
             value={value}
             placeholder={listening ? "Listening..." : "Send a message"}
+            maxRows={6}
+            minRows={1}
+            onChange={({ detail }) => setValue(detail.value)}
+            onAction={() => {
+              props.onSendMessage(value);
+              setValue("");
+            }}
+            actionButtonIconName="send"
+            disableActionButton={!props.enabled || value.trim().length === 0}
           />
-          <div style={{ marginLeft: "8px" }}>
-            <Button
-              disabled={!props.enabled || value.trim().length === 0}
-              onClick={() => {
-                props.onSendMessage(value);
-                setValue("");
-              }}
-              iconAlign="right"
-              iconName={!props.running ? "angle-right-double" : undefined}
-              variant="primary"
-            >
-              {props.running ? (
-                <>
-                  Loading&nbsp;&nbsp;
-                  <Spinner />
-                </>
-              ) : (
-                "Send"
-              )}
-            </Button>
-          </div>
-        </div>
-      </Container>
+        )}
+      </div>
     </SpaceBetween>
   );
 }

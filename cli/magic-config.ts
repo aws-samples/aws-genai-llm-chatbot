@@ -151,6 +151,7 @@ const embeddingModels = [
       options.bedrockRoleArn = config.bedrock?.roleArn;
       options.guardrailsEnable = config.bedrock?.guardrails?.enabled;
       options.guardrails = config.bedrock?.guardrails;
+      options.bedrockAgents = config.bedrock?.agents;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
@@ -345,6 +346,17 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
+      name: "bedrockAgents",
+      message: "Do you want to deploy a sample Bedrock Agent?",
+      initial: options.bedrockAgents ?? false,
+      skip() {
+        return !["us-east-1", "us-west-2"].includes(
+          (this as any).state.answers.bedrockRegion
+        );
+      },
+    },
+    {
+      type: "confirm",
       name: "enableSagemakerModels",
       message: "Do you want to use any Sagemaker Models",
       initial: options.enableSagemakerModels || false,
@@ -461,8 +473,9 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "input",
       name: "sagemakerCronStopSchedule",
-      hint: "This cron format is using AWS eventbridge cron syntax see docs for more information",
-      message: "Stop schedule for Sagmaker models expressed in AWS cron format",
+      hint: "This cron format is using AWS EventBridge cron syntax see docs for more information",
+      message:
+        "Stop schedule for Sagemaker models expressed in AWS cron format",
       skip(): boolean {
         return !(this as any).state.answers.enableCronFormat.includes("cron");
       },
@@ -1151,6 +1164,7 @@ async function processCreateOptions(options: any): Promise<void> {
             identifier: answers.guardrailsIdentifier,
             version: answers.guardrailsVersion,
           },
+          agents: answers.bedrockAgents,
         }
       : undefined,
     llms: {

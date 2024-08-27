@@ -1,0 +1,257 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Powertools API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/current_weather": {
+      "get": {
+        "summary": "GET /current_weather",
+        "description": "get the current weather for a given place",
+        "operationId": "get_current_weather_current_weather_get",
+        "parameters": [
+          {
+            "description": "the name of the place",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Place",
+              "description": "the name of the place"
+            },
+            "name": "place",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Weather"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/absolute_period_dates": {
+      "get": {
+        "summary": "GET /absolute_period_dates",
+        "description": "get the absolute start and end date for a period in YYYY-MM-DD format given the number of day difference from the today",
+        "operationId": "get_absolute_period_dates_absolute_period_dates_get",
+        "parameters": [
+          {
+            "description": "the difference in days from the today to the start date of the period",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Startperioddeltadays",
+              "description": "the difference in days from the today to the start date of the period"
+            },
+            "name": "startPeriodDeltaDays",
+            "in": "query"
+          },
+          {
+            "description": "the difference in days from the today to the end date of the period",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Endperioddeltadays",
+              "description": "the difference in days from the today to the end date of the period"
+            },
+            "name": "endPeriodDeltaDays",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Period"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/historical_weather": {
+      "get": {
+        "summary": "GET /historical_weather",
+        "description": "get the historical daily mean temperature and precipitation for a given place for a range of dates",
+        "operationId": "get_historical_weather_historical_weather_get",
+        "parameters": [
+          {
+            "description": "the name of the place",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Place",
+              "description": "the name of the place"
+            },
+            "name": "place",
+            "in": "query"
+          },
+          {
+            "description": "starting date in YYYY-MM-DD format",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fromdate",
+              "description": "starting date in YYYY-MM-DD format"
+            },
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "description": "ending date in YYYY-MM-DD format",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Todate",
+              "description": "ending date in YYYY-MM-DD format"
+            },
+            "name": "toDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Weather"
+                  },
+                  "type": "array",
+                  "title": "Return"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Period": {
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          }
+        },
+        "type": "object",
+        "required": ["start_date", "end_date"],
+        "title": "Period"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      },
+      "Weather": {
+        "properties": {
+          "time": {
+            "type": "string",
+            "title": "Time"
+          },
+          "temperature": {
+            "type": "string",
+            "title": "Temperature"
+          },
+          "precipitation": {
+            "type": "string",
+            "title": "Precipitation"
+          }
+        },
+        "type": "object",
+        "required": ["time", "temperature", "precipitation"],
+        "title": "Weather"
+      }
+    }
+  }
+}

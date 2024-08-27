@@ -32,17 +32,24 @@ export abstract class OptionsHelper {
     }
   }
 
-  static getSelectOptionGroups<T extends { provider: string; name: string }>(
-    data: T[]
-  ) {
+  static getSelectOptionGroups<
+    T extends {
+      provider: string;
+      name: string;
+      interface?: string;
+      isAgent?: boolean | null;
+      agentIsUpdated?: boolean | null;
+    },
+  >(data: T[]) {
     const modelsMap = new Map<string, T[]>();
     data.forEach((item) => {
-      let items = modelsMap.get(item.provider);
+      const group = `${item.provider}:${item.interface}`;
+      let items = modelsMap.get(group);
       if (!items) {
         items = [];
-        modelsMap.set(item.provider, [item]);
+        modelsMap.set(group, [item]);
       } else {
-        modelsMap.set(item.provider, [...items, item]);
+        modelsMap.set(group, [...items, item]);
       }
     });
 
@@ -52,12 +59,13 @@ export abstract class OptionsHelper {
     const options: SelectProps.OptionGroup[] = keys.map((key) => {
       const items = modelsMap.get(key);
       items?.sort((a, b) => a.name.localeCompare(b.name));
-
       return {
         label: this.getProviderLabel(key),
         options:
           items?.map((item) => ({
-            label: item.name,
+            label:
+              item.name +
+              (item.isAgent ? (item.agentIsUpdated! ? " ⭐️" : " ✅") : ""),
             value: `${item.provider}::${item.name}`,
           })) ?? [],
       };
@@ -81,8 +89,9 @@ export abstract class OptionsHelper {
 
   static getProviderLabel(provider: string) {
     let label = provider;
-    if (label === "sagemaker") label = "SageMaker";
-    else if (label === "bedrock") label = "Bedrock";
+    if (label.startsWith("sagemaker")) label = "SageMaker";
+    else if (label === "bedrock:langchain") label = "Bedrock";
+    else if (label === "bedrock:agent") label = "Bedrock Agents";
     else if (label === "openai") label = "OpenAI";
 
     return label;

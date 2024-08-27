@@ -11,7 +11,8 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { RagEngines } from "../../rag-engines";
 import { Shared } from "../../shared";
-import { SystemConfig } from "../../shared/types";
+import { Direction, ModelInterface, SystemConfig } from "../../shared/types";
+import { SqsSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 interface LangChainInterfaceProps {
   readonly shared: Shared;
@@ -255,6 +256,23 @@ export class LangChainInterface extends Construct {
           new iam.ServicePrincipal("events.amazonaws.com"),
           new iam.ServicePrincipal("sqs.amazonaws.com"),
         ],
+      })
+    );
+
+    props.messagesTopic.addSubscription(
+      new SqsSubscription(queue, {
+        filterPolicyWithMessageBody: {
+          direction: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [Direction.In],
+            })
+          ),
+          modelInterface: sns.FilterOrPolicy.filter(
+            sns.SubscriptionFilter.stringFilter({
+              allowlist: [ModelInterface.LangChain],
+            })
+          ),
+        },
       })
     );
 

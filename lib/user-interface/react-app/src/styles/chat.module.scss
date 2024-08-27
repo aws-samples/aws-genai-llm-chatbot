@@ -36,7 +36,7 @@
 .input_container {
   position: sticky;
   bottom: 0;
-  padding-bottom: awsui.$space-scaled-l;
+  padding-bottom: awsui.$space-scaled-m;
   padding-top: awsui.$space-scaled-xxl;
   background: linear-gradient(
     to bottom,
@@ -135,6 +135,15 @@
   padding: 5px;
 }
 
+.markdown {
+  font-size: 0.9em;
+  font-family: awsui.$font-family-base;
+}
+
+.markdown p {
+  margin: 0px;
+}
+
 .markdownTable {
   width: 100%;
   border-collapse: collapse;
@@ -156,38 +165,4 @@
 
 .markdownTable tr:nth-child(even) {
   background-color: awsui.$color-background-container-content;
-}
-
-.thumbsContainer {
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
-}
-
-.thumbsIcon {
-  cursor: pointer;
-  margin-right: 10px;
-  opacity: 0.5;
-}
-
-/* Styles for thumbs up icon. Should be compatible with dark theme */
-.thumbsUp {
-  color: #539fe5;
-}
-
-/* Styles for thumbs down icon. Should be compatible with dark theme */
-.thumbsDown {
-  color: #539fe5;
-}
-
-/* Style for clicked state */
-.clicked {
-  opacity: 0.5;
-  pointer-events: none; /* Disable pointer events for a clicked icon */
-}
-
-/* Styles for selected icon */
-.thumbsIcon.selected {
-  opacity: 1 !important;
-  pointer-events: none; /* Disable pointer events for the selected icon */
 }
