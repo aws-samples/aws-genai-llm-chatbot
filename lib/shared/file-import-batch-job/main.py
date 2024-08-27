@@ -5,7 +5,7 @@ import genai_core.chunks
 import genai_core.documents
 import genai_core.workspaces
 import genai_core.aurora.create
-from langchain.document_loaders import S3FileLoader
+from langchain_community.document_loaders import S3FileLoader
 
 WORKSPACE_ID = os.environ.get("WORKSPACE_ID")
 DOCUMENT_ID = os.environ.get("DOCUMENT_ID")

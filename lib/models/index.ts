@@ -247,6 +247,42 @@ export class Models extends Construct {
 
     if (
       props.config.llms?.sagemaker.includes(
+        SupportedSageMakerModels.Mistral7b_Instruct3
+      )
+    ) {
+      const MISTRACL_7B_3_ENDPOINT_NAME = "mistralai/Mistral-7B-Instruct-v0.3";
+
+      const mistral7BInstruct3 = new JumpStartSageMakerEndpoint(
+        this,
+        "Mistral7b_Instruct3",
+        {
+          model: JumpStartModel.HUGGINGFACE_LLM_MISTRAL_7B_INSTRUCT_3_0_0,
+          instanceType: SageMakerInstanceType.ML_G5_2XLARGE,
+          vpcConfig: {
+            securityGroupIds: [props.shared.vpc.vpcDefaultSecurityGroup],
+            subnets: props.shared.vpc.privateSubnets.map(
+              (subnet) => subnet.subnetId
+            ),
+          },
+          endpointName: "Mistral-7B-Instruct-v0-3",
+        }
+      );
+
+      this.suppressCdkNagWarningForEndpointRole(mistral7BInstruct3.role);
+
+      models.push({
+        name: MISTRACL_7B_3_ENDPOINT_NAME,
+        endpoint: mistral7BInstruct3.cfnEndpoint,
+        responseStreamingSupported: false,
+        inputModalities: [Modality.Text],
+        outputModalities: [Modality.Text],
+        interface: ModelInterface.LangChain,
+        ragSupported: true,
+      });
+    }
+
+    if (
+      props.config.llms?.sagemaker.includes(
         SupportedSageMakerModels.Llama2_13b_Chat
       )
     ) {
