@@ -3,7 +3,7 @@ pytest-xdist==3.6.1
 pytest-mock==3.11.1
 gql==3.4.1
 aws_lambda_powertools==2.42.0
-bandit==0.17.3
+bandit==1.7.9
 pip-audit==2.7.3
 black==24.8.0
 flake8==7.1.0

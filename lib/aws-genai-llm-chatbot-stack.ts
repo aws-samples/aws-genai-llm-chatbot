@@ -13,6 +13,7 @@ import { IdeficsInterface } from "./model-interfaces/idefics";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { NagSuppressions } from "cdk-nag";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
@@ -107,12 +108,13 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     // IDEFICS Interface Construct
     // This is the model interface receiving messages from the websocket interface via the message topic
     // and interacting with IDEFICS visual language models
-    models.models.filter(
-      (model) => model.interface === ModelInterface.MultiModal
+    const ideficsModels = models.models.filter(
+      (model) =>
+        model.interface === ModelInterface.MultiModal &&
+        model.name.toLocaleLowerCase().includes("idefics")
     );
 
     // check if any deployed model requires idefics interface
-
     const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
       shared,
       config: props.config,
@@ -120,6 +122,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       sessionsTable: chatBotApi.sessionsTable,
       byUserIdIndex: chatBotApi.byUserIdIndex,
       chatbotFilesBucket: chatBotApi.filesBucket,
+      createPrivateGateway: ideficsModels.length > 0,
     });
 
     // Route all incoming messages targeted to idefics to the idefics model interface queue
@@ -228,6 +231,18 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           "/aws/lambda/" + r.functionName
         );
       }),
+      llmRequestHandlersLogGroups: [
+        ideficsInterface.requestHandler,
+        langchainInterface?.requestHandler,
+      ]
+        .filter((i) => i)
+        .map((r) => {
+          return LogGroup.fromLogGroupName(
+            monitoringStack,
+            "Log" + (r as lambda.Function).node.id,
+            "/aws/lambda/" + (r as lambda.Function).functionName
+          );
+        }),
       cognito: {
         userPoolId: authentication.userPool.userPoolId,
         clientId: authentication.userPoolClient.userPoolClientId,
@@ -294,14 +309,18 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/lambda-resolver/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/IdeficsInterface/IdeficsInterfaceRequestHandler/ServiceRole/Resource`,
-        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
-        `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
+        `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/Resource`,
         ...(langchainInterface
           ? [
               `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,
               `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+            ]
+          : []),
+        ...(ideficsModels.length > 0
+          ? [
+              `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
+              `/${this.stackName}/IdeficsInterface/S3IntegrationRole/DefaultPolicy/Resource`,
             ]
           : []),
       ],
@@ -316,27 +335,30 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         },
       ]
     );
-    NagSuppressions.addResourceSuppressionsByPath(
-      this,
-      `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/DeploymentStage.prod/Resource`,
-      [
-        {
-          id: "AwsSolutions-APIG3",
-          reason: "WAF not required due to configured Cognito auth.",
-        },
-      ]
-    );
-    NagSuppressions.addResourceSuppressionsByPath(
-      this,
-      [
-        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
-        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
-      ],
-      [
-        { id: "AwsSolutions-APIG4", reason: "Private API within a VPC." },
-        { id: "AwsSolutions-COG4", reason: "Private API within a VPC." },
-      ]
-    );
+
+    if (ideficsModels.length > 0) {
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/DeploymentStage.prod/Resource`,
+        [
+          {
+            id: "AwsSolutions-APIG3",
+            reason: "WAF not required due to configured Cognito auth.",
+          },
+        ]
+      );
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        [
+          `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
+          `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
+        ],
+        [
+          { id: "AwsSolutions-APIG4", reason: "Private API within a VPC." },
+          { id: "AwsSolutions-COG4", reason: "Private API within a VPC." },
+        ]
+      );
+    }
 
     // RAG configuration
     if (props.config.rag.enabled) {

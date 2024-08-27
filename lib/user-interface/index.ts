@@ -207,8 +207,9 @@ export class UserInterface extends Construct {
                 },
               };
 
-              execSync(`npm --silent --prefix "${appPath}" ci`, options);
-              execSync(`npm --silent --prefix "${appPath}" run build`, options);
+              // Safe because the command is not user provided
+              execSync(`npm --silent --prefix "${appPath}" ci`, options); //NOSONAR Needed for the build process.
+              execSync(`npm --silent --prefix "${appPath}" run build`, options); //NOSONAR
               Utils.copyDirRecursive(buildPath, outputDir);
             } catch (e) {
               console.error(e);

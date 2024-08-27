@@ -2,7 +2,7 @@
 
 exports[`snapshot test 1`] = `
 {
-  "Description": "Description: (uksb-1tupboc45) (version:0.1.122) (tag:C1:0,C2:0,C3:0,C4:0,C5:0,C6:1,C7:0,C8:0) ",
+  "Description": "Description: (uksb-1tupboc45) (version:0.1.122) (tag:C1:0,C2:0,C3:0,C4:0,C5:0,C6:2,C7:0,C8:0) ",
   "Mappings": {
     "DlcRepositoryAccountMap": {
       "ap-east-1": {
@@ -3858,6 +3858,13 @@ schema {
               },
             },
             {
+              "Action": "sagemaker:InvokeEndpoint",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ModelsHuggingFaceM4idefics80binstructendpointIDEFICS80BBC34A48F",
+              },
+            },
+            {
               "Action": [
                 "comprehend:DetectDominantLanguage",
                 "comprehend:DetectSentiment",
@@ -4482,6 +4489,29 @@ schema {
       },
       "Type": "AWS::SageMaker::EndpointConfig",
     },
+    "ModelsEndpointConfigIDEFICS80B8A31DDC6": {
+      "DependsOn": [
+        "ModelsHuggingFaceM4idefics80binstructmodelIDEFICS80B1F09D07D",
+      ],
+      "Properties": {
+        "ProductionVariants": [
+          {
+            "ContainerStartupHealthCheckTimeoutInSeconds": 600,
+            "InitialInstanceCount": 1,
+            "InitialVariantWeight": 1,
+            "InstanceType": "ml.g5.48xlarge",
+            "ModelName": {
+              "Fn::GetAtt": [
+                "ModelsHuggingFaceM4idefics80binstructmodelIDEFICS80B1F09D07D",
+                "ModelName",
+              ],
+            },
+            "VariantName": "AllTraffic",
+          },
+        ],
+      },
+      "Type": "AWS::SageMaker::EndpointConfig",
+    },
     "ModelsFalconLiteRole90259899": {
       "Metadata": {
         "cdk_nag": {
@@ -4596,10 +4626,220 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "ModelsHuggingFaceM4idefics80binstructendpointIDEFICS80BBC34A48F": {
+      "DependsOn": [
+        "ModelsEndpointConfigIDEFICS80B8A31DDC6",
+      ],
+      "Properties": {
+        "EndpointConfigName": {
+          "Fn::GetAtt": [
+            "ModelsEndpointConfigIDEFICS80B8A31DDC6",
+            "EndpointConfigName",
+          ],
+        },
+        "EndpointName": "HuggingFaceM4-idefics-80b-instruct",
+        "Tags": [
+          {
+            "Key": "modelId",
+            "Value": "HuggingFaceM4/idefics-80b-instruct",
+          },
+        ],
+      },
+      "Type": "AWS::SageMaker::Endpoint",
+    },
+    "ModelsHuggingFaceM4idefics80binstructmodelIDEFICS80B1F09D07D": {
+      "Properties": {
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ModelsIDEFICS80BRole5BE23C49",
+            "Arn",
+          ],
+        },
+        "PrimaryContainer": {
+          "Environment": {
+            "HF_MODEL_ID": "HuggingFaceM4/idefics-80b-instruct",
+            "HF_MODEL_QUANTIZE": "bitsandbytes",
+            "MAX_BATCH_TOTAL_TOKENS": "8192",
+            "MAX_INPUT_LENGTH": "1024",
+            "MAX_TOTAL_TOKENS": "2048",
+            "SAGEMAKER_CONTAINER_LOG_LEVEL": "20",
+            "SAGEMAKER_REGION": {
+              "Ref": "AWS::Region",
+            },
+            "SM_NUM_GPUS": "8",
+          },
+          "Image": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::FindInMap": [
+                    "DlcRepositoryAccountMap",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    "value",
+                  ],
+                },
+                ".dkr.ecr.",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/huggingface-pytorch-tgi-inference:2.0.1-tgi1.1.0-gpu-py39-cu118-ubuntu20.04",
+              ],
+            ],
+          },
+          "Mode": "SingleModel",
+        },
+        "Tags": [
+          {
+            "Key": "modelId",
+            "Value": "HuggingFaceM4/idefics-80b-instruct",
+          },
+        ],
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "SharedVPC6716DA5E",
+                "DefaultSecurityGroup",
+              ],
+            },
+          ],
+          "Subnets": [
+            {
+              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::SageMaker::Model",
+    },
+    "ModelsIDEFICS80BRole5BE23C49": {
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-IAM4",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+            {
+              "id": "AwsSolutions-IAM5",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sagemaker.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSageMakerFullAccess",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ModelsIDEFICS80BRoleDefaultPolicy33F8A86E": {
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-IAM4",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+            {
+              "id": "AwsSolutions-IAM5",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ecr:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Fn::FindInMap": [
+                        "DlcRepositoryAccountMap",
+                        {
+                          "Ref": "AWS::Region",
+                        },
+                        "value",
+                      ],
+                    },
+                    ":repository/huggingface-pytorch-tgi-inference",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ModelsIDEFICS80BRoleDefaultPolicy33F8A86E",
+        "Roles": [
+          {
+            "Ref": "ModelsIDEFICS80BRole5BE23C49",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "ModelsModelsParameter4A14799B": {
       "Properties": {
         "Type": "String",
-        "Value": "[{"name":"amazon-FalconLite","endpoint":"amazon-FalconLite","responseStreamingSupported":false,"inputModalities":["TEXT"],"outputModalities":["TEXT"],"interface":"langchain","ragSupported":true}]",
+        "Value": "[{"name":"amazon-FalconLite","endpoint":"amazon-FalconLite","responseStreamingSupported":false,"inputModalities":["TEXT"],"outputModalities":["TEXT"],"interface":"langchain","ragSupported":true},{"name":"HuggingFaceM4-idefics-80b-instruct","endpoint":"HuggingFaceM4-idefics-80b-instruct","responseStreamingSupported":false,"inputModalities":["TEXT","IMAGE"],"outputModalities":["TEXT"],"interface":"multimodal","ragSupported":false}]",
       },
       "Type": "AWS::SSM::Parameter",
     },
@@ -14240,7 +14480,7 @@ schema {
     "SharedConfig358B4A20": {
       "Properties": {
         "Type": "String",
-        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]"]},"rag":{"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true},"knowledgeBase":{"enabled":false}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]}}",
+        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]","Idefics_80b (Multimodal) [ml.g5.48xlarge]"]},"rag":{"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true},"knowledgeBase":{"enabled":false}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]}}",
       },
       "Type": "AWS::SSM::Parameter",
     },

@@ -96,7 +96,7 @@ def record_handler(record: SQSRecord):
     payload: str = record.body
     message: dict = json.loads(payload)
     detail: dict = json.loads(message["Message"])
-    logger.info(detail)
+    logger.info("Incoming request", detail=detail)
 
     if detail["action"] == ChatbotAction.RUN.value:
         handle_run(detail)
@@ -121,14 +121,14 @@ def handle_failed_records(records):
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {
                     "sessionId": session_id,
-                    "content": str(error),
+                    "content": "Something went wrong.",
                     "type": "text",
                 },
             }
         )
 
 
-@logger.inject_lambda_context(log_event=True)
+@logger.inject_lambda_context(log_event=False)
 @tracer.capture_lambda_handler
 def handler(event, context: LambdaContext):
     batch = event["Records"]
@@ -137,9 +137,14 @@ def handler(event, context: LambdaContext):
         with processor(records=batch, handler=record_handler):
             processed_messages = processor.process()
     except BatchProcessingError as e:
-        logger.error(e)
+        logger.exception(e)
 
-    logger.info(processed_messages)
+    for message in processed_messages:
+        logger.info(
+            "Request compelte with status " + message[0],
+            status=message[0],
+            cause=message[1],
+        )
     handle_failed_records(
         message for message in processed_messages if message[0] == "fail"
     )

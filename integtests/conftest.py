@@ -19,9 +19,13 @@ def cognito_credentials(config, worker_id) -> Credentials:
     user_pool_id = config.get("aws_user_pools_id")
     region = config.get("aws_cognito_region")
     user_pool_client_id = config.get("aws_user_pools_web_client_id")
+    identity_pool_id = config.get("aws_cognito_identity_pool_id")
 
     cognito = CognitoClient(
-        region=region, user_pool_id=user_pool_id, client_id=user_pool_client_id
+        region=region,
+        user_pool_id=user_pool_id,
+        client_id=user_pool_client_id,
+        identity_pool_id=identity_pool_id,
     )
     email = "integ-test-user@example.local-" + worker_id
 
@@ -45,6 +49,11 @@ def default_embed_model():
 
 
 @pytest.fixture(scope="session")
+def default_multimodal_model():
+    return "anthropic.claude-3-haiku-20240307-v1:0"
+
+
+@pytest.fixture(scope="session")
 def default_provider():
     return "bedrock"
 
@@ -62,7 +71,7 @@ def react_url():
     return os.environ["REACT_APP_URL"]
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def selenium_driver(react_url):
     options = webdriver.FirefoxOptions()
     if os.getenv("HEADLESS"):
