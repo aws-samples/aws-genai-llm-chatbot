@@ -31,7 +31,7 @@ def test_create(client: AppSyncClient, default_embed_model):
             "kind": "kendra",
             "name": "INTEG_TEST_KENDRA",
             "kendraIndexId": kendra_index_id,
-            "useAllData": True,
+            "useAllData": False,
         }
     )
 
@@ -65,13 +65,29 @@ def test_add_file(client: AppSyncClient):
     files = {"file": b"The Integ Test flower is yellow."}
     response = requests.post(result.get("url"), data=fields_dict, files=files)
     assert response.status_code == 204
+    
+    # Document is added to kendra following a S3 Event processed by a lambda
+    # Waiting (it takes <10 sec)
+    retries = 0
+    while retries < 30:
+        time.sleep(1)
+        retries += 1
+        posts = client.list_documents(
+            {
+                "workspaceId": pytest.workspace.get("id"),
+                "documentType": "file"
+            }
+        )
+        if len(posts.get("items")) > 0:
+            break
 
     client.start_kendra_data_sync(pytest.workspace.get("id"))
 
     syncInProgress = True
     syncRetries = 0
-    while syncInProgress and syncRetries < 50:
-        time.sleep(10)
+    while syncInProgress and syncRetries < 15:
+        # Kendra can sometime take a while to sync and process the documents
+        time.sleep(60)
         syncStatus = client.is_kendra_data_synching(pytest.workspace.get("id"))
         syncInProgress = syncStatus.get("isKendraDataSynching")
         syncRetries += 1
@@ -131,7 +147,7 @@ def test_query_llm(client, default_model, default_provider):
 
     found = False
     retries = 0
-    while not found and retries < 15:
+    while not found and retries < 30:
         time.sleep(1)
         retries += 1
         session = client.get_session(session_id)
