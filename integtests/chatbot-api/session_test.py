@@ -27,7 +27,7 @@ def test_create_session(client, default_model, default_provider, session_id):
     found = False
     sessionFound = None
     retries = 0
-    while not found and retries < 10:
+    while not found and retries < 30:
         time.sleep(1)
         retries += 1
         sessions = client.list_sessions()

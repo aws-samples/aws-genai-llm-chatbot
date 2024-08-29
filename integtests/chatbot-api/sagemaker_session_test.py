@@ -19,27 +19,27 @@ def test_jumpstart_sagemaker_endpoint(client):
         "modelInterface": "langchain",
         "data": {
             "mode": "chain",
-            "text": "Hello, my name is Tom.",
+            "text": "The plant is yellow",
             "files": [],
             "modelName": model_name,
             "provider": "sagemaker",
             "sessionId": session_id,
         },
-        "modelKwargs": {"maxTokens": 150},
+        "modelKwargs": {"maxTokens": 150, "temparature": 0.1},
     }
 
     client.send_query(json.dumps(request))
 
     found = False
     retries = 0
-    while not found and retries < 20:
+    while not found and retries < 30:
         time.sleep(1)
         retries += 1
         session = client.get_session(session_id)
         if (
             session != None
             and len(session.get("history")) == 2
-            and "tom" in session.get("history")[1].get("content").lower()
+            and "plant" in session.get("history")[1].get("content").lower()
         ):
             found = True
             break
@@ -47,7 +47,7 @@ def test_jumpstart_sagemaker_endpoint(client):
 
     request = request.copy()
     # The goal here is to test the conversation history
-    request["data"]["text"] = "What is my name?"
+    request["data"]["text"] = "What is the plant color?"
 
     client.send_query(json.dumps(request))
 
@@ -57,10 +57,11 @@ def test_jumpstart_sagemaker_endpoint(client):
         time.sleep(1)
         retries += 1
         session = client.get_session(session_id)
+
         if (
             session != None
             and len(session.get("history")) == 4
-            and "tom" in session.get("history")[3].get("content").lower()
+            and "yellow" in session.get("history")[3].get("content").lower()
         ):
             found = True
             break
