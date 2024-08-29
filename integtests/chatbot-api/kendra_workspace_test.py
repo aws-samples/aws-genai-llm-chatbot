@@ -65,7 +65,7 @@ def test_add_file(client: AppSyncClient):
     files = {"file": b"The Integ Test flower is yellow."}
     response = requests.post(result.get("url"), data=fields_dict, files=files)
     assert response.status_code == 204
-    
+
     # Document is added to kendra following a S3 Event processed by a lambda
     # Waiting (it takes <10 sec)
     retries = 0
@@ -73,10 +73,7 @@ def test_add_file(client: AppSyncClient):
         time.sleep(1)
         retries += 1
         posts = client.list_documents(
-            {
-                "workspaceId": pytest.workspace.get("id"),
-                "documentType": "file"
-            }
+            {"workspaceId": pytest.workspace.get("id"), "documentType": "file"}
         )
         if len(posts.get("items")) > 0:
             break
