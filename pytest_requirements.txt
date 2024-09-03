@@ -11,4 +11,5 @@ selenium==4.16
 pdfplumber==0.11.0
 pyopenssl==24.2.1
 cryptography==42.0.4
+boto3
 -r lib/shared/layers/common/requirements.txt
