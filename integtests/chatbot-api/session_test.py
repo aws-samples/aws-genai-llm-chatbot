@@ -42,7 +42,6 @@ def test_create_session(client, default_model, default_provider, session_id):
     assert sessionFound.get("title") == request.get("data").get("text")
 
 
-
 def test_get_session(client, session_id, default_model):
     session = client.get_session(session_id)
     assert session.get("id") == session_id
