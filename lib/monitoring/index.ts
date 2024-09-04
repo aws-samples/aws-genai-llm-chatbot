@@ -1,6 +1,6 @@
 import { Stack } from "aws-cdk-lib";
 import { IGraphqlApi } from "aws-cdk-lib/aws-appsync";
-import { LogQueryWidget, Metric } from "aws-cdk-lib/aws-cloudwatch";
+import { LogQueryWidget, MathExpression, Metric } from "aws-cdk-lib/aws-cloudwatch";
 import { ITable } from "aws-cdk-lib/aws-dynamodb";
 import { IFunction as ILambdaFunction } from "aws-cdk-lib/aws-lambda";
 import { CfnCollection } from "aws-cdk-lib/aws-opensearchserverless";
@@ -15,10 +15,11 @@ import { Construct } from "constructs";
 import { CfnIndex } from "aws-cdk-lib/aws-kendra";
 import { IDatabaseCluster } from "aws-cdk-lib/aws-rds";
 import { Queue } from "aws-cdk-lib/aws-sqs";
-import { ILogGroup } from "aws-cdk-lib/aws-logs";
+import { FilterPattern, ILogGroup, MetricFilter } from "aws-cdk-lib/aws-logs";
 
 export interface MonitoringProps {
   prefix: string;
+  advancedMonitoring: boolean;
   appsycnApi: IGraphqlApi;
   appsyncResolversLogGroups: ILogGroup[];
   llmRequestHandlersLogGroups: ILogGroup[];
@@ -71,6 +72,10 @@ export class Monitoring extends Construct {
         )
       )
     );
+
+    if (props.advancedMonitoring) {
+      this.addMetricFilter(props.prefix + "GenAI", monitoring, props.llmRequestHandlersLogGroups);
+    }
 
     const link = `https://${region}.console.aws.amazon.com/cognito/v2/idp/user-pools/${props.cognito.userPoolId}/users?region=${region}`;
     const title = `Cognito [**UserPool**](${link})`;
@@ -145,6 +150,51 @@ export class Monitoring extends Construct {
         alarmFriendlyName: fct.node.id,
       });
     }
+  }
+
+  private addMetricFilter(namespace: string, monitoring: MonitoringFacade, logGroups: ILogGroup[]) {
+    for (const logGroupKey in logGroups) {
+      new MetricFilter(this, 'UsageFilter' + logGroupKey, {
+        logGroup: logGroups[logGroupKey],
+        metricNamespace: namespace,
+        metricName: 'TokenUsage',
+        filterPattern: FilterPattern.stringValue('$.metric_type', "=", "token_usage"),
+        metricValue: '$.value',
+        dimensions: {
+          "model": "$.model"
+        }
+      });
+    }
+
+    monitoring.monitorCustom({
+      alarmFriendlyName: "TokenUsage",
+      humanReadableName: "Token Usage",
+      metricGroups: [
+        {
+          title: "LLM Usage",
+          metrics: [
+            {
+              alarmFriendlyName: "TokenUsage",
+              metric: new MathExpression({
+                label: "Tokens",
+                expression: `SEARCH('{${namespace},model} MetricName=TokenUsage', 'Sum', 60)`,
+              }),
+              addAlarm: {},
+            },
+            {
+              alarmFriendlyName: "LLMChains Calls",
+              metric: new MathExpression({
+                label: "Calls",
+                expression: `SEARCH('{${namespace},model} MetricName=TokenUsage', 'SampleCount', 60)`,
+              }),
+              addAlarm: {},
+              position: AxisPosition.RIGHT,
+            },
+          ],
+        },
+      ],
+    });
+
   }
 
   private addCognitoMetrics(
@@ -319,7 +369,7 @@ export class Monitoring extends Construct {
        */
       queryLines: [
         "fields @timestamp, message, level, location" +
-          (extraFields.length > 0 ? "," + extraFields.join(",") : ""),
+        (extraFields.length > 0 ? "," + extraFields.join(",") : ""),
         `filter ispresent(level)`, // only includes messages using the logger
         "sort @timestamp desc",
         `limit 200`,

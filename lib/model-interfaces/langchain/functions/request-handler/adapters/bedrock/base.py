@@ -14,6 +14,11 @@ from langchain.utilities.anthropic import (
 )
 
 
+from ..base import ModelAdapter
+import genai_core.clients
+from langchain_aws import ChatBedrockConverse
+from langchain.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
+
 def get_guardrails() -> dict:
     if "BEDROCK_GUARDRAILS_ID" in os.environ:
         return {
@@ -22,6 +27,71 @@ def get_guardrails() -> dict:
         }
     return {}
 
+
+class BedrockChatAdapter(ModelAdapter):
+    def __init__(self, model_id, *args, **kwargs):
+        self.model_id = model_id
+
+        super().__init__(*args, **kwargs)
+        
+    def get_qa_prompt(self):
+        system_prompt = "Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. \n\n{context}"
+        return ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt),
+                MessagesPlaceholder("chat_history"),
+                ("human", "{input}"),
+            ]
+        )
+
+    def get_prompt(self):
+        prompt_template = ChatPromptTemplate(
+            [
+                (
+                    "system",
+                    "The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.",
+                ),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", "{input}"),
+            ]
+        )
+
+        return prompt_template
+
+    def get_condense_question_prompt(self):
+        contextualize_q_system_prompt = (
+            "Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question."
+        )
+        return ChatPromptTemplate.from_messages(
+            [
+                ("system", contextualize_q_system_prompt),
+                MessagesPlaceholder("chat_history"),
+                ("human", "{input}"),
+            ]
+        )
+
+    def get_llm(self, model_kwargs={}, extra={}):
+        bedrock = genai_core.clients.get_bedrock_client()
+        params = {}
+        if "temperature" in model_kwargs:
+            params["temperature"] = model_kwargs["temperature"]
+        if "topP" in model_kwargs:
+            params["top_p"] = model_kwargs["topP"]
+        if "maxTokens" in model_kwargs:
+            params["max_tokens"] = model_kwargs["maxTokens"]
+
+        guardrails = get_guardrails()
+        if len(guardrails.keys()) > 0:
+            params["guardrails"] = guardrails
+
+        return ChatBedrockConverse(
+            client=bedrock,
+            model=self.model_id,
+            disable_streaming=model_kwargs.get("streaming", False) == False,
+            callbacks=[self.callback_handler],
+            **params,
+            **extra
+        )
 
 class LLMInputOutputAdapter:
     """Adapter class to prepare the inputs from Langchain to a format
