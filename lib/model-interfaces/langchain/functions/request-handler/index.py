@@ -23,9 +23,12 @@ API_KEYS_SECRETS_ARN = os.environ["API_KEYS_SECRETS_ARN"]
 
 sequence_number = 0
 
-def on_llm_new_token(user_id, session_id, self, token, run_id, chunk, parent_run_id, *args, **kwargs):
+
+def on_llm_new_token(
+    user_id, session_id, self, token, run_id, chunk, parent_run_id, *args, **kwargs
+):
     if isinstance(token, list):
-        # When using the newer Chat objects from Langchain. 
+        # When using the newer Chat objects from Langchain.
         # Token is not a string
         text = ""
         for t in token:

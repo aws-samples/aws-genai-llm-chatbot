@@ -831,8 +831,7 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "advancedMonitoring",
-      message:
-        "Do you want to enable custom metrics and advanced monitoring?",
+      message: "Do you want to enable custom metrics and advanced monitoring?",
       initial: options.advancedMonitoring || false,
     },
     {

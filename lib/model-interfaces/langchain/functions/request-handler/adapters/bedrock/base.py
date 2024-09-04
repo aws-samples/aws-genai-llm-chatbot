@@ -17,7 +17,8 @@ from langchain.utilities.anthropic import (
 from ..base import ModelAdapter
 import genai_core.clients
 from langchain_aws import ChatBedrockConverse
-from langchain.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+
 
 def get_guardrails() -> dict:
     if "BEDROCK_GUARDRAILS_ID" in os.environ:
@@ -33,9 +34,13 @@ class BedrockChatAdapter(ModelAdapter):
         self.model_id = model_id
 
         super().__init__(*args, **kwargs)
-        
+
     def get_qa_prompt(self):
-        system_prompt = "Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. \n\n{context}"
+        system_prompt = (
+            "Use the following pieces of context to answer the question at the end."
+            " If you don't know the answer, just say that you don't know, "
+            "don't try to make up an answer. \n\n{context}"
+        )
         return ChatPromptTemplate.from_messages(
             [
                 ("system", system_prompt),
@@ -49,7 +54,12 @@ class BedrockChatAdapter(ModelAdapter):
             [
                 (
                     "system",
-                    "The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.",
+                    (
+                        "The following is a friendly conversation between "
+                        "a human and an AI."
+                        "If the AI does not know the answer to a question, it "
+                        "truthfully says it does not know."
+                    ),
                 ),
                 MessagesPlaceholder(variable_name="chat_history"),
                 ("human", "{input}"),
@@ -60,7 +70,8 @@ class BedrockChatAdapter(ModelAdapter):
 
     def get_condense_question_prompt(self):
         contextualize_q_system_prompt = (
-            "Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question."
+            "Given the following conversation and a follow up"
+            " question, rephrase the follow up question to be a standalone question."
         )
         return ChatPromptTemplate.from_messages(
             [
@@ -90,8 +101,9 @@ class BedrockChatAdapter(ModelAdapter):
             disable_streaming=model_kwargs.get("streaming", False) == False,
             callbacks=[self.callback_handler],
             **params,
-            **extra
+            **extra,
         )
+
 
 class LLMInputOutputAdapter:
     """Adapter class to prepare the inputs from Langchain to a format

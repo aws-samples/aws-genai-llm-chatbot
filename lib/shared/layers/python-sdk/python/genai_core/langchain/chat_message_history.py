@@ -56,7 +56,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
         """Append the message to the record in DynamoDB"""
         messages = messages_to_dict(self.messages)
         if isinstance(message, AIMessageChunk):
-            # When streaming with RunnableWithMessageHistory, 
+            # When streaming with RunnableWithMessageHistory,
             # it would add a chunk to the history but it expects a text as content.
             ai_message = ""
             for c in message.content:

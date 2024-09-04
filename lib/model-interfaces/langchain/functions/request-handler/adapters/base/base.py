@@ -23,8 +23,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.outputs import LLMResult, ChatGeneration
 from langchain_core.messages.ai import AIMessage, AIMessageChunk
 from langchain_core.messages.human import HumanMessage
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain import hub
+from langchain_aws import ChatBedrockConverse
 
 logger = Logger()
 
@@ -53,7 +52,7 @@ class LLMStartHandler(BaseCallbackHandler):
             and isinstance(generation, ChatGeneration)
             and isinstance(generation.message, AIMessage)
         ):
-            ## In case of rag there could be 2 llm calls.
+            # In case of rag there could be 2 llm calls.
             if self.usage is None:
                 self.usage = {
                     "input_tokens": 0,
@@ -149,7 +148,8 @@ class ModelAdapter:
 
         if workspace_id:
             retriever = WorkspaceRetriever(workspace_id=workspace_id)
-            ## Only stream the last llm call (otherwise the internal llm response will be visible)
+            # Only stream the last llm call (otherwise the internal
+            # llm response will be visible)
             llm_without_streaming = self.get_llm({"streaming": False})
             history_aware_retriever = create_history_aware_retriever(
                 llm_without_streaming,
@@ -157,21 +157,21 @@ class ModelAdapter:
                 self.get_condense_question_prompt(),
             )
             question_answer_chain = create_stuff_documents_chain(
-                self.llm, self.get_qa_prompt(),
+                self.llm,
+                self.get_qa_prompt(),
             )
             chain = create_retrieval_chain(
                 history_aware_retriever, question_answer_chain
             )
         else:
             chain = self.get_prompt() | self.llm
-            
 
         conversation = RunnableWithMessageHistory(
             chain,
             lambda session_id: self.chat_history,
             history_messages_key="chat_history",
             input_messages_key="input",
-            output_messages_key="output"
+            output_messages_key="output",
         )
 
         config = {"configurable": {"session_id": self.session_id}}
@@ -212,7 +212,7 @@ class ModelAdapter:
                 }
                 for doc in retriever.get_last_search_documents()
             ]
-            
+
         metadata = {
             "modelId": self.model_id,
             "modelKwargs": self.model_kwargs,
@@ -233,7 +233,8 @@ class ModelAdapter:
             # Used by Cloudwatch filters to generate a metric of token usage.
             logger.info(
                 "Usage Metric",
-                # Each unique value of model id will create a new cloudwatch metric (each one has a cost)
+                # Each unique value of model id will create a
+                # new cloudwatch metric (each one has a cost)
                 model=self.model_id,
                 metric_type="token_usage",
                 value=self.callback_handler.usage.get("total_tokens"),
@@ -329,7 +330,7 @@ class ModelAdapter:
         logger.debug(f"mode: {self._mode}")
 
         if self._mode == ChatbotMode.CHAIN.value:
-            if isinstance(self.llm, BaseChatModel):
+            if isinstance(self.llm, ChatBedrockConverse):
                 return self.run_with_chain_v2(prompt, workspace_id)
             else:
                 return self.run_with_chain(prompt, workspace_id)

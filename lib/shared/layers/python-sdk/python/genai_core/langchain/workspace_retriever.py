@@ -6,13 +6,14 @@ from langchain.schema import BaseRetriever, Document
 
 logger = Logger()
 
+
 class WorkspaceRetriever(BaseRetriever):
     workspace_id: str
     documents_found: List[Document] = []
 
-    def get_last_search_documents(self) -> List[Document]: 
+    def get_last_search_documents(self) -> List[Document]:
         return self.documents_found
-    
+
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
     ) -> List[Document]:
@@ -21,9 +22,11 @@ class WorkspaceRetriever(BaseRetriever):
             self.workspace_id, query, limit=3, full_response=False
         )
 
-        self.documents_found = [self._get_document(item) for item in result.get("items", [])]
+        self.documents_found = [
+            self._get_document(item) for item in result.get("items", [])
+        ]
         return self.documents_found
-    
+
     def _get_document(self, item):
         content = item["content"]
         content_complement = item.get("content_complement")
