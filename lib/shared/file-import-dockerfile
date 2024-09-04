@@ -1,9 +1,24 @@
-FROM quay.io/unstructured-io/unstructured:0.11.2
+FROM quay.io/unstructured-io/unstructured:0.15.6 as source
+
+USER root
+# Remove training data
+RUN  rm -rf /usr/local/share/tessdata
+
+#Remove large packages that are not used. Docker image does not support GPUs.
+#Related ticket https://github.com/Unstructured-IO/unstructured/issues/2976
+RUN pip uninstall -y `pip freeze | grep torch` && pip uninstall -y `pip freeze | grep nvidia` 
+# Torch is needed for image analysis in pdfs (using CPU version)
+RUN pip install torch==2.3.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+# Remove previous layers to create a smaller image
+FROM scratch 
+COPY --from=source / /
+
+USER notebook-user
 
 WORKDIR /app
 COPY file-import-batch-job/requirements.txt requirements.txt
-RUN pip install -r requirements.txt 
-
+RUN pip install -r requirements.txt  && rm -rf example-docs test_unstructured  
 COPY layers/python-sdk/python/ .
 COPY file-import-batch-job/main.py ./main.py
 

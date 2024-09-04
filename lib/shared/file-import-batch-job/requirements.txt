@@ -16,3 +16,4 @@ beautifulsoup4==4.12.2
 requests==2.32.2
 attrs==23.1.0
 feedparser==6.0.11
+PyJWT==2.9.0
