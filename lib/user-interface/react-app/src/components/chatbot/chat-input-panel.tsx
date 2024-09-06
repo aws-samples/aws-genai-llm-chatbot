@@ -263,7 +263,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         setReadyState(ReadyState.CLOSED);
       }
     })();
-  }, [appContext, state.modelsStatus, props]);
+  }, [appContext, props.session.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const onWindowScroll = () => {
