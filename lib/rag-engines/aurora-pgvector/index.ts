@@ -30,7 +30,11 @@ export class AuroraPgVector extends Construct {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_15_3,
       }),
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      storageEncryptionKey: props.shared.kmsKey,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.SNAPSHOT
+          : cdk.RemovalPolicy.DESTROY,
       writer: rds.ClusterInstance.serverlessV2("ServerlessInstance"),
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
@@ -73,7 +77,8 @@ export class AuroraPgVector extends Construct {
 
     const dbSetupResource = new cdk.CustomResource(
       this,
-      "DatabaseSetupResource",
+      // Force recreation on CMK cange to re-init the DB cluster.
+      "DatabaseSetupResource" + (props.shared.kmsKey ? "cmk-" : ""),
       {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         serviceToken: databaseSetupProvider.serviceToken,

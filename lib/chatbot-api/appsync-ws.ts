@@ -15,10 +15,12 @@ import { ITopic } from "aws-cdk-lib/aws-sns";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as path from "path";
+import { IKey } from "aws-cdk-lib/aws-kms";
 
 interface RealtimeResolversProps {
   readonly queue: IQueue;
   readonly topic: ITopic;
+  readonly topicKey: IKey;
   readonly userPool: UserPool;
   readonly shared: Shared;
   readonly api: appsync.GraphqlApi;
@@ -78,6 +80,13 @@ export class RealtimeResolvers extends Construct {
     outgoingMessageHandler.addEventSource(new SqsEventSource(props.queue));
 
     props.topic.grantPublish(resolverFunction);
+    if (props.topicKey && resolverFunction.role) {
+      props.topicKey.grant(
+        resolverFunction.role,
+        "kms:GenerateDataKey",
+        "kms:Decrypt"
+      );
+    }
 
     const functionDataSource = props.api.addLambdaDataSource(
       "realtimeResolverFunction",

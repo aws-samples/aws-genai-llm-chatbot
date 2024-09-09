@@ -159,9 +159,15 @@ export class PrivateWebsite extends Construct {
 
     const albLogBucket = new s3.Bucket(this, "ALBLoggingBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       enforceSSL: true,
+      // Only SSE-S3 encryption is supported for ALB logs
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
     loadBalancer.logAccessLogs(albLogBucket);
 

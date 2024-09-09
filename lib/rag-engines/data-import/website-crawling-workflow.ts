@@ -8,7 +8,6 @@ import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as logs from "aws-cdk-lib/aws-logs";
-import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface WebsiteCrawlingWorkflowProps {
   readonly config: SystemConfig;
@@ -128,7 +127,11 @@ export class WebsiteCrawlingWorkflow extends Construct {
       resultPath: "$.job",
     });
     const logGroup = new logs.LogGroup(this, "WebsiteCrawlingSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      retention: props.config.logRetention,
     });
 
     const workflow = setProcessing.next(webCrawlerJob).next(setProcessed);
@@ -141,6 +144,10 @@ export class WebsiteCrawlingWorkflow extends Construct {
         level: sfn.LogLevel.ALL,
       },
     });
+
+    if (props.shared.kmsKey) {
+      props.shared.kmsKey.grantEncryptDecrypt(stateMachine.role);
+    }
 
     stateMachine.addToRolePolicy(
       new iam.PolicyStatement({

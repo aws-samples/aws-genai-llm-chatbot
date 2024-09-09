@@ -9,7 +9,14 @@ export function deployCustomScriptModel(
   props: SageMakerModelProps,
   modelConfig: ModelCustomScriptConfig
 ) {
-  const { vpc, region, logRetention } = props;
+  const {
+    vpc,
+    region,
+    logRetention,
+    kmsKey,
+    retainOnDelete,
+    enableEndpointKMSEncryption,
+  } = props;
   const { modelId, instanceType, codeFolder, container, env } = modelConfig;
 
   const endpointName = (
@@ -31,7 +38,10 @@ export function deployCustomScriptModel(
     codeFolder,
     container,
     env,
+    kmsKey,
+    retainOnDelete,
     logRetention,
+    enableEndpointKMSEncryption,
   });
 
   return { model: llmModel.model, endpoint: llmModel.endpoint };

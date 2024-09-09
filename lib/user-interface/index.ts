@@ -39,9 +39,14 @@ export class UserInterface extends Construct {
 
     const uploadLogsBucket = new s3.Bucket(this, "WebsiteLogsBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       enforceSSL: true,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
 
     const websiteBucket = new s3.Bucket(this, "WebsiteBucket", {
@@ -53,6 +58,10 @@ export class UserInterface extends Construct {
       websiteErrorDocument: "index.html",
       enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
+      // Cloudfront with OAI only support S3 Managed (would need to migrate to OAC)
+      // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
 
     // Deploy either Private (only accessible within VPC) or Public facing website

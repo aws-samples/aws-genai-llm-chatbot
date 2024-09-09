@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
@@ -21,6 +22,10 @@ export interface SharedProps {
 
 export class Shared extends Construct {
   readonly vpc: ec2.Vpc;
+  readonly kmsKey: kms.Key;
+  readonly kmsKeyAlias: string;
+  readonly queueKmsKey: kms.Key;
+  readonly queueKmsKeyAlias: string;
   readonly defaultEnvironmentVariables: Record<string, string>;
   readonly configParameter: ssm.StringParameter;
   readonly pythonRuntime: lambda.Runtime = pythonRuntime;
@@ -35,6 +40,9 @@ export class Shared extends Construct {
   constructor(scope: Construct, id: string, props: SharedProps) {
     super(scope, id);
 
+    this.kmsKeyAlias = props.config.prefix + "genaichatbot-shared-key";
+    this.queueKmsKeyAlias =
+      props.config.prefix + "genaichatbot-queue-shared-key";
     const powerToolsLayerVersion = "46";
 
     this.defaultEnvironmentVariables = {
@@ -43,6 +51,28 @@ export class Shared extends Construct {
       POWERTOOLS_LOGGER_LOG_EVENT: "true",
       POWERTOOLS_SERVICE_NAME: "chatbot",
     };
+
+    if (props.config.createCMKs) {
+      this.kmsKey = new kms.Key(this, "KMSKey", {
+        enableKeyRotation: true,
+        // The key is not a data store but is needed to read the retained tables for example
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        alias: this.kmsKeyAlias,
+      });
+
+      // Revisit once the following is merged (Causing circular dependency without a second key)
+      // https://github.com/aws/aws-cdk/pull/31155
+      // Using the same queue for an SQS and event is causing issues.
+      this.queueKmsKey = new kms.Key(this, "QueueKMSKey", {
+        enableKeyRotation: true,
+        // The key is only used for temporary stores (SQS)
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        alias: this.queueKmsKeyAlias,
+      });
+    }
 
     let vpc: ec2.Vpc;
     if (!props.config.vpc?.vpcId) {
@@ -65,7 +95,11 @@ export class Shared extends Construct {
         ],
       });
       const logGroup = new logs.LogGroup(this, "FLowLogsLogGroup", {
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        retention: props.config.logRetention,
       });
       new ec2.FlowLog(this, "FlowLog", {
         resourceType: ec2.FlowLogResourceType.fromVpc(vpc),
@@ -240,6 +274,7 @@ export class Shared extends Construct {
       this,
       "X-Origin-Verify-Secret",
       {
+        encryptionKey: this.kmsKey,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         generateSecretString: {
           excludePunctuation: true,
@@ -250,6 +285,7 @@ export class Shared extends Construct {
     );
 
     const apiKeysSecret = new secretsmanager.Secret(this, "ApiKeysSecret", {
+      encryptionKey: this.kmsKey,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       secretObjectValue: {},
     });
