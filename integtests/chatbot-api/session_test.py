@@ -50,6 +50,15 @@ def test_get_session(client, session_id, default_model):
     assert session.get("history")[1].get("type") == "ai"
 
 
+def test_get_session(client, session_id, default_model):
+    session = client.get_session(session_id)
+    assert session.get("id") == session_id
+    assert session.get("title") == "test"
+    assert len(session.get("history")) == 2
+    assert session.get("history")[0].get("type") == "human"
+    assert session.get("history")[1].get("type") == "ai"
+
+
 def test_delete_session(client, session_id):
     session = client.delete_session(session_id)
     assert session.get("id") == session_id

@@ -1,15 +1,48 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listSessions, getSession } from "../../graphql/queries";
+import {
+  listSessions,
+  getSession,
+  getUploadFileURL,
+  getFileURL,
+} from "../../graphql/queries";
 import { deleteSession, deleteUserSessions } from "../../graphql/mutations";
 import {
   ListSessionsQuery,
   GetSessionQuery,
   DeleteSessionMutation,
   DeleteUserSessionsMutation,
+  GetUploadFileURLQuery,
+  GetFileURLQuery,
 } from "../../API";
 
 export class SessionsClient {
+  async getFileUploadSignedUrl(
+    fileName: string
+  ): Promise<GraphQLResult<GraphQLQuery<GetUploadFileURLQuery>>> {
+    const result = API.graphql<GraphQLQuery<GetUploadFileURLQuery>>({
+      query: getUploadFileURL,
+      variables: {
+        input: {
+          fileName,
+        },
+      },
+    });
+    return result;
+  }
+
+  async getFileSignedUrl(
+    fileName: string
+  ): Promise<GraphQLResult<GraphQLQuery<GetFileURLQuery>>> {
+    const result = API.graphql<GraphQLQuery<GetFileURLQuery>>({
+      query: getFileURL,
+      variables: {
+        fileName,
+      },
+    });
+    return result;
+  }
+
   async getSessions(): Promise<GraphQLResult<GraphQLQuery<ListSessionsQuery>>> {
     const result = await API.graphql<GraphQLQuery<ListSessionsQuery>>({
       query: listSessions,

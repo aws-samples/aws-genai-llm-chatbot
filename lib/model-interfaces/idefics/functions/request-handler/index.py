@@ -53,6 +53,7 @@ def handle_run(record):
         prompt=prompt,
         messages=messages,
         files=files,
+        user_id=user_id,
     )
 
     mlm_response = model.handle_run(prompt=prompt_template, model_kwargs=model_kwargs)

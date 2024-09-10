@@ -234,19 +234,9 @@ export class IdeficsInterface extends Construct {
     });
     integrationRole.addToPolicy(
       new iam.PolicyStatement({
-        actions: ["s3:Get*", "s3:List*"],
+        actions: ["s3:GetObject*"],
         effect: iam.Effect.ALLOW,
-        resources: [
-          `${this.props.chatbotFilesBucket.bucketArn}/*`,
-          `${this.props.chatbotFilesBucket.bucketArn}/*/*`,
-        ],
-      })
-    );
-    integrationRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ["kms:Decrypt", "kms:ReEncryptFrom"],
-        effect: iam.Effect.ALLOW,
-        resources: ["arn:aws:kms:*"],
+        resources: [`${this.props.chatbotFilesBucket.bucketArn}/private/*`],
       })
     );
 
@@ -254,11 +244,12 @@ export class IdeficsInterface extends Construct {
       service: "s3",
       integrationHttpMethod: "GET",
       region: cdk.Aws.REGION,
-      path: `${this.props.chatbotFilesBucket.bucketName}/public/{object}`,
+      path: `${this.props.chatbotFilesBucket.bucketName}/private/{folder}/{key}`,
       options: {
         credentialsRole: integrationRole,
         requestParameters: {
-          "integration.request.path.object": "method.request.path.object",
+          "integration.request.path.folder": "method.request.path.folder",
+          "integration.request.path.key": "method.request.path.key",
         },
         integrationResponses: [
           {
@@ -272,21 +263,25 @@ export class IdeficsInterface extends Construct {
       },
     });
 
-    const fileResource = api.root.addResource("{object}");
-    fileResource.addMethod("ANY", s3Integration, {
-      methodResponses: [
-        {
-          statusCode: "200",
-          responseParameters: {
-            "method.response.header.Content-Type": true,
+    api.root
+      .addResource("{folder}")
+      .addResource("{key}")
+      .addMethod("GET", s3Integration, {
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseParameters: {
+              "method.response.header.Content-Type": true,
+            },
           },
+        ],
+        requestParameters: {
+          "method.request.path.folder": true,
+          "method.request.path.key": true,
+          "method.request.header.Content-Type": true,
         },
-      ],
-      requestParameters: {
-        "method.request.path.object": true,
-        "method.request.header.Content-Type": true,
-      },
-    });
+      });
+
     /**
      * CDK NAG suppression
      */

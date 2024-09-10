@@ -297,11 +297,6 @@ exports[`snapshot test 1`] = `
     },
   },
   "Outputs": {
-    "AuthenticationIdentityPoolIdB65295D6": {
-      "Value": {
-        "Ref": "AuthenticationIdentityPool98062B23",
-      },
-    },
     "AuthenticationUserPoolIdF0D106F7": {
       "Value": {
         "Ref": "AuthenticationUserPool28698864",
@@ -413,163 +408,6 @@ exports[`snapshot test 1`] = `
     },
   },
   "Resources": {
-    "AuthenticationIdentityPool98062B23": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "AllowUnauthenticatedIdentities": false,
-        "CognitoIdentityProviders": [
-          {
-            "ClientId": {
-              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
-            },
-            "ProviderName": {
-              "Fn::Join": [
-                "",
-                [
-                  "cognito-idp.",
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  ".",
-                  {
-                    "Ref": "AWS::URLSuffix",
-                  },
-                  "/",
-                  {
-                    "Ref": "AuthenticationUserPool28698864",
-                  },
-                ],
-              ],
-            },
-            "ServerSideTokenCheck": true,
-          },
-        ],
-      },
-      "Type": "AWS::Cognito::IdentityPool",
-    },
-    "AuthenticationIdentityPoolAuthenticatedRole04DA16FF": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRoleWithWebIdentity",
-              "Condition": {
-                "ForAnyValue:StringLike": {
-                  "cognito-identity.amazonaws.com:amr": "authenticated",
-                },
-                "StringEquals": {
-                  "cognito-identity.amazonaws.com:aud": {
-                    "Ref": "AuthenticationIdentityPool98062B23",
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Federated": "cognito-identity.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Description": {
-          "Fn::Join": [
-            "",
-            [
-              "Default Authenticated Role for Identity Pool ",
-              {
-                "Fn::GetAtt": [
-                  "AuthenticationIdentityPool98062B23",
-                  "Name",
-                ],
-              },
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "AuthenticationIdentityPoolDefaultRoleAttachment468E9E4F": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "IdentityPoolId": {
-          "Ref": "AuthenticationIdentityPool98062B23",
-        },
-        "Roles": {
-          "authenticated": {
-            "Fn::GetAtt": [
-              "AuthenticationIdentityPoolAuthenticatedRole04DA16FF",
-              "Arn",
-            ],
-          },
-          "unauthenticated": {
-            "Fn::GetAtt": [
-              "AuthenticationIdentityPoolUnauthenticatedRoleC08D0BC1",
-              "Arn",
-            ],
-          },
-        },
-      },
-      "Type": "AWS::Cognito::IdentityPoolRoleAttachment",
-    },
-    "AuthenticationIdentityPoolUnauthenticatedRoleC08D0BC1": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRoleWithWebIdentity",
-              "Condition": {
-                "ForAnyValue:StringLike": {
-                  "cognito-identity.amazonaws.com:amr": "unauthenticated",
-                },
-                "StringEquals": {
-                  "cognito-identity.amazonaws.com:aud": {
-                    "Ref": "AuthenticationIdentityPool98062B23",
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Federated": "cognito-identity.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Description": {
-          "Fn::Join": [
-            "",
-            [
-              "Default Unauthenticated Role for Identity Pool ",
-              {
-                "Fn::GetAtt": [
-                  "AuthenticationIdentityPool98062B23",
-                  "Name",
-                ],
-              },
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::IAM::Role",
-    },
     "AuthenticationUserPool28698864": {
       "DeletionPolicy": "Delete",
       "Metadata": {
@@ -1545,7 +1383,7 @@ type EmbeddingModel @aws_cognito_user_pools {
 }
 
 input FileUploadInput {
-  workspaceId: String!
+  workspaceId: String
   fileName: String!
 }
 
@@ -1776,6 +1614,8 @@ type Mutation {
 type Query {
   checkHealth: Boolean @aws_cognito_user_pools
   getUploadFileURL(input: FileUploadInput!): FileUploadResult
+    @aws_cognito_user_pools
+  getFileURL(fileName: String!): String
     @aws_cognito_user_pools
   listModels: [Model!]! @aws_cognito_user_pools
   listWorkspaces: [Workspace!]! @aws_cognito_user_pools
@@ -2114,6 +1954,25 @@ schema {
         },
         "DataSourceName": "proxyResolverFunction",
         "FieldName": "getDocument",
+        "Kind": "UNIT",
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "ChatBotApiConstructChatbotApigetFileURLresolver3FBFB9AC": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "getFileURL",
         "Kind": "UNIT",
         "TypeName": "Query",
       },
@@ -3350,6 +3209,9 @@ schema {
             "AURORA_DB_SECRET_ID": {
               "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
             },
+            "CHATBOT_FILES_BUCKET_NAME": {
+              "Ref": "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
+            },
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -4023,6 +3885,43 @@ schema {
                       {
                         "Fn::GetAtt": [
                           "ChatBotApiConstructChatBucketsUserFeedbackBucketFAFD14AB",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
                           "Arn",
                         ],
                       },

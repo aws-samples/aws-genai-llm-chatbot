@@ -127,6 +127,8 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
     with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.is_kendra_data_synching("id")
     with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.get_file_url("file")
+    with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.list_kendra_indexes()
     with pytest.raises(TransportQueryError, match=match):
         unauthenticated_client.list_documents(

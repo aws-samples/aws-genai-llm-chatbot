@@ -10,7 +10,7 @@ import {
   TextContent,
   Textarea,
 } from "@cloudscape-design/components";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -23,10 +23,10 @@ import {
   RagDocument,
 } from "./types";
 
-import { getSignedUrl } from "./utils";
-
 import "react-json-view-lite/dist/index.css";
 import "../../styles/app.scss";
+import { AppContext } from "../../common/app-context";
+import { ApiClient } from "../../common/api-client/api-client";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
@@ -37,6 +37,7 @@ export interface ChatMessageProps {
 }
 
 export default function ChatMessage(props: ChatMessageProps) {
+  const appContext = useContext(AppContext);
   const [loading, setLoading] = useState<boolean>(false);
   const [message] = useState<ChatBotHistoryItem>(props.message);
   const [files, setFiles] = useState<ImageFile[]>([] as ImageFile[]);
@@ -45,16 +46,23 @@ export default function ChatMessage(props: ChatMessageProps) {
   const [selectedIcon, setSelectedIcon] = useState<1 | 0 | null>(null);
 
   useEffect(() => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
     const getSignedUrls = async () => {
       setLoading(true);
       if (message.metadata?.files as ImageFile[]) {
         const files: ImageFile[] = [];
         for await (const file of message.metadata?.files as ImageFile[]) {
-          const signedUrl = await getSignedUrl(file.key);
-          files.push({
-            ...file,
-            url: signedUrl as string,
-          });
+          const signedUrl = (
+            await apiClient.sessions.getFileSignedUrl(file.key)
+          ).data?.getFileURL;
+          if (signedUrl) {
+            files.push({
+              ...file,
+              url: signedUrl,
+            });
+          }
         }
 
         setLoading(false);
@@ -63,9 +71,11 @@ export default function ChatMessage(props: ChatMessageProps) {
     };
 
     if (message.metadata?.files as ImageFile[]) {
-      getSignedUrls();
+      getSignedUrls().catch((e) => {
+        console.log("Unable to get signed URL", e);
+      });
     }
-  }, [message]);
+  }, [appContext, message]);
 
   let content = "";
   if (props.message.content && props.message.content.length > 0) {

@@ -156,7 +156,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       userPoolId: authentication.userPool.userPoolId,
       userPoolClient: authentication.userPoolClient,
       userPoolClientId: authentication.userPoolClient.userPoolClientId,
-      identityPool: authentication.identityPool,
       api: chatBotApi,
       chatbotFilesBucket: chatBotApi.filesBucket,
       crossEncodersEnabled:
@@ -295,7 +294,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     NagSuppressions.addResourceSuppressionsByPath(
       this,
       [
-        `/${this.stackName}/Authentication/IdentityPool/AuthenticatedRole/DefaultPolicy/Resource`,
         `/${this.stackName}/Authentication/UserPool/smsRole/Resource`,
         `/${this.stackName}/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource`,
@@ -350,8 +348,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       NagSuppressions.addResourceSuppressionsByPath(
         this,
         [
-          `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
-          `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{object}/ANY/Resource`,
+          `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/Default/{folder}/{key}/GET/Resource`,
         ],
         [
           { id: "AwsSolutions-APIG4", reason: "Private API within a VPC." },

@@ -10,9 +10,6 @@ class Credentials(BaseModel):
     id_token: str
     email: str
     password: str
-    aws_access_key: str
-    aws_secret_key: str
-    aws_token: str
 
     def __repr__(self):
         return "Credentials(********)"
@@ -67,28 +64,11 @@ class CognitoClient:
             AuthParameters={"USERNAME": email, "PASSWORD": password},
         )
 
-        login_key = "cognito-idp." + self.region + ".amazonaws.com/" + self.user_pool_id
-        identity_response = self.cognito_identity_client.get_id(
-            IdentityPoolId=self.identity_pool_id,
-            Logins={login_key: response["AuthenticationResult"]["IdToken"]},
-        )
-
-        aws_credentials_respose = (
-            self.cognito_identity_client.get_credentials_for_identity(
-                IdentityId=identity_response["IdentityId"],
-                Logins={login_key: response["AuthenticationResult"]["IdToken"]},
-            )
-        )
-
         return Credentials(
             **{
                 "id_token": response["AuthenticationResult"]["IdToken"],
                 "email": email,
                 "password": password,
-                # Credential with limited permissions (upload images for multi modal)
-                "aws_access_key": aws_credentials_respose["Credentials"]["AccessKeyId"],
-                "aws_secret_key": aws_credentials_respose["Credentials"]["SecretKey"],
-                "aws_token": aws_credentials_respose["Credentials"]["SessionToken"],
             }
         )
 

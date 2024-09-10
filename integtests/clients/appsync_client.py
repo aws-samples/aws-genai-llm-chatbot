@@ -205,6 +205,10 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("getUploadFileURL")
 
+    def get_file_url(self, fileName):
+        query = dsl_gql(DSLQuery(self.schema.Query.getFileURL.args(fileName=fileName)))
+        return self.client.execute(query).get("getFileURL")
+
     def get_document(self, input):
         query = dsl_gql(
             DSLQuery(

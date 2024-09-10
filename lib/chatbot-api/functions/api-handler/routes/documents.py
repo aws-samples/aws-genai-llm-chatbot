@@ -7,8 +7,9 @@ from common.constant import (
     SAFE_SHORT_STR_VALIDATION,
 )
 import genai_core.types
-import genai_core.upload
+import genai_core.presign
 import genai_core.documents
+import genai_core.auth
 from pydantic import BaseModel, Field
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
@@ -20,7 +21,7 @@ logger = Logger()
 
 
 class FileUploadRequest(BaseModel):
-    workspaceId: str = ID_FIELD_VALIDATION
+    workspaceId: Optional[str] = ID_FIELD_VALIDATION
     fileName: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
 
 
@@ -104,7 +105,7 @@ class DocumentSubscriptionStatusRequest(BaseModel):
     )
 
 
-allowed_extensions = set(
+allowed_workspace_extensions = set(
     [
         ".csv",
         ".doc",
@@ -128,18 +129,36 @@ allowed_extensions = set(
     ]
 )
 
+allowed_session_extensions = set(
+    [
+        ".jpg",
+        ".jpeg",
+        ".png",
+    ]
+)
+
 
 @router.resolver(field_name="getUploadFileURL")
 @tracer.capture_method
 def file_upload(input: dict):
     request = FileUploadRequest(**input)
     _, extension = os.path.splitext(request.fileName)
-    if extension not in allowed_extensions:
-        raise genai_core.types.CommonError("Invalid file extension")
 
-    result = genai_core.upload.generate_presigned_post(
-        request.workspaceId, request.fileName
-    )
+    if "workspaceId" in input:
+        if extension not in allowed_workspace_extensions:
+            raise genai_core.types.CommonError("Invalid file extension")
+
+        result = genai_core.presign.generate_workspace_presigned_post(
+            request.workspaceId, request.fileName
+        )
+    else:
+        if extension not in allowed_session_extensions:
+            raise genai_core.types.CommonError("Invalid file extension")
+
+        user_id = genai_core.auth.get_user_id(router)
+        result = genai_core.presign.generate_user_presigned_post(
+            user_id, request.fileName
+        )
 
     logger.info("Generated pre-signed for " + request.fileName)
     return result

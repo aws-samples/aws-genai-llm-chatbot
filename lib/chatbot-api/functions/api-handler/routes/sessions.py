@@ -1,4 +1,7 @@
+from pydantic import BaseModel, Field
+from common.constant import SAFE_STR_REGEX
 from common.validation import WorkspaceIdValidation
+import genai_core.presign
 import genai_core.sessions
 import genai_core.types
 import genai_core.auth
@@ -10,6 +13,23 @@ import json
 tracer = Tracer()
 router = Router()
 logger = Logger()
+
+
+class FileURequestValidation(BaseModel):
+    fileName: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+
+
+@router.resolver(field_name="getFileURL")
+@tracer.capture_method
+def get_file(fileName: str):
+    FileURequestValidation(**{"fileName": fileName})
+    user_id = genai_core.auth.get_user_id(router)
+    result = genai_core.presign.generate_user_presigned_get(
+        user_id, fileName, expiration=600
+    )
+
+    logger.info("Generated pre-signed for " + fileName)
+    return result
 
 
 @router.resolver(field_name="listSessions")

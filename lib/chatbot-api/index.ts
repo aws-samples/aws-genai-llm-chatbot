@@ -95,6 +95,7 @@ export class ChatBotApi extends Construct {
       byUserIdIndex: chatTables.byUserIdIndex,
       api,
       userFeedbackBucket: chatBuckets.userFeedbackBucket,
+      filesBucket: chatBuckets.filesBucket,
     });
 
     this.resolvers.push(apiResolvers.appSyncLambdaResolver);

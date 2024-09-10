@@ -21,7 +21,9 @@ import { CHATBOT_NAME } from "../../common/constants";
 export default function Chat(props: { sessionId?: string }) {
   const appContext = useContext(AppContext);
   const [running, setRunning] = useState<boolean>(false);
-  const [session, setSession] = useState<{ id: string; loading: boolean } | undefined>();
+  const [session, setSession] = useState<
+    { id: string; loading: boolean } | undefined
+  >();
   const [initError, setInitError] = useState<string | undefined>(undefined);
   const [configuration, setConfiguration] = useState<ChatBotConfiguration>(
     () => ({
@@ -149,7 +151,7 @@ export default function Chat(props: { sessionId?: string }) {
         )}
       </div>
       <div className={styles.input_container}>
-        {session &&
+        {session && (
           <ChatInputPanel
             session={session}
             running={running}
@@ -160,7 +162,7 @@ export default function Chat(props: { sessionId?: string }) {
             configuration={configuration}
             setConfiguration={setConfiguration}
           />
-        }
+        )}
       </div>
     </div>
   );

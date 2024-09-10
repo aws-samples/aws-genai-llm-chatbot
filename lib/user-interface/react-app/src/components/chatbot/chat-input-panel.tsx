@@ -50,11 +50,7 @@ import {
   ChatBotToken,
 } from "./types";
 import { sendQuery } from "../../graphql/mutations";
-import {
-  getSelectedModelMetadata,
-  getSignedUrl,
-  updateMessageHistoryRef,
-} from "./utils";
+import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
 import { receiveMessages } from "../../graphql/subscriptions";
 import { Utils } from "../../common/utils";
 
@@ -309,15 +305,22 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   }, [props.messageHistory]);
 
   useEffect(() => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
     const getSignedUrls = async () => {
       if (props.configuration?.files as ImageFile[]) {
         const files: ImageFile[] = [];
         for await (const file of props.configuration?.files ?? []) {
-          const signedUrl = await getSignedUrl(file.key);
-          files.push({
-            ...file,
-            url: signedUrl,
-          });
+          const signedUrl = (
+            await apiClient.sessions.getFileSignedUrl(file.key)
+          ).data?.getFileURL;
+          if (signedUrl) {
+            files.push({
+              ...file,
+              url: signedUrl,
+            });
+          }
         }
 
         setFiles(files);
@@ -325,9 +328,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     };
 
     if (props.configuration.files?.length) {
-      getSignedUrls();
+      getSignedUrls().catch((e) => {
+        console.log("Unable to get signed URL", e);
+      });
     }
-  }, [props.configuration]);
+  }, [appContext, props.configuration]);
 
   const hasImagesInChatHistory = function (): boolean {
     return (

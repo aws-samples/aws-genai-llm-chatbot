@@ -12,21 +12,16 @@ logger = Logger()
 s3 = boto3.resource("s3")
 
 
-def get_image_message(
-    file: dict,
-):
+def get_image_message(file: dict, user_id: str):
     if file["key"] is None:
         raise Exception("Invalid S3 Key " + file["key"])
 
+    key = "private/" + user_id + "/" + file["key"]
     logger.info(
-        "Fetching image",
-        bucket=os.environ["CHATBOT_FILES_BUCKET_NAME"],
-        key="public/" + file["key"],
+        "Fetching image", bucket=os.environ["CHATBOT_FILES_BUCKET_NAME"], key=key
     )
 
-    response = s3.Object(
-        os.environ["CHATBOT_FILES_BUCKET_NAME"], "public/" + file["key"]
-    )
+    response = s3.Object(os.environ["CHATBOT_FILES_BUCKET_NAME"], key)
     img = str(b64encode(response.get()["Body"].read()), "ascii")
     return {
         "type": "image",
@@ -46,7 +41,9 @@ class Claude3(MultiModalModelBase):
         self.model_id = model_id
         self.client = get_bedrock_client()
 
-    def format_prompt(self, prompt: str, messages: list, files: list) -> str:
+    def format_prompt(
+        self, prompt: str, messages: list, files: list, user_id: str
+    ) -> str:
         prompts = []
 
         # Chat history
@@ -59,7 +56,7 @@ class Claude3(MultiModalModelBase):
                 prompts.append(user_msg)
                 message_files = message.additional_kwargs.get("files", [])
                 for message_file in message_files:
-                    user_msg["content"].append(get_image_message(message_file))
+                    user_msg["content"].append(get_image_message(message_file, user_id))
             if message.type.lower() == ChatbotMessageType.AI.value.lower():
                 prompts.append({"role": "assistant", "content": message.content})
 
@@ -70,7 +67,7 @@ class Claude3(MultiModalModelBase):
         }
         prompts.append(user_msg)
         for file in files:
-            user_msg["content"].append(get_image_message(file))
+            user_msg["content"].append(get_image_message(file, user_id))
 
         return json.dumps(
             {

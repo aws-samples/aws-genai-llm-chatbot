@@ -1,4 +1,3 @@
-import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -17,7 +16,6 @@ export interface PrivateWebsiteProps {
   readonly shared: Shared;
   readonly userPoolId: string;
   readonly userPoolClientId: string;
-  readonly identityPool: cognitoIdentityPool.IdentityPool;
   readonly api: ChatBotApi;
   readonly chatbotFilesBucket: s3.Bucket;
   readonly crossEncodersEnabled: boolean;
