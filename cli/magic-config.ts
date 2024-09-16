@@ -201,6 +201,7 @@ const embeddingModels = [
 
       // Advanced settings
 
+      options.advancedMonitoring = config.advancedMonitoring;
       options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
       options.logRetention = config.logRetention;
       options.privateWebsite = config.privateWebsite;
@@ -829,6 +830,12 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
+      name: "advancedMonitoring",
+      message: "Do you want to enable custom metrics and advanced monitoring?",
+      initial: options.advancedMonitoring || false,
+    },
+    {
+      type: "confirm",
       name: "createVpcEndpoints",
       message: "Do you want create VPC Endpoints?",
       initial: options.createVpcEndpoints || false,
@@ -1106,6 +1113,7 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     privateWebsite: advancedSettings.privateWebsite,
+    advancedMonitoring: advancedSettings.advancedMonitoring,
     logRetention: advancedSettings.logRetention
       ? Number(advancedSettings.logRetention)
       : undefined,

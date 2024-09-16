@@ -38,6 +38,7 @@ def test_create_session(client, default_model, default_provider, session_id):
                 break
 
     assert found == True
+
     assert sessionFound.get("title") == request.get("data").get("text")
 
 
@@ -48,6 +49,10 @@ def test_get_session(client, session_id, default_model):
     assert len(session.get("history")) == 2
     assert session.get("history")[0].get("type") == "human"
     assert session.get("history")[1].get("type") == "ai"
+    assert session.get("history")[1].get("metadata") is not None
+    metadata = json.loads(session.get("history")[1].get("metadata"))
+    assert metadata.get("usage") is not None
+    assert metadata.get("usage").get("total_tokens") > 0
 
 
 def test_delete_session(client, session_id):

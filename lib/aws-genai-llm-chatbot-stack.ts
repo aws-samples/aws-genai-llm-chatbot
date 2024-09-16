@@ -223,6 +223,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
     new Monitoring(monitoringStack, "Monitoring", {
       prefix: props.config.prefix,
+      advancedMonitoring: props.config.advancedMonitoring === true,
       appsycnApi: chatBotApi.graphqlApi,
       appsyncResolversLogGroups: chatBotApi.resolvers.map((r) => {
         return LogGroup.fromLogGroupName(
