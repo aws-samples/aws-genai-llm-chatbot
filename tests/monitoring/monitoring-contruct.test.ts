@@ -32,6 +32,7 @@ new Queue(stack, "Queue", {
 
 new Monitoring(stack, "Monitoring", {
   prefix: "",
+  advancedMonitoring: true,
   appsycnApi: GraphqlApi.fromGraphqlApiAttributes(stack, "GraphQL", {
     graphqlApiId: "graphqlApiId",
   }),

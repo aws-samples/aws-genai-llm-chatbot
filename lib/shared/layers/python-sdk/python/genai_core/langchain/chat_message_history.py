@@ -13,6 +13,7 @@ from langchain.schema.messages import (
     messages_from_dict,
     messages_to_dict,
 )
+from langchain_core.messages.ai import AIMessage, AIMessageChunk
 
 client = boto3.resource("dynamodb")
 logger = Logger()
@@ -54,7 +55,16 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
     def add_message(self, message: BaseMessage) -> None:
         """Append the message to the record in DynamoDB"""
         messages = messages_to_dict(self.messages)
-        _message = _message_to_dict(message)
+        if isinstance(message, AIMessageChunk):
+            # When streaming with RunnableWithMessageHistory,
+            # it would add a chunk to the history but it expects a text as content.
+            ai_message = ""
+            for c in message.content:
+                if "text" in c:
+                    ai_message = ai_message + c.get("text")
+            _message = _message_to_dict(AIMessage(ai_message))
+        else:
+            _message = _message_to_dict(message)
         messages.append(_message)
 
         try:
