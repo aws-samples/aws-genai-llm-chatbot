@@ -107,7 +107,7 @@ class BedrockChatNoStreamingAdapter(BedrockChatAdapter):
     """Some models do not support system streaming using the converse API"""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(disable_streaing=True, *args, **kwargs)
+        super().__init__(disable_streaming=True, *args, **kwargs)
 
 
 class BedrockNoChatSystemPromptAdapter(BedrockChatAdapter):
@@ -153,7 +153,7 @@ class BedrockChatNoStreamingNoSystemPromptAdapter(BedrockNoChatSystemPromptAdapt
     """Some models do not support system streaming using the converse API"""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(disable_streaing=True, *args, **kwargs)
+        super().__init__(disable_streaming=True, *args, **kwargs)
 
 
 # Register the adapters
