@@ -1,6 +1,6 @@
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 
-export type ModelProvider = "sagemaker" | "bedrock" | "openai";
+export type ModelProvider = "sagemaker" | "bedrock" | "openai" | "cohere";
 
 export enum SupportedSageMakerModels {
   FalconLite = "FalconLite [ml.g5.12xlarge]",
