@@ -110,7 +110,7 @@ class BedrockChatNoStreamingAdapter(BedrockChatAdapter):
         super().__init__(disable_streaming=True, *args, **kwargs)
 
 
-class BedrockNoChatSystemPromptAdapter(BedrockChatAdapter):
+class BedrockChatNoSystemPromptAdapter(BedrockChatAdapter):
     """Some models do not support system and message history in the conversion API"""
 
     def get_prompt(self):
@@ -149,7 +149,7 @@ Helpful Answer:"""  # noqa: E501
         )
 
 
-class BedrockChatNoStreamingNoSystemPromptAdapter(BedrockNoChatSystemPromptAdapter):
+class BedrockChatNoStreamingNoSystemPromptAdapter(BedrockChatNoSystemPromptAdapter):
     """Some models do not support system streaming using the converse API"""
 
     def __init__(self, *args, **kwargs):
@@ -160,7 +160,7 @@ class BedrockChatNoStreamingNoSystemPromptAdapter(BedrockNoChatSystemPromptAdapt
 registry.register(r"^bedrock.ai21.jamba*", BedrockChatAdapter)
 registry.register(r"^bedrock.ai21.j2*", BedrockChatNoStreamingNoSystemPromptAdapter)
 registry.register(
-    r"^bedrock\.cohere\.command-(text|light-text).*", BedrockNoChatSystemPromptAdapter
+    r"^bedrock\.cohere\.command-(text|light-text).*", BedrockChatNoSystemPromptAdapter
 )
 registry.register(r"^bedrock\.cohere\.command-r.*", BedrockChatAdapter)
 registry.register(r"^bedrock.anthropic.claude*", BedrockChatAdapter)
@@ -178,13 +178,13 @@ registry.register(
 )
 registry.register(
     r"^bedrock.mistral.mistral-7b-*",
-    BedrockNoChatSystemPromptAdapter,
+    BedrockChatNoSystemPromptAdapter,
 )
 registry.register(
     r"^bedrock.mistral.mixtral-*",
-    BedrockNoChatSystemPromptAdapter,
+    BedrockChatNoSystemPromptAdapter,
 )
-registry.register(r"^bedrock.amazon.titan-t*", BedrockNoChatSystemPromptAdapter)
+registry.register(r"^bedrock.amazon.titan-t*", BedrockChatNoSystemPromptAdapter)
 
 
 class PromptTemplateWithHistory(PromptTemplate):
