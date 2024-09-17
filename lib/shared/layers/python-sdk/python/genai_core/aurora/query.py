@@ -260,7 +260,7 @@ def query_workspace_aurora(
             "items": convert_types(ret_items),
         }
 
-    logger.info(ret_value)
+    logger.debug(ret_value)
 
     return ret_value
 
