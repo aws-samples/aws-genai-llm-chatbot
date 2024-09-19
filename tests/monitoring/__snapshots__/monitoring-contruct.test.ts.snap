@@ -72,7 +72,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "","query":"SOURCE 'Test2' | fields @timestamp, message, level, location\\n| filter ispresent(level)\\n| sort @timestamp desc\\n| limit 200"}},{"type":"text","width":24,"height":1,"x":0,"y":17,"properties":{"markdown":"### Token Usage"}},{"type":"metric","width":24,"height":5,"x":0,"y":18,"properties":{"view":"timeSeries","title":"LLM Usage","region":"",
+              "","query":"SOURCE 'Test2' | fields @timestamp, message, level, location\\n| filter ispresent(level)\\n| sort @timestamp desc\\n| limit 200"}},{"type":"text","width":24,"height":1,"x":0,"y":17,"properties":{"markdown":"### Token Usage"}},{"type":"metric","width":24,"height":5,"x":0,"y":18,"properties":{"view":"timeSeries","title":"LLM Usage (Bedrock)","region":"",
               {
                 "Ref": "AWS::Region",
               },

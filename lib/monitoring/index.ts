@@ -187,7 +187,7 @@ export class Monitoring extends Construct {
       humanReadableName: "Token Usage",
       metricGroups: [
         {
-          title: "LLM Usage",
+          title: "LLM Usage (Bedrock)",
           metrics: [
             {
               alarmFriendlyName: "TokenUsage",

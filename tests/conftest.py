@@ -3,6 +3,7 @@ import os
 
 here = os.path.dirname(__file__)
 sys.path.append(here + "/../lib/chatbot-api/functions/api-handler")
+sys.path.append(here + "/../lib/model-interfaces/langchain/functions/request-handler")
 sys.path.append(here + "/../lib/shared/layers/python-sdk/python")
 
 os.environ["AWS_REGION"] = "us-east-1"

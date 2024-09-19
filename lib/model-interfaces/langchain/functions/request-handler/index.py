@@ -14,6 +14,7 @@ import adapters  # noqa: F401 Needed to register the adapters
 from genai_core.utils.websocket import send_to_client
 from genai_core.types import ChatbotAction
 
+
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
 logger = Logger()
@@ -141,11 +142,20 @@ def handle_failed_records(records):
         payload: str = record.body
         message: dict = json.loads(payload)
         detail: dict = json.loads(message["Message"])
-        logger.debug(detail)
         user_id = detail["userId"]
         data = detail.get("data", {})
         session_id = data.get("sessionId", "")
 
+        message = "⚠️ *Something went wrong*"
+        if (
+            "An error occurred (AccessDeniedException)" in error
+            and "You don't have access to the model with the specified model ID"
+            in error
+        ):
+            message = (
+                "⚠️ *This model is not enabled. Please try again later or contact "
+                "an administrator*"
+            )
         send_to_client(
             {
                 "type": "text",
@@ -157,7 +167,7 @@ def handle_failed_records(records):
                     "sessionId": session_id,
                     # Log a vague message because the error can contain
                     # internal information
-                    "content": "Something went wrong",
+                    "content": message,
                     "type": "text",
                 },
             }

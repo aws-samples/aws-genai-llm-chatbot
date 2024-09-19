@@ -6,10 +6,10 @@
   },
   "scripts": {
     "build": "npx @aws-amplify/cli codegen && npx tsc",
-    "watch": "npx tsc -w",
     "cdk": "cdk",
     "deploy": "npx cdk deploy",
     "hotswap": "cdk deploy --hotswap",
+    "watch": "cdk watch",
     "test": "jest",
     "pytest": "pytest tests/",
     "test-all": "npm run test && npm run pytest",

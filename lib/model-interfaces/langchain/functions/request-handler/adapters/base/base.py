@@ -71,12 +71,18 @@ class LLMStartHandler(BaseCallbackHandler):
 
 class ModelAdapter:
     def __init__(
-        self, session_id, user_id, mode=ChatbotMode.CHAIN.value, model_kwargs={}
+        self,
+        session_id,
+        user_id,
+        mode=ChatbotMode.CHAIN.value,
+        disable_streaming=False,
+        model_kwargs={},
     ):
         self.session_id = session_id
         self.user_id = user_id
         self._mode = mode
         self.model_kwargs = model_kwargs
+        self.disable_streaming = disable_streaming
 
         self.callback_handler = LLMStartHandler()
         self.__bind_callbacks()
@@ -176,12 +182,12 @@ class ModelAdapter:
 
         config = {"configurable": {"session_id": self.session_id}}
         try:
-            if self.model_kwargs.get("streaming", False):
+            if not self.disable_streaming and self.model_kwargs.get("streaming", False):
                 answer = ""
                 for chunk in conversation.stream(
                     input={"input": user_prompt}, config=config
                 ):
-                    logger.info("chunk", chunk=chunk)
+                    logger.debug("chunk", chunk=chunk)
                     if "answer" in chunk:
                         answer = answer + chunk["answer"]
                     elif isinstance(chunk, AIMessageChunk):
