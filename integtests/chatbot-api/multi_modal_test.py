@@ -2,32 +2,30 @@ import json
 import os
 import time
 import uuid
-import boto3
 from pathlib import Path
 
 import pytest
+import requests
+from gql.transport.exceptions import TransportQueryError
 
 
-def test_multi_modal(
-    client, config, cognito_credentials, default_multimodal_model, default_provider
-):
-    bucket = config.get("Storage").get("AWSS3").get("bucket")
-    s3 = boto3.resource(
-        "s3",
-        # Use identity pool credentials to verify it owrks
-        aws_access_key_id=cognito_credentials.aws_access_key,
-        aws_secret_access_key=cognito_credentials.aws_secret_key,
-        aws_session_token=cognito_credentials.aws_token,
-    )
+def test_multi_modal(client, default_multimodal_model, default_provider):
+
     key = "INTEG_TEST" + str(uuid.uuid4()) + ".jpeg"
-    object = s3.Object(bucket, "public/" + key)
-    wrong_object = s3.Object(bucket, "private/notallowed/1.jpg")
+    result = client.add_file(
+        input={
+            "fileName": key,
+        }
+    )
+
+    fields = result.get("fields")
+    cleaned_fields = fields.replace("{", "").replace("}", "")
+    pairs = [pair.strip() for pair in cleaned_fields.split(",")]
+    fields_dict = dict(pair.split("=", 1) for pair in pairs)
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    object.put(Body=Path(current_dir + "/resources/powered-by-aws.png").read_bytes())
-    with pytest.raises(Exception, match="AccessDenied"):
-        wrong_object.put(
-            Body=Path(current_dir + "/resources/powered-by-aws.png").read_bytes()
-        )
+    files = {"file": Path(current_dir + "/resources/powered-by-aws.png").read_bytes()}
+    response = requests.post(result.get("url"), data=fields_dict, files=files)
+    assert response.status_code == 204
 
     session_id = str(uuid.uuid4())
 
@@ -58,4 +56,12 @@ def test_multi_modal(
 
     assert "powered by" in content
     client.delete_session(session_id)
-    object.delete()
+
+    # Verify it can get the file
+    url = client.get_file_url(key)
+    assert url.startswith("https://")
+
+
+def test_unknown_file(client):
+    with pytest.raises(TransportQueryError, match="File does not exist"):
+        client.get_file_url("file")

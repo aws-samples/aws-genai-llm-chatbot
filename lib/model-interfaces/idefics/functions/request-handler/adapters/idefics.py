@@ -16,7 +16,9 @@ class Idefics(MultiModalModelBase):
     def __init__(self, model_id: str):
         self.model_id = model_id
 
-    def format_prompt(self, prompt: str, messages: list, files: list) -> str:
+    def format_prompt(
+        self, prompt: str, messages: list, files: list, user_id: str
+    ) -> str:
 
         human_prompt_template = "User:{prompt}"
         human_prompt_with_image = "User:{prompt}![]({image})"
@@ -30,7 +32,8 @@ class Idefics(MultiModalModelBase):
                     prompts.append(human_prompt_template.format(prompt=message.content))
                 for message_file in message_files:
                     image = urljoin(
-                        os.environ["CHATBOT_FILES_PRIVATE_API"], message_file["key"]
+                        os.environ["CHATBOT_FILES_PRIVATE_API"],
+                        user_id + "/" + message_file["key"],
                     )
                     prompts.append(
                         human_prompt_with_image.format(
@@ -45,7 +48,7 @@ class Idefics(MultiModalModelBase):
             prompts.append(human_prompt_template.format(prompt=prompt))
 
         for file in files:
-            key = file["key"]
+            key = user_id + "/" + file["key"]
             prompts.append(
                 human_prompt_with_image.format(
                     prompt=prompt,

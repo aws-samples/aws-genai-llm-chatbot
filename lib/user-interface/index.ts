@@ -1,6 +1,4 @@
-import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
-import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
@@ -24,7 +22,6 @@ export interface UserInterfaceProps {
   readonly userPoolId: string;
   readonly userPoolClientId: string;
   readonly userPoolClient: cognito.UserPoolClient;
-  readonly identityPool: cognitoIdentityPool.IdentityPool;
   readonly api: ChatBotApi;
   readonly chatbotFilesBucket: s3.Bucket;
   readonly crossEncodersEnabled: boolean;
@@ -86,12 +83,10 @@ export class UserInterface extends Construct {
       aws_cognito_region: cdk.Aws.REGION,
       aws_user_pools_id: props.userPoolId,
       aws_user_pools_web_client_id: props.userPoolClientId,
-      aws_cognito_identity_pool_id: props.identityPool.identityPoolId,
       Auth: {
         region: cdk.Aws.REGION,
         userPoolId: props.userPoolId,
         userPoolWebClientId: props.userPoolClientId,
-        identityPoolId: props.identityPool.identityPoolId,
       },
       oauth: props.config.cognitoFederation?.enabled
         ? {
@@ -105,12 +100,6 @@ export class UserInterface extends Construct {
       aws_appsync_graphqlEndpoint: props.api.graphqlApi.graphqlUrl,
       aws_appsync_region: cdk.Aws.REGION,
       aws_appsync_authenticationType: "AMAZON_COGNITO_USER_POOLS",
-      Storage: {
-        AWSS3: {
-          bucket: props.chatbotFilesBucket.bucketName,
-          region: cdk.Aws.REGION,
-        },
-      },
       config: {
         auth_federated_provider: props.config.cognitoFederation?.enabled
           ? {
@@ -129,39 +118,6 @@ export class UserInterface extends Construct {
         privateWebsite: props.config.privateWebsite ? true : false,
       },
     });
-
-    // Allow authenticated web users to read upload data to the attachments bucket for their chat files
-    // ref: https://docs.amplify.aws/lib/storage/getting-started/q/platform/js/#using-amazon-s3
-    props.identityPool.authenticatedRole.addToPrincipalPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
-        resources: [
-          `${props.chatbotFilesBucket.bucketArn}/public/*`,
-          `${props.chatbotFilesBucket.bucketArn}/protected/\${cognito-identity.amazonaws.com:sub}/*`,
-          `${props.chatbotFilesBucket.bucketArn}/private/\${cognito-identity.amazonaws.com:sub}/*`,
-        ],
-      })
-    );
-    props.identityPool.authenticatedRole.addToPrincipalPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["s3:ListBucket"],
-        resources: [`${props.chatbotFilesBucket.bucketArn}`],
-        conditions: {
-          StringLike: {
-            "s3:prefix": [
-              "public/",
-              "public/*",
-              "protected/",
-              "protected/*",
-              "private/${cognito-identity.amazonaws.com:sub}/",
-              "private/${cognito-identity.amazonaws.com:sub}/*",
-            ],
-          },
-        },
-      })
-    );
 
     // Enable CORS for the attachments bucket to allow uploads from the user interface
     // ref: https://docs.amplify.aws/lib/storage/getting-started/q/platform/js/#amazon-s3-bucket-cors-policy-setup

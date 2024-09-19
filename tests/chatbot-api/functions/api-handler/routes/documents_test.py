@@ -34,7 +34,9 @@ document = {
 
 
 def test_file_upload(mocker):
-    mocker.patch("genai_core.upload.generate_presigned_post", return_value="url")
+    mocker.patch(
+        "genai_core.presign.generate_workspace_presigned_post", return_value="url"
+    )
     assert file_upload({"fileName": "fileName.txt", "workspaceId": "id"}) == "url"
 
 

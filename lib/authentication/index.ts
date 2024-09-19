@@ -1,4 +1,3 @@
-import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
 import { SystemConfig } from "../shared/types";
 import * as cognito from "aws-cdk-lib/aws-cognito";
@@ -12,7 +11,6 @@ import * as logs from "aws-cdk-lib/aws-logs";
 export class Authentication extends Construct {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
-  public readonly identityPool: cognitoIdentityPool.IdentityPool;
   public readonly cognitoDomain: cognito.UserPoolDomain;
   public readonly updateUserPoolClient: lambda.Function;
   public readonly customOidcProvider: cognito.UserPoolIdentityProviderOidc;
@@ -52,21 +50,6 @@ export class Authentication extends Construct {
       });
       this.cognitoDomain = userPooldomain;
     }
-
-    const identityPool = new cognitoIdentityPool.IdentityPool(
-      this,
-      "IdentityPool",
-      {
-        authenticationProviders: {
-          userPools: [
-            new cognitoIdentityPool.UserPoolAuthenticationProvider({
-              userPool,
-              userPoolClient,
-            }),
-          ],
-        },
-      }
-    );
 
     if (config.cognitoFederation?.enabled) {
       // Create an IAM Role for the Lambda function
@@ -243,14 +226,9 @@ export class Authentication extends Construct {
 
     this.userPool = userPool;
     this.userPoolClient = userPoolClient;
-    this.identityPool = identityPool;
 
     new cdk.CfnOutput(this, "UserPoolId", {
       value: userPool.userPoolId,
-    });
-
-    new cdk.CfnOutput(this, "IdentityPoolId", {
-      value: identityPool.identityPoolId,
     });
 
     new cdk.CfnOutput(this, "UserPoolWebClientId", {

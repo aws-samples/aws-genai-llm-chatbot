@@ -10,10 +10,13 @@ import {
 } from "@cloudscape-design/components";
 import { useForm } from "../../common/hooks/use-form";
 
-import { Storage } from "aws-amplify";
-import { Dispatch, useState } from "react";
+import { Dispatch, useContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ChatBotConfiguration, FileStorageProvider, ImageFile } from "./types";
+import { AppContext } from "../../common/app-context";
+import { ApiClient } from "../../common/api-client/api-client";
+import { FileUploader } from "../../common/file-uploader";
+import { Utils } from "../../common/utils";
 
 export interface ImageDialogProps {
   sessionId: string;
@@ -26,6 +29,7 @@ export interface ImageDialogProps {
 const ALLOWED_MIME_TYPES = ["image/png", "image/jpg", "image/jpeg"];
 
 export default function ImageDialog(props: ImageDialogProps) {
+  const appContext = useContext(AppContext);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [files, setFiles] = useState<File[]>([] as File[]);
@@ -55,10 +59,14 @@ export default function ImageDialog(props: ImageDialogProps) {
   });
 
   const saveConfig = async () => {
-    if (!validate()) return;
+    if (!validate() || !appContext) return;
     setLoading(true);
+    const apiClient = new ApiClient(appContext);
 
-    const files: ImageFile[] = (await uploadFiles(data.files)) as ImageFile[];
+    const files: ImageFile[] = (await uploadFiles(
+      data.files,
+      apiClient
+    )) as ImageFile[];
 
     props.setConfiguration({
       ...props.configuration,
@@ -102,18 +110,20 @@ export default function ImageDialog(props: ImageDialogProps) {
     return true;
   };
 
-  const uploadFiles = async (files: File[]) => {
+  const uploadFiles = async (files: File[], client: ApiClient) => {
     const s3Files = [];
+    const uploader = new FileUploader();
     for await (const file of files) {
       try {
-        const response = await uploadFile(file);
+        const response = await uploadFile(file, client, uploader);
         s3Files.push({
-          key: `${response.key}`,
+          key: `${response}`,
           provider: FileStorageProvider.S3,
         });
       } catch (error) {
-        const errorMessage = "Error uploading file: " + error;
-        console.log(errorMessage);
+        const errorMessage =
+          "Error uploading file: " + Utils.getErrorMessage(error);
+        console.log(errorMessage, error);
         setError(errorMessage);
       }
     }
@@ -125,20 +135,22 @@ export default function ImageDialog(props: ImageDialogProps) {
     return s3Files;
   };
 
-  const uploadFile = async (file: File) => {
-    console.log(file);
+  const uploadFile = async (
+    file: File,
+    client: ApiClient,
+    uploader: FileUploader
+  ) => {
     const id = uuidv4();
-    const shortId = id.split("-")[0];
     // get the extension of the file and content type
     const extension = file.name.split(".").pop();
-    const contentType = file.type;
-
-    const response = await Storage.put(`${shortId}.${extension}`, file, {
-      contentType,
-    });
-    return {
-      ...response,
-    };
+    const url = (
+      await client.sessions.getFileUploadSignedUrl(`${id}.${extension}`)
+    ).data?.getUploadFileURL;
+    if (!url) {
+      throw new Error("Unable to get the upload url.");
+    }
+    await uploader.upload(file, url, () => {});
+    return `${id}.${extension}`;
   };
 
   return (
