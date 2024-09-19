@@ -295,7 +295,7 @@ async function processCreateOptions(options: any): Promise<void> {
       message:
         "Do you want to create KMS Customer Managed Keys (CMKs)? (It will be used to encrypt the data at rest.)",
       initial: true,
-      hint: "Enabling it on an existing environment will cause the re-creation of some of the resources (for example Aurora cluster, Open Search collecion). To prevent data loss, it is recommended to use it on a new environment or at least enable retain on cleanup (needs to be deployed before enabling the use of CMK). For more information on Aurora migration, please refer to the documentation.",
+      hint: "It is recommended but enabling it on an existing environment will cause the re-creation of some of the resources (for example Aurora cluster, Open Search collecion). To prevent data loss, it is recommended to use it on a new environment or at least enable retain on cleanup (needs to be deployed before enabling the use of CMK). For more information on Aurora migration, please refer to the documentation.",
     },
     {
       type: "confirm",

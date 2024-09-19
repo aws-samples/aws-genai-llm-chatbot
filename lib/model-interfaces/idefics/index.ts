@@ -215,7 +215,8 @@ export class IdeficsInterface extends Construct {
             actions: ["execute-api:Invoke"],
             effect: iam.Effect.ALLOW,
             resources: ["execute-api:/*/*/*"],
-            principals: [new iam.AnyPrincipal()],
+            principals: [new iam.AnyPrincipal()], // NOSONAR
+            // Private integration with deny based on the VPCe
           }),
           new iam.PolicyStatement({
             actions: ["execute-api:Invoke"],
@@ -278,10 +279,11 @@ export class IdeficsInterface extends Construct {
       },
     });
 
+    // prettier-ignore
     api.root
       .addResource("{folder}")
       .addResource("{key}")
-      .addMethod("GET", s3Integration, {
+      .addMethod("GET", s3Integration, { // NOSONAR Private integration
         methodResponses: [
           {
             statusCode: "200",

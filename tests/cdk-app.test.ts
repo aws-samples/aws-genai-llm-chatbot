@@ -12,6 +12,8 @@ const app = new App({
   },
 });
 const config = getTestConfig();
+config.createCMKs = true;
+config.retainOnDelete = true;
 const stack = new AwsGenAILLMChatbotStack(
   app,
   `${config.prefix}GenAIChatBotStack`,

@@ -212,7 +212,8 @@ export class PrivateWebsite extends Construct {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["s3:GetObject", "s3:List*"],
-        principals: [new iam.AnyPrincipal()],
+        principals: [new iam.AnyPrincipal()], // NOSONAR
+        // Access only allowed from the VPC.
         resources: [
           props.websiteBucket.bucketArn,
           `${props.websiteBucket.bucketArn}/*`,

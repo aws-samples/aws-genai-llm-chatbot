@@ -4933,6 +4933,7 @@ schema {
           "MaxCapacity": 2,
           "MinCapacity": 0.5,
         },
+        "StorageEncrypted": false,
         "VpcSecurityGroupIds": [
           {
             "Fn::GetAtt": [
@@ -11503,6 +11504,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",

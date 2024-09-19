@@ -81,6 +81,7 @@ export class HuggingFaceCustomScriptModel extends Construct {
         ? s3.BucketEncryption.KMS
         : s3.BucketEncryption.S3_MANAGED,
       encryptionKey: props.kmsKey,
+      versioned: true,
     });
 
     // Upload build code to S3

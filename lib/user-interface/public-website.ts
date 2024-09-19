@@ -50,6 +50,7 @@ export class PublicWebsite extends Construct {
           ? s3.BucketEncryption.KMS
           : s3.BucketEncryption.S3_MANAGED,
         encryptionKey: props.shared.kmsKey,
+        versioned: true,
       }
     );
 

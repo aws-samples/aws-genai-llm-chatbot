@@ -21,7 +21,7 @@ export function deployCustomScriptModel(
 
   const endpointName = (
     Array.isArray(modelId)
-      ? `Multi${createHash("md5")
+      ? `Multi${createHash("md5") // NOSONAR Not sensitive (naming)
           .update(modelId.join(","))
           .digest("hex")
           .toUpperCase()

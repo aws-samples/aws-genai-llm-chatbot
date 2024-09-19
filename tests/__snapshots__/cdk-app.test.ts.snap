@@ -321,7 +321,7 @@ exports[`snapshot test with CMK 1`] = `
       "Type": "AWS::IAM::Role",
     },
     "AuthenticationUserPool28698864": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -386,7 +386,7 @@ exports[`snapshot test with CMK 1`] = `
         },
       },
       "Type": "AWS::Cognito::UserPool",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "AuthenticationUserPoolUserPoolClient8AE1704E": {
       "Properties": {
@@ -666,7 +666,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       "Type": "AWS::IAM::Policy",
     },
     "ChatBotApiChatBucketsFilesBucket1D4E273A": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "AccelerateConfiguration": {
           "AccelerationStatus": "Enabled",
@@ -675,7 +675,13 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "ServerSideEncryptionConfiguration": [
             {
               "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "SharedKMSKey7BCBB616",
+                    "Arn",
+                  ],
+                },
+                "SSEAlgorithm": "aws:kms",
               },
             },
           ],
@@ -734,37 +740,12 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "ChatBotApiChatBucketsFilesBucketAutoDeleteObjectsCustomResource538551D4": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "ChatBotApiChatBucketsFilesBucketPolicy3E92F963",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "ChatBotApiChatBucketsFilesBucket1D4E273A",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "ChatBotApiChatBucketsFilesBucketPolicy3E92F963": {
       "Properties": {
@@ -807,45 +788,6 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                 },
               ],
             },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "ChatBotApiChatBucketsFilesBucket1D4E273A",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "ChatBotApiChatBucketsFilesBucket1D4E273A",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -853,7 +795,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       "Type": "AWS::S3::BucketPolicy",
     },
     "ChatBotApiChatBucketsLogsBucket829E6C74": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -888,37 +830,12 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "ChatBotApiChatBucketsLogsBucketAutoDeleteObjectsCustomResourceE72A36AE": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "ChatBotApiChatBucketsLogsBucketPolicy7FD1B7BE",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "ChatBotApiChatBucketsLogsBucket829E6C74",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "ChatBotApiChatBucketsLogsBucketPolicy7FD1B7BE": {
       "Properties": {
@@ -961,78 +878,26 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                 },
               ],
             },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "ChatBotApiChatBucketsLogsBucket829E6C74",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "ChatBotApiChatBucketsLogsBucket829E6C74",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
           ],
           "Version": "2012-10-17",
         },
       },
       "Type": "AWS::S3::BucketPolicy",
     },
-    "ChatBotApiChatBucketsUserFeedbackBucketAutoDeleteObjectsCustomResourceF40DE0AF": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "ChatBotApiChatBucketsUserFeedbackBucketPolicy277B5800",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "ChatBotApiChatBucketsUserFeedbackBucketF010A391",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
-    },
     "ChatBotApiChatBucketsUserFeedbackBucketF010A391": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
               "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "SharedKMSKey7BCBB616",
+                    "Arn",
+                  ],
+                },
+                "SSEAlgorithm": "aws:kms",
               },
             },
           ],
@@ -1048,18 +913,12 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "ChatBotApiChatBucketsUserFeedbackBucketPolicy277B5800": {
       "Properties": {
@@ -1102,45 +961,6 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                 },
               ],
             },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "ChatBotApiChatBucketsUserFeedbackBucketF010A391",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "ChatBotApiChatBucketsUserFeedbackBucketF010A391",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -1148,7 +968,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       "Type": "AWS::S3::BucketPolicy",
     },
     "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "AttributeDefinitions": [
           {
@@ -1189,11 +1009,18 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           "PointInTimeRecoveryEnabled": true,
         },
         "SSESpecification": {
+          "KMSMasterKeyId": {
+            "Fn::GetAtt": [
+              "SharedKMSKey7BCBB616",
+              "Arn",
+            ],
+          },
           "SSEEnabled": true,
+          "SSEType": "KMS",
         },
       },
       "Type": "AWS::DynamoDB::Table",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "ChatBotApiChatbotApiBABF9B87": {
       "Properties": {
@@ -2643,10 +2470,26 @@ schema {
           ],
         },
       },
+      "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
+      },
       "Type": "AWS::SNS::Topic",
     },
     "ChatBotApiRealtimeOutgoingMessagesDLQ07751960": {
       "DeletionPolicy": "Delete",
+      "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
+      },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
@@ -2686,6 +2529,12 @@ schema {
     "ChatBotApiRealtimeOutgoingMessagesQueue92DD6F2A": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
@@ -2977,6 +2826,19 @@ schema {
                 "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
               },
             },
+            {
+              "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -3185,6 +3047,16 @@ schema {
               },
             },
             {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedQueueKMSKey26598E83",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": "appsync:GraphQL",
               "Effect": "Allow",
               "Resource": {
@@ -3306,13 +3178,13 @@ schema {
                 "Id",
               ],
             },
-            "DEFAULT_KENDRA_INDEX_NAME": "prefix-genaichatbot-workspac",
+            "DEFAULT_KENDRA_INDEX_NAME": "prefix-cmk-genaichatbot-work",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
             },
             "DEFAULT_KENDRA_S3_DATA_SOURCE_ID": {
               "Fn::GetAtt": [
-                "RagEnginesKendraRetrievalKendraS3DataSourceF4400C3D",
+                "RagEnginesKendraRetrievalKendraS3DataSourceCMKB964C6CC",
                 "Id",
               ],
             },
@@ -3336,7 +3208,7 @@ schema {
             },
             "OPEN_SEARCH_COLLECTION_ENDPOINT": {
               "Fn::GetAtt": [
-                "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                 "CollectionEndpoint",
               ],
             },
@@ -3573,6 +3445,22 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
@@ -3697,7 +3585,7 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "Arn",
                 ],
               },
@@ -4344,6 +4232,22 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -4406,7 +4310,7 @@ schema {
             [
               "Lambda function for auto-deleting objects in ",
               {
-                "Ref": "RagEnginesSageMakerModelMultiAB24ALogsBucket1624BE94",
+                "Ref": "UserInterfaceWebsiteBucket2BDEA247",
               },
               " S3 bucket.",
             ],
@@ -4495,12 +4399,12 @@ schema {
       "Type": "AWS::ApiGateway::RestApi",
     },
     "IdeficsInterfaceChatbotFilesPrivateApiAccessLogs72EB0CAA": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "IdeficsInterfaceChatbotFilesPrivateApiAccount77BB84A1": {
       "DeletionPolicy": "Retain",
@@ -4746,6 +4650,14 @@ schema {
     },
     "IdeficsInterfaceDLQ42807B03": {
       "DeletionPolicy": "Delete",
+      "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
+      },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
@@ -4785,6 +4697,12 @@ schema {
     "IdeficsInterfaceIdeficsIngestionQueue53735B5C": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
@@ -5209,6 +5127,35 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
@@ -5255,6 +5202,20 @@ schema {
             },
             {
               "Action": [
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "ssm:DescribeParameters",
                 "ssm:GetParameters",
                 "ssm:GetParameter",
@@ -5294,6 +5255,16 @@ schema {
               "Resource": {
                 "Fn::GetAtt": [
                   "IdeficsInterfaceIdeficsIngestionQueue53735B5C",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedQueueKMSKey26598E83",
                   "Arn",
                 ],
               },
@@ -5469,6 +5440,14 @@ schema {
     },
     "LangchainInterfaceDLQFABC9CF7": {
       "DeletionPolicy": "Delete",
+      "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
+      },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
@@ -5508,6 +5487,12 @@ schema {
     "LangchainInterfaceLangChainIngestionQueueE5D48FA1": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
@@ -5655,13 +5640,13 @@ schema {
                 "Id",
               ],
             },
-            "DEFAULT_KENDRA_INDEX_NAME": "prefix-genaichatbot-workspac",
+            "DEFAULT_KENDRA_INDEX_NAME": "prefix-cmk-genaichatbot-work",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
             },
             "DEFAULT_KENDRA_S3_DATA_SOURCE_ID": {
               "Fn::GetAtt": [
-                "RagEnginesKendraRetrievalKendraS3DataSourceF4400C3D",
+                "RagEnginesKendraRetrievalKendraS3DataSourceCMKB964C6CC",
                 "Id",
               ],
             },
@@ -5671,7 +5656,7 @@ schema {
             },
             "OPEN_SEARCH_COLLECTION_ENDPOINT": {
               "Fn::GetAtt": [
-                "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                 "CollectionEndpoint",
               ],
             },
@@ -5938,7 +5923,23 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
                   "Arn",
                 ],
               },
@@ -6060,6 +6061,19 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "kendra:Retrieve",
                 "kendra:Query",
               ],
@@ -6115,6 +6129,20 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+              },
+            },
+            {
+              "Action": [
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
               },
             },
             {
@@ -6179,6 +6207,16 @@ schema {
               "Resource": {
                 "Fn::GetAtt": [
                   "LangchainInterfaceLangChainIngestionQueueE5D48FA1",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedQueueKMSKey26598E83",
                   "Arn",
                 ],
               },
@@ -6865,8 +6903,8 @@ schema {
           "referencetoprefixGenAIChatBotStackRagEnginesKendraRetrievalIndex6EE4B09CRef": {
             "Ref": "RagEnginesKendraRetrievalIndex922B65FC",
           },
-          "referencetoprefixGenAIChatBotStackRagEnginesOpenSearchVectorOpenSearchCollection0AA6740CRef": {
-            "Ref": "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+          "referencetoprefixGenAIChatBotStackRagEnginesOpenSearchVectorOpenSearchCollectionCMKD12B055BRef": {
+            "Ref": "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
           },
           "referencetoprefixGenAIChatBotStackRagEnginesRagDynamoDBTablesDocumentsA193574BRef": {
             "Ref": "RagEnginesRagDynamoDBTablesDocumentsF6F2B272",
@@ -6889,7 +6927,7 @@ schema {
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-111111111-us-east-1/ca0a1338d824b813a13b713a4acdcfa3446dcabd079ca3b419be281373f77b69.json",
+              "/cdk-hnb659fds-assets-111111111-us-east-1/df5881137696958709a4f9c78fcc43d5ae9bfd522db6df6d0338a9acfe417aea.json",
             ],
           ],
         },
@@ -6898,7 +6936,7 @@ schema {
       "UpdateReplacePolicy": "Delete",
     },
     "RagEnginesAuroraPgVectorAuroraDatabase2A003265": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "Snapshot",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -6922,6 +6960,12 @@ schema {
         "EnableIAMDatabaseAuthentication": true,
         "Engine": "aurora-postgresql",
         "EngineVersion": "15.3",
+        "KmsKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
         "MasterUserPassword": {
           "Fn::Join": [
             "",
@@ -6951,6 +6995,7 @@ schema {
           "MaxCapacity": 2,
           "MinCapacity": 0.5,
         },
+        "StorageEncrypted": true,
         "VpcSecurityGroupIds": [
           {
             "Fn::GetAtt": [
@@ -6961,7 +7006,7 @@ schema {
         ],
       },
       "Type": "AWS::RDS::DBCluster",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Snapshot",
     },
     "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9": {
       "Properties": {
@@ -7637,6 +7682,22 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
@@ -7687,12 +7748,12 @@ schema {
       "Type": "AWS::IAM::Policy",
     },
     "RagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceSMLogGroup3134E68A": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesAuroraPgVectorCreateAuroraWorkspaceRoleB7D93D09": {
       "Properties": {
@@ -7797,6 +7858,21 @@ schema {
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -8262,7 +8338,7 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
-    "RagEnginesAuroraPgVectorDatabaseSetupResourceCBEE6E4D": {
+    "RagEnginesAuroraPgVectorDatabaseSetupResourcecmk0253E788": {
       "DeletionPolicy": "Delete",
       "DependsOn": [
         "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -8501,7 +8577,7 @@ schema {
               "Name": "OPEN_SEARCH_COLLECTION_ENDPOINT",
               "Value": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "CollectionEndpoint",
                 ],
               },
@@ -8671,6 +8747,22 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -8833,7 +8925,7 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "Arn",
                 ],
               },
@@ -8891,12 +8983,12 @@ schema {
       "Type": "AWS::Batch::JobQueue",
     },
     "RagEnginesDataImportFileImportWorkflowFileImportSMLogGroupACEA6D66": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesDataImportFileImportWorkflowFileImportStateMachine398F0217": {
       "DeletionPolicy": "Delete",
@@ -9052,6 +9144,21 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "events:CreateRule",
                 "events:PutRule",
                 "events:PutTargets",
@@ -9089,6 +9196,12 @@ schema {
     "RagEnginesDataImportIngestionDeadLetterQueue4A2F3D18": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
         "VisibilityTimeout": 900,
       },
       "Type": "AWS::SQS::Queue",
@@ -9130,6 +9243,12 @@ schema {
     "RagEnginesDataImportIngestionQueue045D880F": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
@@ -9205,13 +9324,19 @@ schema {
       "Type": "AWS::SQS::QueuePolicy",
     },
     "RagEnginesDataImportProcessingBucketA7BE9701": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
               "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "SharedKMSKey7BCBB616",
+                    "Arn",
+                  ],
+                },
+                "SSEAlgorithm": "aws:kms",
               },
             },
           ],
@@ -9227,37 +9352,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "RagEnginesDataImportProcessingBucketAutoDeleteObjectsCustomResourceFE76D6A7": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesDataImportProcessingBucketPolicy87702EA3",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesDataImportProcessingBucketPolicy87702EA3": {
       "Properties": {
@@ -9300,72 +9400,14 @@ schema {
                 },
               ],
             },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesDataImportProcessingBucketA7BE9701",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesDataImportProcessingBucketA7BE9701",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
           ],
           "Version": "2012-10-17",
         },
       },
       "Type": "AWS::S3::BucketPolicy",
     },
-    "RagEnginesDataImportProcessingLogsBucketAutoDeleteObjectsCustomResourceB5AF8B71": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesDataImportProcessingLogsBucketPolicy1FE4B16D",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesDataImportProcessingLogsBucketB9FC694F",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
-    },
     "RagEnginesDataImportProcessingLogsBucketB9FC694F": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -9400,18 +9442,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesDataImportProcessingLogsBucketPolicy1FE4B16D": {
       "Properties": {
@@ -9430,45 +9466,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesDataImportProcessingLogsBucketB9FC694F",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesDataImportProcessingLogsBucketB9FC694F",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -9730,6 +9727,22 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
@@ -9766,6 +9779,19 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
             },
             {
               "Action": [
@@ -10111,6 +10137,22 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
             },
             {
               "Action": "states:StartExecution",
@@ -10496,6 +10538,19 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
@@ -10542,7 +10597,7 @@ schema {
       "Type": "AWS::IAM::Policy",
     },
     "RagEnginesDataImportUploadBucket061D697E": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "AccelerateConfiguration": {
           "AccelerationStatus": "Enabled",
@@ -10551,7 +10606,13 @@ schema {
           "ServerSideEncryptionConfiguration": [
             {
               "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "SharedKMSKey7BCBB616",
+                    "Arn",
+                  ],
+                },
+                "SSEAlgorithm": "aws:kms",
               },
             },
           ],
@@ -10589,37 +10650,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "RagEnginesDataImportUploadBucketAutoDeleteObjectsCustomResource501512BA": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesDataImportUploadBucketPolicy05639444",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesDataImportUploadBucket061D697E",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesDataImportUploadBucketNotificationsBC145677": {
       "DependsOn": [
@@ -10684,45 +10720,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesDataImportUploadBucket061D697E",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesDataImportUploadBucket061D697E",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -11067,6 +11064,22 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -11268,6 +11281,16 @@ schema {
               },
             },
             {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedQueueKMSKey26598E83",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": "states:StartExecution",
               "Effect": "Allow",
               "Resource": {
@@ -11309,7 +11332,7 @@ schema {
       "Type": "AWS::Lambda::EventSourceMapping",
     },
     "RagEnginesDataImportUploadLogsBucket7D4429F7": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -11344,37 +11367,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "RagEnginesDataImportUploadLogsBucketAutoDeleteObjectsCustomResource7130792D": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesDataImportUploadLogsBucketPolicy11C555A1",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesDataImportUploadLogsBucket7D4429F7",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesDataImportUploadLogsBucketPolicy11C555A1": {
       "Properties": {
@@ -11393,45 +11391,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesDataImportUploadLogsBucket7D4429F7",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesDataImportUploadLogsBucket7D4429F7",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -11669,7 +11628,7 @@ schema {
               "Name": "OPEN_SEARCH_COLLECTION_ENDPOINT",
               "Value": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "CollectionEndpoint",
                 ],
               },
@@ -11800,6 +11759,22 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
             },
             {
               "Action": [
@@ -11965,7 +11940,7 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "Arn",
                 ],
               },
@@ -12215,6 +12190,21 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "events:CreateRule",
                 "events:PutRule",
                 "events:PutTargets",
@@ -12250,12 +12240,12 @@ schema {
       "Type": "AWS::IAM::Policy",
     },
     "RagEnginesDataImportWebsiteCrawlingWorkflowWebsiteCrawlingSMLogGroup0C0F0231": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesKendraRetrievalCreateKendraWorkspace5D8DE7EF": {
       "DeletionPolicy": "Delete",
@@ -12317,12 +12307,12 @@ schema {
       "UpdateReplacePolicy": "Delete",
     },
     "RagEnginesKendraRetrievalCreateKendraWorkspaceCreateKendraWorkspaceSMLogGroupC9D4A635": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesKendraRetrievalCreateKendraWorkspaceRole3E074B64": {
       "Properties": {
@@ -12402,6 +12392,21 @@ schema {
               "Effect": "Allow",
               "Resource": "*",
             },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -12437,24 +12442,35 @@ schema {
           },
         ],
         "Edition": "ENTERPRISE_EDITION",
-        "Name": "prefix-genaichatbot-workspac",
+        "Name": "prefix-cmk-genaichatbot-work",
         "RoleArn": {
           "Fn::GetAtt": [
             "RagEnginesKendraRetrievalKendraRole162540DA",
             "Arn",
           ],
         },
+        "ServerSideEncryptionConfiguration": {
+          "KmsKeyId": {
+            "Ref": "SharedKMSKey7BCBB616",
+          },
+        },
       },
       "Type": "AWS::Kendra::Index",
     },
     "RagEnginesKendraRetrievalKendraDataBucket1627A447": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
               "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "SharedKMSKey7BCBB616",
+                    "Arn",
+                  ],
+                },
+                "SSEAlgorithm": "aws:kms",
               },
             },
           ],
@@ -12470,37 +12486,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "RagEnginesKendraRetrievalKendraDataBucketAutoDeleteObjectsCustomResourceD149C5A7": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesKendraRetrievalKendraDataBucketPolicy712A21F8",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesKendraRetrievalKendraDataBucketPolicy712A21F8": {
       "Properties": {
@@ -12519,45 +12510,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesKendraRetrievalKendraDataBucket1627A447",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesKendraRetrievalKendraDataBucket1627A447",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -12658,6 +12610,19 @@ schema {
               ],
             },
             {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": "kendra:BatchDeleteDocument",
               "Effect": "Allow",
               "Resource": [
@@ -12669,7 +12634,7 @@ schema {
                 },
                 {
                   "Fn::GetAtt": [
-                    "RagEnginesKendraRetrievalKendraS3DataSourceF4400C3D",
+                    "RagEnginesKendraRetrievalKendraS3DataSourceCMKB964C6CC",
                     "Arn",
                   ],
                 },
@@ -12687,7 +12652,7 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
-    "RagEnginesKendraRetrievalKendraS3DataSourceF4400C3D": {
+    "RagEnginesKendraRetrievalKendraS3DataSourceCMKB964C6CC": {
       "Properties": {
         "DataSourceConfiguration": {
           "S3Configuration": {
@@ -12718,7 +12683,7 @@ schema {
       "Type": "AWS::Kendra::DataSource",
     },
     "RagEnginesKendraRetrievalLogsBucket7EEBA031": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
         "BucketEncryption": {
@@ -12743,37 +12708,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "RagEnginesKendraRetrievalLogsBucketAutoDeleteObjectsCustomResource65BEA9C5": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesKendraRetrievalLogsBucketPolicy0F92CE93",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesKendraRetrievalLogsBucket7EEBA031",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesKendraRetrievalLogsBucketPolicy0F92CE93": {
       "Properties": {
@@ -12816,45 +12756,6 @@ schema {
                 },
               ],
             },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesKendraRetrievalLogsBucket7EEBA031",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesKendraRetrievalLogsBucket7EEBA031",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -12868,7 +12769,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-genaichatbot-workspac/*"],"Permission":["aoss:CreateIndex","aoss:DeleteIndex","aoss:UpdateIndex","aoss:DescribeIndex"]}],"Principal":["",
+              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-cmk-genaichatbot-work/*"],"Permission":["aoss:CreateIndex","aoss:DeleteIndex","aoss:UpdateIndex","aoss:DescribeIndex"]}],"Principal":["",
               {
                 "Fn::GetAtt": [
                   "RagEnginesOpenSearchVectorCreateOpenSearchWorkspaceCreateOpenSearchWorkspaceFunctionServiceRole61F3024C",
@@ -12890,7 +12791,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-genaichatbot-workspac/*"],"Permission":["aoss:DescribeIndex","aoss:UpdateIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
+              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-cmk-genaichatbot-work/*"],"Permission":["aoss:DescribeIndex","aoss:UpdateIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
               {
                 "Fn::GetAtt": [
                   "RagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionServiceRole3BBCBEE9",
@@ -12912,7 +12813,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-genaichatbot-workspac/*"],"Permission":["aoss:DeleteIndex","aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
+              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-cmk-genaichatbot-work/*"],"Permission":["aoss:DeleteIndex","aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
               {
                 "Fn::GetAtt": [
                   "RagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionServiceRoleD99F8BAF",
@@ -12934,7 +12835,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-genaichatbot-workspac/*"],"Permission":["aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
+              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-cmk-genaichatbot-work/*"],"Permission":["aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
               {
                 "Fn::GetAtt": [
                   "RagEnginesDataImportFileImportBatchJobFileImportJobRoleCA3E6A38",
@@ -12956,7 +12857,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-genaichatbot-workspac/*"],"Permission":["aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
+              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-cmk-genaichatbot-work/*"],"Permission":["aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
               {
                 "Fn::GetAtt": [
                   "ChatBotApiRestApiGraphQLApiHandlerServiceRole8BB05949",
@@ -12978,7 +12879,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-genaichatbot-workspac/*"],"Permission":["aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
+              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-cmk-genaichatbot-work/*"],"Permission":["aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
               {
                 "Fn::GetAtt": [
                   "LangchainInterfaceRequestHandlerServiceRole2FA1A914",
@@ -13000,7 +12901,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-genaichatbot-workspac/*"],"Permission":["aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
+              "[{"Rules":[{"ResourceType":"index","Resource":["index/prefix-cmk-genaichatbot-work/*"],"Permission":["aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}],"Principal":["",
               {
                 "Fn::GetAtt": [
                   "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerJobRoleE84A3DDA",
@@ -13118,12 +13019,12 @@ schema {
             "LOG_LEVEL": "INFO",
             "OPEN_SEARCH_COLLECTION_ENDPOINT": {
               "Fn::GetAtt": [
-                "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                 "CollectionEndpoint",
               ],
             },
             "OPEN_SEARCH_COLLECTION_ENDPOINT_PORT": "443",
-            "OPEN_SEARCH_COLLECTION_NAME": "prefix-genaichatbot-workspac",
+            "OPEN_SEARCH_COLLECTION_NAME": "prefix-cmk-genaichatbot-work",
             "POWERTOOLS_DEV": "false",
             "POWERTOOLS_LOGGER_LOG_EVENT": "true",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
@@ -13338,6 +13239,22 @@ schema {
           "Statement": [
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
@@ -13384,7 +13301,7 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "Arn",
                 ],
               },
@@ -13402,12 +13319,12 @@ schema {
       "Type": "AWS::IAM::Policy",
     },
     "RagEnginesOpenSearchVectorCreateOpenSearchWorkspaceCreateOpenSearchWorkspaceSMLogGroupB97A0992": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesOpenSearchVectorCreateOpenSearchWorkspaceRole11F40159": {
       "Properties": {
@@ -13513,6 +13430,21 @@ schema {
               "Effect": "Allow",
               "Resource": "*",
             },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -13531,7 +13463,21 @@ schema {
       ],
       "Properties": {
         "Name": "prefix-genaichatbot-encryption-p",
-        "Policy": "{"Rules":[{"ResourceType":"collection","Resource":["collection/prefix-genaichatbot-workspac"]}],"AWSOwnedKey":true}",
+        "Policy": {
+          "Fn::Join": [
+            "",
+            [
+              "{"Rules":[{"ResourceType":"collection","Resource":["collection/prefix-cmk-genaichatbot-work"]}],"AWSOwnedKey":false,"KmsARN":"",
+              {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+              ""}",
+            ],
+          ],
+        },
         "Type": "encryption",
       },
       "Type": "AWS::OpenSearchServerless::SecurityPolicy",
@@ -13546,7 +13492,7 @@ schema {
           "Fn::Join": [
             "",
             [
-              "[{"Rules":[{"ResourceType":"collection","Resource":["collection/prefix-genaichatbot-workspac"]}],"AllowFromPublic":false,"SourceVPCEs":["",
+              "[{"Rules":[{"ResourceType":"collection","Resource":["collection/prefix-cmk-genaichatbot-work"]}],"AllowFromPublic":false,"SourceVPCEs":["",
               {
                 "Fn::GetAtt": [
                   "RagEnginesOpenSearchVectorVpcEndpoint0433102C",
@@ -13561,16 +13507,18 @@ schema {
       },
       "Type": "AWS::OpenSearchServerless::SecurityPolicy",
     },
-    "RagEnginesOpenSearchVectorOpenSearchCollection0550028F": {
+    "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8": {
+      "DeletionPolicy": "RetainExceptOnCreate",
       "DependsOn": [
         "RagEnginesOpenSearchVectorEncryptionSecurityPolicy14A4564B",
         "RagEnginesOpenSearchVectorNetworkSecurityPolicy0DA2DE7C",
       ],
       "Properties": {
-        "Name": "prefix-genaichatbot-workspac",
+        "Name": "prefix-cmk-genaichatbot-work",
         "Type": "VECTORSEARCH",
       },
       "Type": "AWS::OpenSearchServerless::Collection",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesOpenSearchVectorSecurityGroup0D835056": {
       "Properties": {
@@ -13645,7 +13593,7 @@ schema {
       "Type": "AWS::OpenSearchServerless::VpcEndpoint",
     },
     "RagEnginesRagDynamoDBTablesDocumentsF6F2B272": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "AttributeDefinitions": [
           {
@@ -13718,14 +13666,21 @@ schema {
           "PointInTimeRecoveryEnabled": true,
         },
         "SSESpecification": {
+          "KMSMasterKeyId": {
+            "Fn::GetAtt": [
+              "SharedKMSKey7BCBB616",
+              "Arn",
+            ],
+          },
           "SSEEnabled": true,
+          "SSEType": "KMS",
         },
       },
       "Type": "AWS::DynamoDB::Table",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesRagDynamoDBTablesWorkspacesD2D3C0C4": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "AttributeDefinitions": [
           {
@@ -13774,39 +13729,33 @@ schema {
           "PointInTimeRecoveryEnabled": true,
         },
         "SSESpecification": {
+          "KMSMasterKeyId": {
+            "Fn::GetAtt": [
+              "SharedKMSKey7BCBB616",
+              "Arn",
+            ],
+          },
           "SSEEnabled": true,
+          "SSEType": "KMS",
         },
       },
       "Type": "AWS::DynamoDB::Table",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "RagEnginesSageMakerModelMultiAB24ABucketAutoDeleteObjectsCustomResource4D45F7A7": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesSageMakerModelMultiAB24ABucketPolicyC0BB6B78",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesSageMakerModelMultiAB24ABucketF09A69F9",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesSageMakerModelMultiAB24ABucketF09A69F9": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
               "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "SharedKMSKey7BCBB616",
+                    "Arn",
+                  ],
+                },
+                "SSEAlgorithm": "aws:kms",
               },
             },
           ],
@@ -13824,10 +13773,6 @@ schema {
         },
         "Tags": [
           {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-          {
             "Key": "aws-cdk:cr-owned:build-script:bb3552fb",
             "Value": "true",
           },
@@ -13836,9 +13781,12 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesSageMakerModelMultiAB24ABucketPolicyC0BB6B78": {
       "Properties": {
@@ -13857,45 +13805,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesSageMakerModelMultiAB24ABucketF09A69F9",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesSageMakerModelMultiAB24ABucketF09A69F9",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -14229,6 +14138,22 @@ schema {
                 },
               ],
             },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -14409,7 +14334,7 @@ schema {
       "Type": "AWS::IAM::Policy",
     },
     "RagEnginesSageMakerModelMultiAB24ALogsBucket1624BE94": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -14444,37 +14369,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "RagEnginesSageMakerModelMultiAB24ALogsBucketAutoDeleteObjectsCustomResourceFB4DF7EB": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesSageMakerModelMultiAB24ALogsBucketPolicy6F361623",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "RagEnginesSageMakerModelMultiAB24ALogsBucket1624BE94",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesSageMakerModelMultiAB24ALogsBucketPolicy6F361623": {
       "Properties": {
@@ -14493,45 +14393,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "RagEnginesSageMakerModelMultiAB24ALogsBucket1624BE94",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "RagEnginesSageMakerModelMultiAB24ALogsBucket1624BE94",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -15689,6 +15550,19 @@ schema {
                 },
               ],
             },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -15841,7 +15715,7 @@ schema {
             "LOG_LEVEL": "INFO",
             "OPEN_SEARCH_COLLECTION_ENDPOINT": {
               "Fn::GetAtt": [
-                "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                 "CollectionEndpoint",
               ],
             },
@@ -16082,7 +15956,7 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "Arn",
                 ],
               },
@@ -16123,6 +15997,22 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
             },
             {
               "Action": [
@@ -16289,12 +16179,12 @@ schema {
       "Type": "AWS::IAM::Policy",
     },
     "RagEnginesWorkspacesDeleteDocumentDeleteDocumentSMLogGroupD3F7AE1A": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesWorkspacesDeleteDocumentRoleDefaultPolicy71FACDB8": {
       "Metadata": {
@@ -16382,6 +16272,21 @@ schema {
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -16518,7 +16423,7 @@ schema {
             "LOG_LEVEL": "INFO",
             "OPEN_SEARCH_COLLECTION_ENDPOINT": {
               "Fn::GetAtt": [
-                "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                 "CollectionEndpoint",
               ],
             },
@@ -16759,7 +16664,7 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "RagEnginesOpenSearchVectorOpenSearchCollection0550028F",
+                  "RagEnginesOpenSearchVectorOpenSearchCollectionCMK872E47D8",
                   "Arn",
                 ],
               },
@@ -16800,6 +16705,22 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
             },
             {
               "Action": [
@@ -16966,12 +16887,12 @@ schema {
       "Type": "AWS::IAM::Policy",
     },
     "RagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceSMLogGroup6EA3524F": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesWorkspacesDeleteWorkspaceRole19E7851E": {
       "Properties": {
@@ -17077,6 +16998,21 @@ schema {
               "Effect": "Allow",
               "Resource": "*",
             },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -17102,6 +17038,12 @@ schema {
         },
       },
       "Properties": {
+        "KmsKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
         "SecretString": "{}",
       },
       "Type": "AWS::SecretsManager::Secret",
@@ -17127,17 +17069,17 @@ schema {
     "SharedConfig358B4A20": {
       "Properties": {
         "Type": "String",
-        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]","Idefics_80b (Multimodal) [ml.g5.48xlarge]"]},"rag":{"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true},"knowledgeBase":{"enabled":false}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]}}",
+        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]","Idefics_80b (Multimodal) [ml.g5.48xlarge]"]},"rag":{"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true},"knowledgeBase":{"enabled":false}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]},"createCMKs":true,"retainOnDelete":true}",
       },
       "Type": "AWS::SSM::Parameter",
     },
     "SharedFLowLogsLogGroupE884FFC6": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "SharedFlowLog04219D2B": {
       "Properties": {
@@ -17227,6 +17169,285 @@ schema {
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "SharedKMSKey7BCBB616": {
+      "DeletionPolicy": "RetainExceptOnCreate",
+      "Properties": {
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::111111111:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.us-east-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::111111111:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:CreateGrant",
+                "kms:DescribeKey",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.us-east-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::111111111:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.us-east-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "RagEnginesDataImportFileImportBatchJobFileImportJobRoleCA3E6A38",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.us-east-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerJobRoleE84A3DDA",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.us-east-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "RagEnginesDataImportUploadHandlerServiceRole46EB8689",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.us-east-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "ChatBotApiRestApiGraphQLApiHandlerServiceRole8BB05949",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.us-east-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "LangchainInterfaceRequestHandlerServiceRole2FA1A914",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::KMS::Key",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SharedKMSKeyAliasBBBE90C7": {
+      "Properties": {
+        "AliasName": "alias/prefixgenaichatbot-shared-key",
+        "TargetKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::KMS::Alias",
+    },
+    "SharedQueueKMSKey26598E83": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::111111111:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "RagEnginesDataImportUploadBucket061D697E",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com",
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:GenerateDataKey*",
+                "kms:Decrypt",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com",
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::KMS::Key",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SharedQueueKMSKeyAliasEB8C3E11": {
+      "Properties": {
+        "AliasName": "alias/prefixgenaichatbot-queue-shared-key",
+        "TargetKeyId": {
+          "Fn::GetAtt": [
+            "SharedQueueKMSKey26598E83",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::KMS::Alias",
     },
     "SharedVPC6716DA5E": {
       "Properties": {
@@ -19346,6 +19567,12 @@ schema {
           "GenerateStringKey": "headerValue",
           "SecretStringTemplate": "{}",
         },
+        "KmsKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
       },
       "Type": "AWS::SecretsManager::Secret",
       "UpdateReplacePolicy": "Delete",
@@ -19400,7 +19627,7 @@ schema {
       "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
     },
     "UserInterfacePrivateWebsiteALBLoggingBucketA65ED627": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -19427,37 +19654,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "UserInterfacePrivateWebsiteALBLoggingBucketAutoDeleteObjectsCustomResource54EC7BEC": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "UserInterfacePrivateWebsiteALBLoggingBucketPolicyAAB72A21",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "UserInterfacePrivateWebsiteALBLoggingBucketA65ED627",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "UserInterfacePrivateWebsiteALBLoggingBucketPolicyAAB72A21": {
       "Properties": {
@@ -19476,45 +19678,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "UserInterfacePrivateWebsiteALBLoggingBucketA65ED627",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "UserInterfacePrivateWebsiteALBLoggingBucketA65ED627",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -20256,7 +20419,7 @@ schema {
       "Type": "AWS::S3::BucketPolicy",
     },
     "UserInterfaceWebsiteLogsBucket54728780": {
-      "DeletionPolicy": "Delete",
+      "DeletionPolicy": "RetainExceptOnCreate",
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -20291,37 +20454,12 @@ schema {
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
         "VersioningConfiguration": {
           "Status": "Enabled",
         },
       },
       "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "UserInterfaceWebsiteLogsBucketAutoDeleteObjectsCustomResourceA75855B8": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "UserInterfaceWebsiteLogsBucketPolicyB99816BB",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "UserInterfaceWebsiteLogsBucket54728780",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "UpdateReplacePolicy": "Retain",
     },
     "UserInterfaceWebsiteLogsBucketPolicyB99816BB": {
       "Properties": {
@@ -20340,45 +20478,6 @@ schema {
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "UserInterfaceWebsiteLogsBucket54728780",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "UserInterfaceWebsiteLogsBucket54728780",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
