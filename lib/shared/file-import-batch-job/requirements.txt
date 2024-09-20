@@ -11,7 +11,7 @@ psycopg2-binary==2.9.7
 pgvector==0.2.2
 pydantic==2.4.0
 urllib3<2
-openai==0.28.0
+openai==1.47.0
 beautifulsoup4==4.12.2
 requests==2.32.2
 attrs==23.1.0

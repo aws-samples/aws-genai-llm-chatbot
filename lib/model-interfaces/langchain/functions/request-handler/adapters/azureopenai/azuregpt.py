@@ -1,5 +1,5 @@
 import os
-from langchain_community.chat_models import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI
 
 from ..base import ModelAdapter
 from genai_core.registry import registry
@@ -24,7 +24,7 @@ class AzureGptAdapter(ModelAdapter):
             params["max_tokens"] = model_kwargs["maxTokens"]
 
         return AzureChatOpenAI(
-            openai_api_base=os.environ.get(f"AZURE_OPENAI_API_BASE__{self.model_id}"),
+            azure_endpoint=os.environ.get(f"AZURE_OPENAI_API_BASE__{self.model_id}"),
             deployment_name=os.environ.get(
                 f"AZURE_OPENAI_API_DEPLOYMENT_NAME__{self.model_id}"
             ),
