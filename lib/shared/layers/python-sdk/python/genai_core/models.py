@@ -39,21 +39,22 @@ def list_openai_models():
     if not openai:
         return None
 
-    models = openai.Model.list()
+    models = []
+    for model in openai.models.list():
+        if model.id.startswith("gpt"):
+            models.append(
+                {
+                    "provider": Provider.OPENAI.value,
+                    "name": model.id,
+                    "streaming": True,
+                    "inputModalities": [Modality.TEXT.value],
+                    "outputModalities": [Modality.TEXT.value],
+                    "interface": ModelInterface.LANGCHAIN.value,
+                    "ragSupported": True,
+                }
+            )
 
-    return [
-        {
-            "provider": Provider.OPENAI.value,
-            "name": model["id"],
-            "streaming": True,
-            "inputModalities": [Modality.TEXT.value],
-            "outputModalities": [Modality.TEXT.value],
-            "interface": ModelInterface.LANGCHAIN.value,
-            "ragSupported": True,
-        }
-        for model in models.data
-        if model["id"].startswith("gpt")
-    ]
+    return models
 
 
 def list_azure_openai_models():

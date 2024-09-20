@@ -62,8 +62,8 @@ def _generate_embeddings_openai(model: EmbeddingsModel, input: List[str]):
     if not openai:
         raise CommonError("OpenAI API is not available. Please set OPENAI_API_KEY.")
 
-    data = openai.Embedding.create(input=input, model=model.name)["data"]
-    ret_value = list(map(lambda x: x["embedding"], data))
+    data = openai.embeddings.create(input=input, model=model.name).data
+    ret_value = list(map(lambda x: x.embedding, data))
 
     return ret_value
 
