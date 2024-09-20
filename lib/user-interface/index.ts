@@ -58,7 +58,7 @@ export class UserInterface extends Construct {
       websiteErrorDocument: "index.html",
       enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
-      // Cloudfront with OAI only support S3 Managed (would need to migrate to OAC)
+      // Cloudfront with OAI only supports S3 Managed Key (would need to migrate to OAC)
       // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html
       encryption: s3.BucketEncryption.S3_MANAGED,
       versioned: true,

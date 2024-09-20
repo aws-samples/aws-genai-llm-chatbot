@@ -295,15 +295,15 @@ async function processCreateOptions(options: any): Promise<void> {
       message:
         "Do you want to create KMS Customer Managed Keys (CMKs)? (It will be used to encrypt the data at rest.)",
       initial: true,
-      hint: "It is recommended but enabling it on an existing environment will cause the re-creation of some of the resources (for example Aurora cluster, Open Search collecion). To prevent data loss, it is recommended to use it on a new environment or at least enable retain on cleanup (needs to be deployed before enabling the use of CMK). For more information on Aurora migration, please refer to the documentation.",
+      hint: "It is recommended but enabling it on an existing environment will cause the re-creation of some of the resources (for example Aurora cluster, Open Search collection). To prevent data loss, it is recommended to use it on a new environment or at least enable retain on cleanup (needs to be deployed before enabling the use of CMK). For more information on Aurora migration, please refer to the documentation.",
     },
     {
       type: "confirm",
       name: "retainOnDelete",
       message:
-        "Do you want to retain data stores on cleanup of the project (Logs, S3, Tables, Indexes, Cognito User pools)? For Databases, it will favor the creation of snapshots.",
+        "Do you want to retain data stores on cleanup of the project (Logs, S3, Tables, Indexes, Cognito User pools)?",
       initial: true,
-      hint: "Enabling to remove the risk of deleting data. It will however not delete all the resources on cleanup (would require manual removal if relevant)",
+      hint: "It reduces the risk of deleting data. It will however not delete all the resources on cleanup (would require manual removal if relevant)",
     },
     {
       type: "confirm",

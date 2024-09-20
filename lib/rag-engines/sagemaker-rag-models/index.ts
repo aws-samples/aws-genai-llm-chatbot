@@ -29,7 +29,7 @@ export class SageMakerRagModels extends Construct {
       region: cdk.Aws.REGION,
       logRetention: props.config.logRetention,
       kmsKey: props.shared.kmsKey,
-      // NVMe based instance (like ml.g4dn.xlarge) do not support KMS encryption
+      // NVMe based instances (like ml.g4dn.xlarge) do not support KMS encryption
       // They instead use an hardware module for encryption
       // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/data-protection.html#encryption-rest
       enableEndpointKMSEncryption: false,

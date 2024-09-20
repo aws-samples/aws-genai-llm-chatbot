@@ -117,7 +117,8 @@ export class KendraRetrieval extends Construct {
 
       const s3DataSource = new kendra.CfnDataSource(
         this,
-        // Force re-creation if KMS ARN because the Kendra index would be re-created.
+        // Force re-creation if the key is provided
+        // because the Kendra index would be re-created.
         "KendraS3DataSource" + (props.shared.kmsKey ? "-CMK" : ""),
         {
           type: "S3",

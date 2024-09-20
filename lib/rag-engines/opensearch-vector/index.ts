@@ -98,7 +98,8 @@ export class OpenSearchVector extends Construct {
 
     cfnEncryptionSecurityPolicy.node.addDependency(cfnNetworkSecurityPolicy);
 
-    // Force recreation if KMS ARN is set because the encryption policy needs to be set before creation
+    // Force recreation if a key is set because
+    // the encryption policy needs to be set before creation
     const cfnCollection = new oss.CfnCollection(
       this,
       "OpenSearchCollection" + (props.shared.kmsKey ? "-CMK" : ""),
