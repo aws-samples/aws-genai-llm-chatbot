@@ -79,7 +79,7 @@ export class AuroraPgVector extends Construct {
 
     const dbSetupResource = new cdk.CustomResource(
       this,
-      // Force recreation on CMK cange to re-init the DB cluster.
+      // Force recreation on CMK change to re-init the DB cluster.
       "DatabaseSetupResource" + (props.shared.kmsKey ? "cmk-" : ""),
       {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
