@@ -831,7 +831,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "advancedMonitoring",
-      message: "Do you want to use Amazon CloudWatch custom metrics, alarms and AWS X-Ray?",
+      message:
+        "Do you want to use Amazon CloudWatch custom metrics, alarms and AWS X-Ray?",
       initial: options.advancedMonitoring || false,
     },
     {
