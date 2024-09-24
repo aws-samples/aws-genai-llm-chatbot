@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as cf from "aws-cdk-lib/aws-cloudfront";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
@@ -30,6 +31,7 @@ export interface UserInterfaceProps {
 
 export class UserInterface extends Construct {
   public readonly publishedDomain: string;
+  public readonly cloudFrontDistribution?: cf.IDistribution;
 
   constructor(scope: Construct, id: string, props: UserInterfaceProps) {
     super(scope, id);
@@ -56,7 +58,6 @@ export class UserInterface extends Construct {
     });
 
     // Deploy either Private (only accessible within VPC) or Public facing website
-    let distribution;
     let redirectSignIn: string;
 
     if (props.config.privateWebsite) {
@@ -71,7 +72,7 @@ export class UserInterface extends Construct {
         ...props,
         websiteBucket: websiteBucket,
       });
-      distribution = publicWebsite.distribution;
+      this.cloudFrontDistribution = publicWebsite.distribution;
       this.publishedDomain = props.config.domain
         ? props.config.domain
         : publicWebsite.distribution.distributionDomainName;
@@ -182,7 +183,9 @@ export class UserInterface extends Construct {
       prune: false,
       sources: [asset, exportsAsset],
       destinationBucket: websiteBucket,
-      distribution: props.config.privateWebsite ? undefined : distribution,
+      distribution: props.config.privateWebsite
+        ? undefined
+        : this.cloudFrontDistribution,
     });
 
     /**

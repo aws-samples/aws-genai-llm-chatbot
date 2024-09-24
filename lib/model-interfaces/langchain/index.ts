@@ -38,7 +38,9 @@ export class LangChainInterface extends Construct {
       description: "Langchain request handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
-      tracing: lambda.Tracing.ACTIVE,
+      tracing: props.config.advancedMonitoring
+        ? lambda.Tracing.ACTIVE
+        : lambda.Tracing.DISABLED,
       timeout: cdk.Duration.minutes(15),
       memorySize: 1024,
       logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,

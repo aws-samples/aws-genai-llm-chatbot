@@ -5,6 +5,7 @@ import {
   Function as LambdaFunction,
   LayerVersion,
   LoggingFormat,
+  Tracing,
   Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
@@ -23,6 +24,7 @@ interface RealtimeResolversProps {
   readonly shared: Shared;
   readonly api: appsync.GraphqlApi;
   readonly logRetention?: number;
+  readonly advancedMonitoring?: boolean;
 }
 
 export class RealtimeResolvers extends Construct {
@@ -47,7 +49,9 @@ export class RealtimeResolvers extends Construct {
       handler: "index.handler",
       description: "Appsync resolver handling LLM Queries",
       runtime: Runtime.PYTHON_3_11,
+      tracing: props.advancedMonitoring ? Tracing.ACTIVE : Tracing.DISABLED,
       environment: {
+        ...props.shared.defaultEnvironmentVariables,
         SNS_TOPIC_ARN: props.topic.topicArn,
       },
       logRetention: props.logRetention,
@@ -64,11 +68,18 @@ export class RealtimeResolvers extends Construct {
           __dirname,
           "functions/outgoing-message-appsync/index.ts"
         ),
+        bundling: {
+          externalModules: ["aws-xray-sdk-core", "@aws-sdk"],
+        },
         layers: [powertoolsLayerJS],
         handler: "index.handler",
+        description: "Sends LLM Responses to Appsync",
         runtime: Runtime.NODEJS_18_X,
         loggingFormat: LoggingFormat.JSON,
+        tracing: props.advancedMonitoring ? Tracing.ACTIVE : Tracing.DISABLED,
+        logRetention: props.logRetention,
         environment: {
+          ...props.shared.defaultEnvironmentVariables,
           GRAPHQL_ENDPOINT: props.api.graphqlUrl,
         },
         vpc: props.shared.vpc,
