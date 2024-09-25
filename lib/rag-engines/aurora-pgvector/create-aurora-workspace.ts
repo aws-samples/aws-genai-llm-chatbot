@@ -9,7 +9,6 @@ import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
-import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface CreateAuroraWorkspaceProps {
   readonly config: SystemConfig;
@@ -129,7 +128,11 @@ export class CreateAuroraWorkspace extends Construct {
       this,
       "CreateAuroraWorkspaceSMLogGroup",
       {
-        removalPolicy: RemovalPolicy.DESTROY,
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        retention: props.config.logRetention,
       }
     );
 
@@ -143,6 +146,9 @@ export class CreateAuroraWorkspace extends Construct {
         level: sfn.LogLevel.ALL,
       },
     });
+    if (props.shared.kmsKey) {
+      props.shared.kmsKey.grantEncryptDecrypt(stateMachine.role);
+    }
 
     this.stateMachine = stateMachine;
   }

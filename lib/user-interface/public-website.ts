@@ -40,9 +40,17 @@ export class PublicWebsite extends Construct {
       {
         objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: props.config.retainOnDelete !== true,
         enforceSSL: true,
+        encryption: props.shared.kmsKey
+          ? s3.BucketEncryption.KMS
+          : s3.BucketEncryption.S3_MANAGED,
+        encryptionKey: props.shared.kmsKey,
+        versioned: true,
       }
     );
 
@@ -67,6 +75,7 @@ export class PublicWebsite extends Construct {
               ),
               {
                 aliases: [props.config.domain],
+                securityPolicy: cf.SecurityPolicyProtocol.TLS_V1_2_2021,
               }
             ),
           }),

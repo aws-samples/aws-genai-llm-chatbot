@@ -8,7 +8,11 @@ import { Queue, QueueEncryption } from "aws-cdk-lib/aws-sqs";
 import { DatabaseCluster } from "aws-cdk-lib/aws-rds";
 import { CfnCollection } from "aws-cdk-lib/aws-opensearchserverless";
 import { CfnIndex } from "aws-cdk-lib/aws-kendra";
-import { Bucket } from "aws-cdk-lib/aws-s3";
+import {
+  BlockPublicAccess,
+  Bucket,
+  BucketEncryption,
+} from "aws-cdk-lib/aws-s3";
 import { Function } from "aws-cdk-lib/aws-lambda";
 import { StateMachine } from "aws-cdk-lib/aws-stepfunctions";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
@@ -53,7 +57,13 @@ new Monitoring(stack, "Monitoring", {
     name: "name",
   }),
   buckets: [
-    new Bucket(stack, "Bucket", { publicReadAccess: false, versioned: true }),
+    new Bucket(stack, "Bucket", {
+      publicReadAccess: false,
+      versioned: true,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      encryption: BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+    }),
   ],
   ragFunctionProcessing: [Function.fromFunctionName(stack, "Function", "Name")],
   ragEngineStateMachineProcessing: [

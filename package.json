@@ -5,7 +5,7 @@
     "aws-genai-llm-chatbot": "bin/aws-genai-llm-chatbot.js"
   },
   "scripts": {
-    "build": "npx @aws-amplify/cli codegen && npx tsc",
+    "build": "amplify codegen && tsc",
     "cdk": "cdk",
     "deploy": "npx cdk deploy",
     "hotswap": "cdk deploy --hotswap",
@@ -14,12 +14,12 @@
     "pytest": "pytest tests/",
     "test-all": "npm run test && npm run pytest",
     "integtest": "pytest integtests/",
-    "gen": "npx @aws-amplify/cli codegen",
+    "gen": "amplify codegen",
     "create": "node ./dist/cli/magic.js config",
     "config": "node ./dist/cli/magic.js config",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "pylint": "flake8 .",
-    "format": "npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json|css)\"",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json|css)\"",
     "pyformat": "black .",
     "format-lint-all": "npm run format && npm run pyformat && npm run lint && npm run pylint",
     "vet-all": "npm run format-lint-all && npm run test-all",
