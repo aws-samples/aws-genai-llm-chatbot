@@ -14,7 +14,7 @@ AURORA_DB_REGION = os.environ.get("AWS_REGION")
 
 
 class AuroraConnection(object):
-    token = ""
+    token = None
     token_refresh = datetime.now() - timedelta(minutes=1)
 
     def __init__(self, autocommit=True):
@@ -37,6 +37,9 @@ class AuroraConnection(object):
         self.dbport = AURORA_DB_PORT
         self.dbuser = AURORA_DB_USER
         self.dbpass = AuroraConnection.token
+
+        if AuroraConnection.token is None:
+            raise ValueError("Token is not set.")
 
     def __enter__(self):
         connection = psycopg2.connect(
