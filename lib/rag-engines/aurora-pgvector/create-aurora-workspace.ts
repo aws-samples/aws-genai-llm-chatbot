@@ -10,6 +10,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import { RemovalPolicy } from "aws-cdk-lib";
+import { AURORA_DB_USERS } from ".";
 
 export interface CreateAuroraWorkspaceProps {
   readonly config: SystemConfig;
@@ -42,7 +43,9 @@ export class CreateAuroraWorkspace extends Construct {
         loggingFormat: lambda.LoggingFormat.JSON,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
-          AURORA_DB_SECRET_ID: props.dbCluster.secret?.secretArn as string,
+          AURORA_DB_USER: AURORA_DB_USERS.ADMIN,
+          AURORA_DB_HOST: props.dbCluster?.clusterEndpoint?.hostname ?? "",
+          AURORA_DB_PORT: props.dbCluster?.clusterEndpoint?.port + "",
           WORKSPACES_TABLE_NAME:
             props.ragDynamoDBTables.workspacesTable.tableName,
           WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
@@ -51,7 +54,8 @@ export class CreateAuroraWorkspace extends Construct {
       }
     );
 
-    props.dbCluster.secret?.grantRead(createFunction);
+    // Process will create a new table and requires Admin permission on the SQL Schema
+    props.dbCluster.grantConnect(createFunction, AURORA_DB_USERS.ADMIN);
     props.dbCluster.connections.allowDefaultPortFrom(createFunction);
     props.ragDynamoDBTables.workspacesTable.grantReadWriteData(createFunction);
 

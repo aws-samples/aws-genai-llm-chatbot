@@ -8,7 +8,7 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { AuroraPgVector } from "../aurora-pgvector";
+import { AURORA_DB_USERS, AuroraPgVector } from "../aurora-pgvector";
 import { DataImport } from "../data-import";
 import { KendraRetrieval } from "../kendra-retrieval";
 import { OpenSearchVector } from "../opensearch-vector";
@@ -49,8 +49,11 @@ export class DeleteWorkspace extends Construct {
         loggingFormat: lambda.LoggingFormat.JSON,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
-          AURORA_DB_SECRET_ID: props.auroraPgVector?.database.secret
-            ?.secretArn as string,
+          AURORA_DB_USER: AURORA_DB_USERS.ADMIN,
+          AURORA_DB_HOST:
+            props.auroraPgVector?.database?.clusterEndpoint?.hostname ?? "",
+          AURORA_DB_PORT:
+            props.auroraPgVector?.database?.clusterEndpoint?.port + "",
           UPLOAD_BUCKET_NAME: props.dataImport.uploadBucket.bucketName,
           PROCESSING_BUCKET_NAME: props.dataImport.processingBucket.bucketName,
           WORKSPACES_TABLE_NAME:
@@ -72,7 +75,11 @@ export class DeleteWorkspace extends Construct {
     );
 
     if (props.auroraPgVector) {
-      props.auroraPgVector.database.secret?.grantRead(deleteFunction);
+      // Process will drop a table and requires Admin permission on the SQL Schema
+      props.auroraPgVector.database.grantConnect(
+        deleteFunction,
+        AURORA_DB_USERS.ADMIN
+      );
       props.auroraPgVector.database.connections.allowDefaultPortFrom(
         deleteFunction
       );
