@@ -51,8 +51,8 @@ export default defineConfig({
       {
         text: 'Documentation',
         items: [
-          { text: 'Custom Public Domain', link: '/documentation/custom-public-domain' },
-          { text: 'Private Chatbot', link: '/documentation/private-chatbot' },
+          { text: 'AppSync', link: '/documentation/appsync' },
+          { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },
           {
             text: 'Cognito Federation', items: [
               { text: 'Cognito Overview', link: '/documentation/cognito/overview' },
@@ -60,15 +60,15 @@ export default defineConfig({
               { text: 'Keycloak OIDC example', link: '/documentation/cognito/keycloak-oidc' },
             ]
           },
-          { text: 'Model Requirements', link: '/documentation/model-requirements' },
-          { text: 'Self-hosted models', link: '/documentation/self-hosted-models' },
-          { text: 'Inference Script', link: '/documentation/inference-script' },
+          { text: 'Custom Public Domain', link: '/documentation/custom-public-domain' },
           { text: 'Document Retrieval', link: '/documentation/retriever' },
-          { text: 'AppSync', link: '/documentation/appsync' },
+          { text: 'Inference Script', link: '/documentation/inference-script' },
+          { text: 'Model Requirements', link: '/documentation/model-requirements' },
+          { text: 'Precautions', link: '/documentation/precautions' },
+          { text: 'Private Chatbot', link: '/documentation/private-chatbot' },
           { text: 'SageMaker Schedule', link: '/documentation/sagemaker-schedule' },
-          { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },
           { text: 'Security', link: '/documentation/vulnerability-scanning' },
-          { text: 'Precautions', link: '/documentation/precautions' }
+          { text: 'Self-hosted models', link: '/documentation/self-hosted-models' },
         ]
       }
     ],

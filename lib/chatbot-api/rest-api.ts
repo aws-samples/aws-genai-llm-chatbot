@@ -52,7 +52,9 @@ export class ApiResolvers extends Construct {
         architecture: props.shared.lambdaArchitecture,
         timeout: cdk.Duration.minutes(10),
         memorySize: 512,
-        tracing: lambda.Tracing.ACTIVE,
+        tracing: props.config.advancedMonitoring
+          ? lambda.Tracing.ACTIVE
+          : lambda.Tracing.DISABLED,
         logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
         loggingFormat: lambda.LoggingFormat.JSON,
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],

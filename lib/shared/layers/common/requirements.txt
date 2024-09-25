@@ -1,4 +1,4 @@
-aws_xray_sdk==2.12.1
+aws_xray_sdk==2.14.0
 numpy==1.26.0
 cfnresponse==1.1.2
 aws_requests_auth==0.4.3

@@ -87,6 +87,128 @@ exports[`snapshot test 1`] = `
         "value": "763104351884",
       },
     },
+    "LatestNodeRuntimeMap": {
+      "af-south-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-east-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-3": {
+        "value": "nodejs20.x",
+      },
+      "ap-south-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-south-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-3": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-4": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-5": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-7": {
+        "value": "nodejs20.x",
+      },
+      "ca-central-1": {
+        "value": "nodejs20.x",
+      },
+      "ca-west-1": {
+        "value": "nodejs20.x",
+      },
+      "cn-north-1": {
+        "value": "nodejs18.x",
+      },
+      "cn-northwest-1": {
+        "value": "nodejs18.x",
+      },
+      "eu-central-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-central-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-isoe-west-1": {
+        "value": "nodejs18.x",
+      },
+      "eu-north-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-south-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-south-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-3": {
+        "value": "nodejs20.x",
+      },
+      "il-central-1": {
+        "value": "nodejs20.x",
+      },
+      "me-central-1": {
+        "value": "nodejs20.x",
+      },
+      "me-south-1": {
+        "value": "nodejs20.x",
+      },
+      "mx-central-1": {
+        "value": "nodejs20.x",
+      },
+      "sa-east-1": {
+        "value": "nodejs20.x",
+      },
+      "us-east-1": {
+        "value": "nodejs20.x",
+      },
+      "us-east-2": {
+        "value": "nodejs20.x",
+      },
+      "us-gov-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-gov-west-1": {
+        "value": "nodejs18.x",
+      },
+      "us-iso-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-iso-west-1": {
+        "value": "nodejs18.x",
+      },
+      "us-isob-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-west-1": {
+        "value": "nodejs20.x",
+      },
+      "us-west-2": {
+        "value": "nodejs20.x",
+      },
+    },
     "RagEnginesSageMakerModelImageRepositoryCfnMappingF3891114": {
       "af-south-1": {
         "account": "626614931356",
@@ -186,113 +308,6 @@ exports[`snapshot test 1`] = `
       },
       "us-west-2": {
         "account": "763104351884",
-      },
-    },
-    "ServiceprincipalMap": {
-      "af-south-1": {
-        "states": "states.af-south-1.amazonaws.com",
-      },
-      "ap-east-1": {
-        "states": "states.ap-east-1.amazonaws.com",
-      },
-      "ap-northeast-1": {
-        "states": "states.ap-northeast-1.amazonaws.com",
-      },
-      "ap-northeast-2": {
-        "states": "states.ap-northeast-2.amazonaws.com",
-      },
-      "ap-northeast-3": {
-        "states": "states.ap-northeast-3.amazonaws.com",
-      },
-      "ap-south-1": {
-        "states": "states.ap-south-1.amazonaws.com",
-      },
-      "ap-south-2": {
-        "states": "states.ap-south-2.amazonaws.com",
-      },
-      "ap-southeast-1": {
-        "states": "states.ap-southeast-1.amazonaws.com",
-      },
-      "ap-southeast-2": {
-        "states": "states.ap-southeast-2.amazonaws.com",
-      },
-      "ap-southeast-3": {
-        "states": "states.ap-southeast-3.amazonaws.com",
-      },
-      "ap-southeast-4": {
-        "states": "states.ap-southeast-4.amazonaws.com",
-      },
-      "ca-central-1": {
-        "states": "states.ca-central-1.amazonaws.com",
-      },
-      "cn-north-1": {
-        "states": "states.cn-north-1.amazonaws.com",
-      },
-      "cn-northwest-1": {
-        "states": "states.cn-northwest-1.amazonaws.com",
-      },
-      "eu-central-1": {
-        "states": "states.eu-central-1.amazonaws.com",
-      },
-      "eu-central-2": {
-        "states": "states.eu-central-2.amazonaws.com",
-      },
-      "eu-north-1": {
-        "states": "states.eu-north-1.amazonaws.com",
-      },
-      "eu-south-1": {
-        "states": "states.eu-south-1.amazonaws.com",
-      },
-      "eu-south-2": {
-        "states": "states.eu-south-2.amazonaws.com",
-      },
-      "eu-west-1": {
-        "states": "states.eu-west-1.amazonaws.com",
-      },
-      "eu-west-2": {
-        "states": "states.eu-west-2.amazonaws.com",
-      },
-      "eu-west-3": {
-        "states": "states.eu-west-3.amazonaws.com",
-      },
-      "il-central-1": {
-        "states": "states.il-central-1.amazonaws.com",
-      },
-      "me-central-1": {
-        "states": "states.me-central-1.amazonaws.com",
-      },
-      "me-south-1": {
-        "states": "states.me-south-1.amazonaws.com",
-      },
-      "sa-east-1": {
-        "states": "states.sa-east-1.amazonaws.com",
-      },
-      "us-east-1": {
-        "states": "states.us-east-1.amazonaws.com",
-      },
-      "us-east-2": {
-        "states": "states.us-east-2.amazonaws.com",
-      },
-      "us-gov-east-1": {
-        "states": "states.us-gov-east-1.amazonaws.com",
-      },
-      "us-gov-west-1": {
-        "states": "states.us-gov-west-1.amazonaws.com",
-      },
-      "us-iso-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-iso-west-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-isob-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-west-1": {
-        "states": "states.us-west-1.amazonaws.com",
-      },
-      "us-west-2": {
-        "states": "states.us-west-2.amazonaws.com",
       },
     },
   },
@@ -570,13 +585,14 @@ def handler(event: dict, context):
     props = event["ResourceProperties"]
     notification_configuration = props["NotificationConfiguration"]
     managed = props.get('Managed', 'true').lower() == 'true'
+    skipDestinationValidation = props.get('SkipDestinationValidation', 'false').lower() == 'true'
     stack_id = event['StackId']
     old = event.get("OldResourceProperties", {}).get("NotificationConfiguration", {})
     if managed:
       config = handle_managed(event["RequestType"], notification_configuration)
     else:
       config = handle_unmanaged(props["BucketName"], stack_id, event["RequestType"], notification_configuration, old)
-    s3.put_bucket_notification_configuration(Bucket=props["BucketName"], NotificationConfiguration=config)
+    s3.put_bucket_notification_configuration(Bucket=props["BucketName"], NotificationConfiguration=config, SkipDestinationValidation=skipDestinationValidation)
   except Exception as e:
     logging.exception("Failed to put bucket notification configuration")
     response_status = "FAILED"
@@ -590,17 +606,20 @@ def handle_managed(request_type, notification_configuration):
   return notification_configuration
 
 def handle_unmanaged(bucket, stack_id, request_type, notification_configuration, old):
+  def get_id(n):
+    n['Id'] = ''
+    strToHash=json.dumps(n, sort_keys=True).replace('"Name": "prefix"', '"Name": "Prefix"').replace('"Name": "suffix"', '"Name": "Suffix"')
+    return f"{stack_id}-{hash(strToHash)}"
   def with_id(n):
-    n['Id'] = f"{stack_id}-{hash(json.dumps(n, sort_keys=True))}"
+    n['Id'] = get_id(n)
     return n
 
   external_notifications = {}
   existing_notifications = s3.get_bucket_notification_configuration(Bucket=bucket)
   for t in CONFIGURATION_TYPES:
     if request_type == 'Update':
-        ids = [with_id(n) for n in old.get(t, [])]
-        old_incoming_ids = [n['Id'] for n in ids]
-        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'] in old_incoming_ids]
+        old_incoming_ids = [get_id(n) for n in old.get(t, [])]
+        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not get_id(n) in old_incoming_ids]      
     elif request_type == 'Delete':
         external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f"{stack_id}-")]
     elif request_type == 'Create':
@@ -643,8 +662,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       print(response.read().decode("utf-8"))
     print("Status code: " + response.reason)
   except Exception as e:
-      print("send(..) failed executing request.urlopen(..): " + str(e))
-",
+      print("send(..) failed executing request.urlopen(..): " + str(e))",
         },
         "Description": "AWS CloudFormation handler for "Custom::S3BucketNotifications" resources (@aws-cdk/aws-s3)",
         "Handler": "index.handler",
@@ -1199,7 +1217,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Arn",
             ],
           },
-          "FieldLogLevel": "ALL",
+          "FieldLogLevel": "INFO",
         },
         "Name": "ChatbotGraphqlApi",
         "UserPoolConfig": {
@@ -1212,7 +1230,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           },
         },
         "Visibility": "PRIVATE",
-        "XrayEnabled": true,
+        "XrayEnabled": false,
       },
       "Type": "AWS::AppSync::GraphQLApi",
     },
@@ -2610,6 +2628,9 @@ schema {
           ],
         },
       },
+      "Properties": {
+        "TracingConfig": "PassThrough",
+      },
       "Type": "AWS::SNS::Topic",
     },
     "ChatBotApiConstructRealtimeOutgoingMessagesDLQA7E125CC": {
@@ -2778,6 +2799,12 @@ schema {
         "Description": "Appsync resolver handling LLM Queries",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
+            "LOG_LEVEL": "INFO",
+            "POWERTOOLS_DEV": "false",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
+            "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "SNS_TOPIC_ARN": {
               "Ref": "ChatBotApiConstructRealtimeMessagesTopic85DE37B6",
             },
@@ -2949,14 +2976,21 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Sends LLM Responses to Appsync",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "GRAPHQL_ENDPOINT": {
               "Fn::GetAtt": [
                 "ChatBotApiConstructChatbotApi21E23C68",
                 "GraphQLUrl",
               ],
             },
+            "LOG_LEVEL": "INFO",
+            "POWERTOOLS_DEV": "false",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
+            "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
           },
         },
         "Handler": "index.handler",
@@ -3209,6 +3243,7 @@ schema {
             "AURORA_DB_SECRET_ID": {
               "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
             },
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CHATBOT_FILES_BUCKET_NAME": {
               "Ref": "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
             },
@@ -3265,8 +3300,9 @@ schema {
               ],
             },
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -3338,9 +3374,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 600,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
         "VpcConfig": {
           "SecurityGroupIds": [
             {
@@ -3450,14 +3483,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": [
                 "dynamodb:BatchGetItem",
@@ -4098,7 +4123,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "python3.9",
+        "Runtime": "python3.11",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -4259,7 +4284,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -4305,7 +4338,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -5313,10 +5354,12 @@ schema {
             "AURORA_DB_SECRET_ID": {
               "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
             },
+            "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME": "by_object_type_idx",
             "WORKSPACES_TABLE_NAME": {
               "Ref": "RagEnginesRagDynamoDBTablesWorkspacesD2D3C0C4",
@@ -5564,15 +5607,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -5696,10 +5731,12 @@ schema {
         "Description": "PGVector setup",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
           },
         },
         "Handler": "index.lambda_handler",
@@ -5922,7 +5959,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -6779,15 +6824,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -7331,6 +7368,7 @@ schema {
         "Description": "Retrieves the latest data from the RSS Feed and adds any newly found posts to be queued for Website Crawling",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -7341,8 +7379,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME": "by_object_type_idx",
             "WORKSPACES_TABLE_NAME": {
               "Ref": "RagEnginesRagDynamoDBTablesWorkspacesD2D3C0C4",
@@ -7383,9 +7422,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 900,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -7447,14 +7483,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": [
                 "ssm:DescribeParameters",
@@ -7595,6 +7623,7 @@ schema {
         "Description": "Functions polls the RSS items for pending urls and invokes Website crawler inference. Max of 10 URLs per invoke.",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -7605,8 +7634,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -7653,9 +7683,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 300,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
         "VpcConfig": {
           "SecurityGroupIds": [
             {
@@ -7787,14 +7814,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -7979,6 +7998,7 @@ schema {
         "Description": "Invokes RSS Feed Ingestors for each Subscribed RSS Feed",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -7989,8 +8009,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -8037,9 +8058,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 15,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -8138,14 +8156,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
@@ -8362,6 +8372,7 @@ schema {
             "Arn",
           ],
         },
+        "SkipDestinationValidation": false,
       },
       "Type": "Custom::S3BucketNotifications",
     },
@@ -8476,6 +8487,7 @@ schema {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -8491,8 +8503,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -8545,9 +8558,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 900,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
         "VpcConfig": {
           "SecurityGroupIds": [
             {
@@ -8679,14 +8689,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -9794,15 +9796,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -9985,15 +9979,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -10714,6 +10700,7 @@ schema {
         "Description": "Creates the Open Search workspace",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "OPEN_SEARCH_COLLECTION_ENDPOINT": {
               "Fn::GetAtt": [
@@ -10724,8 +10711,9 @@ schema {
             "OPEN_SEARCH_COLLECTION_ENDPOINT_PORT": "443",
             "OPEN_SEARCH_COLLECTION_NAME": "prefix-genaichatbot-workspac",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME": "by_object_type_idx",
             "WORKSPACES_TABLE_NAME": {
               "Ref": "RagEnginesRagDynamoDBTablesWorkspacesD2D3C0C4",
@@ -10977,15 +10965,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -12324,7 +12304,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12474,7 +12462,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12628,7 +12624,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12826,15 +12830,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -13155,6 +13151,7 @@ schema {
             "AURORA_DB_SECRET_ID": {
               "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
             },
+            "AWS_XRAY_SDK_ENABLED": "false",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
             },
@@ -13170,8 +13167,9 @@ schema {
               ],
             },
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -13682,15 +13680,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -13794,6 +13784,7 @@ schema {
             "AURORA_DB_SECRET_ID": {
               "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
             },
+            "AWS_XRAY_SDK_ENABLED": "false",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
             },
@@ -13810,8 +13801,9 @@ schema {
               ],
             },
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -14229,15 +14221,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],

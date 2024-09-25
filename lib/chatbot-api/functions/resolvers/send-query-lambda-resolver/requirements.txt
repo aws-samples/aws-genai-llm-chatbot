@@ -1,1 +1,2 @@
 pydantic==2.4.0
+aws_xray_sdk==2.14.0

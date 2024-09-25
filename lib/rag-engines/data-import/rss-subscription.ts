@@ -32,7 +32,9 @@ export class RssSubscription extends Construct {
         "Retrieves the latest data from the RSS Feed and adds any newly found posts to be queued for Website Crawling",
       architecture: props.shared.lambdaArchitecture,
       runtime: props.shared.pythonRuntime,
-      tracing: lambda.Tracing.ACTIVE,
+      tracing: props.config.advancedMonitoring
+        ? lambda.Tracing.ACTIVE
+        : lambda.Tracing.DISABLED,
       memorySize: 1024,
       handler: "index.lambda_handler",
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
@@ -73,7 +75,9 @@ export class RssSubscription extends Construct {
         description: "Invokes RSS Feed Ingestors for each Subscribed RSS Feed",
         architecture: props.shared.lambdaArchitecture,
         runtime: props.shared.pythonRuntime,
-        tracing: lambda.Tracing.ACTIVE,
+        tracing: props.config.advancedMonitoring
+          ? lambda.Tracing.ACTIVE
+          : lambda.Tracing.DISABLED,
         memorySize: 1024,
         handler: "index.lambda_handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
@@ -124,7 +128,9 @@ export class RssSubscription extends Construct {
         ),
         architecture: props.shared.lambdaArchitecture,
         runtime: props.shared.pythonRuntime,
-        tracing: lambda.Tracing.ACTIVE,
+        tracing: props.config.advancedMonitoring
+          ? lambda.Tracing.ACTIVE
+          : lambda.Tracing.DISABLED,
         memorySize: 1024,
         handler: "index.lambda_handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],

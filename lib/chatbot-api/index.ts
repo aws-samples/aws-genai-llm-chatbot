@@ -79,11 +79,11 @@ export class ChatBotApi extends Construct {
         ],
       },
       logConfig: {
-        fieldLogLevel: appsync.FieldLogLevel.ALL,
-        retention: RetentionDays.ONE_WEEK,
+        fieldLogLevel: appsync.FieldLogLevel.INFO,
+        retention: props.config.logRetention ?? RetentionDays.ONE_WEEK,
         role: loggingRole,
       },
-      xrayEnabled: true,
+      xrayEnabled: props.config.advancedMonitoring === true,
       visibility: props.config.privateWebsite
         ? appsync.Visibility.PRIVATE
         : appsync.Visibility.GLOBAL,
@@ -104,6 +104,7 @@ export class ChatBotApi extends Construct {
       ...props,
       api,
       logRetention: props.config.logRetention,
+      advancedMonitoring: props.config.advancedMonitoring,
     });
 
     this.resolvers.push(realtimeBackend.resolvers.sendQueryHandler);

@@ -83,6 +83,8 @@ You have:
 
 ## Deployment
 
+Before you start, please read the [precautions](../documentation/precautions.md) and [security](../documentation/vulnerability-scanning.md) pages.
+
 **Step 1.** Clone the repository.
 
 ```bash
@@ -178,7 +180,9 @@ REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/user_inter
 
 ## Monitoring
 
-Once the deployment is complete, a [CloudWatch Dashboard](https://console.aws.amazon.com/cloudwatch) will be available in the selected region to monitor the usage of the resources.
+Once the deployment is complete, a [Amazon CloudWatch Dashboard](https://console.aws.amazon.com/cloudwatch) will be available in the selected region to monitor the usage of the resources.
+
+For more information, please refer to [the monitoring page](../documentation/monitoring.md)
 
 
 ## Run user interface locally
