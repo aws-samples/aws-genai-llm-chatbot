@@ -4974,7 +4974,6 @@ schema {
           "MaxCapacity": 2,
           "MinCapacity": 0.5,
         },
-        "StorageEncrypted": false,
         "VpcSecurityGroupIds": [
           {
             "Fn::GetAtt": [
