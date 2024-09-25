@@ -31,8 +31,8 @@ export class AuroraPgVector extends Construct {
         version: rds.AuroraPostgresEngineVersion.VER_15_3,
       }),
       storageEncryptionKey: props.shared.kmsKey,
-      // Always setting it to true would be a breaking change.
-      storageEncrypted: props.shared.kmsKey ? true : false,
+      // Always setting it to true would be a breaking change. (Undefined to prevent re-creating)
+      storageEncrypted: props.shared.kmsKey ? true : undefined,
       removalPolicy:
         props.config.retainOnDelete === true
           ? cdk.RemovalPolicy.SNAPSHOT
