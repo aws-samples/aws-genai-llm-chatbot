@@ -48,8 +48,13 @@ export class Shared extends Construct {
     this.defaultEnvironmentVariables = {
       POWERTOOLS_DEV: "false",
       LOG_LEVEL: "INFO",
-      POWERTOOLS_LOGGER_LOG_EVENT: "true",
+      // Event might contain end user information and should not be logged by default
+      POWERTOOLS_LOGGER_LOG_EVENT: "false",
       POWERTOOLS_SERVICE_NAME: "chatbot",
+      AWS_XRAY_SDK_ENABLED: props.config.advancedMonitoring ? "true" : "false",
+      POWERTOOLS_TRACE_DISABLED: props.config.advancedMonitoring
+        ? "false"
+        : "true",
     };
 
     if (props.config.createCMKs) {

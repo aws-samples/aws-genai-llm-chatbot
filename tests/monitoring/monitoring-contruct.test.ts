@@ -66,8 +66,11 @@ new Monitoring(stack, "Monitoring", {
     }),
   ],
   ragFunctionProcessing: [Function.fromFunctionName(stack, "Function", "Name")],
-  ragStateMachineProcessing: [
-    StateMachine.fromStateMachineName(stack, "StateMachine", "Name"),
+  ragEngineStateMachineProcessing: [
+    StateMachine.fromStateMachineName(stack, "StateMachine1", "Name1"),
+  ],
+  ragImportStateMachineProcessing: [
+    StateMachine.fromStateMachineName(stack, "StateMachine2", "Name2"),
   ],
 });
 

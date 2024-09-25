@@ -220,7 +220,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     }
 
     const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
-    new Monitoring(monitoringStack, "Monitoring", {
+    const monitoringConstruct = new Monitoring(monitoringStack, "Monitoring", {
       prefix: props.config.prefix,
       advancedMonitoring: props.config.advancedMonitoring === true,
       appsycnApi: chatBotApi.graphqlApi,
@@ -243,6 +243,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
             "/aws/lambda/" + (r as lambda.Function).functionName
           );
         }),
+      cloudFrontDistribution: userInterface.cloudFrontDistribution,
       cognito: {
         userPoolId: authentication.userPool.userPoolId,
         clientId: authentication.userPoolClient.userPoolClientId,
@@ -265,17 +266,33 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       ragFunctionProcessing: [
         ...(ragEngines ? [ragEngines.dataImport.rssIngestorFunction] : []),
       ],
-      ragStateMachineProcessing: [
+      ragImportStateMachineProcessing: [
         ...(ragEngines
           ? [
               ragEngines.dataImport.fileImportWorkflow,
               ragEngines.dataImport.websiteCrawlingWorkflow,
+            ]
+          : []),
+      ],
+      ragEngineStateMachineProcessing: [
+        ...(ragEngines
+          ? [
+              ragEngines.auroraPgVector?.createAuroraWorkspaceWorkflow,
+              ragEngines.openSearchVector?.createOpenSearchWorkspaceWorkflow,
+              ragEngines.kendraRetrieval?.createKendraWorkspaceWorkflow,
               ragEngines.deleteDocumentWorkflow,
               ragEngines.deleteWorkspaceWorkflow,
             ]
           : []),
       ],
     });
+
+    if (monitoringConstruct.compositeAlarmTopic) {
+      new cdk.CfnOutput(this, "CompositeAlarmTopicOutput", {
+        key: "CompositeAlarmTopicOutput",
+        value: monitoringConstruct.compositeAlarmTopic.topicName,
+      });
+    }
 
     /**
      * CDK NAG suppression
@@ -306,6 +323,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/ChatBotApi/RestApi/GraphQLApiHandler/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/RestApi/GraphQLApiHandler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/lambda-resolver/ServiceRole/Resource`,
+        `/${this.stackName}/ChatBotApi/Realtime/Resolvers/lambda-resolver/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,

@@ -104,6 +104,150 @@ exports[`snapshot test 1`] = `
       },
       "Type": "AWS::Kendra::Index",
     },
+    "MonitoringCompositeAlarmTopicA8B720C7": {
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-SNS2",
+              "reason": "No sensitive data in topic.",
+            },
+            {
+              "id": "AwsSolutions-SNS3",
+              "reason": "No sensitive data in topic.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "DisplayName": "CompositeAlarmTopic",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardAppSyncFaultCountCritical74762E0C": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmDescription": "Fault count is too high.",
+        "AlarmName": "GenAI-Chatbot-Dashboard-AppSync-Fault-Count-Critical",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "EvaluationPeriods": 3,
+        "Metrics": [
+          {
+            "Id": "m1",
+            "Label": "5XX Fault",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "GraphQLAPIId",
+                    "Value": "graphqlApiId",
+                  },
+                ],
+                "MetricName": "5XXError",
+                "Namespace": "AWS/AppSync",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": true,
+          },
+        ],
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardAppSyncLatencyP90Critical08C30F3D": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmDescription": "P90 latency is too high.",
+        "AlarmName": "GenAI-Chatbot-Dashboard-AppSync-Latency-P90-Critical",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "EvaluationPeriods": 3,
+        "Metrics": [
+          {
+            "Id": "m1",
+            "Label": "P90",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "GraphQLAPIId",
+                    "Value": "graphqlApiId",
+                  },
+                ],
+                "MetricName": "Latency",
+                "Namespace": "AWS/AppSync",
+              },
+              "Period": 300,
+              "Stat": "p90",
+            },
+            "ReturnData": true,
+          },
+        ],
+        "Threshold": 3000,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardCompositeCritical8A060EEA": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Ref": "MonitoringCompositeAlarmTopicA8B720C7",
+          },
+        ],
+        "AlarmDescription": "Composite alarm",
+        "AlarmName": "GenAI-Chatbot-Dashboard-Composite-Critical",
+        "AlarmRule": {
+          "Fn::Join": [
+            "",
+            [
+              "(ALARM("",
+              {
+                "Fn::GetAtt": [
+                  "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardAppSyncLatencyP90Critical08C30F3D",
+                  "Arn",
+                ],
+              },
+              "") OR ALARM("",
+              {
+                "Fn::GetAtt": [
+                  "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardAppSyncFaultCountCritical74762E0C",
+                  "Arn",
+                ],
+              },
+              "") OR ALARM("",
+              {
+                "Fn::GetAtt": [
+                  "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardStateMachine2FailureRateCritical80A9196E",
+                  "Arn",
+                ],
+              },
+              "") OR ALARM("",
+              {
+                "Fn::GetAtt": [
+                  "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardStateMachine1FailureCountCriticalE67CE559",
+                  "Arn",
+                ],
+              },
+              "") OR ALARM("",
+              {
+                "Fn::GetAtt": [
+                  "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardFunctionFaultRateCritical49A299E7",
+                  "Arn",
+                ],
+              },
+              ""))",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::CloudWatch::CompositeAlarm",
+    },
     "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardDashboardsDashboard32FE3B68": {
       "Properties": {
         "DashboardBody": {
@@ -118,11 +262,11 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P50","stat":"p50"}],["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P90","stat":"p90"}],["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":2,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              "","metrics":[["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P50","stat":"p50"}],["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P90","stat":"p90"}],["AWS/AppSync","Latency","GraphQLAPIId","graphqlApiId",{"label":"P99","stat":"p99"}]],"annotations":{"horizontal":[{"label":"P90 > 3000 for 3 datapoints within 15 minutes","value":3000,"yAxis":"left"}]},"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":2,"properties":{"view":"timeSeries","title":"Errors","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/AppSync","4XXError","GraphQLAPIId","graphqlApiId",{"label":"4XX Error","stat":"Sum"}],["AWS/AppSync","5XXError","GraphQLAPIId","graphqlApiId",{"label":"5XX Fault","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":2,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              "","metrics":[["AWS/AppSync","4XXError","GraphQLAPIId","graphqlApiId",{"label":"4XX Error","stat":"Sum"}],["AWS/AppSync","5XXError","GraphQLAPIId","graphqlApiId",{"label":"5XX Fault","stat":"Sum"}]],"annotations":{"horizontal":[{"label":"5XX Fault > 5 for 3 datapoints within 15 minutes","value":5,"yAxis":"left"}]},"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":2,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -298,7 +442,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "Index",
               },
-              "",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":66,"properties":{"markdown":"# Requests Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":67,"properties":{"markdown":"# RAG Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":68,"properties":{"markdown":"### State Machine **[StateMachine](https://",
+              "",{"stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":66,"properties":{"markdown":"# Requests Processing"}},{"type":"text","width":24,"height":1,"x":0,"y":67,"properties":{"markdown":"# RAG processing (File or website import)"}},{"type":"text","width":24,"height":1,"x":0,"y":68,"properties":{"markdown":"### State Machine **[StateMachine2](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -318,7 +462,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":69,"properties":{"view":"timeSeries","title":"Duration","region":"",
+              ":stateMachine:Name2)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":69,"properties":{"view":"timeSeries","title":"Duration","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -334,7 +478,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"P50","stat":"p50"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              ":stateMachine:Name2",{"label":"P50","stat":"p50"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -346,7 +490,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"P90","stat":"p90"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              ":stateMachine:Name2",{"label":"P90","stat":"p90"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -358,7 +502,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":6,"y":69,"properties":{"view":"timeSeries","title":"Executions","region":"",
+              ":stateMachine:Name2",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":6,"y":69,"properties":{"view":"timeSeries","title":"Executions","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -374,7 +518,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Started","stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","arn:",
+              ":stateMachine:Name2",{"label":"Started","stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -386,7 +530,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Succeeded","stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","arn:",
+              ":stateMachine:Name2",{"label":"Succeeded","stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -398,7 +542,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Failed","stat":"Sum"}],["AWS/States","ExecutionsAborted","StateMachineArn","arn:",
+              ":stateMachine:Name2",{"label":"Failed","stat":"Sum"}],["AWS/States","ExecutionsAborted","StateMachineArn","arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -410,7 +554,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Aborted","stat":"Sum"}],["AWS/States","ExecutionThrottled","StateMachineArn","arn:",
+              ":stateMachine:Name2",{"label":"Aborted","stat":"Sum"}],["AWS/States","ExecutionThrottled","StateMachineArn","arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -422,7 +566,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Throttled","stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","arn:",
+              ":stateMachine:Name2",{"label":"Throttled","stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -434,7 +578,7 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Timeout","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":69,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              ":stateMachine:Name2",{"label":"Timeout","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":69,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -450,7 +594,159 @@ exports[`snapshot test 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":stateMachine:Name",{"label":"Failed (avg)"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":74,"properties":{"markdown":"### Lambda Function **[Function](https://",
+              ":stateMachine:Name2",{"label":"Failed (avg)"}]],"annotations":{"horizontal":[{"label":"Failed (avg) > 0.1 for 3 datapoints within 15 minutes","value":0.1,"yAxis":"left"}]},"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":74,"properties":{"markdown":"# RAG engines management (Create table/index and cleanup)"}},{"type":"text","width":24,"height":1,"x":0,"y":75,"properties":{"markdown":"### State Machine **[StateMachine1](https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/states/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/statemachines/view/arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1)**"}},{"type":"metric","width":6,"height":5,"x":0,"y":76,"properties":{"view":"timeSeries","title":"Duration","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"P50","stat":"p50"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"P90","stat":"p90"}],["AWS/States","ExecutionTime","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"P99","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":12,"height":5,"x":6,"y":76,"properties":{"view":"timeSeries","title":"Executions","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionsStarted","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"Started","stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"Succeeded","stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"Failed","stat":"Sum"}],["AWS/States","ExecutionsAborted","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"Aborted","stat":"Sum"}],["AWS/States","ExecutionThrottled","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"Throttled","stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"Timeout","stat":"Sum"}]],"annotations":{"horizontal":[{"label":"Failed > 0 for 1 datapoints within 5 minutes","value":0,"yAxis":"left"}]},"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":76,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionsFailed","StateMachineArn","arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":stateMachine:Name1",{"label":"Failed (avg)"}]],"yAxis":{}}},{"type":"text","width":24,"height":1,"x":0,"y":81,"properties":{"markdown":"### Lambda Function **[Function](https://",
               {
                 "Ref": "AWS::Region",
               },
@@ -489,7 +785,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              ")**"}},{"type":"metric","width":6,"height":5,"x":0,"y":75,"properties":{"view":"timeSeries","title":"TPS","region":"",
+              ")**"}},{"type":"metric","width":6,"height":5,"x":0,"y":82,"properties":{"view":"timeSeries","title":"TPS","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -524,7 +820,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Invocations","stat":"Sum","visible":false,"id":"requests"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":75,"properties":{"view":"timeSeries","title":"Latency","region":"",
+              "",{"label":"Invocations","stat":"Sum","visible":false,"id":"requests"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":6,"y":82,"properties":{"view":"timeSeries","title":"Latency","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -621,7 +917,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"P99 (avg: \${AVG})","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":75,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
+              "",{"label":"P99 (avg: \${AVG})","stat":"p99"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":12,"y":82,"properties":{"view":"timeSeries","title":"Errors (rate)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -656,7 +952,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Faults (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":75,"properties":{"view":"timeSeries","title":"Rates","region":"",
+              "",{"label":"Faults (avg)"}]],"annotations":{"horizontal":[{"label":"Faults (avg) > 0.1 for 3 datapoints within 15 minutes","value":0.1,"yAxis":"left"}]},"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":6,"height":5,"x":18,"y":82,"properties":{"view":"timeSeries","title":"Rates","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -722,7 +1018,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Provisioned Concurrency Spillovers (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":0,"y":80,"properties":{"view":"timeSeries","title":"Invocations","region":"",
+              "",{"label":"Provisioned Concurrency Spillovers (avg)"}]],"yAxis":{"left":{"min":0,"label":"Rate","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":0,"y":87,"properties":{"view":"timeSeries","title":"Invocations","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -850,7 +1146,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Provisioned Concurrency Spillovers","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":8,"y":80,"properties":{"view":"timeSeries","title":"Iterator","region":"",
+              "",{"label":"Provisioned Concurrency Spillovers","stat":"Sum"}]],"yAxis":{"left":{"min":0,"label":"Count","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":8,"y":87,"properties":{"view":"timeSeries","title":"Iterator","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -885,7 +1181,7 @@ exports[`snapshot test 1`] = `
                   },
                 ],
               },
-              "",{"label":"Iterator Age","stat":"Maximum"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":16,"y":80,"properties":{"view":"timeSeries","title":"Errors","region":"",
+              "",{"label":"Iterator Age","stat":"Maximum"}]],"yAxis":{"left":{"min":0,"label":"ms","showUnits":false}}}},{"type":"metric","width":8,"height":5,"x":16,"y":87,"properties":{"view":"timeSeries","title":"Errors","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -927,6 +1223,175 @@ exports[`snapshot test 1`] = `
         "DashboardName": "GenAI-Chatbot-Dashboard",
       },
       "Type": "AWS::CloudWatch::Dashboard",
+    },
+    "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardFunctionFaultRateCritical49A299E7": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmDescription": "Fault rate is too high.",
+        "AlarmName": "GenAI-Chatbot-Dashboard-Function-Fault-Rate-Critical",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "EvaluationPeriods": 3,
+        "Metrics": [
+          {
+            "Id": "m1",
+            "Label": "Faults (avg)",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "FunctionName",
+                    "Value": {
+                      "Fn::Select": [
+                        6,
+                        {
+                          "Fn::Split": [
+                            ":",
+                            {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "arn:",
+                                  {
+                                    "Ref": "AWS::Partition",
+                                  },
+                                  ":lambda:",
+                                  {
+                                    "Ref": "AWS::Region",
+                                  },
+                                  ":",
+                                  {
+                                    "Ref": "AWS::AccountId",
+                                  },
+                                  ":function:Name",
+                                ],
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "MetricName": "Errors",
+                "Namespace": "AWS/Lambda",
+              },
+              "Period": 300,
+              "Stat": "Average",
+            },
+            "ReturnData": true,
+          },
+        ],
+        "Threshold": 0.1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardStateMachine1FailureCountCriticalE67CE559": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmDescription": "Failure count is too high.",
+        "AlarmName": "GenAI-Chatbot-Dashboard-StateMachine1-Failure-Count-Critical",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Id": "m1",
+            "Label": "Failed",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition",
+                          },
+                          ":states:",
+                          {
+                            "Ref": "AWS::Region",
+                          },
+                          ":",
+                          {
+                            "Ref": "AWS::AccountId",
+                          },
+                          ":stateMachine:Name1",
+                        ],
+                      ],
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsFailed",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": true,
+          },
+        ],
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardStateMachine2FailureRateCritical80A9196E": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmDescription": "Failure rate is too high.",
+        "AlarmName": "GenAI-Chatbot-Dashboard-StateMachine2-Failure-Rate-Critical",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "EvaluationPeriods": 3,
+        "Metrics": [
+          {
+            "Id": "m1",
+            "Label": "Failed (avg)",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition",
+                          },
+                          ":states:",
+                          {
+                            "Ref": "AWS::Region",
+                          },
+                          ":",
+                          {
+                            "Ref": "AWS::AccountId",
+                          },
+                          ":stateMachine:Name2",
+                        ],
+                      ],
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsFailed",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Average",
+            },
+            "ReturnData": true,
+          },
+        ],
+        "Threshold": 0.1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "MonitoringUsageFilter0A1660EBB": {
       "Properties": {

@@ -4,6 +4,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as xray from "aws-cdk-lib/aws-xray";
 import { Construct } from "constructs";
 
 import { Shared } from "../shared";
@@ -18,6 +19,7 @@ interface RealtimeGraphqlApiBackendProps {
   readonly userPool: UserPool;
   readonly api: appsync.GraphqlApi;
   readonly logRetention?: number;
+  readonly advancedMonitoring?: boolean;
 }
 
 export class RealtimeGraphqlApiBackend extends Construct {
@@ -35,7 +37,42 @@ export class RealtimeGraphqlApiBackend extends Construct {
     const messagesTopic = new sns.Topic(this, "MessagesTopic", {
       enforceSSL: true,
       masterKey: props.shared.kmsKey,
+      tracingConfig: props.advancedMonitoring
+        ? sns.TracingConfig.ACTIVE
+        : sns.TracingConfig.PASS_THROUGH,
     });
+
+    if (props.advancedMonitoring) {
+      // https://docs.aws.amazon.com/xray/latest/devguide/xray-services-sns.html#xray-services-sns-configuration
+      const stack = cdk.Stack.of(scope);
+      new xray.CfnResourcePolicy(this, "SNSResourcePolicy", {
+        policyName: "SNSResourcePolicy",
+        policyDocument: JSON.stringify(
+          new iam.PolicyDocument({
+            statements: [
+              new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                principals: [new iam.ServicePrincipal("sns.amazonaws.com")],
+                actions: [
+                  "xray:PutTraceSegments",
+                  "xray:GetSamplingRules",
+                  "xray:GetSamplingTargets",
+                ],
+                resources: ["*"],
+                conditions: {
+                  StringEquals: {
+                    "aws:SourceAccount": stack.account,
+                  },
+                  StringLike: {
+                    "aws:SourceArn": `arn:${stack.partition}:sns:${stack.region}:${stack.account}:*`,
+                  },
+                },
+              }),
+            ],
+          })
+        ),
+      });
+    }
 
     const deadLetterQueue = new sqs.Queue(this, "OutgoingMessagesDLQ", {
       encryption: props.shared.queueKmsKey
@@ -78,6 +115,7 @@ export class RealtimeGraphqlApiBackend extends Construct {
       shared: props.shared,
       api: props.api,
       logRetention: props.logRetention,
+      advancedMonitoring: props.advancedMonitoring,
     });
 
     // Route all outgoing messages to the websocket interface queue

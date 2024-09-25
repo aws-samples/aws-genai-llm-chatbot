@@ -57,7 +57,9 @@ export class IdeficsInterface extends Construct {
         handler: "index.handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         architecture: props.shared.lambdaArchitecture,
-        tracing: lambda.Tracing.ACTIVE,
+        tracing: props.config.advancedMonitoring
+          ? lambda.Tracing.ACTIVE
+          : lambda.Tracing.DISABLED,
         timeout: cdk.Duration.minutes(lambdaDurationInMinutes),
         memorySize: 1024,
         logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,

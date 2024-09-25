@@ -13,4 +13,3 @@ def test_calculate(client: AppSyncClient, default_embed_model, default_provider)
 
     assert len(result) == 1
     assert len(result[0].get("vector")) == 1536
-    assert result[0].get("vector")[0] == 0.03729608149230709

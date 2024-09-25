@@ -15,6 +15,6 @@ beautifulsoup4==4.12.2
 requests==2.32.0
 attrs==23.1.0
 feedparser==6.0.11
-aws_xray_sdk==2.12.1
+aws_xray_sdk==2.14.0
 defusedxml==0.7.1
 pdfplumber==0.11.0
