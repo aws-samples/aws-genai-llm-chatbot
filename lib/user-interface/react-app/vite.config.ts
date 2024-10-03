@@ -9,6 +9,8 @@ const isDev = process.env.NODE_ENV === "development";
 export default defineConfig({
   define: {
     "process.env": {},
+    // Prevents replacing global in the import strings.
+    global: "global",
   },
   plugins: [
     isDev && {

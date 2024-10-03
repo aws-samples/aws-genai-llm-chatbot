@@ -80,6 +80,14 @@ export class Utils {
 
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   static getErrorMessage(error: any) {
+    if (
+      error.errors &&
+      error.errors.length === 1 &&
+      error.errors[0].originalError?.response?.status === 429
+    ) {
+      // Detect WAF throttling error. originalError is an AxiosError object
+      return "Too many requests. Please try again later.";
+    }
     if (error.errors) {
       return error.errors.map((e: any) => e.message).join(", ");
     }

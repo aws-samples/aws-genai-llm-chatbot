@@ -4088,6 +4088,121 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "ChatBotApiConstructWafAppsyncE6AACFFE": {
+      "Properties": {
+        "DefaultAction": {
+          "Allow": {},
+        },
+        "Description": "WAFv2 ACL for APPSync",
+        "Name": "WafAppsync",
+        "Rules": [
+          {
+            "Action": {
+              "Block": {},
+            },
+            "Name": "LimitRequestsPerIP",
+            "Priority": 10,
+            "Statement": {
+              "RateBasedStatement": {
+                "AggregateKeyType": "IP",
+                "EvaluationWindowSec": 600,
+                "Limit": 400,
+              },
+            },
+            "VisibilityConfig": {
+              "CloudWatchMetricsEnabled": true,
+              "MetricName": "LimitRequestsPerIP",
+              "SampledRequestsEnabled": true,
+            },
+          },
+          {
+            "Action": {
+              "Block": {
+                "CustomResponse": {
+                  "ResponseCode": 429,
+                },
+              },
+            },
+            "Name": "LimitLLMRequestsPerIP",
+            "Priority": 1,
+            "Statement": {
+              "RateBasedStatement": {
+                "AggregateKeyType": "IP",
+                "EvaluationWindowSec": 600,
+                "Limit": 100,
+                "ScopeDownStatement": {
+                  "AndStatement": {
+                    "Statements": [
+                      {
+                        "ByteMatchStatement": {
+                          "FieldToMatch": {
+                            "UriPath": {},
+                          },
+                          "PositionalConstraint": "EXACTLY",
+                          "SearchString": "/graphql",
+                          "TextTransformations": [
+                            {
+                              "Priority": 0,
+                              "Type": "NONE",
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        "ByteMatchStatement": {
+                          "FieldToMatch": {
+                            "Body": {
+                              "OversizeHandling": "MATCH",
+                            },
+                          },
+                          "PositionalConstraint": "CONTAINS",
+                          "SearchString": "mutation SendQuery(",
+                          "TextTransformations": [
+                            {
+                              "Priority": 0,
+                              "Type": "NONE",
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "VisibilityConfig": {
+              "CloudWatchMetricsEnabled": true,
+              "MetricName": "LimitRequestsPerIP",
+              "SampledRequestsEnabled": true,
+            },
+          },
+        ],
+        "Scope": "REGIONAL",
+        "VisibilityConfig": {
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "WafAppsync",
+          "SampledRequestsEnabled": true,
+        },
+      },
+      "Type": "AWS::WAFv2::WebACL",
+    },
+    "ChatBotApiConstructWebACLAssociation9B3FB92B": {
+      "Properties": {
+        "ResourceArn": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "Arn",
+          ],
+        },
+        "WebACLArn": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructWafAppsyncE6AACFFE",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::WAFv2::WebACLAssociation",
+    },
     "ChatBotApiConstructapiLoggingRole6BE21CB3": {
       "Metadata": {
         "cdk_nag": {

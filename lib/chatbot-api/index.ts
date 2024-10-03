@@ -5,6 +5,7 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import * as cdk from "aws-cdk-lib";
 import * as path from "path";
 import { Construct } from "constructs";
@@ -95,6 +96,27 @@ export class ChatBotApi extends Construct {
         : appsync.Visibility.GLOBAL,
     });
 
+    if (props.shared.webACLRules.length > 0) {
+      new wafv2.CfnWebACLAssociation(this, "WebACLAssociation", {
+        webAclArn: new wafv2.CfnWebACL(this, "WafAppsync", {
+          defaultAction: { allow: {} },
+          scope: "REGIONAL",
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: "WafAppsync",
+            sampledRequestsEnabled: true,
+          },
+          description: "WAFv2 ACL for APPSync",
+          name: "WafAppsync",
+          rules: [
+            ...props.shared.webACLRules,
+            ...this.createWafRules(props.config.llms.rateLimitPerIP ?? 100),
+          ],
+        }).attrArn,
+        resourceArn: api.arn,
+      });
+    }
+
     const apiResolvers = new ApiResolvers(this, "RestApi", {
       ...props,
       sessionsTable: chatTables.sessionsTable,
@@ -151,5 +173,75 @@ export class ChatBotApi extends Construct {
           "Access to all log groups required for CloudWatch log group creation.",
       },
     ]);
+  }
+
+  private createWafRules(llmRatePerIP: number): wafv2.CfnWebACL.RuleProperty[] {
+    /**
+     * The rate limit is the maximum number of requests from a
+     * single IP address that are allowed in a five-minute period.
+     * The IP address is automatically unblocked after it falls below the limit.
+     */
+    const ruleLimitRequests: wafv2.CfnWebACL.RuleProperty = {
+      name: "LimitLLMRequestsPerIP",
+      priority: 1,
+      action: {
+        block: {
+          customResponse: {
+            responseCode: 429,
+          },
+        },
+      },
+      statement: {
+        rateBasedStatement: {
+          limit: llmRatePerIP,
+          evaluationWindowSec: 60 * 10,
+          aggregateKeyType: "IP",
+          scopeDownStatement: {
+            andStatement: {
+              statements: [
+                {
+                  byteMatchStatement: {
+                    searchString: "/graphql",
+                    fieldToMatch: {
+                      uriPath: {},
+                    },
+                    textTransformations: [
+                      {
+                        priority: 0,
+                        type: "NONE",
+                      },
+                    ],
+                    positionalConstraint: "EXACTLY",
+                  },
+                },
+                {
+                  byteMatchStatement: {
+                    searchString: "mutation SendQuery(",
+                    fieldToMatch: {
+                      body: {
+                        oversizeHandling: "MATCH",
+                      },
+                    },
+                    textTransformations: [
+                      {
+                        priority: 0,
+                        type: "NONE",
+                      },
+                    ],
+                    positionalConstraint: "CONTAINS",
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      visibilityConfig: {
+        sampledRequestsEnabled: true,
+        cloudWatchMetricsEnabled: true,
+        metricName: "LimitRequestsPerIP",
+      },
+    };
+    return [ruleLimitRequests];
   }
 }
