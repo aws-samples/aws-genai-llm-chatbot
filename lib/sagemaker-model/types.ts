@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 
@@ -7,6 +8,10 @@ export interface SageMakerModelProps extends cdk.NestedStackProps {
   vpc: ec2.Vpc;
   region: string;
   model: ModelConfig;
+  logRetention?: number;
+  kmsKey?: kms.Key;
+  retainOnDelete?: boolean;
+  enableEndpointKMSEncryption: boolean;
 }
 
 export enum DeploymentType {

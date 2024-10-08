@@ -55,10 +55,19 @@ export class DataImport extends Construct {
       {
         visibilityTimeout: cdk.Duration.seconds(900),
         enforceSSL: true,
+        encryption: props.shared.queueKmsKey
+          ? sqs.QueueEncryption.KMS
+          : undefined,
+        encryptionMasterKey: props.shared.queueKmsKey,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
       }
     );
 
     const ingestionQueue = new sqs.Queue(this, "IngestionQueue", {
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
       visibilityTimeout: cdk.Duration.seconds(900),
       enforceSSL: true,
       deadLetterQueue: {
@@ -69,18 +78,31 @@ export class DataImport extends Construct {
 
     const uploadLogsBucket = new s3.Bucket(this, "UploadLogsBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       enforceSSL: true,
+      versioned: true,
     });
 
     const uploadBucket = new s3.Bucket(this, "UploadBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       transferAcceleration: true,
       enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
+      encryption: props.shared.kmsKey
+        ? s3.BucketEncryption.KMS
+        : s3.BucketEncryption.S3_MANAGED,
+      encryptionKey: props.shared.kmsKey,
+      versioned: true,
       cors: [
         {
           allowedHeaders: ["*"],
@@ -99,17 +121,30 @@ export class DataImport extends Construct {
 
     const processingLogsBucket = new s3.Bucket(this, "ProcessingLogsBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       enforceSSL: true,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
 
     const processingBucket = new s3.Bucket(this, "ProcessingBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       enforceSSL: true,
       serverAccessLogsBucket: processingLogsBucket,
+      encryption: props.shared.kmsKey
+        ? s3.BucketEncryption.KMS
+        : s3.BucketEncryption.S3_MANAGED,
+      encryptionKey: props.shared.kmsKey,
+      versioned: true,
     });
 
     uploadBucket.addEventNotification(
@@ -187,12 +222,16 @@ export class DataImport extends Construct {
         path.join(__dirname, "./functions/upload-handler")
       ),
       handler: "index.lambda_handler",
+      description: "Data Import upload handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
       timeout: cdk.Duration.minutes(15),
       memorySize: 512,
-      tracing: lambda.Tracing.ACTIVE,
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      tracing: props.config.advancedMonitoring
+        ? lambda.Tracing.ACTIVE
+        : lambda.Tracing.DISABLED,
+      logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+      loggingFormat: lambda.LoggingFormat.JSON,
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       vpc: props.shared.vpc,
       vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,

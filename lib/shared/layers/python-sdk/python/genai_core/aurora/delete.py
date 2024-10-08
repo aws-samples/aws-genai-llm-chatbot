@@ -1,4 +1,5 @@
 import os
+from aws_lambda_powertools import Logger
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 import genai_core.utils.delete_files_with_prefix
@@ -17,9 +18,10 @@ DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 WORKSPACE_OBJECT_TYPE = "workspace"
 
 dynamodb = boto3.resource("dynamodb")
+logger = Logger()
 
 
-def delete_aurora_workspace(workspace: dict):
+def delete_workspace(workspace: dict):
     workspace_id = workspace["workspace_id"]
     genai_core.utils.delete_files_with_prefix.delete_files_with_prefix(
         UPLOAD_BUCKET_NAME, workspace_id
@@ -66,13 +68,14 @@ def delete_aurora_workspace(workspace: dict):
                         "document_id": item["document_id"],
                     }
                 )
-    print(f"Deleted {len(items_to_delete)} items.")
+    logger.info(f"Deleted {len(items_to_delete)} items.")
 
     response = workspaces_table.delete_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
     )
 
-    print(f"Delete Item succeeded: {response}")
+    logger.info(f"Delete Item succeeded: {response}")
+
 
 def delete_aurora_document(workspace_id: str, document: dict):
     table_name = sql.Identifier(workspace_id.replace("-", ""))
@@ -106,12 +109,13 @@ def delete_aurora_document(workspace_id: str, document: dict):
                 "document_id": document_id,
             }
         )
-        print(f"Delete document succeeded: {response}")
+        logger.info(f"Delete document succeeded: {response}")
 
         updateResponse = workspaces_table.update_item(
-            Key={"workspace_id": workspace_id,
-                 "object_type": WORKSPACE_OBJECT_TYPE},
-            UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+            Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
+            UpdateExpression="ADD size_in_bytes :incrementValue, "
+            + "documents :documentsIncrementValue, "
+            + "vectors :vectorsIncrementValue SET updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":incrementValue": -document_size_in_bytes,
                 ":documentsIncrementValue": -documents_diff,
@@ -120,19 +124,24 @@ def delete_aurora_document(workspace_id: str, document: dict):
             },
             ReturnValues="UPDATED_NEW",
         )
-        print(f"Workspaces table updated for the document: {updateResponse}")
+        logger.info(f"Workspaces table updated for the document: {updateResponse}")
 
     except (BotoCoreError, ClientError) as error:
-        print(f"An error occurred: {error}")
+        logger.error(f"An error occurred: {error}")
+
 
 def deleteAuroraDocument(document_id: str, table_name: str):
     try:
         with AuroraConnection(autocommit=False) as cursor:
             cursor.execute(
-                sql.SQL("DELETE FROM {table} WHERE document_id = %s").format(table=table_name),
+                sql.SQL("DELETE FROM {table} WHERE document_id = %s").format(
+                    table=table_name
+                ),
                 (document_id,),
             )
             cursor.connection.commit()
-            print(f"Deleted document {document_id} from {table_name}")
+            logger.info(f"Deleted document {document_id} from {table_name}")
     except psycopg2.Error as e:
-        print(f"An error occurred while deleting document from Aurora table: {e}")
+        logger.error(
+            f"An error occurred while deleting document from Aurora table: {e}"
+        )

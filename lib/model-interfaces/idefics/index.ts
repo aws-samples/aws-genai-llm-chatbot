@@ -14,7 +14,6 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { RemovalPolicy } from "aws-cdk-lib";
 import { NagSuppressions } from "cdk-nag";
 
 interface IdeficsInterfaceProps {
@@ -24,24 +23,143 @@ interface IdeficsInterfaceProps {
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
   readonly chatbotFilesBucket: s3.Bucket;
+  readonly createPrivateGateway: boolean;
 }
 
 export class IdeficsInterface extends Construct {
   public readonly ingestionQueue: sqs.Queue;
   public readonly requestHandler: lambda.Function;
 
-  constructor(scope: Construct, id: string, props: IdeficsInterfaceProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    private props: IdeficsInterfaceProps
+  ) {
     super(scope, id);
 
     const lambdaDurationInMinutes = 15;
 
+    let api;
+    if (props.createPrivateGateway) {
+      api = this.createAPIGW();
+    }
+
+    const requestHandler = new lambda.Function(
+      this,
+      "MultiModalInterfaceRequestHandler",
+      {
+        vpc: props.shared.vpc,
+        code: props.shared.sharedCode.bundleWithLambdaAsset(
+          path.join(__dirname, "./functions/request-handler")
+        ),
+        description: "Multi modal request handler",
+        runtime: props.shared.pythonRuntime,
+        handler: "index.handler",
+        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
+        architecture: props.shared.lambdaArchitecture,
+        tracing: props.config.advancedMonitoring
+          ? lambda.Tracing.ACTIVE
+          : lambda.Tracing.DISABLED,
+        timeout: cdk.Duration.minutes(lambdaDurationInMinutes),
+        memorySize: 1024,
+        logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+        loggingFormat: lambda.LoggingFormat.JSON,
+        environment: {
+          ...props.shared.defaultEnvironmentVariables,
+          CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
+          SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
+          SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
+          MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
+          CHATBOT_FILES_BUCKET_NAME: props.chatbotFilesBucket.bucketName,
+          CHATBOT_FILES_PRIVATE_API: api?.url ?? "",
+        },
+      }
+    );
+
+    props.chatbotFilesBucket.grantRead(requestHandler);
+    props.sessionsTable.grantReadWriteData(requestHandler);
+    props.messagesTopic.grantPublish(requestHandler);
+    if (props.shared.kmsKey && requestHandler.role) {
+      props.shared.kmsKey.grantEncrypt(requestHandler.role);
+    }
+    props.shared.configParameter.grantRead(requestHandler);
+    requestHandler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["bedrock:InvokeModel"],
+        resources: ["*"],
+        effect: iam.Effect.ALLOW,
+      })
+    );
+
+    const deadLetterQueue = new sqs.Queue(this, "DLQ", {
+      enforceSSL: true,
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+    const queue = new sqs.Queue(this, "IdeficsIngestionQueue", {
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
+      visibilityTimeout: cdk.Duration.minutes(lambdaDurationInMinutes * 6),
+      enforceSSL: true,
+      deadLetterQueue: {
+        queue: deadLetterQueue,
+        maxReceiveCount: 3,
+      },
+    });
+
+    queue.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ["sqs:SendMessage"],
+        resources: [queue.queueArn],
+        principals: [
+          new iam.ServicePrincipal("events.amazonaws.com"),
+          new iam.ServicePrincipal("sqs.amazonaws.com"),
+        ],
+      })
+    );
+
+    requestHandler.addEventSource(new lambdaEventSources.SqsEventSource(queue));
+
+    this.ingestionQueue = queue;
+    this.requestHandler = requestHandler;
+  }
+
+  public addSageMakerEndpoint({
+    endpoint,
+    name,
+  }: {
+    endpoint: CfnEndpoint;
+    name: string;
+  }) {
+    this.requestHandler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["sagemaker:InvokeEndpoint"],
+        resources: [endpoint.ref],
+      })
+    );
+    const cleanName = name.replace(/[\s.\-_]/g, "").toUpperCase();
+    this.requestHandler.addEnvironment(
+      `SAGEMAKER_ENDPOINT_${cleanName}`,
+      endpoint.attrEndpointName
+    );
+  }
+
+  private createAPIGW(): apigateway.RestApi {
     // Create a private API to serve images and other files from S3
     // in order to avoid using signed URLs and run out of input tokens
     // with the idefics model
     const defaultSecurityGroup =
-      props.config.vpc?.vpcId && props.config.vpc.vpcDefaultSecurityGroup
-        ? props.config.vpc.vpcDefaultSecurityGroup
-        : props.shared.vpc.vpcDefaultSecurityGroup;
+      this.props.config.vpc?.vpcId &&
+      this.props.config.vpc.vpcDefaultSecurityGroup
+        ? this.props.config.vpc.vpcDefaultSecurityGroup
+        : this.props.shared.vpc.vpcDefaultSecurityGroup;
 
     const vpcDefaultSecurityGroup = defaultSecurityGroup
       ? ec2.SecurityGroup.fromSecurityGroupId(
@@ -53,10 +171,10 @@ export class IdeficsInterface extends Construct {
           this,
           "VPCDefaultSecurityGroup",
           "default",
-          props.shared.vpc
+          this.props.shared.vpc
         );
 
-    const vpcEndpoint = props.shared.vpc.addInterfaceEndpoint(
+    const vpcEndpoint = this.props.shared.vpc.addInterfaceEndpoint(
       "PrivateApiEndpoint",
       {
         service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
@@ -70,7 +188,11 @@ export class IdeficsInterface extends Construct {
       this,
       "ChatbotFilesPrivateApiAccessLogs",
       {
-        removalPolicy: RemovalPolicy.DESTROY,
+        removalPolicy:
+          this.props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        retention: this.props.config.logRetention,
       }
     );
 
@@ -95,7 +217,8 @@ export class IdeficsInterface extends Construct {
             actions: ["execute-api:Invoke"],
             effect: iam.Effect.ALLOW,
             resources: ["execute-api:/*/*/*"],
-            principals: [new iam.AnyPrincipal()],
+            principals: [new iam.AnyPrincipal()], // NOSONAR
+            // Private integration with deny based on the VPCe
           }),
           new iam.PolicyStatement({
             actions: ["execute-api:Invoke"],
@@ -129,19 +252,9 @@ export class IdeficsInterface extends Construct {
     });
     integrationRole.addToPolicy(
       new iam.PolicyStatement({
-        actions: ["s3:Get*", "s3:List*"],
+        actions: ["s3:GetObject*"],
         effect: iam.Effect.ALLOW,
-        resources: [
-          `${props.chatbotFilesBucket.bucketArn}/*`,
-          `${props.chatbotFilesBucket.bucketArn}/*/*`,
-        ],
-      })
-    );
-    integrationRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ["kms:Decrypt", "kms:ReEncryptFrom"],
-        effect: iam.Effect.ALLOW,
-        resources: ["arn:aws:kms:*"],
+        resources: [`${this.props.chatbotFilesBucket.bucketArn}/private/*`],
       })
     );
 
@@ -149,11 +262,12 @@ export class IdeficsInterface extends Construct {
       service: "s3",
       integrationHttpMethod: "GET",
       region: cdk.Aws.REGION,
-      path: `${props.chatbotFilesBucket.bucketName}/public/{object}`,
+      path: `${this.props.chatbotFilesBucket.bucketName}/private/{folder}/{key}`,
       options: {
         credentialsRole: integrationRole,
         requestParameters: {
-          "integration.request.path.object": "method.request.path.object",
+          "integration.request.path.folder": "method.request.path.folder",
+          "integration.request.path.key": "method.request.path.key",
         },
         integrationResponses: [
           {
@@ -167,91 +281,25 @@ export class IdeficsInterface extends Construct {
       },
     });
 
-    const fileResource = api.root.addResource("{object}");
-    fileResource.addMethod("ANY", s3Integration, {
-      methodResponses: [
-        {
-          statusCode: "200",
-          responseParameters: {
-            "method.response.header.Content-Type": true,
+    // prettier-ignore
+    api.root
+      .addResource("{folder}")
+      .addResource("{key}")
+      .addMethod("GET", s3Integration, { // NOSONAR Private integration
+        methodResponses: [
+          {
+            statusCode: "200",
+            responseParameters: {
+              "method.response.header.Content-Type": true,
+            },
           },
-        },
-      ],
-      requestParameters: {
-        "method.request.path.object": true,
-        "method.request.header.Content-Type": true,
-      },
-    });
-
-    const requestHandler = new lambda.Function(
-      this,
-      "IdeficsInterfaceRequestHandler",
-      {
-        vpc: props.shared.vpc,
-        code: props.shared.sharedCode.bundleWithLambdaAsset(
-          path.join(__dirname, "./functions/request-handler")
-        ),
-        runtime: props.shared.pythonRuntime,
-        handler: "index.handler",
-        layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
-        architecture: props.shared.lambdaArchitecture,
-        tracing: lambda.Tracing.ACTIVE,
-        timeout: cdk.Duration.minutes(lambdaDurationInMinutes),
-        memorySize: 1024,
-        logRetention: logs.RetentionDays.ONE_WEEK,
-        environment: {
-          ...props.shared.defaultEnvironmentVariables,
-          CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
-          SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
-          SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
-          MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
-          CHATBOT_FILES_BUCKET_NAME: props.chatbotFilesBucket.bucketName,
-          CHATBOT_FILES_PRIVATE_API: api.url,
-        },
-      }
-    );
-
-    props.chatbotFilesBucket.grantRead(requestHandler);
-    props.sessionsTable.grantReadWriteData(requestHandler);
-    props.messagesTopic.grantPublish(requestHandler);
-    props.shared.configParameter.grantRead(requestHandler);
-    requestHandler.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["bedrock:InvokeModel"],
-        resources: ["*"],
-        effect: iam.Effect.ALLOW,
-      })
-    );
-
-    const deadLetterQueue = new sqs.Queue(this, "DLQ", {
-      enforceSSL: true,
-    });
-    const queue = new sqs.Queue(this, "Queue", {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
-      visibilityTimeout: cdk.Duration.minutes(lambdaDurationInMinutes * 6),
-      enforceSSL: true,
-      deadLetterQueue: {
-        queue: deadLetterQueue,
-        maxReceiveCount: 3,
-      },
-    });
-
-    queue.addToResourcePolicy(
-      new iam.PolicyStatement({
-        actions: ["sqs:SendMessage"],
-        resources: [queue.queueArn],
-        principals: [
-          new iam.ServicePrincipal("events.amazonaws.com"),
-          new iam.ServicePrincipal("sqs.amazonaws.com"),
         ],
-      })
-    );
-
-    requestHandler.addEventSource(new lambdaEventSources.SqsEventSource(queue));
-
-    this.ingestionQueue = queue;
-    this.requestHandler = requestHandler;
+        requestParameters: {
+          "method.request.path.folder": true,
+          "method.request.path.key": true,
+          "method.request.header.Content-Type": true,
+        },
+      });
 
     /**
      * CDK NAG suppression
@@ -264,25 +312,6 @@ export class IdeficsInterface extends Construct {
       },
       { id: "AwsSolutions-IAM5", reason: "Access limited to KMS resources." },
     ]);
-  }
-
-  public addSageMakerEndpoint({
-    endpoint,
-    name,
-  }: {
-    endpoint: CfnEndpoint;
-    name: string;
-  }) {
-    this.requestHandler.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["sagemaker:InvokeEndpoint"],
-        resources: [endpoint.ref],
-      })
-    );
-    const cleanName = name.replace(/[\s.\-_]/g, "").toUpperCase();
-    this.requestHandler.addEnvironment(
-      `SAGEMAKER_ENDPOINT_${cleanName}`,
-      endpoint.attrEndpointName
-    );
+    return api;
   }
 }

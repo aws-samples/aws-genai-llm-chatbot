@@ -20,15 +20,23 @@ jobs:
       - name: Backend
         run: |
           npm ci
+          npm audit
           npm run build
           npm run test
           npx cdk synth
       - name: PyTests
+        # Suppression of pip audit failure until langchain is upgraded.
         run: |
           pip install -r pytest_requirements.txt
+          flake8 .
+          bandit -c bandit.yaml -r .
+          pip-audit -r pytest_requirements.txt
+          pip-audit -r lib/shared/web-crawler-batch-job/requirements.txt
+          pip-audit -r lib/shared/file-import-batch-job/requirements.txt
           pytest tests/
       - name: Frontend
         working-directory: ./lib/user-interface/react-app
         run: |
           npm ci
+          npm audit
           npm run build

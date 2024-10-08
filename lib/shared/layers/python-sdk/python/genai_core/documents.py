@@ -1,8 +1,8 @@
 import os
 import json
 import uuid
+from aws_lambda_powertools import Logger
 import boto3
-from boto3.dynamodb.conditions import Attr, Key
 import botocore
 import feedparser
 import genai_core.types
@@ -44,6 +44,7 @@ lambda_client = boto3.client("lambda")
 
 documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
 workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
+logger = Logger()
 
 
 def list_documents(
@@ -73,7 +74,8 @@ def list_documents(
 
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression="workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)",
+            KeyConditionExpression="workspace_id = :workspace_id AND "
+            + "begins_with(compound_sort_key, :sort_key_prefix)",
             ExclusiveStartKey={
                 "workspace_id": workspace_id,
                 "document_id": last_document_id,
@@ -89,7 +91,8 @@ def list_documents(
     else:
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression="workspace_id = :workspace_id AND begins_with(compound_sort_key, :sort_key_prefix)",
+            KeyConditionExpression="workspace_id = :workspace_id AND "
+            + "begins_with(compound_sort_key, :sort_key_prefix)",
             ExpressionAttributeValues={
                 ":workspace_id": workspace_id,
                 ":sort_key_prefix": sort_key_prefix,
@@ -122,12 +125,11 @@ def set_document_vectors(
         },
     )
 
-    print(response)
-
     if replace:
         response = documents_table.update_item(
             Key={"workspace_id": workspace_id, "document_id": document_id},
-            UpdateExpression="SET vectors=:vectorsValue, updated_at=:timestampValue",
+            UpdateExpression="SET vectors=:vectorsValue, "
+            + "updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":vectorsValue": vectors,
                 ":timestampValue": timestamp,
@@ -136,14 +138,15 @@ def set_document_vectors(
     else:
         response = documents_table.update_item(
             Key={"workspace_id": workspace_id, "document_id": document_id},
-            UpdateExpression="ADD vectors :incrementValue SET updated_at=:timestampValue",
+            UpdateExpression="ADD vectors :incrementValue SET "
+            + "updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":incrementValue": vectors,
                 ":timestampValue": timestamp,
             },
         )
 
-    print(response)
+    logger.info("Response for set_document_vectors", response=response)
 
     return response
 
@@ -153,14 +156,15 @@ def set_sub_documents(workspace_id: str, document_id: str, sub_documents: int):
 
     response = documents_table.update_item(
         Key={"workspace_id": workspace_id, "document_id": document_id},
-        UpdateExpression="SET sub_documents=:subDocumentsValue, updated_at=:timestampValue",
+        UpdateExpression="SET sub_documents=:subDocumentsValue, "
+        + "updated_at=:timestampValue",
         ExpressionAttributeValues={
             ":subDocumentsValue": sub_documents,
             ":timestampValue": timestamp,
         },
     )
 
-    print(response)
+    logger.info("Response for set_sub_documents", response=response)
 
     return response
 
@@ -173,6 +177,7 @@ def get_document(workspace_id: str, document_id: str):
 
     return document
 
+
 def delete_document(workspace_id: str, document_id: str):
     response = documents_table.get_item(
         Key={"workspace_id": workspace_id, "document_id": document_id}
@@ -183,7 +188,11 @@ def delete_document(workspace_id: str, document_id: str):
     if not document:
         raise genai_core.types.CommonError("Document not found")
 
-    if document["status"] != "processed" and document["status"] != "error":
+    if (
+        document["status"] != "processed"
+        and document["status"] != "error"
+        and document["status"] != "enabled"  # rss feed final status
+    ):
         raise genai_core.types.CommonError("Document not ready for deletion")
 
     response = sfn_client.start_execution(
@@ -196,8 +205,9 @@ def delete_document(workspace_id: str, document_id: str):
         ),
     )
 
-    print(response)
+    logger.info("Response for delete_document", response=response)
     return {"documentId": document_id, "deleted": True}
+
 
 def get_document_content(workspace_id: str, document_id: str):
     content_key = f"{workspace_id}/{document_id}/content.txt"
@@ -243,7 +253,7 @@ def update_subscription_timestamp(workspace_id: str, document_id: str):
             ":timestampValue": timestamp,
         },
     )
-    print(response)
+    logger.info("Response for update_subscription_timestamp", response=response)
 
 
 def create_document(
@@ -268,7 +278,8 @@ def create_document(
     if unique_path_document:
         response = documents_table.query(
             IndexName=DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME,
-            KeyConditionExpression="workspace_id=:workspaceValue AND compound_sort_key=:compoundKeyValue",
+            KeyConditionExpression="workspace_id=:workspaceValue AND "
+            + "compound_sort_key=:compoundKeyValue",
             ExpressionAttributeValues={
                 ":workspaceValue": workspace_id,
                 ":compoundKeyValue": f"{document_type}/{path}",
@@ -292,7 +303,9 @@ def create_document(
                 "workspace_id": workspace_id,
                 "document_id": document_id,
             },
-            UpdateExpression="SET compound_sort_key=:compoundKeyValue, #status=:statusValue, size_in_bytes=:sizeValue, vectors=:vectorsValue, updated_at=:timestampValue",
+            UpdateExpression="SET compound_sort_key=:compoundKeyValue, "
+            + "#status=:statusValue, size_in_bytes=:sizeValue, "
+            + "vectors=:vectorsValue, updated_at=:timestampValue",
             ExpressionAttributeNames={"#status": "status"},
             ExpressionAttributeValues={
                 ":compoundKeyValue": f"{document_type}/{path}",
@@ -334,12 +347,13 @@ def create_document(
             document["crawler_properties"] = kwargs["crawler_properties"]
 
         response = documents_table.put_item(Item=document)
-        print(response)
 
     size_diff = size_in_bytes - current_size_in_bytes
     response = workspaces_table.update_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
-        UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+        UpdateExpression="ADD size_in_bytes :incrementValue, "
+        + "documents :documentsIncrementValue, "
+        + "vectors :vectorsIncrementValue SET updated_at=:timestampValue",
         ExpressionAttributeValues={
             ":incrementValue": size_diff,
             ":documentsIncrementValue": documents_diff,
@@ -349,7 +363,7 @@ def create_document(
         ReturnValues="UPDATED_NEW",
     )
 
-    print(response)
+    logger.info("Response for create_document", response=response)
 
     _upload_document_content(
         workspace_id,
@@ -388,7 +402,8 @@ def update_document(workspace_id: str, document_id: str, document_type: str, **k
             content_types = kwargs["content_types"]
             response = documents_table.update_item(
                 Key={"workspace_id": workspace_id, "document_id": document_id},
-                UpdateExpression="SET #crawler_properties=:crawler_properties, updated_at=:timestampValue",
+                UpdateExpression="SET #crawler_properties=:crawler_properties, "
+                + "updated_at=:timestampValue",
                 ExpressionAttributeNames={"#crawler_properties": "crawler_properties"},
                 ExpressionAttributeValues={
                     ":crawler_properties": {
@@ -483,7 +498,7 @@ def _process_document(
             ),
         )
 
-        print(response)
+        logger.info("Response for _process_document", response=response)
     elif document_type == "qna":
         chunk_complements = None
         if content_complement is not None:
@@ -520,7 +535,7 @@ def _process_document(
                     set_status(workspace_id, document_id, "error")
                     raise genai_core.types.CommonError("No urls found in sitemap")
             except Exception as e:
-                print(e)
+                logger.exception(e)
                 set_status(workspace_id, document_id, "error")
                 raise genai_core.types.CommonError("Error extracting urls from sitemap")
 
@@ -566,7 +581,7 @@ def _process_document(
             ),
         )
 
-        print(response)
+        logger.info("Response for _process_document", response=response)
     elif document_type == "rssfeed":
         set_status(workspace_id, document_id, "enabled")
         _trigger_rss_feed_ingestor(workspace_id, document_id)
@@ -633,9 +648,9 @@ def _trigger_rss_feed_ingestor(
                 }
             ),
         )
-        print(response)
+        logger.info("Response for _trigger_rss_feed_ingestor", response=response)
     except Exception as e:
-        print(e)
+        logger.exception(e)
 
 
 def _toggle_document_subscription(
@@ -671,7 +686,7 @@ def check_rss_feed_for_posts(workspace_id, document_id):
         raise genai_core.types.CommonError("Document not found")
 
     feed_path = rss_document["path"]
-    print(f"Parsing RSS Feed for {feed_path}")
+    logger.info(f"Parsing RSS Feed for {feed_path}")
     try:
         feed_contents = feedparser.parse(feed_path)
         if feed_contents:
@@ -704,7 +719,7 @@ def check_rss_feed_for_posts(workspace_id, document_id):
                     )
                 except botocore.exceptions.ClientError as e:
                     if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
-                        print(f"Post already exists: {feed_entry['link']}")
+                        logger.info(f"Post already exists: {feed_entry['link']}")
                         continue
                     else:
                         raise e
@@ -729,22 +744,47 @@ def batch_crawl_websites():
             feed_id = post["rss_feed_id"]["S"]
             document_id = post["document_id"]["S"]
             path = post["path"]["S"]
+
+            properties = post["crawler_properties"]
+
+            follow_links = True
+            if (
+                properties
+                and properties["M"]
+                and properties["M"]["follow_links"]
+                and properties["M"]["follow_links"]["BOOL"] == False
+            ):
+                follow_links = False
+
+            limit = 250
+            if (
+                properties
+                and properties["M"]
+                and properties["M"]["limit"]
+                and properties["M"]["limit"]["N"]
+            ):
+                limit = int(post["crawler_properties"]["M"]["limit"]["N"])
+
+            content_types = []
+            if (
+                properties
+                and properties["M"]
+                and properties["M"]["content_types"]
+                and properties["M"]["content_types"]["L"]
+            ):
+                for type in post["crawler_properties"]["M"]["content_types"]["L"]:
+                    content_types.append(type["S"])
+            else:
+                content_types.append("text/html")
+
             create_document(
                 workspace_id,
                 "website",
                 path=path,
                 crawler_properties={
-                    "follow_links": post["crawler_properties"]["M"]["follow_links"][
-                        "BOOL"
-                    ]
-                    if "crawler_properties" in post
-                    else True,
-                    "limit": int(post["crawler_properties"]["M"]["limit"]["N"])
-                    if "crawler_properties" in post
-                    else 250,
-                    "content_types": post["crawler_properties"]["M"]["content_types"]["L"]
-                    if "crawler_properties" in post and "content_types" in post["crawler_properties"]["M"]
-                    else ["text/html"],
+                    "follow_links": follow_links,
+                    "limit": limit,
+                    "content_types": content_types,
                 },
             )
             set_status(workspace_id, document_id, "processed")

@@ -64,6 +64,7 @@ export class SharedAssetBundler extends Construct {
           command: [
             "zip",
             "-r",
+            "-9",
             path.posix.join("/asset-output", "asset.zip"),
             ".",
           ],

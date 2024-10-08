@@ -1,6 +1,9 @@
 import os
 import shutil
-import subprocess
+
+# Needed since it is a build script
+# that runs during deployment.
+import subprocess  # nosec B404
 from pathlib import Path
 
 import boto3
@@ -60,13 +63,15 @@ os.chdir(str(out_folder))
 print(f"Compressing the model folder: {out_folder}")
 command = "tar -cf model.tar.gz --use-compress-program=pigz *"
 print(f"Running command: {command}")
-subprocess.run(command, shell=True, check=True)
+subprocess.run(
+    command, shell=True, check=True
+)  # nosec B602 Command is not user provided
 print(f"Model folder compressed: {out_folder}")
 print(f"Moving back to: {current_folder}")
 os.chdir(current_folder)
 
 print(f"Uploading the model to S3 bucket: {bucket}")
-s3_client.upload_file(out_folder.joinpath("model.tar.gz"), bucket, f"out/model.tar.gz")
+s3_client.upload_file(out_folder.joinpath("model.tar.gz"), bucket, "out/model.tar.gz")
 model_data = f"s3://{bucket}/out/model.tar.gz"
 
 print(f"Model archive uploaded to: {model_data}")

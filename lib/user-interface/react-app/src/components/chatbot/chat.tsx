@@ -5,7 +5,11 @@ import {
   ChatBotMessageType,
   FeedbackData,
 } from "./types";
-import { SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
+import {
+  Alert,
+  SpaceBetween,
+  StatusIndicator,
+} from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
 import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
@@ -17,10 +21,10 @@ import { CHATBOT_NAME } from "../../common/constants";
 export default function Chat(props: { sessionId?: string }) {
   const appContext = useContext(AppContext);
   const [running, setRunning] = useState<boolean>(false);
-  const [session, setSession] = useState<{ id: string; loading: boolean }>({
-    id: props.sessionId ?? uuidv4(),
-    loading: typeof props.sessionId !== "undefined",
-  });
+  const [session, setSession] = useState<
+    { id: string; loading: boolean } | undefined
+  >();
+  const [initError, setInitError] = useState<string | undefined>(undefined);
   const [configuration, setConfiguration] = useState<ChatBotConfiguration>(
     () => ({
       streaming: true,
@@ -116,6 +120,15 @@ export default function Chat(props: { sessionId?: string }) {
 
   return (
     <div className={styles.chat_container}>
+      {initError && (
+        <Alert
+          statusIconAriaLabel="Error"
+          type="error"
+          header="Unable to initalize the Chatbot."
+        >
+          {initError}
+        </Alert>
+      )}
       <SpaceBetween direction="vertical" size="m">
         {messageHistory.map((message, idx) => (
           <ChatMessage
@@ -138,15 +151,18 @@ export default function Chat(props: { sessionId?: string }) {
         )}
       </div>
       <div className={styles.input_container}>
-        <ChatInputPanel
-          session={session}
-          running={running}
-          setRunning={setRunning}
-          messageHistory={messageHistory}
-          setMessageHistory={(history) => setMessageHistory(history)}
-          configuration={configuration}
-          setConfiguration={setConfiguration}
-        />
+        {session && (
+          <ChatInputPanel
+            session={session}
+            running={running}
+            setRunning={setRunning}
+            messageHistory={messageHistory}
+            setMessageHistory={(history) => setMessageHistory(history)}
+            setInitErrorMessage={(error) => setInitError(error)}
+            configuration={configuration}
+            setConfiguration={setConfiguration}
+          />
+        )}
       </div>
     </div>
   );

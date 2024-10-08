@@ -1,4 +1,5 @@
 import {
+  Alert,
   BreadcrumbGroup,
   ContentLayout,
   Flashbar,
@@ -20,6 +21,7 @@ import AuroraWorkspaceSettings from "./aurora-workspace-settings";
 import DocumentsTab from "./documents-tab";
 import OpenSearchWorkspaceSettings from "./open-search-workspace-settings";
 import KendraWorkspaceSettings from "./kendra-workspace-settings";
+import BedrockKBWorkspaceSettings from "./bedrock-kb-workspace-settings";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Workspace } from "../../../API";
 
@@ -34,12 +36,14 @@ export default function WorkspacePane() {
   const [workspace, setWorkspace] = useState<Workspace | undefined | null>(
     null
   );
+  const [globalError, setGlobalError] = useState<string | undefined>(undefined);
 
   const getWorkspace = useCallback(async () => {
     if (!appContext || !workspaceId) return;
 
     const apiClient = new ApiClient(appContext);
     try {
+      setGlobalError(undefined);
       const result = await apiClient.workspaces.getWorkspace(workspaceId);
       if (!result.data?.getWorkspace) {
         navigate("/rag/workspaces");
@@ -47,7 +51,8 @@ export default function WorkspacePane() {
       }
       setWorkspace(result.data!.getWorkspace);
     } catch (error) {
-      console.error(error);
+      console.error(Utils.getErrorMessage(error));
+      setGlobalError(Utils.getErrorMessage(error));
     }
     setLoading(false);
   }, [appContext, navigate, workspaceId]);
@@ -98,37 +103,47 @@ export default function WorkspacePane() {
                   >
                     Semantic search
                   </RouterButton>
-                  <RouterButtonDropdown
-                    items={[
-                      {
-                        id: "upload-file",
-                        text: "Upload files",
-                        href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-text",
-                        text: "Add texts",
-                        href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-qna",
-                        text: "Add Q&A",
-                        href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "crawl-website",
-                        text: "Crawl website",
-                        href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
-                      },
-                      {
-                        id: "add-rss-subscription",
-                        text: "Add RSS subscription",
-                        href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
-                      },
-                    ]}
-                  >
-                    Add data
-                  </RouterButtonDropdown>
+                  {workspace?.kendraIndexExternal ||
+                  workspace?.knowledgeBaseExternal ? (
+                    <></>
+                  ) : (
+                    <RouterButtonDropdown
+                      disabled={
+                        (workspace?.kendraIndexExternal ||
+                          workspace?.knowledgeBaseExternal) ??
+                        false
+                      }
+                      items={[
+                        {
+                          id: "upload-file",
+                          text: "Upload files",
+                          href: `/rag/workspaces/add-data?tab=file&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-text",
+                          text: "Add texts",
+                          href: `/rag/workspaces/add-data?tab=text&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-qna",
+                          text: "Add Q&A",
+                          href: `/rag/workspaces/add-data?tab=qna&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "crawl-website",
+                          text: "Crawl website",
+                          href: `/rag/workspaces/add-data?tab=website&workspaceId=${workspaceId}`,
+                        },
+                        {
+                          id: "add-rss-subscription",
+                          text: "Add RSS subscription",
+                          href: `/rag/workspaces/add-data?tab=rssfeed&workspaceId=${workspaceId}`,
+                        },
+                      ]}
+                    >
+                      Add data
+                    </RouterButtonDropdown>
+                  )}
                 </SpaceBetween>
               }
             >
@@ -141,6 +156,15 @@ export default function WorkspacePane() {
           }
         >
           <SpaceBetween size="l">
+            {globalError && (
+              <Alert
+                statusIconAriaLabel="Error"
+                type="error"
+                header="Unable to load the workspace."
+              >
+                {globalError}
+              </Alert>
+            )}
             {workspace && workspace.engine === "aurora" && (
               <AuroraWorkspaceSettings workspace={workspace} />
             )}
@@ -150,86 +174,90 @@ export default function WorkspacePane() {
             {workspace && workspace.engine === "kendra" && (
               <KendraWorkspaceSettings workspace={workspace} />
             )}
-            {workspace?.kendraIndexExternal && (
+            {workspace && workspace.engine === "bedrock_kb" && (
+              <BedrockKBWorkspaceSettings workspace={workspace} />
+            )}
+            {workspace?.kendraIndexExternal ||
+            workspace?.knowledgeBaseExternal ? (
               <Flashbar
                 items={[
                   {
                     type: "info",
                     content: (
-                      <>
-                        Data upload is not available for external Kendra indexes
-                      </>
+                      <>Data upload is not available for external retrievers</>
                     ),
                   },
                 ]}
               />
-            )}
-            {workspace && showTabs && (
-              <Tabs
-                tabs={[
-                  {
-                    label: "Files",
-                    id: "file",
-                    content: (
-                      <DocumentsTab
-                        workspaceId={workspaceId}
-                        documentType="file"
-                      />
-                    ),
-                  },
-                  {
-                    label: "Texts",
-                    id: "text",
-                    content: (
-                      <DocumentsTab
-                        workspaceId={workspaceId}
-                        documentType="text"
-                      />
-                    ),
-                  },
-                  {
-                    label: "Q&A",
-                    id: "qna",
-                    disabled: disabledTabs.includes("qna"),
-                    content: (
-                      <DocumentsTab
-                        workspaceId={workspaceId}
-                        documentType="qna"
-                      />
-                    ),
-                  },
-                  {
-                    label: "Websites",
-                    id: "website",
-                    disabled: disabledTabs.includes("website"),
-                    content: (
-                      <DocumentsTab
-                        workspaceId={workspaceId}
-                        documentType="website"
-                      />
-                    ),
-                  },
-                  {
-                    label: "RSS Feeds",
-                    id: "rssfeed",
-                    disabled: disabledTabs.includes("rssfeed"),
-                    content: (
-                      <DocumentsTab
-                        workspaceId={workspaceId}
-                        documentType="rssfeed"
-                      />
-                    ),
-                  },
-                ]}
-                activeTabId={activeTab}
-                onChange={({ detail: { activeTabId } }) => {
-                  setActiveTab(activeTabId);
-                  setSearchParams((current) => ({
-                    ...Utils.urlSearchParamsToRecord(current),
-                    tab: activeTabId,
-                  }));
-                }}
-              />
+            ) : (
+              workspace &&
+              showTabs && (
+                <Tabs
+                  tabs={[
+                    {
+                      label: "Files",
+                      id: "file",
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="file"
+                        />
+                      ),
+                    },
+                    {
+                      label: "Texts",
+                      id: "text",
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="text"
+                        />
+                      ),
+                    },
+                    {
+                      label: "Q&A",
+                      id: "qna",
+                      disabled: disabledTabs.includes("qna"),
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="qna"
+                        />
+                      ),
+                    },
+                    {
+                      label: "Websites",
+                      id: "website",
+                      disabled: disabledTabs.includes("website"),
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="website"
+                        />
+                      ),
+                    },
+                    {
+                      label: "RSS Feeds",
+                      id: "rssfeed",
+                      disabled: disabledTabs.includes("rssfeed"),
+                      content: (
+                        <DocumentsTab
+                          workspaceId={workspaceId}
+                          documentType="rssfeed"
+                        />
+                      ),
+                    },
+                  ]}
+                  activeTabId={activeTab}
+                  onChange={({ detail: { activeTabId } }) => {
+                    setActiveTab(activeTabId);
+                    setSearchParams((current) => ({
+                      ...Utils.urlSearchParamsToRecord(current),
+                      tab: activeTabId,
+                    }));
+                  }}
+                />
+              )
             )}
           </SpaceBetween>
         </ContentLayout>

@@ -1,5 +1,7 @@
+from pydantic import ValidationError
 import pytest
-from genai_core.types import CommonError, EmbeddingsModel
+from genai_core.types import CommonError
+from routes.sessions import get_file
 from routes.sessions import get_sessions
 from routes.sessions import get_session
 from routes.sessions import delete_user_sessions
@@ -15,6 +17,12 @@ session = {
         }
     ],
 }
+
+
+def test_get_file_url(mocker):
+    mocker.patch("genai_core.auth.get_user_id", return_value="userId")
+    mocker.patch("genai_core.presign.generate_user_presigned_get", return_value="url")
+    assert get_file("file") == "url"
 
 
 def test_get_sessions(mocker):
@@ -50,6 +58,13 @@ def test_get_session(mocker):
     assert get_session("id") == expected
 
 
+def test_get_session_invalid_input():
+    with pytest.raises(ValidationError, match="1 validation error"):
+        get_session("")
+    with pytest.raises(ValidationError, match="1 validation error"):
+        get_session(None)
+
+
 def test_get_session_user_not_found(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value=None)
     with pytest.raises(CommonError):
@@ -82,6 +97,13 @@ def test_delete_session(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value="userId")
     mocker.patch("genai_core.sessions.delete_session", return_value=service_response)
     assert delete_session("id") == service_response
+
+
+def test_delete_session_invalid_input():
+    with pytest.raises(ValidationError, match="1 validation error"):
+        delete_session("")
+    with pytest.raises(ValidationError, match="1 validation error"):
+        delete_session(None)
 
 
 def test_delete_session_user_not_found(mocker):

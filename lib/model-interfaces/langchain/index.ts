@@ -12,6 +12,7 @@ import * as path from "path";
 import { RagEngines } from "../../rag-engines";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
+import { AURORA_DB_USERS } from "../../rag-engines/aurora-pgvector";
 
 interface LangChainInterfaceProps {
   readonly shared: Shared;
@@ -35,12 +36,16 @@ export class LangChainInterface extends Construct {
         path.join(__dirname, "./functions/request-handler")
       ),
       handler: "index.handler",
+      description: "Langchain request handler",
       runtime: props.shared.pythonRuntime,
       architecture: props.shared.lambdaArchitecture,
-      tracing: lambda.Tracing.ACTIVE,
+      tracing: props.config.advancedMonitoring
+        ? lambda.Tracing.ACTIVE
+        : lambda.Tracing.DISABLED,
       timeout: cdk.Duration.minutes(15),
       memorySize: 1024,
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+      loggingFormat: lambda.LoggingFormat.JSON,
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       environment: {
         ...props.shared.defaultEnvironmentVariables,
@@ -53,8 +58,13 @@ export class LangChainInterface extends Construct {
           props.ragEngines?.workspacesTable.tableName ?? "",
         WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
           props.ragEngines?.workspacesByObjectTypeIndexName ?? "",
-        AURORA_DB_SECRET_ID: props.ragEngines?.auroraPgVector?.database?.secret
-          ?.secretArn as string,
+        AURORA_DB_USER: AURORA_DB_USERS.READ_ONLY,
+        AURORA_DB_HOST:
+          props.ragEngines?.auroraPgVector?.database?.clusterEndpoint
+            ?.hostname ?? "",
+        AURORA_DB_PORT:
+          props.ragEngines?.auroraPgVector?.database?.clusterEndpoint?.port +
+          "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
           props.ragEngines?.sageMakerRagModels?.model.endpoint
             ?.attrEndpointName ?? "",
@@ -106,8 +116,9 @@ export class LangChainInterface extends Construct {
     }
 
     if (props.ragEngines?.auroraPgVector) {
-      props.ragEngines?.auroraPgVector.database.secret?.grantRead(
-        requestHandler
+      props.ragEngines.auroraPgVector.database.grantConnect(
+        requestHandler,
+        AURORA_DB_USERS.READ_ONLY
       );
       props.ragEngines?.auroraPgVector.database.connections.allowDefaultPortFrom(
         requestHandler
@@ -182,8 +193,36 @@ export class LangChainInterface extends Construct {
       }
     }
 
+    if (props.config.rag.engines.knowledgeBase?.enabled) {
+      for (const item of props.config.rag.engines.knowledgeBase.external ||
+        []) {
+        if (item.roleArn) {
+          requestHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["sts:AssumeRole"],
+              resources: [item.roleArn],
+            })
+          );
+        } else {
+          requestHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: ["bedrock:Retrieve"],
+              resources: [
+                `arn:${cdk.Aws.PARTITION}:bedrock:${
+                  item.region ?? cdk.Aws.REGION
+                }:${cdk.Aws.ACCOUNT_ID}:knowledge-base/${item.knowledgeBaseId}`,
+              ],
+            })
+          );
+        }
+      }
+    }
+
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
+    if (props.shared.kmsKey && requestHandler.role) {
+      props.shared.kmsKey.grantEncrypt(requestHandler.role);
+    }
     props.shared.apiKeysSecret.grantRead(requestHandler);
     props.shared.configParameter.grantRead(requestHandler);
 
@@ -206,10 +245,16 @@ export class LangChainInterface extends Construct {
     );
 
     const deadLetterQueue = new sqs.Queue(this, "DLQ", {
+      encryption: props.shared.kmsKey ? sqs.QueueEncryption.KMS : undefined,
+      encryptionMasterKey: props.shared.kmsKey,
       enforceSSL: true,
     });
 
-    const queue = new sqs.Queue(this, "Queue", {
+    const queue = new sqs.Queue(this, "LangChainIngestionQueue", {
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(15 * 6),
@@ -250,7 +295,7 @@ export class LangChainInterface extends Construct {
         resources: [endpoint.ref],
       })
     );
-    const cleanName = name.replace(/[\s.\-_]/g, "").toUpperCase();
+    const cleanName = name.replace(/[\s./\-_]/g, "").toUpperCase();
     this.requestHandler.addEnvironment(
       `SAGEMAKER_ENDPOINT_${cleanName}`,
       endpoint.attrEndpointName

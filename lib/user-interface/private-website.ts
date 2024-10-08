@@ -1,4 +1,3 @@
-import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -17,7 +16,6 @@ export interface PrivateWebsiteProps {
   readonly shared: Shared;
   readonly userPoolId: string;
   readonly userPoolClientId: string;
-  readonly identityPool: cognitoIdentityPool.IdentityPool;
   readonly api: ChatBotApi;
   readonly chatbotFilesBucket: s3.Bucket;
   readonly crossEncodersEnabled: boolean;
@@ -161,9 +159,15 @@ export class PrivateWebsite extends Construct {
 
     const albLogBucket = new s3.Bucket(this, "ALBLoggingBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       enforceSSL: true,
+      // Only SSE-S3 encryption is supported for ALB logs
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
     loadBalancer.logAccessLogs(albLogBucket);
 
@@ -208,7 +212,8 @@ export class PrivateWebsite extends Construct {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["s3:GetObject", "s3:List*"],
-        principals: [new iam.AnyPrincipal()],
+        principals: [new iam.AnyPrincipal()], // NOSONAR
+        // Access only allowed from the VPC.
         resources: [
           props.websiteBucket.bucketArn,
           `${props.websiteBucket.bucketArn}/*`,

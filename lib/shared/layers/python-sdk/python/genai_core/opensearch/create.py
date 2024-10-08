@@ -1,4 +1,7 @@
+from aws_lambda_powertools import Logger
 from .client import get_open_search_client
+
+logger = Logger()
 
 
 def create_workspace_index(workspace: dict):
@@ -50,5 +53,4 @@ def create_workspace_index(workspace: dict):
 
     response = client.indices.create(index_name, body=index_body)
 
-    print("Created workspace index")
-    print(response)
+    logger.info("Response for create_workspace_index", response=response)

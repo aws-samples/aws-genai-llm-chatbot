@@ -42,7 +42,7 @@ function getCountryCodesAndNames(): { message: string; name: string }[] {
 }
 
 function isValidDate(dateString: string): boolean {
-  // Check the pattern YYYY/MM/DD
+  // Check the pattern YYYY-MM-DD
   const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
   if (!regex.test(dateString)) {
     return false;
@@ -148,6 +148,8 @@ const embeddingModels = [
         fs.readFileSync("./bin/config.json").toString("utf8")
       );
       options.prefix = config.prefix;
+      options.createCMKs = config.createCMKs;
+      options.retainOnDelete = config.retainOnDelete;
       options.vpcId = config.vpc?.vpcId;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
@@ -159,6 +161,8 @@ const embeddingModels = [
         ? config.llms?.sagemaker.length > 0
         : false;
       options.huggingfaceApiSecretArn = config.llms?.huggingfaceApiSecretArn;
+      options.enableSagemakerModelsSchedule =
+        config.llms?.sagemakerSchedule?.enabled;
       options.enableSagemakerModelsSchedule =
         config.llms?.sagemakerSchedule?.enabled;
       options.timezonePicker = config.llms?.sagemakerSchedule?.timezonePicker;
@@ -199,11 +203,14 @@ const embeddingModels = [
         (m) => m.default
       )[0].name;
       options.kendraExternal = config.rag.engines.kendra.external;
+      options.kbExternal = config.rag.engines.knowledgeBase?.external ?? [];
       options.kendraEnterprise = config.rag.engines.kendra.enterprise;
 
       // Advanced settings
 
+      options.advancedMonitoring = config.advancedMonitoring;
       options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
+      options.logRetention = config.logRetention;
       options.privateWebsite = config.privateWebsite;
       options.certificate = config.certificate;
       options.domain = config.domain;
@@ -258,6 +265,12 @@ async function processCreateOptions(options: any): Promise<void> {
       message: "Prefix to differentiate this deployment",
       initial: options.prefix,
       askAnswered: false,
+      validate(value: string) {
+        const regex = /^[a-zA-Z0-9-]{0,10}$/;
+        return regex.test(value)
+          ? true
+          : "Only letters, numbers, and dashes are allowed. The max length is 10 characters.";
+      },
     },
     {
       type: "confirm",
@@ -280,6 +293,22 @@ async function processCreateOptions(options: any): Promise<void> {
       skip(): boolean {
         return !(this as any).state.answers.existingVpc;
       },
+    },
+    {
+      type: "confirm",
+      name: "createCMKs",
+      message:
+        "Do you want to create KMS Customer Managed Keys (CMKs)? (It will be used to encrypt the data at rest.)",
+      initial: true,
+      hint: "It is recommended but enabling it on an existing environment will cause the re-creation of some of the resources (for example Aurora cluster, Open Search collection). To prevent data loss, it is recommended to use it on a new environment or at least enable retain on cleanup (needs to be deployed before enabling the use of CMK). For more information on Aurora migration, please refer to the documentation.",
+    },
+    {
+      type: "confirm",
+      name: "retainOnDelete",
+      message:
+        "Do you want to retain data stores on cleanup of the project (Logs, S3, Tables, Indexes, Cognito User pools)?",
+      initial: true,
+      hint: "It reduces the risk of deleting data. It will however not delete all the resources on cleanup (would require manual removal if relevant)",
     },
     {
       type: "confirm",
@@ -551,7 +580,7 @@ async function processCreateOptions(options: any): Promise<void> {
       type: "confirm",
       name: "enableScheduleEndDate",
       message:
-        "Would you like to set an end data for the start schedule? (after this date the models would no longer start)",
+        "Would you like to set an end date for the start schedule? (after this date the models would no longer start)",
       initial: options.enableScheduleEndDate || false,
       skip(): boolean {
         return !(this as any).state.answers.enableSagemakerModelsSchedule;
@@ -568,7 +597,7 @@ async function processCreateOptions(options: any): Promise<void> {
         }
         return (
           isValidDate(v) ||
-          "The date must be in format YYYY/MM/DD and be in the future"
+          "The date must be in format YYYY-MM-DD and be in the future"
         );
       },
       skip(): boolean {
@@ -601,6 +630,7 @@ async function processCreateOptions(options: any): Promise<void> {
         { message: "Aurora", name: "aurora" },
         { message: "OpenSearch", name: "opensearch" },
         { message: "Kendra (managed)", name: "kendra" },
+        { message: "Bedrock KnowldgeBase", name: "knowledgeBase" },
       ],
       validate(choices: any) {
         return (this as any).skipped || choices.length > 0
@@ -709,6 +739,82 @@ async function processCreateOptions(options: any): Promise<void> {
     });
     newKendra = kendraInstance.newKendra;
   }
+
+  // Knowledge Bases
+  let newKB =
+    answers.enableRag && answers.ragsToEnable.includes("knowledgeBase");
+  const kbExternal: any[] = [];
+  const existingKBIndices = Array.from(options.kbExternal || []);
+  while (newKB === true) {
+    const existingIndex: any = existingKBIndices.pop();
+    const kbQ = [
+      {
+        type: "input",
+        name: "name",
+        message: "Bedrock KnowledgeBase source name",
+        validate(v: string) {
+          return RegExp(/^\w[\w-_]*\w$/).test(v);
+        },
+        initial: existingIndex?.name,
+      },
+      {
+        type: "autocomplete",
+        limit: 8,
+        name: "region",
+        choices: ["us-east-1", "us-west-2"],
+        message: `Region of the Bedrock Knowledge Base index${
+          existingIndex?.region ? " (" + existingIndex?.region + ")" : ""
+        }`,
+        initial: ["us-east-1", "us-west-2"].indexOf(existingIndex?.region),
+      },
+      {
+        type: "input",
+        name: "roleArn",
+        message:
+          "Cross account role Arn to assume to call the Bedrock KnowledgeBase, leave empty if not needed",
+        validate: (v: string) => {
+          const valid = iamRoleRegExp.test(v);
+          return v.length === 0 || valid;
+        },
+        initial: existingIndex?.roleArn ?? "",
+      },
+      {
+        type: "input",
+        name: "knowledgeBaseId",
+        message: "Bedrock KnowledgeBase ID",
+        validate(v: string) {
+          return /[A-Z0-9]{10}/.test(v);
+        },
+        initial: existingIndex?.knowledgeBaseId,
+      },
+      {
+        type: "confirm",
+        name: "enabled",
+        message: "Enable this knowledge base",
+        initial: existingIndex?.enabled ?? true,
+      },
+      {
+        type: "confirm",
+        name: "newKB",
+        message: "Do you want to add another Bedrock KnowledgeBase source",
+        initial: false,
+      },
+    ];
+    const kbInstance: any = await enquirer.prompt(kbQ);
+    const ext = (({ enabled, name, roleArn, knowledgeBaseId, region }) => ({
+      enabled,
+      name,
+      roleArn,
+      knowledgeBaseId,
+      region,
+    }))(kbInstance);
+    if (ext.roleArn === "") ext.roleArn = undefined;
+    kbExternal.push({
+      ...ext,
+    });
+    newKB = kbInstance.newKB;
+  }
+
   const modelsPrompts = [
     {
       type: "select",
@@ -736,6 +842,31 @@ async function processCreateOptions(options: any): Promise<void> {
   const models: any = await enquirer.prompt(modelsPrompts);
 
   const advancedSettingsPrompts = [
+    {
+      type: "input",
+      name: "logRetention",
+      message: "For how long do you want to store the logs (in days)?",
+      initial: options.logRetention ? String(options.logRetention) : "7",
+      validate(value: string) {
+        // https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-logs-loggroup.html#cfn-logs-loggroup-retentionindays
+        const allowed = [
+          1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096,
+          1827, 2192, 2557, 2922, 3288, 3653,
+        ];
+        if (allowed.includes(Number(value))) {
+          return true;
+        } else {
+          return "Allowed values are: " + allowed.join(", ");
+        }
+      },
+    },
+    {
+      type: "confirm",
+      name: "advancedMonitoring",
+      message:
+        "Do you want to use Amazon CloudWatch custom metrics, alarms and AWS X-Ray?",
+      initial: options.advancedMonitoring || false,
+    },
     {
       type: "confirm",
       name: "createVpcEndpoints",
@@ -1004,10 +1135,11 @@ async function processCreateOptions(options: any): Promise<void> {
   }
 
   const randomSuffix = randomBytes(8).toString("hex");
-
   // Create the config object
   const config = {
     prefix: answers.prefix,
+    createCMKs: answers.createCMKs,
+    retainOnDelete: answers.retainOnDelete,
     vpc: answers.existingVpc
       ? {
           vpcId: answers.vpcId.toLowerCase(),
@@ -1015,6 +1147,10 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     privateWebsite: advancedSettings.privateWebsite,
+    advancedMonitoring: advancedSettings.advancedMonitoring,
+    logRetention: advancedSettings.logRetention
+      ? Number(advancedSettings.logRetention)
+      : undefined,
     certificate: advancedSettings.certificate,
     domain: advancedSettings.domain,
     cognitoFederation: advancedSettings.cognitoFederationEnabled
@@ -1095,6 +1231,10 @@ async function processCreateOptions(options: any): Promise<void> {
           external: [{}],
           enterprise: false,
         },
+        knowledgeBase: {
+          enabled: false,
+          external: [{}],
+        },
       },
       crossEncodingEnabled: answers.enableEmbeddingModelsViaSagemaker,
       embeddingsModels: [{}],
@@ -1132,6 +1272,9 @@ async function processCreateOptions(options: any): Promise<void> {
     config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.engines.kendra.enterprise = answers.kendraEnterprise;
+  config.rag.engines.knowledgeBase.enabled =
+    config.rag.engines.knowledgeBase.external.length > 0;
+  config.rag.engines.knowledgeBase.external = [...kbExternal];
 
   console.log("\n✨ This is the chosen configuration:\n");
   console.log(JSON.stringify(config, undefined, 2));

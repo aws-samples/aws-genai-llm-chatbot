@@ -17,7 +17,10 @@ export function getTestConfig(): SystemConfig {
       region: SupportedRegion.US_EAST_1,
     },
     llms: {
-      sagemaker: [SupportedSageMakerModels.FalconLite],
+      sagemaker: [
+        SupportedSageMakerModels.FalconLite,
+        SupportedSageMakerModels.Idefics_80b,
+      ],
     },
     rag: {
       enabled: true,
@@ -32,6 +35,9 @@ export function getTestConfig(): SystemConfig {
           enabled: true,
           createIndex: true,
           enterprise: true,
+        },
+        knowledgeBase: {
+          enabled: false,
         },
       },
       embeddingsModels: [

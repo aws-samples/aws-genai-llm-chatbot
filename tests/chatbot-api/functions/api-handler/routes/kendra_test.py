@@ -1,3 +1,5 @@
+from pydantic import ValidationError
+import pytest
 from routes.kendra import kendra_indexes
 from routes.kendra import kendra_data_sync
 from routes.kendra import kendra_is_syncing
@@ -19,3 +21,10 @@ def test_kendra_is_syncing(mocker):
     mock = mocker.patch("genai_core.kendra.kendra_is_syncing", return_value=False)
     assert kendra_is_syncing("id") == False
     mock.assert_called_once_with(workspace_id="id")
+
+
+def test_kendra_is_syncing_invalid_input():
+    with pytest.raises(ValidationError, match="1 validation error"):
+        kendra_is_syncing("")
+    with pytest.raises(ValidationError, match="1 validation error"):
+        kendra_is_syncing(None)

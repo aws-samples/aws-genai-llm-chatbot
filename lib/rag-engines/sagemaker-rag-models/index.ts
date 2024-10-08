@@ -28,7 +28,14 @@ export class SageMakerRagModels extends Construct {
       const model = new SageMakerModel(this, "Model", {
         vpc: props.shared.vpc,
         region: cdk.Aws.REGION,
-        model: {
+        logRetention: props.config.logRetention,
+      kmsKey: props.shared.kmsKey,
+      // NVMe based instances (like ml.g4dn.xlarge) do not support KMS encryption
+      // They instead use an hardware module for encryption
+      // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/data-protection.html#encryption-rest
+      enableEndpointKMSEncryption: false,
+      retainOnDelete: props.config.retainOnDelete,
+      model: {
           type: DeploymentType.CustomInferenceScript,
           modelId: [
             ...sageMakerEmbeddingsModelIds,
@@ -39,7 +46,7 @@ export class SageMakerRagModels extends Construct {
         },
       });
 
-      this.model = model;
-    }
+    this.model = model;
   }
+}
 }

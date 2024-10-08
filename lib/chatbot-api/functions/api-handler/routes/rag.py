@@ -1,16 +1,11 @@
 import genai_core.parameters
 import genai_core.kendra
-from pydantic import BaseModel
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
 
 tracer = Tracer()
 router = Router()
 logger = Logger()
-
-
-class KendraDataSynchRequest(BaseModel):
-    workspaceId: str
 
 
 @router.resolver(field_name="listRagEngines")
@@ -34,6 +29,11 @@ def engines():
             "id": "kendra",
             "name": "Amazon Kendra",
             "enabled": engines.get("kendra", {}).get("enabled", False) == True,
+        },
+        {
+            "id": "bedrock_kb",
+            "name": "Bedrock Knowledge Bases",
+            "enabled": engines.get("knowledgeBase", {}).get("enabled", False) == True,
         },
     ]
 

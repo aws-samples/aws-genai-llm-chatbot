@@ -33,6 +33,7 @@ export default function Welcome() {
           header={
             <Header
               variant="h1"
+              data-locator="welcome-header"
               description="An opensource, modular and comprehensive solution to deploy a multi-model and multi-RAG powered chatbot using AWS CDK on AWS."
               actions={
                 <RouterButton
@@ -156,15 +157,46 @@ export default function Welcome() {
                 of{" "}
                 <Link
                   external
-                  href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html"
+                  href="https://docs.aws.amazon.com/appsync/latest/devguide/aws-appsync-real-time-data.html"
                 >
-                  Amazon API Gateway WebSocket APIs
+                  Amazon AppSync subscriptions.
                 </Link>
-                <br />
-                Build on top of{" "}
-                <Link external href="https://cloudscape.design/">
-                  AWS Cloudscape design system
-                </Link>
+                <p>
+                  The UI components are provided by{" "}
+                  <Link external href="https://cloudscape.design/">
+                    AWS Cloudscape design system
+                  </Link>
+                </p>
+              </p>
+            </Container>
+            <Container
+              media={{
+                content: (
+                  <img src="/images/welcome/chat-modes.png" alt="placeholder" />
+                ),
+                width: 300,
+                position: "side",
+              }}
+            >
+              <Header variant="h1">Capabilities</Header>
+              <Header variant="h3">Multi-modal chat</Header>
+              <p>
+                You can <Link href="/chatbot/playground">chat</Link> with text
+                or upload images and use multimodal chats. Currently we support
+                multimodal capabilities with Anthropic Claude 3 via Amazon
+                Bedrock and Idefics deployed via SageMaker.
+              </p>
+              <h3>Compare multiple LLMs and RAG sources</h3>
+              <p>
+                In the{" "}
+                <Link href="/chatbot/playground">multi-chat playground</Link>{" "}
+                you can use multiple models and RAG sources simultaneously and
+                compare their answers.
+              </p>
+              <h3>Test RAG sources, embedding and cross-encoders</h3>
+              <p>
+                We provide easy to use interface to test search in RAG data
+                source, text embeddings and cross-encoder scoring.
               </p>
             </Container>
             <Header
@@ -213,6 +245,15 @@ export default function Welcome() {
                   href: "https://aws.amazon.com/blogs/big-data/amazon-opensearch-services-vector-database-capabilities-explained/",
                   description:
                     "With OpenSearch Service’s vector database capabilities, you can implement semantic search, Retrieval Augmented Generation (RAG) with LLMs, recommendation engines, and search rich media.",
+                },
+
+                {
+                  name: "Amazon Bedrock Knowledge Bases",
+                  external: true,
+                  type: "Search Engine",
+                  href: "https://aws.amazon.com/bedrock/knowledge-bases/",
+                  description:
+                    "With Knowledge Bases for Amazon Bedrock, you can give FMs and agents contextual information from your company’s private data sources for Retrieval Augmented Generation (RAG) to deliver more relevant, accurate, and customized responses",
                 },
                 {
                   name: "Amazon Kendra",

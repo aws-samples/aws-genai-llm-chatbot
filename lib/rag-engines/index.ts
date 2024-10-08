@@ -31,14 +31,17 @@ export class RagEngines extends Construct {
   public readonly documentsByStatusIndexName: string;
   public readonly fileImportWorkflow?: sfn.StateMachine;
   public readonly websiteCrawlingWorkflow?: sfn.StateMachine;
-  public readonly deleteWorkspaceWorkflow?: sfn.StateMachine;
-  public readonly deleteDocumentWorkflow?: sfn.StateMachine;
+  public readonly deleteWorkspaceWorkflow: sfn.StateMachine;
+  public readonly deleteDocumentWorkflow: sfn.StateMachine;
   public readonly dataImport: DataImport;
 
   constructor(scope: Construct, id: string, props: RagEnginesProps) {
     super(scope, id);
 
-    const tables = new RagDynamoDBTables(this, "RagDynamoDBTables");
+    const tables = new RagDynamoDBTables(this, "RagDynamoDBTables", {
+      kmsKey: props.shared.kmsKey,
+      retainOnDelete: props.config.retainOnDelete,
+    });
 
     let sageMakerRagModels: SageMakerRagModels | null = null;
     if (props.config.llms.enableSagemakerModels) {
@@ -98,7 +101,6 @@ export class RagEngines extends Construct {
       openSearchVector: openSearchVector ?? undefined,
       kendraRetrieval: kendraRetrieval ?? undefined,
     });
-
     this.auroraPgVector = auroraPgVector;
     this.openSearchVector = openSearchVector;
     this.kendraRetrieval = kendraRetrieval;

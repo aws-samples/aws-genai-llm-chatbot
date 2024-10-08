@@ -1,13 +1,16 @@
 import os
 import json
 import uuid
+from aws_lambda_powertools import Logger
 import boto3
 import genai_core.embeddings
 from datetime import datetime
+from .types import WorkspaceStatus
 from genai_core.types import Task
 
 dynamodb = boto3.resource("dynamodb")
 sfn_client = boto3.client("stepfunctions")
+logger = Logger()
 
 WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME")
 WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ.get(
@@ -121,7 +124,7 @@ def create_workspace_aurora(
         "format_version": 1,
         "name": workspace_name,
         "engine": "aurora",
-        "status": "submitted",
+        "status": WorkspaceStatus.SUBMITTED.value,
         "embeddings_model_provider": embeddings_model_provider,
         "embeddings_model_name": embeddings_model_name,
         "embeddings_model_dimensions": embeddings_model_dimensions,
@@ -141,8 +144,7 @@ def create_workspace_aurora(
         "updated_at": timestamp,
     }
 
-    response = table.put_item(Item=item)
-    print(response)
+    ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,
@@ -153,7 +155,11 @@ def create_workspace_aurora(
         ),
     )
 
-    print(response)
+    logger.info(
+        "Response for create_workspace_aurora",
+        response=response,
+        ddb_response=ddb_response,
+    )
 
     return item
 
@@ -188,7 +194,7 @@ def create_workspace_open_search(
         "format_version": 1,
         "name": workspace_name,
         "engine": "opensearch",
-        "status": "submitted",
+        "status": WorkspaceStatus.SUBMITTED.value,
         "embeddings_model_provider": embeddings_model_provider,
         "embeddings_model_name": embeddings_model_name,
         "embeddings_model_dimensions": embeddings_model_dimensions,
@@ -208,8 +214,7 @@ def create_workspace_open_search(
         "updated_at": timestamp,
     }
 
-    response = table.put_item(Item=item)
-    print(response)
+    ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,
@@ -220,7 +225,11 @@ def create_workspace_open_search(
         ),
     )
 
-    print(response)
+    logger.info(
+        "Response for create_workspace_open_search",
+        response=response,
+        ddb_response=ddb_response,
+    )
 
     return item
 
@@ -240,7 +249,7 @@ def create_workspace_kendra(
         "format_version": 1,
         "name": workspace_name,
         "engine": "kendra",
-        "status": "submitted",
+        "status": WorkspaceStatus.SUBMITTED.value,
         "kendra_index_id": kendra_index_id,
         "kendra_index_external": kendra_index_external,
         "kendra_use_all_data": use_all_data,
@@ -251,8 +260,7 @@ def create_workspace_kendra(
         "updated_at": timestamp,
     }
 
-    response = table.put_item(Item=item)
-    print(response)
+    ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
         stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
@@ -263,7 +271,42 @@ def create_workspace_kendra(
         ),
     )
 
-    print(response)
+    logger.info(
+        "Response for create_workspace_kendra",
+        response=response,
+        ddb_response=ddb_response,
+    )
+
+    return item
+
+
+def create_workspace_bedrock_kb(
+    workspace_name: str, knowledge_base: dict, hybrid_search: bool
+):
+    workspace_id = str(uuid.uuid4())
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    knowledge_base_id = knowledge_base["id"]
+    external = knowledge_base["external"]
+
+    item = {
+        "workspace_id": workspace_id,
+        "object_type": WORKSPACE_OBJECT_TYPE,
+        "format_version": 1,
+        "name": workspace_name,
+        "engine": "bedrock_kb",
+        "status": WorkspaceStatus.READY.value,
+        "knowledge_base_id": knowledge_base_id,
+        "knowledge_base_external": external,
+        "hybrid_search": hybrid_search,
+        "documents": 0,
+        "vectors": 0,
+        "size_in_bytes": 0,
+        "created_at": timestamp,
+        "updated_at": timestamp,
+    }
+
+    response = table.put_item(Item=item)
+    logger.info("Response for create_workspace_bedrock_kb", response=response)
 
     return item
 
@@ -290,4 +333,4 @@ def delete_workspace(workspace_id: str):
         ),
     )
 
-    print(response)
+    logger.info("Response for delete_workspace", response=response)

@@ -1,4 +1,3 @@
-import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
 import { SystemConfig } from "../shared/types";
 import * as cognito from "aws-cdk-lib/aws-cognito";
@@ -12,7 +11,6 @@ import * as logs from "aws-cdk-lib/aws-logs";
 export class Authentication extends Construct {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
-  public readonly identityPool: cognitoIdentityPool.IdentityPool;
   public readonly cognitoDomain: cognito.UserPoolDomain;
   public readonly updateUserPoolClient: lambda.Function;
   public readonly customOidcProvider: cognito.UserPoolIdentityProviderOidc;
@@ -22,7 +20,10 @@ export class Authentication extends Construct {
     super(scope, id);
 
     const userPool = new cognito.UserPool(this, "UserPool", {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy:
+        config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
       selfSignUpEnabled: false,
       mfa: cognito.Mfa.OPTIONAL,
       advancedSecurityMode: cognito.AdvancedSecurityMode.ENFORCED,
@@ -52,21 +53,6 @@ export class Authentication extends Construct {
       });
       this.cognitoDomain = userPooldomain;
     }
-
-    const identityPool = new cognitoIdentityPool.IdentityPool(
-      this,
-      "IdentityPool",
-      {
-        authenticationProviders: {
-          userPools: [
-            new cognitoIdentityPool.UserPoolAuthenticationProvider({
-              userPool,
-              userPoolClient,
-            }),
-          ],
-        },
-      }
-    );
 
     if (config.cognitoFederation?.enabled) {
       // Create an IAM Role for the Lambda function
@@ -111,8 +97,10 @@ export class Authentication extends Construct {
           code: lambda.Code.fromAsset(
             "lib/authentication/lambda/updateUserPoolClient"
           ),
+          description: "Updates the user pool client",
           role: lambdaRoleUpdateClient,
-          logRetention: logs.RetentionDays.ONE_WEEK,
+          logRetention: config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+          loggingFormat: lambda.LoggingFormat.JSON,
           environment: {
             USER_POOL_ID: userPool.userPoolId,
             USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
@@ -136,7 +124,7 @@ export class Authentication extends Construct {
         );
         this.customOidcProvider = customProvider;
 
-        // Unfortunately the above function does not support SecretValue for Client Secrets so updating with lamda
+        // Unfortunately the above function does not support SecretValue for Client Secrets so updating with lambda
         // Create an IAM Role for the Lambda function
         const lambdaRoleUpdateOidcSecret = new iam.Role(
           this,
@@ -187,8 +175,10 @@ export class Authentication extends Construct {
             code: lambda.Code.fromAsset(
               "lib/authentication/lambda/updateOidcSecret"
             ),
+            description: "Updates OIDC secret",
             role: lambdaRoleUpdateOidcSecret,
-            logRetention: logs.RetentionDays.ONE_WEEK,
+            logRetention: config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+            loggingFormat: lambda.LoggingFormat.JSON,
             environment: {
               USER_POOL_ID: userPool.userPoolId,
               USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
@@ -239,14 +229,9 @@ export class Authentication extends Construct {
 
     this.userPool = userPool;
     this.userPoolClient = userPoolClient;
-    this.identityPool = identityPool;
 
     new cdk.CfnOutput(this, "UserPoolId", {
       value: userPool.userPoolId,
-    });
-
-    new cdk.CfnOutput(this, "IdentityPoolId", {
-      value: identityPool.identityPoolId,
     });
 
     new cdk.CfnOutput(this, "UserPoolWebClientId", {

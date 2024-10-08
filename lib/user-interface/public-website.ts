@@ -1,4 +1,3 @@
-import * as cognitoIdentityPool from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
 import * as cf from "aws-cdk-lib/aws-cloudfront";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -14,9 +13,7 @@ export interface PublicWebsiteProps {
   readonly shared: Shared;
   readonly userPoolId: string;
   readonly userPoolClientId: string;
-  readonly identityPool: cognitoIdentityPool.IdentityPool;
   readonly api: ChatBotApi;
-  readonly chatbotFilesBucket: s3.Bucket;
   readonly crossEncodersEnabled: boolean;
   readonly sagemakerEmbeddingsEnabled: boolean;
   readonly websiteBucket: s3.Bucket;
@@ -34,7 +31,6 @@ export class PublicWebsite extends Construct {
 
     const originAccessIdentity = new cf.OriginAccessIdentity(this, "S3OAI");
     props.websiteBucket.grantRead(originAccessIdentity);
-    props.chatbotFilesBucket.grantRead(originAccessIdentity);
     const cfGeoRestrictEnable = props.config.cfGeoRestrictEnable;
     const cfGeoRestrictList = props.config.cfGeoRestrictList;
 
@@ -44,9 +40,17 @@ export class PublicWebsite extends Construct {
       {
         objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: props.config.retainOnDelete !== true,
         enforceSSL: true,
+        encryption: props.shared.kmsKey
+          ? s3.BucketEncryption.KMS
+          : s3.BucketEncryption.S3_MANAGED,
+        encryptionKey: props.shared.kmsKey,
+        versioned: true,
       }
     );
 
@@ -71,6 +75,7 @@ export class PublicWebsite extends Construct {
               ),
               {
                 aliases: [props.config.domain],
+                securityPolicy: cf.SecurityPolicyProtocol.TLS_V1_2_2021,
               }
             ),
           }),
@@ -85,32 +90,6 @@ export class PublicWebsite extends Construct {
             behaviors: [{ isDefaultBehavior: true }],
             s3OriginSource: {
               s3BucketSource: props.websiteBucket,
-              originAccessIdentity,
-            },
-          },
-          {
-            behaviors: [
-              {
-                pathPattern: "/chabot/files/*",
-                allowedMethods: cf.CloudFrontAllowedMethods.ALL,
-                viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                defaultTtl: cdk.Duration.seconds(0),
-                forwardedValues: {
-                  queryString: true,
-                  headers: [
-                    "Referer",
-                    "Origin",
-                    "Authorization",
-                    "Content-Type",
-                    "x-forwarded-user",
-                    "Access-Control-Request-Headers",
-                    "Access-Control-Request-Method",
-                  ],
-                },
-              },
-            ],
-            s3OriginSource: {
-              s3BucketSource: props.chatbotFilesBucket,
               originAccessIdentity,
             },
           },

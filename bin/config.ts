@@ -41,6 +41,9 @@ export function getConfig(): SystemConfig {
           createIndex: false,
           enterprise: false,
         },
+        knowledgeBase: {
+          enabled: false,
+        },
       },
       embeddingsModels: [
         {

@@ -1,6 +1,6 @@
 import json
+from aws_lambda_powertools import Logger
 import boto3
-import logging
 from typing import List
 from decimal import Decimal
 from datetime import datetime
@@ -13,8 +13,10 @@ from langchain.schema.messages import (
     messages_from_dict,
     messages_to_dict,
 )
+from langchain_core.messages.ai import AIMessage, AIMessageChunk
 
 client = boto3.resource("dynamodb")
+logger = Logger()
 
 
 class DynamoDBChatMessageHistory(BaseChatMessageHistory):
@@ -38,9 +40,9 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             )
         except ClientError as error:
             if error.response["Error"]["Code"] == "ResourceNotFoundException":
-                print("No record found with session id: %s", self.session_id)
+                logger.warning("No record found with session id: %s", self.session_id)
             else:
-                print(error)
+                logger.exception(error)
 
         if response and "Item" in response:
             items = response["Item"]["History"]
@@ -53,7 +55,16 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
     def add_message(self, message: BaseMessage) -> None:
         """Append the message to the record in DynamoDB"""
         messages = messages_to_dict(self.messages)
-        _message = _message_to_dict(message)
+        if isinstance(message, AIMessageChunk):
+            # When streaming with RunnableWithMessageHistory,
+            # it would add a chunk to the history but it expects a text as content.
+            ai_message = ""
+            for c in message.content:
+                if "text" in c:
+                    ai_message = ai_message + c.get("text")
+            _message = _message_to_dict(AIMessage(ai_message))
+        else:
+            _message = _message_to_dict(message)
         messages.append(_message)
 
         try:
@@ -66,7 +77,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 }
             )
         except ClientError as err:
-            print(err)
+            logger.exception(err)
 
     def add_metadata(self, metadata: dict) -> None:
         """Add additional metadata to the last message"""
@@ -88,7 +99,7 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             )
 
         except Exception as err:
-            print(err)
+            logger.exception(err)
 
     def clear(self) -> None:
         """Clear session memory from DynamoDB"""
@@ -97,4 +108,4 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 Key={"SessionId": self.session_id, "UserId": self.user_id}
             )
         except ClientError as err:
-            print(err)
+            logger.exception(err)

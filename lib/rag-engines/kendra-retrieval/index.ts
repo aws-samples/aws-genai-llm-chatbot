@@ -36,21 +36,37 @@ export class KendraRetrieval extends Construct {
     );
 
     if (props.config.rag.engines.kendra.createIndex) {
-      const indexName = Utils.getName(props.config, "genaichatbot-workspaces");
+      const indexName = Utils.getName(
+        props.config,
+        (props.shared.kmsKey ? "cmk-" : "") + "genaichatbot-workspaces"
+      );
 
       const logsBucket = new s3.Bucket(this, "LogsBucket", {
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: props.config.retainOnDelete !== true,
         enforceSSL: true,
+        versioned: true,
+        encryption: s3.BucketEncryption.S3_MANAGED,
       });
 
       const dataBucket = new s3.Bucket(this, "KendraDataBucket", {
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: props.config.retainOnDelete !== true,
         enforceSSL: true,
         serverAccessLogsBucket: logsBucket,
+        versioned: true,
+        encryption: props.shared.kmsKey
+          ? s3.BucketEncryption.KMS
+          : s3.BucketEncryption.S3_MANAGED,
+        encryptionKey: props.shared.kmsKey,
       });
 
       const kendraRole = new iam.Role(this, "KendraRole", {
@@ -72,6 +88,11 @@ export class KendraRetrieval extends Construct {
           : "DEVELOPER_EDITION",
         name: indexName,
         roleArn: kendraRole.roleArn,
+        serverSideEncryptionConfiguration: props.shared.kmsKey
+          ? {
+              kmsKeyId: props.shared.kmsKey.keyId,
+            }
+          : undefined,
         documentMetadataConfigurations: [
           {
             name: "workspace_id",
@@ -96,7 +117,9 @@ export class KendraRetrieval extends Construct {
 
       const s3DataSource = new kendra.CfnDataSource(
         this,
-        "KendraS3DataSource",
+        // Force re-creation if the key is provided
+        // because the Kendra index would be re-created.
+        "KendraS3DataSource" + (props.shared.kmsKey ? "-CMK" : ""),
         {
           type: "S3",
           name: "KendraS3DataSource",

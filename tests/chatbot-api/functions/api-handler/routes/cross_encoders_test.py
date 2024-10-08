@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import pytest
 from routes.cross_encoders import models
 from routes.cross_encoders import cross_encoders
@@ -32,3 +33,22 @@ def test_cross_encoders_not_found(mocker):
     mocker.patch("genai_core.cross_encoder.get_cross_encoder_model", return_value=None)
     with pytest.raises(CommonError):
         cross_encoders(input)
+
+
+def test_cross_encoders_invalid_input(mocker):
+    with pytest.raises(ValidationError, match="4 validation errors"):
+        cross_encoders({})
+    with pytest.raises(ValidationError, match="3 validation errors"):
+        invalid = input.copy()
+        invalid["model"] = "<"
+        invalid["provider"] = ""
+        invalid["reference"] = ""
+        cross_encoders(invalid)
+    with pytest.raises(CommonError, match="Passages is empty"):
+        invalid = input.copy()
+        invalid["passages"] = []
+        cross_encoders(invalid)
+    with pytest.raises(ValidationError, match="1 validation error"):
+        invalid = input.copy()
+        invalid["passages"] = [""]
+        cross_encoders(invalid)

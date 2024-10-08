@@ -14,6 +14,7 @@ import {
   Toggle,
   StatusIndicator,
   Container,
+  Alert,
 } from "@cloudscape-design/components";
 import { v4 as uuidv4 } from "uuid";
 import { AppContext } from "../../common/app-context";
@@ -109,6 +110,7 @@ export default function MultiChat() {
   const [readyState, setReadyState] = useState<ReadyState>(
     ReadyState.UNINSTANTIATED
   );
+  const [initError, setInitError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!appContext) return;
@@ -151,7 +153,9 @@ export default function MultiChat() {
         setModelsStatus("finished");
       } catch (error) {
         console.error(Utils.getErrorMessage(error));
+        setInitError(Utils.getErrorMessage(error));
         setModelsStatus("error");
+        setReadyState(ReadyState.CLOSED);
       }
     })();
 
@@ -375,6 +379,15 @@ export default function MultiChat() {
   return (
     <div className={styles.chat_container}>
       <SpaceBetween size="m">
+        {initError && (
+          <Alert
+            statusIconAriaLabel="Error"
+            type="error"
+            header="Unable to initalize the Chatbots."
+          >
+            {initError}
+          </Alert>
+        )}
         <SpaceBetween size="m" alignItems="end">
           <SpaceBetween size="m" direction="horizontal" alignItems="center">
             <StatusIndicator

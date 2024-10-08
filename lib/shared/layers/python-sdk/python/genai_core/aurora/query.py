@@ -54,10 +54,10 @@ def query_workspace_aurora(
         if metric == "cosine":
             cursor.execute(
                 sql.SQL(
-                    """SELECT chunk_id, 
+                    """SELECT chunk_id,
                         workspace_id,
-                        document_id, 
-                        document_sub_id, 
+                        document_id,
+                        document_sub_id,
                         document_type,
                         document_sub_type,
                         path,
@@ -66,7 +66,7 @@ def query_workspace_aurora(
                         content,
                         content_complement,
                         metadata,
-                        content_embeddings <=> %s AS vector_search_score 
+                        content_embeddings <=> %s AS vector_search_score
                 FROM {table} ORDER BY vector_search_score LIMIT %s;"""
                 ).format(table=table_name),
                 [np.array(query_embeddings), vector_search_limit],
@@ -74,10 +74,10 @@ def query_workspace_aurora(
         elif metric == "l2":
             cursor.execute(
                 sql.SQL(
-                    """SELECT chunk_id, 
+                    """SELECT chunk_id,
                         workspace_id,
-                        document_id, 
-                        document_sub_id, 
+                        document_id,
+                        document_sub_id,
                         document_type,
                         document_sub_type,
                         path,
@@ -86,7 +86,7 @@ def query_workspace_aurora(
                         content,
                         content_complement,
                         metadata,
-                        content_embeddings <-> %s AS vector_search_score 
+                        content_embeddings <-> %s AS vector_search_score
                 FROM {table} ORDER BY vector_search_score LIMIT %s;"""
                 ).format(table=table_name),
                 [np.array(query_embeddings), vector_search_limit],
@@ -94,10 +94,10 @@ def query_workspace_aurora(
         elif metric == "inner":
             cursor.execute(
                 sql.SQL(
-                    """SELECT chunk_id, 
+                    """SELECT chunk_id,
                         workspace_id,
-                        document_id, 
-                        document_sub_id, 
+                        document_id,
+                        document_sub_id,
                         document_type,
                         document_sub_type,
                         path,
@@ -106,7 +106,7 @@ def query_workspace_aurora(
                         content,
                         content_complement,
                         metadata,
-                        content_embeddings <#> %s AS vector_search_score 
+                        content_embeddings <#> %s AS vector_search_score
                 FROM {table} ORDER BY vector_search_score LIMIT %s;"""
                 ).format(table=table_name),
                 [np.array(query_embeddings), vector_search_limit],
@@ -123,10 +123,10 @@ def query_workspace_aurora(
 
             cursor.execute(
                 sql.SQL(
-                    """SELECT chunk_id, 
+                    """SELECT chunk_id,
                             workspace_id,
-                            document_id, 
-                            document_sub_id, 
+                            document_id,
+                            document_sub_id,
                             document_type,
                             document_sub_type,
                             path,
@@ -136,11 +136,11 @@ def query_workspace_aurora(
                             content_complement,
                             metadata,
                             ts_rank_cd(to_tsvector('{language}', content), query) AS keyword_search_score
-                            FROM {table}, 
-                            plainto_tsquery('{language}', %s) query 
-                            WHERE to_tsvector('{language}', content) @@ query 
-                            ORDER BY keyword_search_score DESC 
-                            LIMIT %s;"""
+                            FROM {table},
+                            plainto_tsquery('{language}', %s) query
+                            WHERE to_tsvector('{language}', content) @@ query
+                            ORDER BY keyword_search_score DESC
+                            LIMIT %s;"""  # noqa:E501
                 ).format(table=table_name, language=language),
                 [query, keyword_search_limit],
             )
@@ -265,7 +265,7 @@ def query_workspace_aurora(
             "items": convert_types(ret_items),
         }
 
-    logger.info(ret_value)
+    logger.debug(ret_value)
 
     return ret_value
 

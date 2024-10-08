@@ -2,6 +2,7 @@ import os
 import json
 import time
 import random
+from aws_lambda_powertools import Logger
 import botocore
 import numpy as np
 from genai_core.types import EmbeddingsModel, CommonError, Provider, Task
@@ -10,6 +11,7 @@ import genai_core.parameters
 from typing import List, Optional
 
 SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
+logger = Logger()
 
 
 def generate_embeddings(
@@ -60,8 +62,8 @@ def _generate_embeddings_openai(model: EmbeddingsModel, input: List[str]):
     if not openai:
         raise CommonError("OpenAI API is not available. Please set OPENAI_API_KEY.")
 
-    data = openai.Embedding.create(input=input, model=model.name)["data"]
-    ret_value = list(map(lambda x: x["embedding"], data))
+    data = openai.embeddings.create(input=input, model=model.name).data
+    ret_value = list(map(lambda x: x.embedding, data))
 
     return ret_value
 
@@ -145,8 +147,12 @@ def _generate_embeddings_sagemaker(model: EmbeddingsModel, input: List[str]):
                 error_code == "ServiceUnavailableException"
                 or error_code == "InternalServerError"
             ):
-                print(f"Attempt {attempt + 1} failed with a 500 error.")
-                time.sleep(random.uniform(0.3, 1.5))
+                logger.info(f"Attempt {attempt + 1} failed with a 500 error.")
+                time.sleep(
+                    random.uniform(
+                        0.3, 1.5
+                    )  # nosec B311 Random value not used for cyptographic purposes
+                )
                 continue
             else:
                 # If the exception was due to another reason, raise it.

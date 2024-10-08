@@ -2,8 +2,6 @@ import os
 import json
 import uuid
 from datetime import datetime
-from urllib.parse import urljoin
-from adapters import Idefics, Claude3
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
@@ -11,14 +9,11 @@ from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingErro
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-from langchain.llms import SagemakerEndpoint
-
+import adapters  # noqa: F401 Needed to register the adapters
 from genai_core.langchain import DynamoDBChatMessageHistory
 from genai_core.utils.websocket import send_to_client
-from genai_core.types import ChatbotAction, ChatbotMessageType
+from genai_core.types import ChatbotAction
 from genai_core.registry import registry
-
-from content_handler import ContentHandler
 
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
@@ -26,7 +21,7 @@ logger = Logger()
 
 
 def handle_run(record):
-    print(record)
+    logger.info("Incoming request", record=record)
     user_id = record["userId"]
     data = record["data"]
     provider = data["provider"]
@@ -58,6 +53,7 @@ def handle_run(record):
         prompt=prompt,
         messages=messages,
         files=files,
+        user_id=user_id,
     )
 
     mlm_response = model.handle_run(prompt=prompt_template, model_kwargs=model_kwargs)
@@ -101,7 +97,7 @@ def record_handler(record: SQSRecord):
     payload: str = record.body
     message: dict = json.loads(payload)
     detail: dict = json.loads(message["Message"])
-    logger.info(detail)
+    logger.info("Incoming request", detail=detail)
 
     if detail["action"] == ChatbotAction.RUN.value:
         handle_run(detail)
@@ -126,14 +122,14 @@ def handle_failed_records(records):
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {
                     "sessionId": session_id,
-                    "content": str(error),
+                    "content": "Something went wrong.",
                     "type": "text",
                 },
             }
         )
 
 
-@logger.inject_lambda_context(log_event=True)
+@logger.inject_lambda_context(log_event=False)
 @tracer.capture_lambda_handler
 def handler(event, context: LambdaContext):
     batch = event["Records"]
@@ -142,9 +138,14 @@ def handler(event, context: LambdaContext):
         with processor(records=batch, handler=record_handler):
             processed_messages = processor.process()
     except BatchProcessingError as e:
-        logger.error(e)
+        logger.exception(e)
 
-    logger.info(processed_messages)
+    for message in processed_messages:
+        logger.info(
+            "Request compelte with status " + message[0],
+            status=message[0],
+            cause=message[1],
+        )
     handle_failed_records(
         message for message in processed_messages if message[0] == "fail"
     )

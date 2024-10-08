@@ -83,6 +83,8 @@ You have:
 
 ## Deployment
 
+Before you start, please read the [precautions](../documentation/precautions.md) and [security](../documentation/vulnerability-scanning.md) pages.
+
 **Step 1.** Clone the repository.
 
 ```bash
@@ -98,7 +100,7 @@ cd aws-genai-llm-chatbot
 **Step 3.** <a id="deployment-dependencies-installation"></a> Install the project dependencies and build the project.
 
 ```bash
-npm install && npm run build
+npm ci && npm run build
 ```
 
 **Step 4.** (Optional) Run the unit tests
@@ -115,7 +117,7 @@ npm run config
 
 You'll be prompted to configure the different aspects of the solution, such as:
 
-- The LLMs or MLMs to enable (we support all models provided by Bedrock along with SageMaker hosted Idefics, FalconLite, Mistral and more to come).
+- The LLMs or MLMs to enable (we support all models provided by Bedrock that [were enabled](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) along with SageMaker hosted Idefics, FalconLite, Mistral and more to come).
 - Setup of the RAG system: engine selection (i.e. Aurora w/ pgvector, OpenSearch, Kendra).
 - Embeddings selection.
 - Limit accessibility to website and backend to VPC (private chatbot).
@@ -132,13 +134,13 @@ Your configuration is now stored under `bin/config.json`. You can re-run the `np
 > **Note**: This is required if you have never used AWS CDK on this account and region combination. ([More information on CDK bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/cli.html#cli-bootstrap)).
 
 ```bash
-npx cdk bootstrap aws://{targetAccountId}/{targetRegion}
+npm run cdk bootstrap aws://{targetAccountId}/{targetRegion}
 ```
 
 You can now deploy by running:
 
 ```bash
-npx cdk deploy
+npm run cdk deploy
 ```
 
 > **Note**: This step duration can vary greatly, depending on the Constructs you are deploying.
@@ -163,6 +165,25 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 **Step 10.** Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`.
 
 **Step 11.** Login with the user created in **Step 8** and follow the instructions.
+
+**Step 12.** (Optional) Run the integration tests
+The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` (Claude Instant), `anthropic.claude-3-haiku-20240307-v1:0` (Claude 3 Haiku) and `amazon.titan-embed-text-v1` (Titan Embeddings G1 - Text) which need to be enabled in Bedrock.
+
+To run the tests (Replace the url with the one you used in the steps above)
+```bash
+REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/ --ignore integtests/user_interface -n 3 --dist=loadfile 
+```
+To run the UI tests, you will fist need to download and run [geckodriver](https://github.com/mozilla/geckodriver)
+```bash
+REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/user_interface 
+```
+
+## Monitoring
+
+Once the deployment is complete, a [Amazon CloudWatch Dashboard](https://console.aws.amazon.com/cloudwatch) will be available in the selected region to monitor the usage of the resources.
+
+For more information, please refer to [the monitoring page](../documentation/monitoring.md)
+
 
 ## Run user interface locally
 

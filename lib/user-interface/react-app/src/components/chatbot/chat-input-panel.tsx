@@ -50,11 +50,7 @@ import {
   ChatBotToken,
 } from "./types";
 import { sendQuery } from "../../graphql/mutations";
-import {
-  getSelectedModelMetadata,
-  getSignedUrl,
-  updateMessageHistoryRef,
-} from "./utils";
+import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
 import { receiveMessages } from "../../graphql/subscriptions";
 import { Utils } from "../../common/utils";
 
@@ -66,6 +62,7 @@ export interface ChatInputPanelProps {
   setMessageHistory: (history: ChatBotHistoryItem[]) => void;
   configuration: ChatBotConfiguration;
   setConfiguration: Dispatch<React.SetStateAction<ChatBotConfiguration>>;
+  setInitErrorMessage?: (error?: string) => void;
 }
 
 export abstract class ChatScrollState {
@@ -179,7 +176,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         });
         Promise.all([result])
           .then((x) => console.log(`Query successful`, x))
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            console.log(Utils.getErrorMessage(err));
+          });
       })
       .catch((err) => {
         console.log(err);
@@ -215,6 +214,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
       /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
       let workspacesResult: GraphQLResult<any>;
       try {
+        if (props.setInitErrorMessage) props.setInitErrorMessage(undefined);
         if (appContext?.config.rag_enabled) {
           [modelsResult, workspacesResult] = await Promise.all([
             apiClient.models.getModels(),
@@ -250,13 +250,16 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         }));
       } catch (error) {
         console.log(Utils.getErrorMessage(error));
+        if (props.setInitErrorMessage)
+          props.setInitErrorMessage(Utils.getErrorMessage(error));
         setState((state) => ({
           ...state,
           modelsStatus: "error",
         }));
+        setReadyState(ReadyState.CLOSED);
       }
     })();
-  }, [appContext, state.modelsStatus]);
+  }, [appContext, props.session.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const onWindowScroll = () => {
@@ -302,15 +305,22 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   }, [props.messageHistory]);
 
   useEffect(() => {
+    if (!appContext) return;
+
+    const apiClient = new ApiClient(appContext);
     const getSignedUrls = async () => {
       if (props.configuration?.files as ImageFile[]) {
         const files: ImageFile[] = [];
         for await (const file of props.configuration?.files ?? []) {
-          const signedUrl = await getSignedUrl(file.key);
-          files.push({
-            ...file,
-            url: signedUrl,
-          });
+          const signedUrl = (
+            await apiClient.sessions.getFileSignedUrl(file.key)
+          ).data?.getFileURL;
+          if (signedUrl) {
+            files.push({
+              ...file,
+              url: signedUrl,
+            });
+          }
         }
 
         setFiles(files);
@@ -318,9 +328,11 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     };
 
     if (props.configuration.files?.length) {
-      getSignedUrls();
+      getSignedUrls().catch((e) => {
+        console.log("Unable to get signed URL", e);
+      });
     }
-  }, [props.configuration]);
+  }, [appContext, props.configuration]);
 
   const hasImagesInChatHistory = function (): boolean {
     return (
@@ -333,7 +345,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     );
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async (): Promise<void> => {
     if (!state.selectedModel) return;
     if (props.running) return;
     if (readyState !== ReadyState.OPEN) return;
@@ -404,12 +416,21 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     props.setMessageHistory(messageHistoryRef.current);
 
-    API.graphql({
-      query: sendQuery,
-      variables: {
-        data: JSON.stringify(request),
-      },
-    });
+    try {
+      await API.graphql({
+        query: sendQuery,
+        variables: {
+          data: JSON.stringify(request),
+        },
+      });
+    } catch (err) {
+      console.log(Utils.getErrorMessage(err));
+      props.setRunning(false);
+      messageHistoryRef.current[messageHistoryRef.current.length - 1].content =
+        "**Error**, Unable to process the request: " +
+        Utils.getErrorMessage(err);
+      props.setMessageHistory(messageHistoryRef.current);
+    }
   };
 
   const connectionStatus = {
@@ -476,6 +497,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             setConfiguration={props.setConfiguration}
           />
           <TextareaAutosize
+            data-locator="prompt-input"
             className={styles.input_textarea}
             maxRows={6}
             minRows={1}
@@ -513,6 +535,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 />
               ))}
             <Button
+              data-locator="submit-prompt"
               disabled={
                 readyState !== ReadyState.OPEN ||
                 !state.models?.length ||
@@ -548,6 +571,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         >
           <Select
             disabled={props.running}
+            data-locator="select-model"
             statusType={state.modelsStatus}
             loadingText="Loading models (might take few seconds)..."
             placeholder="Select a model"

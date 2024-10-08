@@ -1,5 +1,5 @@
 import os
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from ..base import ModelAdapter
 from genai_core.registry import registry
 

@@ -8,12 +8,11 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { AuroraPgVector } from "../aurora-pgvector";
+import { AURORA_DB_USERS, AuroraPgVector } from "../aurora-pgvector";
 import { DataImport } from "../data-import";
 import { KendraRetrieval } from "../kendra-retrieval";
 import { OpenSearchVector } from "../opensearch-vector";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
-import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface DeleteWorkspaceProps {
   readonly config: SystemConfig;
@@ -26,7 +25,7 @@ export interface DeleteWorkspaceProps {
 }
 
 export class DeleteWorkspace extends Construct {
-  public readonly stateMachine?: sfn.StateMachine;
+  public readonly stateMachine: sfn.StateMachine;
 
   constructor(scope: Construct, id: string, props: DeleteWorkspaceProps) {
     super(scope, id);
@@ -39,16 +38,21 @@ export class DeleteWorkspace extends Construct {
         code: props.shared.sharedCode.bundleWithLambdaAsset(
           path.join(__dirname, "./functions/delete-workspace-workflow/delete")
         ),
+        description: "Deletes a workspace",
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         timeout: cdk.Duration.minutes(15),
-        logRetention: logs.RetentionDays.ONE_WEEK,
+        logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+        loggingFormat: lambda.LoggingFormat.JSON,
         environment: {
           ...props.shared.defaultEnvironmentVariables,
-          AURORA_DB_SECRET_ID: props.auroraPgVector?.database.secret
-            ?.secretArn as string,
+          AURORA_DB_USER: AURORA_DB_USERS.ADMIN,
+          AURORA_DB_HOST:
+            props.auroraPgVector?.database?.clusterEndpoint?.hostname ?? "",
+          AURORA_DB_PORT:
+            props.auroraPgVector?.database?.clusterEndpoint?.port + "",
           UPLOAD_BUCKET_NAME: props.dataImport.uploadBucket.bucketName,
           PROCESSING_BUCKET_NAME: props.dataImport.processingBucket.bucketName,
           WORKSPACES_TABLE_NAME:
@@ -70,7 +74,11 @@ export class DeleteWorkspace extends Construct {
     );
 
     if (props.auroraPgVector) {
-      props.auroraPgVector.database.secret?.grantRead(deleteFunction);
+      // Process will drop a table and requires Admin permission on the SQL Schema
+      props.auroraPgVector.database.grantConnect(
+        deleteFunction,
+        AURORA_DB_USERS.ADMIN
+      );
       props.auroraPgVector.database.connections.allowDefaultPortFrom(
         deleteFunction
       );
@@ -160,7 +168,11 @@ export class DeleteWorkspace extends Construct {
       .next(new sfn.Succeed(this, "Success"));
 
     const logGroup = new logs.LogGroup(this, "DeleteWorkspaceSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      retention: props.config.logRetention,
     });
 
     const stateMachine = new sfn.StateMachine(this, "DeleteWorkspace", {
@@ -173,6 +185,9 @@ export class DeleteWorkspace extends Construct {
         level: sfn.LogLevel.ALL,
       },
     });
+    if (props.shared.kmsKey) {
+      props.shared.kmsKey.grantEncryptDecrypt(stateMachine.role);
+    }
 
     this.stateMachine = stateMachine;
   }

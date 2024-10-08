@@ -1,4 +1,5 @@
 import os
+from aws_lambda_powertools import Logger
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 from .client import get_open_search_client
@@ -16,9 +17,10 @@ DOCUMENTS_TABLE_NAME = os.environ.get("DOCUMENTS_TABLE_NAME")
 WORKSPACE_OBJECT_TYPE = "workspace"
 
 dynamodb = boto3.resource("dynamodb")
+logger = Logger()
 
 
-def delete_open_search_workspace(workspace: dict):
+def delete_workspace(workspace: dict):
     workspace_id = workspace["workspace_id"]
     index_name = workspace_id.replace("-", "")
 
@@ -32,7 +34,7 @@ def delete_open_search_workspace(workspace: dict):
     client = get_open_search_client()
     if client.indices.exists(index_name):
         client.indices.delete(index=index_name)
-        print(f"Index {index_name} deleted.")
+        logger.info(f"Index {index_name} deleted.")
 
     workspaces_table = dynamodb.Table(WORKSPACES_TABLE_NAME)
     documents_table = dynamodb.Table(DOCUMENTS_TABLE_NAME)
@@ -66,14 +68,14 @@ def delete_open_search_workspace(workspace: dict):
                         "document_id": item["document_id"],
                     }
                 )
-                
-    print(f"Deleted {len(items_to_delete)} items.")
+
+    logger.info(f"Deleted {len(items_to_delete)} items.")
 
     response = workspaces_table.delete_item(
         Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
     )
 
-    print(f"Delete Item succeeded: {response}")
+    logger.info(f"Delete Item succeeded: {response}")
 
 
 def delete_open_search_document(workspace_id: str, document: dict):
@@ -108,12 +110,13 @@ def delete_open_search_document(workspace_id: str, document: dict):
                 "document_id": document_id,
             }
         )
-        print(f"Delete document succeeded: {response}")
+        logger.info(f"Delete document succeeded: {response}")
 
         updateResponse = workspaces_table.update_item(
-            Key={"workspace_id": workspace_id,
-                 "object_type": WORKSPACE_OBJECT_TYPE},
-            UpdateExpression="ADD size_in_bytes :incrementValue, documents :documentsIncrementValue, vectors :vectorsIncrementValue SET updated_at=:timestampValue",
+            Key={"workspace_id": workspace_id, "object_type": WORKSPACE_OBJECT_TYPE},
+            UpdateExpression="ADD size_in_bytes :incrementValue, "
+            + "documents :documentsIncrementValue, vectors :vectorsIncrementValue "
+            + "SET updated_at=:timestampValue",
             ExpressionAttributeValues={
                 ":incrementValue": -document_size_in_bytes,
                 ":documentsIncrementValue": -documents_diff,
@@ -122,36 +125,30 @@ def delete_open_search_document(workspace_id: str, document: dict):
             },
             ReturnValues="UPDATED_NEW",
         )
-        print(f"Workspaces table updated for the document: {updateResponse}")
+        logger.info(f"Workspaces table updated for the document: {updateResponse}")
 
     except (BotoCoreError, ClientError) as error:
-        print(f"An error occurred: {error}")
-
+        logger.error(f"An error occurred: {error}")
 
 
 def deleteOpenSearchDocument(document_id, index_name):
     client = get_open_search_client()
     if client.indices.exists(index_name):
-        search_query = {
-            "query": {
-                "match": {
-                    "document_id": document_id
-                }
-            }
-        }
+        search_query = {"query": {"match": {"document_id": document_id}}}
         from_ = 0
         batch_size = 100
         while True:
             search_response = client.search(
-                index=index_name, body=search_query, from_=from_, size=batch_size)
+                index=index_name, body=search_query, from_=from_, size=batch_size
+            )
 
-            hits = search_response['hits']['hits']
+            hits = search_response["hits"]["hits"]
             if not hits:
                 break
 
             for hit in hits:
-                client.delete(index=index_name, id=hit['_id'])
+                client.delete(index=index_name, id=hit["_id"])
 
             from_ += batch_size
 
-        print(f"Record {document_id} deleted.")
+        logger.info(f"Record {document_id} deleted.")

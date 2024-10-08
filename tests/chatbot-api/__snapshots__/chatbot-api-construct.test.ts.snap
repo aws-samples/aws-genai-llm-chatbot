@@ -2,7 +2,7 @@
 
 exports[`snapshot test 1`] = `
 {
-  "Description": "Description: (uksb-1tupboc45) (version:0.1.122) (tag:C1:0,C2:0,C3:0,C4:0,C5:0,C6:1,C7:0,C8:0) ",
+  "Description": "Description: (uksb-1tupboc45) (version:0.1.122) (tag:C1:0,C2:0,C3:0,C4:0,C5:0,C6:2,C7:0,C8:0) ",
   "Mappings": {
     "DlcRepositoryAccountMap": {
       "ap-east-1": {
@@ -85,6 +85,128 @@ exports[`snapshot test 1`] = `
       },
       "us-west-2": {
         "value": "763104351884",
+      },
+    },
+    "LatestNodeRuntimeMap": {
+      "af-south-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-east-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-3": {
+        "value": "nodejs20.x",
+      },
+      "ap-south-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-south-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-3": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-4": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-5": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-7": {
+        "value": "nodejs20.x",
+      },
+      "ca-central-1": {
+        "value": "nodejs20.x",
+      },
+      "ca-west-1": {
+        "value": "nodejs20.x",
+      },
+      "cn-north-1": {
+        "value": "nodejs18.x",
+      },
+      "cn-northwest-1": {
+        "value": "nodejs18.x",
+      },
+      "eu-central-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-central-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-isoe-west-1": {
+        "value": "nodejs18.x",
+      },
+      "eu-north-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-south-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-south-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-3": {
+        "value": "nodejs20.x",
+      },
+      "il-central-1": {
+        "value": "nodejs20.x",
+      },
+      "me-central-1": {
+        "value": "nodejs20.x",
+      },
+      "me-south-1": {
+        "value": "nodejs20.x",
+      },
+      "mx-central-1": {
+        "value": "nodejs20.x",
+      },
+      "sa-east-1": {
+        "value": "nodejs20.x",
+      },
+      "us-east-1": {
+        "value": "nodejs20.x",
+      },
+      "us-east-2": {
+        "value": "nodejs20.x",
+      },
+      "us-gov-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-gov-west-1": {
+        "value": "nodejs18.x",
+      },
+      "us-iso-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-iso-west-1": {
+        "value": "nodejs18.x",
+      },
+      "us-isob-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-west-1": {
+        "value": "nodejs20.x",
+      },
+      "us-west-2": {
+        "value": "nodejs20.x",
       },
     },
     "RagEnginesSageMakerModelImageRepositoryCfnMappingF3891114": {
@@ -188,120 +310,8 @@ exports[`snapshot test 1`] = `
         "account": "763104351884",
       },
     },
-    "ServiceprincipalMap": {
-      "af-south-1": {
-        "states": "states.af-south-1.amazonaws.com",
-      },
-      "ap-east-1": {
-        "states": "states.ap-east-1.amazonaws.com",
-      },
-      "ap-northeast-1": {
-        "states": "states.ap-northeast-1.amazonaws.com",
-      },
-      "ap-northeast-2": {
-        "states": "states.ap-northeast-2.amazonaws.com",
-      },
-      "ap-northeast-3": {
-        "states": "states.ap-northeast-3.amazonaws.com",
-      },
-      "ap-south-1": {
-        "states": "states.ap-south-1.amazonaws.com",
-      },
-      "ap-south-2": {
-        "states": "states.ap-south-2.amazonaws.com",
-      },
-      "ap-southeast-1": {
-        "states": "states.ap-southeast-1.amazonaws.com",
-      },
-      "ap-southeast-2": {
-        "states": "states.ap-southeast-2.amazonaws.com",
-      },
-      "ap-southeast-3": {
-        "states": "states.ap-southeast-3.amazonaws.com",
-      },
-      "ap-southeast-4": {
-        "states": "states.ap-southeast-4.amazonaws.com",
-      },
-      "ca-central-1": {
-        "states": "states.ca-central-1.amazonaws.com",
-      },
-      "cn-north-1": {
-        "states": "states.cn-north-1.amazonaws.com",
-      },
-      "cn-northwest-1": {
-        "states": "states.cn-northwest-1.amazonaws.com",
-      },
-      "eu-central-1": {
-        "states": "states.eu-central-1.amazonaws.com",
-      },
-      "eu-central-2": {
-        "states": "states.eu-central-2.amazonaws.com",
-      },
-      "eu-north-1": {
-        "states": "states.eu-north-1.amazonaws.com",
-      },
-      "eu-south-1": {
-        "states": "states.eu-south-1.amazonaws.com",
-      },
-      "eu-south-2": {
-        "states": "states.eu-south-2.amazonaws.com",
-      },
-      "eu-west-1": {
-        "states": "states.eu-west-1.amazonaws.com",
-      },
-      "eu-west-2": {
-        "states": "states.eu-west-2.amazonaws.com",
-      },
-      "eu-west-3": {
-        "states": "states.eu-west-3.amazonaws.com",
-      },
-      "il-central-1": {
-        "states": "states.il-central-1.amazonaws.com",
-      },
-      "me-central-1": {
-        "states": "states.me-central-1.amazonaws.com",
-      },
-      "me-south-1": {
-        "states": "states.me-south-1.amazonaws.com",
-      },
-      "sa-east-1": {
-        "states": "states.sa-east-1.amazonaws.com",
-      },
-      "us-east-1": {
-        "states": "states.us-east-1.amazonaws.com",
-      },
-      "us-east-2": {
-        "states": "states.us-east-2.amazonaws.com",
-      },
-      "us-gov-east-1": {
-        "states": "states.us-gov-east-1.amazonaws.com",
-      },
-      "us-gov-west-1": {
-        "states": "states.us-gov-west-1.amazonaws.com",
-      },
-      "us-iso-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-iso-west-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-isob-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-west-1": {
-        "states": "states.us-west-1.amazonaws.com",
-      },
-      "us-west-2": {
-        "states": "states.us-west-2.amazonaws.com",
-      },
-    },
   },
   "Outputs": {
-    "AuthenticationIdentityPoolIdB65295D6": {
-      "Value": {
-        "Ref": "AuthenticationIdentityPool98062B23",
-      },
-    },
     "AuthenticationUserPoolIdF0D106F7": {
       "Value": {
         "Ref": "AuthenticationUserPool28698864",
@@ -413,163 +423,6 @@ exports[`snapshot test 1`] = `
     },
   },
   "Resources": {
-    "AuthenticationIdentityPool98062B23": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "AllowUnauthenticatedIdentities": false,
-        "CognitoIdentityProviders": [
-          {
-            "ClientId": {
-              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
-            },
-            "ProviderName": {
-              "Fn::Join": [
-                "",
-                [
-                  "cognito-idp.",
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  ".",
-                  {
-                    "Ref": "AWS::URLSuffix",
-                  },
-                  "/",
-                  {
-                    "Ref": "AuthenticationUserPool28698864",
-                  },
-                ],
-              ],
-            },
-            "ServerSideTokenCheck": true,
-          },
-        ],
-      },
-      "Type": "AWS::Cognito::IdentityPool",
-    },
-    "AuthenticationIdentityPoolAuthenticatedRole04DA16FF": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRoleWithWebIdentity",
-              "Condition": {
-                "ForAnyValue:StringLike": {
-                  "cognito-identity.amazonaws.com:amr": "authenticated",
-                },
-                "StringEquals": {
-                  "cognito-identity.amazonaws.com:aud": {
-                    "Ref": "AuthenticationIdentityPool98062B23",
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Federated": "cognito-identity.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Description": {
-          "Fn::Join": [
-            "",
-            [
-              "Default Authenticated Role for Identity Pool ",
-              {
-                "Fn::GetAtt": [
-                  "AuthenticationIdentityPool98062B23",
-                  "Name",
-                ],
-              },
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "AuthenticationIdentityPoolDefaultRoleAttachment468E9E4F": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "IdentityPoolId": {
-          "Ref": "AuthenticationIdentityPool98062B23",
-        },
-        "Roles": {
-          "authenticated": {
-            "Fn::GetAtt": [
-              "AuthenticationIdentityPoolAuthenticatedRole04DA16FF",
-              "Arn",
-            ],
-          },
-          "unauthenticated": {
-            "Fn::GetAtt": [
-              "AuthenticationIdentityPoolUnauthenticatedRoleC08D0BC1",
-              "Arn",
-            ],
-          },
-        },
-      },
-      "Type": "AWS::Cognito::IdentityPoolRoleAttachment",
-    },
-    "AuthenticationIdentityPoolUnauthenticatedRoleC08D0BC1": {
-      "DependsOn": [
-        "AuthenticationUserPool28698864",
-        "AuthenticationUserPoolsmsRole5227CBC5",
-        "AuthenticationUserPoolUserPoolClient8AE1704E",
-      ],
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRoleWithWebIdentity",
-              "Condition": {
-                "ForAnyValue:StringLike": {
-                  "cognito-identity.amazonaws.com:amr": "unauthenticated",
-                },
-                "StringEquals": {
-                  "cognito-identity.amazonaws.com:aud": {
-                    "Ref": "AuthenticationIdentityPool98062B23",
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Federated": "cognito-identity.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Description": {
-          "Fn::Join": [
-            "",
-            [
-              "Default Unauthenticated Role for Identity Pool ",
-              {
-                "Fn::GetAtt": [
-                  "AuthenticationIdentityPool98062B23",
-                  "Name",
-                ],
-              },
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::IAM::Role",
-    },
     "AuthenticationUserPool28698864": {
       "DeletionPolicy": "Delete",
       "Metadata": {
@@ -732,13 +585,14 @@ def handler(event: dict, context):
     props = event["ResourceProperties"]
     notification_configuration = props["NotificationConfiguration"]
     managed = props.get('Managed', 'true').lower() == 'true'
+    skipDestinationValidation = props.get('SkipDestinationValidation', 'false').lower() == 'true'
     stack_id = event['StackId']
     old = event.get("OldResourceProperties", {}).get("NotificationConfiguration", {})
     if managed:
       config = handle_managed(event["RequestType"], notification_configuration)
     else:
       config = handle_unmanaged(props["BucketName"], stack_id, event["RequestType"], notification_configuration, old)
-    s3.put_bucket_notification_configuration(Bucket=props["BucketName"], NotificationConfiguration=config)
+    s3.put_bucket_notification_configuration(Bucket=props["BucketName"], NotificationConfiguration=config, SkipDestinationValidation=skipDestinationValidation)
   except Exception as e:
     logging.exception("Failed to put bucket notification configuration")
     response_status = "FAILED"
@@ -752,17 +606,20 @@ def handle_managed(request_type, notification_configuration):
   return notification_configuration
 
 def handle_unmanaged(bucket, stack_id, request_type, notification_configuration, old):
+  def get_id(n):
+    n['Id'] = ''
+    strToHash=json.dumps(n, sort_keys=True).replace('"Name": "prefix"', '"Name": "Prefix"').replace('"Name": "suffix"', '"Name": "Suffix"')
+    return f"{stack_id}-{hash(strToHash)}"
   def with_id(n):
-    n['Id'] = f"{stack_id}-{hash(json.dumps(n, sort_keys=True))}"
+    n['Id'] = get_id(n)
     return n
 
   external_notifications = {}
   existing_notifications = s3.get_bucket_notification_configuration(Bucket=bucket)
   for t in CONFIGURATION_TYPES:
     if request_type == 'Update':
-        ids = [with_id(n) for n in old.get(t, [])]
-        old_incoming_ids = [n['Id'] for n in ids]
-        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'] in old_incoming_ids]
+        old_incoming_ids = [get_id(n) for n in old.get(t, [])]
+        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not get_id(n) in old_incoming_ids]      
     elif request_type == 'Delete':
         external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f"{stack_id}-")]
     elif request_type == 'Create':
@@ -805,8 +662,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       print(response.read().decode("utf-8"))
     print("Status code: " + response.reason)
   except Exception as e:
-      print("send(..) failed executing request.urlopen(..): " + str(e))
-",
+      print("send(..) failed executing request.urlopen(..): " + str(e))",
         },
         "Description": "AWS CloudFormation handler for "Custom::S3BucketNotifications" resources (@aws-cdk/aws-s3)",
         "Handler": "index.handler",
@@ -879,6 +735,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "AccelerateConfiguration": {
           "AccelerationStatus": "Enabled",
         },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "CorsConfiguration": {
           "CorsRules": [
             {
@@ -918,6 +783,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -1041,6 +909,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -1060,6 +937,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -1191,6 +1071,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     "ChatBotApiConstructChatBucketsUserFeedbackBucketFAFD14AB": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "ChatBotApiConstructChatBucketsLogsBucket1B8722C1",
@@ -1208,6 +1097,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -1352,19 +1244,8 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           {
             "AuthenticationType": "AWS_IAM",
           },
-          {
-            "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
-            "UserPoolConfig": {
-              "AwsRegion": {
-                "Ref": "AWS::Region",
-              },
-              "UserPoolId": {
-                "Ref": "AuthenticationUserPool28698864",
-              },
-            },
-          },
         ],
-        "AuthenticationType": "API_KEY",
+        "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
         "LogConfig": {
           "CloudWatchLogsRoleArn": {
             "Fn::GetAtt": [
@@ -1372,27 +1253,22 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               "Arn",
             ],
           },
-          "FieldLogLevel": "ALL",
+          "FieldLogLevel": "INFO",
         },
         "Name": "ChatbotGraphqlApi",
+        "UserPoolConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region",
+          },
+          "DefaultAction": "ALLOW",
+          "UserPoolId": {
+            "Ref": "AuthenticationUserPool28698864",
+          },
+        },
         "Visibility": "PRIVATE",
-        "XrayEnabled": true,
+        "XrayEnabled": false,
       },
       "Type": "AWS::AppSync::GraphQLApi",
-    },
-    "ChatBotApiConstructChatbotApiDefaultApiKeyB909A7CF": {
-      "DependsOn": [
-        "ChatBotApiConstructChatbotApiSchema07900657",
-      ],
-      "Properties": {
-        "ApiId": {
-          "Fn::GetAtt": [
-            "ChatBotApiConstructChatbotApi21E23C68",
-            "ApiId",
-          ],
-        },
-      },
-      "Type": "AWS::AppSync::ApiKey",
     },
     "ChatBotApiConstructChatbotApiLogRetentionCF5F6908": {
       "Properties": {
@@ -1451,6 +1327,13 @@ input CreateWorkspaceKendraInput {
   kind: String!
   kendraIndexId: String!
   useAllData: Boolean!
+}
+
+input CreateWorkspaceBedrockKBInput {
+  name: String!
+  kind: String!
+  knowledgeBaseId: String!
+  hybridSearch: Boolean!
 }
 
 input CreateWorkspaceOpenSearchInput {
@@ -1554,7 +1437,7 @@ type EmbeddingModel @aws_cognito_user_pools {
 }
 
 input FileUploadInput {
-  workspaceId: String!
+  workspaceId: String
   fileName: String!
 }
 
@@ -1575,6 +1458,12 @@ input GetRSSPostsInput {
 }
 
 type KendraIndex @aws_cognito_user_pools {
+  id: String!
+  name: String!
+  external: Boolean!
+}
+
+type BedrockKB @aws_cognito_user_pools {
   id: String!
   name: String!
   external: Boolean!
@@ -1732,6 +1621,8 @@ type Workspace @aws_cognito_user_pools {
   kendraIndexId: String
   kendraIndexExternal: Boolean
   kendraUseAllData: Boolean
+  knowledgeBaseId: String
+  knowledgeBaseExternal: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -1744,6 +1635,8 @@ type Channel @aws_iam @aws_cognito_user_pools {
 
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
+    @aws_cognito_user_pools
+  createBedrockKBWorkspace(input: CreateWorkspaceBedrockKBInput!): Workspace!
     @aws_cognito_user_pools
   createOpenSearchWorkspace(input: CreateWorkspaceOpenSearchInput!): Workspace!
     @aws_cognito_user_pools
@@ -1776,6 +1669,8 @@ type Query {
   checkHealth: Boolean @aws_cognito_user_pools
   getUploadFileURL(input: FileUploadInput!): FileUploadResult
     @aws_cognito_user_pools
+  getFileURL(fileName: String!): String
+    @aws_cognito_user_pools
   listModels: [Model!]! @aws_cognito_user_pools
   listWorkspaces: [Workspace!]! @aws_cognito_user_pools
   getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools
@@ -1788,6 +1683,7 @@ type Query {
     @aws_cognito_user_pools
   getSession(id: String!): Session @aws_cognito_user_pools
   listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools
+  listBedrockKnowledgeBases: [BedrockKB!]! @aws_cognito_user_pools
   isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools
   listDocuments(input: ListDocumentsInput!): DocumentsResult!
     @aws_cognito_user_pools
@@ -1965,6 +1861,25 @@ schema {
       },
       "Type": "AWS::AppSync::Resolver",
     },
+    "ChatBotApiConstructChatbotApicreateBedrockKBWorkspaceresolverC35C5AB8": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "createBedrockKBWorkspace",
+        "Kind": "UNIT",
+        "TypeName": "Mutation",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
     "ChatBotApiConstructChatbotApicreateKendraWorkspaceresolver03A533E2": {
       "DependsOn": [
         "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
@@ -2098,6 +2013,25 @@ schema {
       },
       "Type": "AWS::AppSync::Resolver",
     },
+    "ChatBotApiConstructChatbotApigetFileURLresolver3FBFB9AC": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "getFileURL",
+        "Kind": "UNIT",
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
     "ChatBotApiConstructChatbotApigetRSSPostsresolverFF07D9C6": {
       "DependsOn": [
         "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
@@ -2188,6 +2122,25 @@ schema {
         },
         "DataSourceName": "proxyResolverFunction",
         "FieldName": "isKendraDataSynching",
+        "Kind": "UNIT",
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "ChatBotApiConstructChatbotApilistBedrockKnowledgeBasesresolver6F8C3883": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "listBedrockKnowledgeBases",
         "Kind": "UNIT",
         "TypeName": "Query",
       },
@@ -2711,6 +2664,9 @@ schema {
           ],
         },
       },
+      "Properties": {
+        "TracingConfig": "PassThrough",
+      },
       "Type": "AWS::SNS::Topic",
     },
     "ChatBotApiConstructRealtimeOutgoingMessagesDLQA7E125CC": {
@@ -2876,8 +2832,15 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Appsync resolver handling LLM Queries",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
+            "LOG_LEVEL": "INFO",
+            "POWERTOOLS_DEV": "false",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
+            "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "SNS_TOPIC_ARN": {
               "Ref": "ChatBotApiConstructRealtimeMessagesTopic85DE37B6",
             },
@@ -2902,6 +2865,9 @@ schema {
             ],
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "ChatBotApiConstructRealtimeResolverslambdaresolverServiceRoleB83D9D98",
@@ -3046,14 +3012,21 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Sends LLM Responses to Appsync",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "GRAPHQL_ENDPOINT": {
               "Fn::GetAtt": [
                 "ChatBotApiConstructChatbotApi21E23C68",
                 "GraphQLUrl",
               ],
             },
+            "LOG_LEVEL": "INFO",
+            "POWERTOOLS_DEV": "false",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
+            "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
           },
         },
         "Handler": "index.handler",
@@ -3071,6 +3044,9 @@ schema {
             ],
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "ChatBotApiConstructRealtimeResolversoutgoingmessagehandlerServiceRoleBD2EC7CC",
@@ -3294,13 +3270,28 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Main Appsync resolver",
         "Environment": {
           "Variables": {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
+            },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_read",
+            "AWS_XRAY_SDK_ENABLED": "false",
+            "CHATBOT_FILES_BUCKET_NAME": {
+              "Ref": "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
             },
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
@@ -3355,12 +3346,18 @@ schema {
               ],
             },
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
-            "RSS_FEED_INGESTOR_FUNCTION": "",
+            "RSS_FEED_INGESTOR_FUNCTION": {
+              "Fn::GetAtt": [
+                "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                "Arn",
+              ],
+            },
             "SAGEMAKER_RAG_MODELS_ENDPOINT": {
               "Fn::GetAtt": [
                 "RagEnginesSageMakerModelMultiAB24AEndpoint6DA7D681",
@@ -3411,6 +3408,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -3420,9 +3420,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 600,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
         "VpcConfig": {
           "SecurityGroupIds": [
             {
@@ -3534,14 +3531,6 @@ schema {
           "Statement": [
             {
               "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
-              "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
@@ -3619,13 +3608,60 @@ schema {
               ],
             },
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "RagEnginesDataImportRssSubscriptionRssIngestorC19E7D9E",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
               ],
+            },
+            {
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_read",
+                  ],
+                ],
               },
             },
             {
@@ -3773,6 +3809,13 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Ref": "ModelsamazonFalconLiteendpointFalconLite71C23411",
+              },
+            },
+            {
+              "Action": "sagemaker:InvokeEndpoint",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ModelsHuggingFaceM4idefics80binstructendpointIDEFICS80BBC34A48F",
               },
             },
             {
@@ -3960,6 +4003,43 @@ schema {
               "Resource": [
                 {
                   "Fn::GetAtt": [
+                    "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
                     "RagEnginesDataImportUploadBucket061D697E",
                     "Arn",
                   ],
@@ -4110,7 +4190,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "python3.9",
+        "Runtime": "python3.11",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -4271,7 +4351,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -4317,7 +4405,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -4391,6 +4487,29 @@ schema {
             "ModelName": {
               "Fn::GetAtt": [
                 "ModelsamazonFalconLitemodelFalconLiteA0714F90",
+                "ModelName",
+              ],
+            },
+            "VariantName": "AllTraffic",
+          },
+        ],
+      },
+      "Type": "AWS::SageMaker::EndpointConfig",
+    },
+    "ModelsEndpointConfigIDEFICS80B8A31DDC6": {
+      "DependsOn": [
+        "ModelsHuggingFaceM4idefics80binstructmodelIDEFICS80B1F09D07D",
+      ],
+      "Properties": {
+        "ProductionVariants": [
+          {
+            "ContainerStartupHealthCheckTimeoutInSeconds": 600,
+            "InitialInstanceCount": 1,
+            "InitialVariantWeight": 1,
+            "InstanceType": "ml.g5.48xlarge",
+            "ModelName": {
+              "Fn::GetAtt": [
+                "ModelsHuggingFaceM4idefics80binstructmodelIDEFICS80B1F09D07D",
                 "ModelName",
               ],
             },
@@ -4514,10 +4633,220 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "ModelsHuggingFaceM4idefics80binstructendpointIDEFICS80BBC34A48F": {
+      "DependsOn": [
+        "ModelsEndpointConfigIDEFICS80B8A31DDC6",
+      ],
+      "Properties": {
+        "EndpointConfigName": {
+          "Fn::GetAtt": [
+            "ModelsEndpointConfigIDEFICS80B8A31DDC6",
+            "EndpointConfigName",
+          ],
+        },
+        "EndpointName": "HuggingFaceM4-idefics-80b-instruct",
+        "Tags": [
+          {
+            "Key": "modelId",
+            "Value": "HuggingFaceM4/idefics-80b-instruct",
+          },
+        ],
+      },
+      "Type": "AWS::SageMaker::Endpoint",
+    },
+    "ModelsHuggingFaceM4idefics80binstructmodelIDEFICS80B1F09D07D": {
+      "Properties": {
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ModelsIDEFICS80BRole5BE23C49",
+            "Arn",
+          ],
+        },
+        "PrimaryContainer": {
+          "Environment": {
+            "HF_MODEL_ID": "HuggingFaceM4/idefics-80b-instruct",
+            "HF_MODEL_QUANTIZE": "bitsandbytes",
+            "MAX_BATCH_TOTAL_TOKENS": "8192",
+            "MAX_INPUT_LENGTH": "1024",
+            "MAX_TOTAL_TOKENS": "2048",
+            "SAGEMAKER_CONTAINER_LOG_LEVEL": "20",
+            "SAGEMAKER_REGION": {
+              "Ref": "AWS::Region",
+            },
+            "SM_NUM_GPUS": "8",
+          },
+          "Image": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::FindInMap": [
+                    "DlcRepositoryAccountMap",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    "value",
+                  ],
+                },
+                ".dkr.ecr.",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/huggingface-pytorch-tgi-inference:2.0.1-tgi1.1.0-gpu-py39-cu118-ubuntu20.04",
+              ],
+            ],
+          },
+          "Mode": "SingleModel",
+        },
+        "Tags": [
+          {
+            "Key": "modelId",
+            "Value": "HuggingFaceM4/idefics-80b-instruct",
+          },
+        ],
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "SharedVPC6716DA5E",
+                "DefaultSecurityGroup",
+              ],
+            },
+          ],
+          "Subnets": [
+            {
+              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::SageMaker::Model",
+    },
+    "ModelsIDEFICS80BRole5BE23C49": {
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-IAM4",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+            {
+              "id": "AwsSolutions-IAM5",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sagemaker.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSageMakerFullAccess",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ModelsIDEFICS80BRoleDefaultPolicy33F8A86E": {
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-IAM4",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+            {
+              "id": "AwsSolutions-IAM5",
+              "reason": "Gives user ability to deploy and delete endpoints from the UI.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ecr:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Fn::FindInMap": [
+                        "DlcRepositoryAccountMap",
+                        {
+                          "Ref": "AWS::Region",
+                        },
+                        "value",
+                      ],
+                    },
+                    ":repository/huggingface-pytorch-tgi-inference",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ModelsIDEFICS80BRoleDefaultPolicy33F8A86E",
+        "Roles": [
+          {
+            "Ref": "ModelsIDEFICS80BRole5BE23C49",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "ModelsModelsParameter4A14799B": {
       "Properties": {
         "Type": "String",
-        "Value": "[{"name":"amazon-FalconLite","endpoint":"amazon-FalconLite","responseStreamingSupported":false,"inputModalities":["TEXT"],"outputModalities":["TEXT"],"interface":"langchain","ragSupported":true}]",
+        "Value": "[{"name":"amazon-FalconLite","endpoint":"amazon-FalconLite","responseStreamingSupported":false,"inputModalities":["TEXT"],"outputModalities":["TEXT"],"interface":"langchain","ragSupported":true},{"name":"HuggingFaceM4-idefics-80b-instruct","endpoint":"HuggingFaceM4-idefics-80b-instruct","responseStreamingSupported":false,"inputModalities":["TEXT","IMAGE"],"outputModalities":["TEXT"],"interface":"multimodal","ragSupported":false}]",
       },
       "Type": "AWS::SSM::Parameter",
     },
@@ -4639,6 +4968,7 @@ schema {
         },
       },
       "Properties": {
+        "BackupRetentionPeriod": 35,
         "CopyTagsToSnapshot": true,
         "DBClusterParameterGroupName": "default.aurora-postgresql15",
         "DBSubnetGroupName": {
@@ -4646,7 +4976,7 @@ schema {
         },
         "EnableIAMDatabaseAuthentication": true,
         "Engine": "aurora-postgresql",
-        "EngineVersion": "15.3",
+        "EngineVersion": "15.7",
         "MasterUserPassword": {
           "Fn::Join": [
             "",
@@ -4833,9 +5163,9 @@ schema {
       },
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
-    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup83AAAE44IndirectPort4B2D0B28": {
+    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupB72DF80DIndirectPort533F0865": {
       "Properties": {
-        "Description": "from RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup83AAAE44:{IndirectPort}",
+        "Description": "from RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupB72DF80D:{IndirectPort}",
         "FromPort": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -4851,7 +5181,7 @@ schema {
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
           "Fn::GetAtt": [
-            "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup1D51AC8A",
+            "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupDBC1F0DD",
             "GroupId",
           ],
         },
@@ -4864,9 +5194,9 @@ schema {
       },
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
-    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup3E85B007IndirectPort088D32B1": {
+    "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup485782FFIndirectPort3EC7335D": {
       "Properties": {
-        "Description": "from RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup3E85B007:{IndirectPort}",
+        "Description": "from RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup485782FF:{IndirectPort}",
         "FromPort": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -4882,7 +5212,7 @@ schema {
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
           "Fn::GetAtt": [
-            "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup9851CDD2",
+            "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup1141A545",
             "GroupId",
           ],
         },
@@ -5086,15 +5416,28 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Creates Aurora workspace",
         "Environment": {
           "Variables": {
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_admin",
+            "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME": "by_object_type_idx",
             "WORKSPACES_TABLE_NAME": {
               "Ref": "RagEnginesRagDynamoDBTablesWorkspacesD2D3C0C4",
@@ -5123,6 +5466,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceFunctionServiceRole11C35928",
@@ -5263,13 +5609,34 @@ schema {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_admin",
+                  ],
+                ],
               },
             },
             {
@@ -5339,15 +5706,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -5449,6 +5808,37 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "RagEnginesAuroraPgVectorDatabaseSetupExtensionsAndUsers22702371": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecretBF0EF63E",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromChatBotApiConstructRestApiApiSecurityGroup5956F387IndirectPort6F9024AE",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceFunctionSecurityGroup90937669IndirectPortF35F96D5",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesAuroraPgVectorDatabaseSetupFunctionSecurityGroup868747A2IndirectPort6045707A",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupB72DF80DIndirectPort533F0865",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup485782FFIndirectPort3EC7335D",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionSecurityGroup6310BD77IndirectPortCDECACF4",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionSecurityGroup631ABE4DIndirectPort8FC2076C",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroup333F94D8",
+        "RagEnginesAuroraPgVectorAuroraDatabaseServerlessInstance42B5CDC1",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSubnets038B8C27",
+      ],
+      "Properties": {
+        "AURORA_DB_SECRET_ID": {
+          "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEvent66CC77D0",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
     "RagEnginesAuroraPgVectorDatabaseSetupFunction3EAE1D9D": {
       "DependsOn": [
         "RagEnginesAuroraPgVectorDatabaseSetupFunctionServiceRoleDefaultPolicy526D1214",
@@ -5468,12 +5858,15 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Users and PGVector setup",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
           },
         },
         "Handler": "index.lambda_handler",
@@ -5498,6 +5891,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorDatabaseSetupFunctionServiceRole09B67CA3",
@@ -5693,7 +6089,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -5835,36 +6239,53 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
-    "RagEnginesAuroraPgVectorDatabaseSetupResourceCBEE6E4D": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecretBF0EF63E",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromChatBotApiConstructRestApiApiSecurityGroup5956F387IndirectPort6F9024AE",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceFunctionSecurityGroup90937669IndirectPortF35F96D5",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesAuroraPgVectorDatabaseSetupFunctionSecurityGroup868747A2IndirectPort6045707A",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup83AAAE44IndirectPort4B2D0B28",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup3E85B007IndirectPort088D32B1",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionSecurityGroup6310BD77IndirectPortCDECACF4",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromRagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionSecurityGroup631ABE4DIndirectPort8FC2076C",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroup333F94D8",
-        "RagEnginesAuroraPgVectorAuroraDatabaseServerlessInstance42B5CDC1",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSubnets038B8C27",
-      ],
+    "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentA4E537F2": {
       "Properties": {
-        "AURORA_DB_SECRET_ID": {
-          "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEvent66CC77D0",
-            "Arn",
+        "ComputeResources": {
+          "MaxvCpus": 256,
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupDBC1F0DD",
+                "GroupId",
+              ],
+            },
           ],
+          "Subnets": [
+            {
+              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
+            },
+          ],
+          "Type": "FARGATE",
+          "UpdateToLatestImageVersion": true,
+        },
+        "ReplaceComputeEnvironment": true,
+        "State": "ENABLED",
+        "Type": "managed",
+        "UpdatePolicy": {
+          "JobExecutionTimeoutMinutes": 30,
         },
       },
-      "Type": "AWS::CloudFormation::CustomResource",
-      "UpdateReplacePolicy": "Delete",
+      "Type": "AWS::Batch::ComputeEnvironment",
+    },
+    "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupDBC1F0DD": {
+      "Properties": {
+        "GroupDescription": "Default/RagEngines/DataImport/FileImportBatchJob/FargateComputeEnvironment/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "SharedVPC6716DA5E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "RagEnginesDataImportFileImportBatchJobFileImportContainerExecutionRoleDEA643AB": {
       "Properties": {
@@ -5985,9 +6406,25 @@ schema {
               },
             },
             {
-              "Name": "AURORA_DB_SECRET_ID",
+              "Name": "AURORA_DB_USER",
+              "Value": "aurora_db_iam_write",
+            },
+            {
+              "Name": "AURORA_DB_HOST",
               "Value": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Address",
+                ],
+              },
+            },
+            {
+              "Name": "AURORA_DB_PORT",
+              "Value": {
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Port",
+                ],
               },
             },
             {
@@ -6035,12 +6472,16 @@ schema {
               },
             },
           ],
+          "EphemeralStorage": {
+            "SizeInGiB": 40,
+          },
           "ExecutionRoleArn": {
             "Fn::GetAtt": [
               "RagEnginesDataImportFileImportBatchJobFileImportContainerExecutionRoleDEA643AB",
               "Arn",
             ],
           },
+          "FargatePlatformConfiguration": {},
           "Image": [
             "Dummy",
           ],
@@ -6050,20 +6491,24 @@ schema {
               "Arn",
             ],
           },
+          "NetworkConfiguration": {
+            "AssignPublicIp": "DISABLED",
+          },
           "ReadonlyRootFilesystem": false,
           "ResourceRequirements": [
             {
               "Type": "MEMORY",
-              "Value": "2048",
+              "Value": "4096",
             },
             {
               "Type": "VCPU",
               "Value": "2",
             },
           ],
+          "RuntimePlatform": {},
         },
         "PlatformCapabilities": [
-          "EC2",
+          "FARGATE",
         ],
         "RetryStrategy": {
           "Attempts": 3,
@@ -6333,13 +6778,34 @@ schema {
               ],
             },
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_write",
+                  ],
+                ],
               },
             },
             {
@@ -6392,7 +6858,7 @@ schema {
           {
             "ComputeEnvironment": {
               "Fn::GetAtt": [
-                "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentB41D1F13",
+                "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentA4E537F2",
                 "ComputeEnvironmentArn",
               ],
             },
@@ -6403,107 +6869,6 @@ schema {
         "State": "ENABLED",
       },
       "Type": "AWS::Batch::JobQueue",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentB41D1F13": {
-      "Properties": {
-        "ComputeResources": {
-          "AllocationStrategy": "BEST_FIT_PROGRESSIVE",
-          "InstanceRole": {
-            "Fn::GetAtt": [
-              "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileB38E049C",
-              "Arn",
-            ],
-          },
-          "InstanceTypes": [
-            "m6a.large",
-            "optimal",
-          ],
-          "MaxvCpus": 4,
-          "MinvCpus": 0,
-          "SecurityGroupIds": [
-            {
-              "Fn::GetAtt": [
-                "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup1D51AC8A",
-                "GroupId",
-              ],
-            },
-          ],
-          "Subnets": [
-            {
-              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
-            },
-            {
-              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
-            },
-          ],
-          "Type": "EC2",
-          "UpdateToLatestImageVersion": true,
-        },
-        "ReplaceComputeEnvironment": true,
-        "State": "ENABLED",
-        "Type": "managed",
-        "UpdatePolicy": {
-          "JobExecutionTimeoutMinutes": 30,
-        },
-      },
-      "Type": "AWS::Batch::ComputeEnvironment",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileB38E049C": {
-      "Properties": {
-        "Roles": [
-          {
-            "Ref": "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileRole6292FF8B",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::InstanceProfile",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentInstanceProfileRole6292FF8B": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "ec2.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
-              ],
-            ],
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "RagEnginesDataImportFileImportBatchJobManagedEc2EcsComputeEnvironmentSecurityGroup1D51AC8A": {
-      "Properties": {
-        "GroupDescription": "Default/RagEngines/DataImport/FileImportBatchJob/ManagedEc2EcsComputeEnvironment/SecurityGroup",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow all outbound traffic by default",
-            "IpProtocol": "-1",
-          },
-        ],
-        "VpcId": {
-          "Ref": "SharedVPC6716DA5E",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
     },
     "RagEnginesDataImportFileImportWorkflowFileImportSMLogGroupACEA6D66": {
       "DeletionPolicy": "Delete",
@@ -6595,15 +6960,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -6824,6 +7181,15 @@ schema {
     "RagEnginesDataImportProcessingBucketA7BE9701": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "RagEnginesDataImportProcessingLogsBucketB9FC694F",
@@ -6841,6 +7207,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -6983,6 +7352,15 @@ schema {
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -7002,6 +7380,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -7113,7 +7494,7 @@ schema {
     },
     "RagEnginesDataImportRssSubscriptionCrawlQueuedRssPostsScheduleRuleD709D79A": {
       "Properties": {
-        "ScheduleExpression": "rate(10 minutes)",
+        "ScheduleExpression": "rate(5 minutes)",
         "State": "ENABLED",
         "Targets": [
           {
@@ -7147,6 +7528,7 @@ schema {
         "Description": "Retrieves the latest data from the RSS Feed and adds any newly found posts to be queued for Website Crawling",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -7157,8 +7539,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME": "by_object_type_idx",
             "WORKSPACES_TABLE_NAME": {
               "Ref": "RagEnginesRagDynamoDBTablesWorkspacesD2D3C0C4",
@@ -7187,6 +7570,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -7196,9 +7582,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 900,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -7260,14 +7643,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": [
                 "ssm:DescribeParameters",
@@ -7408,6 +7783,7 @@ schema {
         "Description": "Functions polls the RSS items for pending urls and invokes Website crawler inference. Max of 10 URLs per invoke.",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -7418,8 +7794,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -7454,6 +7831,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -7463,9 +7843,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 300,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
         "VpcConfig": {
           "SecurityGroupIds": [
             {
@@ -7486,6 +7863,35 @@ schema {
         },
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "RagEnginesDataImportRssSubscriptioncrawlQueuedRssPostsFunctionLogRetention98BE58FB": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+      ],
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "RagEnginesDataImportRssSubscriptioncrawlQueuedRssPostsFunction7348FF25",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 7,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
     },
     "RagEnginesDataImportRssSubscriptioncrawlQueuedRssPostsFunctionSecurityGroupF06E23E0": {
       "DependsOn": [
@@ -7568,14 +7974,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -7760,6 +8158,7 @@ schema {
         "Description": "Invokes RSS Feed Ingestors for each Subscribed RSS Feed",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -7770,8 +8169,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -7806,6 +8206,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -7815,9 +8218,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 15,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -7916,14 +8316,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
@@ -8035,6 +8427,15 @@ schema {
         "AccelerateConfiguration": {
           "AccelerationStatus": "Enabled",
         },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "CorsConfiguration": {
           "CorsRules": [
             {
@@ -8074,6 +8475,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -8140,6 +8544,7 @@ schema {
             "Arn",
           ],
         },
+        "SkipDestinationValidation": false,
       },
       "Type": "Custom::S3BucketNotifications",
     },
@@ -8248,11 +8653,13 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Data Import upload handler",
         "Environment": {
           "Variables": {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
+            "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
             },
@@ -8268,8 +8675,9 @@ schema {
             },
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -8310,6 +8718,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -8319,9 +8730,6 @@ schema {
         },
         "Runtime": "python3.11",
         "Timeout": 900,
-        "TracingConfig": {
-          "Mode": "Active",
-        },
         "VpcConfig": {
           "SecurityGroupIds": [
             {
@@ -8453,14 +8861,6 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -8761,6 +9161,15 @@ schema {
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -8780,6 +9189,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -8985,6 +9397,54 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentC972B00C": {
+      "Properties": {
+        "ComputeResources": {
+          "MaxvCpus": 256,
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup1141A545",
+                "GroupId",
+              ],
+            },
+          ],
+          "Subnets": [
+            {
+              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
+            },
+          ],
+          "Type": "FARGATE",
+          "UpdateToLatestImageVersion": true,
+        },
+        "ReplaceComputeEnvironment": true,
+        "State": "ENABLED",
+        "Type": "managed",
+        "UpdatePolicy": {
+          "JobExecutionTimeoutMinutes": 30,
+        },
+      },
+      "Type": "AWS::Batch::ComputeEnvironment",
+    },
+    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup1141A545": {
+      "Properties": {
+        "GroupDescription": "Default/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerFargateComputeEnvironment/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "SharedVPC6716DA5E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
     "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerJobDC22C303": {
       "Properties": {
         "ContainerProperties": {
@@ -9008,9 +9468,25 @@ schema {
               },
             },
             {
-              "Name": "AURORA_DB_SECRET_ID",
+              "Name": "AURORA_DB_USER",
+              "Value": "aurora_db_iam_write",
+            },
+            {
+              "Name": "AURORA_DB_HOST",
               "Value": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Address",
+                ],
+              },
+            },
+            {
+              "Name": "AURORA_DB_PORT",
+              "Value": {
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Port",
+                ],
               },
             },
             {
@@ -9064,6 +9540,7 @@ schema {
               "Arn",
             ],
           },
+          "FargatePlatformConfiguration": {},
           "Image": [
             "Dummy",
           ],
@@ -9073,20 +9550,24 @@ schema {
               "Arn",
             ],
           },
+          "NetworkConfiguration": {
+            "AssignPublicIp": "DISABLED",
+          },
           "ReadonlyRootFilesystem": false,
           "ResourceRequirements": [
             {
               "Type": "MEMORY",
-              "Value": "2048",
+              "Value": "4096",
             },
             {
               "Type": "VCPU",
               "Value": "2",
             },
           ],
+          "RuntimePlatform": {},
         },
         "PlatformCapabilities": [
-          "EC2",
+          "FARGATE",
         ],
         "RetryStrategy": {
           "Attempts": 3,
@@ -9112,7 +9593,7 @@ schema {
           {
             "ComputeEnvironment": {
               "Fn::GetAtt": [
-                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentA32238DF",
+                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentC972B00C",
                 "ComputeEnvironmentArn",
               ],
             },
@@ -9323,13 +9804,34 @@ schema {
               ],
             },
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_write",
+                  ],
+                ],
               },
             },
             {
@@ -9425,107 +9927,6 @@ schema {
       },
       "Type": "AWS::IAM::Role",
     },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentA32238DF": {
-      "Properties": {
-        "ComputeResources": {
-          "AllocationStrategy": "BEST_FIT_PROGRESSIVE",
-          "InstanceRole": {
-            "Fn::GetAtt": [
-              "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfile38D79E54",
-              "Arn",
-            ],
-          },
-          "InstanceTypes": [
-            "m6a.large",
-            "optimal",
-          ],
-          "MaxvCpus": 4,
-          "MinvCpus": 0,
-          "SecurityGroupIds": [
-            {
-              "Fn::GetAtt": [
-                "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup9851CDD2",
-                "GroupId",
-              ],
-            },
-          ],
-          "Subnets": [
-            {
-              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
-            },
-            {
-              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
-            },
-          ],
-          "Type": "EC2",
-          "UpdateToLatestImageVersion": true,
-        },
-        "ReplaceComputeEnvironment": true,
-        "State": "ENABLED",
-        "Type": "managed",
-        "UpdatePolicy": {
-          "JobExecutionTimeoutMinutes": 30,
-        },
-      },
-      "Type": "AWS::Batch::ComputeEnvironment",
-    },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfile38D79E54": {
-      "Properties": {
-        "Roles": [
-          {
-            "Ref": "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfileRole951949EE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::InstanceProfile",
-    },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentInstanceProfileRole951949EE": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "ec2.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
-              ],
-            ],
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "RagEnginesDataImportWebCrawlerBatchJobWebCrawlerManagedEc2EcsComputeEnvironmentSecurityGroup9851CDD2": {
-      "Properties": {
-        "GroupDescription": "Default/RagEngines/DataImport/WebCrawlerBatchJob/WebCrawlerManagedEc2EcsComputeEnvironment/SecurityGroup",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow all outbound traffic by default",
-            "IpProtocol": "-1",
-          },
-        ],
-        "VpcId": {
-          "Ref": "SharedVPC6716DA5E",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
-    },
     "RagEnginesDataImportWebsiteCrawlingWorkflowWebsiteCrawling9B1CEC96": {
       "DeletionPolicy": "Delete",
       "DependsOn": [
@@ -9616,15 +10017,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -9807,15 +10200,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -9927,6 +10312,15 @@ schema {
     "RagEnginesKendraRetrievalKendraDataBucket1627A447": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "RagEnginesKendraRetrievalLogsBucket7EEBA031",
@@ -9944,6 +10338,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -10176,6 +10573,15 @@ schema {
       "DeletionPolicy": "Delete",
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -10195,6 +10601,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -10306,7 +10715,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicycreateworkflowCF675858": {
       "Properties": {
-        "Name": "prefix-access-policy-create-work",
+        "Name": "prefix-create-workflow-access-po",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10328,7 +10737,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicydeletedocumentE38B92A9": {
       "Properties": {
-        "Name": "prefix-access-policy-delete-docu",
+        "Name": "prefix-delete-document-access-po",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10350,7 +10759,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicydeleteworkspaceB7671EBB": {
       "Properties": {
-        "Name": "prefix-access-policy-delete-work",
+        "Name": "prefix-delete-workspace-access-p",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10372,7 +10781,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicyfileimportjob36E505CB": {
       "Properties": {
-        "Name": "prefix-access-policy-file-import",
+        "Name": "prefix-file-import-job-access-po",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10394,7 +10803,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicygraphqlapi1D6DC8C2": {
       "Properties": {
-        "Name": "prefix-access-policy-graphql-api",
+        "Name": "prefix-graphql-api-access-policy",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10416,7 +10825,7 @@ schema {
     },
     "RagEnginesOpenSearchVectorAccessPolicywebcrawlerjobBB1BFE70": {
       "Properties": {
-        "Name": "prefix-access-policy-web-crawler",
+        "Name": "prefix-web-crawler-job-access-po",
         "Policy": {
           "Fn::Join": [
             "",
@@ -10533,8 +10942,10 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Creates the Open Search workspace",
         "Environment": {
           "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "OPEN_SEARCH_COLLECTION_ENDPOINT": {
               "Fn::GetAtt": [
@@ -10545,8 +10956,9 @@ schema {
             "OPEN_SEARCH_COLLECTION_ENDPOINT_PORT": "443",
             "OPEN_SEARCH_COLLECTION_NAME": "prefix-genaichatbot-workspac",
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME": "by_object_type_idx",
             "WORKSPACES_TABLE_NAME": {
               "Ref": "RagEnginesRagDynamoDBTablesWorkspacesD2D3C0C4",
@@ -10575,6 +10987,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesOpenSearchVectorCreateOpenSearchWorkspaceCreateOpenSearchWorkspaceFunctionServiceRole61F3024C",
@@ -10795,15 +11210,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -11179,6 +11586,15 @@ schema {
     "RagEnginesSageMakerModelMultiAB24ABucketF09A69F9": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "RagEnginesSageMakerModelMultiAB24ALogsBucket1624BE94",
@@ -11204,6 +11620,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -11663,7 +12082,11 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Checks the completion of an HuggingFace build request",
         "Handler": "index.is_complete",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerServiceRole01E1EAD7",
@@ -11673,6 +12096,29 @@ schema {
         "Runtime": "python3.11",
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerLogRetention65A63A01": {
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerDF048AE3",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 7,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
     },
     "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerServiceRole01E1EAD7": {
       "Properties": {
@@ -11745,6 +12191,15 @@ schema {
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -11764,6 +12219,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -11983,7 +12441,11 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Manages HuggingFace model build requests",
         "Handler": "index.on_event",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AOnEventHandlerServiceRole0D576031",
@@ -11993,6 +12455,29 @@ schema {
         "Runtime": "python3.11",
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "RagEnginesSageMakerModelMultiAB24AOnEventHandlerLogRetentionF204D605": {
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "RagEnginesSageMakerModelMultiAB24AOnEventHandler3AAD1104",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 7,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
     },
     "RagEnginesSageMakerModelMultiAB24AOnEventHandlerServiceRole0D576031": {
       "Properties": {
@@ -12088,7 +12573,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12238,7 +12731,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12392,7 +12893,15 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12590,15 +13099,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -12913,11 +13414,23 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Deletes document added to a workspace",
         "Environment": {
           "Variables": {
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_write",
+            "AWS_XRAY_SDK_ENABLED": "false",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
             },
@@ -12933,8 +13446,9 @@ schema {
               ],
             },
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -12969,6 +13483,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionServiceRole3BBCBEE9",
@@ -13109,13 +13626,34 @@ schema {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_write",
+                  ],
+                ],
               },
             },
             {
@@ -13442,15 +13980,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -13548,11 +14078,23 @@ schema {
           },
           "S3Key": "Dummy",
         },
+        "Description": "Deletes a workspace",
         "Environment": {
           "Variables": {
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_admin",
+            "AWS_XRAY_SDK_ENABLED": "false",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
             },
@@ -13569,8 +14111,9 @@ schema {
               ],
             },
             "POWERTOOLS_DEV": "false",
-            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
             "PROCESSING_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportProcessingBucketA7BE9701",
             },
@@ -13605,6 +14148,9 @@ schema {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
         ],
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionServiceRoleD99F8BAF",
@@ -13745,13 +14291,34 @@ schema {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_admin",
+                  ],
+                ],
               },
             },
             {
@@ -13985,15 +14552,7 @@ schema {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -14135,7 +14694,7 @@ schema {
     "SharedConfig358B4A20": {
       "Properties": {
         "Type": "String",
-        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]"]},"rag":{"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]}}",
+        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]","Idefics_80b (Multimodal) [ml.g5.48xlarge]"]},"rag":{"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true},"knowledgeBase":{"enabled":false}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]}}",
       },
       "Type": "AWS::SSM::Parameter",
     },

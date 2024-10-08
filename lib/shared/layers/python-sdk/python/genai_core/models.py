@@ -1,8 +1,11 @@
+from aws_lambda_powertools import Logger
 import genai_core.types
 import genai_core.clients
 import genai_core.parameters
 
 from genai_core.types import Modality, Provider, ModelInterface
+
+logger = Logger()
 
 
 def list_models():
@@ -36,27 +39,30 @@ def list_openai_models():
     if not openai:
         return None
 
-    models = openai.Model.list()
+    models = []
+    for model in openai.models.list():
+        if model.id.startswith("gpt"):
+            models.append(
+                {
+                    "provider": Provider.OPENAI.value,
+                    "name": model.id,
+                    "streaming": True,
+                    "inputModalities": [Modality.TEXT.value],
+                    "outputModalities": [Modality.TEXT.value],
+                    "interface": ModelInterface.LANGCHAIN.value,
+                    "ragSupported": True,
+                }
+            )
 
-    return [
-        {
-            "provider": Provider.OPENAI.value,
-            "name": model["id"],
-            "streaming": True,
-            "inputModalities": [Modality.TEXT.value],
-            "outputModalities": [Modality.TEXT.value],
-            "interface": ModelInterface.LANGCHAIN.value,
-            "ragSupported": True,
-        }
-        for model in models.data
-        if model["id"].startswith("gpt")
-    ]
+    return models
 
 
 def list_azure_openai_models():
-    # azure openai model are listed, comma separated in AZURE_OPENAI_MODELS variable in external API secret
+    # azure openai model are listed, comma separated in
+    # AZURE_OPENAI_MODELS variable in external API secret
     models = genai_core.parameters.get_external_api_key("AZURE_OPENAI_MODELS") or ""
-
+    if not models:
+        return None
     return [
         {
             "provider": Provider.AZURE_OPENAI.value,
@@ -108,7 +114,7 @@ def list_bedrock_models():
 
         return models
     except Exception as e:
-        print(f"Error listing Bedrock models: {e}")
+        logger.error(f"Error listing Bedrock models: {e}")
         return None
 
 
@@ -141,7 +147,7 @@ def list_bedrock_finetuned_models():
 
         return models
     except Exception as e:
-        print(f"Error listing fine-tuned Bedrock models: {e}")
+        logger.error(f"Error listing fine-tuned Bedrock models: {e}")
         return None
 
 

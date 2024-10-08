@@ -5,7 +5,7 @@ SIZE=${2:-120}
 
 VERSIONID=$(awk /VERSION_ID=/ /etc/os-release |cut -d \" -f 2)
 
-if [[ "$VERSIONID" == "2023" ]]; then
+if [[ "$VERSIONID" == "2023" || "$VERSIONID" == "22.04" ]]; then
   # Get the METADATA INSTANCE V2 token
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
   # Get the ID of the environment host Amazon EC2 instance.
