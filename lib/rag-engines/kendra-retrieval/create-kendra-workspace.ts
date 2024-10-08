@@ -6,7 +6,6 @@ import { RagDynamoDBTables } from "../rag-dynamodb-tables";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import * as logs from "aws-cdk-lib/aws-logs";
-import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface CreateKendraWorkspaceProps {
   readonly config: SystemConfig;
@@ -85,7 +84,11 @@ export class CreateKendraWorkspace extends Construct {
       this,
       "CreateKendraWorkspaceSMLogGroup",
       {
-        removalPolicy: RemovalPolicy.DESTROY,
+        removalPolicy:
+          props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        retention: props.config.logRetention,
       }
     );
 
@@ -99,6 +102,9 @@ export class CreateKendraWorkspace extends Construct {
         level: sfn.LogLevel.ALL,
       },
     });
+    if (props.shared.kmsKey) {
+      props.shared.kmsKey.grantEncryptDecrypt(stateMachine.role);
+    }
 
     this.stateMachine = stateMachine;
   }

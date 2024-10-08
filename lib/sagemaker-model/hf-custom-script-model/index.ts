@@ -8,6 +8,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as cr from "aws-cdk-lib/custom-resources";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { NagSuppressions } from "cdk-nag";
@@ -26,7 +27,10 @@ export interface HuggingFaceCustomScriptModelProps {
   env?: { [key: string]: string };
   architecture?: lambda.Architecture;
   runtime?: lambda.Runtime;
+  kmsKey?: kms.Key;
+  retainOnDelete?: boolean;
   logRetention?: number;
+  enableEndpointKMSEncryption: boolean;
 }
 
 export class HuggingFaceCustomScriptModel extends Construct {
@@ -54,17 +58,30 @@ export class HuggingFaceCustomScriptModel extends Construct {
 
     const logsBucket = new s3.Bucket(this, "LogsBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.retainOnDelete !== true,
       enforceSSL: true,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
 
     const buildBucket = new s3.Bucket(this, "Bucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy:
+        props.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
       enforceSSL: true,
       serverAccessLogsBucket: logsBucket,
-      autoDeleteObjects: true,
+      autoDeleteObjects: props.retainOnDelete !== true,
+      encryption: props.kmsKey
+        ? s3.BucketEncryption.KMS
+        : s3.BucketEncryption.S3_MANAGED,
+      encryptionKey: props.kmsKey,
+      versioned: true,
     });
 
     // Upload build code to S3
@@ -225,7 +242,7 @@ export class HuggingFaceCustomScriptModel extends Construct {
 
     // run the custom resource to start the build
     const build = new cdk.CustomResource(this, "Build", {
-      // removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
       serviceToken: provider.serviceToken,
       properties: {
         ProjectName: codeBuildProject.projectName,
@@ -276,6 +293,10 @@ export class HuggingFaceCustomScriptModel extends Construct {
       this,
       "EndpointConfig",
       {
+        kmsKeyId:
+          props.kmsKey && props.enableEndpointKMSEncryption
+            ? props.kmsKey.keyId
+            : undefined,
         productionVariants: [
           {
             instanceType,

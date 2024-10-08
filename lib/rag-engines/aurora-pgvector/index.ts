@@ -38,7 +38,13 @@ export class AuroraPgVector extends Construct {
         // https://docs.aws.amazon.com/AmazonRDS/latest/AuroraPostgreSQLReleaseNotes/AuroraPostgreSQL.Extensions.html
         version: rds.AuroraPostgresEngineVersion.VER_15_7,
       }),
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      storageEncryptionKey: props.shared.kmsKey,
+      // Always setting it to true would be a breaking change. (Undefined to prevent re-creating)
+      storageEncrypted: props.shared.kmsKey ? true : undefined,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.SNAPSHOT
+          : cdk.RemovalPolicy.DESTROY,
       writer: rds.ClusterInstance.serverlessV2("ServerlessInstance"),
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
@@ -86,7 +92,8 @@ export class AuroraPgVector extends Construct {
 
     const dbSetupResource = new cdk.CustomResource(
       this,
-      "DatabaseSetupExtensionsAndUsers",
+      // Force recreation on CMK change to re-init the DB cluster.
+      "DatabaseSetupExtensionsAndUsers" + (props.shared.kmsKey ? "cmk-" : ""),
       {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         serviceToken: databaseSetupProvider.serviceToken,

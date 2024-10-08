@@ -1,6 +1,7 @@
 import os
 import boto3
 import botocore
+import botocore.config
 import genai_core.workspaces
 import genai_core.types
 import unicodedata
@@ -9,12 +10,19 @@ UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME")
 CHATBOT_FILES_BUCKET_NAME = os.environ.get("CHATBOT_FILES_BUCKET_NAME")
 MAX_FILE_SIZE = 100 * 1000 * 1000  # 100Mb
 
+s3_client = boto3.client(
+    "s3",
+    config=botocore.config.Config(
+        # Presign URLs only work with CMK if sigv4 is used
+        # (boto3 default to v2 in some cases)
+        signature_version="s3v4",
+    ),
+)
+
 
 def generate_workspace_presigned_post(
     workspace_id: str, file_name: str, expiration=3600
 ):
-    s3_client = boto3.client("s3")
-
     file_name = unicodedata.normalize("NFC", file_name)
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
@@ -40,8 +48,6 @@ def generate_workspace_presigned_post(
 
 
 def generate_user_presigned_post(user_id: str, file_name: str, expiration=3600):
-    s3_client = boto3.client("s3")
-
     file_name = unicodedata.normalize("NFC", file_name)
     if not user_id or len(user_id) < 10:
         raise genai_core.types.CommonError("User not set")
@@ -69,8 +75,6 @@ def generate_user_presigned_post(user_id: str, file_name: str, expiration=3600):
 
 
 def generate_user_presigned_get(user_id: str, file_name: str, expiration=3600):
-    s3_client = boto3.client("s3")
-
     file_name = unicodedata.normalize("NFC", file_name)
     if not user_id or len(user_id) < 10:
         raise genai_core.types.CommonError("User not set")

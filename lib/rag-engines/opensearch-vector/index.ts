@@ -1,3 +1,4 @@
+import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as oss from "aws-cdk-lib/aws-opensearchserverless";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
@@ -30,7 +31,7 @@ export class OpenSearchVector extends Construct {
 
     const collectionName = Utils.getName(
       props.config,
-      "genaichatbot-workspaces"
+      (props.shared.kmsKey ? "cmk-" : "") + "genaichatbot-workspaces"
     );
 
     const sg = new ec2.SecurityGroup(this, "SecurityGroup", {
@@ -89,17 +90,30 @@ export class OpenSearchVector extends Construct {
               Resource: [`collection/${collectionName}`],
             },
           ],
-          AWSOwnedKey: true,
+          AWSOwnedKey: props.shared.kmsKey === undefined,
+          KmsARN: props.shared.kmsKey?.keyArn,
         }).replace(/(\r\n|\n|\r)/gm, ""),
       }
     );
 
     cfnEncryptionSecurityPolicy.node.addDependency(cfnNetworkSecurityPolicy);
 
-    const cfnCollection = new oss.CfnCollection(this, "OpenSearchCollection", {
-      name: collectionName,
-      type: "VECTORSEARCH",
-    });
+    // Force recreation if a key is set because
+    // the encryption policy needs to be set before creation
+    const cfnCollection = new oss.CfnCollection(
+      this,
+      "OpenSearchCollection" + (props.shared.kmsKey ? "-CMK" : ""),
+      {
+        name: collectionName,
+        type: "VECTORSEARCH",
+      }
+    );
+
+    if (props.config.retainOnDelete) {
+      cfnCollection.applyRemovalPolicy(
+        cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+      );
+    }
 
     const createWorkflow = new CreateOpenSearchWorkspace(
       this,

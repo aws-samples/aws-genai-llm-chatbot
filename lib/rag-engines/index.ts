@@ -38,7 +38,10 @@ export class RagEngines extends Construct {
   constructor(scope: Construct, id: string, props: RagEnginesProps) {
     super(scope, id);
 
-    const tables = new RagDynamoDBTables(this, "RagDynamoDBTables");
+    const tables = new RagDynamoDBTables(this, "RagDynamoDBTables", {
+      kmsKey: props.shared.kmsKey,
+      retainOnDelete: props.config.retainOnDelete,
+    });
 
     let sageMakerRagModels: SageMakerRagModels | null = null;
     if (
@@ -101,7 +104,6 @@ export class RagEngines extends Construct {
       openSearchVector: openSearchVector ?? undefined,
       kendraRetrieval: kendraRetrieval ?? undefined,
     });
-
     this.auroraPgVector = auroraPgVector;
     this.openSearchVector = openSearchVector;
     this.kendraRetrieval = kendraRetrieval;

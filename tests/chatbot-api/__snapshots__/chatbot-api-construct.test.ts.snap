@@ -735,6 +735,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "AccelerateConfiguration": {
           "AccelerationStatus": "Enabled",
         },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "CorsConfiguration": {
           "CorsRules": [
             {
@@ -774,6 +783,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -897,6 +909,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -916,6 +937,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -1047,6 +1071,15 @@ def submit_response(event: dict, context, response_status: str, error_message: s
     "ChatBotApiConstructChatBucketsUserFeedbackBucketFAFD14AB": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "ChatBotApiConstructChatBucketsLogsBucket1B8722C1",
@@ -1064,6 +1097,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -7145,6 +7181,15 @@ schema {
     "RagEnginesDataImportProcessingBucketA7BE9701": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "RagEnginesDataImportProcessingLogsBucketB9FC694F",
@@ -7162,6 +7207,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -7304,6 +7352,15 @@ schema {
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -7323,6 +7380,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -8367,6 +8427,15 @@ schema {
         "AccelerateConfiguration": {
           "AccelerationStatus": "Enabled",
         },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "CorsConfiguration": {
           "CorsRules": [
             {
@@ -8406,6 +8475,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -9089,6 +9161,15 @@ schema {
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -9108,6 +9189,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -10228,6 +10312,15 @@ schema {
     "RagEnginesKendraRetrievalKendraDataBucket1627A447": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "RagEnginesKendraRetrievalLogsBucket7EEBA031",
@@ -10245,6 +10338,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -10477,6 +10573,15 @@ schema {
       "DeletionPolicy": "Delete",
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -10496,6 +10601,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -11478,6 +11586,15 @@ schema {
     "RagEnginesSageMakerModelMultiAB24ABucketF09A69F9": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "LoggingConfiguration": {
           "DestinationBucketName": {
             "Ref": "RagEnginesSageMakerModelMultiAB24ALogsBucket1624BE94",
@@ -11503,6 +11620,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -12071,6 +12191,15 @@ schema {
       },
       "Properties": {
         "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
         "OwnershipControls": {
           "Rules": [
             {
@@ -12090,6 +12219,9 @@ schema {
             "Value": "true",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",

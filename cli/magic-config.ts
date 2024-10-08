@@ -145,6 +145,8 @@ const embeddingModels = [
         fs.readFileSync("./bin/config.json").toString("utf8")
       );
       options.prefix = config.prefix;
+      options.createCMKs = config.createCMKs;
+      options.retainOnDelete = config.retainOnDelete;
       options.vpcId = config.vpc?.vpcId;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
@@ -286,6 +288,22 @@ async function processCreateOptions(options: any): Promise<void> {
       skip(): boolean {
         return !(this as any).state.answers.existingVpc;
       },
+    },
+    {
+      type: "confirm",
+      name: "createCMKs",
+      message:
+        "Do you want to create KMS Customer Managed Keys (CMKs)? (It will be used to encrypt the data at rest.)",
+      initial: true,
+      hint: "It is recommended but enabling it on an existing environment will cause the re-creation of some of the resources (for example Aurora cluster, Open Search collection). To prevent data loss, it is recommended to use it on a new environment or at least enable retain on cleanup (needs to be deployed before enabling the use of CMK). For more information on Aurora migration, please refer to the documentation.",
+    },
+    {
+      type: "confirm",
+      name: "retainOnDelete",
+      message:
+        "Do you want to retain data stores on cleanup of the project (Logs, S3, Tables, Indexes, Cognito User pools)?",
+      initial: true,
+      hint: "It reduces the risk of deleting data. It will however not delete all the resources on cleanup (would require manual removal if relevant)",
     },
     {
       type: "confirm",
@@ -718,7 +736,7 @@ async function processCreateOptions(options: any): Promise<void> {
       {
         type: "input",
         name: "name",
-        message: "KnowledgeBase source name",
+        message: "Bedrock KnowledgeBase source name",
         validate(v: string) {
           return RegExp(/^\w[\w-_]*\w$/).test(v);
         },
@@ -1103,10 +1121,11 @@ async function processCreateOptions(options: any): Promise<void> {
   }
 
   const randomSuffix = randomBytes(8).toString("hex");
-
   // Create the config object
   const config = {
     prefix: answers.prefix,
+    createCMKs: answers.createCMKs,
+    retainOnDelete: answers.retainOnDelete,
     vpc: answers.existingVpc
       ? {
           vpcId: answers.vpcId.toLowerCase(),

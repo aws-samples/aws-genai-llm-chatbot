@@ -13,7 +13,6 @@ import { DataImport } from "../data-import";
 import { KendraRetrieval } from "../kendra-retrieval";
 import { OpenSearchVector } from "../opensearch-vector";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
-import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface DeleteWorkspaceProps {
   readonly config: SystemConfig;
@@ -169,7 +168,11 @@ export class DeleteWorkspace extends Construct {
       .next(new sfn.Succeed(this, "Success"));
 
     const logGroup = new logs.LogGroup(this, "DeleteWorkspaceSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      retention: props.config.logRetention,
     });
 
     const stateMachine = new sfn.StateMachine(this, "DeleteWorkspace", {
@@ -182,6 +185,9 @@ export class DeleteWorkspace extends Construct {
         level: sfn.LogLevel.ALL,
       },
     });
+    if (props.shared.kmsKey) {
+      props.shared.kmsKey.grantEncryptDecrypt(stateMachine.role);
+    }
 
     this.stateMachine = stateMachine;
   }

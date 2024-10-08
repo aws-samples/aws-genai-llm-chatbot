@@ -35,6 +35,8 @@ export class RealtimeGraphqlApiBackend extends Construct {
     super(scope, id);
     // Create the main Message Topic acting as a message bus
     const messagesTopic = new sns.Topic(this, "MessagesTopic", {
+      enforceSSL: true,
+      masterKey: props.shared.kmsKey,
       tracingConfig: props.advancedMonitoring
         ? sns.TracingConfig.ACTIVE
         : sns.TracingConfig.PASS_THROUGH,
@@ -73,10 +75,18 @@ export class RealtimeGraphqlApiBackend extends Construct {
     }
 
     const deadLetterQueue = new sqs.Queue(this, "OutgoingMessagesDLQ", {
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
       enforceSSL: true,
     });
 
     const queue = new sqs.Queue(this, "OutgoingMessagesQueue", {
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       enforceSSL: true,
       deadLetterQueue: {
@@ -100,6 +110,7 @@ export class RealtimeGraphqlApiBackend extends Construct {
     const resolvers = new RealtimeResolvers(this, "Resolvers", {
       queue: queue,
       topic: messagesTopic,
+      topicKey: props.shared.kmsKey,
       userPool: props.userPool,
       shared: props.shared,
       api: props.api,

@@ -42,8 +42,14 @@ export class ChatBotApi extends Construct {
   constructor(scope: Construct, id: string, props: ChatBotApiProps) {
     super(scope, id);
 
-    const chatTables = new ChatBotDynamoDBTables(this, "ChatDynamoDBTables");
-    const chatBuckets = new ChatBotS3Buckets(this, "ChatBuckets");
+    const chatTables = new ChatBotDynamoDBTables(this, "ChatDynamoDBTables", {
+      kmsKey: props.shared.kmsKey,
+      retainOnDelete: props.config.retainOnDelete,
+    });
+    const chatBuckets = new ChatBotS3Buckets(this, "ChatBuckets", {
+      kmsKey: props.shared.kmsKey,
+      retainOnDelete: props.config.retainOnDelete,
+    });
 
     const loggingRole = new iam.Role(this, "apiLoggingRole", {
       assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),

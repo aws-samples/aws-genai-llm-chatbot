@@ -13,7 +13,6 @@ import { DataImport } from "../data-import";
 import { KendraRetrieval } from "../kendra-retrieval";
 import { OpenSearchVector } from "../opensearch-vector";
 import { RagDynamoDBTables } from "../rag-dynamodb-tables";
-import { RemovalPolicy } from "aws-cdk-lib";
 
 export interface DeleteDocumentProps {
   readonly config: SystemConfig;
@@ -166,7 +165,11 @@ export class DeleteDocument extends Construct {
       .next(new sfn.Succeed(this, "Success"));
 
     const logGroup = new logs.LogGroup(this, "DeleteDocumentSMLogGroup", {
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      retention: props.config.logRetention,
     });
 
     const stateMachine = new sfn.StateMachine(this, "DeleteDocument", {
@@ -179,6 +182,9 @@ export class DeleteDocument extends Construct {
         level: sfn.LogLevel.ALL,
       },
     });
+    if (props.shared.kmsKey) {
+      props.shared.kmsKey.grantEncryptDecrypt(stateMachine.role);
+    }
 
     this.stateMachine = stateMachine;
   }
