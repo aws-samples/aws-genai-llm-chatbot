@@ -12,6 +12,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import { NagSuppressions } from "cdk-nag";
+import { AURORA_DB_USERS } from "../aurora-pgvector";
 
 export interface WebCrawlerBatchJobProps {
   readonly config: SystemConfig;
@@ -78,8 +79,9 @@ export class WebCrawlerBatchJob extends Construct {
           AWS_DEFAULT_REGION: cdk.Stack.of(this).region,
           CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
           API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
-          AURORA_DB_SECRET_ID: props.auroraDatabase?.secret
-            ?.secretArn as string,
+          AURORA_DB_USER: AURORA_DB_USERS.WRITE,
+          AURORA_DB_HOST: props.auroraDatabase?.clusterEndpoint?.hostname ?? "",
+          AURORA_DB_PORT: props.auroraDatabase?.clusterEndpoint?.port + "",
           PROCESSING_BUCKET_NAME: props.processingBucket.bucketName,
           WORKSPACES_TABLE_NAME:
             props.ragDynamoDBTables.workspacesTable.tableName,
@@ -126,7 +128,10 @@ export class WebCrawlerBatchJob extends Construct {
     );
 
     if (props.auroraDatabase) {
-      props.auroraDatabase.secret?.grantRead(webCrawlerJobRole);
+      props.auroraDatabase.grantConnect(
+        webCrawlerJobRole,
+        AURORA_DB_USERS.WRITE
+      );
       props.auroraDatabase.connections.allowDefaultPortFrom(computeEnvironment);
     }
 

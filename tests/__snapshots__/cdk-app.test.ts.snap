@@ -3185,9 +3185,19 @@ schema {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_read",
             "AWS_XRAY_SDK_ENABLED": "false",
             "CHATBOT_FILES_BUCKET_NAME": {
               "Ref": "ChatBotApiChatBucketsFilesBucket1D4E273A",
@@ -3586,13 +3596,26 @@ schema {
               ],
             },
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:us-east-1:111111111:dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_read",
+                  ],
+                ],
               },
             },
             {
@@ -5641,9 +5664,19 @@ schema {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_read",
             "AWS_XRAY_SDK_ENABLED": "false",
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
@@ -5913,13 +5946,26 @@ schema {
               "Resource": "*",
             },
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:us-east-1:111111111:dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_read",
+                  ],
+                ],
               },
             },
             {
@@ -6965,6 +7011,7 @@ schema {
         },
       },
       "Properties": {
+        "BackupRetentionPeriod": 35,
         "CopyTagsToSnapshot": true,
         "DBClusterParameterGroupName": "default.aurora-postgresql15",
         "DBSubnetGroupName": {
@@ -6972,7 +7019,7 @@ schema {
         },
         "EnableIAMDatabaseAuthentication": true,
         "Engine": "aurora-postgresql",
-        "EngineVersion": "15.3",
+        "EngineVersion": "15.7",
         "KmsKeyId": {
           "Fn::GetAtt": [
             "SharedKMSKey7BCBB616",
@@ -7467,9 +7514,19 @@ schema {
         "Description": "Creates Aurora workspace",
         "Environment": {
           "Variables": {
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_admin",
             "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
@@ -7686,13 +7743,26 @@ schema {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:us-east-1:111111111:dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_admin",
+                  ],
+                ],
               },
             },
             {
@@ -7901,6 +7971,38 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "RagEnginesAuroraPgVectorDatabaseSetupExtensionsAndUserscmk099B67F6": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecretBF0EF63E",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackChatBotApiRestApiApiSecurityGroup777E7B0FIndirectPortFB3425A8",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackLangchainInterfaceRequestHandlerSecurityGroupB2D839AFIndirectPort986F7CFB",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceFunctionSecurityGroupCA3FBD41IndirectPort2E9A07FB",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesAuroraPgVectorDatabaseSetupFunctionSecurityGroup5F090D4DIndirectPort4DDBF43D",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupD501189BIndirectPortA2FD26DA",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup692C5DACIndirectPortDC5EAC53",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionSecurityGroupBCA1570BIndirectPortC0A48B57",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionSecurityGroupCBB81808IndirectPort368BBCEB",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroup333F94D8",
+        "RagEnginesAuroraPgVectorAuroraDatabaseServerlessInstance42B5CDC1",
+        "RagEnginesAuroraPgVectorAuroraDatabaseSubnets038B8C27",
+      ],
+      "Properties": {
+        "AURORA_DB_SECRET_ID": {
+          "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEvent66CC77D0",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
     "RagEnginesAuroraPgVectorDatabaseSetupFunction3EAE1D9D": {
       "DependsOn": [
         "RagEnginesAuroraPgVectorDatabaseSetupFunctionServiceRoleDefaultPolicy526D1214",
@@ -7920,7 +8022,7 @@ schema {
           "S3Bucket": "cdk-hnb659fds-assets-111111111-us-east-1",
           "S3Key": "Dummy",
         },
-        "Description": "PGVector setup",
+        "Description": "Users and PGVector setup",
         "Environment": {
           "Variables": {
             "AWS_XRAY_SDK_ENABLED": "false",
@@ -8355,38 +8457,6 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
-    "RagEnginesAuroraPgVectorDatabaseSetupResourcecmk0253E788": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecretBF0EF63E",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackChatBotApiRestApiApiSecurityGroup777E7B0FIndirectPortFB3425A8",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackLangchainInterfaceRequestHandlerSecurityGroupB2D839AFIndirectPort986F7CFB",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceFunctionSecurityGroupCA3FBD41IndirectPort2E9A07FB",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesAuroraPgVectorDatabaseSetupFunctionSecurityGroup5F090D4DIndirectPort4DDBF43D",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentSecurityGroupD501189BIndirectPortA2FD26DA",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesDataImportWebCrawlerBatchJobWebCrawlerFargateComputeEnvironmentSecurityGroup692C5DACIndirectPortDC5EAC53",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesWorkspacesDeleteDocumentDeleteDocumentFunctionSecurityGroupBCA1570BIndirectPortC0A48B57",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroupfromprefixGenAIChatBotStackRagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceFunctionSecurityGroupCBB81808IndirectPort368BBCEB",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSecurityGroup333F94D8",
-        "RagEnginesAuroraPgVectorAuroraDatabaseServerlessInstance42B5CDC1",
-        "RagEnginesAuroraPgVectorAuroraDatabaseSubnets038B8C27",
-      ],
-      "Properties": {
-        "AURORA_DB_SECRET_ID": {
-          "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEvent66CC77D0",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::CloudFormation::CustomResource",
-      "UpdateReplacePolicy": "Delete",
-    },
     "RagEnginesDataImportFileImportBatchJobFargateComputeEnvironmentA4E537F2": {
       "Properties": {
         "ComputeResources": {
@@ -8550,9 +8620,25 @@ schema {
               },
             },
             {
-              "Name": "AURORA_DB_SECRET_ID",
+              "Name": "AURORA_DB_USER",
+              "Value": "aurora_db_iam_write",
+            },
+            {
+              "Name": "AURORA_DB_HOST",
               "Value": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Address",
+                ],
+              },
+            },
+            {
+              "Name": "AURORA_DB_PORT",
+              "Value": {
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Port",
+                ],
               },
             },
             {
@@ -8928,13 +9014,26 @@ schema {
               ],
             },
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:us-east-1:111111111:dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_write",
+                  ],
+                ],
               },
             },
             {
@@ -11566,9 +11665,25 @@ schema {
               },
             },
             {
-              "Name": "AURORA_DB_SECRET_ID",
+              "Name": "AURORA_DB_USER",
+              "Value": "aurora_db_iam_write",
+            },
+            {
+              "Name": "AURORA_DB_HOST",
               "Value": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Address",
+                ],
+              },
+            },
+            {
+              "Name": "AURORA_DB_PORT",
+              "Value": {
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                  "Endpoint.Port",
+                ],
               },
             },
             {
@@ -11908,13 +12023,26 @@ schema {
               ],
             },
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:us-east-1:111111111:dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_write",
+                  ],
+                ],
               },
             },
             {
@@ -15686,9 +15814,19 @@ schema {
         "Description": "Deletes document added to a workspace",
         "Environment": {
           "Variables": {
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_write",
             "AWS_XRAY_SDK_ENABLED": "false",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
@@ -15924,13 +16062,26 @@ schema {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:us-east-1:111111111:dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_write",
+                  ],
+                ],
               },
             },
             {
@@ -16395,9 +16546,19 @@ schema {
         "Description": "Deletes a workspace",
         "Environment": {
           "Variables": {
-            "AURORA_DB_SECRET_ID": {
-              "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+            "AURORA_DB_HOST": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Address",
+              ],
             },
+            "AURORA_DB_PORT": {
+              "Fn::GetAtt": [
+                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                "Endpoint.Port",
+              ],
+            },
+            "AURORA_DB_USER": "aurora_db_iam_admin",
             "AWS_XRAY_SDK_ENABLED": "false",
             "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME": {
               "Ref": "RagEnginesKendraRetrievalKendraDataBucket1627A447",
@@ -16634,13 +16795,26 @@ schema {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-              ],
+              "Action": "rds-db:connect",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "RagEnginesAuroraPgVectorAuroraDatabaseSecretAttachmentA167E2A9",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":rds-db:us-east-1:111111111:dbuser:",
+                    {
+                      "Fn::GetAtt": [
+                        "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+                        "DBClusterResourceId",
+                      ],
+                    },
+                    "/aurora_db_iam_admin",
+                  ],
+                ],
               },
             },
             {

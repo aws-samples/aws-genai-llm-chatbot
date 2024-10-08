@@ -15,6 +15,7 @@ import * as appsync from "aws-cdk-lib/aws-appsync";
 import { parse } from "graphql";
 import { readFileSync } from "fs";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import { AURORA_DB_USERS } from "../rag-engines/aurora-pgvector";
 
 export interface ApiResolversProps {
   readonly shared: Shared;
@@ -75,8 +76,13 @@ export class ApiResolvers extends Construct {
           CHATBOT_FILES_BUCKET_NAME: props.filesBucket.bucketName,
           PROCESSING_BUCKET_NAME:
             props.ragEngines?.processingBucket?.bucketName ?? "",
-          AURORA_DB_SECRET_ID: props.ragEngines?.auroraPgVector?.database
-            ?.secret?.secretArn as string,
+          AURORA_DB_USER: AURORA_DB_USERS.READ_ONLY,
+          AURORA_DB_HOST:
+            props.ragEngines?.auroraPgVector?.database?.clusterEndpoint
+              ?.hostname ?? "",
+          AURORA_DB_PORT:
+            props.ragEngines?.auroraPgVector?.database?.clusterEndpoint?.port +
+            "",
           WORKSPACES_TABLE_NAME:
             props.ragEngines?.workspacesTable.tableName ?? "",
           WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
@@ -139,7 +145,10 @@ export class ApiResolvers extends Construct {
       }
 
       if (props.ragEngines?.auroraPgVector) {
-        props.ragEngines.auroraPgVector.database.secret?.grantRead(apiHandler);
+        props.ragEngines.auroraPgVector.database.grantConnect(
+          apiHandler,
+          AURORA_DB_USERS.READ_ONLY
+        );
         props.ragEngines.auroraPgVector.database.connections.allowDefaultPortFrom(
           apiHandler
         );

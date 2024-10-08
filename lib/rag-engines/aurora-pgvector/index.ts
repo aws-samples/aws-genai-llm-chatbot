@@ -19,6 +19,12 @@ export interface AuroraPgVectorProps {
   readonly ragDynamoDBTables: RagDynamoDBTables;
 }
 
+export enum AURORA_DB_USERS {
+  READ_ONLY = "aurora_db_iam_read",
+  WRITE = "aurora_db_iam_write",
+  ADMIN = "aurora_db_iam_admin",
+}
+
 export class AuroraPgVector extends Construct {
   readonly database: rds.DatabaseCluster;
   public readonly createAuroraWorkspaceWorkflow: sfn.StateMachine;
@@ -28,7 +34,9 @@ export class AuroraPgVector extends Construct {
 
     const dbCluster = new rds.DatabaseCluster(this, "AuroraDatabase", {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
-        version: rds.AuroraPostgresEngineVersion.VER_15_3,
+        // Extensions version per engine
+        // https://docs.aws.amazon.com/AmazonRDS/latest/AuroraPostgreSQLReleaseNotes/AuroraPostgreSQL.Extensions.html
+        version: rds.AuroraPostgresEngineVersion.VER_15_7,
       }),
       storageEncryptionKey: props.shared.kmsKey,
       // Always setting it to true would be a breaking change. (Undefined to prevent re-creating)
@@ -41,6 +49,11 @@ export class AuroraPgVector extends Construct {
       vpc: props.shared.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       iamAuthentication: true,
+      backup: {
+        // 35 days is the max value
+        // https://docs.aws.amazon.com/prescriptive-guidance/latest/backup-recovery/rds.html
+        retention: cdk.Duration.days(35),
+      },
     });
 
     const databaseSetupFunction = new lambda.Function(
@@ -49,9 +62,9 @@ export class AuroraPgVector extends Construct {
       {
         vpc: props.shared.vpc,
         code: props.shared.sharedCode.bundleWithLambdaAsset(
-          path.join(__dirname, "./functions/pgvector-setup")
+          path.join(__dirname, "./functions/pg-setup")
         ),
-        description: "PGVector setup",
+        description: "Users and PGVector setup",
         runtime: props.shared.pythonRuntime,
         architecture: props.shared.lambdaArchitecture,
         handler: "index.lambda_handler",
@@ -80,7 +93,7 @@ export class AuroraPgVector extends Construct {
     const dbSetupResource = new cdk.CustomResource(
       this,
       // Force recreation on CMK change to re-init the DB cluster.
-      "DatabaseSetupResource" + (props.shared.kmsKey ? "cmk-" : ""),
+      "DatabaseSetupExtensionsAndUsers" + (props.shared.kmsKey ? "cmk-" : ""),
       {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         serviceToken: databaseSetupProvider.serviceToken,
