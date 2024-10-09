@@ -84,6 +84,7 @@ export interface SystemConfig {
   certificate?: string;
   domain?: string;
   privateWebsite?: boolean;
+  rateLimitPerIP?: number;
   cognitoFederation?: {
     enabled?: boolean;
     autoRedirect?: boolean;
@@ -113,6 +114,7 @@ export interface SystemConfig {
     };
   };
   llms: {
+    rateLimitPerIP?: number;
     sagemaker: SupportedSageMakerModels[];
     huggingfaceApiSecretArn?: string;
     sagemakerSchedule?: {
