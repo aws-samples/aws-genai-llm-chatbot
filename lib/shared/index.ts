@@ -324,7 +324,7 @@ export class Shared extends Construct {
   private createWafRules(ratePerIP: number): wafv2.CfnWebACL.RuleProperty[] {
     /**
      * The rate limit is the maximum number of requests from a
-     * single IP address that are allowed in a five-minute period.
+     * single IP address that are allowed in a ten-minute period.
      * The IP address is automatically unblocked after it falls below the limit.
      */
     const ruleLimitRequests: wafv2.CfnWebACL.RuleProperty = {
