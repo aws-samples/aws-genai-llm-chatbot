@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as cf from "aws-cdk-lib/aws-cloudfront";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
@@ -30,6 +31,7 @@ export interface UserInterfaceProps {
 
 export class UserInterface extends Construct {
   public readonly publishedDomain: string;
+  public readonly cloudFrontDistribution?: cf.IDistribution;
 
   constructor(scope: Construct, id: string, props: UserInterfaceProps) {
     super(scope, id);
@@ -39,9 +41,14 @@ export class UserInterface extends Construct {
 
     const uploadLogsBucket = new s3.Bucket(this, "WebsiteLogsBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy:
+        props.config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.config.retainOnDelete !== true,
       enforceSSL: true,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
 
     const websiteBucket = new s3.Bucket(this, "WebsiteBucket", {
@@ -53,10 +60,13 @@ export class UserInterface extends Construct {
       websiteErrorDocument: "index.html",
       enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
+      // Cloudfront with OAI only supports S3 Managed Key (would need to migrate to OAC)
+      // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
     });
 
     // Deploy either Private (only accessible within VPC) or Public facing website
-    let distribution;
     let redirectSignIn: string;
 
     if (props.config.privateWebsite) {
@@ -71,7 +81,7 @@ export class UserInterface extends Construct {
         ...props,
         websiteBucket: websiteBucket,
       });
-      distribution = publicWebsite.distribution;
+      this.cloudFrontDistribution = publicWebsite.distribution;
       this.publishedDomain = props.config.domain
         ? props.config.domain
         : publicWebsite.distribution.distributionDomainName;
@@ -182,7 +192,9 @@ export class UserInterface extends Construct {
       prune: false,
       sources: [asset, exportsAsset],
       destinationBucket: websiteBucket,
-      distribution: props.config.privateWebsite ? undefined : distribution,
+      distribution: props.config.privateWebsite
+        ? undefined
+        : this.cloudFrontDistribution,
     });
 
     /**

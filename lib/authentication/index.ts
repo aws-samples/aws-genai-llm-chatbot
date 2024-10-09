@@ -20,7 +20,10 @@ export class Authentication extends Construct {
     super(scope, id);
 
     const userPool = new cognito.UserPool(this, "UserPool", {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy:
+        config.retainOnDelete === true
+          ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+          : cdk.RemovalPolicy.DESTROY,
       selfSignUpEnabled: false,
       mfa: cognito.Mfa.OPTIONAL,
       advancedSecurityMode: cognito.AdvancedSecurityMode.ENFORCED,

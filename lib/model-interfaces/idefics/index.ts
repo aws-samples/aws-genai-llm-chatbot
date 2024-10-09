@@ -14,7 +14,6 @@ import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
 import { SystemConfig } from "../../shared/types";
-import { RemovalPolicy } from "aws-cdk-lib";
 import { NagSuppressions } from "cdk-nag";
 
 interface IdeficsInterfaceProps {
@@ -58,7 +57,9 @@ export class IdeficsInterface extends Construct {
         handler: "index.handler",
         layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
         architecture: props.shared.lambdaArchitecture,
-        tracing: lambda.Tracing.ACTIVE,
+        tracing: props.config.advancedMonitoring
+          ? lambda.Tracing.ACTIVE
+          : lambda.Tracing.DISABLED,
         timeout: cdk.Duration.minutes(lambdaDurationInMinutes),
         memorySize: 1024,
         logRetention: props.config.logRetention ?? logs.RetentionDays.ONE_WEEK,
@@ -78,6 +79,9 @@ export class IdeficsInterface extends Construct {
     props.chatbotFilesBucket.grantRead(requestHandler);
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
+    if (props.shared.kmsKey && requestHandler.role) {
+      props.shared.kmsKey.grantEncrypt(requestHandler.role);
+    }
     props.shared.configParameter.grantRead(requestHandler);
     requestHandler.addToRolePolicy(
       new iam.PolicyStatement({
@@ -89,8 +93,17 @@ export class IdeficsInterface extends Construct {
 
     const deadLetterQueue = new sqs.Queue(this, "DLQ", {
       enforceSSL: true,
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
     const queue = new sqs.Queue(this, "IdeficsIngestionQueue", {
+      encryption: props.shared.queueKmsKey
+        ? sqs.QueueEncryption.KMS
+        : undefined,
+      encryptionMasterKey: props.shared.queueKmsKey,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
       visibilityTimeout: cdk.Duration.minutes(lambdaDurationInMinutes * 6),
@@ -175,7 +188,11 @@ export class IdeficsInterface extends Construct {
       this,
       "ChatbotFilesPrivateApiAccessLogs",
       {
-        removalPolicy: RemovalPolicy.DESTROY,
+        removalPolicy:
+          this.props.config.retainOnDelete === true
+            ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
+            : cdk.RemovalPolicy.DESTROY,
+        retention: this.props.config.logRetention,
       }
     );
 
@@ -200,7 +217,8 @@ export class IdeficsInterface extends Construct {
             actions: ["execute-api:Invoke"],
             effect: iam.Effect.ALLOW,
             resources: ["execute-api:/*/*/*"],
-            principals: [new iam.AnyPrincipal()],
+            principals: [new iam.AnyPrincipal()], // NOSONAR
+            // Private integration with deny based on the VPCe
           }),
           new iam.PolicyStatement({
             actions: ["execute-api:Invoke"],
@@ -263,10 +281,11 @@ export class IdeficsInterface extends Construct {
       },
     });
 
+    // prettier-ignore
     api.root
       .addResource("{folder}")
       .addResource("{key}")
-      .addMethod("GET", s3Integration, {
+      .addMethod("GET", s3Integration, { // NOSONAR Private integration
         methodResponses: [
           {
             statusCode: "200",

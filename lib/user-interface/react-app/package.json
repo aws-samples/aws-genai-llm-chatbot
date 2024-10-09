@@ -58,6 +58,7 @@
   "overrides": {
     "@aws-amplify/geo@2.3.12": {
       "fast-xml-parser": "4.4.1"
-    }
+    },
+    "cookie": "^0.7.0"
   }
 }

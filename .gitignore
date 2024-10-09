@@ -442,6 +442,7 @@ venv
 lib/user-interface/react-app/public/aws-exports.json
 out.tmp
 bin/config.json
+bin/config*.json
 
 # Docs
 docs/.vitepress/cache
