@@ -24,6 +24,8 @@ from langchain_core.outputs import LLMResult, ChatGeneration
 from langchain_core.messages.ai import AIMessage, AIMessageChunk
 from langchain_core.messages.human import HumanMessage
 from langchain_aws import ChatBedrockConverse
+from adapters.shared.prompts.system_prompts import prompts, lang  # Import prompts and language
+
 
 logger = Logger()
 
@@ -129,20 +131,62 @@ class ModelAdapter:
         )
 
     def get_prompt(self):
-        template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
-
-        Current conversation:
-        {chat_history}
-
-        Question: {input}"""  # noqa: E501
-
+        # Fetch the conversation prompt based on the current language
+        conversation_prompt = prompts[lang]['conversation_prompt']
+        logger.info(f"Generating the conversation prompt for language: {lang}")
+    
+        # Use the fetched prompt for the selected language
+        template = f"""{conversation_prompt}
+    
+        {prompts[lang]['current_conversation_word']}:
+        {{chat_history}}
+    
+        {prompts[lang]['question_word']}: {{input}}"""
+    
+        logger.debug(f"Generated conversation prompt template for language {lang}: {template}")
+    
         return PromptTemplate.from_template(template)
 
     def get_condense_question_prompt(self):
-        return CONDENSE_QUESTION_PROMPT
+        system_prompt = prompts[lang]['condense_question_prompt']
+        
+        template = f"""{system_prompt}
+<conv>
+{{chat_history}}
+</conv>
+    
+<followup>
+{{question}}
+</followup>
+"""
+     
+        logger.info(f"Language selected for get_condense_question_prompt: {lang}")
+        logger.info(f"Condense Question Prompt Template: {template}")
+    
+        return PromptTemplate(
+            input_variables=["chat_history", "question"],
+            template=template
+        )
 
     def get_qa_prompt(self):
-        return QA_PROMPT
+        system_prompt = prompts[lang]['qa_prompt']
+        question_word = prompts[lang]['question_word']
+
+        
+        template = f"""{system_prompt}
+    
+        {{context}}
+        
+        {question_word}: {{question}}"""
+        
+        # Tracer la langue choisie et le contenu du template
+        logger.info(f"Language selected for get_qa_prompt: {lang}")
+        logger.info(f"Base QA Prompt Template: {template}")
+        
+        # Retourner le PromptTemplate avec les variables d'entrée "context" et "question"
+        return PromptTemplate(
+            template=template, input_variables=["context", "question"]
+        )
 
     def run_with_chain_v2(self, user_prompt, workspace_id=None):
         if not self.llm:
