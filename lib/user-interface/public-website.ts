@@ -14,8 +14,6 @@ export interface PublicWebsiteProps {
   readonly userPoolId: string;
   readonly userPoolClientId: string;
   readonly api: ChatBotApi;
-  readonly crossEncodersEnabled: boolean;
-  readonly sagemakerEmbeddingsEnabled: boolean;
   readonly websiteBucket: s3.Bucket;
 }
 

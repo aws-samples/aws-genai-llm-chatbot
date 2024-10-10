@@ -5,8 +5,8 @@ input CreateWorkspaceAuroraInput {
   kind: String!
   embeddingsModelProvider: String!
   embeddingsModelName: String!
-  crossEncoderModelProvider: String!
-  crossEncoderModelName: String!
+  crossEncoderModelProvider: String
+  crossEncoderModelName: String
   languages: [String!]!
   metric: String!
   index: Boolean!
@@ -35,8 +35,8 @@ input CreateWorkspaceOpenSearchInput {
   kind: String!
   embeddingsModelProvider: String!
   embeddingsModelName: String!
-  crossEncoderModelProvider: String!
-  crossEncoderModelName: String!
+  crossEncoderModelProvider: String
+  crossEncoderModelName: String
   languages: [String!]!
   hybridSearch: Boolean!
   chunkingStrategy: String!

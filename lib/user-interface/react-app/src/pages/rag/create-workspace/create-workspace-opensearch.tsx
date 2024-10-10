@@ -15,7 +15,6 @@ const nameRegex = /^[\w+_-]+$/;
 const defaults: OpenSearchWorkspaceCreateInput = {
   name: "",
   embeddingsModel: null,
-  crossEncodingEnabled: false,
   crossEncoderModel: null,
   languages: [{ value: "english", label: "English" }],
   hybridSearch: false,
@@ -35,7 +34,8 @@ export default function CreateWorkspaceOpenSearch() {
         embeddingsModel: EmbeddingsModelHelper.getSelectOption(
           appContext?.config.default_embeddings_model
         ),
-        crossEncodingEnabled: appContext?.config.cross_encoders_enabled || false,
+        crossEncodingEnabled:
+          appContext?.config.cross_encoders_enabled || false,
         hybridSearch: appContext?.config.cross_encoders_enabled || false,
         crossEncoderModel: OptionsHelper.getSelectOption(
           appContext?.config.default_cross_encoder_model
@@ -103,9 +103,15 @@ export default function CreateWorkspaceOpenSearch() {
       data.embeddingsModel?.value
     );
 
-    const crossEncoderModel = OptionsHelper.parseValue(
-      data.crossEncoderModel?.value
-    );
+    let crossEncoderModel;
+    const crossEncoderSelected =
+      data.crossEncoderModel?.value !== "__none__" &&
+      appContext?.config.cross_encoders_enabled;
+    if (crossEncoderSelected) {
+      crossEncoderModel = OptionsHelper.parseValue(
+        data.crossEncoderModel?.value
+      );
+    }
 
     const apiClient = new ApiClient(appContext);
     try {
@@ -113,10 +119,10 @@ export default function CreateWorkspaceOpenSearch() {
         name: data.name.trim(),
         embeddingsModelProvider: embeddingsModel.provider,
         embeddingsModelName: embeddingsModel.name,
-        crossEncoderModelProvider: crossEncoderModel.provider,
-        crossEncoderModelName: crossEncoderModel.name,
+        crossEncoderModelProvider: crossEncoderModel?.provider,
+        crossEncoderModelName: crossEncoderModel?.name,
         languages: data.languages.map((x) => x.value ?? ""),
-        hybridSearch: data.hybridSearch,
+        hybridSearch: data.hybridSearch && crossEncoderSelected,
         chunkingStrategy: "recursive",
         chunkSize: data.chunkSize,
         chunkOverlap: data.chunkOverlap,
@@ -156,6 +162,9 @@ export default function CreateWorkspaceOpenSearch() {
       >
         <OpenSearchForm
           data={data}
+          crossEncodingEnabled={
+            appContext?.config.cross_encoders_enabled || false
+          }
           onChange={onChange}
           errors={errors}
           submitting={submitting}

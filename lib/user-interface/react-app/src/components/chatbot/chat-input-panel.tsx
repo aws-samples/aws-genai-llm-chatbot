@@ -699,9 +699,13 @@ function getSelectedModelOption(models: Model[]): SelectProps.Option | null {
     );
 
     if (targetModel) {
-      selectedModelOption = OptionsHelper.getSelectOptionGroups([
-        targetModel,
-      ])[0].options[0];
+      const groups = OptionsHelper.getSelectOptionGroups([targetModel]).filter(
+        (i) => (i as SelectProps.OptionGroup).options
+      ) as SelectProps.OptionGroup[];
+      selectedModelOption =
+        groups.length > 0 && groups[0].options.length > 0
+          ? groups[0].options[0]
+          : null;
     }
   }
 
@@ -745,8 +749,13 @@ function getSelectedModelOption(models: Model[]): SelectProps.Option | null {
     }
 
     if (candidate) {
-      selectedModelOption = OptionsHelper.getSelectOptionGroups([candidate])[0]
-        .options[0];
+      const groups = OptionsHelper.getSelectOptionGroups([candidate]).filter(
+        (i) => (i as SelectProps.OptionGroup).options
+      ) as SelectProps.OptionGroup[];
+      selectedModelOption =
+        groups.length > 0 && groups[0].options.length > 0
+          ? groups[0].options[0]
+          : null;
     }
   }
 

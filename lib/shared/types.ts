@@ -70,6 +70,13 @@ export enum Direction {
   Out = "OUT",
 }
 
+export interface ModelConfig {
+  provider: ModelProvider;
+  name: string;
+  dimensions?: number;
+  default?: boolean;
+}
+
 export interface SystemConfig {
   prefix: string;
   createCMKs?: boolean;
@@ -113,7 +120,6 @@ export interface SystemConfig {
     };
   };
   llms: {
-    enableSagemakerModels: boolean;
     sagemaker: SupportedSageMakerModels[];
     huggingfaceApiSecretArn?: string;
     sagemakerSchedule?: {
@@ -131,7 +137,7 @@ export interface SystemConfig {
   };
   rag: {
     enabled: boolean;
-    enableEmbeddingModelsViaSagemaker: boolean;
+    deployDefaultSagemakerModels?: boolean;
     engines: {
       aurora: {
         enabled: boolean;
@@ -160,18 +166,9 @@ export interface SystemConfig {
         }[];
       };
     };
-    embeddingsModels: {
-      provider: ModelProvider;
-      name: string;
-      dimensions: number;
-      default?: boolean;
-    }[];
+    embeddingsModels: ModelConfig[];
     crossEncodingEnabled: boolean;
-    crossEncoderModels: {
-      provider: ModelProvider;
-      name: string;
-      default?: boolean;
-    }[];
+    crossEncoderModels: ModelConfig[];
   };
 }
 

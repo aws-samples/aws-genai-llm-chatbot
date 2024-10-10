@@ -158,9 +158,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       userPoolClientId: authentication.userPoolClient.userPoolClientId,
       api: chatBotApi,
       chatbotFilesBucket: chatBotApi.filesBucket,
-      crossEncodersEnabled: props.config.rag.crossEncodingEnabled,
-      sagemakerEmbeddingsEnabled:
-        props.config.rag.enableEmbeddingModelsViaSagemaker,
     });
 
     if (props.config.cognitoFederation?.enabled) {
@@ -415,7 +412,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         ]
       );
 
-      if (props.config.llms.enableSagemakerModels) {
+      if (ragEngines?.sageMakerRagModels?.model) {
         NagSuppressions.addResourceSuppressionsByPath(
           this,
           [

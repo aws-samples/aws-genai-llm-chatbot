@@ -12,7 +12,7 @@ export function HybridSearchField(props: HybridSearchProps) {
   return (
     <FormField
       label="Hybrid Search"
-      description="Use vector similarity together with Open Search full-text queries for hybrid search."
+      description="Use vector similarity together with Open Search full-text queries for hybrid search. Cross encoding is required to rank the results."
       errorText={props.errors.hybridSearch}
     >
       <Toggle

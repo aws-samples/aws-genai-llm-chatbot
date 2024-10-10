@@ -3,7 +3,9 @@ import { existsSync, readFileSync } from "fs";
 
 export function getConfig(): SystemConfig {
   if (existsSync("./bin/config.json")) {
-    return JSON.parse(readFileSync("./bin/config.json").toString("utf8"));
+    return JSON.parse(
+      readFileSync("./bin/config.json").toString("utf8")
+    ) as SystemConfig;
   }
   // Default config
   return {
@@ -23,12 +25,10 @@ export function getConfig(): SystemConfig {
     },
     llms: {
       // sagemaker: [SupportedSageMakerModels.FalconLite]
-      enableSagemakerModels: false,
       sagemaker: [],
     },
     rag: {
       enabled: false,
-      enableEmbeddingModelsViaSagemaker: false,
       engines: {
         aurora: {
           enabled: false,

@@ -44,12 +44,10 @@ export class RagEngines extends Construct {
     });
 
     let sageMakerRagModels: SageMakerRagModels | null = null;
-    if (props.config.llms.enableSagemakerModels) {
-      sageMakerRagModels = new SageMakerRagModels(this, "SageMaker", {
-        shared: props.shared,
-        config: props.config,
-      });
-    }
+    sageMakerRagModels = new SageMakerRagModels(this, "SageMaker", {
+      shared: props.shared,
+      config: props.config,
+    });
 
     let auroraPgVector: AuroraPgVector | null = null;
     if (props.config.rag.engines.aurora.enabled) {

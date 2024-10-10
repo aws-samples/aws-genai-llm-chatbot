@@ -20,7 +20,6 @@ def query_workspace_aurora(
     full_response: bool,
     threshold: int = 0,
 ):
-    config = genai_core.parameters.get_config()
     table_name = sql.Identifier(workspace_id.replace("-", ""))
     embeddings_model_provider = workspace["embeddings_model_provider"]
     embeddings_model_name = workspace["embeddings_model_name"]
@@ -180,15 +179,15 @@ def query_workspace_aurora(
                 item["keyword_search_score"] = current["keyword_search_score"]
 
     unique_items = list(unique_items.values())
-    
-    if (config["rag"]["crossEncodingEnabled"]):
+
+    if cross_encoder_model_name is not None:
         cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
             cross_encoder_model_provider, cross_encoder_model_name
         )
 
         if cross_encoder_model is None:
             raise genai_core.types.CommonError("Cross encoder model not found")
-    
+
         score_dict = dict({})
         if len(unique_items) > 0:
             passages = [record["content"] for record in unique_items]
@@ -221,8 +220,10 @@ def query_workspace_aurora(
             "keyword_search_items": convert_types(keyword_search_records),
         }
     else:
-        if config["rag"]["crossEncodingEnabled"]:
-            ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[:limit]
+        if cross_encoder_model_name is not None:
+            ret_items = list(
+                filter(lambda val: val["score"] > threshold, unique_items)
+            )[:limit]
         else:
             ret_items = unique_items[:limit]
 

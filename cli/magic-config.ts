@@ -10,6 +10,7 @@ import {
   SupportedSageMakerModels,
   SystemConfig,
   SupportedBedrockRegion,
+  ModelConfig,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
@@ -87,7 +88,7 @@ const secretManagerArnRegExp = RegExp(
   /arn:aws:secretsmanager:[\w-_]+:\d+:secret:[\w-_]+/
 );
 
-const embeddingModels = [
+const embeddingModels: ModelConfig[] = [
   {
     provider: "sagemaker",
     name: "intfloat/multilingual-e5-large",
@@ -182,8 +183,8 @@ const embeddingModels = [
       options.startScheduleEndDate =
         config.llms?.sagemakerSchedule?.startScheduleEndDate;
       options.enableRag = config.rag.enabled;
-      options.enableEmbeddingModelsViaSagemaker =
-        config.rag.enableEmbeddingModelsViaSagemaker;
+      options.deployDefaultSagemakerModels =
+        config.rag.deployDefaultSagemakerModels;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) =>
           (
@@ -613,10 +614,10 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
-      name: "enableEmbeddingModelsViaSagemaker",
+      name: "deployDefaultSagemakerModels",
       message:
-        "Do you want to enable embedding and cross-encoder models via SageMaker?",
-      initial: options.enableEmbeddingModelsViaSagemaker || false,
+        "Do you want to deploy the default embedding and cross-encoder models via SageMaker?",
+      initial: options.deployDefaultSagemakerModels || false,
       skip(): boolean {
         return !(this as any).state.answers.enableRag;
       },
@@ -823,6 +824,14 @@ async function processCreateOptions(options: any): Promise<void> {
       choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
       initial: options.defaultEmbedding,
       validate(value: string) {
+        const embeding = embeddingModels.find((i) => i.name === value);
+        if (
+          embeding &&
+          (this as any).state.answers.deployDefaultSagemakerModels === false &&
+          embeding?.provider === "sagemaker"
+        ) {
+          return "SageMaker default models are not enabled. Please select another model.";
+        }
         if ((this as any).state.answers.enableRag) {
           return value ? true : "Select a default embedding model";
         }
@@ -1216,8 +1225,7 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     rag: {
       enabled: answers.enableRag,
-      enableEmbeddingModelsViaSagemaker:
-        answers.enableEmbeddingModelsViaSagemaker,
+      deployDefaultSagemakerModels: answers.deployDefaultSagemakerModels,
       engines: {
         aurora: {
           enabled: answers.ragsToEnable.includes("aurora"),
@@ -1236,25 +1244,29 @@ async function processCreateOptions(options: any): Promise<void> {
           external: [{}],
         },
       },
-      crossEncodingEnabled: answers.enableEmbeddingModelsViaSagemaker,
-      embeddingsModels: [{}],
-      crossEncoderModels: [{}],
+      embeddingsModels: [] as ModelConfig[],
+      crossEncoderModels: [] as ModelConfig[],
     },
   };
 
-  config.rag.crossEncoderModels[0] = {
-    provider: "sagemaker",
-    name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-    default: true,
-  };
-
-  if (!config.rag.enableEmbeddingModelsViaSagemaker) {
+  if (config.rag.enabled && config.rag.deployDefaultSagemakerModels) {
+    config.rag.crossEncoderModels[0] = {
+      provider: "sagemaker",
+      name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+      default: true,
+    };
+    config.rag.embeddingsModels = embeddingModels;
+  } else if (config.rag.enabled) {
     config.rag.embeddingsModels = embeddingModels.filter(
       (model) => model.provider !== "sagemaker"
     );
+    for (const model of config.rag.embeddingsModels) {
+      model.default = model.name === models.defaultEmbedding;
+    }
   } else {
-    config.rag.embeddingsModels = embeddingModels;
+    config.rag.embeddingsModels = [];
   }
+
   // If we have not enabled rag the default embedding is set to the first model
   if (!answers.enableRag) {
     (config.rag.embeddingsModels[0] as any).default = true;
