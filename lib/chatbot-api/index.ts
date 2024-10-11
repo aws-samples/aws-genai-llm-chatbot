@@ -34,7 +34,6 @@ export class ChatBotApi extends Construct {
   public readonly messagesTopic: sns.Topic;
   public readonly outBoundQueue: sqs.Queue;
   public readonly sessionsTable: dynamodb.Table;
-  public readonly byUserIdIndex: string;
   public readonly filesBucket: s3.Bucket;
   public readonly userFeedbackBucket: s3.Bucket;
   public readonly graphqlApi: appsync.GraphqlApi;
@@ -120,7 +119,6 @@ export class ChatBotApi extends Construct {
     const apiResolvers = new ApiResolvers(this, "RestApi", {
       ...props,
       sessionsTable: chatTables.sessionsTable,
-      byUserIdIndex: chatTables.byUserIdIndex,
       api,
       userFeedbackBucket: chatBuckets.userFeedbackBucket,
       filesBucket: chatBuckets.filesBucket,
@@ -158,7 +156,6 @@ export class ChatBotApi extends Construct {
     this.messagesTopic = realtimeBackend.messagesTopic;
     this.outBoundQueue = realtimeBackend.queue;
     this.sessionsTable = chatTables.sessionsTable;
-    this.byUserIdIndex = chatTables.byUserIdIndex;
     this.userFeedbackBucket = chatBuckets.userFeedbackBucket;
     this.filesBucket = chatBuckets.filesBucket;
     this.graphqlApi = api;

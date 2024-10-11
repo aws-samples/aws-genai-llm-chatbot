@@ -20,7 +20,6 @@ interface LangChainInterfaceProps {
   readonly ragEngines?: RagEngines;
   readonly messagesTopic: sns.Topic;
   readonly sessionsTable: dynamodb.Table;
-  readonly byUserIdIndex: string;
 }
 
 export class LangChainInterface extends Construct {
@@ -51,7 +50,6 @@ export class LangChainInterface extends Construct {
         ...props.shared.defaultEnvironmentVariables,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
         SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
-        SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
         API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
         MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
         WORKSPACES_TABLE_NAME:
