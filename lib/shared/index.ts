@@ -5,6 +5,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { Construct } from "constructs";
 import * as path from "path";
 import { Layer } from "../layer";
@@ -36,6 +37,7 @@ export class Shared extends Construct {
   readonly powerToolsLayer: lambda.ILayerVersion;
   readonly sharedCode: SharedAssetBundler;
   readonly s3vpcEndpoint: ec2.InterfaceVpcEndpoint;
+  readonly webACLRules: wafv2.CfnWebACL.RuleProperty[] = [];
 
   constructor(scope: Construct, id: string, props: SharedProps) {
     super(scope, id);
@@ -250,6 +252,8 @@ export class Shared extends Construct {
       }
     }
 
+    this.webACLRules = this.createWafRules(props.config.rateLimitPerIP ?? 400);
+
     const configParameter = new ssm.StringParameter(this, "Config", {
       stringValue: JSON.stringify(props.config),
     });
@@ -315,5 +319,33 @@ export class Shared extends Construct {
     NagSuppressions.addResourceSuppressions(apiKeysSecret, [
       { id: "AwsSolutions-SMG4", reason: "Secret value is blank." },
     ]);
+  }
+
+  private createWafRules(ratePerIP: number): wafv2.CfnWebACL.RuleProperty[] {
+    /**
+     * The rate limit is the maximum number of requests from a
+     * single IP address that are allowed in a ten-minute period.
+     * The IP address is automatically unblocked after it falls below the limit.
+     */
+    const ruleLimitRequests: wafv2.CfnWebACL.RuleProperty = {
+      name: "LimitRequestsPerIP",
+      priority: 10,
+      action: {
+        block: {},
+      },
+      statement: {
+        rateBasedStatement: {
+          limit: ratePerIP,
+          evaluationWindowSec: 60 * 10,
+          aggregateKeyType: "IP",
+        },
+      },
+      visibilityConfig: {
+        sampledRequestsEnabled: true,
+        cloudWatchMetricsEnabled: true,
+        metricName: "LimitRequestsPerIP",
+      },
+    };
+    return [ruleLimitRequests];
   }
 }
