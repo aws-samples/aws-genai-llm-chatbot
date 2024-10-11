@@ -33,26 +33,25 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
         self.user_id = user_id
         self.max_messages = max_messages  # Store max_messages
 
-
     def _get_full_history(self) -> List[BaseMessage]:
         """Query all messages from DynamoDB for the current session"""
         messages: List[BaseMessage] = []
-        response =  self.table.query(
+        response = self.table.query(
             KeyConditionExpression="#pk = :user_id AND begins_with(#sk, :session_prefix)",
             FilterExpression="#itemType = :itemType",
             ExpressionAttributeNames={
                 "#pk": "PK",
                 "#sk": "SK",
-                "#itemType": "ItemType"
+                "#itemType": "ItemType",
             },
             ScanIndexForward=True,
             ExpressionAttributeValues={
                 ":user_id": f"USER#{self.user_id}",
                 ":session_prefix": f"SESSION#{self.session_id}",
-                ":itemType": "message"
-            }
+                ":itemType": "message",
+            },
         )
-        items = response.get('Items', [])
+        items = response.get("Items", [])
 
         return items
 
@@ -64,13 +63,15 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
         # Hande case where max_messages is None
         if self.max_messages is None:
             self.max.messages = len(full_history_items)
-            
+
         # Slice before processing
-        relevant_items = full_history_items[-self.max_messages:]
+        relevant_items = full_history_items[-self.max_messages :]
 
         # Use itemgetter and list comprehension
-        get_history_data = itemgetter('History')
-        return [_message_from_dict(get_history_data(item) or '') for item in relevant_items]
+        get_history_data = itemgetter("History")
+        return [
+            _message_from_dict(get_history_data(item) or "") for item in relevant_items
+        ]
 
     def add_message(self, message: BaseMessage) -> None:
         """Append the message to the record in DynamoDB"""
@@ -93,22 +94,20 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 self.table.update_item(
                     Key={
                         "PK": f"USER#{self.user_id}",
-                        "SK": f"SESSION#{self.session_id}"
+                        "SK": f"SESSION#{self.session_id}",
                     },
                     UpdateExpression="SET LastUpdateTime = :time",
                     ConditionExpression="attribute_exists(PK)",
-                    ExpressionAttributeValues={
-                        ":time": current_time
-                    }
+                    ExpressionAttributeValues={":time": current_time},
                 )
             except ClientError as err:
-                if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                if err.response["Error"]["Code"] == "ConditionalCheckFailedException":
                     # Session doesn't exist, so create a new one
                     self.table.put_item(
                         Item={
                             "PK": f"USER#{self.user_id}",
                             "SK": f"SESSION#{self.session_id}",
-                            "Title":  _message_to_dict(message)
+                            "Title": _message_to_dict(message)
                             .get("data", {})
                             .get("content", "<no title>"),
                             "StartTime": current_time,
@@ -120,8 +119,6 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 else:
                     # If some other error occurs, re-raise the exception
                     raise
-
-
 
             self.table.put_item(
                 Item={
@@ -154,15 +151,11 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             self.table.update_item(
                 Key={
                     "PK": f"USER#{self.user_id}",
-                    "SK": f"SESSION#{self.session_id}#{most_recent_history['StartTime']}"
+                    "SK": f"SESSION#{self.session_id}#{most_recent_history['StartTime']}",
                 },
                 UpdateExpression="SET #data = :data",
-                ExpressionAttributeNames={
-                    "#data": "History"
-                },
-                ExpressionAttributeValues={
-                    ":data": most_recent_history["History"]
-                }
+                ExpressionAttributeNames={"#data": "History"},
+                ExpressionAttributeValues={":data": most_recent_history["History"]},
             )
 
         except Exception as err:

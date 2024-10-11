@@ -14,6 +14,7 @@ dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
 table = dynamodb.Table(SESSIONS_TABLE_NAME)
 logger = Logger()
 
+
 def _get_messages_by_session_id(session_id, user_id):
     items = []
     try:
@@ -23,33 +24,30 @@ def _get_messages_by_session_id(session_id, user_id):
             ExpressionAttributeNames={
                 "#pk": "PK",
                 "#sk": "SK",
-                "#item_type": "ItemType"
+                "#item_type": "ItemType",
             },
             ExpressionAttributeValues={
-                ':user_id': f'USER#{user_id}',
-                ':session_prefix': f'SESSION#{session_id}',
-                ':session_type': 'message'
+                ":user_id": f"USER#{user_id}",
+                ":session_prefix": f"SESSION#{session_id}",
+                ":session_type": "message",
             },
-            ScanIndexForward=True
+            ScanIndexForward=True,
         )
 
-        items = response.get('Items', [])
+        items = response.get("Items", [])
 
         # If there are more items, continue querying
-        while 'LastEvaluatedKey' in response:
+        while "LastEvaluatedKey" in response:
             response = table.query(
                 KeyConditionExpression="#pk = :user_id AND begins_with(#sk, :session_prefix)",
-                ExpressionAttributeNames={
-                    "#pk": "PK",
-                    "#sk": "SK"
-                },
+                ExpressionAttributeNames={"#pk": "PK", "#sk": "SK"},
                 ExpressionAttributeValues={
-                    ':user_id': f'USER#{user_id}',
-                    ':session_prefix': f'SESSION#{session_id}'
+                    ":user_id": f"USER#{user_id}",
+                    ":session_prefix": f"SESSION#{session_id}",
                 },
-                ScanIndexForward=True
+                ScanIndexForward=True,
             )
-            items.extend(response.get('Items', []))
+            items.extend(response.get("Items", []))
 
     except ClientError as error:
         if error.response["Error"]["Code"] == "ResourceNotFoundException":
@@ -58,6 +56,7 @@ def _get_messages_by_session_id(session_id, user_id):
             logger.exception(error)
 
     return items
+
 
 def get_session(session_id, user_id):
     try:
@@ -72,11 +71,10 @@ def get_session(session_id, user_id):
         }
 
         for item in items:
-            if 'ItemType' in item:
-                if item['ItemType'] == 'message':
-                    returnItem['History'].append(item['History'])
-                    returnItem['StartTime']= item['StartTime']
-
+            if "ItemType" in item:
+                if item["ItemType"] == "message":
+                    returnItem["History"].append(item["History"])
+                    returnItem["StartTime"] = item["StartTime"]
 
     except ClientError as error:
         if error.response["Error"]["Code"] == "ResourceNotFoundException":
@@ -85,6 +83,7 @@ def get_session(session_id, user_id):
             logger.exception(error)
 
     return returnItem
+
 
 def list_sessions_by_user_id(user_id: str) -> List[Dict[str, Any]]:
     """
@@ -106,13 +105,13 @@ def list_sessions_by_user_id(user_id: str) -> List[Dict[str, Any]]:
                 "ExpressionAttributeNames": {
                     "#pk": "PK",
                     "#sk": "SK",
-                    "#item_type": "ItemType"
+                    "#item_type": "ItemType",
                 },
                 "ExpressionAttributeValues": {
                     ":user_id": f"USER#{user_id}",
                     ":session_prefix": "SESSION#",
-                    ":session_type": "session"
-                }
+                    ":session_type": "session",
+                },
             }
 
             if last_evaluated_key:
@@ -134,6 +133,7 @@ def list_sessions_by_user_id(user_id: str) -> List[Dict[str, Any]]:
             logger.exception(f"Error retrieving sessions for user {user_id}: {error}")
 
     return session_items
+
 
 def delete_session(session_id, user_id):
     try:
@@ -170,7 +170,6 @@ def delete_session(session_id, user_id):
     return {"id": session_id, "deleted": True}
 
 
-
 def delete_user_sessions(user_id):
     try:
         sessions = list_sessions_by_user_id(user_id)  # Get all sessions for the user
@@ -178,7 +177,9 @@ def delete_user_sessions(user_id):
 
         for session in sessions:
             # Extract the session ID from the SK (assuming SK is in the format 'SESSION#<session_id>')
-            session_id = session["SK"].split("#")[1]  # Extracting session ID from 'SESSION#<session_id>'
+            session_id = session["SK"].split("#")[
+                1
+            ]  # Extracting session ID from 'SESSION#<session_id>'
 
             # Delete each session
             result = delete_session(session_id, user_id)
