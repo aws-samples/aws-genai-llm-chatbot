@@ -975,36 +975,22 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       "Properties": {
         "AttributeDefinitions": [
           {
-            "AttributeName": "SessionId",
+            "AttributeName": "PK",
             "AttributeType": "S",
           },
           {
-            "AttributeName": "UserId",
+            "AttributeName": "SK",
             "AttributeType": "S",
           },
         ],
         "BillingMode": "PAY_PER_REQUEST",
-        "GlobalSecondaryIndexes": [
-          {
-            "IndexName": "byUserId",
-            "KeySchema": [
-              {
-                "AttributeName": "UserId",
-                "KeyType": "HASH",
-              },
-            ],
-            "Projection": {
-              "ProjectionType": "ALL",
-            },
-          },
-        ],
         "KeySchema": [
           {
-            "AttributeName": "SessionId",
+            "AttributeName": "PK",
             "KeyType": "HASH",
           },
           {
-            "AttributeName": "UserId",
+            "AttributeName": "SK",
             "KeyType": "RANGE",
           },
         ],
@@ -3273,7 +3259,6 @@ schema {
                 "EndpointName",
               ],
             },
-            "SESSIONS_BY_USER_ID_INDEX_NAME": "byUserId",
             "SESSIONS_TABLE_NAME": {
               "Ref": "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
             },
@@ -3872,18 +3857,7 @@ schema {
                   ],
                 },
                 {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
-                          "Arn",
-                        ],
-                      },
-                      "/index/*",
-                    ],
-                  ],
+                  "Ref": "AWS::NoValue",
                 },
               ],
             },
@@ -5036,7 +5010,6 @@ schema {
                 "EndpointName",
               ],
             },
-            "SESSIONS_BY_USER_ID_INDEX_NAME": "byUserId",
             "SESSIONS_TABLE_NAME": {
               "Ref": "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
             },
@@ -5329,18 +5302,7 @@ schema {
                   ],
                 },
                 {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
-                          "Arn",
-                        ],
-                      },
-                      "/index/*",
-                    ],
-                  ],
+                  "Ref": "AWS::NoValue",
                 },
               ],
             },
@@ -5838,7 +5800,6 @@ schema {
                 "EndpointName",
               ],
             },
-            "SESSIONS_BY_USER_ID_INDEX_NAME": "byUserId",
             "SESSIONS_TABLE_NAME": {
               "Ref": "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
             },
@@ -6274,18 +6235,7 @@ schema {
                   ],
                 },
                 {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
-                          "Arn",
-                        ],
-                      },
-                      "/index/*",
-                    ],
-                  ],
+                  "Ref": "AWS::NoValue",
                 },
               ],
             },

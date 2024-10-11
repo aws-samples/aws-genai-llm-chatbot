@@ -18,7 +18,7 @@ export class ChatBotDynamoDBTables extends Construct {
     // Create the sessions table with a partition key of USER#<UUID>
     // and a sort key of SK of SESSION#<Unique Session ID>>
     // No need to the global secondary index for this table
-    const sessionsTable = new dynamodb.Table(this, "SessionTable", {
+    const sessionsTable = new dynamodb.Table(this, "SessionsTable", {
       partitionKey: {
         name: "PK",
         type: dynamodb.AttributeType.STRING,
