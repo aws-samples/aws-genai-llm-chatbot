@@ -212,6 +212,8 @@ const embeddingModels: ModelConfig[] = [
       options.advancedMonitoring = config.advancedMonitoring;
       options.createVpcEndpoints = config.vpc?.createVpcEndpoints;
       options.logRetention = config.logRetention;
+      options.rateLimitPerAIP = config.rateLimitPerIP;
+      options.llmRateLimitPerIP = config.llms.rateLimitPerIP;
       options.privateWebsite = config.privateWebsite;
       options.certificate = config.certificate;
       options.domain = config.domain;
@@ -300,7 +302,7 @@ async function processCreateOptions(options: any): Promise<void> {
       name: "createCMKs",
       message:
         "Do you want to create KMS Customer Managed Keys (CMKs)? (It will be used to encrypt the data at rest.)",
-      initial: true,
+      initial: options.createCMKs ?? true,
       hint: "It is recommended but enabling it on an existing environment will cause the re-creation of some of the resources (for example Aurora cluster, Open Search collection). To prevent data loss, it is recommended to use it on a new environment or at least enable retain on cleanup (needs to be deployed before enabling the use of CMK). For more information on Aurora migration, please refer to the documentation.",
     },
     {
@@ -308,7 +310,7 @@ async function processCreateOptions(options: any): Promise<void> {
       name: "retainOnDelete",
       message:
         "Do you want to retain data stores on cleanup of the project (Logs, S3, Tables, Indexes, Cognito User pools)?",
-      initial: true,
+      initial: options.retainOnDelete ?? true,
       hint: "It reduces the risk of deleting data. It will however not delete all the resources on cleanup (would require manual removal if relevant)",
     },
     {
@@ -853,6 +855,38 @@ async function processCreateOptions(options: any): Promise<void> {
   const advancedSettingsPrompts = [
     {
       type: "input",
+      name: "llmRateLimitPerIP",
+      message:
+        "What is the allowed rate per IP for Gen AI calls (over 10 minutes)? This is used by the SendQuery mutation only",
+      initial: options.llmRateLimitPerIP
+        ? String(options.llmRateLimitPerIP)
+        : "100",
+      validate(value: string) {
+        if (Number(value) >= 10) {
+          return true;
+        } else {
+          return "Should be more than 10";
+        }
+      },
+    },
+    {
+      type: "input",
+      name: "rateLimitPerIP",
+      message:
+        "What the allowed per IP for all calls (over 10 minutes)? This is used by the all the AppSync APIs and CloudFront",
+      initial: options.rateLimitPerAIP
+        ? String(options.rateLimitPerAIP)
+        : "400",
+      validate(value: string) {
+        if (Number(value) >= 10) {
+          return true;
+        } else {
+          return "Should be more than 10";
+        }
+      },
+    },
+    {
+      type: "input",
       name: "logRetention",
       message: "For how long do you want to store the logs (in days)?",
       initial: options.logRetention ? String(options.logRetention) : "7",
@@ -897,7 +931,7 @@ async function processCreateOptions(options: any): Promise<void> {
       name: "customPublicDomain",
       message:
         "Do you want to provide a custom domain name and corresponding certificate arn for the public website ?",
-      initial: options.customPublicDomain || false,
+      initial: options.domain ? true : false,
       skip(): boolean {
         return (this as any).state.answers.privateWebsite;
       },
@@ -1160,6 +1194,9 @@ async function processCreateOptions(options: any): Promise<void> {
     logRetention: advancedSettings.logRetention
       ? Number(advancedSettings.logRetention)
       : undefined,
+    rateLimitPerAIP: advancedSettings?.rateLimitPerIP
+      ? Number(advancedSettings?.rateLimitPerIP)
+      : undefined,
     certificate: advancedSettings.certificate,
     domain: advancedSettings.domain,
     cognitoFederation: advancedSettings.cognitoFederationEnabled
@@ -1206,6 +1243,9 @@ async function processCreateOptions(options: any): Promise<void> {
       : undefined,
     llms: {
       enableSagemakerModels: answers.enableSagemakerModels,
+      rateLimitPerAIP: advancedSettings?.llmRateLimitPerIP
+        ? Number(advancedSettings?.llmRateLimitPerIP)
+        : undefined,
       sagemaker: answers.sagemakerModels,
       huggingfaceApiSecretArn: answers.huggingfaceApiSecretArn,
       sagemakerSchedule: answers.enableSagemakerModelsSchedule
