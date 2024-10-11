@@ -94,24 +94,24 @@ class BedrockChatAdapter(ModelAdapter):
     def get_llm(self, model_kwargs={}, extra={}):
         bedrock = genai_core.clients.get_bedrock_client()
         params = {}
-    
+
         # Collect temperature, topP, and maxTokens if available
         temperature = model_kwargs.get("temperature")
         top_p = model_kwargs.get("topP")
         max_tokens = model_kwargs.get("maxTokens")
-    
+
         if temperature:
             params["temperature"] = temperature
         if top_p:
             params["top_p"] = top_p
         if max_tokens:
             params["max_tokens"] = max_tokens
-    
+
         # Fetch guardrails if any
         guardrails = get_guardrails()
         if len(guardrails.keys()) > 0:
             params["guardrails"] = guardrails
-    
+
         # Log all parameters in a single log entry, including full guardrails
         logger.info(
             f"Creating LLM chain for model {self.model_id}",
@@ -121,7 +121,7 @@ class BedrockChatAdapter(ModelAdapter):
             max_tokens=max_tokens,
             guardrails=guardrails,
         )
-    
+
         # Return ChatBedrockConverse instance with the collected params
         return ChatBedrockConverse(
             client=bedrock,

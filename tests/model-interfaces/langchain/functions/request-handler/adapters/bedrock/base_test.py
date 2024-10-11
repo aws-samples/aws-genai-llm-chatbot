@@ -7,7 +7,6 @@ from langchain_core.messages.human import HumanMessage
 from adapters.shared.prompts.system_prompts import prompts  # Ajout de l'importation
 
 
-
 def test_registry():
     with pytest.raises(ValueError, match="not found"):
         registry.get_adapter("invalid")
@@ -37,7 +36,7 @@ def test_chat_adapter(mocker):
     result = model.get_qa_prompt().format(
         input="input", context="context", chat_history=[HumanMessage(content="history")]
     )
-    # Mise à jour de l'assertion pour correspondre au prompt anglais dans system_prompts.py
+
     assert "Use the following pieces of context" in result
     assert "Human: history" in result
     assert "Human: input" in result
@@ -45,7 +44,7 @@ def test_chat_adapter(mocker):
     result = model.get_prompt().format(
         input="input", chat_history=[HumanMessage(content="history")]
     )
-    # Mise à jour de l'assertion pour correspondre au prompt anglais dans system_prompts.py
+
     assert "The following is a friendly conversation" in result
     assert "Human: history" in result
     assert "Human: input" in result
@@ -53,7 +52,7 @@ def test_chat_adapter(mocker):
     result = model.get_condense_question_prompt().format(
         input="input", chat_history=[HumanMessage(content="history")]
     )
-    # Mise à jour de l'assertion pour correspondre au prompt anglais dans system_prompts.py
+
     assert "Given the conversation inside the tags" in result
     assert "Human: history" in result
     assert "Human: input" in result
@@ -119,4 +118,3 @@ def test_chat_without_system_adapter(mocker):
         model="model",
         callbacks=ANY,
     )
-

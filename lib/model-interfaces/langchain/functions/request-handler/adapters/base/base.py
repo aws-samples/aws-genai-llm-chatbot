@@ -40,6 +40,7 @@ logger = Logger()
 class Mode(Enum):
     CHAIN = "chain"
 
+
 def get_guardrails() -> dict:
     if "BEDROCK_GUARDRAILS_ID" in os.environ:
         logger.debug("Guardrails ID found in environment variables.")
@@ -593,12 +594,8 @@ class PromptTemplateWithHistory(PromptTemplate):
 
 # Register the adapters
 registry.register(r"^bedrock.ai21.jamba*", BedrockChatAdapter)
-registry.register(
-    r"^bedrock.ai21.j2*", BedrockChatNoStreamingNoSystemPromptAdapter
-)
-registry.register(
-    r"^bedrock\.cohere\.command-(text|light-text).*", BedrockChatNoSystemPromptAdapter
-)
+registry.register(r"^bedrock.ai21.j2*", BedrockChatNoStreamingNoSystemPromptAdapter)
+registry.register(r"^bedrock\.cohere\.command-(text|light-text).*", BedrockChatNoSystemPromptAdapter)
 registry.register(r"^bedrock\.cohere\.command-r.*", BedrockChatAdapter)
 registry.register(r"^bedrock.anthropic.claude*", BedrockChatAdapter)
 registry.register(r"^bedrock.meta.llama*", BedrockChatAdapter)
