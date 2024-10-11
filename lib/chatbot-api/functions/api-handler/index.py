@@ -7,6 +7,7 @@ from aws_lambda_powertools.event_handler import (
 from pydantic import ValidationError
 
 from genai_core.types import CommonError
+from genai_core.parameters import load_all_from_ssm
 from routes.health import router as health_router
 from routes.embeddings import router as embeddings_router
 from routes.cross_encoders import router as cross_encoders_router
@@ -44,7 +45,9 @@ app.include_router(bedrock_kb_router)
 )
 @tracer.capture_lambda_handler
 def handler(event: dict, context: LambdaContext) -> dict:
+
     try:
+        load_all_from_ssm()
         logger.info(
             "Incoming request for " + event["info"]["fieldName"],
             arguments=event["arguments"],

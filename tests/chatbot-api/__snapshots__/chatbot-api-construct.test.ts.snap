@@ -209,6 +209,98 @@ exports[`snapshot test 1`] = `
         "value": "nodejs20.x",
       },
     },
+    "ParamsandsecretslayerMap": {
+      "af-south-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:af-south-1:317013901791:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-east-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-east-1:768336418462:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-northeast-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-northeast-1:133490724326:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-northeast-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-northeast-2:738900069198:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-northeast-3": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-northeast-3:576959938190:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-south-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-south-1:176022468876:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-south-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-south-2:070087711984:layer:AWS-Parameters-and-Secrets-Lambda-Extension:1",
+      },
+      "ap-southeast-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-southeast-1:044395824272:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-southeast-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-southeast-2:665172237481:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ap-southeast-3": {
+        "1x0x103xx86x64": "arn:aws:lambda:ap-southeast-3:490737872127:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "ca-central-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:ca-central-1:200266452380:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "cn-north-1": {
+        "1x0x103xx86x64": "arn:aws-cn:lambda:cn-north-1:287114880934:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "cn-northwest-1": {
+        "1x0x103xx86x64": "arn:aws-cn:lambda:cn-northwest-1:287310001119:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "eu-central-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-central-1:187925254637:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "eu-central-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-central-2:772501565639:layer:AWS-Parameters-and-Secrets-Lambda-Extension:1",
+      },
+      "eu-north-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-north-1:427196147048:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "eu-south-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-south-1:325218067255:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "eu-south-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-south-2:524103009944:layer:AWS-Parameters-and-Secrets-Lambda-Extension:1",
+      },
+      "eu-west-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-west-1:015030872274:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "eu-west-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-west-2:133256977650:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "eu-west-3": {
+        "1x0x103xx86x64": "arn:aws:lambda:eu-west-3:780235371811:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "me-central-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:me-central-1:858974508948:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "me-south-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:me-south-1:832021897121:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "sa-east-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:sa-east-1:933737806257:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "us-east-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "us-east-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:us-east-2:590474943231:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "us-gov-east-1": {
+        "1x0x103xx86x64": "arn:aws-us-gov:lambda:us-gov-east-1:129776340158:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "us-gov-west-1": {
+        "1x0x103xx86x64": "arn:aws-us-gov:lambda:us-gov-west-1:127562683043:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "us-west-1": {
+        "1x0x103xx86x64": "arn:aws:lambda:us-west-1:997803712105:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+      "us-west-2": {
+        "1x0x103xx86x64": "arn:aws:lambda:us-west-2:345057560386:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+      },
+    },
     "RagEnginesSageMakerModelImageRepositoryCfnMappingF3891114": {
       "af-south-1": {
         "account": "626614931356",
@@ -3235,6 +3327,19 @@ schema {
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },
+    "ChatBotApiConstructRestApiAURORADBHOST81276288": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/AURORA_DB_HOST",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+            "Endpoint.Address",
+          ],
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
     "ChatBotApiConstructRestApiApiSecurityGroup01DF524F": {
       "Properties": {
         "GroupDescription": "Default/ChatBotApiConstruct/RestApi/ApiSecurityGroup",
@@ -3250,6 +3355,56 @@ schema {
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ChatBotApiConstructRestApiCREATEAURORAWORKSPACEWORKFLOWARN377682C7": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/CREATE_AURORA_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesAuroraPgVectorCreateAuroraWorkspace50EFF4E7",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiConstructRestApiCREATEKENDRAWORKSPACEWORKFLOWARN870B17B3": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesKendraRetrievalCreateKendraWorkspace5D8DE7EF",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiConstructRestApiCREATEOPENSEARCHWORKSPACEWORKFLOWARN306193C2": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesOpenSearchVectorCreateOpenSearchWorkspace2B2FCA5B",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiConstructRestApiDELETEDOCUMENTWORKFLOWARN95F1EED0": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/DELETE_DOCUMENT_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesWorkspacesDeleteDocumentA1FD6471",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiConstructRestApiDELETEWORKSPACEWORKFLOWARN2BE6FC41": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/DELETE_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesWorkspacesDeleteWorkspace6908C6DA",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
     },
     "ChatBotApiConstructRestApiGraphQLApiHandlerA19E8192": {
       "DependsOn": [
@@ -3276,12 +3431,6 @@ schema {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
-            "AURORA_DB_HOST": {
-              "Fn::GetAtt": [
-                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
-                "Endpoint.Address",
-              ],
-            },
             "AURORA_DB_PORT": {
               "Fn::GetAtt": [
                 "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -3295,15 +3444,6 @@ schema {
             },
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
-            },
-            "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesAuroraPgVectorCreateAuroraWorkspace50EFF4E7",
-            },
-            "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesKendraRetrievalCreateKendraWorkspace5D8DE7EF",
-            },
-            "CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesOpenSearchVectorCreateOpenSearchWorkspace2B2FCA5B",
             },
             "DEFAULT_KENDRA_INDEX_ID": {
               "Fn::GetAtt": [
@@ -3321,12 +3461,6 @@ schema {
                 "Id",
               ],
             },
-            "DELETE_DOCUMENT_WORKFLOW_ARN": {
-              "Ref": "RagEnginesWorkspacesDeleteDocumentA1FD6471",
-            },
-            "DELETE_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesWorkspacesDeleteWorkspace6908C6DA",
-            },
             "DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME": "by_compound_key_idx",
             "DOCUMENTS_BY_STATUS_INDEX": "by_status_idx",
             "DOCUMENTS_TABLE_NAME": {
@@ -3335,6 +3469,8 @@ schema {
             "FILE_IMPORT_WORKFLOW_ARN": {
               "Ref": "RagEnginesDataImportFileImportWorkflowFileImportStateMachine398F0217",
             },
+            "LOAD_FROM_SSM": "AURORA_DB_HOST,DELETE_WORKSPACE_WORKFLOW_ARN,DELETE_DOCUMENT_WORKFLOW_ARN,CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN",
+            "LOAD_FROM_SSM_PREFIX": "/prefix/GraphQLApiHandler/",
             "LOG_LEVEL": "INFO",
             "MODELS_PARAMETER_NAME": {
               "Ref": "ModelsModelsParameter4A14799B",
@@ -3345,6 +3481,11 @@ schema {
                 "CollectionEndpoint",
               ],
             },
+            "PARAMETERS_SECRETS_EXTENSION_CACHE_ENABLED": "true",
+            "PARAMETERS_SECRETS_EXTENSION_CACHE_SIZE": "500",
+            "PARAMETERS_SECRETS_EXTENSION_HTTP_PORT": "2773",
+            "PARAMETERS_SECRETS_EXTENSION_LOG_LEVEL": "info",
+            "PARAMETERS_SECRETS_EXTENSION_MAX_CONNECTIONS": "3",
             "POWERTOOLS_DEV": "false",
             "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
@@ -3364,10 +3505,14 @@ schema {
                 "EndpointName",
               ],
             },
+            "SECRETS_MANAGER_TIMEOUT_MILLIS": "0",
+            "SECRETS_MANAGER_TTL": "300",
             "SESSIONS_BY_USER_ID_INDEX_NAME": "byUserId",
             "SESSIONS_TABLE_NAME": {
               "Ref": "ChatBotApiConstructChatDynamoDBTablesSessionsTableD81EF9A7",
             },
+            "SSM_PARAMETER_STORE_TIMEOUT_MILLIS": "0",
+            "SSM_PARAMETER_STORE_TTL": "300",
             "UPLOAD_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportUploadBucket061D697E",
             },
@@ -3406,6 +3551,15 @@ schema {
           },
           {
             "Ref": "SharedCommonLayerFC89CBCE",
+          },
+          {
+            "Fn::FindInMap": [
+              "ParamsandsecretslayerMap",
+              {
+                "Ref": "AWS::Region",
+              },
+              "1x0x103xx86x64",
+            ],
           },
         ],
         "LoggingConfig": {
@@ -3529,6 +3683,26 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/prefix/GraphQLApiHandler/*",
+                  ],
+                ],
+              },
+            },
             {
               "Action": [
                 "dynamodb:BatchGetItem",

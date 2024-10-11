@@ -40,6 +40,36 @@ export class ApiResolvers extends Construct {
       vpc: props.shared.vpc,
     });
 
+    // Lambda has a size limit of 4KB in the env variables.
+    // To reduce the size, store verbose values in SSM Parameter store.
+    // Only a subset is using this method because env varibale are faster
+    const parameterStores: { [key: string]: string } = {
+      AURORA_DB_HOST:
+        props.ragEngines?.auroraPgVector?.database?.clusterEndpoint?.hostname ??
+        "None",
+      DELETE_WORKSPACE_WORKFLOW_ARN:
+        props.ragEngines?.deleteWorkspaceWorkflow?.stateMachineArn ?? "None",
+      DELETE_DOCUMENT_WORKFLOW_ARN:
+        props.ragEngines?.deleteDocumentWorkflow?.stateMachineArn ?? "None",
+      CREATE_AURORA_WORKSPACE_WORKFLOW_ARN:
+        props.ragEngines?.auroraPgVector?.createAuroraWorkspaceWorkflow
+          ?.stateMachineArn ?? "None",
+      CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN:
+        props.ragEngines?.openSearchVector?.createOpenSearchWorkspaceWorkflow
+          ?.stateMachineArn ?? "None",
+      CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN:
+        props.ragEngines?.kendraRetrieval?.createKendraWorkspaceWorkflow
+          ?.stateMachineArn ?? "None",
+    };
+
+    const ssmPrefix = "/" + props.config.prefix + "/GraphQLApiHandler/";
+
+    for (const parameter in parameterStores) {
+      new ssm.StringParameter(this, parameter, {
+        parameterName: ssmPrefix + parameter,
+        stringValue: parameterStores[parameter],
+      });
+    }
     const appSyncLambdaResolver = new lambda.Function(
       this,
       "GraphQLApiHandler",
@@ -62,8 +92,21 @@ export class ApiResolvers extends Construct {
         vpc: props.shared.vpc,
         securityGroups: [apiSecurityGroup],
         vpcSubnets: props.shared.vpc.privateSubnets as ec2.SubnetSelection,
+        paramsAndSecrets: lambda.ParamsAndSecretsLayerVersion.fromVersion(
+          lambda.ParamsAndSecretsVersions.V1_0_103,
+          {
+            cacheSize: 500,
+            logLevel: lambda.ParamsAndSecretsLogLevel.INFO,
+          }
+        ),
         environment: {
           ...props.shared.defaultEnvironmentVariables,
+          LOAD_FROM_SSM_PREFIX: ssmPrefix,
+          LOAD_FROM_SSM: Object.keys(parameterStores).join(","),
+          AURORA_DB_USER: AURORA_DB_USERS.READ_ONLY.toString(),
+          AURORA_DB_PORT:
+            props.ragEngines?.auroraPgVector?.database?.clusterEndpoint?.port +
+            "",
           CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
           MODELS_PARAMETER_NAME: props.modelsParameter.parameterName,
           X_ORIGIN_VERIFY_SECRET_ARN:
@@ -76,13 +119,6 @@ export class ApiResolvers extends Construct {
           CHATBOT_FILES_BUCKET_NAME: props.filesBucket.bucketName,
           PROCESSING_BUCKET_NAME:
             props.ragEngines?.processingBucket?.bucketName ?? "",
-          AURORA_DB_USER: AURORA_DB_USERS.READ_ONLY,
-          AURORA_DB_HOST:
-            props.ragEngines?.auroraPgVector?.database?.clusterEndpoint
-              ?.hostname ?? "",
-          AURORA_DB_PORT:
-            props.ragEngines?.auroraPgVector?.database?.clusterEndpoint?.port +
-            "",
           WORKSPACES_TABLE_NAME:
             props.ragEngines?.workspacesTable.tableName ?? "",
           WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME:
@@ -96,19 +132,6 @@ export class ApiResolvers extends Construct {
           SAGEMAKER_RAG_MODELS_ENDPOINT:
             props.ragEngines?.sageMakerRagModels?.model.endpoint
               ?.attrEndpointName ?? "",
-          DELETE_WORKSPACE_WORKFLOW_ARN:
-            props.ragEngines?.deleteWorkspaceWorkflow?.stateMachineArn ?? "",
-          DELETE_DOCUMENT_WORKFLOW_ARN:
-            props.ragEngines?.deleteDocumentWorkflow?.stateMachineArn ?? "",
-          CREATE_AURORA_WORKSPACE_WORKFLOW_ARN:
-            props.ragEngines?.auroraPgVector?.createAuroraWorkspaceWorkflow
-              ?.stateMachineArn ?? "",
-          CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN:
-            props.ragEngines?.openSearchVector
-              ?.createOpenSearchWorkspaceWorkflow?.stateMachineArn ?? "",
-          CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN:
-            props.ragEngines?.kendraRetrieval?.createKendraWorkspaceWorkflow
-              ?.stateMachineArn ?? "",
           FILE_IMPORT_WORKFLOW_ARN:
             props.ragEngines?.fileImportWorkflow?.stateMachineArn ?? "",
           WEBSITE_CRAWLING_WORKFLOW_ARN:
@@ -130,6 +153,20 @@ export class ApiResolvers extends Construct {
         },
       }
     );
+
+    appSyncLambdaResolver.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [
+          `arn:aws:ssm:${cdk.Stack.of(scope).region}:${
+            cdk.Stack.of(scope).account
+          }:parameter` +
+            ssmPrefix +
+            "*",
+        ],
+      })
+    );
+
     this.appSyncLambdaResolver = appSyncLambdaResolver;
 
     function addPermissions(apiHandler: lambda.Function) {
