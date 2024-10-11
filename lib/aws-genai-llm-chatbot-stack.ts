@@ -158,7 +158,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       userPoolClientId: authentication.userPoolClient.userPoolClientId,
       api: chatBotApi,
       chatbotFilesBucket: chatBotApi.filesBucket,
-      uploadBucket: ragEngines?.uploadBucket,
       crossEncodersEnabled:
         typeof ragEngines?.sageMakerRagModels?.model !== "undefined",
       sagemakerEmbeddingsEnabled:

@@ -25,7 +25,6 @@ export interface UserInterfaceProps {
   readonly userPoolClient: cognito.UserPoolClient;
   readonly api: ChatBotApi;
   readonly chatbotFilesBucket: s3.Bucket;
-  readonly uploadBucket?: s3.Bucket;
   readonly crossEncodersEnabled: boolean;
   readonly sagemakerEmbeddingsEnabled: boolean;
 }
@@ -57,12 +56,8 @@ export class UserInterface extends Construct {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       autoDeleteObjects: true,
       bucketName: props.config.privateWebsite ? props.config.domain : undefined,
-      websiteIndexDocument: props.config.privateWebsite
-        ? "index.html"
-        : undefined,
-      websiteErrorDocument: props.config.privateWebsite
-        ? "index.html"
-        : undefined,
+      websiteIndexDocument: "index.html",
+      websiteErrorDocument: "index.html",
       enforceSSL: true,
       serverAccessLogsBucket: uploadLogsBucket,
       // Cloudfront with OAI only supports S3 Managed Key (would need to migrate to OAC)
@@ -85,8 +80,6 @@ export class UserInterface extends Construct {
       const publicWebsite = new PublicWebsite(this, "PublicWebsite", {
         ...props,
         websiteBucket: websiteBucket,
-        chatbotFilesBucket: props.chatbotFilesBucket,
-        uploadBucket: props.uploadBucket,
       });
       this.cloudFrontDistribution = publicWebsite.distribution;
       this.publishedDomain = props.config.domain
