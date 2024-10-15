@@ -1,9 +1,7 @@
 import os
 from aws_lambda_powertools import Logger
 import boto3
-import json
 from botocore.exceptions import ClientError
-from boto3.dynamodb.conditions import Key, Attr
 from typing import List, Dict, Any
 
 AWS_REGION = os.environ["AWS_REGION"]
@@ -19,7 +17,9 @@ def _get_messages_by_session_id(session_id, user_id):
     items = []
     try:
         response = table.query(
-            KeyConditionExpression="#pk = :user_id AND begins_with(#sk, :session_prefix)",
+            KeyConditionExpression=(
+                "#pk = :user_id AND begins_with(#sk, :session_prefix)"
+            ),
             FilterExpression="#item_type = :session_type",
             ExpressionAttributeNames={
                 "#pk": "PK",
@@ -39,7 +39,9 @@ def _get_messages_by_session_id(session_id, user_id):
         # If there are more items, continue querying
         while "LastEvaluatedKey" in response:
             response = table.query(
-                KeyConditionExpression="#pk = :user_id AND begins_with(#sk, :session_prefix)",
+                KeyConditionExpression=(
+                    "#pk = :user_id AND begins_with(#sk, :session_prefix)"
+                ),
                 ExpressionAttributeNames={"#pk": "PK", "#sk": "SK"},
                 ExpressionAttributeValues={
                     ":user_id": f"USER#{user_id}",
@@ -100,7 +102,9 @@ def list_sessions_by_user_id(user_id: str) -> List[Dict[str, Any]]:
         last_evaluated_key = None
         while True:
             query_params = {
-                "KeyConditionExpression": "#pk = :user_id AND begins_with(#sk, :session_prefix)",
+                "KeyConditionExpression": (
+                    "#pk = :user_id AND begins_with(#sk, :session_prefix)"
+                ),
                 "FilterExpression": "#item_type = :session_type",
                 "ExpressionAttributeNames": {
                     "#pk": "PK",
@@ -176,7 +180,8 @@ def delete_user_sessions(user_id):
         ret_value = []
 
         for session in sessions:
-            # Extract the session ID from the SK (assuming SK is in the format 'SESSION#<session_id>')
+            # Extract the session ID from the SK
+            # (assuming SK is in the format 'SESSION#<session_id>')
             session_id = session["SK"].split("#")[
                 1
             ]  # Extracting session ID from 'SESSION#<session_id>'

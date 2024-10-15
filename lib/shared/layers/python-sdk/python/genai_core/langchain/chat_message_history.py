@@ -35,9 +35,10 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
 
     def _get_full_history(self) -> List[BaseMessage]:
         """Query all messages from DynamoDB for the current session"""
-        messages: List[BaseMessage] = []
         response = self.table.query(
-            KeyConditionExpression="#pk = :user_id AND begins_with(#sk, :session_prefix)",
+            KeyConditionExpression=(
+                "#pk = :user_id AND begins_with(#sk, :session_prefix)"
+            ),
             FilterExpression="#itemType = :itemType",
             ExpressionAttributeNames={
                 "#pk": "PK",
@@ -151,11 +152,18 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
             self.table.update_item(
                 Key={
                     "PK": f"USER#{self.user_id}",
-                    "SK": f"SESSION#{self.session_id}#{most_recent_history['StartTime']}",
+                    "SK": (
+                        f"SESSION#{self.session_id}"
+                        f"#{most_recent_history['StartTime']}"
+                    ),
                 },
                 UpdateExpression="SET #data = :data",
-                ExpressionAttributeNames={"#data": "History"},
-                ExpressionAttributeValues={":data": most_recent_history["History"]},
+                ExpressionAttributeNames={
+                    "#data": "History"
+                },
+                ExpressionAttributeValues={
+                    ":data": most_recent_history["History"]
+                },
             )
 
         except Exception as err:
