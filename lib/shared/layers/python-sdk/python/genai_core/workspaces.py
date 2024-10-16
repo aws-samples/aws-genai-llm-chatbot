@@ -16,16 +16,6 @@ WORKSPACES_TABLE_NAME = os.environ.get("WORKSPACES_TABLE_NAME")
 WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME = os.environ.get(
     "WORKSPACES_BY_OBJECT_TYPE_INDEX_NAME"
 )
-CREATE_AURORA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
-    "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN"
-)
-CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN = os.environ.get(
-    "CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN"
-)
-CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN = os.environ.get(
-    "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN"
-)
-DELETE_WORKSPACE_WORKFLOW_ARN = os.environ.get("DELETE_WORKSPACE_WORKFLOW_ARN")
 
 WORKSPACE_OBJECT_TYPE = "workspace"
 
@@ -147,7 +137,7 @@ def create_workspace_aurora(
     ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
-        stateMachineArn=CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,
+        stateMachineArn=os.environ.get("CREATE_AURORA_WORKSPACE_WORKFLOW_ARN"),
         input=json.dumps(
             {
                 "workspace_id": workspace_id,
@@ -217,7 +207,7 @@ def create_workspace_open_search(
     ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
-        stateMachineArn=CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,
+        stateMachineArn=os.environ.get("CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN"),
         input=json.dumps(
             {
                 "workspace_id": workspace_id,
@@ -263,7 +253,7 @@ def create_workspace_kendra(
     ddb_response = table.put_item(Item=item)
 
     response = sfn_client.start_execution(
-        stateMachineArn=CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN,
+        stateMachineArn=os.environ.get("CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN"),
         input=json.dumps(
             {
                 "workspace_id": workspace_id,
@@ -325,7 +315,7 @@ def delete_workspace(workspace_id: str):
         raise genai_core.types.CommonError("Workspace not ready for deletion")
 
     response = sfn_client.start_execution(
-        stateMachineArn=DELETE_WORKSPACE_WORKFLOW_ARN,
+        stateMachineArn=os.environ.get("DELETE_WORKSPACE_WORKFLOW_ARN"),
         input=json.dumps(
             {
                 "workspace_id": workspace_id,
