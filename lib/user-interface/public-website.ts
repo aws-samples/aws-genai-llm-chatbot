@@ -4,7 +4,6 @@ import * as cf from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
-import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { Construct } from "constructs";
 import { Shared } from "../shared";
 import { SystemConfig } from "../shared/types";
@@ -58,22 +57,6 @@ export class PublicWebsite extends Construct {
         versioned: true,
       }
     );
-
-    let webAcl;
-    if (props.shared.webACLRules.length > 0) {
-      webAcl = new wafv2.CfnWebACL(this, "WafCloudfront", {
-        defaultAction: { allow: {} },
-        scope: "CLOUDFRONT",
-        visibilityConfig: {
-          cloudWatchMetricsEnabled: true,
-          metricName: "WafCloudfront",
-          sampledRequestsEnabled: true,
-        },
-        description: "WAFv2 ACL for CloudFront",
-        name: "WafCloudfront",
-        rules: props.shared.webACLRules,
-      });
-    }
 
     const fileBucketURLs = [
       `https://${props.chatbotFilesBucket.bucketName}.s3-accelerate.amazonaws.com`,
@@ -155,7 +138,6 @@ export class PublicWebsite extends Construct {
       priceClass: cf.PriceClass.PRICE_CLASS_ALL,
       httpVersion: cf.HttpVersion.HTTP2_AND_3,
       minimumProtocolVersion: cf.SecurityPolicyProtocol.TLS_V1_2_2021,
-      webAclId: webAcl ? webAcl.attrArn : undefined,
       enableLogging: true,
       logBucket: distributionLogsBucket,
       logIncludesCookies: false,
