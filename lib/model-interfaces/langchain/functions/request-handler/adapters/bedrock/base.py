@@ -28,7 +28,7 @@ def get_guardrails() -> dict:
             "guardrailIdentifier": os.environ["BEDROCK_GUARDRAILS_ID"],
             "guardrailVersion": os.environ.get("BEDROCK_GUARDRAILS_VERSION", "DRAFT"),
         }
-    logger.info("No guardrails ID found.")
+    logger.debug("No guardrails ID found.")
     return {}
 
 
@@ -100,7 +100,7 @@ class BedrockChatAdapter(ModelAdapter):
         top_p = model_kwargs.get("topP")
         max_tokens = model_kwargs.get("maxTokens")
 
-        if temperature:
+        if temperature is not None:
             params["temperature"] = temperature
         if top_p:
             params["top_p"] = top_p
@@ -175,21 +175,20 @@ class BedrockChatNoSystemPromptAdapter(BedrockChatAdapter):
         return prompt_template
 
     def get_condense_question_prompt(self):
-        # Change le niveau global à DEBUG
         # Fetch the prompt and translated words based on the current language
         condense_question_prompt = prompts[locale]["condense_question_prompt"]
-        logger.info(f"condense_question_prompt: {condense_question_prompt}")
+        logger.debug(f"condense_question_prompt: {condense_question_prompt}")
 
         follow_up_input_word = prompts[locale]["follow_up_input_word"]
-        logger.info(f"follow_up_input_word: {follow_up_input_word}")
+        logger.debug(f"follow_up_input_word: {follow_up_input_word}")
 
         standalone_question_word = prompts[locale]["standalone_question_word"]
-        logger.info(f"standalone_question_word: {standalone_question_word}")
+        logger.debug(f"standalone_question_word: {standalone_question_word}")
 
         chat_history_word = prompts[locale]["chat_history_word"]
-        logger.info(f"chat_history_word: {chat_history_word}")
+        logger.debug(f"chat_history_word: {chat_history_word}")
 
-        logger.info("Generating no-system-prompt template for condensing question.")
+        logger.debug("Generating no-system-prompt template for condensing question.")
 
         # Combine the prompt with placeholders
         template = f"""{condense_question_prompt}
@@ -197,7 +196,7 @@ class BedrockChatNoSystemPromptAdapter(BedrockChatAdapter):
 {follow_up_input_word}: {{input}}
 {standalone_question_word}:"""
         # Log the content of template
-        logger.info(f"get_condense_question_prompt: Template content: {template}")
+        logger.debug(f"get_condense_question_prompt: Template content: {template}")
         # Create the PromptTemplateWithHistory instance
         prompt_template = PromptTemplateWithHistory(
             input_variables=["input", "chat_history"], template=template
