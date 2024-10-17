@@ -1,7 +1,12 @@
 import os
 import re
-from enum import Enum
+import genai_core.clients
 from aws_lambda_powertools import Logger
+from enum import Enum
+from typing import Any, Dict, List
+from genai_core.registry import registry
+from genai_core.types import ChatbotMode
+from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains.conversation.base import ConversationChain
 from langchain.chains import ConversationalRetrievalChain
@@ -9,28 +14,28 @@ from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.memory import ConversationBufferMemory
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.prompts.prompt import PromptTemplate
 from langchain.chains.conversational_retrieval.prompts import (
     QA_PROMPT,
     CONDENSE_QUESTION_PROMPT,
 )
-from typing import Dict, List, Any
-
-from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
-from genai_core.types import ChatbotMode
-
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.outputs import LLMResult, ChatGeneration
+from langchain_core.messages import BaseMessage
 from langchain_core.messages.ai import AIMessage, AIMessageChunk
 from langchain_core.messages.human import HumanMessage
 from langchain_aws import ChatBedrockConverse
+from adapters.shared.prompts.system_prompts import (
+    prompts,
+    locale,
+)  # Import prompts and language
 
 logger = Logger()
 
 
 class Mode(Enum):
     CHAIN = "chain"
-
 
 class LLMStartHandler(BaseCallbackHandler):
     prompts = []
@@ -60,12 +65,12 @@ class LLMStartHandler(BaseCallbackHandler):
                     "total_tokens": 0,
                 }
             self.usage = {
-                "input_tokens": self.usage.get("input_tokens")
-                + generation.message.usage_metadata.get("input_tokens"),
-                "output_tokens": self.usage.get("output_tokens")
-                + generation.message.usage_metadata.get("output_tokens"),
-                "total_tokens": self.usage.get("total_tokens")
-                + generation.message.usage_metadata.get("total_tokens"),
+                "input_tokens": self.usage.get("input_tokens", 0)
+                + generation.message.usage_metadata.get("input_tokens", 0),
+                "output_tokens": self.usage.get("output_tokens", 0)
+                + generation.message.usage_metadata.get("output_tokens", 0),
+                "total_tokens": self.usage.get("total_tokens", 0)
+                + generation.message.usage_metadata.get("total_tokens", 0),
             }
 
 
@@ -199,7 +204,7 @@ class ModelAdapter:
                     input={"input": user_prompt}, config=config
                 )
                 if "answer" in response:
-                    answer = response.get("answer")  # Rag flow
+                    answer = response.get("answer")  # RAG flow
                 else:
                     answer = response.content
         except Exception as e:
