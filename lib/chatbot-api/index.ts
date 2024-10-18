@@ -1,5 +1,6 @@
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as sns from "aws-cdk-lib/aws-sns";
@@ -110,7 +111,10 @@ export class ChatBotApi extends Construct {
           name: "WafAppsync",
           rules: [
             ...props.shared.webACLRules,
-            ...this.createWafRules(props.config.llms.rateLimitPerIP ?? 100),
+            ...this.createWafRules(
+              props.config.llms.rateLimitPerIP ?? 100,
+              props.shared.vpc
+            ),
           ],
         }).attrArn,
         resourceArn: api.arn,
@@ -175,7 +179,10 @@ export class ChatBotApi extends Construct {
     ]);
   }
 
-  private createWafRules(llmRatePerIP: number): wafv2.CfnWebACL.RuleProperty[] {
+  private createWafRules(
+    llmRatePerIP: number,
+    vpc: ec2.Vpc
+  ): wafv2.CfnWebACL.RuleProperty[] {
     /**
      * The rate limit is the maximum number of requests from a
      * single IP address that are allowed in a ten-minute period.
@@ -242,6 +249,39 @@ export class ChatBotApi extends Construct {
         metricName: "LimitRequestsPerIP",
       },
     };
-    return [ruleLimitRequests];
+
+    // The following rule is disabling throttling for calls coming from the VPC.
+    const eips: string[] = [];
+    vpc.node.findAll().forEach((resource) => {
+      if (resource instanceof ec2.CfnEIP) {
+        // NAT Gateways IP
+        eips.push(resource.attrPublicIp + "/32");
+      }
+    });
+
+    const vpcnIpSet = new wafv2.CfnIPSet(this, "VPCPublicIPs", {
+      addresses: eips,
+      ipAddressVersion: "IPV4",
+      scope: "REGIONAL",
+    });
+
+    const allowInternalCalls: wafv2.CfnWebACL.RuleProperty = {
+      name: "AllowInternalCalls",
+      priority: 2,
+      action: {
+        allow: {},
+      },
+      statement: {
+        ipSetReferenceStatement: {
+          arn: vpcnIpSet.attrArn,
+        },
+      },
+      visibilityConfig: {
+        sampledRequestsEnabled: false,
+        cloudWatchMetricsEnabled: false,
+        metricName: "AllowInternalCalls",
+      },
+    };
+    return [ruleLimitRequests, allowInternalCalls];
   }
 }
