@@ -4119,6 +4119,29 @@ schema {
       },
       "Type": "AWS::IAM::Policy",
     },
+    "ChatBotApiConstructVPCPublicIPs5C63CEBB": {
+      "Properties": {
+        "Addresses": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::GetAtt": [
+                    "SharedVPCpublicSubnet1EIPA9E2FC1C",
+                    "PublicIp",
+                  ],
+                },
+                "/32",
+              ],
+            ],
+          },
+        ],
+        "IPAddressVersion": "IPV4",
+        "Scope": "REGIONAL",
+      },
+      "Type": "AWS::WAFv2::IPSet",
+    },
     "ChatBotApiConstructWafAppsyncE6AACFFE": {
       "Properties": {
         "DefaultAction": {
@@ -4205,6 +4228,28 @@ schema {
               "CloudWatchMetricsEnabled": true,
               "MetricName": "LimitRequestsPerIP",
               "SampledRequestsEnabled": true,
+            },
+          },
+          {
+            "Action": {
+              "Allow": {},
+            },
+            "Name": "AllowInternalCalls",
+            "Priority": 2,
+            "Statement": {
+              "IPSetReferenceStatement": {
+                "Arn": {
+                  "Fn::GetAtt": [
+                    "ChatBotApiConstructVPCPublicIPs5C63CEBB",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+            "VisibilityConfig": {
+              "CloudWatchMetricsEnabled": false,
+              "MetricName": "AllowInternalCalls",
+              "SampledRequestsEnabled": false,
             },
           },
         ],
