@@ -37,6 +37,7 @@ logger = Logger()
 class Mode(Enum):
     CHAIN = "chain"
 
+
 class LLMStartHandler(BaseCallbackHandler):
     prompts = []
     usage = None
