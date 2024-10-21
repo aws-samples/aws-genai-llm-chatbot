@@ -31,7 +31,7 @@ def get_ssm_parameter(ssm_parameter_path: str, token: str):
     request = urllib.request.Request(url)
     request.add_header("X-Aws-Parameters-Secrets-Token", token)
     # Bandit false positive. The url used cannot use a different scheme
-    config = json.loads(urllib.request.urlopen(request).read()) #nosec 
+    config = json.loads(urllib.request.urlopen(request).read())  # nosec
     return config["Parameter"]["Value"]
 
 
