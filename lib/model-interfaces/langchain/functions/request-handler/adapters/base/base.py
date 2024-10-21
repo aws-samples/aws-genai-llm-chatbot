@@ -1,12 +1,7 @@
 import os
 import re
-import genai_core.clients
-from aws_lambda_powertools import Logger
 from enum import Enum
-from typing import Any, Dict, List
-from genai_core.registry import registry
-from genai_core.types import ChatbotMode
-from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
+from aws_lambda_powertools import Logger
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains.conversation.base import ConversationChain
 from langchain.chains import ConversationalRetrievalChain
@@ -14,22 +9,21 @@ from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.memory import ConversationBufferMemory
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.prompts.prompt import PromptTemplate
 from langchain.chains.conversational_retrieval.prompts import (
     QA_PROMPT,
     CONDENSE_QUESTION_PROMPT,
 )
+from typing import Dict, List, Any
+
+from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
+from genai_core.types import ChatbotMode
+
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.outputs import LLMResult, ChatGeneration
-from langchain_core.messages import BaseMessage
 from langchain_core.messages.ai import AIMessage, AIMessageChunk
 from langchain_core.messages.human import HumanMessage
 from langchain_aws import ChatBedrockConverse
-from adapters.shared.prompts.system_prompts import (
-    prompts,
-    locale,
-)  # Import prompts and language
 
 logger = Logger()
 
