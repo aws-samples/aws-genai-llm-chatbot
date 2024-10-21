@@ -31,7 +31,7 @@ def test_get_sessions(mocker):
     expected = [
         {
             "id": session.get("SessionId"),
-            "title": "content",
+            "title": "<no title>",
             "startTime": session.get("StartTime") + "Z",
         }
     ]
