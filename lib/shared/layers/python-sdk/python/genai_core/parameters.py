@@ -30,7 +30,8 @@ def get_ssm_parameter(ssm_parameter_path: str, token: str):
     url = "http://localhost:2773/systemsmanager/parameters/get/?%s" % params
     request = urllib.request.Request(url)
     request.add_header("X-Aws-Parameters-Secrets-Token", token)
-    config = json.loads(urllib.request.urlopen(request).read())
+    # Bandit false positive. The url used cannot use a different scheme
+    config = json.loads(urllib.request.urlopen(request).read()) #nosec 
     return config["Parameter"]["Value"]
 
 
