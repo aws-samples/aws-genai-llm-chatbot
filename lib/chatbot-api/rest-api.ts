@@ -94,7 +94,7 @@ export class ApiResolvers extends Construct {
           DOCUMENTS_BY_STATUS_INDEX:
             props.ragEngines?.documentsByStatusIndexName ?? "",
           SAGEMAKER_RAG_MODELS_ENDPOINT:
-            props.ragEngines?.sageMakerRagModels?.model.endpoint
+            props.ragEngines?.sageMakerRagModels?.model?.endpoint
               ?.attrEndpointName ?? "",
           DELETE_WORKSPACE_WORKFLOW_ARN:
             props.ragEngines?.deleteWorkspaceWorkflow?.stateMachineArn ?? "",
@@ -275,7 +275,7 @@ export class ApiResolvers extends Construct {
         props.ragEngines.deleteDocumentWorkflow.grantStartExecution(apiHandler);
       }
 
-      if (props.ragEngines?.sageMakerRagModels) {
+      if (props.ragEngines?.sageMakerRagModels?.model) {
         apiHandler.addToRolePolicy(
           new iam.PolicyStatement({
             actions: ["sagemaker:InvokeEndpoint"],

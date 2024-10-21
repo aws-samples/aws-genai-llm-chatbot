@@ -26,8 +26,6 @@ export interface UserInterfaceProps {
   readonly api: ChatBotApi;
   readonly chatbotFilesBucket: s3.Bucket;
   readonly uploadBucket?: s3.Bucket;
-  readonly crossEncodersEnabled: boolean;
-  readonly sagemakerEmbeddingsEnabled: boolean;
 }
 
 export class UserInterface extends Construct {
@@ -95,6 +93,9 @@ export class UserInterface extends Construct {
       redirectSignIn = `https://${this.publishedDomain}`;
     }
 
+    const sagemakerEmbedingModels = props.config.rag.embeddingsModels.filter(
+      (i) => i.provider === "sagemaker"
+    );
     const exportsAsset = s3deploy.Source.jsonData("aws-exports.json", {
       aws_project_region: cdk.Aws.REGION,
       aws_cognito_region: cdk.Aws.REGION,
@@ -126,12 +127,16 @@ export class UserInterface extends Construct {
             }
           : undefined,
         rag_enabled: props.config.rag.enabled,
-        cross_encoders_enabled: props.crossEncodersEnabled,
-        sagemaker_embeddings_enabled: props.sagemakerEmbeddingsEnabled,
-        default_embeddings_model: Utils.getDefaultEmbeddingsModel(props.config),
-        default_cross_encoder_model: Utils.getDefaultCrossEncoderModel(
-          props.config
-        ),
+        cross_encoders_enabled: props.config.rag.crossEncoderModels.length > 0,
+        sagemaker_embeddings_enabled: sagemakerEmbedingModels.length > 0,
+        default_embeddings_model:
+          props.config.rag.embeddingsModels.length > 0
+            ? Utils.getDefaultEmbeddingsModel(props.config)
+            : undefined,
+        default_cross_encoder_model:
+          props.config.rag.crossEncoderModels.length > 0
+            ? Utils.getDefaultCrossEncoderModel(props.config)
+            : undefined,
         privateWebsite: props.config.privateWebsite ? true : false,
       },
     });

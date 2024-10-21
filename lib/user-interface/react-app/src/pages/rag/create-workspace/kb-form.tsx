@@ -98,6 +98,7 @@ export default function KBForm(props: KBFormProps) {
           />
         </FormField>
         <HybridSearchField
+          disabled={props.submitting}
           submitting={props.submitting}
           errors={props.errors}
           checked={props.data.hybridSearch}

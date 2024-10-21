@@ -10,8 +10,8 @@ def run_before_and_after_tests(client: AppSyncClient):
     for workspace in client.list_workspaces():
         if (
             workspace.get("name") == "INTEG_TEST_AURORA"
-            and workspace.get("status") == "ready"
-        ):
+            or workspace.get("name") == "INTEG_TEST_AURORA_WITHOUT_RERANK"
+        ) and workspace.get("status") == "ready":
             client.delete_workspace(workspace.get("id"))
 
 
@@ -22,23 +22,25 @@ def test_create(client: AppSyncClient, default_embed_model):
     if engine.get("enabled") == False:
         pytest.skip_flag = True
         pytest.skip("Aurora is not enabled.")
-    pytest.workspace = client.create_aurora_workspace(
-        input={
-            "kind": "auro2",
-            "name": "INTEG_TEST_AURORA",
-            "embeddingsModelProvider": "bedrock",
-            "embeddingsModelName": default_embed_model,
-            "crossEncoderModelName": "cross-encoder/ms-marco-MiniLM-L-12-v2",
-            "crossEncoderModelProvider": "sagemaker",
-            "languages": ["english"],
-            "index": True,
-            "hybridSearch": True,
-            "metric": "inner",
-            "chunkingStrategy": "recursive",
-            "chunkSize": 1000,
-            "chunkOverlap": 200,
-        }
-    )
+    input = {
+        "kind": "auro2",
+        "name": "INTEG_TEST_AURORA_WITHOUT_RERANK",
+        "embeddingsModelProvider": "bedrock",
+        "embeddingsModelName": default_embed_model,
+        "languages": ["english"],
+        "index": True,
+        "hybridSearch": True,
+        "metric": "inner",
+        "chunkingStrategy": "recursive",
+        "chunkSize": 1000,
+        "chunkOverlap": 200,
+    }
+    input_with_rerank = input.copy()
+    input_with_rerank["name"] = "INTEG_TEST_AURORA"
+    input_with_rerank["crossEncoderModelName"] = "cross-encoder/ms-marco-MiniLM-L-12-v2"
+    input_with_rerank["crossEncoderModelProvider"] = "sagemaker"
+    pytest.workspace = client.create_aurora_workspace(input=input_with_rerank)
+    pytest.workspace_no_re_rank = client.create_aurora_workspace(input=input)
 
     ready = False
     retries = 0
@@ -56,9 +58,21 @@ def test_create(client: AppSyncClient, default_embed_model):
 def test_add_rss(client: AppSyncClient):
     if pytest.skip_flag == True:
         pytest.skip("Aurora is not enabled.")
+
     pytest.document = client.add_rss_feed(
         input={
             "workspaceId": pytest.workspace.get("id"),
+            "title": "INTEG_TEST_AURORA_TITLE",
+            "address": "https://github.com/aws-samples/aws-genai-llm-chatbot/"
+            + "releases.atom",
+            "contentTypes": ["text/html"],
+            "followLinks": True,
+            "limit": 2,
+        }
+    )
+    client.add_rss_feed(
+        input={
+            "workspaceId": pytest.workspace_no_re_rank.get("id"),
             "title": "INTEG_TEST_AURORA_TITLE",
             "address": "https://github.com/aws-samples/aws-genai-llm-chatbot/"
             + "releases.atom",
@@ -134,6 +148,29 @@ def test_search_document(client: AppSyncClient):
                 "content"
             )
             assert "website" in result.get("items")[0].get("documentType")
+    assert ready == True
+
+
+def test_search_document_no_reank(client: AppSyncClient):
+    if pytest.skip_flag == True:
+        pytest.skip("Aurora is not enabled.")
+    ready = False
+    retries = 0
+    # Wait for the page to be crawled. This starts on a cron every 5 min.
+    while not ready and retries < 50:
+        time.sleep(15)
+        retries += 1
+        result = client.semantic_search(
+            input={
+                "workspaceId": pytest.workspace_no_re_rank.get("id"),
+                "query": "Release github",
+            }
+        )
+        if len(result.get("items")) > 1:
+            ready = True
+            assert result.get("engine") == "aurora"
+            # Re-ranking score is no set but the results are ordered by Aurora.
+            assert result.get("items")[0].get("score") is None
     assert ready == True
 
 
