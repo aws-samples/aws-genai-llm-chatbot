@@ -33,8 +33,9 @@ export abstract class OptionsHelper {
   }
 
   static getSelectOptionGroups<T extends { provider: string; name: string }>(
-    data: T[]
-  ) {
+    data: T[],
+    addNone: boolean = false
+  ): (SelectProps.OptionGroup | SelectProps.Option)[] {
     const modelsMap = new Map<string, T[]>();
     data.forEach((item) => {
       let items = modelsMap.get(item.provider);
@@ -62,6 +63,16 @@ export abstract class OptionsHelper {
           })) ?? [],
       };
     });
+
+    if (addNone) {
+      return [
+        {
+          label: "None",
+          value: "__none__",
+        },
+        ...options,
+      ];
+    }
 
     return options;
   }
