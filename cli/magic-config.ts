@@ -112,16 +112,19 @@ const embeddingModels: ModelConfig[] = [
     provider: "bedrock",
     name: "amazon.titan-embed-image-v1",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "bedrock",
     name: "cohere.embed-english-v3",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "bedrock",
     name: "cohere.embed-multilingual-v3",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "openai",
@@ -200,9 +203,14 @@ const embeddingModels: ModelConfig[] = [
         options.ragsToEnable.pop("kendra");
       }
       options.embeddings = config.rag.embeddingsModels.map((m) => m.name);
-      options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
+      const defaultEmbeddings = (config.rag.embeddingsModels ?? []).filter(
         (m) => m.default
-      )[0].name;
+      );
+
+      if (defaultEmbeddings.length > 0) {
+        options.defaultEmbedding = defaultEmbeddings[0].name;
+      }
+
       options.kendraExternal = config.rag.engines.kendra.external;
       options.kbExternal = config.rag.engines.knowledgeBase?.external ?? [];
       options.kendraEnterprise = config.rag.engines.kendra.enterprise;
@@ -373,7 +381,7 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "enableSagemakerModels",
-      message: "Do you want to use any Sagemaker Models",
+      message: "Do you want to use any text generation Sagemaker Models",
       initial: options.enableSagemakerModels || false,
     },
     {
@@ -665,10 +673,14 @@ async function processCreateOptions(options: any): Promise<void> {
           options.kendraExternal.length > 0) ||
         false,
       skip(): boolean {
-        return !(this as any).state.answers.enableRag;
+        return (
+          !(this as any).state.answers.enableRag ||
+          !(this as any).state.answers.ragsToEnable.includes("kendra")
+        );
       },
     },
   ];
+
   const answers: any = await enquirer.prompt(questions);
   const kendraExternal: any[] = [];
   let newKendra = answers.enableRag && answers.kendra;
@@ -828,13 +840,14 @@ async function processCreateOptions(options: any): Promise<void> {
       validate(value: string) {
         const embeding = embeddingModels.find((i) => i.name === value);
         if (
+          answers.enableRag &&
           embeding &&
-          (this as any).state.answers.deployDefaultSagemakerModels === false &&
+          answers?.deployDefaultSagemakerModels === false &&
           embeding?.provider === "sagemaker"
         ) {
           return "SageMaker default models are not enabled. Please select another model.";
         }
-        if ((this as any).state.answers.enableRag) {
+        if (answers.enableRag) {
           return value ? true : "Select a default embedding model";
         }
         return true;
@@ -1156,6 +1169,7 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: false,
     },
   ]);
+
   let advancedSettings: any = {};
   if (doAdvancedConfirm.doAdvancedSettings) {
     advancedSettings = await enquirer.prompt(advancedSettingsPrompts);
@@ -1300,22 +1314,14 @@ async function processCreateOptions(options: any): Promise<void> {
     config.rag.embeddingsModels = embeddingModels.filter(
       (model) => model.provider !== "sagemaker"
     );
-    for (const model of config.rag.embeddingsModels) {
-      model.default = model.name === models.defaultEmbedding;
-    }
   } else {
     config.rag.embeddingsModels = [];
   }
 
-  // If we have not enabled rag the default embedding is set to the first model
-  if (!answers.enableRag) {
-    (config.rag.embeddingsModels[0] as any).default = true;
-  } else {
-    config.rag.embeddingsModels.forEach((m: any) => {
-      if (m.name === models.defaultEmbedding) {
-        m.default = true;
-      }
-    });
+  if (config.rag.embeddingsModels.length > 0 && models.defaultEmbedding) {
+    for (const model of config.rag.embeddingsModels) {
+      model.default = model.name === models.defaultEmbedding;
+    }
   }
 
   config.rag.engines.kendra.createIndex =
@@ -1324,9 +1330,10 @@ async function processCreateOptions(options: any): Promise<void> {
     config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.engines.kendra.enterprise = answers.kendraEnterprise;
+
+  config.rag.engines.knowledgeBase.external = [...kbExternal];
   config.rag.engines.knowledgeBase.enabled =
     config.rag.engines.knowledgeBase.external.length > 0;
-  config.rag.engines.knowledgeBase.external = [...kbExternal];
 
   console.log("\n✨ This is the chosen configuration:\n");
   console.log(JSON.stringify(config, undefined, 2));
