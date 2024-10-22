@@ -149,10 +149,12 @@ export class Shared extends Construct {
       });
 
       // Create VPC Endpoint for SageMaker Runtime
-      vpc.addInterfaceEndpoint("SageMakerRuntimeEndpoint", {
-        service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
-        open: true,
-      });
+      if (props.config.llms.sagemaker.length > 0) {
+        vpc.addInterfaceEndpoint("SageMakerRuntimeEndpoint", {
+          service: ec2.InterfaceVpcEndpointAwsService.SAGEMAKER_RUNTIME,
+          open: true,
+        });
+      }
 
       if (props.config.privateWebsite) {
         // Create VPC Endpoint for AppSync
@@ -170,10 +172,11 @@ export class Shared extends Construct {
           service: ec2.InterfaceVpcEndpointAwsService.SNS,
         });
 
-        // Create VPC Endpoint for Step Functions
-        vpc.addInterfaceEndpoint("StepFunctionsEndpoint", {
-          service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
-        });
+        if (props.config.rag.enabled) {
+          vpc.addInterfaceEndpoint("StepFunctionsEndpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
+          });
+        }
 
         // Create VPC Endpoint for SSM
         vpc.addInterfaceEndpoint("SSMEndpoint", {
