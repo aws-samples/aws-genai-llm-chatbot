@@ -4,6 +4,7 @@ import pytest
 from genai_core.registry import registry
 import adapters.bedrock.base  # noqa: F401 Needed to register the adapters
 from langchain_core.messages.human import HumanMessage
+from adapters.shared.prompts.system_prompts import prompts  # Ajout de l'importation
 
 
 def test_registry():
@@ -35,21 +36,24 @@ def test_chat_adapter(mocker):
     result = model.get_qa_prompt().format(
         input="input", context="context", chat_history=[HumanMessage(content="history")]
     )
-    assert "System: Use the following pieces" in result
+
+    assert "Use the following pieces of context" in result
     assert "Human: history" in result
     assert "Human: input" in result
 
     result = model.get_prompt().format(
         input="input", chat_history=[HumanMessage(content="history")]
     )
-    assert "System: The following is a friendly conversation" in result
+
+    assert "The following is a friendly conversation" in result
     assert "Human: history" in result
     assert "Human: input" in result
 
     result = model.get_condense_question_prompt().format(
         input="input", chat_history=[HumanMessage(content="history")]
     )
-    assert "System: Given the following conversation" in result
+
+    assert "Given the conversation inside the tags" in result
     assert "Human: history" in result
     assert "Human: input" in result
 
@@ -93,16 +97,15 @@ def test_chat_without_system_adapter(mocker):
     result = model.get_prompt().format(
         input="input", chat_history=[HumanMessage(content="history")]
     )
-    assert "The following is a friendly conversation" in result
-    assert "Current conversation:" in result
+    assert prompts["en"]["conversation_prompt"] in result
     assert "Human: history" in result
     assert "Question: input" in result
 
     result = model.get_condense_question_prompt().format(
         input="input", chat_history=[HumanMessage(content="history")]
     )
-    assert "Given the following conversation" in result
-    assert "Chat History:" in result
+    assert "Given the conversation inside the tags" in result
+    assert "Chat History" in result
     assert "Human: history" in result
     assert "Follow Up Input: input" in result
 

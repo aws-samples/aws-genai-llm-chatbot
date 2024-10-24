@@ -60,12 +60,12 @@ class LLMStartHandler(BaseCallbackHandler):
                     "total_tokens": 0,
                 }
             self.usage = {
-                "input_tokens": self.usage.get("input_tokens")
-                + generation.message.usage_metadata.get("input_tokens"),
-                "output_tokens": self.usage.get("output_tokens")
-                + generation.message.usage_metadata.get("output_tokens"),
-                "total_tokens": self.usage.get("total_tokens")
-                + generation.message.usage_metadata.get("total_tokens"),
+                "input_tokens": self.usage.get("input_tokens", 0)
+                + generation.message.usage_metadata.get("input_tokens", 0),
+                "output_tokens": self.usage.get("output_tokens", 0)
+                + generation.message.usage_metadata.get("output_tokens", 0),
+                "total_tokens": self.usage.get("total_tokens", 0)
+                + generation.message.usage_metadata.get("total_tokens", 0),
             }
 
 
@@ -199,7 +199,7 @@ class ModelAdapter:
                     input={"input": user_prompt}, config=config
                 )
                 if "answer" in response:
-                    answer = response.get("answer")  # Rag flow
+                    answer = response.get("answer")  # RAG flow
                 else:
                     answer = response.content
         except Exception as e:
