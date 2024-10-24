@@ -838,6 +838,7 @@ async function processCreateOptions(options: any): Promise<void> {
       choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
       initial: options.defaultEmbedding,
       validate(value: string) {
+        if ((this as any).skipped) return true;
         const embeding = embeddingModels.find((i) => i.name === value);
         if (
           answers.enableRag &&
