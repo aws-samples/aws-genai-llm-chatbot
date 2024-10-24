@@ -66,7 +66,7 @@ export class LangChainInterface extends Construct {
           props.ragEngines?.auroraPgVector?.database?.clusterEndpoint?.port +
           "",
         SAGEMAKER_RAG_MODELS_ENDPOINT:
-          props.ragEngines?.sageMakerRagModels?.model.endpoint
+          props.ragEngines?.sageMakerRagModels?.model?.endpoint
             ?.attrEndpointName ?? "",
         OPEN_SEARCH_COLLECTION_ENDPOINT:
           props.ragEngines?.openSearchVector?.openSearchCollectionEndpoint ??
@@ -147,7 +147,7 @@ export class LangChainInterface extends Construct {
       props.ragEngines.documentsTable.grantReadWriteData(requestHandler);
     }
 
-    if (props.ragEngines?.sageMakerRagModels) {
+    if (props.ragEngines?.sageMakerRagModels?.model) {
       requestHandler.addToRolePolicy(
         new iam.PolicyStatement({
           actions: ["sagemaker:InvokeEndpoint"],

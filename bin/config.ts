@@ -3,7 +3,9 @@ import { existsSync, readFileSync } from "fs";
 
 export function getConfig(): SystemConfig {
   if (existsSync("./bin/config.json")) {
-    return JSON.parse(readFileSync("./bin/config.json").toString("utf8"));
+    return JSON.parse(
+      readFileSync("./bin/config.json").toString("utf8")
+    ) as SystemConfig;
   }
   // Default config
   return {
@@ -48,11 +50,13 @@ export function getConfig(): SystemConfig {
           provider: "sagemaker",
           name: "intfloat/multilingual-e5-large",
           dimensions: 1024,
+          default: false,
         },
         {
           provider: "sagemaker",
           name: "sentence-transformers/all-MiniLM-L6-v2",
           dimensions: 384,
+          default: false,
         },
         {
           provider: "bedrock",
@@ -80,8 +84,10 @@ export function getConfig(): SystemConfig {
           provider: "openai",
           name: "text-embedding-ada-002",
           dimensions: 1536,
+          default: false,
         },
       ],
+      crossEncodingEnabled: false,
       crossEncoderModels: [
         {
           provider: "sagemaker",

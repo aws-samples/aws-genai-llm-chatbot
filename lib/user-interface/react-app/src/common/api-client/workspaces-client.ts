@@ -56,8 +56,8 @@ export class WorkspacesClient {
     name: string;
     embeddingsModelProvider: string;
     embeddingsModelName: string;
-    crossEncoderModelProvider: string;
-    crossEncoderModelName: string;
+    crossEncoderModelProvider?: string;
+    crossEncoderModelName?: string;
     languages: string[];
     metric: string;
     index: boolean;
@@ -79,8 +79,8 @@ export class WorkspacesClient {
     name: string;
     embeddingsModelProvider: string;
     embeddingsModelName: string;
-    crossEncoderModelProvider: string;
-    crossEncoderModelName: string;
+    crossEncoderModelProvider?: string;
+    crossEncoderModelName?: string;
     languages: string[];
     hybridSearch: boolean;
     chunkingStrategy: string;

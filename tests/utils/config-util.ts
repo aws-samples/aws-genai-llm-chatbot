@@ -23,6 +23,7 @@ export function getTestConfig(): SystemConfig {
       ],
     },
     rag: {
+      crossEncodingEnabled: true,
       enabled: true,
       engines: {
         aurora: {

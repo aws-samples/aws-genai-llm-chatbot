@@ -38,13 +38,6 @@ def query_workspace_aurora(
     if selected_model is None:
         raise CommonError("Embeddings model not found")
 
-    cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
-        cross_encoder_model_provider, cross_encoder_model_name
-    )
-
-    if cross_encoder_model is None:
-        raise CommonError("Cross encoder model not found")
-
     query_embeddings = genai_core.embeddings.generate_embeddings(
         selected_model, [query], Task.RETRIEVE
     )[0]
@@ -186,24 +179,33 @@ def query_workspace_aurora(
                 item["keyword_search_score"] = current["keyword_search_score"]
 
     unique_items = list(unique_items.values())
-    score_dict = dict({})
-    if len(unique_items) > 0:
-        passages = [record["content"] for record in unique_items]
-        passage_scores = genai_core.cross_encoder.rank_passages(
-            cross_encoder_model, query, passages
+
+    if cross_encoder_model_name is not None:
+        cross_encoder_model = genai_core.cross_encoder.get_cross_encoder_model(
+            cross_encoder_model_provider, cross_encoder_model_name
         )
 
-        for i in range(len(unique_items)):
-            score = passage_scores[i]
-            unique_items[i]["score"] = score
-            score_dict[unique_items[i]["chunk_id"]] = score
+        if cross_encoder_model is None:
+            raise genai_core.types.CommonError("Cross encoder model not found")
 
-    unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
+        score_dict = dict({})
+        if len(unique_items) > 0:
+            passages = [record["content"] for record in unique_items]
+            passage_scores = genai_core.cross_encoder.rank_passages(
+                cross_encoder_model, query, passages
+            )
 
-    for record in vector_search_records:
-        record["score"] = score_dict[record["chunk_id"]]
-    for record in keyword_search_records:
-        record["score"] = score_dict[record["chunk_id"]]
+            for i in range(len(unique_items)):
+                score = passage_scores[i]
+                unique_items[i]["score"] = score
+                score_dict[unique_items[i]["chunk_id"]] = score
+
+        unique_items = sorted(unique_items, key=lambda x: x["score"], reverse=True)
+
+        for record in vector_search_records:
+            record["score"] = score_dict[record["chunk_id"]]
+        for record in keyword_search_records:
+            record["score"] = score_dict[record["chunk_id"]]
 
     if full_response:
         unique_items = unique_items[:limit]
@@ -218,9 +220,13 @@ def query_workspace_aurora(
             "keyword_search_items": convert_types(keyword_search_records),
         }
     else:
-        ret_items = list(filter(lambda val: val["score"] > threshold, unique_items))[
-            :limit
-        ]
+        if cross_encoder_model_name is not None:
+            ret_items = list(
+                filter(lambda val: val["score"] > threshold, unique_items)
+            )[:limit]
+        else:
+            ret_items = unique_items[:limit]
+
         if len(ret_items) < limit:
             # inner product metric is negative hence we sort ascending
             if metric == "inner":

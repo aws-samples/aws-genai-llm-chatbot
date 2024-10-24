@@ -10,6 +10,7 @@ import {
   SupportedSageMakerModels,
   SystemConfig,
   SupportedBedrockRegion,
+  ModelConfig,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
@@ -34,7 +35,6 @@ function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
 function getCountryCodesAndNames(): { message: string; name: string }[] {
   // Use country-list to get an array of countries with their codes and names
   const countries = getData();
-
   // Map the country data to match the desired output structure
   const countryInfo = countries.map(({ code, name }) => {
     return { message: `${name} (${code})`, name: code };
@@ -88,42 +88,49 @@ const secretManagerArnRegExp = RegExp(
   /arn:aws:secretsmanager:[\w-_]+:\d+:secret:[\w-_]+/
 );
 
-const embeddingModels = [
+const embeddingModels: ModelConfig[] = [
   {
     provider: "sagemaker",
     name: "intfloat/multilingual-e5-large",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "sagemaker",
     name: "sentence-transformers/all-MiniLM-L6-v2",
     dimensions: 384,
+    default: false,
   },
   {
     provider: "bedrock",
     name: "amazon.titan-embed-text-v1",
     dimensions: 1536,
+    default: false,
   },
   //Support for inputImage is not yet implemented for amazon.titan-embed-image-v1
   {
     provider: "bedrock",
     name: "amazon.titan-embed-image-v1",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "bedrock",
     name: "cohere.embed-english-v3",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "bedrock",
     name: "cohere.embed-multilingual-v3",
     dimensions: 1024,
+    default: false,
   },
   {
     provider: "openai",
     name: "text-embedding-ada-002",
     dimensions: 1536,
+    default: false,
   },
 ];
 
@@ -179,6 +186,8 @@ const embeddingModels = [
       options.startScheduleEndDate =
         config.llms?.sagemakerSchedule?.startScheduleEndDate;
       options.enableRag = config.rag.enabled;
+      options.deployDefaultSagemakerModels =
+        config.rag.deployDefaultSagemakerModels;
       options.ragsToEnable = Object.keys(config.rag.engines ?? {}).filter(
         (v: string) =>
           (
@@ -194,9 +203,14 @@ const embeddingModels = [
         options.ragsToEnable.pop("kendra");
       }
       options.embeddings = config.rag.embeddingsModels.map((m) => m.name);
-      options.defaultEmbedding = (config.rag.embeddingsModels ?? []).filter(
+      const defaultEmbeddings = (config.rag.embeddingsModels ?? []).filter(
         (m) => m.default
-      )[0].name;
+      );
+
+      if (defaultEmbeddings.length > 0) {
+        options.defaultEmbedding = defaultEmbeddings[0].name;
+      }
+
       options.kendraExternal = config.rag.engines.kendra.external;
       options.kbExternal = config.rag.engines.knowledgeBase?.external ?? [];
       options.kendraEnterprise = config.rag.engines.kendra.enterprise;
@@ -367,7 +381,7 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "enableSagemakerModels",
-      message: "Do you want to use any Sagemaker Models",
+      message: "Do you want to use any text generation Sagemaker Models",
       initial: options.enableSagemakerModels || false,
     },
     {
@@ -609,6 +623,16 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: options.enableRag || false,
     },
     {
+      type: "confirm",
+      name: "deployDefaultSagemakerModels",
+      message:
+        "Do you want to deploy the default embedding and cross-encoder models via SageMaker?",
+      initial: options.deployDefaultSagemakerModels || false,
+      skip(): boolean {
+        return !(this as any).state.answers.enableRag;
+      },
+    },
+    {
       type: "multiselect",
       name: "ragsToEnable",
       hint: "SPACE to select, ENTER to confirm selection",
@@ -649,10 +673,14 @@ async function processCreateOptions(options: any): Promise<void> {
           options.kendraExternal.length > 0) ||
         false,
       skip(): boolean {
-        return !(this as any).state.answers.enableRag;
+        return (
+          !(this as any).state.answers.enableRag ||
+          !(this as any).state.answers.ragsToEnable.includes("kendra")
+        );
       },
     },
   ];
+
   const answers: any = await enquirer.prompt(questions);
   const kendraExternal: any[] = [];
   let newKendra = answers.enableRag && answers.kendra;
@@ -810,10 +838,18 @@ async function processCreateOptions(options: any): Promise<void> {
       choices: embeddingModels.map((m) => ({ name: m.name, value: m })),
       initial: options.defaultEmbedding,
       validate(value: string) {
-        if ((this as any).state.answers.enableRag) {
+        const embeding = embeddingModels.find((i) => i.name === value);
+        if (
+          answers.enableRag &&
+          embeding &&
+          answers?.deployDefaultSagemakerModels === false &&
+          embeding?.provider === "sagemaker"
+        ) {
+          return "SageMaker default models are not enabled. Please select another model.";
+        }
+        if (answers.enableRag) {
           return value ? true : "Select a default embedding model";
         }
-
         return true;
       },
       skip() {
@@ -1133,6 +1169,7 @@ async function processCreateOptions(options: any): Promise<void> {
       initial: false,
     },
   ]);
+
   let advancedSettings: any = {};
   if (doAdvancedConfirm.doAdvancedSettings) {
     advancedSettings = await enquirer.prompt(advancedSettingsPrompts);
@@ -1219,6 +1256,7 @@ async function processCreateOptions(options: any): Promise<void> {
         }
       : undefined,
     llms: {
+      enableSagemakerModels: answers.enableSagemakerModels,
       rateLimitPerAIP: advancedSettings?.llmRateLimitPerIP
         ? Number(advancedSettings?.llmRateLimitPerIP)
         : undefined,
@@ -1241,6 +1279,7 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     rag: {
       enabled: answers.enableRag,
+      deployDefaultSagemakerModels: answers.deployDefaultSagemakerModels,
       engines: {
         aurora: {
           enabled: answers.ragsToEnable.includes("aurora"),
@@ -1259,27 +1298,31 @@ async function processCreateOptions(options: any): Promise<void> {
           external: [{}],
         },
       },
-      embeddingsModels: [{}],
-      crossEncoderModels: [{}],
+      embeddingsModels: [] as ModelConfig[],
+      crossEncoderModels: [] as ModelConfig[],
     },
   };
 
-  // If we have not enabled rag the default embedding is set to the first model
-  if (!answers.enableRag) {
-    models.defaultEmbedding = embeddingModels[0].name;
+  if (config.rag.enabled && config.rag.deployDefaultSagemakerModels) {
+    config.rag.crossEncoderModels[0] = {
+      provider: "sagemaker",
+      name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+      default: true,
+    };
+    config.rag.embeddingsModels = embeddingModels;
+  } else if (config.rag.enabled) {
+    config.rag.embeddingsModels = embeddingModels.filter(
+      (model) => model.provider !== "sagemaker"
+    );
+  } else {
+    config.rag.embeddingsModels = [];
   }
 
-  config.rag.crossEncoderModels[0] = {
-    provider: "sagemaker",
-    name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-    default: true,
-  };
-  config.rag.embeddingsModels = embeddingModels;
-  config.rag.embeddingsModels.forEach((m: any) => {
-    if (m.name === models.defaultEmbedding) {
-      m.default = true;
+  if (config.rag.embeddingsModels.length > 0 && models.defaultEmbedding) {
+    for (const model of config.rag.embeddingsModels) {
+      model.default = model.name === models.defaultEmbedding;
     }
-  });
+  }
 
   config.rag.engines.kendra.createIndex =
     answers.ragsToEnable.includes("kendra");
@@ -1287,9 +1330,10 @@ async function processCreateOptions(options: any): Promise<void> {
     config.rag.engines.kendra.createIndex || kendraExternal.length > 0;
   config.rag.engines.kendra.external = [...kendraExternal];
   config.rag.engines.kendra.enterprise = answers.kendraEnterprise;
+
+  config.rag.engines.knowledgeBase.external = [...kbExternal];
   config.rag.engines.knowledgeBase.enabled =
     config.rag.engines.knowledgeBase.external.length > 0;
-  config.rag.engines.knowledgeBase.external = [...kbExternal];
 
   console.log("\n✨ This is the chosen configuration:\n");
   console.log(JSON.stringify(config, undefined, 2));
