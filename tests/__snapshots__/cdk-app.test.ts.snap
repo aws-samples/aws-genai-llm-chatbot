@@ -3144,6 +3144,19 @@ schema {
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },
+    "ChatBotApiRestApiAURORADBHOST50DD50E7": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/AURORA_DB_HOST",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
+            "Endpoint.Address",
+          ],
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
     "ChatBotApiRestApiApiSecurityGroupC0E40B67": {
       "Properties": {
         "GroupDescription": "prefixGenAIChatBotStack/ChatBotApi/RestApi/ApiSecurityGroup",
@@ -3159,6 +3172,56 @@ schema {
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ChatBotApiRestApiCREATEAURORAWORKSPACEWORKFLOWARN71570127": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/CREATE_AURORA_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesAuroraPgVectorCreateAuroraWorkspace50EFF4E7",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiRestApiCREATEKENDRAWORKSPACEWORKFLOWARN5C545985": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesKendraRetrievalCreateKendraWorkspace5D8DE7EF",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiRestApiCREATEOPENSEARCHWORKSPACEWORKFLOWARNE33DBA7F": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesOpenSearchVectorCreateOpenSearchWorkspace2B2FCA5B",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiRestApiDELETEDOCUMENTWORKFLOWARN85E09161": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/DELETE_DOCUMENT_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesWorkspacesDeleteDocumentA1FD6471",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "ChatBotApiRestApiDELETEWORKSPACEWORKFLOWARN64B2371C": {
+      "Properties": {
+        "Name": "/prefix/GraphQLApiHandler/DELETE_WORKSPACE_WORKFLOW_ARN",
+        "Type": "String",
+        "Value": {
+          "Ref": "RagEnginesWorkspacesDeleteWorkspace6908C6DA",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
     },
     "ChatBotApiRestApiGraphQLApiHandler140797C1": {
       "DependsOn": [
@@ -3185,12 +3248,6 @@ schema {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
-            "AURORA_DB_HOST": {
-              "Fn::GetAtt": [
-                "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
-                "Endpoint.Address",
-              ],
-            },
             "AURORA_DB_PORT": {
               "Fn::GetAtt": [
                 "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -3204,15 +3261,6 @@ schema {
             },
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
-            },
-            "CREATE_AURORA_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesAuroraPgVectorCreateAuroraWorkspace50EFF4E7",
-            },
-            "CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesKendraRetrievalCreateKendraWorkspace5D8DE7EF",
-            },
-            "CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesOpenSearchVectorCreateOpenSearchWorkspace2B2FCA5B",
             },
             "DEFAULT_KENDRA_INDEX_ID": {
               "Fn::GetAtt": [
@@ -3230,12 +3278,6 @@ schema {
                 "Id",
               ],
             },
-            "DELETE_DOCUMENT_WORKFLOW_ARN": {
-              "Ref": "RagEnginesWorkspacesDeleteDocumentA1FD6471",
-            },
-            "DELETE_WORKSPACE_WORKFLOW_ARN": {
-              "Ref": "RagEnginesWorkspacesDeleteWorkspace6908C6DA",
-            },
             "DOCUMENTS_BY_COMPOUND_KEY_INDEX_NAME": "by_compound_key_idx",
             "DOCUMENTS_BY_STATUS_INDEX": "by_status_idx",
             "DOCUMENTS_TABLE_NAME": {
@@ -3244,6 +3286,8 @@ schema {
             "FILE_IMPORT_WORKFLOW_ARN": {
               "Ref": "RagEnginesDataImportFileImportWorkflowFileImportStateMachine398F0217",
             },
+            "LOAD_FROM_SSM": "AURORA_DB_HOST,DELETE_WORKSPACE_WORKFLOW_ARN,DELETE_DOCUMENT_WORKFLOW_ARN,CREATE_AURORA_WORKSPACE_WORKFLOW_ARN,CREATE_OPEN_SEARCH_WORKSPACE_WORKFLOW_ARN,CREATE_KENDRA_WORKSPACE_WORKFLOW_ARN",
+            "LOAD_FROM_SSM_PREFIX": "/prefix/GraphQLApiHandler/",
             "LOG_LEVEL": "INFO",
             "MODELS_PARAMETER_NAME": {
               "Ref": "ModelsModelsParameter4A14799B",
@@ -3254,6 +3298,11 @@ schema {
                 "CollectionEndpoint",
               ],
             },
+            "PARAMETERS_SECRETS_EXTENSION_CACHE_ENABLED": "true",
+            "PARAMETERS_SECRETS_EXTENSION_CACHE_SIZE": "500",
+            "PARAMETERS_SECRETS_EXTENSION_HTTP_PORT": "2773",
+            "PARAMETERS_SECRETS_EXTENSION_LOG_LEVEL": "info",
+            "PARAMETERS_SECRETS_EXTENSION_MAX_CONNECTIONS": "3",
             "POWERTOOLS_DEV": "false",
             "POWERTOOLS_LOGGER_LOG_EVENT": "false",
             "POWERTOOLS_SERVICE_NAME": "chatbot",
@@ -3273,10 +3322,14 @@ schema {
                 "EndpointName",
               ],
             },
+            "SECRETS_MANAGER_TIMEOUT_MILLIS": "0",
+            "SECRETS_MANAGER_TTL": "300",
             "SESSIONS_BY_USER_ID_INDEX_NAME": "byUserId",
             "SESSIONS_TABLE_NAME": {
               "Ref": "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
             },
+            "SSM_PARAMETER_STORE_TIMEOUT_MILLIS": "0",
+            "SSM_PARAMETER_STORE_TTL": "300",
             "UPLOAD_BUCKET_NAME": {
               "Ref": "RagEnginesDataImportUploadBucket061D697E",
             },
@@ -3316,6 +3369,7 @@ schema {
           {
             "Ref": "SharedCommonLayerFC89CBCE",
           },
+          "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
         ],
         "LoggingConfig": {
           "LogFormat": "JSON",
@@ -3475,6 +3529,11 @@ schema {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": "arn:aws:ssm:us-east-1:111111111:parameter/prefix/GraphQLApiHandler/*",
+            },
             {
               "Action": [
                 "kms:Decrypt",
