@@ -36,8 +36,8 @@ prompts = {
         ),
         # Prompt for rephrasing a follow-up question to be a standalone question
         "condense_question_prompt": (
-            "Given the conversation inside the tags <conv></conv>, rephrase the follow "
-            "up question inside <followup></followup> to be a standalone question."
+            "Given the following conversation and a follow up"
+            " question, rephrase the follow up question to be a standalone question."
         ),
         "current_conversation_word": "Current conversation",
         "question_word": "Question",
@@ -74,9 +74,8 @@ prompts = {
         # Prompt for rephrasing a follow-up question to be a
         # standalone question (French-Canadian)
         "condense_question_prompt": (
-            "En vous basant sur la conversation à l'intérieur des balises "
-            "<conv></conv>, reformulez la question de suivi trouvée à l'intérieur de "
-            "<followup></followup> pour qu'elle soit une question autonome."
+            "Avec la conversation ci-dessous et la question de suivi, "
+            "reformulez la question de suivi de manière à ce qu'elle soit une question autonome."
         ),
         "current_conversation_word": "Conversation en cours",
         "question_word": "Question",
