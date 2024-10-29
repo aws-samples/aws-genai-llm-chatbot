@@ -5853,6 +5853,7 @@ schema {
     "RagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceSMLogGroup3134E68A": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/CreateAuroraWorkspace-c8452d5c1e50beef6ce7711a12b5b2b94c06ab63c9",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -7033,6 +7034,7 @@ schema {
     "RagEnginesDataImportFileImportWorkflowFileImportSMLogGroupACEA6D66": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/FileImportStateMachine-c8dccfec6c46c17fc1838ad79ebf8db898b8909b9c",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -10280,6 +10282,7 @@ schema {
     "RagEnginesDataImportWebsiteCrawlingWorkflowWebsiteCrawlingSMLogGroup0C0F0231": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/WebsiteCrawling-c84c2dc1c7dcbb91f090053c5011b698fba19f95c3",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -10347,6 +10350,7 @@ schema {
     "RagEnginesKendraRetrievalCreateKendraWorkspaceCreateKendraWorkspaceSMLogGroupC9D4A635": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/CreateKendraWorkspace-c8fb806c7befce2813b20d937db829309c4304e20d",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -11357,6 +11361,7 @@ schema {
     "RagEnginesOpenSearchVectorCreateOpenSearchWorkspaceCreateOpenSearchWorkspaceSMLogGroupB97A0992": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/CreateOpenSearchWorkspace-c8a01fbc6e0a5b466bef32a0f428525db17267e978",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -14699,6 +14704,7 @@ schema {
     "RagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceSMLogGroup6EA3524F": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/DeleteWorkspace-c8407881c0ca4430481731ee6b0a7f7f73e6028115",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
