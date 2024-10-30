@@ -2860,7 +2860,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -3400,7 +3400,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -5618,7 +5618,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -6044,7 +6044,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -7724,7 +7724,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -7985,7 +7985,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -8360,7 +8360,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -8872,7 +8872,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -11143,7 +11143,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -13640,7 +13640,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -14039,6 +14039,7 @@ schema {
     "RagEnginesWorkspacesDeleteDocumentDeleteDocumentSMLogGroupD3F7AE1A": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/DeleteWorkspace-c86de8028b47fd4c13e24a1f6afdd4cc78fb5a7272",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -14305,7 +14306,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },

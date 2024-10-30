@@ -45,7 +45,7 @@ export class Shared extends Construct {
     this.kmsKeyAlias = props.config.prefix + "genaichatbot-shared-key";
     this.queueKmsKeyAlias =
       props.config.prefix + "genaichatbot-queue-shared-key";
-    const powerToolsLayerVersion = "46";
+    const powerToolsLayerVersion = "2";
 
     this.defaultEnvironmentVariables = {
       POWERTOOLS_DEV: "false",
@@ -258,10 +258,12 @@ export class Shared extends Construct {
       stringValue: JSON.stringify(props.config),
     });
 
+    //https://docs.powertools.aws.dev/lambda/python/3.2.0/
+    const pythonVersion = pythonRuntime.name.replace(".", "");
     const powerToolsArn =
       lambdaArchitecture === lambda.Architecture.X86_64
-        ? `arn:${cdk.Aws.PARTITION}:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2:${powerToolsLayerVersion}`
-        : `arn:${cdk.Aws.PARTITION}:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:${powerToolsLayerVersion}`;
+        ? `arn:${cdk.Aws.PARTITION}:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-${pythonVersion}-x86_64:${powerToolsLayerVersion}`
+        : `arn:${cdk.Aws.PARTITION}:lambda:${cdk.Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-${pythonVersion}-arm64:${powerToolsLayerVersion}`;
 
     const powerToolsLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
