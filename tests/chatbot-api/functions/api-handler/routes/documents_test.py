@@ -41,7 +41,7 @@ def test_file_upload(mocker):
 
 
 def test_file_upload_invalid_input(mocker):
-    with pytest.raises(ValidationError, match="2 validation errors"):
+    with pytest.raises(ValidationError, match="1 validation error"):
         file_upload({})
     with pytest.raises(ValidationError, match="2 validation errors"):
         file_upload({"fileName": "fileName<txt", "workspaceId": "id<"})
@@ -230,7 +230,7 @@ def test_add_website(mocker):
 
 
 def test_add_website_invalid_input(mocker):
-    with pytest.raises(ValidationError, match="6 validation errors"):
+    with pytest.raises(ValidationError, match="5 validation errors"):
         add_website({})
     with pytest.raises(ValidationError, match="6 validation errors"):
         add_website(
@@ -282,7 +282,7 @@ def test_add_rss_feed(mocker):
 
 
 def test_add_rss_feed_invalid_input(mocker):
-    with pytest.raises(ValidationError, match="4 validation errors"):
+    with pytest.raises(ValidationError, match="3 validation errors"):
         add_rss_feed({})
     with pytest.raises(ValidationError, match="5 validation errors"):
         add_rss_feed(
@@ -342,7 +342,7 @@ def test_update_rss_feed(mocker):
 
 
 def test_update_rss_feed_invalid_input(mocker):
-    with pytest.raises(ValidationError, match="4 validation errors"):
+    with pytest.raises(ValidationError, match="3 validation errors"):
         update_rss_feed({})
     with pytest.raises(CommonError, match="documentId is not set"):
         update_rss_feed(

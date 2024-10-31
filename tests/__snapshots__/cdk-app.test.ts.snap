@@ -2689,7 +2689,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -3309,7 +3309,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -5101,7 +5101,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -5907,7 +5907,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -7713,7 +7713,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -7995,6 +7995,7 @@ schema {
     "RagEnginesAuroraPgVectorCreateAuroraWorkspaceCreateAuroraWorkspaceSMLogGroup3134E68A": {
       "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/CreateAuroraWorkspace-c85defe1059e7fe274e5d32dfa5fbf22bf25029784",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -8207,7 +8208,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -9261,6 +9262,7 @@ schema {
     "RagEnginesDataImportFileImportWorkflowFileImportSMLogGroupACEA6D66": {
       "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/FileImportStateMachine-c8cf719aab95cd313558c24b954a4d64738cc90e28",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -9859,7 +9861,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -10169,7 +10171,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -10589,7 +10591,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -11076,7 +11078,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -12512,6 +12514,7 @@ schema {
     "RagEnginesDataImportWebsiteCrawlingWorkflowWebsiteCrawlingSMLogGroup0C0F0231": {
       "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/WebsiteCrawling-c84284c45e3cc190f86fcddfefa098795bf6057ea6",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -12579,6 +12582,7 @@ schema {
     "RagEnginesKendraRetrievalCreateKendraWorkspaceCreateKendraWorkspaceSMLogGroupC9D4A635": {
       "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/CreateKendraWorkspace-c82d1f0bddb3f281b5b0d41fbdc8dd5ce18a954f60",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -13320,7 +13324,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -13593,6 +13597,7 @@ schema {
     "RagEnginesOpenSearchVectorCreateOpenSearchWorkspaceCreateOpenSearchWorkspaceSMLogGroupB97A0992": {
       "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/CreateOpenSearchWorkspace-c80c40855b0079b324a7fd75085c6a2e70b9e6eeae",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -16032,7 +16037,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -16478,6 +16483,7 @@ schema {
     "RagEnginesWorkspacesDeleteDocumentDeleteDocumentSMLogGroupD3F7AE1A": {
       "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/DeleteWorkspace-c8f300d08639a84d1a06e986b62cd5544b8a7b47f9",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",
@@ -16765,7 +16771,7 @@ schema {
                 {
                   "Ref": "AWS::Region",
                 },
-                ":017000801446:layer:AWSLambdaPowertoolsPythonV2:46",
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
               ],
             ],
           },
@@ -17211,6 +17217,7 @@ schema {
     "RagEnginesWorkspacesDeleteWorkspaceDeleteWorkspaceSMLogGroup6EA3524F": {
       "DeletionPolicy": "RetainExceptOnCreate",
       "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/DeleteWorkspace-c8d0f97b477041b4948603d16e0499afeaa5361c9c",
         "RetentionInDays": 731,
       },
       "Type": "AWS::Logs::LogGroup",

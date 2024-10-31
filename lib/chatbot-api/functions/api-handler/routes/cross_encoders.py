@@ -14,7 +14,7 @@ logger = Logger()
 
 class CrossEncodersRequest(BaseModel):
     provider: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
-    model: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    model: str = Field(min_length=1, max_length=500, pattern=r"^[A-Za-z0-9-_. /]*$")
     reference: str = Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)
     passages: List[Annotated[str, Field(min_length=1, max_length=MAX_STR_INPUT_LENGTH)]]
 

@@ -10,7 +10,7 @@ export default defineConfig({
   define: {
     "process.env": {},
     // Prevents replacing global in the import strings.
-    global: "global",
+    global: isDev ? {} : "global",
   },
   plugins: [
     isDev && {

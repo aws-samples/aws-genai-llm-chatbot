@@ -52,8 +52,9 @@ def handler(event: dict, context: LambdaContext) -> dict:
         )
         return app.resolve(event, context)
     except ValidationError as e:
-        logger.warning(e.errors())
-        raise e
+        errors = e.errors(include_url=False, include_context=False, include_input=False)
+        logger.warning("Validation error", errors=errors)
+        raise ValueError(f"Invalid request. Details: {errors}")
     except CommonError as e:
         logger.warning(str(e))
         raise e
