@@ -96,6 +96,52 @@ exports[`snapshot test 1`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
+    "ExampleA925490C": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "KeyPolicy": {
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:GenerateDataKey*",
+                "kms:Decrypt",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudwatch.amazonaws.com",
+              },
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::KMS::Key",
+      "UpdateReplacePolicy": "Retain",
+    },
     "Index": {
       "Properties": {
         "Edition": "edition",
@@ -121,6 +167,12 @@ exports[`snapshot test 1`] = `
       },
       "Properties": {
         "DisplayName": "CompositeAlarmTopic",
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "ExampleA925490C",
+            "Arn",
+          ],
+        },
       },
       "Type": "AWS::SNS::Topic",
     },

@@ -16,6 +16,8 @@ import {
 import { Function } from "aws-cdk-lib/aws-lambda";
 import { StateMachine } from "aws-cdk-lib/aws-stepfunctions";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { Shared } from "../../lib/shared";
+import { Key } from "aws-cdk-lib/aws-kms";
 
 jest.spyOn(console, "log").mockImplementation(() => {});
 
@@ -36,6 +38,7 @@ new Queue(stack, "Queue", {
 
 new Monitoring(stack, "Monitoring", {
   prefix: "",
+  shared: { kmsKey: new Key(stack, "Example") } as Shared,
   advancedMonitoring: true,
   appsycnApi: GraphqlApi.fromGraphqlApiAttributes(stack, "GraphQL", {
     graphqlApiId: "graphqlApiId",

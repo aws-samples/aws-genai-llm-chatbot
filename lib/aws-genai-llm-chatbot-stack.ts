@@ -218,6 +218,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
 
     const monitoringStack = new cdk.NestedStack(this, "MonitoringStack");
     const monitoringConstruct = new Monitoring(monitoringStack, "Monitoring", {
+      shared,
       prefix: props.config.prefix,
       advancedMonitoring: props.config.advancedMonitoring === true,
       appsycnApi: chatBotApi.graphqlApi,
