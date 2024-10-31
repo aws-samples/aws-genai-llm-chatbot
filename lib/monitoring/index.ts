@@ -24,9 +24,12 @@ import { FilterPattern, ILogGroup, MetricFilter } from "aws-cdk-lib/aws-logs";
 import { IDistribution } from "aws-cdk-lib/aws-cloudfront";
 import { ITopic, Topic } from "aws-cdk-lib/aws-sns";
 import { NagSuppressions } from "cdk-nag";
+import { Shared } from "../shared";
+import { PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export interface MonitoringProps {
   prefix: string;
+  readonly shared: Shared;
   advancedMonitoring: boolean;
   appsycnApi: IGraphqlApi;
   appsyncResolversLogGroups: ILogGroup[];
@@ -261,7 +264,20 @@ export class Monitoring extends Construct {
       const onAlarmTopic = new Topic(this, "CompositeAlarmTopic", {
         displayName: props.prefix + "CompositeAlarmTopic",
         enforceSSL: true,
+        masterKey: props.shared.kmsKey,
       });
+
+      if (props.shared.kmsKey) {
+        // Following the guide
+        // https://docs.aws.amazon.com/sns/latest/dg/sns-key-management.html#sns-what-permissions-for-sse
+        props.shared.kmsKey.addToResourcePolicy(
+          new PolicyStatement({
+            actions: ["kms:GenerateDataKey*", "kms:Decrypt"],
+            principals: [new ServicePrincipal("cloudwatch.amazonaws.com")],
+            resources: ["*"],
+          })
+        );
+      }
 
       /**
        * CDK NAG suppression
