@@ -1,6 +1,7 @@
 from typing import Annotated, List, Optional
 from common.constant import (
     SAFE_SHORT_STR_VALIDATION,
+    SAFE_SHORT_STR_VALIDATION_OPTIONAL,
 )
 from common.validation import WorkspaceIdValidation
 import genai_core.types
@@ -27,9 +28,13 @@ class CreateWorkspaceAuroraRequest(BaseModel):
     kind: str = SAFE_SHORT_STR_VALIDATION
     name: str = Field(min_length=1, max_length=100, pattern=name_regex)
     embeddingsModelProvider: str = SAFE_SHORT_STR_VALIDATION
-    embeddingsModelName: str = SAFE_SHORT_STR_VALIDATION
-    crossEncoderModelProvider: Optional[str] = SAFE_SHORT_STR_VALIDATION
-    crossEncoderModelName: Optional[str] = SAFE_SHORT_STR_VALIDATION
+    embeddingsModelName: str = Field(
+        min_length=0, max_length=500, pattern=r"^[A-Za-z0-9-_. /]*$", default=None
+    )
+    crossEncoderModelProvider: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
+    crossEncoderModelName: Optional[str] = Field(
+        min_length=0, max_length=500, pattern=r"^[A-Za-z0-9-_. /]*$", default=None
+    )
     languages: List[Annotated[str, SAFE_SHORT_STR_VALIDATION]]
     metric: str = SAFE_SHORT_STR_VALIDATION
     index: bool

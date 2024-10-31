@@ -7,7 +7,7 @@ import genai_core.aurora.chunks
 import genai_core.opensearch.chunks
 from genai_core.types import CommonError, Task
 from typing import List, Optional
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 PROCESSING_BUCKET_NAME = os.environ.get("PROCESSING_BUCKET_NAME", "")
 s3 = boto3.resource("s3")

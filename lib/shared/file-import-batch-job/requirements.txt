@@ -4,12 +4,11 @@ numpy==1.26.0
 cfnresponse==1.1.2
 aws_requests_auth==0.4.3
 requests-aws4auth==1.2.3
-langchain==0.2.14
-langchain-community==0.2.12
+langchain==0.3.5
+langchain-community==0.3.3
 opensearch-py==2.3.1
 psycopg2-binary==2.9.7
 pgvector==0.2.2
-pydantic==2.4.0
 urllib3<2
 openai==1.47.0
 beautifulsoup4==4.12.2

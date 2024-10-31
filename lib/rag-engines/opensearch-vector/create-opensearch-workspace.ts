@@ -151,6 +151,10 @@ export class CreateOpenSearchWorkspace extends Construct {
             ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
             : cdk.RemovalPolicy.DESTROY,
         retention: props.config.logRetention,
+        // Log group name should start with `/aws/vendedlogs/` to not exceed Cloudwatch Logs Resource Policy
+        // size limit.
+        // https://docs.aws.amazon.com/step-functions/latest/dg/bp-cwl.html
+        logGroupName: `/aws/vendedlogs/states/CreateOpenSearchWorkspace-${this.node.addr}`,
       }
     );
 

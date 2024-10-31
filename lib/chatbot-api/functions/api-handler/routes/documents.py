@@ -1,6 +1,7 @@
 import os
 from common.constant import (
     ID_FIELD_VALIDATION,
+    ID_FIELD_VALIDATION_OPTIONAL,
     SAFE_HTTP_STR_REGEX,
     SAFE_STR_REGEX,
     MAX_STR_INPUT_LENGTH,
@@ -19,9 +20,13 @@ tracer = Tracer()
 router = Router()
 logger = Logger()
 
+CONTENT_TYPE_VALDIATION = Field(
+    min_length=1, max_length=100, pattern=r"^[A-Za-z0-9-_./]*$"
+)
+
 
 class FileUploadRequest(BaseModel):
-    workspaceId: Optional[str] = ID_FIELD_VALIDATION
+    workspaceId: Optional[str] = ID_FIELD_VALIDATION_OPTIONAL
     fileName: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
 
 
@@ -43,7 +48,7 @@ class WebsiteDocumentRequest(BaseModel):
     address: str = Field(min_length=1, max_length=500, pattern=SAFE_HTTP_STR_REGEX)
     followLinks: bool
     limit: int = Field(gt=-1)
-    contentTypes: Optional[List[Annotated[str, SAFE_SHORT_STR_VALIDATION]]]
+    contentTypes: Optional[List[Annotated[str, CONTENT_TYPE_VALDIATION]]] = None
 
 
 class RssFeedDocumentRequest(BaseModel):
@@ -59,16 +64,14 @@ class RssFeedDocumentRequest(BaseModel):
         default=None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
     )
     followLinks: bool
-    contentTypes: Optional[List[Annotated[str, SAFE_SHORT_STR_VALIDATION]]]
+    contentTypes: Optional[List[Annotated[str, CONTENT_TYPE_VALDIATION]]] = None
 
 
 class RssFeedCrawlerUpdateRequest(BaseModel):
     documentType: str = SAFE_SHORT_STR_VALIDATION
     followLinks: bool
     limit: int = Field(lt=500)
-    contentTypes: Optional[Annotated[str, SAFE_SHORT_STR_VALIDATION]] = Field(
-        min_length=1, max_length=100, pattern=SAFE_STR_REGEX
-    )
+    contentTypes: Optional[List[Annotated[str, CONTENT_TYPE_VALDIATION]]] = None
 
 
 class ListDocumentsRequest(BaseModel):
