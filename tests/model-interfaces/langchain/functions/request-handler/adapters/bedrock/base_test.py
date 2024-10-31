@@ -53,7 +53,7 @@ def test_chat_adapter(mocker):
         input="input", chat_history=[HumanMessage(content="history")]
     )
 
-    assert "Given the conversation inside the tags" in result
+    assert "Given the following conversation and" in result
     assert "Human: history" in result
     assert "Human: input" in result
 
@@ -104,7 +104,7 @@ def test_chat_without_system_adapter(mocker):
     result = model.get_condense_question_prompt().format(
         input="input", chat_history=[HumanMessage(content="history")]
     )
-    assert "Given the conversation inside the tags" in result
+    assert "Given the following conversation and" in result
     assert "Chat History" in result
     assert "Human: history" in result
     assert "Follow Up Input: input" in result

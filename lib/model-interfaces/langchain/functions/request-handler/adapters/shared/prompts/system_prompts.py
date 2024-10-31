@@ -75,7 +75,8 @@ prompts = {
         # standalone question (French-Canadian)
         "condense_question_prompt": (
             "Avec la conversation ci-dessous et la question de suivi, "
-            "reformulez la question de suivi de manière à ce qu'elle soit une question autonome."
+            "reformulez la question de suivi de manière à ce qu'elle soit "
+            "une question autonome."
         ),
         "current_conversation_word": "Conversation en cours",
         "question_word": "Question",
