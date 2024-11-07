@@ -1,6 +1,8 @@
 import boto3
+from botocore.config import Config
+import os
 
-s3 = boto3.client("s3")
+s3 = boto3.client("s3", region_name = os.environ['AWS_REGION'], config = Config(signature_version = 's3v4'))
 
 
 def file_exists(bucket, key):

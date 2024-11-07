@@ -1,5 +1,6 @@
 import os
 import boto3
+from botocore.config import Config
 import genai_core.types
 import genai_core.chunks
 import genai_core.documents
@@ -14,7 +15,7 @@ INPUT_OBJECT_KEY = os.environ.get("INPUT_OBJECT_KEY")
 PROCESSING_BUCKET_NAME = os.environ.get("PROCESSING_BUCKET_NAME")
 PROCESSING_OBJECT_KEY = os.environ.get("PROCESSING_OBJECT_KEY")
 
-s3_client = boto3.client("s3")
+s3_client = boto3.client("s3", region_name = os.environ['AWS_REGION'], config = Config(signature_version = 's3v4'))
 
 
 def main():

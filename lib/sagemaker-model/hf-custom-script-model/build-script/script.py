@@ -7,9 +7,10 @@ import subprocess  # nosec B404
 from pathlib import Path
 
 import boto3
+from botocore.config import Config
 from huggingface_hub import snapshot_download
 
-s3_client = boto3.client("s3")
+s3_client = boto3.client("s3", region_name = os.environ['AWS_REGION'], config = Config(signature_version = 's3v4'))
 
 local_model_folder = os.getenv("LOCAL_MODEL_FOLDER", "./model")
 bucket = os.getenv("BUILD_BUCKET", "")
