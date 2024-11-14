@@ -42,11 +42,17 @@ Roadmap is available through the [GitHub Project](https://github.com/orgs/aws-sa
 # License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
-
-- [Changelog](CHANGELOG.md) of the project.
 - [License](LICENSE) of the project.
 - [Code of Conduct](CODE_OF_CONDUCT.md) of the project.
 - [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+Although this repository is released under the  MIT-0 license, its front-end and SQL implementation use the following third party projects:
+- [psycopg2-binary](https://github.com/psycopg/psycopg2)
+- [jackspeak](https://github.com/isaacs/jackspeak)
+- [package-json-from-dist](https://github.com/isaacs/package-json-from-dist)
+- [path-scurry](https://github.com/isaacs/path-scurry)
+
+These projects' licensing includes the LGPL v3 and  BlueOak-1.0.0 licenses.
 
 # Legal Disclaimer
 
