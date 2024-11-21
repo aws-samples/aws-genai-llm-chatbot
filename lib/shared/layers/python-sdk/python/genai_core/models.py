@@ -87,11 +87,14 @@ def list_bedrock_models():
             byInferenceType=genai_core.types.InferenceType.ON_DEMAND.value,
             byOutputModality=genai_core.types.Modality.TEXT.value,
         )
+
+        enabledModels = genai_core.parameters.get_enabled_bedrock_models()
+
         bedrock_models = [
             m
             for m in response.get("modelSummaries", [])
             if m.get("modelLifecycle", {}).get("status")
-            == genai_core.types.ModelStatus.ACTIVE.value
+            == genai_core.types.ModelStatus.ACTIVE.value and m.get("modelId") in enabledModels
         ]
 
         models = [
