@@ -18,7 +18,7 @@ Use the [Cloud9 console](https://console.aws.amazon.com/cloud9control/home?#/cre
 - Select `Ubuntu Server 22.04 LTS` as Platform.
 
 The default EBS volume create with the Cloud9 instance is too small and you need to increase it to at least 100GB.
-To do this, clone the Github repo and then run the following command from the Cloud9 terminal:
+To do this, run the following command from the Cloud9 terminal:
 
 ```
 git clone https://github.com/aws-samples/aws-genai-llm-chatbot.git
