@@ -17,15 +17,6 @@ Use the [Cloud9 console](https://console.aws.amazon.com/cloud9control/home?#/cre
 - Select `m5.large` or larger as Instance Type.
 - Select `Ubuntu Server 22.04 LTS` as Platform.
 
-The default EBS volume create with the Cloud9 instance is too small and you need to increase it to at least 100GB.
-To do this, run the following command from the Cloud9 terminal:
-
-```
-./scripts/cloud9-resize.sh
-```
-
-See the documentation for more details on [environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize).
-
 You can now proceed with the [deployment](#deployment)
 
 ### Github Codespaces
@@ -85,6 +76,8 @@ You have:
 
 Before you start, please read the [precautions](../documentation/precautions.md) and [security](../documentation/vulnerability-scanning.md) pages.
 
+See the documentation for more details on [environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize).
+
 **Step 1.** Clone the repository.
 
 ```bash
@@ -95,6 +88,18 @@ git clone https://github.com/aws-samples/aws-genai-llm-chatbot
 
 ```bash
 cd aws-genai-llm-chatbot
+```
+
+If you are using [AWS Cloud9](https://aws.amazon.com/cloud9/), you need to know the default EBS volume create with the Cloud9 instance is too small and you need to increase it to at least 100GB.
+To do this, run the following command from the Cloud9 terminal:
+
+```
+chmod +x scripts/cloud9-resize.sh
+```
+
+
+```
+./scripts/cloud9-resize.sh
 ```
 
 **Step 3.** <a id="deployment-dependencies-installation"></a> Install the project dependencies and build the project.
