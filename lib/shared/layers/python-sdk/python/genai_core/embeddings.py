@@ -13,6 +13,14 @@ from typing import List, Optional
 SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
 logger = Logger()
 
+# New models allows you to specify different dimension sizes
+MODELS_WITH_CUSTOM_DIMENSIONS = {
+    "amazon.titan-embed-text-v2",
+    # Add other model prefixes here
+}
+
+def supports_custom_dimensions(model_name: str) -> bool:
+    return any(model_name.startswith(prefix) for prefix in MODELS_WITH_CUSTOM_DIMENSIONS)
 
 def generate_embeddings(
     model: EmbeddingsModel, input: List[str], task: str = "store", batch_size: int = 50
@@ -89,7 +97,7 @@ def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedroc
         body = {"inputText": value}
 
         # Only include demensions for specific models
-        if model.supports_custom_dimensions:
+        if supports_custom_dimensions(model.name):
             body["dimensions"] = model.dimensions
 
         response = bedrock.invoke_model(
