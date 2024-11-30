@@ -86,9 +86,14 @@ def _generate_embeddings_bedrock(model: EmbeddingsModel, input: List[str], task:
 def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedrock):
     ret_value = []
     for value in input:
-        body = json.dumps({"inputText": value})
+        body = {"inputText": value}
+
+        # Only include demensions for specific models
+        if model.supports_custom_dimensions:
+            body["dimensions"] = model.dimensions
+
         response = bedrock.invoke_model(
-            body=body,
+            body=json.dumps(body),
             modelId=model.name,
             accept="application/json",
             contentType="application/json",

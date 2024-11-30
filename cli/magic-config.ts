@@ -132,6 +132,12 @@ const embeddingModels: ModelConfig[] = [
     dimensions: 1536,
     default: false,
   },
+  {
+    provider: "bedrock",
+    name: "amazon.titan-embed-text-v2:0",
+    dimensions: 512,
+    default: false,
+  }
 ];
 
 /**
