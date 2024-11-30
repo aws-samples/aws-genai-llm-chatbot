@@ -60,23 +60,32 @@ def create_workspace_table(workspace: dict):
         if has_index:
             if metric == "cosine":
                 cursor.execute(
+                    # sql.SQL(
+                    #     "CREATE INDEX ON {table} USING ivfflat "
+                    #     + "(content_embeddings vector_cosine_ops) WITH (lists = 100);"
+                    # ).format(table=table_name)
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING ivfflat "
-                        + "(content_embeddings vector_cosine_ops) WITH (lists = 100);"
+                        "CREATE INDEX ON {table} USING hnsw (content_embeddings vector_cosine_ops);"
                     ).format(table=table_name)
                 )
             elif metric == "l2":
                 cursor.execute(
+                    # sql.SQL(
+                    #     "CREATE INDEX ON {table} USING ivfflat "
+                    #     + "(content_embeddings vector_l2_ops) WITH (lists = 100);"
+                    # ).format(table=table_name)
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING ivfflat "
-                        + "(content_embeddings vector_l2_ops) WITH (lists = 100);"
+                        "CREATE INDEX ON {table} USING hnsw (content_embeddings vector_l2_ops);"
                     ).format(table=table_name)
                 )
             elif metric == "inner":
                 cursor.execute(
+                        # sql.SQL(
+                    #     "CREATE INDEX ON {table} USING ivfflat "
+                    #     + "(content_embeddings vector_ip_ops) WITH (lists = 100);"
+                    # ).format(table=table_name)
                     sql.SQL(
-                        "CREATE INDEX ON {table} USING ivfflat "
-                        + "(content_embeddings vector_ip_ops) WITH (lists = 100);"
+                        "CREATE INDEX ON {table} USING hnsw (content_embeddings vector_ip_ops);"
                     ).format(table=table_name)
                 )
 
