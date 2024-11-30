@@ -36,7 +36,7 @@ export class AuroraPgVector extends Construct {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         // Extensions version per engine
         // https://docs.aws.amazon.com/AmazonRDS/latest/AuroraPostgreSQLReleaseNotes/AuroraPostgreSQL.Extensions.html
-        version: rds.AuroraPostgresEngineVersion.VER_15_7,
+        version: rds.AuroraPostgresEngineVersion.VER_16_4
       }),
       storageEncryptionKey: props.shared.kmsKey,
       // Always setting it to true would be a breaking change. (Undefined to prevent re-creating)
