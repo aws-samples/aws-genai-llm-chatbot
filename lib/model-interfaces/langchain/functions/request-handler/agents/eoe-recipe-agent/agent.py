@@ -1,4 +1,13 @@
-from typing import Dict, List, Optional, Tuple, Any
+# At the top of agent.py
+import sys
+from pathlib import Path
+
+# Find the project root (you might need to adjust the number of parents)
+project_root = Path(__file__).parents[5]  # Goes up 6 levels to your_project_root
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
+
+from typing import Dict, List, Union, Optional, Tuple, Any, cast
 from dataclasses import dataclass
 from enum import Enum
 from langchain_core.agents import AgentAction, AgentFinish
@@ -12,21 +21,48 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools.render import format_tool_to_openai_function
 import json
 import re
+from callbacks.tool_monitoring import ToolMonitoringCallback
+from pydantic import SecretStr
+from langchain.callbacks.base import BaseCallbackHandler
+from langchain.callbacks.manager import CallbackManager, Callbacks
 
-def extract_json(text: str) -> Dict[str, Any]:
-    """Extract and parse JSON from text."""
+def extract_json(text: Union[str, List[Union[str, Dict[str, Any]]]]) -> Dict[str, Any]:
+    """Extract and parse JSON from text or structured content.
+
+    Args:
+        text: Either a string containing JSON or a structured response that needs to be converted
+
+    Returns:
+        Dict[str, Any]: Parsed JSON object
+
+    Raises:
+        ValueError: If JSON cannot be extracted or parsed
+    """
     try:
-        # Find the position of first '{' and last '}'
-        start = text.find('{')
-        end = text.rfind('}')
-        if start == -1 or end == -1:
-            raise ValueError("No JSON object found in text")
+        if isinstance(text, str):
+            # Handle string input
+            start = text.find('{')
+            end = text.rfind('}')
+            if start == -1 or end == -1:
+                raise ValueError("No JSON object found in text")
+            json_str = text[start:end + 1]
+            return json.loads(json_str)
+        elif isinstance(text, list):
+            # Handle list input - combine all strings and try to extract JSON
+            combined_text = ' '.join(
+                str(item) if isinstance(item, (str, dict)) else ''
+                for item in text
+            )
+            return extract_json(combined_text)  # Recursively process as string
+        elif isinstance(text, dict):
+            # If we already have a dict, return it
+            return text
+        else:
+            raise ValueError(f"Unsupported input type: {type(text)}")
 
-        # Extract potential JSON substring
-        json_str = text[start:end + 1]
-        return json.loads(json_str)
     except (json.JSONDecodeError, ValueError) as e:
         raise ValueError(f"Failed to extract JSON: {str(e)}")
+
 
 class CookingMethod(Enum):
     BAKING = "baking"
@@ -40,12 +76,6 @@ class CookingMethod(Enum):
     SLOW_COOKING = "slow_cooking"
     NO_COOK = "no_cook"
     NOT_SURE = "not_sure"
-
-@dataclass
-class ContextualSubstitution:
-    substitution: str
-    notes: str
-    cooking_adjustments: Optional[str] = None
 
 @dataclass
 class CookingContext:
@@ -116,8 +146,8 @@ class EOERecipeAssistant:
     def __init__(self, api_key: str):
         # Initialize LLM
         self.llm = ChatAnthropic(
-            anthropic_api_key=api_key,
-            model_name="claude-3-5-haiku-20241022"
+            anthripoc_api_key=api_key,
+            model_name="claude-3-5-haiku-20241022",
         )
 
         # Initialize cooking method cache
@@ -126,7 +156,8 @@ class EOERecipeAssistant:
         # Initialize preferred substitutions
         self.preferred_substitutions = {
             "butter": {
-                CookingMethod.BAKING: ContextualSubstitution(
+                CookingMethod.BAKING: IngredientSubstitution(
+                    original_ingredient="butter",
                     substitution="ghee",
                     notes="Use clarified butter/ghee for similar richness while avoiding dairy proteins",
                     cooking_adjustments="Reduce amount by 10-15% as ghee is more concentrated"
@@ -203,7 +234,18 @@ class EOERecipeAssistant:
         )
 
     async def analyze_recipe(self, recipe: str, user_profile: UserProfile) -> RecipeAnalysis:
-        """Analyze a recipe based on user's specific EOE triggers and current phase."""
+        """Analyze a recipe based on user's specific EOE triggers and current phase.
+
+        Args:
+            recipe: The recipe text to analyze
+            user_profile: User profile containing triggers and phase information
+
+        Returns:
+            RecipeAnalysis: Structured analysis of the recipe
+
+        Raises:
+            ValueError: If recipe analysis fails
+        """
         try:
             prompt = f"""You are an expert in personalized EOE dietary management.
             Analyze this recipe for {user_profile.name}'s triggers: {', '.join(user_profile.triggers)}
@@ -215,11 +257,14 @@ class EOERecipeAssistant:
             Return ONLY a JSON object with analysis results matching the RecipeAnalysis structure."""
 
             response = await self.llm.ainvoke([HumanMessage(content=prompt)])
+
+            # Handle the response content regardless of its type
             data = extract_json(response.content)
             return RecipeAnalysis.from_dict(data)
 
         except Exception as e:
             raise ValueError(f"Failed to analyze recipe: {str(e)}")
+
 
     async def analyze_recipe_with_context(
         self,
@@ -379,9 +424,12 @@ class ModifyRecipeTool(BaseTool):
         return modified.__dict__
 
 class EOERecipeAgent:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, enable_monitoring: bool = True):
         # Initialize the EOERecipeAssistant
         self.eoe_assistant = EOERecipeAssistant(api_key)
+
+        # Initialize callback handler
+        self.monitoring_callback: Optional[ToolMonitoringCallback] = ToolMonitoringCallback() if enable_monitoring else None
 
         # Initialize tools
         self.tools = [
@@ -393,7 +441,7 @@ class EOERecipeAgent:
         # Initialize LLM
         self.llm = ChatAnthropic(
             anthropic_api_key=api_key,
-            model_name="claude-3-5-haiku-20241022"
+            model_name="claude-3-5-haiku-20241022",
         )
 
         # Create prompt template
@@ -430,29 +478,58 @@ class EOERecipeAgent:
             | OpenAIFunctionsAgentOutputParser()
         )
 
-        # Create executor
+        # Initialize the executor using the setup method
+        self.setup_executor()
+
+
+    async def process_recipe(self, recipe: str, user_profile: UserProfile) -> Dict:
+        """Process a recipe for the given user profile."""
+        try:
+            result = await self.agent_executor.ainvoke(
+                {
+                    "input": f"""Please analyze and modify this recipe for {user_profile.name} who has
+                    the following EOE triggers: {', '.join(user_profile.triggers)} and is in the {user_profile.phase} phase.
+
+                    Recipe:
+                    {recipe}
+                    """
+                }
+            )
+
+            return result
+
+        except Exception as e:
+            if self.monitoring_callback:
+                print(f"Recipe processing error: {str(e)}")
+            raise
+
+    def setup_executor(self):
+        if self.monitoring_callback:
+            # Cast our ToolMonitoringCallback to BaseCallbackHandler
+            base_callbacks = [cast(BaseCallbackHandler, self.monitoring_callback)]
+            callback_manager = CallbackManager(handlers=base_callbacks)
+        else:
+            callback_manager = None
+
         self.agent_executor = AgentExecutor(
             agent=self.agent,
             tools=self.tools,
             verbose=True,
-            handle_parsing_errors=True
+            handle_parsing_errors=True,
+            callbacks=callback_manager
         )
 
-    async def process_recipe(self, recipe: str, user_profile: UserProfile) -> Dict:
-        """Process a recipe for the given user profile."""
-        result = await self.agent_executor.ainvoke(
-            {
-                "input": f"""Please analyze and modify this recipe for {user_profile.name} who has
-                the following EOE triggers: {', '.join(user_profile.triggers)} and is in the {user_profile.phase} phase.
+    def get_metrics(self) -> Optional[Dict[str, Any]]:
+        """Safely get metrics from the monitoring callback.
 
-                Recipe:
-                {recipe}
-                """
-            }
-        )
-        return result
+        Returns:
+            Optional[Dict[str, Any]]: Metrics dictionary if monitoring is enabled, None otherwise
+        """
+        if self.monitoring_callback:
+            return self.monitoring_callback.get_metrics()
+        return None
 
-# Example usage
+# Updated example usage
 async def main():
     from dotenv import load_dotenv
     import os
@@ -462,7 +539,8 @@ async def main():
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
 
-    agent = EOERecipeAgent(api_key)
+    # Initialize agent with monitoring enabled
+    agent = EOERecipeAgent(api_key, enable_monitoring=True)
 
     user = UserProfile(
         name="John",
@@ -489,6 +567,14 @@ async def main():
     try:
         result = await agent.process_recipe(recipe, user)
         print("Agent Result:", json.dumps(result, indent=2))
+
+        # Print tool usage metrics
+        print("\nTool Usage Metrics:")
+        metrics = agent.get_metrics()
+        if metrics:
+            print(json.dumps(metrics, indent=2))
+        else:
+            print("Monitoring is disabled - no metrics available")
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
