@@ -146,8 +146,10 @@ class EOERecipeAssistant:
     def __init__(self, api_key: str):
         # Initialize LLM
         self.llm = ChatAnthropic(
-            anthripoc_api_key=api_key,
+            api_key=api_key,
             model_name="claude-3-5-haiku-20241022",
+            timeout=None,
+            stop=None,
         )
 
         # Initialize cooking method cache
@@ -440,8 +442,10 @@ class EOERecipeAgent:
 
         # Initialize LLM
         self.llm = ChatAnthropic(
-            anthropic_api_key=api_key,
+            api_key=SecretStr(api_key),
             model_name="claude-3-5-haiku-20241022",
+            timeout=None,
+            stop=None
         )
 
         # Create prompt template
