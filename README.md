@@ -66,6 +66,14 @@ This library is licensed under the MIT-0 License. See the LICENSE file.
 - [Code of Conduct](CODE_OF_CONDUCT.md) of the project.
 - [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
+Although this repository is released under the  MIT-0 license, its front-end and SQL implementation use the following third party projects:
+- [psycopg2-binary](https://github.com/psycopg/psycopg2)
+- [jackspeak](https://github.com/isaacs/jackspeak)
+- [package-json-from-dist](https://github.com/isaacs/package-json-from-dist)
+- [path-scurry](https://github.com/isaacs/path-scurry)
+
+These projects' licensing includes the LGPL v3 and  BlueOak-1.0.0 licenses.
+
 # Legal Disclaimer
 
 You should consider doing your own independent assessment before using the content in this sample for production purposes. This may include (amongst other things) testing, securing, and optimizing the content provided in this sample, based on your specific quality control practices and standards.
