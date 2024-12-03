@@ -47,7 +47,6 @@ def _convert_records(source: str, workspace_id: str, records: List[dict]):
     converted_records = []
     _id = 0
     for record in records:
-
         path = record.get("location", {}).get("s3Location", {}).get("uri", "")
         content = record.get("content", {}).get("text", "")
         score = record.get("score", 0)

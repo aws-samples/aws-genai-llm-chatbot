@@ -1,25 +1,21 @@
-from aws_lambda_powertools import Logger
-from .base import MultiModalModelBase
-from genai_core.types import ChatbotMessageType
-from urllib.parse import urljoin
 import os
-from langchain.llms import SagemakerEndpoint
+from urllib.parse import urljoin
+
+from aws_lambda_powertools import Logger
 from content_handler import ContentHandler
 from genai_core.registry import registry
+from genai_core.types import ChatbotMessageType
+from langchain.llms import SagemakerEndpoint
+
+from .base import MultiModalModelBase
 
 logger = Logger()
 
 
 class Idefics(MultiModalModelBase):
-    model_id: str
-
-    def __init__(self, model_id: str):
-        self.model_id = model_id
-
     def format_prompt(
         self, prompt: str, messages: list, files: list, user_id: str
     ) -> str:
-
         human_prompt_template = "User:{prompt}"
         human_prompt_with_image = "User:{prompt}![]({image})"
         ai_prompt_template = "Assistant:{prompt}"
@@ -87,7 +83,9 @@ class Idefics(MultiModalModelBase):
         )
 
         mlm_response = mlm.predict(prompt)
-        return mlm_response
+        return {
+            "content": mlm_response,
+        }
 
 
 registry.register(r"^sagemaker.*idefics*", Idefics)

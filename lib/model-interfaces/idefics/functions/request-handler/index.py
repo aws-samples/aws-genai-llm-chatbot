@@ -1,23 +1,51 @@
-import os
 import json
+import os
 import uuid
 from datetime import datetime
 
+import adapters  # noqa: F401 Needed to register the adapters
+import boto3
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
-
-import adapters  # noqa: F401 Needed to register the adapters
 from genai_core.langchain import DynamoDBChatMessageHistory
-from genai_core.utils.websocket import send_to_client
-from genai_core.types import ChatbotAction
 from genai_core.registry import registry
+from genai_core.types import ChatbotAction
+from genai_core.utils.websocket import send_to_client
+
+print(boto3.__version__)
 
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
 logger = Logger()
+
+sequence_number = 0
+
+
+def on_llm_new_token(user_id, session_id, self, *args, **kwargs):
+    chunk = args[0]
+    if chunk is None or len(chunk) == 0:
+        return
+    global sequence_number
+    sequence_number += 1
+
+    send_to_client(
+        {
+            "type": "text",
+            "action": ChatbotAction.LLM_NEW_TOKEN.value,
+            "userId": user_id,
+            "timestamp": str(int(round(datetime.now().timestamp()))),
+            "data": {
+                "sessionId": session_id,
+                "token": {
+                    "sequenceNumber": sequence_number,
+                    "value": chunk,
+                },
+            },
+        }
+    )
 
 
 def handle_run(record):
@@ -47,38 +75,61 @@ def handle_run(record):
     messages = chat_history.messages
 
     adapter = registry.get_adapter(f"{provider}.{model_id}")
-    model = adapter(model_id=model_id)
+    adapter.on_llm_new_token = lambda *args, **kwargs: on_llm_new_token(
+        user_id, session_id, *args, **kwargs
+    )
+    model = adapter(
+        model_id=model_id,
+        session_id=session_id,
+        user_id=user_id,
+        model_kwargs=model_kwargs,
+        mode=mode,
+    )
 
-    prompt_template = model.format_prompt(
+    run_input = model.format_prompt(
         prompt=prompt,
         messages=messages,
         files=files,
-        user_id=user_id,
     )
 
-    mlm_response = model.handle_run(prompt=prompt_template, model_kwargs=model_kwargs)
+    ai_response = model.handle_run(
+        input=run_input, model_kwargs=model_kwargs, files=files
+    )
 
-    metadata = {
+    # Add user files and mesage to chat history
+    user_message_metadata = {
         "provider": provider,
         "modelId": model_id,
         "modelKwargs": model_kwargs,
         "mode": mode,
         "sessionId": session_id,
         "userId": user_id,
-        "prompts": [model.clean_prompt(prompt_template)],
+        "prompts": [model.clean_prompt(run_input)],
+        "files": files or [],
     }
-    if files:
-        metadata["files"] = files
-
     chat_history.add_user_message(prompt)
-    chat_history.add_metadata(metadata)
-    chat_history.add_ai_message(mlm_response)
+    chat_history.add_metadata(user_message_metadata)
+
+    # Add AI files and message to chat history
+    ai_response_metadata = {
+        "provider": provider,
+        "modelId": model_id,
+        "modelKwargs": model_kwargs,
+        "mode": mode,
+        "sessionId": session_id,
+        "userId": user_id,
+        "prompts": [model.clean_prompt(run_input)],
+        "files": ai_response.get("files", []),
+    }
+    ai_text_response = ai_response.get("content", "")
+    chat_history.add_ai_message(ai_text_response)
+    chat_history.add_metadata(ai_response_metadata)
 
     response = {
         "sessionId": session_id,
         "type": "text",
-        "content": mlm_response,
-        "metadata": metadata,
+        "content": ai_text_response,
+        "metadata": ai_response_metadata,
     }
 
     send_to_client(
@@ -114,6 +165,25 @@ def handle_failed_records(records):
         data = detail.get("data", {})
         session_id = data.get("sessionId", "")
 
+        message = "⚠️ *Something went wrong*"
+        if (
+            "An error occurred (ValidationException)" in error
+            and "The provided image must have dimensions in set [1280x720]" in error
+        ):
+            # At this time only one input size is supported by the Nova reel model.
+            message = "⚠️ *The provided image must have dimensions of 1280x720.*"
+
+        elif (
+            "An error occurred (AccessDeniedException)" in error
+            and "You don't have access to the model with the specified model ID"
+            in error
+        ):
+            message = (
+                "*This model is not enabled. "
+                "Please try again later or contact "
+                "an administrator*"
+            )
+
         send_to_client(
             {
                 "type": "text",
@@ -122,7 +192,7 @@ def handle_failed_records(records):
                 "timestamp": str(int(round(datetime.now().timestamp()))),
                 "data": {
                     "sessionId": session_id,
-                    "content": "Something went wrong.",
+                    "content": message,
                     "type": "text",
                 },
             }

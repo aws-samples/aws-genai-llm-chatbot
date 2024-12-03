@@ -10,11 +10,32 @@
 
 ![sample](docs/about/assets/chabot-sample.gif "AWS GenAI Chatbot")
 
+
+## 🚀 NEW! Support for new Amazon Nova Models 🚀
+### Deploy this chatbot to use the recently announced [Amazon Nova models](https://aws.amazon.com/blogs/aws/introducing-amazon-nova-frontier-intelligence-and-industry-leading-price-performance/)!
+### These powerful models can __understand__ and __generate__ images and videos.
+
+Deploy this chatbot to experiment with:
+- `Amazon Nova Micro`
+- `Amazon Nova Lite`
+- `Amazon Nova Pro`
+- `Amazon Nova Canvas`
+- `Amazon Nova Reels`
+
+
+
+Make sure to request access to the new models [here](https://aws-samples.github.io/aws-genai-llm-chatbot/documentation/model-requirements.html#amazon-bedrock-requirements)
+
+Read more about the new models [here](https://www.aboutamazon.com/news/aws/amazon-nova-artificial-intelligence-bedrock-aws)
+
+---
+
+
 This solution provides ready-to-use code so you can start **experimenting with a variety of Large Language Models and Multimodal Language Models, settings and prompts** in your own AWS account.
 
 Supported model providers:
 
-- [Amazon Bedrock](https://aws.amazon.com/bedrock/)
+- [Amazon Bedrock](https://aws.amazon.com/bedrock/) which supports a wide range of models from AWS, Anthropic, Cohere and Mistral including the lastst models from Amazon Nova. See [Recent announcements](#) for more details.
 - [Amazon SageMaker](https://aws.amazon.com/sagemaker/) self-hosted models from Foundation, Jumpstart and HuggingFace.
 - Third-party providers via API such as Anthropic, Cohere, AI21 Labs, OpenAI, etc. [See available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list.
 
@@ -42,6 +63,8 @@ Roadmap is available through the [GitHub Project](https://github.com/orgs/aws-sa
 # License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
+
+- [Changelog](CHANGELOG.md) of the project.
 - [License](LICENSE) of the project.
 - [Code of Conduct](CODE_OF_CONDUCT.md) of the project.
 - [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.

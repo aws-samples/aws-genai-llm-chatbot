@@ -46,6 +46,7 @@ class Modality(Enum):
     TEXT = "TEXT"
     IMAGE = "IMAGE"
     EMBEDDING = "EMBEDDING"
+    VIDEO = "VIDEO"
 
 
 class InferenceType(Enum):

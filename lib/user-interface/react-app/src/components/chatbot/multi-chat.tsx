@@ -75,6 +75,7 @@ function createNewSession(): ChatSession {
       maxTokens: 512,
       temperature: 0.1,
       topP: 0.9,
+      seed: 0,
     },
   };
 }
@@ -203,6 +204,7 @@ export default function MultiChat() {
             maxTokens: chatSession.configuration.maxTokens,
             temperature: chatSession.configuration.temperature,
             topP: chatSession.configuration.topP,
+            seed: chatSession.configuration.seed,
           },
           text: value,
           mode: ChatBotMode.Chain,

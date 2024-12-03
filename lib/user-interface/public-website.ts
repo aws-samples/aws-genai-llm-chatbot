@@ -93,6 +93,7 @@ export class PublicWebsite extends Construct {
               };` +
               "font-src 'self' data:; " + // Fonts are inline in the CSS files
               `img-src 'self' ${fileBucketURLs.join(" ")} blob:; ` +
+              `media-src 'self' ${fileBucketURLs.join(" ")} blob:; ` +
               "style-src 'self' 'unsafe-inline';", // React uses inline style
             override: true,
           },
