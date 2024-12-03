@@ -12,7 +12,7 @@
 
 
 ## 🚀 NEW! Support for new Amazon Nova Models 🚀
-### Deploy this chatbot to use the latest Amazon Nova models!
+### Deploy this chatbot to use the recently announced [Amazon Nova models](https://aws.amazon.com/blogs/aws/introducing-amazon-nova-frontier-intelligence-and-industry-leading-price-performance/)!
 ### These powerful models can __understand__ and __generate__ images and videos.
 
 Deploy this chatbot to experiment with:
@@ -25,6 +25,9 @@ Deploy this chatbot to experiment with:
 
 
 Make sure to request access to the new models [here](https://aws-samples.github.io/aws-genai-llm-chatbot/documentation/model-requirements.html#amazon-bedrock-requirements)
+
+Read more about the new models [here](https://www.aboutamazon.com/news/aws/amazon-nova-artificial-intelligence-bedrock-aws)
+
 ---
 
 
