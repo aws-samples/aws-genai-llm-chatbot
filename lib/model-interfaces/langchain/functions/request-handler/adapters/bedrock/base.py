@@ -256,6 +256,7 @@ registry.register(r"^bedrock.mistral.mistral-small*", BedrockChatAdapter)
 registry.register(r"^bedrock.mistral.mistral-7b-*", BedrockChatNoSystemPromptAdapter)
 registry.register(r"^bedrock.mistral.mixtral-*", BedrockChatNoSystemPromptAdapter)
 registry.register(r"^bedrock.amazon.titan-t*", BedrockChatNoSystemPromptAdapter)
+registry.register(r"^bedrock.amazon.nova*", BedrockChatAdapter)
 
 
 class PromptTemplateWithHistory(PromptTemplate):

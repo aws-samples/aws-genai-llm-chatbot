@@ -109,6 +109,16 @@
   border-radius: 8px;
 }
 
+.img_chabot_message_ai {
+  max-width: 50%;
+  border-radius: 8px;
+}
+
+.video_chabot_message {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
 @media (max-width: 689px) {
   .input_controls {
     display: grid;

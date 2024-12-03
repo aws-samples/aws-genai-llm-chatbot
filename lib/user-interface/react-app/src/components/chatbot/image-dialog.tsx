@@ -12,7 +12,12 @@ import { useForm } from "../../common/hooks/use-form";
 
 import { Dispatch, useContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { ChatBotConfiguration, FileStorageProvider, ImageFile } from "./types";
+import {
+  ChatBotConfiguration,
+  FileStorageProvider,
+  ImageFile,
+  ChabotInputModality,
+} from "./types";
 import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
 import { FileUploader } from "../../common/file-uploader";
@@ -119,6 +124,7 @@ export default function ImageDialog(props: ImageDialogProps) {
         s3Files.push({
           key: `${response}`,
           provider: FileStorageProvider.S3,
+          type: ChabotInputModality.Image,
         });
       } catch (error) {
         const errorMessage =

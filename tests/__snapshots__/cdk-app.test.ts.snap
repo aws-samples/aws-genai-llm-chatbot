@@ -5296,6 +5296,13 @@ schema {
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
               ],
               "Effect": "Allow",
               "Resource": [
@@ -5320,19 +5327,6 @@ schema {
                   ],
                 },
               ],
-            },
-            {
-              "Action": [
-                "kms:Decrypt",
-                "kms:DescribeKey",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "SharedKMSKey7BCBB616",
-                  "Arn",
-                ],
-              },
             },
             {
               "Action": [
@@ -5435,7 +5429,10 @@ schema {
               },
             },
             {
-              "Action": "bedrock:InvokeModel",
+              "Action": [
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModelWithResponseStream",
+              ],
               "Effect": "Allow",
               "Resource": "*",
             },

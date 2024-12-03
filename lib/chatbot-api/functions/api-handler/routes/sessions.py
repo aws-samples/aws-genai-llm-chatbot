@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from common.constant import SAFE_STR_REGEX
+from common.constant import SAFE_FILE_NAME_REGEX
 from common.validation import WorkspaceIdValidation
 import genai_core.presign
 import genai_core.sessions
@@ -16,7 +16,7 @@ logger = Logger()
 
 
 class FileURequestValidation(BaseModel):
-    fileName: str = Field(min_length=1, max_length=500, pattern=SAFE_STR_REGEX)
+    fileName: str = Field(min_length=1, max_length=500, pattern=SAFE_FILE_NAME_REGEX)
 
 
 @router.resolver(field_name="getFileURL")

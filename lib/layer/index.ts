@@ -34,9 +34,8 @@ export class Layer extends Construct {
           [
             `pip install -r requirements.txt ${args.join(" ")}`,
             `cd /asset-output/python`,
-            // Remove boto3 since it's already part of the lambda runtime
             // Remove sqlalchemy, used by Langchain when storing the memory using sql
-            `rm -rf boto3* botocore* sqlalchemy*`,
+            `rm -rf sqlalchemy*`,
             // Main impact of cold start is the file size. (faster to have the lambda regenerate them)
             `find . -name "*.pyc" -type f -delete`,
             `cd -`,

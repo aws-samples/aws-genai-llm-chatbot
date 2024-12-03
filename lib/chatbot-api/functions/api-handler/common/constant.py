@@ -12,3 +12,4 @@ SAFE_SHORT_STR_VALIDATION = Field(min_length=1, max_length=100, pattern=SAFE_STR
 SAFE_SHORT_STR_VALIDATION_OPTIONAL = Field(
     min_length=1, max_length=100, pattern=SAFE_STR_REGEX, default=None
 )
+SAFE_FILE_NAME_REGEX = r"^[A-Za-z0-9-_./\\ ]*$"
