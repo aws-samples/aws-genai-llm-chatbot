@@ -620,7 +620,7 @@ async def main():
 
     assistant = EOERecipeAssistant(api_key)
     user = UserProfile(
-        name="John",
+        name="Greg",
         triggers=["dairy", "wheat","eggs" ],
         phase="elimination"  # elimination, reintroduction, maintenance
     )
