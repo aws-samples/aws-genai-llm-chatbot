@@ -170,7 +170,7 @@ def handle_failed_records(records):
             "An error occurred (ValidationException)" in error
             and "The provided image must have dimensions in set [1280x720]" in error
         ):
-            ## At this time only one input size is supported by the Nova reel model.
+            # At this time only one input size is supported by the Nova reel model.
             message = "⚠️ *The provided image must have dimensions of 1280x720.*"
 
         elif (
@@ -179,7 +179,8 @@ def handle_failed_records(records):
             in error
         ):
             message = (
-                ":warning: *This model is not enabled. Please try again later or contact "
+                "*This model is not enabled. "
+                "Please try again later or contact "
                 "an administrator*"
             )
 
