@@ -8,7 +8,8 @@ export interface ChatBotConfiguration {
   maxTokens: number;
   temperature: number;
   topP: number;
-  files: ImageFile[] | null;
+  seed: number;
+  files: ImageFile[] | VideoFile[] | null;
 }
 
 export interface ChatInputState {
@@ -37,11 +38,14 @@ export enum ChatBotAction {
 
 export enum ChatBotModelInterface {
   Langchain = "langchain",
+  Multimodal = "multimodal",
   Idefics = "idefics",
 }
 
 export enum ChatBotMode {
   Chain = "chain",
+  ImageGeneration = "image_generation",
+  VideoGeneration = "video_generation",
 }
 
 export enum FileStorageProvider {
@@ -50,9 +54,19 @@ export enum FileStorageProvider {
 
 export interface ImageFile {
   provider: FileStorageProvider;
+  type: string;
   key: string;
   url: string;
 }
+
+export interface VideoFile {
+  provider: FileStorageProvider;
+  type: string;
+  key: string;
+  url: string;
+}
+
+export type MediaFile = ImageFile | VideoFile;
 
 export interface ChatBotHeartbeatRequest {
   action: ChatBotAction.Heartbeat;
@@ -69,7 +83,7 @@ export interface ChatBotRunRequest {
     modelName: string;
     provider: string;
     sessionId: string;
-    files: ImageFile[] | null;
+    files: ImageFile[] | VideoFile[] | null;
     text: string;
     mode: string;
     workspaceId?: string;
@@ -109,6 +123,7 @@ export interface ChatBotHistoryItem {
     | null
     | undefined
     | ImageFile[]
+    | VideoFile[]
     | string[]
     | string[][]
     | RagDocument[]
@@ -130,6 +145,7 @@ export interface ChatBotMessageResponse {
       | null
       | undefined
       | ImageFile[]
+      | VideoFile[]
       | string[]
       | string[][]
       | RagDocument[]
@@ -140,12 +156,14 @@ export interface ChatBotMessageResponse {
 export enum ChabotInputModality {
   Text = "TEXT",
   Image = "IMAGE",
+  Video = "VIDEO",
 }
 
 export enum ChabotOutputModality {
   Text = "TEXT",
   Image = "IMAGE",
   Embedding = "EMBEDDING",
+  Video = "VIDEO",
 }
 
 export interface FeedbackData {

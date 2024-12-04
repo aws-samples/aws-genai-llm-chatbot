@@ -12,4 +12,4 @@ pdfplumber==0.11.0
 pyopenssl==24.2.1
 cryptography==43.0.1
 boto3
--r lib/shared/layers/common/requirements.txt
+-r lib/shared/layers/common/requirements.txt --find-links=lib/shared/layers/common

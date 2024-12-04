@@ -25,6 +25,7 @@ interface LLMConfigDialogData {
   maxTokens: number;
   temperature: number;
   topP: number;
+  seed: number;
 }
 
 export default function LLMConfigDialog(props: LLMConfigDialogProps) {
@@ -36,6 +37,7 @@ export default function LLMConfigDialog(props: LLMConfigDialogProps) {
         maxTokens: props.session.configuration.maxTokens,
         temperature: props.session.configuration.temperature,
         topP: props.session.configuration.topP,
+        seed: props.session.configuration.seed,
       };
 
       return retValue;
@@ -70,6 +72,7 @@ export default function LLMConfigDialog(props: LLMConfigDialogProps) {
     //   temperature: props.configuration.temperature,
     //   maxTokens: props.configuration.maxTokens,
     //   topP: props.configuration.topP,
+    //   seed: props.configuration.seed,
     // });
 
     props.setVisible(false);
@@ -161,6 +164,20 @@ export default function LLMConfigDialog(props: LLMConfigDialogProps) {
                 floatVal = Math.min(1.0, Math.max(0.0, floatVal));
 
                 onChange({ topP: floatVal });
+              }}
+            />
+          </FormField>
+          <FormField
+            label="Seed"
+            errorText={errors.seed}
+            description="For video and image generation, a seed value can be used to generate the same output multiple times. Using a different seed value guarantees to get different generations."
+          >
+            <Input
+              type="number"
+              step={1}
+              value={data.seed.toString()}
+              onChange={({ detail: { value } }) => {
+                onChange({ seed: parseInt(value) });
               }}
             />
           </FormField>

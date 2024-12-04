@@ -21,6 +21,9 @@ The default EBS volume create with the Cloud9 instance is too small and you need
 To do this, run the following command from the Cloud9 terminal:
 
 ```
+git clone https://github.com/aws-samples/aws-genai-llm-chatbot.git
+cd aws-genai-llm-chatbot/
+chmod +x scripts/cloud9-resize.sh
 ./scripts/cloud9-resize.sh
 ```
 

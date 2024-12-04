@@ -75,8 +75,16 @@ export class IdeficsInterface extends Construct {
         },
       }
     );
+    if (props.config.bedrock?.roleArn) {
+      requestHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["sts:AssumeRole"],
+          resources: [props.config.bedrock.roleArn],
+        })
+      );
+    }
 
-    props.chatbotFilesBucket.grantRead(requestHandler);
+    props.chatbotFilesBucket.grantReadWrite(requestHandler);
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
     if (props.shared.kmsKey && requestHandler.role) {
@@ -85,7 +93,10 @@ export class IdeficsInterface extends Construct {
     props.shared.configParameter.grantRead(requestHandler);
     requestHandler.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ["bedrock:InvokeModel"],
+        actions: [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream",
+        ],
         resources: ["*"],
         effect: iam.Effect.ALLOW,
       })

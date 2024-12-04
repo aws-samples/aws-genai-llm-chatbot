@@ -12,7 +12,6 @@ s3_client = boto3.client("s3")
 
 
 def main():
-
     response = s3_client.get_object(Bucket=PROCESSING_BUCKET_NAME, Key=OBJECT_KEY)
     file_content = response["Body"].read().decode("utf-8")
     data = json.loads(file_content)

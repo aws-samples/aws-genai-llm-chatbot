@@ -85,7 +85,6 @@ def list_bedrock_models():
 
         response = bedrock.list_foundation_models(
             byInferenceType=genai_core.types.InferenceType.ON_DEMAND.value,
-            byOutputModality=genai_core.types.Modality.TEXT.value,
         )
         bedrock_models = [
             m
@@ -109,7 +108,6 @@ def list_bedrock_models():
             if "inputModalities" in model
             and "outputModalities" in model
             and Modality.EMBEDDING.value not in model.get("outputModalities", [])
-            and Modality.IMAGE.value not in model.get("outputModalities", [])
         ]
 
         return models
