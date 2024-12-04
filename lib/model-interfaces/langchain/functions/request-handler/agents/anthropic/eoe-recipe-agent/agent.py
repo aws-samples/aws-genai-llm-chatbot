@@ -1,6 +1,6 @@
 import json
 import re
-from langchain_anthropic import ChatAnthropic
+import anthropic
 from langchain_core.messages import HumanMessage
 from typing import Dict, List, Optional, Tuple, Type, TypeVar, Any
 from enum import Enum
@@ -116,11 +116,7 @@ def extract_json(text):
 
 class EOERecipeAssistant:
     def __init__(self, api_key: str, preferred_substitutions: Optional[Dict[str, Dict[CookingMethod, ContextualSubstitution]]] = None):
-        self.llm = ChatAnthropic(
-            model_name="claude-3-5-haiku-20241022",
-            timeout=None,
-            stop=None,
-        )
+        self.client = anthropic.Anthropic(api_key=api_key)
 
         self.preferred_substitutions = preferred_substitutions or {
             "butter": {
@@ -145,7 +141,7 @@ class EOERecipeAssistant:
         self._cooking_method_cache = {}
 
     async def _detect_cooking_method_llm(self, recipe_context: str) -> CookingContext:
-        """Use LLM to analyze recipe context and determine cooking methods and parameters."""
+        """Use Anthropic's Claude to analyze recipe context and determine cooking methods and parameters."""
         cache_key = hash(recipe_context)
         if cache_key in self._cooking_method_cache:
             return self._cooking_method_cache[cache_key]
@@ -164,8 +160,18 @@ class EOERecipeAssistant:
                 "equipment": ["list", "of", "cooking", "equipment"]
             }}"""
 
-            response = await self.llm.ainvoke([HumanMessage(content=prompt)])
-            data = extract_json(response.content)
+            # Use the Anthropic client to create a message
+            response = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.client.messages.create(
+                    model="claude-3-5-haiku-20241022",
+                    max_tokens=1000,
+                    temperature=0,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+            )
+
+            data = extract_json(response.content[0].text)
 
             if data is None:
                 raise ValueError("Detect cooking method from LLM is none")
@@ -258,7 +264,6 @@ class EOERecipeAssistant:
     ) -> ModifiedRecipe:
         """Generate a modified version of the recipe using analysis and substitutions."""
         try:
-            # Prepare context for LLM
             subs_context = "\n".join([
                 f"- Replace {sub.original_ingredient} with {sub.substitution}"
                 f" ({sub.cooking_adjustments if sub.cooking_adjustments else 'no adjustment needed'})"
@@ -282,20 +287,24 @@ class EOERecipeAssistant:
             Temperature: {f"{cooking_context.temperature}°F" if cooking_context.temperature else "Not specified"}
             Duration: {cooking_context.duration if cooking_context.duration else "Not specified"}
 
-            Please maintain the original recipe's structure and formatting while:
-            1. Applying all substitutions
-            2. Adding any necessary preparation notes
-            3. Adjusting cooking instructions if needed
-            4. Including cross-contamination prevention notes where relevant
-
             Return ONLY a JSON object in this exact format with no additional text:
             {{
                 "modified_recipe": "complete modified recipe text",
                 "modification_notes": ["list", "of", "important", "notes", "about", "modifications"]
             }}"""
 
-            response = await self.llm.ainvoke([HumanMessage(content=prompt)])
-            data = extract_json(response.content)
+            # Use the Anthropic client to create a message
+            response = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.client.messages.create(
+                    model="claude-3-5-haiku-20241022",
+                    max_tokens=2000,
+                    temperature=0,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+            )
+
+            data = extract_json(response.content[0].text)
 
             if data is None:
                 raise ValueError("Modify recipe is none")
@@ -315,8 +324,6 @@ class EOERecipeAssistant:
         try:
             prompt = f"""You are an expert in personalized EOE (Eosinophilic Esophagitis) dietary management.
             Your primary focus is on helping individuals navigate their EOE journey based on their known triggers and current phase.
-            EoE triggers are often hard to identify becuase EoE is a SLOW food allergy. There could also be a stacking affect for triggers which
-            can cause individuals to misdiagnose their triggers.
 
             USER PROFILE:
             Current Phase: {user_profile.phase}
@@ -328,31 +335,7 @@ class EOERecipeAssistant:
             Recipe to Analyze:
             {recipe}
 
-            ANALYSIS PRIORITIES:
-            1. PRIMARY FOCUS - User's Known Triggers:
-            - Carefully check for ANY form of {', '.join(user_profile.triggers)}
-            - Consider both obvious and hidden sources of these specific triggers
-            - Flag ingredients that commonly cross-react with known triggers
-            - Identify potential cross-contamination risks for known triggers
-
-            2. Phase-Appropriate Considerations:
-            {self.get_phase_guidance(user_profile.phase)}
-
-            3. Additional Watchpoints:
-            - If in elimination phase: Also check standard EOE triggers not yet tested
-            - If in reintroduction phase: Pay special attention to ingredients related to foods being tested
-            - If in maintenance phase: Focus on known triggers while allowing safe foods
-
-            Common Foods and Ingredients Reference:
-            {self.get_ingredient_reference(user_profile.triggers)}
-
-            Analyze the recipe with this personalized context in mind.
-            Consider:
-            1. Direct ingredients that match user's triggers
-            2. Hidden sources of user's specific triggers
-            3. Cross-contamination risks relevant to user's triggers
-            4. Phase-specific concerns
-            5. Suggestions for safe substitutions where needed
+            {self.get_analysis_priorities(user_profile)}
 
             Return ONLY a JSON object in this exact format with no additional text or explanation:
             {{
@@ -371,8 +354,18 @@ class EOERecipeAssistant:
                 }}
             }}"""
 
-            response = await self.llm.ainvoke([HumanMessage(content=prompt)])
-            data = extract_json(response.content)
+            # Use the Anthropic client to create a message
+            response = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.client.messages.create(
+                    model="claude-3-5-haiku-20241022",
+                    max_tokens=1500,
+                    temperature=0,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+            )
+
+            data = extract_json(response.content[0].text)
 
             if data is None:
                 raise ValueError("Analyze recipe is none")
@@ -381,6 +374,27 @@ class EOERecipeAssistant:
 
         except Exception as e:
             raise ValueError(f"Failed to analyze recipe: {str(e)}")
+
+    def get_analysis_priorities(self, user_profile: UserProfile) -> str:
+        """Helper method to generate analysis priorities based on user profile."""
+        return f"""
+        ANALYSIS PRIORITIES:
+        1. PRIMARY FOCUS - User's Known Triggers:
+        - Carefully check for ANY form of {', '.join(user_profile.triggers)}
+        - Consider both obvious and hidden sources of these specific triggers
+        - Flag ingredients that commonly cross-react with known triggers
+        - Identify potential cross-contamination risks for known triggers
+
+        2. Phase-Appropriate Considerations:
+        {self.get_phase_guidance(user_profile.phase)}
+
+        3. Additional Watchpoints:
+        - If in elimination phase: Also check standard EOE triggers not yet tested
+        - If in reintroduction phase: Pay special attention to ingredients related to foods being tested
+        - If in maintenance phase: Focus on known triggers while allowing safe foods
+
+        Common Foods and Ingredients Reference:
+        {self.get_ingredient_reference(user_profile.triggers)}"""
 
     def get_phase_context(self, phase: str) -> str:
         """Return context-specific guidance based on user's current phase."""
@@ -523,15 +537,17 @@ class EOERecipeAssistant:
                 cooking_context.primary_method
             )
 
-            if not sub_info and cooking_context.temperature:
+            # If no direct match for cooking method, try to find a high-temperature alternative
+            if not sub_info and cooking_context and cooking_context.temperature:
                 if cooking_context.temperature >= 400:
                     sub_info = self.preferred_substitutions[ingredient_lower].get(
                         CookingMethod.ROASTING
                     )
 
+            # If we found a preferred substitution, return it with context-specific notes
             if sub_info:
                 context_notes = f"{sub_info.notes}"
-                if cooking_context.temperature:
+                if cooking_context and cooking_context.temperature:
                     context_notes += f"\nFor {cooking_context.temperature}°F cooking temperature"
 
                 return IngredientSubstitution(
@@ -541,7 +557,12 @@ class EOERecipeAssistant:
                     cooking_adjustments=sub_info.cooking_adjustments
                 )
 
+        # If no preferred substitution found, use Claude to suggest one
         try:
+            # Get cooking context if not provided
+            if not cooking_context:
+                cooking_context = await self._detect_cooking_method_llm(recipe_context)
+
             prompt = f"""You are an expert in EOE dietary management and recipe modification.
             Please suggest substitutions for the following ingredient, considering the specific cooking context.
 
@@ -561,8 +582,18 @@ class EOERecipeAssistant:
                 "cooking_adjustments": "any necessary cooking adjustments"
             }}"""
 
-            response = await self.llm.ainvoke([HumanMessage(content=prompt)])
-            data = extract_json(response.content)
+            # Use the Anthropic client to create a message
+            response = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.client.messages.create(
+                    model="claude-3-5-haiku-20241022",
+                    max_tokens=1000,
+                    temperature=0,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+            )
+
+            data = extract_json(response.content[0].text)
 
             if data is None:
                 raise ValueError("Ingredient substitution is none")
