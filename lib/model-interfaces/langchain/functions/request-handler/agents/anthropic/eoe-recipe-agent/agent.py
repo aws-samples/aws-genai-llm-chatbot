@@ -4,7 +4,11 @@ import anthropic
 from langchain_core.messages import HumanMessage
 from typing import Dict, List, Optional, Tuple, Type, TypeVar, Any
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+from datetime import datetime
+from models.recipe import RecipeAnalysis, IngredientSubstitution, ModifiedRecipe
+from models.cooking import CookingContext, ContextualSubstitution
+from models.user import UserProfile
 
 T = TypeVar('T')
 
@@ -19,83 +23,6 @@ class CookingMethod(Enum):
     BRAISING = "braising"
     SLOW_COOKING = "slow_cooking"
     NO_COOK = "no_cook"
-
-@dataclass
-class CookingContext:
-    """Structured cooking information extracted from recipe context"""
-    primary_method: CookingMethod
-    temperature: Optional[int] = None
-    duration: Optional[str] = None
-    equipment: Optional[List[str]] = None
-
-@dataclass
-class ContextualSubstitution:
-    substitution: str
-    notes: str
-    cooking_adjustments: Optional[str] = None
-
-
-from dataclasses import dataclass
-from typing import List, Dict
-
-@dataclass
-class RecipeAnalysis:
-    """Structured analysis of recipe for EOE triggers with phase-specific context"""
-    trigger_ingredients: List[str]
-    safe_ingredients: List[str]
-    uncertain_ingredients: List[str]
-    modification_needed: bool
-    trigger_categories: List[str]
-    notes: Dict[str, str]
-    cross_contamination_risks: List[str]
-    phase_specific_concerns: List[str]
-    substitution_suggestions: Dict[str, str]
-
-    @classmethod
-    def from_dict(cls, data: dict) -> 'RecipeAnalysis':
-        return cls(
-            trigger_ingredients=data["trigger_ingredients"],
-            safe_ingredients=data["safe_ingredients"],
-            uncertain_ingredients=data["uncertain_ingredients"],
-            modification_needed=data["modification_needed"],
-            trigger_categories=data.get("trigger_categories", []),
-            notes=data.get("notes", {}),
-            cross_contamination_risks=data.get("cross_contamination_risks", []),
-            phase_specific_concerns=data.get("phase_specific_concerns", []),
-            substitution_suggestions=data.get("substitution_suggestions", {})
-        )
-
-@dataclass
-class IngredientSubstitution:
-    """Structured substitution recommendation"""
-    original_ingredient: str
-    substitution: str
-    notes: str
-    cooking_adjustments: Optional[str] = None
-
-    @classmethod
-    def from_dict(cls, data: dict) -> 'IngredientSubstitution':
-        return cls(
-            original_ingredient=data["original_ingredient"],
-            substitution=data["substitution"],
-            notes=data["notes"],
-            cooking_adjustments=data.get("cooking_adjustments")
-        )
-
-@dataclass
-class ModifiedRecipe:
-    """Structured representation of a modified recipe"""
-    original_text: str
-    modified_text: str
-    substitutions_used: List[IngredientSubstitution]
-    modification_notes: List[str]
-
-@dataclass
-class UserProfile:
-    """User dietary profile"""
-    name: str
-    triggers: List[str]
-    phase: str
 
 
 def extract_json(text):
@@ -320,57 +247,89 @@ class EOERecipeAssistant:
             raise ValueError(f"Failed to generate modified recipe: {str(e)}")
 
     async def analyze_recipe(self, recipe: str, user_profile: UserProfile) -> RecipeAnalysis:
-        """Analyze a recipe based on user's specific EOE triggers and current phase."""
+        """Analyze a recipe based on user's specific EOE triggers and current phase. Returns a structured analysis
+        using the Anthropic API with JSON-focused messaging."""
         try:
-            prompt = f"""You are an expert in personalized EOE (Eosinophilic Esophagitis) dietary management.
-            Your primary focus is on helping individuals navigate their EOE journey based on their known triggers and current phase.
+            # Build our rich context as a structured message
+            expert_context = {
+                "type": "text",
+                "text": """You are an expert in personalized EOE (Eosinophilic Esophagitis) dietary management.
+                Your primary focus is on helping individuals navigate their EOE journey based on their known triggers and current phase."""
+            }
 
-            USER PROFILE:
-            Current Phase: {user_profile.phase}
-            Known Triggers: {', '.join(user_profile.triggers)}
+            user_context = {
+                "type": "text",
+                "text": f"""USER PROFILE:
+                Current Phase: {user_profile.phase}
+                Known Triggers: {', '.join(user_profile.triggers)}
 
-            CONTEXT BASED ON USER'S PHASE:
-            {self.get_phase_context(user_profile.phase)}
+                CONTEXT BASED ON USER'S PHASE:
+                {self.get_phase_context(user_profile.phase)}"""
+            }
 
-            Recipe to Analyze:
-            {recipe}
+            recipe_content = {
+                "type": "text",
+                "text": f"""Recipe to Analyze:
+                {recipe}
 
-            {self.get_analysis_priorities(user_profile)}
+                {self.get_analysis_priorities(user_profile)}"""
+            }
 
-            Return ONLY a JSON object in this exact format with no additional text or explanation:
-            {{
-                "trigger_ingredients": ["list", "of", "trigger", "ingredients"],
-                "safe_ingredients": ["list", "of", "safe", "ingredients"],
-                "uncertain_ingredients": ["list", "of", "uncertain", "ingredients"],
-                "modification_needed": true or false,
-                "trigger_categories": ["list", "of", "trigger", "categories"],
-                "notes": {{
-                    "ingredient_name": "reason for concern or uncertainty"
-                }},
-                "cross_contamination_risks": ["list", "of", "possible", "risks"],
-                "phase_specific_concerns": ["list", "of", "concerns", "based", "on", "current", "phase"],
-                "substitution_suggestions": {{
-                    "ingredient": "suggested_replacement"
-                }}
-            }}"""
+            json_schema = {
+                "type": "text",
+                "text": """{
+                    "trigger_ingredients": ["list", "of", "trigger", "ingredients"],
+                    "safe_ingredients": ["list", "of", "safe", "ingredients"],
+                    "uncertain_ingredients": ["list", "of", "uncertain", "ingredients"],
+                    "modification_needed": true or false,
+                    "trigger_categories": ["list", "of", "trigger", "categories"],
+                    "notes": {
+                        "ingredient_name": "reason for concern or uncertainty"
+                    },
+                    "cross_contamination_risks": ["list", "of", "possible", "risks"],
+                    "phase_specific_concerns": ["list", "of", "concerns", "based", "on", "current", "phase"],
+                    "substitution_suggestions": {
+                        "ingredient": "suggested_replacement"
+                    }
+                }"""
+            }
 
-            # Use the Anthropic client to create a message
+            # Create a structured message for the API
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        expert_context,
+                        user_context,
+                        recipe_content,
+                        {
+                            "type": "text",
+                            "text": "Analyze the recipe and return a JSON object matching exactly this schema:"
+                        },
+                        json_schema
+                    ]
+                }
+            ]
+
+            # Make the API call with structured messaging and strong JSON enforcement
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.client.messages.create(
                     model="claude-3-5-haiku-20241022",
                     max_tokens=1500,
                     temperature=0,
-                    messages=[{"role": "user", "content": prompt}]
+                    system="You are a recipe analysis expert. Return only valid JSON matching the provided schema, with no additional text.",
+                    messages=messages
                 )
             )
 
-            data = extract_json(response.content[0].text)
+            try:
+                # Parse the response directly as JSON
+                recipe_analysis = json.loads(response.content[0].text)
+                return RecipeAnalysis.from_dict(recipe_analysis)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse JSON response: {e}. Response was: {response.content[0].text}")
 
-            if data is None:
-                raise ValueError("Analyze recipe is none")
-
-            return RecipeAnalysis.from_dict(data)
 
         except Exception as e:
             raise ValueError(f"Failed to analyze recipe: {str(e)}")
@@ -675,16 +634,19 @@ async def main():
     try:
         # Get analysis and substitutions as before
         analysis, cooking_context = await assistant.analyze_recipe_with_context(recipe, user)
+
         print("\nRecipe Analysis:")
-        print(f"Trigger Ingredients: {analysis.trigger_ingredients}")
-        print(f"Safe Ingredients: {analysis.safe_ingredients}")
-        print(f"Uncertain Ingredients: {analysis.uncertain_ingredients}")
-        print(f"Modification Needed: {analysis.modification_needed}")
-        print(f"Trigger Categories: {analysis.trigger_categories}")
-        print(f"Notes: {analysis.notes}")
-        print(f"Cross Contamination Risks: {analysis.cross_contamination_risks}")
-        print(f"Phase specific concerns: {analysis.phase_specific_concerns}")
-        print(f"Substitution suggestions: {analysis.substitution_suggestions}")
+        print(analysis.to_json_pretty())
+
+        # print(f"Trigger Ingredients: {analysis.trigger_ingredients}")
+        # print(f"Safe Ingredients: {analysis.safe_ingredients}")
+        # print(f"Uncertain Ingredients: {analysis.uncertain_ingredients}")
+        # print(f"Modification Needed: {analysis.modification_needed}")
+        # print(f"Trigger Categories: {analysis.trigger_categories}")
+        # print(f"Notes: {analysis.notes}")
+        # print(f"Cross Contamination Risks: {analysis.cross_contamination_risks}")
+        # print(f"Phase specific concerns: {analysis.phase_specific_concerns}")
+        # print(f"Substitution suggestions: {analysis.substitution_suggestions}")
 
 
         print(f"\nCooking Context:")
