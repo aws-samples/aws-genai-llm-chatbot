@@ -3,6 +3,9 @@ import {
   Container,
   Spinner,
   TextContent,
+  Button,
+  Popover,
+  StatusIndicator,
 } from "@cloudscape-design/components";
 import { useContext, useEffect, useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
@@ -212,6 +215,30 @@ export default function ChatMessage(props: ChatMessageProps) {
             )
           }
         >
+        {props.message.content.length > 0 && (
+          <div className={styles.btn_chabot_message_copy}>
+            <Popover
+              data-locator="copy-clipboard"
+              size="medium"
+              position="top"
+              triggerType="custom"
+              dismissButton={false}
+              content={
+                <StatusIndicator type="success">
+                  Copied to clipboard
+                </StatusIndicator>
+              }
+            >
+              <Button
+                variant="inline-icon"
+                iconName="copy"
+                onClick={() => {
+                  navigator.clipboard.writeText(props.message.content);
+                }}
+              />
+            </Popover>
+          </div>
+        )}
           {loading ||
           (content.length === 0 && !processingAsyncFiles && !files.length) ? (
             <Box>
