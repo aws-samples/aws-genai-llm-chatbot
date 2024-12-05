@@ -8,7 +8,6 @@ from pgvector.psycopg2 import register_vector
 client = boto3.client("rds")
 
 AURORA_DB_USER = os.environ.get("AURORA_DB_USER")
-AURORA_DB_HOST = os.environ.get("AURORA_DB_HOST")
 AURORA_DB_PORT = os.environ.get("AURORA_DB_PORT")
 AURORA_DB_REGION = os.environ.get("AWS_REGION")
 
@@ -18,6 +17,7 @@ class AuroraConnection(object):
     token_refresh = datetime.now() - timedelta(minutes=1)
 
     def __init__(self, autocommit=True):
+        aurora_db_host = os.environ.get("AURORA_DB_HOST")
         now = datetime.now()
         if AuroraConnection.token_refresh < now:
             AuroraConnection.token_refresh = now + timedelta(
@@ -26,14 +26,14 @@ class AuroraConnection(object):
             # Base on
             # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.Python.html
             AuroraConnection.token = client.generate_db_auth_token(
-                DBHostname=AURORA_DB_HOST,
+                DBHostname=aurora_db_host,
                 Port=AURORA_DB_PORT,
                 DBUsername=AURORA_DB_USER,
                 Region=AURORA_DB_REGION,
             )
         self.autocommit = autocommit
 
-        self.dbhost = AURORA_DB_HOST
+        self.dbhost = aurora_db_host
         self.dbport = AURORA_DB_PORT
         self.dbuser = AURORA_DB_USER
         self.dbpass = AuroraConnection.token

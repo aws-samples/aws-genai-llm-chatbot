@@ -27,7 +27,6 @@ DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME = os.environ.get(
     "DEFAULT_KENDRA_S3_DATA_SOURCE_BUCKET_NAME"
 )
 
-DELETE_DOCUMENT_WORKFLOW_ARN = os.environ.get("DELETE_DOCUMENT_WORKFLOW_ARN")
 RSS_FEED_INGESTOR_FUNCTION = os.environ.get("RSS_FEED_INGESTOR_FUNCTION", "")
 RSS_FEED_SCHEDULE_ROLE_ARN = os.environ.get("RSS_FEED_SCHEDULE_ROLE_ARN", "")
 DOCUMENTS_BY_STATUS_INDEX = os.environ.get("DOCUMENTS_BY_STATUS_INDEX", "")
@@ -196,7 +195,7 @@ def delete_document(workspace_id: str, document_id: str):
         raise genai_core.types.CommonError("Document not ready for deletion")
 
     response = sfn_client.start_execution(
-        stateMachineArn=DELETE_DOCUMENT_WORKFLOW_ARN,
+        stateMachineArn=os.environ.get("DELETE_DOCUMENT_WORKFLOW_ARN"),
         input=json.dumps(
             {
                 "workspace_id": workspace_id,
