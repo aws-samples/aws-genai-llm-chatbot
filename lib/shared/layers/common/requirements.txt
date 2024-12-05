@@ -2,7 +2,7 @@ boto3-1.35.58-py3-none-any.whl
 botocore-1.35.58-py3-none-any.whl
 langchain_aws-0.2.2-py3-none-any.whl
 aws_xray_sdk==2.14.0
-numpy==1.26.0
+numpy==1.26.4
 cfnresponse==1.1.2
 aws_requests_auth==0.4.3
 requests-aws4auth==1.2.3
@@ -12,7 +12,7 @@ langchain-community==0.3.3
 langchain-openai==0.2.4
 langchain-text-splitters==0.3.1
 opensearch-py==2.4.2
-psycopg2-binary==2.9.7
+psycopg2-binary==2.9.10
 pgvector==0.2.2
 urllib3<2
 beautifulsoup4==4.12.2
