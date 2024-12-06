@@ -1,28 +1,12 @@
 import json
 import re
 import anthropic
-from langchain_core.messages import HumanMessage
 from typing import Dict, List, Optional, Tuple, Type, TypeVar, Any
-from enum import Enum
-from dataclasses import dataclass, asdict
-from datetime import datetime
 from models.recipe import RecipeAnalysis, IngredientSubstitution, ModifiedRecipe
-from models.cooking import CookingContext, ContextualSubstitution
+from models.cooking import CookingContext, ContextualSubstitution, CookingMethod
 from models.user import UserProfile
 
 T = TypeVar('T')
-
-class CookingMethod(Enum):
-    BAKING = "baking"
-    GRILLING = "grilling"
-    SAUTEING = "sauteing"
-    FRYING = "frying"
-    ROASTING = "roasting"
-    BROILING = "broiling"
-    STEAMING = "steaming"
-    BRAISING = "braising"
-    SLOW_COOKING = "slow_cooking"
-    NO_COOK = "no_cook"
 
 
 def extract_json(text):
@@ -74,48 +58,72 @@ class EOERecipeAssistant:
             return self._cooking_method_cache[cache_key]
 
         try:
-            prompt = f"""As a culinary expert, analyze this recipe context and identify the cooking method and parameters.
+            expert_context = {
+                "type": "text",
+                "text": """You are a culinary expert specializing in identifying cooking methods and parameters
+                from recipe descriptions. Focus on extracting precise cooking instructions and equipment needs."""
+            }
 
-            Recipe Context:
-            {recipe_context}
+            recipe_content = {
+                "type": "text",
+                "text": f"""Recipe Context to Analyze:
+                {recipe_context}"""
+            }
 
-            Return ONLY a JSON object with this exact format, no additional text:
-            {{
-                "primary_method": "one of: baking, grilling, sauteing, frying, roasting, no_cook",
-                "temperature": null or temperature in Fahrenheit if specified,
-                "duration": null or cooking duration if specified,
-                "equipment": ["list", "of", "cooking", "equipment"]
-            }}"""
+            # Update schema to explicitly list valid cooking methods
+            json_schema = {
+                "type": "text",
+                "text": f"""{{
+                    "primary_method": "MUST BE ONE OF: {', '.join(method.value for method in CookingMethod)}",
+                    "temperature": null or temperature in Fahrenheit if specified,
+                    "duration": null or cooking duration if specified,
+                    "equipment": ["list", "of", "cooking", "equipment"]
+                }}"""
+            }
 
-            # Use the Anthropic client to create a message
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        expert_context,
+                        recipe_content,
+                        {
+                            "type": "text",
+                            "text": "Analyze the recipe context and return a JSON object matching exactly this schema:"
+                        },
+                        json_schema
+                    ]
+                }
+            ]
+
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.client.messages.create(
                     model="claude-3-5-haiku-20241022",
                     max_tokens=1000,
                     temperature=0,
-                    messages=[{"role": "user", "content": prompt}]
+                    system="You are a cooking method analysis expert. Return only valid JSON matching the provided schema, with no additional text.",
+                    messages=messages
                 )
             )
 
-            data = extract_json(response.content[0].text)
+            try:
+                data = json.loads(response.content[0].text)
+                if not data:
+                    raise ValueError("Detect cooking method from LLM returned empty response")
 
-            if data is None:
-                raise ValueError("Detect cooking method from LLM is none")
+                # Use the from_dict constructor to ensure proper type conversion
+                context = CookingContext.from_dict(data)
+                self._cooking_method_cache[cache_key] = context
+                return context
 
-            context = CookingContext(
-                primary_method=CookingMethod(data["primary_method"]),
-                temperature=data.get("temperature"),
-                duration=data.get("duration"),
-                equipment=data.get("equipment")
-            )
-
-            self._cooking_method_cache[cache_key] = context
-            return context
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse JSON response: {e}. Response was: {response.content[0].text}")
 
         except Exception as e:
             print(f"LLM cooking method detection failed: {str(e)}")
             return self._detect_cooking_method_basic(recipe_context)
+
 
     def _detect_cooking_method_basic(self, recipe_context: str) -> CookingContext:
         """Fallback method using basic keyword matching."""
@@ -135,7 +143,7 @@ class EOERecipeAssistant:
         duration_match = re.search(r'(\d+[-\s]?\d*)\s*(minutes?|hours?)', context_lower)
         duration = duration_match.group(0) if duration_match else None
 
-        primary_method = CookingMethod.NO_COOK
+        primary_method = CookingMethod.NO_COOK  # Default to NO_COOK
         for method, keywords in method_keywords.items():
             if any(keyword in context_lower for keyword in keywords):
                 primary_method = method
@@ -491,10 +499,15 @@ class EOERecipeAssistant:
         if not cooking_context:
             cooking_context = await self._detect_cooking_method_llm(recipe_context)
 
+        # Convert string to CookingMethod if needed
+        cooking_method = (
+            CookingMethod(cooking_context.primary_method)
+            if isinstance(cooking_context.primary_method, str)
+            else cooking_context.primary_method
+        )
+
         if ingredient_lower in self.preferred_substitutions:
-            sub_info = self.preferred_substitutions[ingredient_lower].get(
-                cooking_context.primary_method
-            )
+            sub_info = self.preferred_substitutions[ingredient_lower].get(cooking_method)
 
             # If no direct match for cooking method, try to find a high-temperature alternative
             if not sub_info and cooking_context and cooking_context.temperature:
@@ -518,15 +531,11 @@ class EOERecipeAssistant:
 
         # If no preferred substitution found, use Claude to suggest one
         try:
-            # Get cooking context if not provided
-            if not cooking_context:
-                cooking_context = await self._detect_cooking_method_llm(recipe_context)
-
             prompt = f"""You are an expert in EOE dietary management and recipe modification.
             Please suggest substitutions for the following ingredient, considering the specific cooking context.
 
             Recipe Context: {recipe_context}
-            Cooking Method: {cooking_context.primary_method.value}
+            Cooking Method: {cooking_method.value}
             Temperature: {f"{cooking_context.temperature}°F" if cooking_context.temperature else "Not specified"}
             Duration: {cooking_context.duration if cooking_context.duration else "Not specified"}
 
@@ -650,10 +659,12 @@ async def main():
 
 
         print(f"\nCooking Context:")
-        print(f"Method: {cooking_context.primary_method.value}")
-        print(f"Temperature: {cooking_context.temperature}°F")
-        print(f"Duration: {cooking_context.duration}")
-        print(f"Equipment: {cooking_context.equipment}")
+        print(cooking_context.to_json_pretty())
+
+        # print(f"Method: {cooking_context.primary_method.value}")
+        # print(f"Temperature: {cooking_context.temperature}°F")
+        # print(f"Duration: {cooking_context.duration}")
+        # print(f"Equipment: {cooking_context.equipment}")
 
 
          # Concurrent substitution processing
