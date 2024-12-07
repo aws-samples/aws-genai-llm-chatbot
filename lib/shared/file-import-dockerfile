@@ -10,6 +10,9 @@ RUN pip uninstall -y `pip freeze | grep torch` && pip uninstall -y `pip freeze |
 # Torch is needed for image analysis in pdfs (using CPU version)
 RUN pip install torch==2.3.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
+# This is required to process the pdf files produced by 'Microsoft: Print to PDF'
+RUN apk add --no-cache tesseract-eng
+
 # Remove previous layers to create a smaller image
 FROM scratch 
 COPY --from=source / /
