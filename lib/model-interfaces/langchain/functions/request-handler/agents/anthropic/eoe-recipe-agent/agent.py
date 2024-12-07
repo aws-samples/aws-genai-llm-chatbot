@@ -1,6 +1,8 @@
 import json
 import re
-import anthropic
+from anthropic import Anthropic
+from anthropic.types import MessageParam, TextBlockParam
+
 from typing import Dict, List, Optional, Tuple, Type, TypeVar, Any
 from models.recipe import RecipeAnalysis, IngredientSubstitution, ModifiedRecipe
 from models.cooking import CookingContext, ContextualSubstitution, CookingMethod
@@ -27,7 +29,7 @@ def extract_json(text):
 
 class EOERecipeAssistant:
     def __init__(self, api_key: str, preferred_substitutions: Optional[Dict[str, Dict[CookingMethod, ContextualSubstitution]]] = None):
-        self.client = anthropic.Anthropic(api_key=api_key)
+        self.client = Anthropic(api_key=api_key)
 
         self.preferred_substitutions = preferred_substitutions or {
             "butter": {
@@ -58,20 +60,20 @@ class EOERecipeAssistant:
             return self._cooking_method_cache[cache_key]
 
         try:
-            expert_context = {
+            expert_context: TextBlockParam = {
                 "type": "text",
                 "text": """You are a culinary expert specializing in identifying cooking methods and parameters
                 from recipe descriptions. Focus on extracting precise cooking instructions and equipment needs."""
             }
 
-            recipe_content = {
+            recipe_content:TextBlockParam = {
                 "type": "text",
                 "text": f"""Recipe Context to Analyze:
                 {recipe_context}"""
             }
 
             # Update schema to explicitly list valid cooking methods
-            json_schema = {
+            json_schema: TextBlockParam = {
                 "type": "text",
                 "text": f"""{{
                     "primary_method": "MUST BE ONE OF: {', '.join(method.value for method in CookingMethod)}",
@@ -81,7 +83,7 @@ class EOERecipeAssistant:
                 }}"""
             }
 
-            messages = [
+            messages:List[MessageParam] = [
                 {
                     "role": "user",
                     "content": [
@@ -190,66 +192,106 @@ class EOERecipeAssistant:
             check_result(context, CookingContext)
         )
 
+
     async def generate_modified_recipe(
-        self,
-        original_recipe: str,
-        analysis: RecipeAnalysis,
-        substitutions: List[IngredientSubstitution],
-        cooking_context: CookingContext
-    ) -> ModifiedRecipe:
+            self,
+            original_recipe: str,
+            analysis: RecipeAnalysis,
+            substitutions: List[IngredientSubstitution],
+            cooking_context: CookingContext
+        ) -> ModifiedRecipe:
         """Generate a modified version of the recipe using analysis and substitutions."""
         try:
-            subs_context = "\n".join([
-                f"- Replace {sub.original_ingredient} with {sub.substitution}"
-                f" ({sub.cooking_adjustments if sub.cooking_adjustments else 'no adjustment needed'})"
-                for sub in substitutions
-            ])
+            # Build structured message components
+            expert_context: TextBlockParam = {
+                "type": "text",
+                "text": """You are an expert in EOE-safe recipe modification. Your role is to create
+                modified versions of recipes that maintain their structure and clarity while
+                incorporating all required substitutions safely and effectively."""
+            }
 
-            prompt = f"""As an expert in EOE-safe recipe modification, create a modified version of this recipe
-            incorporating all substitutions while maintaining recipe structure and clarity.
+            recipe_analysis: TextBlockParam = {
+                "type": "text",
+                "text": f"Recipe Analysis:\n{analysis}"
+            }
 
-            Recipe Analysis:
-            {analysis}
+            recipe_content: TextBlockParam = {
+                "type": "text",
+                "text": f"Original Recipe:\n{original_recipe}"
+            }
 
-            Original Recipe:
-            {original_recipe}
+            # Format substitutions context - Convert IngredientSubstitution objects to string format
+            subs_list = []
+            for sub in substitutions:
+                sub_str = f"- Replace {sub.original_ingredient} with {sub.substitution}"
+                if sub.cooking_adjustments:
+                    sub_str += f" ({sub.cooking_adjustments})"
+                subs_list.append(sub_str)
 
-            Required Substitutions:
-            {subs_context}
+            substitutions_context: TextBlockParam = {
+                "type": "text",
+                "text": f"Required Substitutions:\n{chr(10).join(subs_list)}"
+            }
 
-            Cooking Context:
-            Method: {cooking_context.primary_method.value}
-            Temperature: {f"{cooking_context.temperature}°F" if cooking_context.temperature else "Not specified"}
-            Duration: {cooking_context.duration if cooking_context.duration else "Not specified"}
+            cooking_info: TextBlockParam = {
+                "type": "text",
+                "text": f"""Cooking Context:
+                Method: {cooking_context.primary_method.value}
+                Temperature: {f"{cooking_context.temperature}°F" if cooking_context.temperature else "Not specified"}
+                Duration: {cooking_context.duration if cooking_context.duration else "Not specified"}"""
+            }
 
-            Return ONLY a JSON object in this exact format with no additional text:
-            {{
-                "modified_recipe": "complete modified recipe text",
-                "modification_notes": ["list", "of", "important", "notes", "about", "modifications"]
-            }}"""
+            json_schema: TextBlockParam = {
+                "type": "text",
+                "text": """{
+                    "modified_text": "complete modified recipe text",
+                    "modification_notes": ["list", "of", "important", "notes", "about", "modifications"]
+                }"""
+            }
 
-            # Use the Anthropic client to create a message
+            # Create structured message for the API
+            messages: List[MessageParam] = [
+                {
+                    "role": "user",
+                    "content": [
+                        expert_context,
+                        recipe_analysis,
+                        recipe_content,
+                        substitutions_context,
+                        cooking_info,
+                        {
+                            "type": "text",
+                            "text": "Create a modified version of the recipe and return a JSON object matching exactly this schema:"
+                        },
+                        json_schema
+                    ]
+                }
+            ]
+
+            # Make the API call with structured messaging and strong JSON enforcement
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.client.messages.create(
                     model="claude-3-5-haiku-20241022",
                     max_tokens=2000,
                     temperature=0,
-                    messages=[{"role": "user", "content": prompt}]
+                    system="You are a recipe modification expert. Return only valid JSON matching the provided schema, with no additional text.",
+                    messages=messages
                 )
             )
 
-            data = extract_json(response.content[0].text)
+            try:
+                # Parse the response directly as JSON
+                data = json.loads(response.content[0].text)
+                return ModifiedRecipe(
+                    modified_text=data.get("modified_text"),
+                    modification_notes=data.get("modification_notes"),
+                    original_text=original_recipe,
+                    substitutions_used=substitutions
+                )
 
-            if data is None:
-                raise ValueError("Modify recipe is none")
-
-            return ModifiedRecipe(
-                original_text=original_recipe,
-                modified_text=data["modified_recipe"],
-                substitutions_used=substitutions,
-                modification_notes=data["modification_notes"]
-            )
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse JSON response: {e}. Response was: {response.content[0].text}")
 
         except Exception as e:
             raise ValueError(f"Failed to generate modified recipe: {str(e)}")
@@ -265,7 +307,7 @@ class EOERecipeAssistant:
                 Your primary focus is on helping individuals navigate their EOE journey based on their known triggers and current phase."""
             }
 
-            user_context = {
+            user_context: TextBlockParam = {
                 "type": "text",
                 "text": f"""USER PROFILE:
                 Current Phase: {user_profile.phase}
@@ -275,7 +317,7 @@ class EOERecipeAssistant:
                 {self.get_phase_context(user_profile.phase)}"""
             }
 
-            recipe_content = {
+            recipe_content: TextBlockParam = {
                 "type": "text",
                 "text": f"""Recipe to Analyze:
                 {recipe}
@@ -283,7 +325,7 @@ class EOERecipeAssistant:
                 {self.get_analysis_priorities(user_profile)}"""
             }
 
-            json_schema = {
+            json_schema: TextBlockParam = {
                 "type": "text",
                 "text": """{
                     "trigger_ingredients": ["list", "of", "trigger", "ingredients"],
@@ -303,7 +345,7 @@ class EOERecipeAssistant:
             }
 
             # Create a structured message for the API
-            messages = [
+            messages: List[MessageParam] = [
                 {
                     "role": "user",
                     "content": [
@@ -647,39 +689,14 @@ async def main():
         print("\nRecipe Analysis:")
         print(analysis.to_json_pretty())
 
-        # print(f"Trigger Ingredients: {analysis.trigger_ingredients}")
-        # print(f"Safe Ingredients: {analysis.safe_ingredients}")
-        # print(f"Uncertain Ingredients: {analysis.uncertain_ingredients}")
-        # print(f"Modification Needed: {analysis.modification_needed}")
-        # print(f"Trigger Categories: {analysis.trigger_categories}")
-        # print(f"Notes: {analysis.notes}")
-        # print(f"Cross Contamination Risks: {analysis.cross_contamination_risks}")
-        # print(f"Phase specific concerns: {analysis.phase_specific_concerns}")
-        # print(f"Substitution suggestions: {analysis.substitution_suggestions}")
-
-
         print(f"\nCooking Context:")
         print(cooking_context.to_json_pretty())
-
-        # print(f"Method: {cooking_context.primary_method.value}")
-        # print(f"Temperature: {cooking_context.temperature}°F")
-        # print(f"Duration: {cooking_context.duration}")
-        # print(f"Equipment: {cooking_context.equipment}")
 
 
          # Concurrent substitution processing
         substitutions = await assistant.process_substitutions(
             recipe, analysis, user, cooking_context
         )
-
-        print("\nSubstitution Suggestions:")
-        for sub in substitutions:
-            print(f"\nOriginal: {sub.original_ingredient}")
-            print(f"Substitute with: {sub.substitution}")
-            print(f"Notes: {sub.notes}")
-            if sub.cooking_adjustments:
-                print(f"Cooking Adjustments: {sub.cooking_adjustments}")
-
 
         # Generate modified recipe
         modified_recipe = await assistant.generate_modified_recipe(
@@ -690,10 +707,8 @@ async def main():
         )
 
         print("\nModified Recipe:")
-        print(modified_recipe.modified_text)
-        print("\nModification Notes:")
-        for note in modified_recipe.modification_notes:
-            print(f"- {note}")
+        print(modified_recipe.to_json_pretty())
+
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
