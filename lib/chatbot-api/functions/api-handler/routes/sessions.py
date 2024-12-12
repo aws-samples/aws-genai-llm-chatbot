@@ -44,9 +44,7 @@ def get_sessions():
     return [
         {
             "id": session.get("SessionId"),
-            "title": session.get("History", [{}])[0]
-            .get("data", {})
-            .get("content", "<no title>"),
+            "title": session.get("Title", "<no title>"),
             "startTime": f'{session.get("StartTime")}Z',
         }
         for session in sessions
@@ -76,7 +74,7 @@ def get_session(id: str):
                 "type": item.get("type"),
                 "content": item.get("data", {}).get("content"),
                 "metadata": json.dumps(
-                    item.get("data", {}).get("additional_kwargs"),
+                    item.get("data", {}).get("additional_kwargs", {}),
                     cls=genai_core.utils.json.CustomEncoder,
                 ),
             }

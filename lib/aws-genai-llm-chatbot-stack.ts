@@ -77,7 +77,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         ragEngines,
         messagesTopic: chatBotApi.messagesTopic,
         sessionsTable: chatBotApi.sessionsTable,
-        byUserIdIndex: chatBotApi.byUserIdIndex,
       });
 
       // Route all incoming messages targeted to langchain to the langchain model interface queue
@@ -120,7 +119,6 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       config: props.config,
       messagesTopic: chatBotApi.messagesTopic,
       sessionsTable: chatBotApi.sessionsTable,
-      byUserIdIndex: chatBotApi.byUserIdIndex,
       chatbotFilesBucket: chatBotApi.filesBucket,
       createPrivateGateway: ideficsModels.length > 0,
     });

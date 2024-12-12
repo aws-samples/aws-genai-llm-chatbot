@@ -15,13 +15,16 @@ export class ChatBotDynamoDBTables extends Construct {
   constructor(scope: Construct, id: string, props: ChatBotDynamoDBTablesProps) {
     super(scope, id);
 
+    // Create the sessions table with a partition key of USER#<UUID>
+    // and a sort key of SK of SESSION#<Unique Session ID>>
+    // No need to the global secondary index for this table
     const sessionsTable = new dynamodb.Table(this, "SessionsTable", {
       partitionKey: {
-        name: "SessionId",
+        name: "PK",
         type: dynamodb.AttributeType.STRING,
       },
       sortKey: {
-        name: "UserId",
+        name: "SK",
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -34,11 +37,6 @@ export class ChatBotDynamoDBTables extends Construct {
           ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
           : cdk.RemovalPolicy.DESTROY,
       pointInTimeRecovery: true,
-    });
-
-    sessionsTable.addGlobalSecondaryIndex({
-      indexName: this.byUserIdIndex,
-      partitionKey: { name: "UserId", type: dynamodb.AttributeType.STRING },
     });
 
     this.sessionsTable = sessionsTable;

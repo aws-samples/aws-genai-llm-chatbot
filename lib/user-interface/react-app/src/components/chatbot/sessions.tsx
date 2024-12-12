@@ -87,11 +87,19 @@ export default function Sessions(props: SessionsProps) {
 
     setIsLoading(true);
     const apiClient = new ApiClient(appContext);
-    await Promise.all(
-      selectedItems.map((s) => apiClient.sessions.deleteSession(s.id))
-    );
-    await getSessions();
-    setIsLoading(false);
+    try {
+      await Promise.all(
+        selectedItems.map((s) => apiClient.sessions.deleteSession(s.id))
+      );
+      await getSessions();
+      setSelectedItems([]); // Clear selected items
+    } catch (error) {
+      console.error("Error deleting sessions:", error);
+      setGlobalError("Failed to delete selected sessions. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setShowModalDelete(false); // Close the modal regardless of success or failure
+    }
   };
 
   const deleteUserSessions = async () => {
@@ -99,9 +107,16 @@ export default function Sessions(props: SessionsProps) {
 
     setIsLoading(true);
     const apiClient = new ApiClient(appContext);
-    await apiClient.sessions.deleteSessions();
-    await getSessions();
-    setIsLoading(false);
+    try {
+      await apiClient.sessions.deleteSessions();
+      await getSessions();
+    } catch (error) {
+      console.error("Error deleting all sessions:", error);
+      setGlobalError("Failed to delete all sessions. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setDeleteAllSessions(false); // Close the modal regardless of success or failure
+    }
   };
 
   return (
