@@ -34,6 +34,8 @@ import { LoadingStatus, ModelInterface } from "../../common/types";
 import styles from "../../styles/chat.module.scss";
 import ConfigDialog from "./config-dialog";
 import ImageDialog from "./image-dialog";
+import VideoDialog from "./video-dialog";
+
 import {
   ChabotInputModality,
   ChatBotHeartbeatRequest,
@@ -45,9 +47,10 @@ import {
   ChatBotMode,
   ChatBotRunRequest,
   ChatInputState,
-  ImageFile,
+  MediaFile,
   ChatBotModelInterface,
   ChatBotToken,
+  ChabotOutputModality,
 } from "./types";
 import { sendQuery } from "../../graphql/mutations";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
@@ -99,7 +102,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   });
   const [configDialogVisible, setConfigDialogVisible] = useState(false);
   const [imageDialogVisible, setImageDialogVisible] = useState(false);
-  const [files, setFiles] = useState<ImageFile[]>([]);
+  const [videoDialogVisible, setVideoDialogVisible] = useState(false);
+  const [files, setFiles] = useState<MediaFile[]>([]);
+  const [outputModality, setOutputModality] = useState<ChabotOutputModality>(
+    ChabotOutputModality.Text
+  );
+
   const [readyState, setReadyState] = useState<ReadyState>(
     ReadyState.UNINSTANTIATED
   );
@@ -309,8 +317,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
 
     const apiClient = new ApiClient(appContext);
     const getSignedUrls = async () => {
-      if (props.configuration?.files as ImageFile[]) {
-        const files: ImageFile[] = [];
+      if (props.configuration?.files as MediaFile[]) {
+        const files: MediaFile[] = [];
         for await (const file of props.configuration?.files ?? []) {
           const signedUrl = (
             await apiClient.sessions.getFileSignedUrl(file.key)
@@ -334,7 +342,16 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     }
   }, [appContext, props.configuration]);
 
-  const hasImagesInChatHistory = function (): boolean {
+  // when a model is selected, set the default mode to first output modality
+  useEffect(() => {
+    if ((state.selectedModelMetadata?.outputModalities?.length || 0) > 0) {
+      setOutputModality(
+        state.selectedModelMetadata!.outputModalities[0] as ChabotOutputModality
+      );
+    }
+  }, [state.selectedModelMetadata]);
+
+  const hasFilesInChatHistory = function (): boolean {
     return (
       messageHistoryRef.current.filter(
         (x) =>
@@ -354,20 +371,28 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const { name, provider } = OptionsHelper.parseValue(
       state.selectedModel.value
     );
-
+    const mode =
+      outputModality === ChabotOutputModality.Text
+        ? ChatBotMode.Chain
+        : outputModality;
     const value = state.value.trim();
     const request: ChatBotRunRequest = {
       action: ChatBotAction.Run,
       modelInterface:
         (props.configuration.files && props.configuration.files.length > 0) ||
-        (hasImagesInChatHistory() &&
+        (hasFilesInChatHistory() &&
           state.selectedModelMetadata?.inputModalities.includes(
             ChabotInputModality.Image
-          ))
-          ? "multimodal"
+          )) ||
+        state.selectedModelMetadata?.inputModalities.includes(
+          ChabotInputModality.Video
+        ) ||
+        outputModality === ChabotOutputModality.Video ||
+        outputModality === ChabotOutputModality.Image
+          ? ChatBotModelInterface.Multimodal
           : (state.selectedModelMetadata!.interface as ModelInterface),
       data: {
-        mode: ChatBotMode.Chain,
+        mode,
         text: value,
         files: props.configuration.files ?? [],
         modelName: name,
@@ -379,6 +404,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
           maxTokens: props.configuration.maxTokens,
           temperature: props.configuration.temperature,
           topP: props.configuration.topP,
+          seed: props.configuration.seed,
         },
       },
     };
@@ -488,11 +514,34 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 }
               ></Button>
             )}
+            {state.selectedModelMetadata?.inputModalities.includes(
+              ChabotInputModality.Video
+            ) && (
+              <Button
+                variant="icon"
+                onClick={() => setVideoDialogVisible(true)}
+                iconSvg={
+                  <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="18" height="19" x="3" y="2" strokeWidth="2" />
+                    <path d="M9 7l8 5-8 5V7z" />
+                  </svg>
+                }
+              >
+                Video
+              </Button>
+            )}
           </SpaceBetween>
           <ImageDialog
             sessionId={props.session.id}
             visible={imageDialogVisible}
             setVisible={setImageDialogVisible}
+            configuration={props.configuration}
+            setConfiguration={props.setConfiguration}
+          />
+          <VideoDialog
+            sessionId={props.session.id}
+            visible={videoDialogVisible}
+            setVisible={setVideoDialogVisible}
             configuration={props.configuration}
             setConfiguration={props.setConfiguration}
           />
@@ -513,7 +562,15 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               }
             }}
             value={state.value}
-            placeholder={listening ? "Listening..." : "Send a message"}
+            placeholder={
+              listening
+                ? "Listening..."
+                : outputModality === ChabotOutputModality.Image
+                ? "Describe the image you want to generate"
+                : outputModality === ChabotOutputModality.Video
+                ? "Describe the video you want to generate"
+                : "Send a message"
+            }
           />
           <div style={{ marginLeft: "8px" }}>
             {state.selectedModelMetadata?.inputModalities.includes(
@@ -521,19 +578,144 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             ) &&
               files.length > 0 &&
               files.map((file, idx) => (
-                <img
-                  key={idx}
-                  onClick={() => setImageDialogVisible(true)}
-                  src={file.url}
-                  style={{
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    maxHeight: "30px",
-                    float: "left",
-                    marginRight: "8px",
-                  }}
-                />
+                <div key={idx} style={{ float: "left" }}>
+                  {file.type === ChabotInputModality.Image ? (
+                    <img
+                      key={idx}
+                      onClick={() => setImageDialogVisible(true)}
+                      src={file.url}
+                      style={{
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        maxHeight: "30px",
+                        float: "left",
+                        marginRight: "8px",
+                      }}
+                    />
+                  ) : (
+                    <video
+                      key={idx}
+                      onClick={() => setVideoDialogVisible(true)}
+                      src={file.url}
+                      style={{
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        maxHeight: "30px",
+                        float: "left",
+                        marginRight: "8px",
+                      }}
+                    />
+                  )}
+                </div>
               ))}
+            {state.selectedModelMetadata?.outputModalities.includes(
+              ChabotInputModality.Text
+            ) && (
+              <div
+                style={{
+                  float: "left",
+                  marginTop: "4px",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color:
+                    outputModality === ChabotOutputModality.Text
+                      ? "blue"
+                      : "#000",
+                }}
+                onClick={() => setOutputModality(ChabotOutputModality.Text)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="2" width="12" height="12" rx="1" />
+                  <path d="M5 5H11" />
+                  <path d="M8 5V11" />
+                  <path d="M11 11V11" />
+                </svg>
+              </div>
+            )}
+            {state.selectedModelMetadata?.outputModalities.includes(
+              ChabotInputModality.Image
+            ) && (
+              <div
+                style={{
+                  float: "left",
+                  marginTop: "4px",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color:
+                    outputModality === ChabotOutputModality.Image
+                      ? "blue"
+                      : "#000",
+                }}
+                onClick={() => setOutputModality(ChabotOutputModality.Image)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="2" width="12" height="12" rx="1" />
+                  <circle cx="5.5" cy="5.5" r="1" />
+                  <path d="M14 10L10.5 7L3 13" />
+                  <path d="M12 13L8 9L5 12" />
+                </svg>
+              </div>
+            )}
+            {state.selectedModelMetadata?.outputModalities.includes(
+              ChabotInputModality.Video
+            ) && (
+              <div
+                style={{
+                  float: "left",
+                  marginRight: "4px",
+                  marginTop: "4px",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color:
+                    outputModality === ChabotOutputModality.Video
+                      ? "blue"
+                      : "#000",
+                }}
+                onClick={() => setOutputModality(ChabotOutputModality.Video)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="2" width="12" height="12" rx="1" />
+                  <path d="M2 6L14 6" />
+                  <path d="M5 3L6.5 6" />
+                  <path d="M8 3L9.5 6" />
+                  <path d="M11 3L12.5 6" />
+                  <path d="M6.5 8L10 9.75L6.5 11.5Z" />
+                </svg>
+              </div>
+            )}
             <Button
               data-locator="submit-prompt"
               disabled={

@@ -10,7 +10,6 @@ from gql.transport.exceptions import TransportQueryError
 
 
 def test_multi_modal(client, default_multimodal_model, default_provider):
-
     key = "INTEG_TEST" + str(uuid.uuid4()) + ".jpeg"
     result = client.add_file(
         input={

@@ -8,7 +8,7 @@ import unicodedata
 
 UPLOAD_BUCKET_NAME = os.environ.get("UPLOAD_BUCKET_NAME")
 CHATBOT_FILES_BUCKET_NAME = os.environ.get("CHATBOT_FILES_BUCKET_NAME")
-MAX_FILE_SIZE = 100 * 1000 * 1000  # 100Mb
+MAX_FILE_SIZE = 10 * 1000 * 1000  # 10Mb
 
 s3_client = boto3.client(
     "s3",
@@ -80,7 +80,6 @@ def generate_user_presigned_get(user_id: str, file_name: str, expiration=3600):
     if not user_id or len(user_id) < 10:
         raise genai_core.types.CommonError("User not set")
 
-    file_name = os.path.basename(file_name)
     object_name = f"private/{user_id}/{file_name}"
     try:
         s3_client.head_object(Bucket=CHATBOT_FILES_BUCKET_NAME, Key=object_name)

@@ -1,17 +1,13 @@
 import {
   Box,
-  Button,
   Container,
-  ExpandableSection,
-  Popover,
   Spinner,
-  StatusIndicator,
-  Tabs,
   TextContent,
-  Textarea,
+  Button,
+  Popover,
+  StatusIndicator,
 } from "@cloudscape-design/components";
-import { useContext, useEffect, useState } from "react";
-import { JsonView, darkStyles } from "react-json-view-lite";
+import { useContext, useEffect, useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "../../styles/chat.module.scss";
@@ -19,14 +15,14 @@ import {
   ChatBotConfiguration,
   ChatBotHistoryItem,
   ChatBotMessageType,
-  ImageFile,
-  RagDocument,
+  MediaFile,
+  ChabotOutputModality,
 } from "./types";
-
-import "react-json-view-lite/dist/index.css";
-import "../../styles/app.scss";
 import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
+import { ChatMessageMetadata } from "./chat-message-metadata";
+import { ChatMessageMediaDisplay } from "./chat-message-media-display";
+import { ChatMessageFeedbackButtons } from "./chat-message-feedback-buttons";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
@@ -39,43 +35,146 @@ export interface ChatMessageProps {
 export default function ChatMessage(props: ChatMessageProps) {
   const appContext = useContext(AppContext);
   const [loading, setLoading] = useState<boolean>(false);
-  const [message] = useState<ChatBotHistoryItem>(props.message);
-  const [files, setFiles] = useState<ImageFile[]>([] as ImageFile[]);
+  const [message, setMessage] = useState<ChatBotHistoryItem>(props.message);
+  const [files, setFiles] = useState<MediaFile[]>([] as MediaFile[]);
   const [documentIndex, setDocumentIndex] = useState("0");
   const [promptIndex, setPromptIndex] = useState("0");
   const [selectedIcon, setSelectedIcon] = useState<1 | 0 | null>(null);
+  const [processingAsyncFiles, setProcessingAsyncFiles] =
+    useState<boolean>(false);
+  const [asyncFiles, setAsyncFiles] = useState<MediaFile[]>([]);
+  const [processedKeys, setProcessedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!appContext) return;
+    setMessage(props.message);
+  }, [props.message]);
 
-    const apiClient = new ApiClient(appContext);
-    const getSignedUrls = async () => {
-      setLoading(true);
-      if (message.metadata?.files as ImageFile[]) {
-        const files: ImageFile[] = [];
-        for await (const file of message.metadata?.files as ImageFile[]) {
-          const signedUrl = (
-            await apiClient.sessions.getFileSignedUrl(file.key)
-          ).data?.getFileURL;
-          if (signedUrl) {
-            files.push({
-              ...file,
-              url: signedUrl,
+  const getSignedUrl = useCallback(
+    async (apiClient: ApiClient, file: MediaFile): Promise<string | null> => {
+      try {
+        const response = await apiClient.sessions.getFileSignedUrl(file.key);
+        console.log(`File ${file.key} retrieved: ${response.data?.getFileURL}`);
+        return response.data?.getFileURL || null;
+      } catch (error) {
+        console.log(`File ${file.key} could not be retrieved ${error}`);
+        return null;
+      }
+    },
+    []
+  );
+
+  const processPendingFiles = useCallback(
+    async (apiClient: ApiClient, pendingFiles: MediaFile[]) => {
+      const retryDelay = 30000;
+      const maxRetries = 12;
+      let retryCount = 0;
+      let remainingFiles = pendingFiles.filter(
+        (file) => !processedKeys.has(file.key)
+      );
+
+      if (remainingFiles.length === 0) return;
+
+      setProcessingAsyncFiles(true);
+      setAsyncFiles(remainingFiles);
+
+      try {
+        while (remainingFiles.length > 0 && retryCount < maxRetries) {
+          const stillPending: MediaFile[] = [];
+          const newlyReady: MediaFile[] = [];
+
+          await Promise.all(
+            remainingFiles.map(async (file) => {
+              if (processedKeys.has(file.key)) return;
+
+              const signedUrl = await getSignedUrl(apiClient, file);
+              if (signedUrl) {
+                newlyReady.push({ ...file, url: signedUrl });
+                setProcessedKeys((prev) => new Set([...prev, file.key]));
+              } else {
+                stillPending.push(file);
+              }
+            })
+          );
+
+          if (newlyReady.length > 0) {
+            setFiles((prev) => {
+              const existingKeys = new Set(prev.map((f) => f.key));
+              const uniqueNewFiles = newlyReady.filter(
+                (f) => !existingKeys.has(f.key)
+              );
+              return [...prev, ...uniqueNewFiles];
             });
           }
-        }
 
+          remainingFiles = stillPending;
+          setAsyncFiles(remainingFiles);
+
+          if (remainingFiles.length > 0) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+            retryCount++;
+          }
+        }
+      } finally {
+        setProcessingAsyncFiles(false);
+        setAsyncFiles([]);
+      }
+
+      if (remainingFiles.length > 0) {
+        console.warn("Some files could not be processed:", remainingFiles);
+      }
+    },
+    [getSignedUrl, processedKeys]
+  );
+
+  useEffect(() => {
+    const processFiles = async () => {
+      if (!appContext || !message.metadata?.files) return;
+      const files = message.metadata.files as MediaFile[];
+      if (files.length === 0) return;
+
+      const apiClient = new ApiClient(appContext);
+      setLoading(true);
+
+      try {
+        const pendingFiles: MediaFile[] = [];
+        const immediateFiles: MediaFile[] = [];
+
+        await Promise.all(
+          (message.metadata.files as MediaFile[]).map(
+            async (file: MediaFile) => {
+              if (processedKeys.has(file.key)) return;
+
+              const signedUrl = await getSignedUrl(apiClient, file);
+              if (signedUrl) {
+                immediateFiles.push({ ...file, url: signedUrl });
+                setProcessedKeys((prev) => new Set([...prev, file.key]));
+              } else if (file.type === ChabotOutputModality.Video) {
+                pendingFiles.push(file);
+              }
+            }
+          )
+        );
+
+        setFiles((prev) => {
+          const existingKeys = new Set(prev.map((f) => f.key));
+          const uniqueNewFiles = immediateFiles.filter(
+            (f) => !existingKeys.has(f.key)
+          );
+          return [...prev, ...uniqueNewFiles];
+        });
+
+        if (pendingFiles.length > 0) {
+          processPendingFiles(apiClient, pendingFiles);
+        }
+      } catch (error) {
+        console.error("Error processing files:", error);
+      } finally {
         setLoading(false);
-        setFiles(files);
       }
     };
 
-    if (message.metadata?.files as ImageFile[]) {
-      getSignedUrls().catch((e) => {
-        console.log("Unable to get signed URL", e);
-      });
-    }
-  }, [appContext, message]);
+    processFiles();
+  }, [appContext, message, processPendingFiles, getSignedUrl, processedKeys]);
 
   let content = "";
   if (props.message.content && props.message.content.length > 0) {
@@ -105,263 +204,125 @@ export default function ChatMessage(props: ChatMessageProps) {
             ((props?.showMetadata && props.message.metadata) ||
               (props.message.metadata &&
                 props.configuration?.showMetadata)) && (
-              <ExpandableSection variant="footer" headerText="Metadata">
-                <JsonView
-                  shouldInitiallyExpand={(level) => level < 2}
-                  data={JSON.parse(
-                    JSON.stringify(props.message.metadata).replace(
-                      /\\n/g,
-                      "\\\\n"
-                    )
-                  )}
-                  style={{
-                    ...darkStyles,
-                    stringValue: "jsonStrings",
-                    numberValue: "jsonNumbers",
-                    booleanValue: "jsonBool",
-                    nullValue: "jsonNull",
-                    container: "jsonContainer",
-                  }}
-                />
-                {props.message.metadata.documents &&
-                  (props.message.metadata.documents as RagDocument[]).length >
-                    0 && (
-                    <>
-                      <div className={styles.btn_chabot_metadata_copy}>
-                        <Popover
-                          size="medium"
-                          position="top"
-                          triggerType="custom"
-                          dismissButton={false}
-                          content={
-                            <StatusIndicator type="success">
-                              Copied to clipboard
-                            </StatusIndicator>
-                          }
-                        >
-                          <Button
-                            variant="inline-icon"
-                            iconName="copy"
-                            onClick={() => {
-                              navigator.clipboard.writeText(
-                                (
-                                  props.message.metadata
-                                    .documents as RagDocument[]
-                                )[parseInt(documentIndex)].page_content
-                              );
-                            }}
-                          />
-                        </Popover>
-                      </div>
-                      <Tabs
-                        tabs={(
-                          props.message.metadata.documents as RagDocument[]
-                        ).map((p: RagDocument, i) => {
-                          return {
-                            id: `${i}`,
-                            label:
-                              p.metadata.path?.split("/").at(-1) ??
-                              p.metadata.title ??
-                              p.metadata.document_id.slice(-8),
-                            href: p.metadata.path,
-                            content: (
-                              <Textarea
-                                key={p.metadata.chunk_id}
-                                value={p.page_content}
-                                readOnly={true}
-                                rows={8}
-                              />
-                            ),
-                          };
-                        })}
-                        activeTabId={documentIndex}
-                        onChange={({ detail }) =>
-                          setDocumentIndex(detail.activeTabId)
-                        }
-                      />
-                    </>
-                  )}
-                {props.message.metadata.prompts && (
-                  <>
-                    <div className={styles.btn_chabot_metadata_copy}>
-                      <Popover
-                        size="medium"
-                        position="top"
-                        triggerType="custom"
-                        dismissButton={false}
-                        content={
-                          <StatusIndicator type="success">
-                            Copied to clipboard
-                          </StatusIndicator>
-                        }
-                      >
-                        <Button
-                          variant="inline-icon"
-                          iconName="copy"
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              (props.message.metadata.prompts as string[][])[
-                                parseInt(promptIndex)
-                              ][0]
-                            );
-                          }}
-                        />
-                      </Popover>
-                    </div>
-                    <Tabs
-                      tabs={(props.message.metadata.prompts as string[][]).map(
-                        (p, i) => {
-                          return {
-                            id: `${i}`,
-                            label: `Prompt ${
-                              (props.message.metadata.prompts as string[][])
-                                .length > 1
-                                ? i + 1
-                                : ""
-                            }`,
-                            content: (
-                              <>
-                                <Textarea
-                                  value={p[0]}
-                                  readOnly={true}
-                                  rows={8}
-                                />
-                              </>
-                            ),
-                          };
-                        }
-                      )}
-                      activeTabId={promptIndex}
-                      onChange={({ detail }) =>
-                        setPromptIndex(detail.activeTabId)
-                      }
-                    />
-                  </>
-                )}
-              </ExpandableSection>
+              <ChatMessageMetadata
+                metadata={props.message.metadata}
+                showMetadata={true}
+                documentIndex={documentIndex}
+                promptIndex={promptIndex}
+                setDocumentIndex={setDocumentIndex}
+                setPromptIndex={setPromptIndex}
+              />
             )
           }
         >
-          {content?.length === 0 ? (
+        {props.message.content.length > 0 && (
+          <div className={styles.btn_chabot_message_copy}>
+            <Popover
+              data-locator="copy-clipboard"
+              size="medium"
+              position="top"
+              triggerType="custom"
+              dismissButton={false}
+              content={
+                <StatusIndicator type="success">
+                  Copied to clipboard
+                </StatusIndicator>
+              }
+            >
+              <Button
+                variant="inline-icon"
+                iconName="copy"
+                onClick={() => {
+                  navigator.clipboard.writeText(props.message.content);
+                }}
+              />
+            </Popover>
+          </div>
+        )}
+          {loading ||
+          (content.length === 0 && !processingAsyncFiles && !files.length) ? (
             <Box>
               <Spinner />
             </Box>
-          ) : null}
-          {props.message.content.length > 0 ? (
-            <div className={styles.btn_chabot_message_copy}>
-              <Popover
-                data-locator="copy-clipboard"
-                size="medium"
-                position="top"
-                triggerType="custom"
-                dismissButton={false}
-                content={
-                  <StatusIndicator type="success">
-                    Copied to clipboard
-                  </StatusIndicator>
-                }
-              >
-                <Button
-                  variant="inline-icon"
-                  iconName="copy"
-                  onClick={() => {
-                    navigator.clipboard.writeText(props.message.content);
+          ) : (
+            <>
+              {content && (
+                <ReactMarkdown
+                  children={content}
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    pre(props) {
+                      const { children, ...rest } = props;
+                      return (
+                        <pre {...rest} className={styles.codeMarkdown}>
+                          {children}
+                        </pre>
+                      );
+                    },
+                    table(props) {
+                      const { children, ...rest } = props;
+                      return (
+                        <table {...rest} className={styles.markdownTable}>
+                          {children}
+                        </table>
+                      );
+                    },
+                    th(props) {
+                      const { children, ...rest } = props;
+                      return (
+                        <th {...rest} className={styles.markdownTableCell}>
+                          {children}
+                        </th>
+                      );
+                    },
+                    td(props) {
+                      const { children, ...rest } = props;
+                      return (
+                        <td {...rest} className={styles.markdownTableCell}>
+                          {children}
+                        </td>
+                      );
+                    },
                   }}
                 />
-              </Popover>
-            </div>
-          ) : null}
-          <ReactMarkdown
-            children={content}
-            remarkPlugins={[remarkGfm]}
-            components={{
-              pre(props) {
-                const { children, ...rest } = props;
-                return (
-                  <pre {...rest} className={styles.codeMarkdown}>
-                    {children}
-                  </pre>
-                );
-              },
-              table(props) {
-                const { children, ...rest } = props;
-                return (
-                  <table {...rest} className={styles.markdownTable}>
-                    {children}
-                  </table>
-                );
-              },
-              th(props) {
-                const { children, ...rest } = props;
-                return (
-                  <th {...rest} className={styles.markdownTableCell}>
-                    {children}
-                  </th>
-                );
-              },
-              td(props) {
-                const { children, ...rest } = props;
-                return (
-                  <td {...rest} className={styles.markdownTableCell}>
-                    {children}
-                  </td>
-                );
-              },
-            }}
-          />
-          <div className={styles.thumbsContainer}>
-            {(selectedIcon === 1 || selectedIcon === null) && (
-              <Button
-                variant="icon"
-                iconName={selectedIcon === 1 ? "thumbs-up-filled" : "thumbs-up"}
-                onClick={() => {
-                  props.onThumbsUp();
-                  setSelectedIcon(1);
-                }}
+              )}
+
+              <ChatMessageMediaDisplay files={files} isAIMessage={true} />
+
+              {processingAsyncFiles && (
+                <Box margin={{ top: "s" }}>
+                  <TextContent>
+                    <small>
+                      {asyncFiles.map((file) => file.type).join(" and ")}{" "}
+                      {asyncFiles.length > 1 ? "are" : "is"} being generated.
+                      This might take few minutes. You can keep using the app
+                      and come back later.
+                    </small>
+                  </TextContent>
+                  <Spinner />
+                </Box>
+              )}
+
+              <ChatMessageFeedbackButtons
+                selectedIcon={selectedIcon}
+                onThumbsUp={props.onThumbsUp}
+                onThumbsDown={props.onThumbsDown}
+                setSelectedIcon={setSelectedIcon}
               />
-            )}
-            {(selectedIcon === 0 || selectedIcon === null) && (
-              <Button
-                iconName={
-                  selectedIcon === 0 ? "thumbs-down-filled" : "thumbs-down"
-                }
-                variant="icon"
-                onClick={() => {
-                  props.onThumbsDown();
-                  setSelectedIcon(0);
-                }}
-              />
-            )}
-          </div>
+            </>
+          )}
         </Container>
       )}
-      {loading && (
-        <Box float="left">
-          <Spinner />
-        </Box>
-      )}
-      {files && !loading && (
-        <>
-          {files.map((file, idx) => (
-            <a
-              key={idx}
-              href={file.url as string}
-              target="_blank"
-              rel="noreferrer"
-              style={{ marginLeft: "5px", marginRight: "5px" }}
-            >
-              <img
-                src={file.url as string}
-                className={styles.img_chabot_message}
-              />
-            </a>
-          ))}
-        </>
-      )}
+
       {props.message?.type === ChatBotMessageType.Human && (
-        <TextContent>
-          <strong>{props.message.content}</strong>
-        </TextContent>
+        <>
+          {(!processingAsyncFiles || files.length > 0) && (
+            <TextContent>
+              <strong>{props.message.content}</strong>
+            </TextContent>
+          )}
+          <ChatMessageMediaDisplay files={files} isAIMessage={false} />
+        </>
       )}
     </div>
   );
