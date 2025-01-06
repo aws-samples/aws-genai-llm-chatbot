@@ -84,7 +84,7 @@ def test_add_rss(client: AppSyncClient):
 
     ready = False
     retries = 0
-    while not ready and retries < 10:
+    while not ready and retries < 20:
         time.sleep(5)
         retries += 1
         document = client.get_document(

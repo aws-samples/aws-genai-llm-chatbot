@@ -15,13 +15,14 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-region: ${{ secrets.PIPELINE_AWS_REGION }}
-        role-to-assume: arn:aws:iam::${{ secrets.PIPELINE_AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+        role-to-assume: arn:aws:iam::${{ secrets.PIPELINE_AWS_ACCOUNT_ID }}:role/${{ secrets.PIPELINE_ROLE }}
         role-session-name: github-action
     - name: Validate
       run: |
-          executionId=$(aws codepipeline start-pipeline-execution --name  ${{ secrets.PIPELINE_NAME }}-${{ github.head_ref }} --region ${{ secrets.PIPELINE_AWS_REGION }} --query "pipelineExecutionId" --output text)
+          executionId=$(aws codepipeline start-pipeline-execution --name  ${{ secrets.PIPELINE_NAME }} --region ${{ secrets.PIPELINE_AWS_REGION }} --query "pipelineExecutionId" --output text)
+          sleep 60
           while true; do
-            status=$(aws codepipeline get-pipeline-execution --pipeline-name ${{ secrets.PIPELINE_NAME }}-${{ github.head_ref }} --region ${{ secrets.PIPELINE_AWS_REGION }} --pipeline-execution-id $executionId --query "pipelineExecution.status" --output text)
+            status=$(aws codepipeline get-pipeline-execution --pipeline-name ${{ secrets.PIPELINE_NAME }} --region ${{ secrets.PIPELINE_AWS_REGION }} --pipeline-execution-id $executionId --query "pipelineExecution.status" --output text)
             echo "Pipeline status: $status"
             if [[ "$status" == "Failed" ]]; then
               echo "Pipeline failed."
