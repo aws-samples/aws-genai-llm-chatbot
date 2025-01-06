@@ -169,7 +169,7 @@ class Nova(MultiModalModelBase):
                 "width": 1280,
                 "height": 768,
                 "cfgScale": 7.0,
-                "seed": model_kwargs.get("seed", randint(0, 2147483646)),  # nosec B311
+                "seed": model_kwargs.get("seed", randint(0, 2147483646)),  # fmt: skip # noqa # nosec B311 # NOSONAR
             },
         }
         logger.info(
@@ -236,7 +236,7 @@ class Nova(MultiModalModelBase):
                 "durationSeconds": 6,
                 "fps": 24,
                 "dimension": "1280x720",
-                "seed": model_kwargs.get("seed", randint(0, 2147483646)),  # nosec B311
+                "seed": model_kwargs.get("seed", randint(0, 2147483646)),  # fmt: skip # noqa  # nosec B311 # NOSONAR
             },
         }
         logger.info("Model input", model_input=model_input)

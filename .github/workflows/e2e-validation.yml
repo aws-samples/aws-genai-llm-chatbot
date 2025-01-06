@@ -1,0 +1,34 @@
+name: End to end verification
+on:
+  push:
+    branches:
+      - main
+      - feat_workflow
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: ${{ secrets.PIPELINE_AWS_REGION }}
+        role-to-assume: arn:aws:iam::${{ secrets.PIPELINE_AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+        role-session-name: github-action
+    - name: Validate
+      run: |
+          executionId=$(aws codepipeline start-pipeline-execution --name  ${{ secrets.PIPELINE_NAME }}-${{ github.head_ref }} --region ${{ secrets.PIPELINE_AWS_REGION }} --query "pipelineExecutionId" --output text)
+          while true; do
+            status=$(aws codepipeline get-pipeline-execution --pipeline-name ${{ secrets.PIPELINE_NAME }}-${{ github.head_ref }} --region ${{ secrets.PIPELINE_AWS_REGION }} --pipeline-execution-id $executionId --query "pipelineExecution.status" --output text)
+            echo "Pipeline status: $status"
+            if [[ "$status" == "Failed" ]]; then
+              echo "Pipeline failed."
+              exit 1
+            fi
+            if [[ "$status" != "InProgress" ]]; then
+              break
+            fi
+            sleep 30
+          done
