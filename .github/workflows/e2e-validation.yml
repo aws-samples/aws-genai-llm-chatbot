@@ -1,9 +1,8 @@
-name: End to end verification
+name: End to end validation
 on:
   push:
     branches:
       - main
-      - feat_workflow
 jobs:
   validation:
     runs-on: ubuntu-latest
