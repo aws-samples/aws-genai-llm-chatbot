@@ -28,12 +28,10 @@ class MultiModalModelBase:
     @abstractmethod
     def handle_run(
         self, input: dict, model_kwargs: dict, files: Optional[list] = None
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @abstractmethod
-    def on_llm_new_token(self, user_id: str, session_id: str, chunk: str) -> None:
-        ...
+    def on_llm_new_token(self, user_id: str, session_id: str, chunk: str) -> None: ...
 
     def upload_file_message(self, content: bytes, file_type: str):
         key = str(uuid.uuid4())
@@ -133,12 +131,10 @@ class MultiModalModelBase:
         return json.dumps(input)
 
     @abstractmethod
-    def generate_image(self, input: dict, model_kwargs: dict):
-        ...
+    def generate_image(self, input: dict, model_kwargs: dict): ...
 
     @abstractmethod
-    def generate_video(self, input: dict, model_kwargs: dict):
-        ...
+    def generate_video(self, input: dict, model_kwargs: dict): ...
 
     def converse(self, input: dict, model_kwargs: dict):
         logger.info("Incoming request for nova", model_kwargs=model_kwargs)
