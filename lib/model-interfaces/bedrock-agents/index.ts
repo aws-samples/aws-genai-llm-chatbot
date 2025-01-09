@@ -7,6 +7,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as appsync from "aws-cdk-lib/aws-appsync";
 import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
@@ -19,6 +20,7 @@ interface BedrockAgentsInterfaceProps {
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
   readonly chatbotFilesBucket: s3.Bucket;
+  readonly graphqlApi: appsync.GraphqlApi;
 }
 
 export class BedrockAgentsInterface extends Construct {
@@ -60,6 +62,8 @@ export class BedrockAgentsInterface extends Construct {
         SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
         CHATBOT_FILES_BUCKET_NAME: props.chatbotFilesBucket.bucketName,
         MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
+        APPSYNC_ENDPOINT: props.graphqlApi.graphqlUrl,
+        DIRECT_SEND: props.config.directSend ? "true" : "false",
       },
     });
 
@@ -74,6 +78,8 @@ export class BedrockAgentsInterface extends Construct {
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.chatbotFilesBucket.grantRead(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
+    props.graphqlApi.grantQuery(requestHandler);
+    props.graphqlApi.grantMutation(requestHandler);
 
     requestHandler.addToRolePolicy(
       new iam.PolicyStatement({
