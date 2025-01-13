@@ -23,7 +23,6 @@ export interface ApiResolversProps {
   readonly ragEngines?: RagEngines;
   readonly userPool: cognito.UserPool;
   readonly sessionsTable: dynamodb.Table;
-  readonly byUserIdIndex: string;
   readonly filesBucket: s3.Bucket;
   readonly userFeedbackBucket: s3.Bucket;
   readonly modelsParameter: ssm.StringParameter;
@@ -70,7 +69,6 @@ export class ApiResolvers extends Construct {
             props.shared.xOriginVerifySecret.secretArn,
           API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
           SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
-          SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
           USER_FEEDBACK_BUCKET_NAME: props.userFeedbackBucket?.bucketName ?? "",
           UPLOAD_BUCKET_NAME: props.ragEngines?.uploadBucket?.bucketName ?? "",
           CHATBOT_FILES_BUCKET_NAME: props.filesBucket.bucketName,
