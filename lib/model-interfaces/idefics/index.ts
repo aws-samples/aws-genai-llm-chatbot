@@ -23,7 +23,6 @@ interface IdeficsInterfaceProps {
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
   readonly chatbotFilesBucket: s3.Bucket;
-  readonly createPrivateGateway: boolean;
 }
 
 export class IdeficsInterface extends Construct {
@@ -39,10 +38,7 @@ export class IdeficsInterface extends Construct {
 
     const lambdaDurationInMinutes = 15;
 
-    let api;
-    if (props.createPrivateGateway) {
-      api = this.createAPIGW();
-    }
+    const api = this.createAPIGW();
 
     const requestHandler = new lambda.Function(
       this,
@@ -261,6 +257,7 @@ export class IdeficsInterface extends Construct {
         ),
       ],
     });
+
     integrationRole.addToPolicy(
       new iam.PolicyStatement({
         actions: ["s3:GetObject*"],
@@ -268,6 +265,10 @@ export class IdeficsInterface extends Construct {
         resources: [`${this.props.chatbotFilesBucket.bucketArn}/private/*`],
       })
     );
+
+    if (this.props.shared.kmsKey) {
+      this.props.shared.kmsKey?.grantDecrypt(integrationRole);
+    }
 
     const s3Integration = new apigateway.AwsIntegration({
       service: "s3",

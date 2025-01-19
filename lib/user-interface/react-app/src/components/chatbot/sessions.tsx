@@ -92,6 +92,7 @@ export default function Sessions(props: SessionsProps) {
     );
     await getSessions();
     setIsLoading(false);
+    setShowModalDelete(false);
   };
 
   const deleteUserSessions = async () => {
@@ -102,6 +103,7 @@ export default function Sessions(props: SessionsProps) {
     await apiClient.sessions.deleteSessions();
     await getSessions();
     setIsLoading(false);
+    setDeleteAllSessions(false);
   };
 
   return (
@@ -142,7 +144,11 @@ export default function Sessions(props: SessionsProps) {
               >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={deleteUserSessions}>
+              <Button
+                variant="primary"
+                data-locator="confirm-delete-all"
+                onClick={deleteUserSessions}
+              >
                 Ok
               </Button>
             </SpaceBetween>{" "}
@@ -246,6 +252,7 @@ export default function Sessions(props: SessionsProps) {
                 </Button>
                 <Button
                   iconAlt="Delete all sessions"
+                  data-locator="delete-all"
                   iconName="delete-marker"
                   variant="inline-link"
                   onClick={() => setDeleteAllSessions(true)}

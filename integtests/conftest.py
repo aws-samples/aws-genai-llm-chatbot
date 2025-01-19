@@ -9,13 +9,28 @@ from clients.appsync_client import AppSyncClient
 
 
 @pytest.fixture(scope="session")
-def client(cognito_credentials: Credentials, config):
+def client(cognito_admin_credentials: Credentials, config):
     endpoint = config.get("aws_appsync_graphqlEndpoint")
-    return AppSyncClient(endpoint=endpoint, id_token=cognito_credentials.id_token)
+    return AppSyncClient(endpoint=endpoint, id_token=cognito_admin_credentials.id_token)
 
 
 @pytest.fixture(scope="session")
-def cognito_credentials(config, worker_id) -> Credentials:
+def client_user(cognito_user_credentials: Credentials, config):
+    endpoint = config.get("aws_appsync_graphqlEndpoint")
+    return AppSyncClient(endpoint=endpoint, id_token=cognito_user_credentials.id_token)
+
+
+@pytest.fixture(scope="session")
+def client_workspace_manager(
+    cognito_workspace_manager_credentials: Credentials, config
+):
+    endpoint = config.get("aws_appsync_graphqlEndpoint")
+    return AppSyncClient(
+        endpoint=endpoint, id_token=cognito_workspace_manager_credentials.id_token
+    )
+
+
+def get_cognito_credentials(config, worker_id, role) -> Credentials:
     user_pool_id = config.get("aws_user_pools_id")
     region = config.get("aws_cognito_region")
     user_pool_client_id = config.get("aws_user_pools_web_client_id")
@@ -27,9 +42,24 @@ def cognito_credentials(config, worker_id) -> Credentials:
         client_id=user_pool_client_id,
         identity_pool_id=identity_pool_id,
     )
-    email = "integ-test-user@example.local-" + worker_id
+    email = "integ-test-user@example.local-" + role.replace("_", "-") + "-" + worker_id
 
-    return cognito.get_credentials(email=email)
+    return cognito.get_credentials(email=email, role=role)
+
+
+@pytest.fixture(scope="session")
+def cognito_workspace_manager_credentials(config, worker_id) -> Credentials:
+    return get_cognito_credentials(config, worker_id, "workspace_manager")
+
+
+@pytest.fixture(scope="session")
+def cognito_admin_credentials(config, worker_id) -> Credentials:
+    return get_cognito_credentials(config, worker_id, "admin")
+
+
+@pytest.fixture(scope="session")
+def cognito_user_credentials(config, worker_id) -> Credentials:
+    return get_cognito_credentials(config, worker_id, "user")
 
 
 @pytest.fixture(scope="session")
@@ -51,6 +81,11 @@ def default_embed_model():
 @pytest.fixture(scope="session")
 def default_multimodal_model():
     return "anthropic.claude-3-haiku-20240307-v1:0"
+
+
+@pytest.fixture(scope="session")
+def default_image_generation_model():
+    return "amazon.nova-canvas-v1:0"
 
 
 @pytest.fixture(scope="session")

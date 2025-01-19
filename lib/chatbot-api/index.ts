@@ -21,6 +21,7 @@ import * as appsync from "aws-cdk-lib/aws-appsync";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { NagSuppressions } from "cdk-nag";
+import { ApplicationDynamoDBTables } from "./application-dynamodb-tables";
 
 export interface ChatBotApiProps {
   readonly shared: Shared;
@@ -36,6 +37,7 @@ export class ChatBotApi extends Construct {
   public readonly outBoundQueue: sqs.Queue;
   public readonly sessionsTable: dynamodb.Table;
   public readonly byUserIdIndex: string;
+  public readonly applicationTable: dynamodb.Table;
   public readonly filesBucket: s3.Bucket;
   public readonly userFeedbackBucket: s3.Bucket;
   public readonly graphqlApi: appsync.GraphqlApi;
@@ -52,7 +54,14 @@ export class ChatBotApi extends Construct {
       kmsKey: props.shared.kmsKey,
       retainOnDelete: props.config.retainOnDelete,
     });
-
+    const applicationTables = new ApplicationDynamoDBTables(
+      this,
+      "AppDynamoDBTables",
+      {
+        kmsKey: props.shared.kmsKey,
+        retainOnDelete: props.config.retainOnDelete,
+      }
+    );
     const loggingRole = new iam.Role(this, "apiLoggingRole", {
       assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),
       inlinePolicies: {
@@ -70,6 +79,7 @@ export class ChatBotApi extends Construct {
 
     const api = new appsync.GraphqlApi(this, "ChatbotApi", {
       name: "ChatbotGraphqlApi",
+      introspectionConfig: appsync.IntrospectionConfig.DISABLED,
       definition: appsync.Definition.fromFile(
         path.join(__dirname, "schema/schema.graphql")
       ),
@@ -125,6 +135,7 @@ export class ChatBotApi extends Construct {
       ...props,
       sessionsTable: chatTables.sessionsTable,
       byUserIdIndex: chatTables.byUserIdIndex,
+      applicationTable: applicationTables.applicationTable,
       api,
       userFeedbackBucket: chatBuckets.userFeedbackBucket,
       filesBucket: chatBuckets.filesBucket,
@@ -137,6 +148,7 @@ export class ChatBotApi extends Construct {
       api,
       logRetention: props.config.logRetention,
       advancedMonitoring: props.config.advancedMonitoring,
+      applicationTable: applicationTables.applicationTable,
     });
 
     this.resolvers.push(realtimeBackend.resolvers.sendQueryHandler);
@@ -163,6 +175,7 @@ export class ChatBotApi extends Construct {
     this.outBoundQueue = realtimeBackend.queue;
     this.sessionsTable = chatTables.sessionsTable;
     this.byUserIdIndex = chatTables.byUserIdIndex;
+    this.applicationTable = applicationTables.applicationTable;
     this.userFeedbackBucket = chatBuckets.userFeedbackBucket;
     this.filesBucket = chatBuckets.filesBucket;
     this.graphqlApi = api;

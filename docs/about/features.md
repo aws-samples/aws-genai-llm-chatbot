@@ -14,7 +14,7 @@ Supported model providers:
 
 Deploy [IDEFICS](https://huggingface.co/blog/idefics) models on [Amazon SageMaker](https://aws.amazon.com/sagemaker/) and see how the chatbot can answer questions about images, describe visual content, generate text grounded in multiple images.
 
-![sample](./assets/multimodal-sample.gif "AWS GenAI Chatbot")
+![sample](./assets/multimodal-sample.gif "GenAI Chatbot on AWS")
 
 Currently, the following multimodal models are supported:
 
@@ -36,13 +36,13 @@ and select one of the supported models (press Space to select/deselect) from the
 
 Send the same query to 2 to 4 separate models at once and see how each one responds based on its own learned history, context and access to the same powerful document retriever, so all requests can pull from the same up-to-date knowledge.
 
-![sample](./assets/multichat-sample.gif "AWS GenAI Chatbot")
+![sample](./assets/multichat-sample.gif "GenAI Chatbot on AWS")
 
 ## Experiment with multiple RAG options with Workspaces
 
 A workspace is a logical namespace where you can upload files for indexing and storage in one of the vector databases. You can select the embeddings model and text-splitting configuration of your choice.
 
-![sample](./assets/create-workspace-sample.gif "AWS GenAI Chatbot")
+![sample](./assets/create-workspace-sample.gif "GenAI Chatbot on AWS")
 
 ## Unlock RAG potentials with Workspaces Debugging Tools
 
@@ -52,7 +52,7 @@ The solution comes with several debugging tools to help you debug RAG scenarios:
 - Test different embeddings models directly in the UI
 - Test cross encoders and analyse distances from different functions between sentences.
 
-![sample](./assets/workspace-debug-sample.gif "AWS GenAI Chatbot")
+![sample](./assets/workspace-debug-sample.gif "GenAI Chatbot on AWS")
 
 ## Full-fledged User Interface
 
@@ -63,3 +63,11 @@ Protected with [Amazon Cognito Authentication](https://aws.amazon.com/cognito/) 
 The interface layer between the UI and backend is built with [AppSync](https://docs.aws.amazon.com/appsync/latest/devguide/what-is-appsync.html) for management requests and for realtime interaction with chatbot (messages and responses) using GraphQL subscriptions.
 
 Design system provided by [AWS Cloudscape Design System](https://cloudscape.design/).
+
+## Configure and customize chatbots for different domains
+
+The solution supports creating configurable chatbots called **applications**. Admin users can define applications by selecting a model, model settings, workspace, and system prompts. Configured applications are then available for regular users based on their assigned role, allowing controlled access to pre-configured chat experiences. 
+
+Roles determine which applications a user can access - for example, a "customer support" role may only be able to use applications tailored for handling support inquiries from users. Additional roles can be created as needed to cater applications to specific user groups or departments.
+
+![sample](./assets/application.gif "GenAI Chatbot on AWS")

@@ -24,7 +24,7 @@ Configuration options in the installer made available by this feature are as fol
 
 3. "Do you want to setup a SAML or OIDC provider? or choose to do this later after install" => `[SAML, OIDC, Later]`
 
-> Here you can choose to setup a SAML or OIDC provider, alternatively you can choose to configure the provider yourself within Cognito after deployment. This is useful when you have specific requirements that arent supported in the installer or dont have the details yet. This will setup the chatbot with federation enabled and you will just need to ensure when you set it up in Cognito that you do so with the same name as provided above.
+> Here you can choose to setup a SAML or OIDC provider, alternatively you can choose to configure the provider yourself within Cognito after deployment. This is useful when you have specific requirements that aren't supported in the installer or don't have the details yet. This will setup the chatbot with federation enabled and you will just need to ensure when you set it up in Cognito that you do so with the same name as provided above.
 
 4. [SAML] "Provide a URL to a SAML metadata document. This document is issued by your SAML provider." => `URL`
 
@@ -36,7 +36,7 @@ Configuration options in the installer made available by this feature are as fol
 
 6. [OIDC] "Enter the secret manager ARN containing the OIDC client secret to use (see docs for info)" => `Secrets Manager ARN`
 
-> Provide the ARN of the secret within secrets manager containing a plaintext only value of the OIDC Client Secret to be used. By setting it within secrets manager this ensures the secret isnt stored in plain text configuration files or within CloudFormation. Example ARN: *arn:aws:secretsmanager:ap-southeast-2:111504783555:secret:cb-llm-cognito-federation-oidc-gr67hN*
+> Provide the ARN of the secret within secrets manager containing a plaintext only value of the OIDC Client Secret to be used. By setting it within secrets manager this ensures the secret isn't stored in plain text configuration files or within CloudFormation. Example ARN: *arn:aws:secretsmanager:ap-southeast-2:111504783555:secret:cb-llm-cognito-federation-oidc-gr67hN*
 
 ![example](./assets/cognito-example-secret.png "OIDC Secret Example")
 
@@ -46,11 +46,13 @@ Configuration options in the installer made available by this feature are as fol
 
 8. "Would you like to automatically redirect users to this identity provider?" => `true/false`
 
-> If you only expect users to login via the federated provider and dont need local cognito login as well, you can set this to true to automatically redirect users to login via the federated provider when visiting the webpage. Preventing them from need to click login on the logon page.
+> If you only expect users to login via the federated provider and don't need local cognito login as well, you can set this to true to automatically redirect users to login via the federated provider when visiting the webpage. Preventing them from needing to click login on the logon page.
+
+9. Each user must have following user attributes: email and custom:chatbot_role with the expected role to be able to use the Chatbot. The value of the attribute should match the Cognito user group name.
 
 ## Additional configuration
 
-At this time we havent built in specifing attribute mapping between the federated provider and cognito, you can still do this but it must be setup post deployment within the cognito console.
+At this time we havent built in specifying attribute mapping between the federated provider and cognito, you can still do this but it must be setup post deployment within the cognito console.
 
 ## Limitations
 

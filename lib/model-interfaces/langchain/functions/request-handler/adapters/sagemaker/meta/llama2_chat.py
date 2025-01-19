@@ -10,9 +10,9 @@ from ...base import ModelAdapter
 from genai_core.registry import registry
 
 from ...shared.meta.llama2_chat import (
-    Llama2ChatPromptTemplate,
-    Llama2ChatQAPromptTemplate,
-    Llama2ChatCondensedQAPromptTemplate,
+    get_llama2_chat_condensed_qa_template,
+    get_llama2_chat_qa_template,
+    get_llama2_chat_template,
 )
 from ...shared.meta.llama2_chat import Llama2ConversationBufferMemory
 
@@ -81,14 +81,14 @@ class SMLlama2ChatAdapter(ModelAdapter):
             callbacks=[self.callback_handler],
         )
 
-    def get_prompt(self):
-        return Llama2ChatPromptTemplate
+    def get_prompt(self, custom_prompt):
+        return get_llama2_chat_template(custom_prompt)
 
-    def get_qa_prompt(self):
-        return Llama2ChatQAPromptTemplate
+    def get_qa_prompt(self, custom_prompt):
+        return get_llama2_chat_qa_template(custom_prompt)
 
-    def get_condense_question_prompt(self):
-        return Llama2ChatCondensedQAPromptTemplate
+    def get_condense_question_prompt(self, custom_prompt):
+        return get_llama2_chat_condensed_qa_template(custom_prompt)
 
 
 # Register the adapter

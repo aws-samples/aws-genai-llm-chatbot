@@ -236,6 +236,7 @@ export default function Embeddings() {
                   )}
                   <Button
                     data-testid="create"
+                    data-locator="submit"
                     disabled={submitting || embeddingModels.length === 0}
                     variant="primary"
                     onClick={submitForm}
@@ -254,6 +255,7 @@ export default function Embeddings() {
                       errorText={errors.embeddingsModel}
                     >
                       <Multiselect
+                        data-locator="select-model"
                         disabled={submitting}
                         statusType={embeddingsModelStatus}
                         selectedOptions={embeddingModels.map((em) => ({
@@ -296,6 +298,7 @@ export default function Embeddings() {
                         }
                       >
                         <Textarea
+                          data-locator={`input-${index}`}
                           disabled={submitting}
                           value={input}
                           onChange={({ detail }) => {
@@ -307,6 +310,7 @@ export default function Embeddings() {
                       </FormField>
                     ))}
                     <Button
+                      data-locator="add"
                       disabled={submitting || data.input.length >= 5}
                       onClick={addInput}
                     >
@@ -323,6 +327,7 @@ export default function Embeddings() {
                 <SpaceBetween size="m">
                   <Toggle
                     checked={pinFirstInput}
+                    data-locator="result-toggle"
                     onChange={({ detail }) => setPinFirstInput(detail.checked)}
                   >
                     Relative to the first input

@@ -4,32 +4,9 @@
 
 To deploy the solution you can use 3 different methods:
 
-1. [AWS Cloud9](#aws-cloud9) (Recommended)
-2. [Github Codespaces](#github-codespaces)
-3. [Local machine](#local-machine)
-
-### AWS Cloud9
-
-We recommend deploying with [AWS Cloud9](https://aws.amazon.com/cloud9/).
-
-Use the [Cloud9 console](https://console.aws.amazon.com/cloud9control/home?#/create/) to create a new Cloud9 instance. Ensure you use the following values when creating the instance:
-
-- Select `m5.large` or larger as Instance Type.
-- Select `Ubuntu Server 22.04 LTS` as Platform.
-
-The default EBS volume create with the Cloud9 instance is too small and you need to increase it to at least 100GB.
-To do this, run the following command from the Cloud9 terminal:
-
-```
-git clone https://github.com/aws-samples/aws-genai-llm-chatbot.git
-cd aws-genai-llm-chatbot/
-chmod +x scripts/cloud9-resize.sh
-./scripts/cloud9-resize.sh
-```
-
-See the documentation for more details on [environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize).
-
-You can now proceed with the [deployment](#deployment)
+1. [Github Codespaces](#github-codespaces)
+2. [Local machine](#local-machine)
+3. [AWS Cloud9](#aws-cloud9) (Deprecated)
 
 ### Github Codespaces
 
@@ -84,9 +61,29 @@ You have:
    - N.B. [`buildx`](https://github.com/docker/buildx) is also required. For Windows and macOS `buildx` [is included](https://github.com/docker/buildx#windows-and-macos) in [Docker Desktop](https://docs.docker.com/desktop/)
 7. [Python 3+](https://www.python.org/downloads/) installed
 
+### AWS Cloud9
+
+[AWS Cloud9](https://aws.amazon.com/blogs/devops/how-to-migrate-from-aws-cloud9-to-aws-ide-toolkits-or-aws-cloudshell/) is only available to existing users of Cloud9.
+
+Use the [Cloud9 console](https://console.aws.amazon.com/cloud9control/home?#/create/) to create a new Cloud9 instance. Ensure you use the following values when creating the instance:
+
+- Select `m5.large` or larger as Instance Type.
+- Select `Ubuntu Server 22.04 LTS` as Platform.
+
+The default EBS volume create with the Cloud9 instance is too small and you need to increase it to at least 100GB.
+To do this, run the following command from the Cloud9 terminal:
+
+```
+./scripts/cloud9-resize.sh
+```
+
+See the documentation for more details on [environment resize](https://docs.aws.amazon.com/cloud9/latest/user-guide/move-environment.html#move-environment-resize).
+
+You can now proceed with the [deployment](#deployment)
+
 ## Deployment
 
-Before you start, please read the [precautions](../documentation/precautions.md) and [security](../documentation/vulnerability-scanning.md) pages.
+Before you start, please read the [precautions](../documentation/precautions.md) and [security](../documentation/security.md) pages.
 
 **Step 1.** Clone the repository.
 
@@ -126,6 +123,8 @@ You'll be prompted to configure the different aspects of the solution, such as:
 - Limit accessibility to website and backend to VPC (private chatbot).
 - Add existing Amazon Kendra indices as RAG sources
 
+For more details about the options, please refer to the [configuration page](./config.md)
+
 When done, answer `Y` to create or update your configuration.
 
 ![sample](./assets/magic-config-sample.gif "CLI sample")
@@ -163,14 +162,18 @@ GenAIChatBotStack.ApiKeysSecretNameXXXX = ApiKeysSecretName-xxxxxx
 
 **Step 8.** Open the generated **Cognito User Pool** Link from outputs above i.e. `https://xxxxx.console.aws.amazon.com/cognito/v2/idp/user-pools/xxxxx_XXXXX/users?region=xxxxx`
 
-**Step 9.** Add a user that will be used to log into the web interface.
+**Step 9.** Add a user that will be used to log into the web interface. 
 
-**Step 10.** Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`.
+**Step 10.** Assign the admin role to the user.
 
-**Step 11.** Login with the user created in **Step 8** and follow the instructions.
+For more information, please refer to [the access control page](../documentation/access-control.md)
 
-**Step 12.** (Optional) Run the integration tests
-The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` (Claude Instant), `anthropic.claude-3-haiku-20240307-v1:0` (Claude 3 Haiku) and `amazon.titan-embed-text-v1` (Titan Embeddings G1 - Text) which need to be enabled in Bedrock.
+**Step 11.** Open the `User Interface` Url for the outputs above, i.e. `dxxxxxxxxxxxxx.cloudfront.net`.
+
+**Step 12.** Login with the user created in **Step 8** and follow the instructions.
+
+**Step 13.** (Optional) Run the integration tests
+The tests require to be authenticated against your AWS Account because it will create cognito users. In addition, the tests will use `anthropic.claude-instant-v1` (Claude Instant), `anthropic.claude-3-haiku-20240307-v1:0` (Claude 3 Haiku), `amazon.titan-embed-text-v1` (Titan Embeddings G1 - Text) and `amazon.nova-canvas-v1:0` (Amazon Nova Canvas) which need to be enabled in Bedrock, 1 workspace engine and the SageMaker default models.
 
 To run the tests (Replace the url with the one you used in the steps above)
 ```bash

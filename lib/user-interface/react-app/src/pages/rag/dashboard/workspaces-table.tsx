@@ -36,7 +36,10 @@ export default function WorkspacesTable(props: WorkspacesTableProps) {
                 Workspace is a collection of documents
               </Box>
             </div>
-            <RouterButton href="/rag/workspaces/create">
+            <RouterButton
+              href="/rag/workspaces/create"
+              data-locator="create-workspace"
+            >
               Create Workspace
             </RouterButton>
           </SpaceBetween>

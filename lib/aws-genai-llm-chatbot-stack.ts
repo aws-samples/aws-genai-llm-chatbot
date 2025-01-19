@@ -78,6 +78,8 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         messagesTopic: chatBotApi.messagesTopic,
         sessionsTable: chatBotApi.sessionsTable,
         byUserIdIndex: chatBotApi.byUserIdIndex,
+        applicationTable: chatBotApi.applicationTable,
+        chatbotFilesBucket: chatBotApi.filesBucket,
       });
 
       // Route all incoming messages targeted to langchain to the langchain model interface queue
@@ -115,38 +117,40 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     );
 
     // check if any deployed model requires idefics interface
-    const ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
-      shared,
-      config: props.config,
-      messagesTopic: chatBotApi.messagesTopic,
-      sessionsTable: chatBotApi.sessionsTable,
-      byUserIdIndex: chatBotApi.byUserIdIndex,
-      chatbotFilesBucket: chatBotApi.filesBucket,
-      createPrivateGateway: ideficsModels.length > 0,
-    });
+    let ideficsInterface;
+    if (ideficsModels.length > 0) {
+      ideficsInterface = new IdeficsInterface(this, "IdeficsInterface", {
+        shared,
+        config: props.config,
+        messagesTopic: chatBotApi.messagesTopic,
+        sessionsTable: chatBotApi.sessionsTable,
+        byUserIdIndex: chatBotApi.byUserIdIndex,
+        chatbotFilesBucket: chatBotApi.filesBucket,
+      });
 
-    // Route all incoming messages targeted to idefics to the idefics model interface queue
-    chatBotApi.messagesTopic.addSubscription(
-      new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
-        filterPolicyWithMessageBody: {
-          direction: sns.FilterOrPolicy.filter(
-            sns.SubscriptionFilter.stringFilter({
-              allowlist: [Direction.In],
-            })
-          ),
-          modelInterface: sns.FilterOrPolicy.filter(
-            sns.SubscriptionFilter.stringFilter({
-              allowlist: [ModelInterface.MultiModal],
-            })
-          ),
-        },
-      })
-    );
+      // Route all incoming messages targeted to idefics to the idefics model interface queue
+      chatBotApi.messagesTopic.addSubscription(
+        new subscriptions.SqsSubscription(ideficsInterface.ingestionQueue, {
+          filterPolicyWithMessageBody: {
+            direction: sns.FilterOrPolicy.filter(
+              sns.SubscriptionFilter.stringFilter({
+                allowlist: [Direction.In],
+              })
+            ),
+            modelInterface: sns.FilterOrPolicy.filter(
+              sns.SubscriptionFilter.stringFilter({
+                allowlist: [ModelInterface.MultiModal],
+              })
+            ),
+          },
+        })
+      );
 
-    for (const model of models.models) {
-      // if model name contains idefics then add to idefics interface
-      if (model.interface === ModelInterface.MultiModal) {
-        ideficsInterface.addSageMakerEndpoint(model);
+      for (const model of models.models) {
+        // if model name contains idefics then add to idefics interface
+        if (model.interface === ModelInterface.MultiModal) {
+          ideficsInterface.addSageMakerEndpoint(model);
+        }
       }
     }
 
@@ -230,7 +234,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         );
       }),
       llmRequestHandlersLogGroups: [
-        ideficsInterface.requestHandler,
+        ideficsInterface?.requestHandler,
         langchainInterface?.requestHandler,
       ]
         .filter((i) => i)
@@ -248,13 +252,14 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       },
       tables: [
         chatBotApi.sessionsTable,
+        chatBotApi.applicationTable,
         ...(ragEngines
           ? [ragEngines.workspacesTable, ragEngines.documentsTable]
           : []),
       ],
       sqs: [
         chatBotApi.outBoundQueue,
-        ideficsInterface.ingestionQueue,
+        ...(ideficsInterface ? [ideficsInterface.ingestionQueue] : []),
         ...(langchainInterface ? [langchainInterface.ingestionQueue] : []),
       ],
       aurora: ragEngines?.auroraPgVector?.database,
@@ -324,8 +329,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/lambda-resolver/ServiceRole/DefaultPolicy/Resource`,
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/Resource`,
         `/${this.stackName}/ChatBotApi/Realtime/Resolvers/outgoing-message-handler/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
-        `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/Resource`,
+        ...(ideficsInterface
+          ? [
+              `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/DefaultPolicy/Resource`,
+              `/${this.stackName}/IdeficsInterface/MultiModalInterfaceRequestHandler/ServiceRole/Resource`,
+            ]
+          : []),
         ...(langchainInterface
           ? [
               `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/Resource`,

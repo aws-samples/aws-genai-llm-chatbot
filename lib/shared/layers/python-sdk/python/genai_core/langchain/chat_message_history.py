@@ -14,6 +14,7 @@ from langchain.schema.messages import (
     messages_to_dict,
 )
 from langchain_core.messages.ai import AIMessage, AIMessageChunk
+from langchain_core.messages.human import HumanMessage
 
 client = boto3.resource("dynamodb")
 logger = Logger()
@@ -29,9 +30,14 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
         self.table = client.Table(table_name)
         self.session_id = session_id
         self.user_id = user_id
+        self.temporary_messages = []
+        self.start_time = None
 
     @property
     def messages(self) -> List[BaseMessage]:
+        return self.get_messages_from_storage() + self.temporary_messages
+
+    def get_messages_from_storage(self) -> List[BaseMessage]:
         """Retrieve the messages from DynamoDB"""
         response = None
         try:
@@ -46,15 +52,15 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
 
         if response and "Item" in response:
             items = response["Item"]["History"]
+            self.start_time = response["Item"]["StartTime"]
         else:
             items = []
 
-        messages = messages_from_dict(items)
-        return messages
+        return messages_from_dict(items)
 
     def add_message(self, message: BaseMessage) -> None:
         """Append the message to the record in DynamoDB"""
-        messages = messages_to_dict(self.messages)
+        messages = messages_to_dict(self.get_messages_from_storage())
         if isinstance(message, AIMessageChunk):
             # When streaming with RunnableWithMessageHistory,
             # it would add a chunk to the history but it expects a text as content.
@@ -79,9 +85,13 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
         except ClientError as err:
             logger.exception(err)
 
+    def add_temporary_message(self, message: HumanMessage) -> None:
+        """Add a message without storing it (For example images, documents)"""
+        self.temporary_messages.append(message)
+
     def add_metadata(self, metadata: dict) -> None:
         """Add additional metadata to the last message"""
-        messages = messages_to_dict(self.messages)
+        messages = messages_to_dict(self.get_messages_from_storage())
         if not messages:
             return
 
@@ -93,7 +103,49 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 Item={
                     "SessionId": self.session_id,
                     "UserId": self.user_id,
-                    "StartTime": datetime.now().isoformat(),
+                    "StartTime": (
+                        datetime.now().isoformat()
+                        if self.start_time is None
+                        else self.start_time
+                    ),
+                    "History": messages,
+                }
+            )
+
+        except Exception as err:
+            logger.exception(err)
+
+    def replace_last_message(self, content: str) -> None:
+        """Replace the last message. For example when it is blocked by guardrails"""
+        messages = messages_to_dict(self.get_messages_from_storage())
+        if not messages:
+            return
+
+        logger.info(
+            "updaing",
+            content=content,
+            date=self.start_time,
+            item={
+                "SessionId": self.session_id,
+                "UserId": self.user_id,
+                "StartTime": (
+                    datetime.now().isoformat()
+                    if self.start_time is None
+                    else self.start_time
+                ),
+                "History": messages,
+            },
+        )
+        try:
+            self.table.put_item(
+                Item={
+                    "SessionId": self.session_id,
+                    "UserId": self.user_id,
+                    "StartTime": (
+                        datetime.now().isoformat()
+                        if self.start_time is None
+                        else self.start_time
+                    ),
                     "History": messages,
                 }
             )

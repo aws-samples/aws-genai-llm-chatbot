@@ -6,6 +6,7 @@ def test_engines(mocker):
         "genai_core.parameters.get_config",
         return_value={"rag": {"engines": {"aurora": {"enabled": True}}}},
     )
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
     response = engines()
     assert len(response) == 4
     assert response[0].get("enabled") == True
@@ -16,3 +17,9 @@ def test_engines(mocker):
     assert response[1].get("id") == "opensearch"
     assert response[2].get("id") == "kendra"
     assert response[3].get("id") == "bedrock_kb"
+
+
+def test_engines_unauthorized(mocker):
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user"])
+    response = engines()
+    assert response.get("error") == "Unauthorized"

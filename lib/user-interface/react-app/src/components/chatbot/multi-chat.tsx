@@ -34,7 +34,6 @@ import {
   ChatBotMessageType,
   ChatBotRunRequest,
   ChatBotMode,
-  ChabotInputModality,
   ChabotOutputModality,
   ChatBotHeartbeatRequest,
   ChatBotModelInterface,
@@ -69,13 +68,20 @@ function createNewSession(): ChatSession {
     running: false,
     messageHistory: [],
     configuration: {
-      files: [],
+      images: [],
+      documents: [],
+      videos: [],
       streaming: true,
       showMetadata: false,
       maxTokens: 512,
       temperature: 0.1,
       topP: 0.9,
       seed: 0,
+      filesBlob: {
+        images: null,
+        videos: null,
+        documents: null,
+      },
     },
   };
 }
@@ -140,15 +146,7 @@ export default function MultiChat() {
         } else {
           modelsResult = await apiClient.models.getModels();
         }
-
-        const models = modelsResult.data
-          ? modelsResult.data.listModels.filter(
-              /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-              (m: any) =>
-                m.inputModalities.includes(ChabotInputModality.Text) &&
-                m.outputModalities.includes(ChabotOutputModality.Text)
-            )
-          : [];
+        const models = modelsResult.data ? modelsResult.data.listModels : [];
         setModels(models);
         setWorkspaces(workspaces);
         setModelsStatus("finished");
@@ -168,6 +166,18 @@ export default function MultiChat() {
       refChatSessions.current = [];
     };
   }, [appContext]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const getChatBotMode = (
+    outputModality: ChabotOutputModality
+  ): ChatBotMode => {
+    const chatBotModeMap = {
+      [ChabotOutputModality.Text]: ChatBotMode.Chain,
+      [ChabotOutputModality.Image]: ChatBotMode.ImageGeneration,
+      [ChabotOutputModality.Video]: ChatBotMode.VideoGeneration,
+    } as { [key: string]: ChatBotMode };
+
+    return chatBotModeMap[outputModality] ?? ChatBotMode.Chain;
+  };
 
   const enabled =
     readyState === ReadyState.OPEN &&
@@ -189,6 +199,9 @@ export default function MultiChat() {
         chatSession.model?.value
       );
 
+      const outputModalities = (chatSession.modelMetadata?.outputModalities ??
+        []) as ChabotOutputModality[];
+
       const value = message.trim();
       const request: ChatBotRunRequest = {
         action: ChatBotAction.Run,
@@ -197,7 +210,9 @@ export default function MultiChat() {
           modelName: name,
           provider: provider,
           sessionId: chatSession.id,
-          files: [],
+          images: [],
+          documents: [],
+          videos: [],
           workspaceId: chatSession.workspace?.value,
           modelKwargs: {
             streaming: chatSession.configuration.streaming,
@@ -207,7 +222,9 @@ export default function MultiChat() {
             seed: chatSession.configuration.seed,
           },
           text: value,
-          mode: ChatBotMode.Chain,
+          mode: getChatBotMode(
+            outputModalities[0] ?? ChabotOutputModality.Text
+          ),
         },
       };
 
@@ -414,6 +431,7 @@ export default function MultiChat() {
               onClick={() => addSession()}
               disabled={!enableAddModels || chatSessions.length >= 4}
               iconName="add-plus"
+              data-locator="add-model"
             >
               Add model
             </Button>
@@ -435,8 +453,8 @@ export default function MultiChat() {
           </SpaceBetween>
         </SpaceBetween>
         <ColumnLayout columns={chatSessions.length}>
-          {chatSessions.map((chatSession) => (
-            <Container key={chatSession.id}>
+          {chatSessions.map((chatSession, index) => (
+            <Container key={chatSession.id} data-locator={`model-${index}`}>
               <SpaceBetween direction="vertical" size="m">
                 <div
                   style={{
@@ -449,6 +467,7 @@ export default function MultiChat() {
                     disabled={!enableAddModels}
                     loadingText="Loading models (might take few seconds)..."
                     statusType={modelsStatus}
+                    data-locator={`select-model-${index}`}
                     placeholder="Select a model"
                     empty={
                       <div>
@@ -550,7 +569,7 @@ export default function MultiChat() {
           );
         })}
       </SpaceBetween>
-      <div className={styles.input_container}>
+      <div>
         <MultiChatInputPanel
           running={chatSessions.some((c) => c.running)}
           enabled={enabled}

@@ -187,4 +187,5 @@ export interface SageMakerModelEndpoint {
   outputModalities: Modality[];
   interface: ModelInterface;
   ragSupported: boolean;
+  bedrockGuardrails?: boolean;
 }

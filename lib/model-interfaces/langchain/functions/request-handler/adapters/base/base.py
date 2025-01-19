@@ -18,6 +18,8 @@ from typing import Dict, List, Any
 
 from genai_core.langchain import WorkspaceRetriever, DynamoDBChatMessageHistory
 from genai_core.types import ChatbotMode
+from genai_core.types import CommonError
+from genai_core.clients import get_bedrock_client
 
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.outputs import LLMResult, ChatGeneration
@@ -41,7 +43,8 @@ class LLMStartHandler(BaseCallbackHandler):
     def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> Any:
-        self.prompts.append(prompts)
+        for prompt in prompts:
+            self.prompts.append(prompt)
 
     def on_llm_end(
         self, response: LLMResult, *, run_id, parent_run_id, **kwargs: Any
@@ -82,7 +85,11 @@ class ModelAdapter:
         self.user_id = user_id
         self._mode = mode
         self.model_kwargs = model_kwargs
-        self.disable_streaming = disable_streaming
+        # Disable streaming since the guardrails are applied after the full response
+        # With the exception of Bedrock models
+        self.disable_streaming = (
+            disable_streaming or self.should_call_apply_bedrock_guardrails()
+        )
 
         self.callback_handler = LLMStartHandler()
         self.__bind_callbacks()
@@ -99,6 +106,58 @@ class ModelAdapter:
         for method in callback_methods:
             if method in valid_callback_names:
                 setattr(self.callback_handler, method, getattr(self, method))
+
+    def get_bedrock_guardrails(self) -> dict:
+        if "BEDROCK_GUARDRAILS_ID" in os.environ:
+            return {
+                "guardrailIdentifier": os.environ["BEDROCK_GUARDRAILS_ID"],
+                "guardrailVersion": os.environ.get(
+                    "BEDROCK_GUARDRAILS_VERSION", "DRAFT"
+                ),
+            }
+        return {}
+
+    def should_call_apply_bedrock_guardrails(self) -> bool:
+        guardrails = self.get_bedrock_guardrails()
+        return len(guardrails.keys()) > 0
+
+    def apply_bedrock_guardrails(self, source: str, content: str):
+        if self.should_call_apply_bedrock_guardrails():
+            bedrock = get_bedrock_client()
+            guardrails = self.get_bedrock_guardrails()
+            response = bedrock.apply_guardrail(
+                guardrailIdentifier=guardrails.get("guardrailIdentifier"),
+                guardrailVersion=guardrails.get("guardrailVersion"),
+                source=source,
+                content=[
+                    {
+                        "text": {
+                            "text": content,
+                        }
+                    },
+                ],
+            )
+            if response.get("action") == "GUARDRAIL_INTERVENED":
+                outputs = response.get("outputs")
+                return {
+                    "sessionId": self.session_id,
+                    "type": "text",
+                    # This message is the one configured in the
+                    # bedrock guardrail settings
+                    "content": (
+                        response.get("outputs")[0].get("text")
+                        if len(outputs) > 0
+                        else "I cannot answer this question."
+                    ),
+                }
+        else:
+            return None
+
+    def add_files_to_message_history(self, images=[], documents=[], videos=[]):
+        # Needs to be implemented per adapter. (For example Bedrock needs to use base64)
+        if len(images) > 0 or len(documents) > 0 or len(videos) > 0:
+            raise CommonError("Adapter does not support files as a input")
+        return
 
     def get_endpoint(self, model_id):
         clean_name = "SAGEMAKER_ENDPOINT_" + re.sub(r"[\s.\/\-_]", "", model_id).upper()
@@ -128,7 +187,7 @@ class ModelAdapter:
             output_key=output_key,
         )
 
-    def get_prompt(self):
+    def get_prompt(self, custom_prompt=None):
         template = """The following is a friendly conversation between a human and an AI. If the AI does not know the answer to a question, it truthfully says it does not know.
 
         Current conversation:
@@ -138,18 +197,37 @@ class ModelAdapter:
 
         return PromptTemplate.from_template(template)
 
-    def get_condense_question_prompt(self):
+    def get_condense_question_prompt(self, custom_prompt=None):
         return CONDENSE_QUESTION_PROMPT
 
-    def get_qa_prompt(self):
+    def get_qa_prompt(self, custom_prompt=None):
         return QA_PROMPT
 
-    def run_with_chain_v2(self, user_prompt, workspace_id=None):
+    def generate_image(self, input: dict, files=None):
+        raise CommonError("This adapter does not support image generation")
+
+    def generate_video(self, input: dict, files=None):
+        raise CommonError("This adapter does not support video generation")
+
+    def format_prompt(self, prompt, messages, files):
+        # Needs to be implemented per adapter. (For example Bedrock needs to use base64)
+        raise CommonError("Prompt formatting not supported for this adapter")
+
+    def run_with_chain_v2(
+        self,
+        user_prompt,
+        workspace_id=None,
+        images=[],
+        sessions_documents=[],
+        videos=[],
+        user_groups=None,
+        system_prompts={},
+    ):
         if not self.llm:
             raise ValueError("llm must be set")
 
         self.callback_handler.prompts = []
-        documents = []
+        workspace_documents = []
         retriever = None
 
         if workspace_id:
@@ -160,17 +238,22 @@ class ModelAdapter:
             history_aware_retriever = create_history_aware_retriever(
                 llm_without_streaming,
                 retriever,
-                self.get_condense_question_prompt(),
+                self.get_condense_question_prompt(
+                    custom_prompt=system_prompts.get("condenseSystemPrompt")
+                ),
             )
             question_answer_chain = create_stuff_documents_chain(
                 self.llm,
-                self.get_qa_prompt(),
+                self.get_qa_prompt(custom_prompt=system_prompts.get("systemPromptRag")),
             )
             chain = create_retrieval_chain(
                 history_aware_retriever, question_answer_chain
             )
         else:
-            chain = self.get_prompt() | self.llm
+            chain = (
+                self.get_prompt(custom_prompt=system_prompts.get("systemPrompt"))
+                | self.llm
+            )
 
         conversation = RunnableWithMessageHistory(
             chain,
@@ -181,8 +264,13 @@ class ModelAdapter:
         )
 
         config = {"configurable": {"session_id": self.session_id}}
+        self.add_files_to_message_history(images, sessions_documents, videos)
         try:
-            if not self.disable_streaming and self.model_kwargs.get("streaming", False):
+            if (
+                not self.disable_streaming
+                and not self.should_call_apply_bedrock_guardrails()
+                and self.model_kwargs.get("streaming", False)
+            ):
                 answer = ""
                 for chunk in conversation.stream(
                     input={"input": user_prompt}, config=config
@@ -211,7 +299,7 @@ class ModelAdapter:
             self.chat_history.add_message(HumanMessage(user_prompt))
             self.chat_history.add_message(AIMessage(answer))
         if retriever is not None:
-            documents = [
+            workspace_documents = [
                 {
                     "page_content": doc.page_content,
                     "metadata": doc.metadata,
@@ -219,18 +307,31 @@ class ModelAdapter:
                 for doc in retriever.get_last_search_documents()
             ]
 
+        clean_prompts = []
+        for prompt in self.callback_handler.prompts:
+            # Remove JSON from the promt (which contains binary of input files)
+            clean_prompts.append(re.sub(r"\[{.*}\]*", "*FILE*", prompt))
+
         metadata = {
             "modelId": self.model_id,
             "modelKwargs": self.model_kwargs,
             "mode": self._mode,
             "sessionId": self.session_id,
             "userId": self.user_id,
-            "documents": documents,
-            "prompts": self.callback_handler.prompts,
+            "documents": workspace_documents,
+            "prompts": clean_prompts,
             "usage": self.callback_handler.usage,
         }
 
-        self.chat_history.add_metadata(metadata)
+        if is_admin_role(user_groups):
+            self.chat_history.add_metadata(
+                {
+                    **metadata,
+                    "images": images,
+                    "videos": videos,
+                    "documents": sessions_documents + workspace_documents,
+                }
+            )
 
         if (
             self.callback_handler.usage is not None
@@ -246,14 +347,28 @@ class ModelAdapter:
                 value=self.callback_handler.usage.get("total_tokens"),
             )
 
-        return {
+        response = {
             "sessionId": self.session_id,
             "type": "text",
             "content": answer,
-            "metadata": metadata,
         }
 
-    def run_with_chain(self, user_prompt, workspace_id=None):
+        if is_admin_role(user_groups) and metadata is not None:
+            response["metadata"] = metadata
+        else:
+            response["metadata"] = {
+                "sessionId": self.session_id,
+            }
+
+        return response
+
+    def run_with_chain(
+        self,
+        user_prompt,
+        workspace_id=None,
+        user_groups=None,
+        system_prompts={},
+    ):
         if not self.llm:
             raise ValueError("llm must be set")
 
@@ -264,8 +379,14 @@ class ModelAdapter:
                 self.llm,
                 WorkspaceRetriever(workspace_id=workspace_id),
                 condense_question_llm=self.get_llm({"streaming": False}),
-                condense_question_prompt=self.get_condense_question_prompt(),
-                combine_docs_chain_kwargs={"prompt": self.get_qa_prompt()},
+                condense_question_prompt=self.get_condense_question_prompt(
+                    custom_prompt=system_prompts.get("condenseSystemPrompt")
+                ),
+                combine_docs_chain_kwargs={
+                    "prompt": self.get_qa_prompt(
+                        custom_prompt=system_prompts.get("systemPromptRag")
+                    )
+                },
                 return_source_documents=True,
                 memory=self.get_memory(output_key="answer", return_messages=True),
                 verbose=True,
@@ -292,18 +413,26 @@ class ModelAdapter:
                 "prompts": self.callback_handler.prompts,
             }
 
-            self.chat_history.add_metadata(metadata)
+            if is_admin_role(user_groups) and metadata is not None:
+                self.chat_history.add_metadata(metadata)
 
-            return {
+            response = {
                 "sessionId": self.session_id,
                 "type": "text",
                 "content": result["answer"],
-                "metadata": metadata,
             }
+
+            if is_admin_role(user_groups) and metadata is not None:
+                response["metadata"] = metadata
+            else:
+                response["metadata"] = {
+                    "sessionId": self.session_id,
+                }
+            return response
 
         conversation = ConversationChain(
             llm=self.llm,
-            prompt=self.get_prompt(),
+            prompt=self.get_prompt(custom_prompt=system_prompts.get("systemPrompt")),
             memory=self.get_memory(),
             verbose=True,
         )
@@ -321,24 +450,162 @@ class ModelAdapter:
             "prompts": self.callback_handler.prompts,
         }
 
-        self.chat_history.add_metadata(metadata)
+        if is_admin_role(user_groups) and metadata is not None:
+            self.chat_history.add_metadata(metadata)
 
-        return {
+        response = {
             "sessionId": self.session_id,
             "type": "text",
             "content": answer,
-            "metadata": metadata,
         }
 
-    def run(self, prompt, workspace_id=None, *args, **kwargs):
+        if is_admin_role(user_groups) and metadata is not None:
+            response["metadata"] = metadata
+
+        return response
+
+    def run_with_media_generation_chain(
+        self, prompt, user_groups=None, images=[], documents=[], videos=[]
+    ):
+        # Get chat history
+        messages = self.chat_history.messages
+        # Format prompt
+        input = self.format_prompt(prompt, messages, images + videos)
+
+        self.add_files_to_message_history(images, documents, videos)
+
+        try:
+            if self._mode == ChatbotMode.IMAGE_GENERATION.value:
+                # Chain process for image generation
+                ai_response = self.generate_image(input, files=images)
+            elif self._mode == ChatbotMode.VIDEO_GENERATION.value:
+                # Chain process for video generation
+                ai_response = self.generate_video(input, files=images)
+            else:
+                raise ValueError(f"unknown media generation mode {self._mode}")
+        except Exception as e:
+            logger.exception(e)
+            raise e
+
+        # Add user files and mesage to chat history
+        user_message_metadata = {
+            "modelId": self.model_id,
+            "modelKwargs": self.model_kwargs,
+            "mode": self._mode,
+            "sessionId": self.session_id,
+            "userId": self.user_id,
+            "images": images,
+            "documents": documents,
+            "videos": videos,
+        }
+        self.chat_history.add_user_message(prompt)
+        self.chat_history.add_metadata(user_message_metadata)
+
+        # Add AI files and message to chat history
+        ai_images = ai_response.get("images", [])
+        ai_videos = ai_response.get("videos", [])
+
+        ai_response_metadata = {
+            "modelId": self.model_id,
+            "modelKwargs": self.model_kwargs,
+            "mode": self._mode,
+            "sessionId": self.session_id,
+            "userId": self.user_id,
+            "images": ai_images,
+            "videos": ai_videos,
+        }
+
+        ai_text_response = ai_response.get("content", "")
+        self.chat_history.add_ai_message(ai_text_response)
+
+        if is_admin_role(user_groups):
+            ai_response_metadata.update(
+                {
+                    "prompts": [input.get("last_message")],
+                }
+            )
+        self.chat_history.add_metadata(ai_response_metadata)
+
+        response = {
+            "sessionId": self.session_id,
+            "type": "text",
+            "content": ai_response.get("content"),
+            "metadata": ai_response_metadata,
+        }
+
+        return response
+
+    def run(
+        self,
+        prompt,
+        workspace_id=None,
+        images=[],
+        documents=[],
+        videos=[],
+        user_groups=[],
+        system_prompts={},
+        *args,
+        **kwargs,
+    ):
         logger.debug(f"run with {kwargs}")
         logger.debug(f"workspace_id {workspace_id}")
         logger.debug(f"mode: {self._mode}")
 
+        guardrail_response = self.apply_bedrock_guardrails(
+            source="INPUT", content=prompt
+        )
+        if guardrail_response is not None:
+            logger.info("Blocking intput message using Guardrails")
+            return guardrail_response
+
         if self._mode == ChatbotMode.CHAIN.value:
             if isinstance(self.llm, ChatBedrockConverse):
-                return self.run_with_chain_v2(prompt, workspace_id)
+                response = self.run_with_chain_v2(
+                    prompt,
+                    workspace_id,
+                    images,
+                    documents,
+                    videos,
+                    user_groups,
+                    system_prompts=system_prompts,
+                )
             else:
-                return self.run_with_chain(prompt, workspace_id)
+                response = self.run_with_chain(
+                    prompt,
+                    workspace_id,
+                    user_groups,
+                    system_prompts=system_prompts,
+                )
+            guardrail_response = self.apply_bedrock_guardrails(
+                source="OUTPUT", content=response.get("content")
+            )
+            if guardrail_response is not None:
+                # Replace the last message in the history
+                logger.info("Blocking ouput message using Guardrails")
+                self.chat_history.replace_last_message(
+                    guardrail_response.get("content")
+                )
+                return guardrail_response
+
+            return response
+
+        elif self._mode in [
+            ChatbotMode.IMAGE_GENERATION.value,
+            ChatbotMode.VIDEO_GENERATION.value,
+        ]:
+            # Media generation
+            return self.run_with_media_generation_chain(
+                prompt,
+                user_groups,
+                images,
+                documents,
+                videos,
+            )
 
         raise ValueError(f"unknown mode {self._mode}")
+
+
+def is_admin_role(user_groups):
+    if user_groups and ("admin" in user_groups or "workspace_manager" in user_groups):
+        return True
+    return False

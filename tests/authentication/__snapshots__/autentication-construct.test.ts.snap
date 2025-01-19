@@ -43,6 +43,26 @@ exports[`snapshot test 1`] = `
     },
   },
   "Resources": {
+    "AuthenticationConstructAdminGroup28128A39": {
+      "Properties": {
+        "Description": "Administrators group",
+        "GroupName": "admin",
+        "UserPoolId": {
+          "Ref": "AuthenticationConstructUserPoolFE5ABE04",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolGroup",
+    },
+    "AuthenticationConstructUserGroup5F3156CD": {
+      "Properties": {
+        "Description": "User group",
+        "GroupName": "user",
+        "UserPoolId": {
+          "Ref": "AuthenticationConstructUserPoolFE5ABE04",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolGroup",
+    },
     "AuthenticationConstructUserPoolFE5ABE04": {
       "DeletionPolicy": "Delete",
       "Metadata": {
@@ -180,6 +200,16 @@ exports[`snapshot test 1`] = `
         ],
       },
       "Type": "AWS::IAM::Role",
+    },
+    "AuthenticationConstructWorkspaceManagerGroup00E7A4D7": {
+      "Properties": {
+        "Description": "Workspace managers group",
+        "GroupName": "workspace_manager",
+        "UserPoolId": {
+          "Ref": "AuthenticationConstructUserPoolFE5ABE04",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolGroup",
     },
   },
   "Rules": {

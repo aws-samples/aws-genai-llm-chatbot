@@ -1,22 +1,9 @@
 # Using AppSync
 
-Define or change the schema in `./lib/chatbot-api/schema`.
+The project relies on [AWS AppSync](https://docs.aws.amazon.com/appsync/latest/devguide/what-is-appsync.html) which creates serverless GraphQL and Pub/Sub APIs that simplify application development through a single endpoint to securely query, update, or publish data. One of the key advantages is [GraphQL subscriptions](https://docs.aws.amazon.com/appsync/latest/devguide/aws-appsync-real-time-data.html) which is used to receive the chatbot responses in real time using streaming.
 
-At the moment we only use the `schema-ws.graphql` to define the real-time API. The REST API might be replaced by AppSync in the future.
+### Schema
+The GraphQL Schema defining the possible operatiosn can be found in `lib/chatbot-api/schema/schema.graphql`. Once deployed, AWS AppSync provides a Querying tool on the [AWS Console](https://us-east-1.console.aws.amazon.com/appsync/home?region=us-east-1) which can be used to explore and test the APIs.
 
-If you modified the definition for the schema, you can regenerate the client code using
-
-```bash
-cd lib/user-interface/react-app
-npx @npx @aws-amplify/cli codegen add --apiId <api_id> --region <region>
-```
-
-Accept all the defaults.
-
-If you use a None data source, you need to modify `src/API.ts` adding:
-
-```ts
-export type NoneQueryVariables = {
-  none?: string | null;
-};
-```
+### Authentication
+AWS AppSync supports built in authentication modes. This project relies on the [@aws_cognito_user_pools one](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#using-additional-authorization-modes) to authenticate Amazon Cognito users.

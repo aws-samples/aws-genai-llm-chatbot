@@ -170,6 +170,7 @@ export default function DocumentsTab(props: DocumentsTabProps) {
                 <Button iconName="refresh" onClick={refreshPage} />
                 <RouterButton
                   href={`/rag/workspaces/add-data?workspaceId=${props.workspaceId}&tab=${props.documentType}`}
+                  data-locator="add-link"
                 >
                   {typeAddStr}
                 </RouterButton>

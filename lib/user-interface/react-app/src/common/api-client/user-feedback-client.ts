@@ -18,6 +18,7 @@ export class UserFeedbackClient {
           prompt: params.feedbackData.prompt,
           completion: params.feedbackData.completion,
           model: params.feedbackData.model,
+          applicationId: params.feedbackData.applicationId,
         },
       },
     });

@@ -354,7 +354,9 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "guardrailsEnable",
-      message: "Do you want to enable Bedrock Guardrails",
+      message:
+        "Do you want to enable Bedrock Guardrails? This is a recommended feature to build responsible AI applications." +
+        " (Supported by all models except Idefics via SageMaker. If enabled, streaming will only work with Bedrock)",
       initial: options.guardrailsEnable ?? false,
     },
     {
@@ -381,7 +383,7 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "confirm",
       name: "enableSagemakerModels",
-      message: "Do you want to use any text generation Sagemaker Models",
+      message: "Do you want to use any text generation SageMaker Models",
       initial: options.enableSagemakerModels || false,
     },
     {

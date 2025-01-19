@@ -7,7 +7,6 @@ import {
   Routes,
 } from "react-router-dom";
 import { AppContext } from "./common/app-context";
-import GlobalHeader from "./components/global-header";
 import Models from "./pages/chatbot/models/models";
 import MultiChatPlayground from "./pages/chatbot/playground/multi-chat-playground";
 import Playground from "./pages/chatbot/playground/playground";
@@ -25,45 +24,228 @@ import Workspaces from "./pages/rag/workspaces/workspaces";
 import Welcome from "./pages/welcome";
 import "./styles/app.scss";
 import SessionPage from "./pages/chatbot/sessions/sessions";
+import Applications from "./pages/admin/applications/applications";
+import ManageApplication from "./pages/admin/manage-application/manage-application";
+import ApplicationChat from "./pages/application/application";
+import Layout from "./layout";
+import { UserContext } from "./common/user-context";
+import { UserRole } from "./common/types";
 
 function App() {
   const appContext = useContext(AppContext);
+  const userContext = useContext(UserContext);
   const Router = appContext?.config.privateWebsite ? HashRouter : BrowserRouter;
 
   return (
     <div style={{ height: "100%" }}>
       <Router>
-        <GlobalHeader />
-        <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
-            <Route index path="/" element={<Welcome />} />
-            <Route path="/chatbot" element={<Outlet />}>
-              <Route path="playground" element={<Playground />} />
-              <Route path="playground/:sessionId" element={<Playground />} />
-              <Route path="sessions" element={<SessionPage />} />
-              <Route path="multichat" element={<MultiChatPlayground />} />
-              <Route path="models" element={<Models />} />
-            </Route>
-            <Route path="/rag" element={<Outlet />}>
-              <Route path="" element={<Dashboard />} />
-              <Route path="engines" element={<Engines />} />
-              <Route path="embeddings" element={<Embeddings />} />
-              <Route path="cross-encoders" element={<CrossEncoders />} />
-              <Route path="semantic-search" element={<SemanticSearch />} />
-              <Route path="workspaces" element={<Workspaces />} />
-              <Route path="workspaces/create" element={<CreateWorkspace />} />
-              <Route
-                path="workspaces/:workspaceId"
-                element={<WorkspacePane />}
-              />
-              <Route
-                path="workspaces/:workspaceId/rss/:feedId"
-                element={<RssFeed />}
-              />
-              <Route path="workspaces/add-data" element={<AddData />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
+            <Route
+              index
+              path="/application/:applicationId"
+              element={
+                <Layout showHeader={false}>
+                  <ApplicationChat />
+                </Layout>
+              }
+            />
+            {userContext?.userRoles !== undefined &&
+              (userContext?.userRoles.includes(UserRole.ADMIN) ||
+                userContext?.userRoles.includes(
+                  UserRole.WORKSPACE_MANAGER
+                )) && (
+                <>
+                  <Route
+                    index
+                    path="/"
+                    element={
+                      <Layout showHeader={true}>
+                        <Welcome />
+                      </Layout>
+                    }
+                  />
+                  <Route path="/chatbot" element={<Outlet />}>
+                    <Route
+                      path="playground"
+                      element={
+                        <Layout showHeader={true}>
+                          <Playground />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="playground/:sessionId"
+                      element={
+                        <Layout showHeader={true}>
+                          <Playground />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="sessions"
+                      element={
+                        <Layout showHeader={true}>
+                          <SessionPage />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="multichat"
+                      element={
+                        <Layout showHeader={true}>
+                          <MultiChatPlayground />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="models"
+                      element={
+                        <Layout showHeader={true}>
+                          <Models />
+                        </Layout>
+                      }
+                    />
+                  </Route>
+                  <Route
+                    path="/rag"
+                    element={
+                      <Layout showHeader={true}>
+                        <Outlet />
+                      </Layout>
+                    }
+                  >
+                    <Route
+                      path=""
+                      element={
+                        <Layout showHeader={true}>
+                          <Dashboard />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="engines"
+                      element={
+                        <Layout showHeader={true}>
+                          <Engines />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="embeddings"
+                      element={
+                        <Layout showHeader={true}>
+                          <Embeddings />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="cross-encoders"
+                      element={
+                        <Layout showHeader={true}>
+                          <CrossEncoders />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="semantic-search"
+                      element={
+                        <Layout showHeader={true}>
+                          <SemanticSearch />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="workspaces"
+                      element={
+                        <Layout showHeader={true}>
+                          <Workspaces />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="workspaces/create"
+                      element={
+                        <Layout showHeader={true}>
+                          <CreateWorkspace />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="workspaces/:workspaceId"
+                      element={
+                        <Layout showHeader={true}>
+                          <WorkspacePane />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="workspaces/:workspaceId/rss/:feedId"
+                      element={
+                        <Layout showHeader={true}>
+                          <RssFeed />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="workspaces/add-data"
+                      element={
+                        <Layout showHeader={true}>
+                          <AddData />
+                        </Layout>
+                      }
+                    />
+                  </Route>
+                </>
+              )}
+
+            {userContext?.userRoles !== undefined &&
+              userContext?.userRoles.includes(UserRole.ADMIN) && (
+                <>
+                  <Route
+                    path="/admin"
+                    element={
+                      <Layout showHeader={true}>
+                        <Outlet />
+                      </Layout>
+                    }
+                  >
+                    <Route
+                      path="applications"
+                      element={
+                        <Layout showHeader={true}>
+                          <Applications />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="applications/manage"
+                      element={
+                        <Layout showHeader={true}>
+                          <ManageApplication />
+                        </Layout>
+                      }
+                    />
+                    <Route
+                      path="applications/manage/:applicationId"
+                      element={
+                        <Layout showHeader={true}>
+                          <ManageApplication />
+                        </Layout>
+                      }
+                    />
+                  </Route>
+                </>
+              )}
+
+            <Route
+              path="*"
+              element={
+                <Layout showHeader={true}>
+                  <NotFound />
+                </Layout>
+              }
+            />
           </Routes>
         </div>
       </Router>

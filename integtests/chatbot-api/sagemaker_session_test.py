@@ -10,7 +10,7 @@ import pytest
 def test_jumpstart_sagemaker_endpoint(client):
     model_name = "mistralai/Mistral-7B-Instruct-v0.3"
     models = client.list_models()
-    model = next(i for i in models if i.get("name") == model_name)
+    model = next((i for i in models if i.get("name") == model_name), None)
     if model is None:
         pytest.skip("Mistra v0.3 is not enabled.")
     session_id = str(uuid.uuid4())
@@ -25,7 +25,7 @@ def test_jumpstart_sagemaker_endpoint(client):
             "provider": "sagemaker",
             "sessionId": session_id,
         },
-        "modelKwargs": {"maxTokens": 150, "temparature": 0.1},
+        "modelKwargs": {"maxTokens": 150, "temperature": 0.1},
     }
 
     client.send_query(json.dumps(request))

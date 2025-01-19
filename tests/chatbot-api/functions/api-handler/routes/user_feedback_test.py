@@ -5,7 +5,7 @@ from routes.user_feedback import user_feedback
 
 input = {
     "sessionId": "sessionId",
-    "key": "key",
+    "key": 1,
     "feedback": "feedback",
     "prompt": "prompt",
     "completion": "completion",
@@ -19,6 +19,8 @@ def test_user_feedback(mocker):
         "genai_core.user_feedback.add_user_feedback",
         return_value={"feedback_id": "feedback_id"},
     )
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
+
     assert user_feedback(input) == {"feedback_id": "feedback_id"}
 
     mock.assert_called_once_with(
@@ -34,14 +36,15 @@ def test_user_feedback(mocker):
 
 def test_user_feedback_user_not_found(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value=None)
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
     with pytest.raises(CommonError):
         user_feedback(input)
 
 
 def test_user_feedback_invalid_input(mocker):
-    with pytest.raises(ValidationError, match="6 validation error"):
+    with pytest.raises(ValidationError, match="5 validation error"):
         user_feedback({})
-    with pytest.raises(ValidationError, match="6 validation error"):
+    with pytest.raises(ValidationError, match="5 validation error"):
         user_feedback(
             {
                 "sessionId": "",

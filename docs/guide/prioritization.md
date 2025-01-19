@@ -1,12 +1,12 @@
-# How We Prioritize: AWS GenAI Chatbot Solution
+# How We Prioritize: GenAI Chatbot on AWS Solution
 
 ## Introduction
 
-At AWS, we strive to deliver high-quality solutions that meet the evolving needs of our customers and the broader community. This document outlines our approach to prioritizing work for the AWS GenAI Chatbot Solution.
+At AWS, we strive to deliver high-quality solutions that meet the evolving needs of our customers and the broader community. This document outlines our approach to prioritizing work for the GenAI Chatbot on AWS Solution.
 
 ## Document Purpose
 
-The purpose of this document is to provide transparency into the factors we consider when prioritizing work related to the AWS GenAI Chatbot Solution. Our goal is to deliver tangible value to our users on a predictable and frequent schedule, while maintaining a balance between community feedback, customer requests, partner collaborations, and internal priorities.
+The purpose of this document is to provide transparency into the factors we consider when prioritizing work related to the GenAI Chatbot on AWS Solution. Our goal is to deliver tangible value to our users on a predictable and frequent schedule, while maintaining a balance between community feedback, customer requests, partner collaborations, and internal priorities.
 
 ## Prioritization Factors
 
@@ -14,7 +14,7 @@ We prioritize work based on several factors, including community feedback, custo
 
 ### Community
 
-Our vibrant community of users and contributors plays a crucial role in shaping the direction of the AWS GenAI Chatbot Solution. We closely monitor and prioritize issues and pull requests that receive significant community attention, as indicated by reactions, comments, and links to related issues or PRs. Issues with the most community support are given high priority, and we strive to provide timelines for addressing them whenever possible.
+Our vibrant community of users and contributors plays a crucial role in shaping the direction of the GenAI Chatbot on AWS Solution. We closely monitor and prioritize issues and pull requests that receive significant community attention, as indicated by reactions, comments, and links to related issues or PRs. Issues with the most community support are given high priority, and we strive to provide timelines for addressing them whenever possible.
 
 ### Customer Requests
 
@@ -30,7 +30,7 @@ Customer requests with substantial community support or those pertaining to our 
 
 In addition to external inputs, we consider several internal factors when prioritizing work:
 
-1. **SDK/Core Updates**: We strive to keep the AWS GenAI Chatbot Solution up-to-date with minor SDK releases, which are automatically pulled in through our automation processes. Major SDK releases with breaking changes may require us to release a new major version of the solution, which we aim to limit.
+1. **SDK/Core Updates**: We strive to keep the GenAI Chatbot on AWS Solution up-to-date with minor SDK releases, which are automatically pulled in through our automation processes. Major SDK releases with breaking changes may require us to release a new major version of the solution, which we aim to limit.
 
 2. **Technical Debt**: We allocate capacity for addressing technical debt in every iteration. Minor technical debt items can be addressed by engineers as needed, while larger items are discussed and prioritized during dedicated technical debt review meetings.
 
@@ -38,4 +38,4 @@ In addition to external inputs, we consider several internal factors when priori
 
 ## Conclusion
 
-At AWS, we strive to balance the diverse needs and inputs of our community, customers, partners, and internal stakeholders when prioritizing work for the AWS GenAI Chatbot Solution. By being transparent about our prioritization process, we hope to foster a better understanding of why certain features, improvements, or bug fixes are prioritized over others. We remain committed to delivering a high-quality solution that provides tangible value to our users on a predictable and frequent schedule.
+At AWS, we strive to balance the diverse needs and inputs of our community, customers, partners, and internal stakeholders when prioritizing work for the GenAI Chatbot on AWS Solution. By being transparent about our prioritization process, we hope to foster a better understanding of why certain features, improvements, or bug fixes are prioritized over others. We remain committed to delivering a high-quality solution that provides tangible value to our users on a predictable and frequent schedule.

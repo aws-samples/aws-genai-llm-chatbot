@@ -12,10 +12,12 @@ import genai_core.workspaces
 from pydantic import BaseModel, Field
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
+from genai_core.auth import UserPermissions
 
 tracer = Tracer()
 router = Router()
 logger = Logger()
+permissions = UserPermissions(router)
 
 name_regex = r"^[\w+_-]+$"
 
@@ -78,9 +80,11 @@ class CreateWorkspaceBedrockKBRequest(BaseModel):
 
 @router.resolver(field_name="listWorkspaces")
 @tracer.capture_method
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def list_workspaces():
     workspaces = genai_core.workspaces.list_workspaces()
-
     ret_value = [_convert_workspace(workspace) for workspace in workspaces]
 
     return ret_value
@@ -88,20 +92,24 @@ def list_workspaces():
 
 @router.resolver(field_name="getWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def get_workspace(workspaceId: id):
     WorkspaceIdValidation(**{"workspaceId": workspaceId})
-    workspace = genai_core.workspaces.get_workspace(workspaceId)
 
+    workspace = genai_core.workspaces.get_workspace(workspaceId)
     if not workspace:
         return None
-
     ret_value = _convert_workspace(workspace)
-
     return ret_value
 
 
 @router.resolver(field_name="deleteWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def delete_workspace(workspaceId: str):
     WorkspaceIdValidation(**{"workspaceId": workspaceId})
     genai_core.workspaces.delete_workspace(workspaceId)
@@ -109,17 +117,22 @@ def delete_workspace(workspaceId: str):
 
 @router.resolver(field_name="createAuroraWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def create_aurora_workspace(input: dict):
-    config = genai_core.parameters.get_config()
-
     request = CreateWorkspaceAuroraRequest(**input)
-    ret_value = _create_workspace_aurora(request, config)
 
+    config = genai_core.parameters.get_config()
+    ret_value = _create_workspace_aurora(request, config)
     return ret_value
 
 
 @router.resolver(field_name="createOpenSearchWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def create_open_search_workspace(input: dict):
     config = genai_core.parameters.get_config()
 
@@ -130,6 +143,9 @@ def create_open_search_workspace(input: dict):
 
 @router.resolver(field_name="createKendraWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def create_kendra_workspace(input: dict):
     config = genai_core.parameters.get_config()
 
@@ -140,6 +156,9 @@ def create_kendra_workspace(input: dict):
 
 @router.resolver(field_name="createBedrockKBWorkspace")
 @tracer.capture_method
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def create_bedrock_kb_workspace(input: dict):
     config = genai_core.parameters.get_config()
 

@@ -9,6 +9,9 @@ from aws_lambda_powertools.logging import correlation_paths
 from pydantic import BaseModel, Field, ValidationError
 
 
+from applications import get_application
+
+
 tracer = Tracer()
 logger = Logger(log_uncaught_exceptions=True)
 
@@ -33,6 +36,7 @@ class ModelKwargsFieldValidation(BaseModel):
 class FileFieldValidation(BaseModel):
     provider: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
     key: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
+    modality: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
 
 
 class DataFieldValidation(BaseModel):
@@ -46,7 +50,8 @@ class DataFieldValidation(BaseModel):
     text: Optional[str] = Field(
         min_length=1, max_length=MAX_STR_INPUT_LENGTH, default=None
     )
-    files: Optional[List[FileFieldValidation]]
+    images: Optional[List[FileFieldValidation]] = None
+    documents: Optional[List[FileFieldValidation]] = None
     modelKwargs: Optional[ModelKwargsFieldValidation] = None
 
 
@@ -66,16 +71,78 @@ def handler(event, context: LambdaContext):
         arguments=event["arguments"],
         identify=event["identity"],
     )
-    request = json.loads(event["arguments"]["data"])
-    message = {
-        "action": request["action"],
-        "modelInterface": request["modelInterface"],
-        "direction": "IN",
-        "timestamp": str(int(round(datetime.now().timestamp()))),
-        "userId": event["identity"]["sub"],
-        "data": request.get("data", {}),
-    }
+    user_roles = event.get("identity", {}).get("claims").get("cognito:groups")
 
+    request = json.loads(event["arguments"]["data"])
+    if request.get("applicationId"):
+        application_id = request.get("applicationId")
+        application_item = get_application(application_id)
+        logger.info("Application item 1", applicationItem=application_item)
+
+        app_roles = application_item.get("Roles", [])
+        app_roles.append("admin")
+        app_roles.append("workspace_namager")
+
+        if not (set(user_roles).intersection(set(app_roles))) and not (
+            "admin" in user_roles or "workspace_manager" in user_roles
+        ):
+            raise RuntimeError("User is not authorized to access this application")
+        logger.info("Application item 2", applicationItem=application_item)
+        provider = application_item.get("Model").split("::")[0]
+        modelName = application_item.get("Model").split("::")[1]
+        workspace_value = application_item.get("Workspace")
+        allow_images = application_item.get("AllowImageInput")
+        allow_videos = application_item.get("AllowVideoInput")
+        allow_documents = application_item.get("AllowDocumentInput")
+        workspaceId = workspace_value.split("::")[-1] if workspace_value else None
+
+        modelKwargs = {
+            "streaming": application_item.get("Streaming", False),
+            "maxTokens": int(application_item.get("MaxTokens", 512)),
+            "temperature": float(application_item.get("Temperature", 0.6)),
+            "topP": float(application_item.get("TopP", 0.9)),
+        }
+        system_prompts = {
+            "systemPrompt": application_item.get("SystemPrompt", ""),
+            "systemPromptRag": application_item.get("SystemPromptRag", ""),
+            "condenseSystemPrompt": application_item.get("CondenseSystemPrompt", ""),
+        }
+        message = {
+            "action": request["action"],
+            "modelInterface": request["modelInterface"],
+            "direction": "IN",
+            "timestamp": str(int(round(datetime.now().timestamp()))),
+            "userId": event["identity"]["sub"],
+            "userGroups": user_roles,
+            "systemPrompts": system_prompts,
+            "data": {
+                "mode": request["data"]["mode"] or "chain",
+                "text": request["data"]["text"],
+                "images": request["data"]["images"] if allow_images else [],
+                "videos": request["data"]["videos"] if allow_videos else [],
+                "documents": request["data"]["documents"] if allow_documents else [],
+                "modelName": modelName,
+                "provider": provider,
+                "sessionId": request["data"]["sessionId"],
+                "workspaceId": workspaceId,
+                "modelKwargs": modelKwargs,
+            },
+        }
+    else:
+        if not ("admin" in user_roles or "workspace_manager" in user_roles):
+            raise RuntimeError("User is not authorized to access this application")
+        message = {
+            "action": request["action"],
+            "modelInterface": request["modelInterface"],
+            "direction": "IN",
+            "timestamp": str(int(round(datetime.now().timestamp()))),
+            "userId": event["identity"]["sub"],
+            "userGroups": user_roles,
+            "data": request.get("data", {}),
+        }
+    InputValidation(**message)
+
+    logger.info("Sending message to SNS topic", sns_message=message)
     try:
         InputValidation(**message)
         response = sns.publish(TopicArn=TOPIC_ARN, Message=json.dumps(message))

@@ -1,6 +1,6 @@
 # Inference script
 
-We are using a multi-model enpoint hosted on Sagemaker and provide a inference script to process requests and send responses back.
+We are using an optional multi-model endpoint hosted on Sagemaker and provide an inference script to process requests and send responses back.
 
 The inference script is currently hardcoded with the supported models (lib/rag-engines/sagemaker-rag-models/model/inference.py)
 

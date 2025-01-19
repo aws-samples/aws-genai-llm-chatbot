@@ -14,6 +14,14 @@ class AppSyncClient:
             schema_string = f.read()
 
         # remove AWS specific syntax from the schema
+        schema_string = schema_string.replace(
+            '@aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])',
+            "",
+        )
+        schema_string = schema_string.replace(
+            '@aws_cognito_user_pools(cognito_groups: ["admin"])',
+            "",
+        )
         schema_string = schema_string.replace("@aws_cognito_user_pools", "")
         schema_string = schema_string.replace("@aws_iam", "")
         schema_string = schema_string.replace(
@@ -325,3 +333,122 @@ class AppSyncClient:
             )
         )
         return self.client.execute(query).get("listKendraIndexes")
+
+    def list_roles(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listRoles.select(
+                    self.schema.Role.id,
+                    self.schema.Role.name,
+                )
+            )
+        )
+        return self.client.execute(query).get("listRoles")
+
+    def list_applications(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listApplications.select(
+                    self.schema.Application.id,
+                    self.schema.Application.name,
+                    self.schema.Application.workspace,
+                    self.schema.Application.systemPrompt,
+                    self.schema.Application.systemPromptRag,
+                    self.schema.Application.condenseSystemPrompt,
+                    self.schema.Application.roles,
+                    self.schema.Application.allowImageInput,
+                    self.schema.Application.allowVideoInput,
+                    self.schema.Application.allowDocumentInput,
+                    self.schema.Application.enableGuardrails,
+                    self.schema.Application.streaming,
+                    self.schema.Application.maxTokens,
+                    self.schema.Application.temperature,
+                    self.schema.Application.topP,
+                    self.schema.Application.createTime,
+                    self.schema.Application.updateTime,
+                )
+            )
+        )
+        return self.client.execute(query).get("listApplications")
+
+    def delete_application(self, id: str):
+        query = dsl_gql(DSLMutation(self.schema.Mutation.deleteApplication.args(id=id)))
+        return self.client.execute(query).get("deleteApplication")
+
+    def create_application(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.createApplication.args(input=input).select(
+                    self.schema.Application.id,
+                    self.schema.Application.name,
+                    self.schema.Application.workspace,
+                    self.schema.Application.systemPrompt,
+                    self.schema.Application.systemPromptRag,
+                    self.schema.Application.condenseSystemPrompt,
+                    self.schema.Application.roles,
+                    self.schema.Application.allowImageInput,
+                    self.schema.Application.allowVideoInput,
+                    self.schema.Application.allowDocumentInput,
+                    self.schema.Application.enableGuardrails,
+                    self.schema.Application.streaming,
+                    self.schema.Application.maxTokens,
+                    self.schema.Application.temperature,
+                    self.schema.Application.topP,
+                    self.schema.Application.createTime,
+                    self.schema.Application.updateTime,
+                )
+            )
+        )
+        return self.client.execute(query).get("createApplication")
+
+    def update_application(self, input):
+        query = dsl_gql(
+            DSLMutation(
+                self.schema.Mutation.updateApplication.args(input=input).select(
+                    self.schema.Application.id,
+                    self.schema.Application.name,
+                    self.schema.Application.workspace,
+                    self.schema.Application.systemPrompt,
+                    self.schema.Application.systemPromptRag,
+                    self.schema.Application.condenseSystemPrompt,
+                    self.schema.Application.roles,
+                    self.schema.Application.allowImageInput,
+                    self.schema.Application.allowVideoInput,
+                    self.schema.Application.allowDocumentInput,
+                    self.schema.Application.enableGuardrails,
+                    self.schema.Application.streaming,
+                    self.schema.Application.maxTokens,
+                    self.schema.Application.temperature,
+                    self.schema.Application.topP,
+                    self.schema.Application.createTime,
+                    self.schema.Application.updateTime,
+                )
+            )
+        )
+        return self.client.execute(query).get("updateApplication")
+
+    def get_application(self, id):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.getApplication.args(id=id).select(
+                    self.schema.Application.id,
+                    self.schema.Application.name,
+                    self.schema.Application.workspace,
+                    self.schema.Application.systemPrompt,
+                    self.schema.Application.systemPromptRag,
+                    self.schema.Application.condenseSystemPrompt,
+                    self.schema.Application.roles,
+                    self.schema.Application.allowImageInput,
+                    self.schema.Application.allowVideoInput,
+                    self.schema.Application.allowDocumentInput,
+                    self.schema.Application.enableGuardrails,
+                    self.schema.Application.streaming,
+                    self.schema.Application.maxTokens,
+                    self.schema.Application.temperature,
+                    self.schema.Application.topP,
+                    self.schema.Application.createTime,
+                    self.schema.Application.updateTime,
+                )
+            )
+        )
+        return self.client.execute(query).get("getApplication")

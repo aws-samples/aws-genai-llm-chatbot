@@ -423,6 +423,26 @@ exports[`snapshot test 1`] = `
     },
   },
   "Resources": {
+    "AuthenticationAdminGroup9DE6241F": {
+      "Properties": {
+        "Description": "Administrators group",
+        "GroupName": "admin",
+        "UserPoolId": {
+          "Ref": "AuthenticationUserPool28698864",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolGroup",
+    },
+    "AuthenticationUserGroup4D88FB05": {
+      "Properties": {
+        "Description": "User group",
+        "GroupName": "user",
+        "UserPoolId": {
+          "Ref": "AuthenticationUserPool28698864",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolGroup",
+    },
     "AuthenticationUserPool28698864": {
       "DeletionPolicy": "Delete",
       "Metadata": {
@@ -560,6 +580,16 @@ exports[`snapshot test 1`] = `
         ],
       },
       "Type": "AWS::IAM::Role",
+    },
+    "AuthenticationWorkspaceManagerGroupB3DA7503": {
+      "Properties": {
+        "Description": "Workspace managers group",
+        "GroupName": "workspace_manager",
+        "UserPoolId": {
+          "Ref": "AuthenticationUserPool28698864",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolGroup",
     },
     "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691": {
       "DependsOn": [
@@ -729,6 +759,32 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "AWS::IAM::Policy",
     },
+    "ChatBotApiConstructAppDynamoDBTablesApplicationsTable2F75FAC8": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "Id",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "Id",
+            "KeyType": "HASH",
+          },
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true,
+        },
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
+    },
     "ChatBotApiConstructChatBucketsFilesBucket66FE32D5": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -763,6 +819,21 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                 "ETag",
               ],
               "MaxAge": 3000,
+            },
+          ],
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1,
+              },
+              "ExpiredObjectDeleteMarker": true,
+              "Id": "Delete mark for delete and incomplete uploads",
+              "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 30,
+              },
+              "Status": "Enabled",
             },
           ],
         },
@@ -1246,6 +1317,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
           },
         ],
         "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
+        "IntrospectionConfig": "DISABLED",
         "LogConfig": {
           "CloudWatchLogsRoleArn": {
             "Fn::GetAtt": [
@@ -1483,6 +1555,7 @@ type Model @aws_cognito_user_pools {
   inputModalities: [String!]!
   outputModalities: [String!]!
   streaming: Boolean!
+  bedrockGuardrails: Boolean
 }
 
 type PassageRank @aws_cognito_user_pools {
@@ -1518,9 +1591,37 @@ input RssFeedInput {
   contentTypes: [String!]!
 }
 
+input UpdateRssFeedInput {
+  documentId: String!
+  workspaceId: String!
+  limit: Int!
+  followLinks: Boolean!
+  contentTypes: [String!]!
+}
+
 input SemanticSearchInput {
   workspaceId: String!
   query: String!
+}
+
+input ManageApplicationInput {
+  id: String
+  name: String!
+  model: String!
+  workspace: String
+  systemPrompt: String
+  systemPromptRag: String
+  condenseSystemPrompt: String
+  roles: [String]!
+  allowImageInput: Boolean!
+  allowDocumentInput: Boolean!
+  allowVideoInput: Boolean!
+  enableGuardrails: Boolean!
+  streaming: Boolean!
+  maxTokens: Int!
+  temperature: Float!
+  topP: Float!
+  seed: Int
 }
 
 type SemanticSearchItem @aws_cognito_user_pools {
@@ -1575,9 +1676,10 @@ input UserFeedbackInput {
   sessionId: String!
   key: Int!
   feedback: String!
-  prompt: String!
+  prompt: String
   completion: String!
   model: String!
+  applicationId: String
 }
 
 input TextDocumentInput {
@@ -1633,36 +1735,69 @@ type Channel @aws_iam @aws_cognito_user_pools {
   userId: String
 }
 
+type Role @aws_cognito_user_pools {
+  id: String!
+  name: String!
+}
+
+type Application @aws_cognito_user_pools {
+  id: String!
+  name: String!
+  model: String
+  workspace: String
+  systemPrompt: String
+  systemPromptRag: String
+  condenseSystemPrompt: String
+  roles: [String]
+  allowImageInput: Boolean
+  allowDocumentInput: Boolean
+  allowVideoInput: Boolean
+  outputModalities: [String]
+  enableGuardrails: Boolean
+  streaming: Boolean
+  maxTokens: Int
+  temperature: Float
+  topP: Float
+  seed: Int
+  createTime: AWSDateTime
+  updateTime: AWSDateTime
+}
+
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   createBedrockKBWorkspace(input: CreateWorkspaceBedrockKBInput!): Workspace!
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   createOpenSearchWorkspace(input: CreateWorkspaceOpenSearchInput!): Workspace!
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
-    @aws_cognito_user_pools
-  startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools
-  deleteWorkspace(workspaceId: String!): Boolean @aws_cognito_user_pools
-  deleteDocument(input: DeleteDocumentInput!): DeleteDocumentResult @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  deleteWorkspace(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  deleteDocument(input: DeleteDocumentInput!): DeleteDocumentResult 
+  @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   addTextDocument(input: TextDocumentInput!): DocumentResult
-    @aws_cognito_user_pools
-  addUserFeedback(input: UserFeedbackInput!): UserFeedbackResult
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  addUserFeedback(input: UserFeedbackInput!): UserFeedbackResult @aws_cognito_user_pools
   addQnADocument(input: QnADocumentInput!): DocumentResult
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   setDocumentSubscriptionStatus(
     input: DocumentSubscriptionStatusInput!
-  ): DocumentResult @aws_cognito_user_pools
-  addWebsite(input: WebsiteInput!): DocumentResult @aws_cognito_user_pools
-  addRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
-  updateRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools
+  ): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  addWebsite(input: WebsiteInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  addRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  updateRssFeed(input: UpdateRssFeedInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   deleteUserSessions: [DeleteSessionResult!] @aws_cognito_user_pools
   deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
   # Real-time
   sendQuery(data: String): String @aws_cognito_user_pools
   publishResponse(sessionId: String, userId: String, data: String): Channel
     @aws_iam
+  createApplication(input: ManageApplicationInput!): Application! 
+  @aws_cognito_user_pools(cognito_groups: ["admin"])
+  updateApplication(input: ManageApplicationInput!): Application! 
+  @aws_cognito_user_pools(cognito_groups: ["admin"])
+  deleteApplication(id: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin"])
 }
 
 type Query {
@@ -1671,27 +1806,31 @@ type Query {
     @aws_cognito_user_pools
   getFileURL(fileName: String!): String
     @aws_cognito_user_pools
-  listModels: [Model!]! @aws_cognito_user_pools
-  listWorkspaces: [Workspace!]! @aws_cognito_user_pools
-  getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools
-  listRagEngines: [RagEngine!]! @aws_cognito_user_pools
+  listModels: [Model!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listWorkspaces: [Workspace!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listRagEngines: [RagEngine!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   performSemanticSearch(input: SemanticSearchInput!): SemanticSearchResult!
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listSessions: [Session!]! @aws_cognito_user_pools
-  listEmbeddingModels: [EmbeddingModel!]! @aws_cognito_user_pools
+  listEmbeddingModels: [EmbeddingModel!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   calculateEmbeddings(input: CalculateEmbeddingsInput!): [Embedding]!
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   getSession(id: String!): Session @aws_cognito_user_pools
-  listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools
-  listBedrockKnowledgeBases: [BedrockKB!]! @aws_cognito_user_pools
-  isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools
+  listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listBedrockKnowledgeBases: [BedrockKB!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listDocuments(input: ListDocumentsInput!): DocumentsResult!
-    @aws_cognito_user_pools
-  getDocument(input: GetDocumentInput!): Document @aws_cognito_user_pools
-  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult @aws_cognito_user_pools
-  listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getDocument(input: GetDocumentInput!): Document @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult 
+  @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   rankPassages(input: RankPassagesInput!): [PassageRank!]!
-    @aws_cognito_user_pools
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listRoles: [Role!]! @aws_cognito_user_pools(cognito_groups: ["admin"])
+  getApplication(id: String!): Application @aws_cognito_user_pools
+  listApplications: [Application!]! @aws_cognito_user_pools
 }
 
 type Subscription {
@@ -1842,6 +1981,25 @@ schema {
       },
       "Type": "AWS::AppSync::Resolver",
     },
+    "ChatBotApiConstructChatbotApicreateApplicationresolverE5665735": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "createApplication",
+        "Kind": "UNIT",
+        "TypeName": "Mutation",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
     "ChatBotApiConstructChatbotApicreateAuroraWorkspaceresolver8E22CC68": {
       "DependsOn": [
         "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
@@ -1913,6 +2071,25 @@ schema {
         },
         "DataSourceName": "proxyResolverFunction",
         "FieldName": "createOpenSearchWorkspace",
+        "Kind": "UNIT",
+        "TypeName": "Mutation",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "ChatBotApiConstructChatbotApideleteApplicationresolverA0FE365B": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "deleteApplication",
         "Kind": "UNIT",
         "TypeName": "Mutation",
       },
@@ -1991,6 +2168,25 @@ schema {
         "FieldName": "deleteWorkspace",
         "Kind": "UNIT",
         "TypeName": "Mutation",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "ChatBotApiConstructChatbotApigetApplicationresolver65EDD621": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "getApplication",
+        "Kind": "UNIT",
+        "TypeName": "Query",
       },
       "Type": "AWS::AppSync::Resolver",
     },
@@ -2127,6 +2323,25 @@ schema {
       },
       "Type": "AWS::AppSync::Resolver",
     },
+    "ChatBotApiConstructChatbotApilistApplicationsresolver164D7841": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "listApplications",
+        "Kind": "UNIT",
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
     "ChatBotApiConstructChatbotApilistBedrockKnowledgeBasesresolver6F8C3883": {
       "DependsOn": [
         "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
@@ -2255,6 +2470,25 @@ schema {
         },
         "DataSourceName": "proxyResolverFunction",
         "FieldName": "listRagEngines",
+        "Kind": "UNIT",
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "ChatBotApiConstructChatbotApilistRolesresolver046DCE71": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "listRoles",
         "Kind": "UNIT",
         "TypeName": "Query",
       },
@@ -2617,7 +2851,7 @@ schema {
           ],
         },
         "CodeS3Location": {
-          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/4edd9618bc0937271352df1dcc99520e7cc9bc3f1a5fa7952dc8f1858f6c768e.js",
+          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/33289b1fb5a9026b1e38688be130c35a70b5e6aa991e7e9699789aa1f3ad7a18.js",
         },
         "DataSourceName": "relaysource",
         "FieldName": "receiveMessages",
@@ -2627,6 +2861,25 @@ schema {
           "RuntimeVersion": "1.0.0",
         },
         "TypeName": "Subscription",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "ChatBotApiConstructChatbotApiupdateApplicationresolver5AA2ADB9": {
+      "DependsOn": [
+        "ChatBotApiConstructChatbotApiproxyResolverFunction22AA16EE",
+        "ChatBotApiConstructChatbotApiSchema07900657",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiConstructChatbotApi21E23C68",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "updateApplication",
+        "Kind": "UNIT",
+        "TypeName": "Mutation",
       },
       "Type": "AWS::AppSync::Resolver",
     },
@@ -2835,6 +3088,9 @@ schema {
         "Description": "Appsync resolver handling LLM Queries",
         "Environment": {
           "Variables": {
+            "APPLICATIONS_TABLE_NAME": {
+              "Ref": "ChatBotApiConstructAppDynamoDBTablesApplicationsTable2F75FAC8",
+            },
             "AWS_XRAY_SDK_ENABLED": "false",
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
@@ -2984,6 +3240,30 @@ schema {
                 "Ref": "ChatBotApiConstructRealtimeMessagesTopic85DE37B6",
               },
             },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "ChatBotApiConstructAppDynamoDBTablesApplicationsTable2F75FAC8",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -3016,6 +3296,9 @@ schema {
         "Environment": {
           "Variables": {
             "AWS_XRAY_SDK_ENABLED": "false",
+            "COGNITO_USER_POOL_ID": {
+              "Ref": "AuthenticationUserPool28698864",
+            },
             "GRAPHQL_ENDPOINT": {
               "Fn::GetAtt": [
                 "ChatBotApiConstructChatbotApi21E23C68",
@@ -3254,6 +3537,7 @@ schema {
     "ChatBotApiConstructRestApiGraphQLApiHandlerA19E8192": {
       "DependsOn": [
         "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRoleDefaultPolicyFF371064",
+        "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRoleOverflowPolicy1DDCB38DE",
         "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRole94ABDD64",
         "SharedVPCprivateSubnet1DefaultRoute608F3753",
         "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
@@ -3276,6 +3560,9 @@ schema {
             "API_KEYS_SECRETS_ARN": {
               "Ref": "SharedApiKeysSecret9EA666ED",
             },
+            "APPLICATIONS_TABLE_NAME": {
+              "Ref": "ChatBotApiConstructAppDynamoDBTablesApplicationsTable2F75FAC8",
+            },
             "AURORA_DB_HOST": {
               "Fn::GetAtt": [
                 "RagEnginesAuroraPgVectorAuroraDatabase2A003265",
@@ -3288,10 +3575,13 @@ schema {
                 "Endpoint.Port",
               ],
             },
-            "AURORA_DB_USER": "aurora_db_iam_read",
+            "AURORA_DB_USER": "aurora_db_iam_write",
             "AWS_XRAY_SDK_ENABLED": "false",
             "CHATBOT_FILES_BUCKET_NAME": {
               "Ref": "ChatBotApiConstructChatBucketsFilesBucket66FE32D5",
+            },
+            "COGNITO_USER_POOL_ID": {
+              "Ref": "AuthenticationUserPool28698864",
             },
             "CONFIG_PARAMETER_NAME": {
               "Ref": "SharedConfig358B4A20",
@@ -3659,7 +3949,7 @@ schema {
                         "DBClusterResourceId",
                       ],
                     },
-                    "/aurora_db_iam_read",
+                    "/aurora_db_iam_write",
                   ],
                 ],
               },
@@ -3827,6 +4117,16 @@ schema {
               "Resource": "*",
             },
             {
+              "Action": "cognito-idp:ListGroups",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "AuthenticationUserPool28698864",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": [
                 "secretsmanager:GetSecretValue",
                 "secretsmanager:DescribeSecret",
@@ -3951,6 +4251,34 @@ schema {
             },
             {
               "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "ChatBotApiConstructAppDynamoDBTablesApplicationsTable2F75FAC8",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -4062,6 +4390,40 @@ schema {
             },
             {
               "Action": [
+                "bedrock:ListFoundationModels",
+                "bedrock:ListCustomModels",
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModelWithResponseStream",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRoleDefaultPolicyFF371064",
+        "Roles": [
+          {
+            "Ref": "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRole94ABDD64",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRoleOverflowPolicy1DDCB38DE": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+      ],
+      "Properties": {
+        "Description": "Part of the policies for Default/ChatBotApiConstruct/RestApi/GraphQLApiHandler/ServiceRole",
+        "Path": "/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -4097,27 +4459,16 @@ schema {
                 },
               ],
             },
-            {
-              "Action": [
-                "bedrock:ListFoundationModels",
-                "bedrock:ListCustomModels",
-                "bedrock:InvokeModel",
-                "bedrock:InvokeModelWithResponseStream",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRoleDefaultPolicyFF371064",
         "Roles": [
           {
             "Ref": "ChatBotApiConstructRestApiGraphQLApiHandlerServiceRole94ABDD64",
           },
         ],
       },
-      "Type": "AWS::IAM::Policy",
+      "Type": "AWS::IAM::ManagedPolicy",
     },
     "ChatBotApiConstructVPCPublicIPs5C63CEBB": {
       "Properties": {

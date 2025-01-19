@@ -18,13 +18,11 @@ import { TextHelper } from "../../../common/helpers/text-helper";
 import { PropertyFilterI18nStrings } from "../../../common/i18n/property-filter-i18n-strings";
 import { TableEmptyState } from "../../../components/table-empty-state";
 import { TableNoMatchState } from "../../../components/table-no-match-state";
-import {
-  ModelsColumnDefinitions,
-  ModelsColumnFilteringProperties,
-} from "./column-definitions";
+import { ModelsColumnDefinitions } from "./column-definitions";
 import { CHATBOT_NAME } from "../../../common/constants";
 import { Model } from "../../../API";
 import { Utils } from "../../../common/utils";
+import { ModelsColumnFilteringProperties } from "./model-filtering-properties";
 
 export default function Models() {
   const onFollow = useOnFollow();

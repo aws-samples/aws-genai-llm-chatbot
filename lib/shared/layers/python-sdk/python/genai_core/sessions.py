@@ -10,6 +10,7 @@ SESSIONS_BY_USER_ID_INDEX_NAME = os.environ["SESSIONS_BY_USER_ID_INDEX_NAME"]
 
 dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
 table = dynamodb.Table(SESSIONS_TABLE_NAME)
+s3 = boto3.resource("s3")
 logger = Logger()
 
 
@@ -62,7 +63,28 @@ def list_sessions_by_user_id(user_id):
 
 def delete_session(session_id, user_id):
     try:
+        session = table.get_item(Key={"SessionId": session_id, "UserId": user_id}).get(
+            "Item", {}
+        )
+        for item in session.get("History"):
+            metadata = item.get("data", {}).get("additional_kwargs", {})
+            for file in (
+                metadata.get("images", [])
+                + metadata.get("documents", [])
+                + metadata.get("videos", [])
+            ):
+                if not isinstance(file, dict) or "key" not in file:
+                    continue
+                key = "private/" + user_id + "/" + file["key"]
+                logger.info(
+                    "Deleting session file",
+                    bucket=os.environ["CHATBOT_FILES_BUCKET_NAME"],
+                    key=key,
+                )
+                s3.Object(os.environ["CHATBOT_FILES_BUCKET_NAME"], key).delete()
+
         table.delete_item(Key={"SessionId": session_id, "UserId": user_id})
+        logger.info("Sessions deleted", sessionId=session_id)
     except ClientError as error:
         if error.response["Error"]["Code"] == "ResourceNotFoundException":
             logger.warning("No record found with session id: %s", session_id)
