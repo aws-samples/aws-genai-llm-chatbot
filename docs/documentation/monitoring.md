@@ -25,3 +25,5 @@ The alarms listed in `lib/monitoring/index.ts` are examples and they should be u
 ### Review AWS X-Ray sampling
 Consider updating the default [AWS X-Ray sampling rules](https://docs.aws.amazon.com/xray/latest/devguide/xray-console-sampling.html) to define the amount of data recorded
 
+### Log Level
+The project [logger](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/) sets the default log level to INFO. This setting can be changed globally by updating the LOG_LEVEL envrionment variable in `lib/shared/index.ts`.

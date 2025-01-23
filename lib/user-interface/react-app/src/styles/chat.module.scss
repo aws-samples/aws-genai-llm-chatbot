@@ -1,29 +1,17 @@
 @use "@cloudscape-design/design-tokens/index" as awsui;
 
 .chat_container {
-  margin-bottom: -40px;
-  min-height: calc(100vh - 96px);
+  min-height: calc(100vh - 155px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-@media (min-width: 466px) {
-  .chat_container {
-    min-height: calc(100vh - 104px);
-  }
-}
-
-@media (min-width: 689px) {
-  .chat_container {
-    min-height: calc(100vh - 60px);
-  }
-}
-
-@media (min-width: 913px) {
-  .chat_container {
-    min-height: calc(100vh - 68px);
-  }
+.chat_app_container {
+  min-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .welcome_text {
@@ -36,8 +24,7 @@
 .input_container {
   position: sticky;
   bottom: 0;
-  padding-bottom: awsui.$space-scaled-l;
-  padding-top: awsui.$space-scaled-xxl;
+  margin-top: 10px;
   background: linear-gradient(
     to bottom,
     transparent 0%,
@@ -54,6 +41,17 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 4px;
+}
+
+.prompt_input_wrapper {
+  position: relative;
+
+  .icon {
+    position: absolute;
+    right: 40px;
+    bottom: 5px;
+    color: blue;
+  }
 }
 
 .input_textarea {
@@ -105,8 +103,11 @@
 }
 
 .img_chabot_message {
-  max-width: 30%;
+  width: 200px;
   border-radius: 8px;
+  max-height: 200px;
+  object-fit: cover;
+  overflow: hidden;
 }
 
 .img_chabot_message_ai {
@@ -145,6 +146,14 @@
   padding: 5px;
 }
 
+.markdown {
+  font-family: awsui.$font-family-base;
+}
+
+.markdown p {
+  margin: 0px;
+}
+
 .markdownTable {
   width: 100%;
   border-collapse: collapse;
@@ -168,36 +177,6 @@
   background-color: awsui.$color-background-container-content;
 }
 
-.thumbsContainer {
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
-}
-
-.thumbsIcon {
-  cursor: pointer;
-  margin-right: 10px;
-  opacity: 0.5;
-}
-
-/* Styles for thumbs up icon. Should be compatible with dark theme */
-.thumbsUp {
-  color: #539fe5;
-}
-
-/* Styles for thumbs down icon. Should be compatible with dark theme */
-.thumbsDown {
-  color: #539fe5;
-}
-
-/* Style for clicked state */
-.clicked {
-  opacity: 0.5;
-  pointer-events: none; /* Disable pointer events for a clicked icon */
-}
-
-/* Styles for selected icon */
-.thumbsIcon.selected {
-  opacity: 1 !important;
-  pointer-events: none; /* Disable pointer events for the selected icon */
+.appChatContainer {
+  padding: 20px;
 }

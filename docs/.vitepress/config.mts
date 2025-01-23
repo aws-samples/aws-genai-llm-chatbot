@@ -2,8 +2,8 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "AWS GenAI LLM Chatbot",
-  description: "Deploying a Multi-Model and Multi-RAG Powered Chatbot Using AWS CDK on AWS",
+  title: "GenAI Chatbot on AWS",
+  description: "Building RAG use cases with GenAI Chatbot on AWS",
   base: "/aws-genai-llm-chatbot/",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
@@ -44,6 +44,7 @@ export default defineConfig({
         text: 'Guide',
         items: [
           { text: 'Deploy', link: '/guide/deploy' },
+          { text: 'Configuration', link: '/guide/config' },
           { text: 'Developer Guide', link: '/guide/developers' },
           { text: 'Development Prioritization', link: '/guide/prioritization' },
         ]
@@ -51,6 +52,8 @@ export default defineConfig({
       {
         text: 'Documentation',
         items: [
+          { text: 'Access Control', link: '/documentation/access-control' },
+          { text: 'Applications', link: '/documentation/applications' },
           { text: 'AppSync', link: '/documentation/appsync' },
           { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },
           {
@@ -67,7 +70,7 @@ export default defineConfig({
           { text: 'Precautions', link: '/documentation/precautions' },
           { text: 'Private Chatbot', link: '/documentation/private-chatbot' },
           { text: 'SageMaker Schedule', link: '/documentation/sagemaker-schedule' },
-          { text: 'Security', link: '/documentation/vulnerability-scanning' },
+          { text: 'Security', link: '/documentation/security' },
           { text: 'Self-hosted models', link: '/documentation/self-hosted-models' },
         ]
       }

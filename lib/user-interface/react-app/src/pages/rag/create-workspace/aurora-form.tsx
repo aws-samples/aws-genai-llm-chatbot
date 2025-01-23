@@ -47,6 +47,7 @@ export default function AuroraForm(props: AuroraFormProps) {
         <FormField label="Workspace Name" errorText={props.errors.name}>
           <Input
             placeholder="My Workspace"
+            data-locator="name"
             disabled={props.submitting}
             value={props.data.name}
             onChange={({ detail: { value } }) =>

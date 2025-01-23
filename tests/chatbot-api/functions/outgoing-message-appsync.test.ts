@@ -13,6 +13,14 @@ jest.mock("@aws-sdk/signature-v4", () => ({
   }),
 }));
 
+beforeAll(() => {
+  process.env.COGNITO_USER_POOL_ID = "mock-user-pool-id";
+});
+
+afterAll(() => {
+  delete process.env.COGNITO_USER_POOL_ID;
+});
+
 const validEvent: SQSEvent = {
   Records: [
     {

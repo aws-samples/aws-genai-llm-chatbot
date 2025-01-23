@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from gql.transport.exceptions import TransportQueryError
 from clients.appsync_client import AppSyncClient
@@ -151,5 +152,49 @@ def test_unauthenticated(unauthenticated_client: AppSyncClient):
                 "kind": "kendra",
                 "kendraIndexId": "kendra-id-1",
                 "useAllData": True,
+            }
+        )
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.list_roles()
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.list_applications()
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.get_application("id")
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.create_application(
+            input={
+                "id": "id",
+                "name": "name",
+                "model": "provider::model",
+                "workspace": "workspace_name::workspace_id",
+                "roles": [],
+                "allowImageInput": True,
+                "allowVideoInput": True,
+                "allowDocumentInput": True,
+                "enableGuardrails": False,
+                "streaming": False,
+                "maxTokens": 512,
+                "temperature": 0.6,
+                "topP": 0.9,
+                "createTime": datetime.now(),
+            }
+        )
+    with pytest.raises(TransportQueryError, match=match):
+        unauthenticated_client.update_application(
+            input={
+                "id": "id",
+                "name": "name",
+                "model": "provider::model",
+                "workspace": "workspace_name::workspace_id",
+                "roles": [],
+                "allowImageInput": True,
+                "allowVideoInput": True,
+                "allowDocumentInput": True,
+                "enableGuardrails": False,
+                "streaming": False,
+                "maxTokens": 512,
+                "temperature": 0.6,
+                "topP": 0.9,
+                "createTime": datetime.now(),
             }
         )

@@ -6,6 +6,7 @@ import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as xray from "aws-cdk-lib/aws-xray";
 import { Construct } from "constructs";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 import { Shared } from "../shared";
 import { Direction } from "../shared/types";
@@ -20,6 +21,7 @@ interface RealtimeGraphqlApiBackendProps {
   readonly api: appsync.GraphqlApi;
   readonly logRetention?: number;
   readonly advancedMonitoring?: boolean;
+  readonly applicationTable: dynamodb.Table;
 }
 
 export class RealtimeGraphqlApiBackend extends Construct {
@@ -116,6 +118,7 @@ export class RealtimeGraphqlApiBackend extends Construct {
       api: props.api,
       logRetention: props.logRetention,
       advancedMonitoring: props.advancedMonitoring,
+      applicationTable: props.applicationTable,
     });
 
     // Route all outgoing messages to the websocket interface queue

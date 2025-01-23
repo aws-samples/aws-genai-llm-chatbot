@@ -2,8 +2,8 @@
 layout: home
 
 hero:
-  name: "AWS GenAI Chatbot"
-  text: "Deploying a Multi-Model and Multi-RAG Powered Chatbot Using AWS CDK on AWS"
+  name: "GenAI Chatbot on AWS"
+  text: "Building RAG use cases with GenAI Chatbot on AWS"
   actions:
     - theme: brand
       text: Guide
@@ -24,4 +24,8 @@ features:
     details: The solution comes with several debugging tools to help you debug RAG scenarios.
   - title: Full-fledged User Interface
     details: The repository includes a CDK construct to deploy a full-fledged UI built with React to interact with the deployed LLMs/MLMs as chatbots. Hosted on Amazon S3 and distributed with Amazon CloudFront.
+  - title: Configure and customize chatbots for different domains
+    details: Build multiple chatbots tailored for different domains by selecting underlying ML models, assigning workspaces, and customizing settings - all through an admin interface.
+  - title: Granular access management through user roles
+    details: The solution supports restricting access to chatbots and system functionality based on user roles.   
 ---

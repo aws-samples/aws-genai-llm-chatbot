@@ -11,14 +11,12 @@ import { TableEmptyState } from "../../../components/table-empty-state";
 import { TableNoMatchState } from "../../../components/table-no-match-state";
 import { WorkspacesPageHeader } from "./workspaces-page-header";
 import { PropertyFilterI18nStrings } from "../../../common/i18n/property-filter-i18n-strings";
-import {
-  WorkspaceColumnFilteringProperties,
-  WorkspacesColumnDefinitions,
-} from "./column-definitions";
+import { WorkspacesColumnDefinitions } from "./column-definitions";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { Workspace } from "../../../API";
 import { Utils } from "../../../common/utils";
+import { WorkspaceColumnFilteringProperties } from "./workspace-filter-properties";
 
 export default function WorkspacesTable() {
   const appContext = useContext(AppContext);

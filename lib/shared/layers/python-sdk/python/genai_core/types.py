@@ -71,6 +71,8 @@ class Direction(Enum):
 
 class ChatbotMode(Enum):
     CHAIN = "chain"
+    IMAGE_GENERATION = "image_generation"
+    VIDEO_GENERATION = "video_generation"
 
 
 class ChatbotAction(Enum):
@@ -90,3 +92,7 @@ class Task(Enum):
     RETRIEVE = "retrieve"
     SEARCH_QUERY = "search_query"
     SEARCH_DOCUMENT = "search_document"
+
+
+class FileStorageProvider(Enum):
+    S3 = "s3"

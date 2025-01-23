@@ -3,10 +3,10 @@ from pages.layout import Layout
 from clients.cognito_client import Credentials
 
 
-def test_login(selenium_driver, cognito_credentials):
+def test_login(selenium_driver, cognito_admin_credentials):
     page = LoginPage(selenium_driver)
     layout = Layout(selenium_driver)
-    home_page = page.login(cognito_credentials)
+    home_page = page.login(cognito_admin_credentials)
     assert home_page.is_visible() == True
     layout.logout()
 

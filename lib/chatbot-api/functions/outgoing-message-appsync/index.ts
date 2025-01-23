@@ -26,7 +26,23 @@ const recordHandler = async (record: SQSRecord): Promise<void> => {
     const item = JSON.parse(payload);
 
     const req = JSON.parse(item.Message);
-    logger.debug("Processed message", req);
+
+    const userPoolId = process.env.COGNITO_USER_POOL_ID;
+    if (!userPoolId) {
+      throw new Error("COGNITO_USER_POOL_ID environment variable is not set");
+    }
+
+    if (req.action === "final_response") {
+      const userGroups = req.userGroups;
+      if (
+        !(
+          userGroups.includes("admin") || userGroups.includes("workspace_admin")
+        )
+      ) {
+        delete item.Message.metadata;
+      }
+    }
+
     /***
      * Payload format
      * 

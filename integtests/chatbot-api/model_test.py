@@ -10,7 +10,7 @@ def test_list_models(client: AppSyncClient, default_model):
         "provider": "bedrock",
         "interface": "langchain",
         "ragSupported": True,
-        "inputModalities": ["TEXT"],
+        "inputModalities": ["TEXT", "DOCUMENT"],
         "outputModalities": ["TEXT"],
         "streaming": True,
     }

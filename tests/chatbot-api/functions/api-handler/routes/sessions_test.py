@@ -47,6 +47,7 @@ def test_get_sessions_user_not_found(mocker):
 def test_get_session(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value="userId")
     mocker.patch("genai_core.sessions.get_session", return_value=session)
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
     expected = {
         "id": session.get("SessionId"),
         "title": "content",
@@ -55,6 +56,20 @@ def test_get_session(mocker):
             {"type": "type", "content": "content", "metadata": '"additional_kwargs"'}
         ],
     }
+    assert get_session("id") == expected
+
+
+def test_get_session_user(mocker):
+    mocker.patch("genai_core.auth.get_user_id", return_value="userId")
+    mocker.patch("genai_core.sessions.get_session", return_value=session)
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user"])
+    expected = {
+        "id": session.get("SessionId"),
+        "title": "content",
+        "startTime": session.get("StartTime") + "Z",
+        "history": [{"type": "type", "content": "content"}],
+    }
+    # no metadata in response
     assert get_session("id") == expected
 
 
@@ -74,6 +89,7 @@ def test_get_session_user_not_found(mocker):
 def test_get_session_not_found(mocker):
     mocker.patch("genai_core.auth.get_user_id", return_value="userId")
     mocker.patch("genai_core.sessions.get_session", return_value=None)
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
     assert get_session("id") == None
 
 

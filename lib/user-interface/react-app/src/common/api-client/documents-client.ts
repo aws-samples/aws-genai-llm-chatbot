@@ -9,6 +9,7 @@ import {
 import {
   addQnADocument,
   addRssFeed,
+  updateRssFeed,
   addTextDocument,
   addWebsite,
   setDocumentSubscriptionStatus,
@@ -232,7 +233,7 @@ export class DocumentsClient {
     contentTypes: string[]
   ): Promise<GraphQLResult<GraphQLQuery<UpdateRssFeedMutation>>> {
     const result = API.graphql<GraphQLQuery<UpdateRssFeedMutation>>({
-      query: addRssFeed,
+      query: updateRssFeed,
       variables: {
         input: {
           workspaceId,

@@ -1,9 +1,11 @@
 import os
+import re
+import mimetypes
 import genai_core.clients
 from aws_lambda_powertools import Logger
-from typing import Any, List
+from typing import Any, List, Optional
+import boto3
 from adapters.base import ModelAdapter
-from genai_core.registry import registry
 from langchain_core.messages import BaseMessage
 from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.human import HumanMessage
@@ -16,20 +18,7 @@ from adapters.shared.prompts.system_prompts import (
 )  # Import prompts and language
 
 logger = Logger()
-
-# Setting programmatic log level
-# logger.setLevel("DEBUG")
-
-
-def get_guardrails() -> dict:
-    if "BEDROCK_GUARDRAILS_ID" in os.environ:
-        logger.debug("Guardrails ID found in environment variables.")
-        return {
-            "guardrailIdentifier": os.environ["BEDROCK_GUARDRAILS_ID"],
-            "guardrailVersion": os.environ.get("BEDROCK_GUARDRAILS_VERSION", "DRAFT"),
-        }
-    logger.debug("No guardrails ID found.")
-    return {}
+s3 = boto3.resource("s3")
 
 
 class BedrockChatAdapter(ModelAdapter):
@@ -38,14 +27,160 @@ class BedrockChatAdapter(ModelAdapter):
         logger.info(f"Initializing BedrockChatAdapter with model_id: {model_id}")
         super().__init__(*args, **kwargs)
 
-    def get_qa_prompt(self):
-        # Fetch the QA prompt based on the current language
-        qa_system_prompt = prompts[locale]["qa_prompt"]
-        # Append the context placeholder if needed
-        qa_system_prompt_with_context = qa_system_prompt + "\n\n{context}"
+    def should_call_apply_bedrock_guardrails(self) -> bool:
+        guardrails = self.get_bedrock_guardrails()
+        # Here are listed the models that do not support guardrails with the converse api # noqa
+        # Fall back to using the ApplyGuardrail API
+        # https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference-supported-models-features.html # noqa
+        if re.match(r"^bedrock.ai21.jamba*", self.model_id) or re.match(
+            r"^bedrock\.cohere\.command-r.*", self.model_id
+        ):
+            return True and len(guardrails.keys()) > 0
+        else:
+            return False
+
+    def add_files_to_message_history(self, images=[], documents=[], videos=[]):
+        for image in images:
+            filename, file_extension = os.path.splitext(image["key"])
+            file_extension = file_extension.lower().replace(".", "")
+            if file_extension == "jpg" or file_extension == "jpeg":
+                file_extension = "jpeg"
+            elif file_extension != "png":
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
+                raise Exception("Unsupported format " + file_extension)
+
+            self.chat_history.add_temporary_message(
+                HumanMessage(
+                    content=[
+                        {
+                            "type": "image",
+                            "image": {
+                                "format": file_extension,
+                                "source": {
+                                    "bytes": self.get_file_from_s3(image)["source"][
+                                        "bytes"
+                                    ]
+                                },
+                            },
+                        }
+                    ]
+                )
+            )
+
+        i = 0
+        for document in documents:
+            i = i + 1
+            filename, file_extension = os.path.splitext(document["key"])
+            file_extension = file_extension.lower().replace(".", "")
+            supported = [
+                "pdf",
+                "csv",
+                "doc",
+                "docx",
+                "xls",
+                "xlsx",
+                "html",
+                "txt",
+                "md",
+            ]
+            if file_extension not in supported:
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_DocumentBlock.html
+                raise Exception("Unsupported format " + file_extension)
+            self.chat_history.add_temporary_message(
+                HumanMessage(
+                    content=[
+                        {
+                            "type": "document",
+                            "document": {
+                                "format": file_extension,
+                                "name": "input-document-"
+                                + str(i),  # Generic name as suggested by the doc above
+                                "source": {
+                                    "bytes": self.get_file_from_s3(document)["source"][
+                                        "bytes"
+                                    ]
+                                },
+                            },
+                        }
+                    ]
+                )
+            )
+
+        # Add videos to message history - applied to models with video input modality
+        for video in videos:
+            filename, file_extension = os.path.splitext(video["key"])
+            file_extension = file_extension.lower().replace(".", "")
+            if file_extension != "mp4":
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_VideoBlock.html
+                raise Exception("Unsupported format " + file_extension)
+            self.chat_history.add_temporary_message(
+                HumanMessage(
+                    content=[
+                        {
+                            "type": "video",
+                            "video": {
+                                "format": "mp4",
+                                "source": {
+                                    "bytes": self.get_file_from_s3(video)["source"][
+                                        "bytes"
+                                    ]
+                                },
+                            },
+                        }
+                    ]
+                )
+            )
+        return
+
+    def get_file_from_s3(
+        self,
+        file: dict,
+        use_s3_path: Optional[bool] = False,
+    ):
+        if file["key"] is None:
+            raise Exception("Invalid S3 Key " + file["key"])
+
+        key = "private/" + self.user_id + "/" + file["key"]
         logger.info(
-            f"Generating QA prompt template with: {qa_system_prompt_with_context}"
+            "Fetching file", bucket=os.environ["CHATBOT_FILES_BUCKET_NAME"], key=key
         )
+        extension = mimetypes.guess_extension(file["key"]) or file["key"].split(".")[-1]
+        mime_type = mimetypes.guess_type(file["key"])[0] or ""
+        file_type = mime_type.split("/")[0]
+        logger.info("File type", file_type=file_type)
+        logger.info("File extension", extension=extension)
+        logger.info("File mime type", mime_type=mime_type)
+        format = mime_type.split("/")[-1] or extension
+
+        response = s3.Object(os.environ["CHATBOT_FILES_BUCKET_NAME"], key)  # noqa
+        logger.info("File response", response=response)
+        media_bytes = response.get()["Body"].read()
+
+        source = {}
+        if use_s3_path:
+            source["s3Location"] = {
+                "uri": f"s3://{os.environ['CHATBOT_FILES_BUCKET_NAME']}/{key}",
+            }
+        else:
+            source["bytes"] = media_bytes
+
+        return {
+            "format": format,
+            "source": source,
+            "type": file_type,
+        }
+
+    def get_qa_prompt(self, custom_prompt=None):
+        if custom_prompt:
+            qa_system_prompt_with_context = custom_prompt + "\n\n{context}"
+        else:
+            # Fetch the QA prompt based on the current language
+            qa_system_prompt = prompts[locale]["qa_prompt"]
+            # Append the context placeholder if needed
+            qa_system_prompt_with_context = qa_system_prompt + "\n\n{context}"
+            logger.info(
+                f"Generating QA prompt template with: {qa_system_prompt_with_context}"
+            )
 
         # Create the ChatPromptTemplate
         chat_prompt_template = ChatPromptTemplate.from_messages(
@@ -61,25 +196,33 @@ class BedrockChatAdapter(ModelAdapter):
 
         return chat_prompt_template
 
-    def get_prompt(self):
-        # Fetch the conversation prompt based on the current language
-        conversation_prompt = prompts[locale]["conversation_prompt"]
+    def get_prompt(self, custom_prompt=None):
+        if custom_prompt:
+            system_prompt = custom_prompt
+        else:
+            # Fetch the conversation prompt based on the current language
+            system_prompt = prompts[locale]["conversation_prompt"]
         logger.info("Generating general conversation prompt template.")
-        chat_prompt_template = ChatPromptTemplate.from_messages(
+
+        prompt_template = ChatPromptTemplate(
             [
-                ("system", conversation_prompt),
+                ("system", system_prompt),
                 MessagesPlaceholder(variable_name="chat_history"),
                 ("human", "{input}"),
             ]
         )
         # Trace the ChatPromptTemplate by logging its content
-        logger.debug(f"ChatPromptTemplate messages: {chat_prompt_template.messages}")
-        return chat_prompt_template
+        logger.debug(f"ChatPromptTemplate messages: {prompt_template.messages}")
+        return prompt_template
 
-    def get_condense_question_prompt(self):
-        # Fetch the prompt based on the current language
-        condense_question_prompt = prompts[locale]["condense_question_prompt"]
-        logger.info("Generating condense question prompt template.")
+    def get_condense_question_prompt(self, custom_prompt=None):
+        if custom_prompt:
+            condense_question_prompt = custom_prompt
+        else:
+            # Fetch the prompt based on the current language
+            condense_question_prompt = prompts[locale]["condense_question_prompt"]
+            logger.info("Generating condense question prompt template.")
+
         chat_prompt_template = ChatPromptTemplate.from_messages(
             [
                 ("system", condense_question_prompt),
@@ -108,7 +251,7 @@ class BedrockChatAdapter(ModelAdapter):
             params["max_tokens"] = max_tokens
 
         # Fetch guardrails if any
-        guardrails = get_guardrails()
+        guardrails = self.get_bedrock_guardrails()
         if len(guardrails.keys()) > 0:
             params["guardrails"] = guardrails
 
@@ -147,10 +290,13 @@ class BedrockChatNoStreamingAdapter(BedrockChatAdapter):
 class BedrockChatNoSystemPromptAdapter(BedrockChatAdapter):
     """Some models do not support system and message history in the conversation API"""
 
-    def get_prompt(self):
-        # Fetch the conversation prompt and translated
-        # words based on the current language
-        conversation_prompt = prompts[locale]["conversation_prompt"]
+    def get_prompt(self, custom_prompt=None):
+        if custom_prompt:
+            conversation_prompt = custom_prompt
+        else:
+            # Fetch the conversation prompt and translated
+            # words based on the current language
+            conversation_prompt = prompts[locale]["conversation_prompt"]
         question_word = prompts[locale]["question_word"]
         assistant_word = prompts[locale]["assistant_word"]
         logger.info("Generating no-system-prompt template for conversation.")
@@ -174,9 +320,12 @@ class BedrockChatNoSystemPromptAdapter(BedrockChatAdapter):
 
         return prompt_template
 
-    def get_condense_question_prompt(self):
-        # Fetch the prompt and translated words based on the current language
-        condense_question_prompt = prompts[locale]["condense_question_prompt"]
+    def get_condense_question_prompt(self, custom_prompt=None):
+        if custom_prompt:
+            condense_question_prompt = custom_prompt
+        else:
+            # Fetch the prompt and translated words based on the current language
+            condense_question_prompt = prompts[locale]["condense_question_prompt"]
         logger.debug(f"condense_question_prompt: {condense_question_prompt}")
 
         follow_up_input_word = prompts[locale]["follow_up_input_word"]
@@ -207,9 +356,12 @@ class BedrockChatNoSystemPromptAdapter(BedrockChatAdapter):
 
         return prompt_template
 
-    def get_qa_prompt(self):
-        # Fetch the QA prompt and translated words based on the current language
-        qa_system_prompt = prompts[locale]["qa_prompt"]
+    def get_qa_prompt(self, custom_prompt=None):
+        if custom_prompt:
+            qa_system_prompt = custom_prompt
+        else:
+            # Fetch the QA prompt and translated words based on the current language
+            qa_system_prompt = prompts[locale]["qa_prompt"]
         question_word = prompts[locale]["question_word"]
         helpful_answer_word = prompts[locale]["helpful_answer_word"]
         logger.info("Generating no-system-prompt QA template.")
@@ -242,23 +394,6 @@ class BedrockChatNoStreamingNoSystemPromptAdapter(BedrockChatNoSystemPromptAdapt
         super().__init__(disable_streaming=True, *args, **kwargs)
 
 
-# Register the adapters
-registry.register(r"^bedrock.ai21.jamba*", BedrockChatAdapter)
-registry.register(r"^bedrock.ai21.j2*", BedrockChatNoStreamingNoSystemPromptAdapter)
-registry.register(
-    r"^bedrock\.cohere\.command-(text|light-text).*", BedrockChatNoSystemPromptAdapter
-)
-registry.register(r"^bedrock\.cohere\.command-r.*", BedrockChatAdapter)
-registry.register(r"^bedrock.anthropic.claude*", BedrockChatAdapter)
-registry.register(r"^bedrock.meta.llama*", BedrockChatAdapter)
-registry.register(r"^bedrock.mistral.mistral-large*", BedrockChatAdapter)
-registry.register(r"^bedrock.mistral.mistral-small*", BedrockChatAdapter)
-registry.register(r"^bedrock.mistral.mistral-7b-*", BedrockChatNoSystemPromptAdapter)
-registry.register(r"^bedrock.mistral.mixtral-*", BedrockChatNoSystemPromptAdapter)
-registry.register(r"^bedrock.amazon.titan-t*", BedrockChatNoSystemPromptAdapter)
-registry.register(r"^bedrock.amazon.nova*", BedrockChatAdapter)
-
-
 class PromptTemplateWithHistory(PromptTemplate):
     def format(self, **kwargs: Any) -> str:
         chat_history = kwargs["chat_history"]
@@ -268,7 +403,9 @@ class PromptTemplateWithHistory(PromptTemplate):
             # list the history
             chat_history_str = ""
             for message in chat_history:
-                if isinstance(message, BaseMessage):
+                if isinstance(message, BaseMessage) and isinstance(
+                    message.content, str
+                ):
                     prefix = ""
                     if isinstance(message, AIMessage):
                         prefix = "AI: "

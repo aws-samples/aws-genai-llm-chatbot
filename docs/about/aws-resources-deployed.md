@@ -16,6 +16,8 @@ Please note: This is list is considered a best effort approach to helping you un
 * **User Pool** [**Required**]
 * **User Pool Client** [**Required**]
     * Attach an existing Cognito Domain for Federation, adds Permission for User Pool to leverage existing Cognito Domain / Creates OIDC or SAML Identity Provider in Cognito [*Optional*]
+* **User Groups** [**Required**]
+    * Admin and workspace_manager roles allow applications (configurable chatbots) and workspace management retrospectively.
 
 ## Retrieval Augmented Generation (RAG) Engines
 This section describes the RAG engines that house and return stored data for use with Generative AI. Additionally this section includes resources deployed to support data ingestion and processing for RAG.

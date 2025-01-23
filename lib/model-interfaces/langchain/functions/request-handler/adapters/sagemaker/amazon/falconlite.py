@@ -58,7 +58,7 @@ class SMFalconLiteAdapter(ModelAdapter):
             callbacks=[self.callback_handler],
         )
 
-    def get_prompt(self):
+    def get_prompt(self, custom_prompt=None):
         template = """<|prompter|>Our current conversation: {chat_history}
 
         {input}<|endoftext|><|assistant|>"""

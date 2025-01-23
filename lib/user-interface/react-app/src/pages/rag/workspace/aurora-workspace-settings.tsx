@@ -45,6 +45,7 @@ export default function AuroraWorkspaceSettings(
             <div>
               <StatusIndicator
                 type={Labels.statusTypeMap[props.workspace.status!]}
+                data-locator="workspace-status"
               >
                 {Labels.statusMap[props.workspace.status!]}
               </StatusIndicator>

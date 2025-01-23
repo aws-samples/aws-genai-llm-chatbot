@@ -14,7 +14,6 @@ import adapters  # noqa: F401 Needed to register the adapters
 from genai_core.utils.websocket import send_to_client
 from genai_core.types import ChatbotAction
 
-
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
 logger = Logger()
@@ -28,6 +27,9 @@ sequence_number = 0
 def on_llm_new_token(
     user_id, session_id, self, token, run_id, chunk, parent_run_id, *args, **kwargs
 ):
+    if self.disable_streaming:
+        logger.debug("Streaming is disabled, ignoring token")
+        return
     if isinstance(token, list):
         # When using the newer Chat objects from Langchain.
         # Token is not a string
@@ -80,6 +82,7 @@ def handle_heartbeat(record):
 
 def handle_run(record):
     user_id = record["userId"]
+    user_groups = record["userGroups"]
     data = record["data"]
     provider = data["provider"]
     model_id = data["modelName"]
@@ -87,7 +90,10 @@ def handle_run(record):
     prompt = data["text"]
     workspace_id = data.get("workspaceId", None)
     session_id = data.get("sessionId")
-
+    images = data.get("images", [])
+    documents = data.get("documents", [])
+    videos = data.get("videos", [])
+    system_prompts = record.get("systemPrompts", {})
     if not session_id:
         session_id = str(uuid.uuid4())
 
@@ -108,6 +114,11 @@ def handle_run(record):
     response = model.run(
         prompt=prompt,
         workspace_id=workspace_id,
+        user_groups=user_groups,
+        images=images,
+        documents=documents,
+        videos=videos,
+        system_prompts=system_prompts,
     )
 
     logger.debug(response)
@@ -118,6 +129,7 @@ def handle_run(record):
             "action": ChatbotAction.FINAL_RESPONSE.value,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "userId": user_id,
+            "userGroups": user_groups,
             "data": response,
         }
     )
@@ -129,6 +141,7 @@ def record_handler(record: SQSRecord):
     message: dict = json.loads(payload)
     detail: dict = json.loads(message["Message"])
     logger.debug(detail)
+    logger.info("details", detail=detail)
 
     if detail["action"] == ChatbotAction.RUN.value:
         handle_run(detail)
@@ -148,14 +161,31 @@ def handle_failed_records(records):
 
         message = "⚠️ *Something went wrong*"
         if (
+            "An error occurred (ValidationException)" in error
+            and "The provided image must have dimensions in set [1280x720]" in error
+        ):
+            # At this time only one input size is supported by the Nova reel model.
+            message = "⚠️ *The provided image must have dimensions of 1280x720.*"
+        elif (
+            "An error occurred (ValidationException)" in error
+            and "The width of the provided image must be within range [320, 4096]"
+            in error
+        ):
+            # At this time only this size is supported by the Nova canvas model.
+            message = "⚠️ *The width of the provided image must be within range 320 and 4096 pixels.*"  # noqa
+        elif (
             "An error occurred (AccessDeniedException)" in error
             and "You don't have access to the model with the specified model ID"
             in error
         ):
             message = (
-                "⚠️ *This model is not enabled. Please try again later or contact "
+                "*This model is not enabled. "
+                "Please try again later or contact "
                 "an administrator*"
             )
+        else:
+            logger.error("Unable to process request", error=error)
+
         send_to_client(
             {
                 "type": "text",
