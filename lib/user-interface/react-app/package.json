@@ -54,7 +54,7 @@
     "postcss": "^8.4.27",
     "sass": "^1.65.1",
     "typescript": "^5.0.2",
-    "vite": "^4.5.3",
+    "vite": "^4.5.9",
     "zen-observable": "^0.10.0"
   },
   "overrides": {
