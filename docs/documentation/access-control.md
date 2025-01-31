@@ -8,7 +8,7 @@ You need to assign the admin role to a user to be able to use the project after 
 Users can have one or more roles defining their permissions. It can be used to restrict access to the functionalities as defined below.
 
 
-Rubicon has 3 pre-defined roles. They are created during deployment by CDK code. 
+The GenAI Chatbot on AWS has 3 pre-defined roles. They are created during deployment by CDK code. 
 1. admin - _full access_
 2. workspace_manager - _full access except the admin pages such as managing applications_
 3. user - _access to assigned applications_

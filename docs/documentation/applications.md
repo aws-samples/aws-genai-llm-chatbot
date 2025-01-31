@@ -10,7 +10,7 @@ Roles determine which applications a user can access - for example, a "customer 
 
 
 ## Iframe integration
-1. Deploy Rubicon.
+1. Deploy the GenAI Chatbot on AWS.
 2. Copy `GenAIChatBotStack.UserInterfaceUserInterfaceDomainName` value from the deployment output. It has `dxxxxxxxxxxxxx.cloudfront.net` format.
 3. Open UI dxxxxxxxxxxxxx.cloudfront.net.
 4. Create an application and open it (the URL will be used in the next step).

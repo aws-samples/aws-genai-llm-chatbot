@@ -26,3 +26,13 @@ chatbot.example.org
 ### After Private Deployment: 
 1. In Route 53 [link the created VPC to the Private Hosted Zone (PHZ)](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zone-private-associate-vpcs.html)
 2. In the PHZ, [add an "A Record"](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-to-elb-load-balancer.html) with your chosen subdomain (i.e. chatbot.example.org) that points to the website Application Load Balancer Alias.
+
+### Limitations
+Deploying a fully private chatbot requires extending the existing solution. Since the current setup uses **Cognito and AppSync**, both of which are publicly accessible, additional configuration is needed:  
+
+- Authentication must be extended to integrate with your **private IdP**.  
+- AppSync access must be configured using **AWS PrivateLink** for private connectivity.  
+
+For more details, refer to these resources:  
+- [AppSync Lambda Authorization](https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/)  
+- [Using Private APIs with AppSync](https://docs.aws.amazon.com/appsync/latest/devguide/using-private-apis.html)  
