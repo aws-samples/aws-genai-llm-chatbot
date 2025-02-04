@@ -16,6 +16,10 @@ def list_models():
     if bedrock_models:
         models.extend(bedrock_models)
 
+    bedrock_cris_models = list_bedrock_cris_models()
+    if bedrock_cris_models:
+        models.extend(bedrock_cris_models)
+
     fine_tuned_models = list_bedrock_finetuned_models()
     if fine_tuned_models:
         models.extend(fine_tuned_models)
@@ -80,6 +84,73 @@ def list_azure_openai_models():
     ]
 
 
+# Based on the table (Need to support both document and sytem prompt)
+# https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference-supported-models-features.html
+def does_model_support_documents(model_name):
+    return (
+        not re.match(r"^ai21.jamba*", model_name)
+        and not re.match(r"^ai21.j2*", model_name)
+        and not re.match(r"^amazon.titan-t*", model_name)
+        and not re.match(r"^cohere.command-light*", model_name)
+        and not re.match(r"^cohere.command-text*", model_name)
+        and not re.match(r"^mistral.mistral-7b-instruct-*", model_name)
+        and not re.match(r"^mistral.mistral-small*", model_name)
+        and not re.match(r"^amazon.nova-reel*", model_name)
+        and not re.match(r"^amazon.nova-canvas*", model_name)
+        and not re.match(r"^amazon.nova-micro*", model_name)
+    )
+
+
+def create_bedrock_model_profile(bedrock_model: dict, model_name: str) -> dict:
+    model = {
+        "provider": Provider.BEDROCK.value,
+        "name": model_name,
+        "streaming": bedrock_model.get("responseStreamingSupported", False),
+        "inputModalities": bedrock_model["inputModalities"],
+        "outputModalities": bedrock_model["outputModalities"],
+        "interface": ModelInterface.LANGCHAIN.value,
+        "ragSupported": True,
+        "bedrockGuardrails": True,
+    }
+
+    if does_model_support_documents(model["name"]):
+        model["inputModalities"].append("DOCUMENT")
+    return model
+
+
+def list_cross_region_inference_profiles():
+    bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock")
+    response = bedrock.list_inference_profiles()
+
+    return {
+        inference_profile["models"][0]["modelArn"].split("/")[1]: inference_profile[
+            "inferenceProfileId"
+        ]
+        for inference_profile in response.get("inferenceProfileSummaries", [])
+        if (
+            inference_profile.get("status") == "ACTIVE"
+            and inference_profile.get("type") == "SYSTEM_DEFINED"
+        )
+    }
+
+
+def list_bedrock_cris_models():
+    try:
+        cross_region_profiles = list_cross_region_inference_profiles()
+        bedrock_client = genai_core.clients.get_bedrock_client(service_name="bedrock")
+        all_models = bedrock_client.list_foundation_models()["modelSummaries"]
+
+        return [
+            create_bedrock_model_profile(model, cross_region_profiles[model["modelId"]])
+            for model in all_models
+            if genai_core.types.InferenceType.INFERENCE_PROFILE.value
+            in model["inferenceTypesSupported"]
+        ]
+    except Exception as e:
+        logger.error(f"Error listing cross region inference profiles models: {e}")
+        return None
+
+
 def list_bedrock_models():
     try:
         bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock")
@@ -108,33 +179,9 @@ def list_bedrock_models():
                 )
             ):
                 continue
-            model = {
-                "provider": Provider.BEDROCK.value,
-                "name": bedrock_model["modelId"],
-                "streaming": bedrock_model.get("responseStreamingSupported", False),
-                "inputModalities": bedrock_model["inputModalities"],
-                "outputModalities": bedrock_model["outputModalities"],
-                "interface": ModelInterface.LANGCHAIN.value,
-                "ragSupported": True,
-                "bedrockGuardrails": True,
-            }
-            # Based on the table (Need to support both document and sytem prompt)
-            # https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference-supported-models-features.html
-            if (
-                not re.match(r"^ai21.jamba*", model["name"])
-                and not re.match(r"^ai21.j2*", model["name"])
-                and not re.match(r"^amazon.titan-t*", model["name"])
-                and not re.match(r"^cohere.command-light*", model["name"])
-                and not re.match(r"^cohere.command-text*", model["name"])
-                and not re.match(r"^mistral.mistral-7b-instruct-*", model["name"])
-                and not re.match(r"^mistral.mistral-small*", model["name"])
-                and not re.match(r"^amazon.nova-reel*", model["name"])
-                and not re.match(r"^amazon.nova-canvas*", model["name"])
-                and not re.match(r"^amazon.nova-micro*", model["name"])
-            ):
-                model["inputModalities"].append("DOCUMENT")
-
-            models.append(model)
+            models.append(
+                create_bedrock_model_profile(bedrock_model, bedrock_model["modelId"])
+            )
 
         return models
     except Exception as e:

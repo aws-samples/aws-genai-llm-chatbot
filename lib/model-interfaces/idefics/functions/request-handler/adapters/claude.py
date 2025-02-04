@@ -14,3 +14,4 @@ class Claude3(MultiModalModelBase):
 
 
 registry.register(r"^bedrock.anthropic.claude-3.*", Claude3)
+registry.register(r"^bedrock.*.anthropic.claude-3.*", Claude3)

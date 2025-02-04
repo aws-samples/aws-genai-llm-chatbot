@@ -52,6 +52,7 @@ class Modality(Enum):
 class InferenceType(Enum):
     ON_DEMAND = "ON_DEMAND"
     PROVISIONED = "PROVISIONED"
+    INFERENCE_PROFILE = "INFERENCE_PROFILE"
 
 
 class ModelStatus(Enum):

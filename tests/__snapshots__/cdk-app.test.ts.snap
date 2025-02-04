@@ -4428,6 +4428,7 @@ schema {
               "Action": [
                 "bedrock:ListFoundationModels",
                 "bedrock:ListCustomModels",
+                "bedrock:ListInferenceProfiles",
                 "bedrock:InvokeModel",
                 "bedrock:InvokeModelWithResponseStream",
               ],

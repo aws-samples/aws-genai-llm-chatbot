@@ -331,6 +331,7 @@ export class ApiResolvers extends Construct {
             actions: [
               "bedrock:ListFoundationModels",
               "bedrock:ListCustomModels",
+              "bedrock:ListInferenceProfiles",
               "bedrock:InvokeModel",
               "bedrock:InvokeModelWithResponseStream",
             ],
