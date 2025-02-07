@@ -51,6 +51,7 @@ def on_llm_new_token(user_id, session_id, self, *args, **kwargs):
 def handle_run(record):
     logger.info("Incoming request", record=record)
     user_id = record["userId"]
+    user_groups = record["userGroups"]
     data = record["data"]
     provider = data["provider"]
     model_id = data["modelName"]
@@ -58,7 +59,7 @@ def handle_run(record):
     model_kwargs = data.get("modelKwargs", {})
     prompt = data["text"]
     session_id = data.get("sessionId")
-    files = data.get("files", [])
+    files = data.get("images", [])
 
     if not files:
         files = []
@@ -138,6 +139,7 @@ def handle_run(record):
             "action": ChatbotAction.FINAL_RESPONSE.value,
             "timestamp": str(int(round(datetime.now().timestamp()))),
             "userId": user_id,
+            "userGroups": user_groups,
             "data": response,
         }
     )
@@ -221,3 +223,9 @@ def handler(event, context: LambdaContext):
     )
 
     return processor.response()
+
+
+def is_admin_role(user_groups):
+    if user_groups and ("admin" in user_groups or "workspace_manager" in user_groups):
+        return True
+    return False

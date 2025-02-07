@@ -34,6 +34,7 @@ def test_semantic_search(mocker):
     mock = mocker.patch(
         "genai_core.semantic_search.semantic_search", return_value=search_response
     )
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
     input = {"query": "query", "workspaceId": "id"}
     response = semantic_search(input)
     mock.assert_called_once_with(
@@ -57,9 +58,16 @@ def test_semantic_search(mocker):
 
 
 def test_semantic_search_invalid_input(mocker):
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
     with pytest.raises(ValidationError, match="2 validation error"):
         semantic_search({})
     with pytest.raises(ValidationError, match="2 validation error"):
         semantic_search({"query": "<", "workspaceId": "<"})
     with pytest.raises(ValidationError, match="2 validation error"):
         semantic_search({"query": "<", "workspaceId": "<"})
+
+
+def test_semantic_search_unauthorized(mocker):
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user"])
+    response = semantic_search({})
+    assert response.get("error") == "Unauthorized"

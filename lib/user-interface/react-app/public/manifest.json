@@ -1,7 +1,7 @@
 {
   "id": "/",
   "start_url": "/",
-  "name": "AWS GenAI Chatbot",
+  "name": "GenAI Chatbot on AWS",
   "short_name": "GenAI Chatbot",
   "description": "AWS Multi LLM ChatBot Sample",
   "theme_color": "#000000",

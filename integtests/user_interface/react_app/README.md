@@ -10,5 +10,5 @@ REACT_APP_URL=https://dxxxxxxxxxxxxx.cloudfront.net pytest integtests/user_inter
 ```
 or for local development
 ```
-REACT_APP_URL=http://localhost:4444  pytest integtests/user_interface/
+REACT_APP_URL=http://localhost:3000  pytest integtests/user_interface/
 ```

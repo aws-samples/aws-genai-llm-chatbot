@@ -43,6 +43,16 @@ export class ChatBotS3Buckets extends Construct {
         : s3.BucketEncryption.S3_MANAGED,
       encryptionKey: props.kmsKey,
       versioned: true,
+      // Delete user files that have been mark for delete after
+      lifecycleRules: [
+        {
+          id: "Delete mark for delete and incomplete uploads",
+          enabled: true,
+          abortIncompleteMultipartUploadAfter: cdk.Duration.days(1),
+          noncurrentVersionExpiration: cdk.Duration.days(30),
+          expiredObjectDeleteMarker: true,
+        },
+      ],
       cors: [
         {
           allowedHeaders: ["*"],

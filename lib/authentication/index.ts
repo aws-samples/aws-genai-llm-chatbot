@@ -33,6 +33,24 @@ export class Authentication extends Construct {
       },
     });
 
+    new cognito.CfnUserPoolGroup(this, "AdminGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "admin",
+      description: "Administrators group",
+    });
+
+    new cognito.CfnUserPoolGroup(this, "WorkspaceManagerGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "workspace_manager",
+      description: "Workspace managers group",
+    });
+
+    new cognito.CfnUserPoolGroup(this, "UserGroup", {
+      userPoolId: userPool.userPoolId,
+      groupName: "user",
+      description: "User group",
+    });
+
     const userPoolClient = userPool.addClient("UserPoolClient", {
       generateSecret: false,
       authFlows: {
@@ -119,7 +137,19 @@ export class Authentication extends Construct {
               config.cognitoFederation?.customOIDC?.OIDCIssuerURL || "",
             userPool: userPool,
             name: config.cognitoFederation?.customProviderName,
-            scopes: ["openid", "email"],
+            scopes: ["openid", "email", "profile"],
+            attributeRequestMethod: cognito.OidcAttributeRequestMethod.GET,
+            attributeMapping: {
+              custom: {
+                "custom:chatbot_role": cognito.ProviderAttribute.other(
+                  "custom:chatbot_role"
+                ),
+                email_verified:
+                  cognito.ProviderAttribute.other("email_verified"),
+                profile: cognito.ProviderAttribute.other("profile"),
+              },
+              email: cognito.ProviderAttribute.other("email"),
+            },
           }
         );
         this.customOidcProvider = customProvider;
@@ -219,12 +249,87 @@ export class Authentication extends Construct {
             ),
             userPool: userPool,
             name: config.cognitoFederation?.customProviderName,
+            attributeMapping: {
+              custom: {
+                "custom:chatbot_role": cognito.ProviderAttribute.other(
+                  "custom:chatbot_role"
+                ),
+                email_verified:
+                  cognito.ProviderAttribute.other("email_verified"),
+                profile: cognito.ProviderAttribute.other("profile"),
+              },
+              email: cognito.ProviderAttribute.other("email"),
+            },
           }
         );
         this.customSamlProvider = customProvider;
       }
 
       this.updateUserPoolClient = updateUserPoolClientLambda;
+    }
+
+    if (config.cognitoFederation?.enabled) {
+      const lambdaRoleAddUserToGroup = new iam.Role(
+        this,
+        "lambdaRoleAddUserToGroup",
+        {
+          assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+        }
+      );
+
+      lambdaRoleAddUserToGroup.addToPolicy(
+        new iam.PolicyStatement({
+          actions: [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+          ],
+          resources: ["*"],
+        })
+      );
+      const addFederatedUserToUserGroupLambda = new lambda.Function(
+        this,
+        "addFederatedUserToUserGroup",
+        {
+          runtime: lambda.Runtime.PYTHON_3_12,
+          handler: "index.handler",
+          code: lambda.Code.fromAsset(
+            "lib/authentication/lambda/addFederatedUserToUserGroup"
+          ),
+          description:
+            "Add federated user to Cognito user group defined in custom:chatbot_role attribute.",
+          role: lambdaRoleAddUserToGroup,
+          logRetention: config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+          loggingFormat: lambda.LoggingFormat.JSON,
+        }
+      );
+
+      addFederatedUserToUserGroupLambda.addPermission(
+        "CognitoPostAuthTrigger",
+        {
+          principal: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
+          sourceArn: userPool.userPoolArn,
+        }
+      );
+      userPool.addTrigger(
+        cognito.UserPoolOperation.POST_AUTHENTICATION,
+        addFederatedUserToUserGroupLambda
+      );
+
+      lambdaRoleAddUserToGroup.attachInlinePolicy(
+        new iam.Policy(this, "AddUserToGroupPolicy", {
+          statements: [
+            new iam.PolicyStatement({
+              actions: [
+                "cognito-idp:AdminAddUserToGroup",
+                "cognito-idp:AdminListGroupsForUser",
+                "cognito-idp:AdminRemoveUserFromGroup",
+              ],
+              resources: [userPool.userPoolArn],
+            }),
+          ],
+        })
+      );
     }
 
     this.userPool = userPool;
@@ -264,6 +369,20 @@ export class Authentication extends Construct {
           `/${
             cdk.Stack.of(this).stackName
           }/Authentication/lambdaRoleUpdateClient/DefaultPolicy/Resource`,
+        ],
+        [
+          {
+            id: "AwsSolutions-IAM5",
+            reason: "IAM role implicitly created by CDK.",
+          },
+        ]
+      );
+      NagSuppressions.addResourceSuppressionsByPath(
+        cdk.Stack.of(this),
+        [
+          `/${
+            cdk.Stack.of(this).stackName
+          }/Authentication/lambdaRoleAddUserToGroup/DefaultPolicy/Resource`,
         ],
         [
           {

@@ -17,6 +17,7 @@ import { UserPool } from "aws-cdk-lib/aws-cognito";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as path from "path";
 import { IKey } from "aws-cdk-lib/aws-kms";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 interface RealtimeResolversProps {
   readonly queue: IQueue;
@@ -27,6 +28,7 @@ interface RealtimeResolversProps {
   readonly api: appsync.GraphqlApi;
   readonly logRetention?: number;
   readonly advancedMonitoring?: boolean;
+  readonly applicationTable: dynamodb.Table;
 }
 
 export class RealtimeResolvers extends Construct {
@@ -55,6 +57,7 @@ export class RealtimeResolvers extends Construct {
       environment: {
         ...props.shared.defaultEnvironmentVariables,
         SNS_TOPIC_ARN: props.topic.topicArn,
+        APPLICATIONS_TABLE_NAME: props.applicationTable.tableName,
       },
       logRetention: props.logRetention,
       loggingFormat: LoggingFormat.JSON,
@@ -83,6 +86,7 @@ export class RealtimeResolvers extends Construct {
         environment: {
           ...props.shared.defaultEnvironmentVariables,
           GRAPHQL_ENDPOINT: props.api.graphqlUrl,
+          COGNITO_USER_POOL_ID: props.userPool.userPoolId,
         },
         vpc: props.shared.vpc,
       }
@@ -98,6 +102,8 @@ export class RealtimeResolvers extends Construct {
         "kms:Decrypt"
       );
     }
+
+    props.applicationTable.grantReadData(resolverFunction);
 
     const functionDataSource = props.api.addLambdaDataSource(
       "realtimeResolverFunction",

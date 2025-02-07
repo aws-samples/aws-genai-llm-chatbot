@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as logs from "aws-cdk-lib/aws-logs";
@@ -21,6 +22,8 @@ interface LangChainInterfaceProps {
   readonly messagesTopic: sns.Topic;
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
+  readonly applicationTable: dynamodb.Table;
+  readonly chatbotFilesBucket: s3.Bucket;
 }
 
 export class LangChainInterface extends Construct {
@@ -49,9 +52,11 @@ export class LangChainInterface extends Construct {
       layers: [props.shared.powerToolsLayer, props.shared.commonLayer],
       environment: {
         ...props.shared.defaultEnvironmentVariables,
+        CHATBOT_FILES_BUCKET_NAME: props.chatbotFilesBucket.bucketName,
         CONFIG_PARAMETER_NAME: props.shared.configParameter.parameterName,
         SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
         SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
+        APPLICATIONS_TABLE_NAME: props.applicationTable.tableName,
         API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
         MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
         WORKSPACES_TABLE_NAME:
@@ -83,11 +88,14 @@ export class LangChainInterface extends Construct {
       },
     });
 
+    props.chatbotFilesBucket.grantReadWrite(requestHandler);
+
     if (props.config.bedrock?.enabled) {
       requestHandler.addToRolePolicy(
         new iam.PolicyStatement({
           actions: [
             "bedrock:InvokeModel",
+            "bedrock:ApplyGuardrail",
             "bedrock:InvokeModelWithResponseStream",
           ],
           resources: ["*"],
@@ -219,6 +227,7 @@ export class LangChainInterface extends Construct {
     }
 
     props.sessionsTable.grantReadWriteData(requestHandler);
+    props.applicationTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);
     if (props.shared.kmsKey && requestHandler.role) {
       props.shared.kmsKey.grantEncrypt(requestHandler.role);

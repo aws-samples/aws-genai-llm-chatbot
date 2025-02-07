@@ -61,6 +61,11 @@ export enum DocumentSubscriptionStatus {
   DEFAULT = UNKNOWN,
 }
 
+export enum UserRole {
+  ADMIN = "admin",
+  WORKSPACE_MANAGER = "workspace_manager",
+}
+
 export interface AuroraWorkspaceCreateInput {
   name: string;
   embeddingsModel: SelectProps.Option | null;
@@ -93,4 +98,25 @@ export interface BedrockKBWorkspaceCreateInput {
   name: string;
   knowledgeBaseId: SelectProps.Option | null;
   hybridSearch: boolean;
+}
+
+export interface ApplicationManageInput {
+  id?: string;
+  name: string;
+  systemPrompt: string;
+  systemPromptRag: string;
+  condenseSystemPrompt: string;
+  selectedRoles: readonly SelectProps.Option[];
+  selectedModel: SelectProps.Option | null;
+  selectedWorkspace: SelectProps.Option | null;
+  allowImageInput: boolean;
+  allowDocumentInput: boolean;
+  allowVideoInput: boolean;
+  enableGuardrails: boolean;
+  createTime?: string;
+  streaming: boolean;
+  maxTokens: number;
+  temperature: number;
+  topP: number;
+  seed: number;
 }

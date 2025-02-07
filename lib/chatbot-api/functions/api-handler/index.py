@@ -19,6 +19,9 @@ from routes.documents import router as documents_router
 from routes.kendra import router as kendra_router
 from routes.user_feedback import router as user_feedback_router
 from routes.bedrock_kb import router as bedrock_kb_router
+from routes.roles import router as roles_router
+from routes.applications import router as applicatiion_router
+
 
 tracer = Tracer()
 logger = Logger(serialize_stacktrace=True)
@@ -37,6 +40,8 @@ app.include_router(documents_router)
 app.include_router(kendra_router)
 app.include_router(user_feedback_router)
 app.include_router(bedrock_kb_router)
+app.include_router(roles_router)
+app.include_router(applicatiion_router)
 
 
 @logger.inject_lambda_context(

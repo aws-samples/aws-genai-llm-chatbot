@@ -11,6 +11,8 @@ import { DocumentsClient } from "./documents-client";
 import { KendraClient } from "./kendra-client";
 import { UserFeedbackClient } from "./user-feedback-client";
 import { BedrockKBClient } from "./kb-client";
+import { RolesClient } from "./roles-client";
+import { ApplicationsClient } from "./applications-client";
 
 export class ApiClient {
   private _healthClient?: HealthClient;
@@ -25,6 +27,8 @@ export class ApiClient {
   private _kendraClient?: KendraClient;
   private _userFeedbackClient?: UserFeedbackClient;
   private _bedrockKBClient?: BedrockKBClient;
+  private _rolesClient?: RolesClient;
+  private _applicationsClient?: ApplicationsClient;
 
   public get health() {
     if (!this._healthClient) {
@@ -120,6 +124,22 @@ export class ApiClient {
     }
 
     return this._userFeedbackClient;
+  }
+
+  public get roles() {
+    if (!this._rolesClient) {
+      this._rolesClient = new RolesClient();
+    }
+
+    return this._rolesClient;
+  }
+
+  public get applications() {
+    if (!this._applicationsClient) {
+      this._applicationsClient = new ApplicationsClient();
+    }
+
+    return this._applicationsClient;
   }
 
   constructor(protected _appConfig: AppConfig) {}

@@ -271,7 +271,7 @@ def create_document(
     timestamp = _get_timestamp()
     workspace = genai_core.workspaces.get_workspace(workspace_id)
     if not workspace:
-        return None
+        raise genai_core.types.CommonError("Workspace not found")
 
     document = None
     unique_path_document = document_type in ["file", "website", "rssfeed"]
@@ -395,6 +395,14 @@ def create_document(
 
 def update_document(workspace_id: str, document_id: str, document_type: str, **kwargs):
     timestamp = _get_timestamp()
+    workspace = genai_core.workspaces.get_workspace(workspace_id)
+    if not workspace:
+        raise genai_core.types.CommonError("Workspace not found")
+
+    rss_document = get_document(workspace_id, document_id)
+    if not rss_document:
+        raise genai_core.types.CommonError("Document not found")
+
     if document_type == "rssfeed":
         if "limit" in kwargs and "follow_links" in kwargs:
             follow_links = kwargs["follow_links"]

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from common.constant import SAFE_FILE_NAME_REGEX
+from common.constant import SAFE_FILE_NAME_REGEX, UserRole
 from common.validation import WorkspaceIdValidation
 import genai_core.presign
 import genai_core.sessions
@@ -61,9 +61,35 @@ def get_session(id: str):
     if user_id is None:
         raise genai_core.types.CommonError("User not found")
 
+    user_roles = genai_core.auth.get_user_roles(router)
+    if user_roles is None:
+        raise genai_core.types.CommonError("User does not have any roles")
+
+    showMetadata = False
+    if (
+        UserRole.ADMIN.value in user_roles
+        or UserRole.WORKSPACE_MANAGER.value in user_roles
+    ):
+        showMetadata = True
+
     session = genai_core.sessions.get_session(id, user_id)
     if not session:
         return None
+
+    history = [
+        {
+            "type": item.get("type"),
+            "content": item.get("data", {}).get("content"),
+        }
+        for item in session.get("History")
+    ]
+
+    if showMetadata:
+        for item, original_item in zip(history, session.get("History")):
+            item["metadata"] = json.dumps(
+                original_item.get("data", {}).get("additional_kwargs"),
+                cls=genai_core.utils.json.CustomEncoder,
+            )
 
     return {
         "id": session.get("SessionId"),
@@ -71,17 +97,7 @@ def get_session(id: str):
         .get("data", {})
         .get("content", "<no title>"),
         "startTime": f'{session.get("StartTime")}Z',
-        "history": [
-            {
-                "type": item.get("type"),
-                "content": item.get("data", {}).get("content"),
-                "metadata": json.dumps(
-                    item.get("data", {}).get("additional_kwargs"),
-                    cls=genai_core.utils.json.CustomEncoder,
-                ),
-            }
-            for item in session.get("History")
-        ],
+        "history": history,
     }
 
 

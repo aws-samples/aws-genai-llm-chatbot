@@ -31,7 +31,7 @@ class CognitoClient:
             "cognito-identity", region_name=region
         )
 
-    def get_credentials(self, email: str) -> Credentials:
+    def get_credentials(self, email: str, role: str) -> Credentials:
         try:
             self.cognito_idp_client.admin_get_user(
                 UserPoolId=self.user_pool_id,
@@ -47,6 +47,10 @@ class CognitoClient:
                     {"Name": "email_verified", "Value": "True"},
                 ],
                 MessageAction="SUPPRESS",
+            )
+
+            response = self.cognito_idp_client.admin_add_user_to_group(
+                UserPoolId=self.user_pool_id, Username=email, GroupName=role
             )
 
         password = self.get_password()

@@ -1,4 +1,4 @@
-# Deploying a Multi-Model and Multi-RAG Powered Chatbot Using AWS CDK on AWS
+# Building RAG use cases with GenAI Chatbot on AWS
 
 [![Release Notes](https://img.shields.io/github/v/release/aws-samples/aws-genai-llm-chatbot)](https://github.com/aws-samples/aws-genai-llm-chatbot/releases)
 [![GitHub star chart](https://img.shields.io/github/stars/aws-samples/aws-genai-llm-chatbot?style=social)](https://star-history.com/#aws-samples/aws-genai-llm-chatbot)
@@ -8,7 +8,7 @@
 
 [![Full Documentation](https://img.shields.io/badge/Full%20Documentation-blue?style=for-the-badge&logo=Vite&logoColor=white)](https://aws-samples.github.io/aws-genai-llm-chatbot/)
 
-![sample](docs/about/assets/chabot-sample.gif "AWS GenAI Chatbot")
+![sample](docs/about/assets/chabot-sample.gif "GenAI Chatbot on AWS")
 
 
 ## 🚀 NEW! Support for new Amazon Nova Models 🚀
@@ -35,7 +35,7 @@ This solution provides ready-to-use code so you can start **experimenting with a
 
 Supported model providers:
 
-- [Amazon Bedrock](https://aws.amazon.com/bedrock/) which supports a wide range of models from AWS, Anthropic, Cohere and Mistral including the lastst models from Amazon Nova. See [Recent announcements](#) for more details.
+- [Amazon Bedrock](https://aws.amazon.com/bedrock/) which supports a wide range of models from AWS, Anthropic, Cohere and Mistral including the latest models from Amazon Nova. See [Recent announcements](https://aws.amazon.com/blogs/aws/introducing-amazon-nova-frontier-intelligence-and-industry-leading-price-performance/) for more details.
 - [Amazon SageMaker](https://aws.amazon.com/sagemaker/) self-hosted models from Foundation, Jumpstart and HuggingFace.
 - Third-party providers via API such as Anthropic, Cohere, AI21 Labs, OpenAI, etc. [See available langchain integrations](https://python.langchain.com/docs/integrations/llms/) for a comprehensive list.
 

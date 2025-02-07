@@ -6,7 +6,13 @@ class PlaygroundPage(object):
         self.driver = driver
         self.dom_operator = DomOperator(driver)
 
-    def send_prompt(self, prompt, model):
+    def is_model_select_visible(self):
+        select = self.dom_operator.getByPath(
+            "//div[@data-locator='select-model']", wait=5
+        )
+        return select != False
+
+    def select_model(self, model):
         select = self.dom_operator.getByPath(
             "//div[@data-locator='select-model']", wait=5
         )
@@ -17,19 +23,22 @@ class PlaygroundPage(object):
         )
         option.click()
 
+    def send_prompt(self, prompt):
         textarea = self.dom_operator.getByPath(
-            "//textarea[@data-locator='prompt-input']", wait=5
+            "//div[@data-locator='prompt-input']//textarea", wait=5
         )
         textarea.send_keys(prompt)
 
-        textarea = self.dom_operator.getByPath(
-            "//button[@data-locator='submit-prompt']", wait=5
+        submit = self.dom_operator.getByPath(
+            "//div[@data-locator='prompt-input']//button[@aria-label='Send'][not(@disabled)]",  # noqa
+            wait=5,
         )
-        textarea.click()
+        submit.click()
 
     def wait_for_reply(self, expected_str):
-        self.dom_operator.getByPath(
-            "//div[@data-locator='chatbot-ai-container']//p[contains(text()"
+        dom = self.dom_operator.getByPath(
+            "//div[@data-locator='chatbot-ai-container']//div[@aria-label='ai']//p[contains(text()"  # noqa
             + f",'{expected_str}')]",
             wait=25,
         )
+        assert dom != False

@@ -87,7 +87,9 @@ export class PublicWebsite extends Construct {
               `connect-src 'self' https://cognito-idp.${
                 cdk.Stack.of(scope).region
               }.amazonaws.com/ ` +
-              (congnitoFederationDomain ? `${congnitoFederationDomain} ` : "") +
+              (congnitoFederationDomain
+                ? `https://${congnitoFederationDomain} `
+                : "") +
               `${websocketURL} ${fileBucketURLs.join(" ")} ${
                 props.api.graphqlApi.graphqlUrl
               };` +

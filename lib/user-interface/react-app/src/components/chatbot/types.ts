@@ -9,7 +9,16 @@ export interface ChatBotConfiguration {
   temperature: number;
   topP: number;
   seed: number;
-  files: ImageFile[] | VideoFile[] | null;
+  images: SessionFile[] | null;
+  documents: SessionFile[] | null;
+  videos: SessionFile[] | null;
+  filesBlob: ChatBotFilesBlob;
+}
+
+export interface ChatBotFilesBlob {
+  images: File[] | null;
+  documents: File[] | null;
+  videos: File[] | null;
 }
 
 export interface ChatInputState {
@@ -21,6 +30,7 @@ export interface ChatInputState {
   selectedWorkspace: SelectProps.Option | null;
   modelsStatus: LoadingStatus;
   workspacesStatus: LoadingStatus;
+  applicationStatus?: LoadingStatus;
 }
 
 export enum ChatBotMessageType {
@@ -52,21 +62,13 @@ export enum FileStorageProvider {
   S3 = "s3",
 }
 
-export interface ImageFile {
+export interface SessionFile {
   provider: FileStorageProvider;
   type: string;
   key: string;
   url: string;
+  modality: ChabotInputModality;
 }
-
-export interface VideoFile {
-  provider: FileStorageProvider;
-  type: string;
-  key: string;
-  url: string;
-}
-
-export type MediaFile = ImageFile | VideoFile;
 
 export interface ChatBotHeartbeatRequest {
   action: ChatBotAction.Heartbeat;
@@ -78,17 +80,20 @@ export interface ChatBotHeartbeatRequest {
 
 export interface ChatBotRunRequest {
   action: ChatBotAction.Run;
-  modelInterface: ModelInterface;
-  data: {
-    modelName: string;
-    provider: string;
+  modelInterface?: ModelInterface;
+  data?: {
+    modelName?: string;
+    provider?: string;
     sessionId: string;
-    files: ImageFile[] | VideoFile[] | null;
+    documents: SessionFile[] | null;
+    images: SessionFile[] | null;
+    videos: SessionFile[] | null;
     text: string;
-    mode: string;
+    mode?: string;
     workspaceId?: string;
     modelKwargs?: Record<string, string | boolean | number>;
   };
+  applicationId?: string;
 }
 
 export interface ChatBotToken {
@@ -122,11 +127,11 @@ export interface ChatBotHistoryItem {
     | number
     | null
     | undefined
-    | ImageFile[]
-    | VideoFile[]
+    | SessionFile[]
     | string[]
     | string[][]
     | RagDocument[]
+    | ChatBotFilesBlob
   >;
   tokens?: ChatBotToken[];
 }
@@ -144,11 +149,11 @@ export interface ChatBotMessageResponse {
       | number
       | null
       | undefined
-      | ImageFile[]
-      | VideoFile[]
+      | SessionFile[]
       | string[]
       | string[][]
       | RagDocument[]
+      | ChatBotFilesBlob
     >;
   };
 }
@@ -156,6 +161,7 @@ export interface ChatBotMessageResponse {
 export enum ChabotInputModality {
   Text = "TEXT",
   Image = "IMAGE",
+  Document = "DOCUMENT",
   Video = "VIDEO",
 }
 
@@ -173,4 +179,5 @@ export interface FeedbackData {
   prompt: string;
   completion: string;
   model: string;
+  applicationId?: string;
 }

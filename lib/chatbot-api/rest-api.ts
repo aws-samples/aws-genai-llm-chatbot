@@ -24,6 +24,7 @@ export interface ApiResolversProps {
   readonly userPool: cognito.UserPool;
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
+  readonly applicationTable: dynamodb.Table;
   readonly filesBucket: s3.Bucket;
   readonly userFeedbackBucket: s3.Bucket;
   readonly modelsParameter: ssm.StringParameter;
@@ -71,12 +72,13 @@ export class ApiResolvers extends Construct {
           API_KEYS_SECRETS_ARN: props.shared.apiKeysSecret.secretArn,
           SESSIONS_TABLE_NAME: props.sessionsTable.tableName,
           SESSIONS_BY_USER_ID_INDEX_NAME: props.byUserIdIndex,
+          APPLICATIONS_TABLE_NAME: props.applicationTable.tableName,
           USER_FEEDBACK_BUCKET_NAME: props.userFeedbackBucket?.bucketName ?? "",
           UPLOAD_BUCKET_NAME: props.ragEngines?.uploadBucket?.bucketName ?? "",
           CHATBOT_FILES_BUCKET_NAME: props.filesBucket.bucketName,
           PROCESSING_BUCKET_NAME:
             props.ragEngines?.processingBucket?.bucketName ?? "",
-          AURORA_DB_USER: AURORA_DB_USERS.READ_ONLY,
+          AURORA_DB_USER: AURORA_DB_USERS.WRITE,
           AURORA_DB_HOST:
             props.ragEngines?.auroraPgVector?.database?.clusterEndpoint
               ?.hostname ?? "",
@@ -127,6 +129,7 @@ export class ApiResolvers extends Construct {
               ?.bucketName ?? "",
           RSS_FEED_INGESTOR_FUNCTION:
             props.ragEngines?.dataImport.rssIngestorFunction?.functionArn ?? "",
+          COGNITO_USER_POOL_ID: props.userPool.userPoolId,
         },
       }
     );
@@ -147,7 +150,7 @@ export class ApiResolvers extends Construct {
       if (props.ragEngines?.auroraPgVector) {
         props.ragEngines.auroraPgVector.database.grantConnect(
           apiHandler,
-          AURORA_DB_USERS.READ_ONLY
+          AURORA_DB_USERS.WRITE
         );
         props.ragEngines.auroraPgVector.database.connections.allowDefaultPortFrom(
           apiHandler
@@ -303,11 +306,20 @@ export class ApiResolvers extends Construct {
         })
       );
 
+      apiHandler.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["cognito-idp:ListGroups"],
+          resources: [props.userPool.userPoolArn],
+          effect: iam.Effect.ALLOW,
+        })
+      );
+
       props.shared.xOriginVerifySecret.grantRead(apiHandler);
       props.shared.apiKeysSecret.grantRead(apiHandler);
       props.shared.configParameter.grantRead(apiHandler);
       props.modelsParameter.grantRead(apiHandler);
       props.sessionsTable.grantReadWriteData(apiHandler);
+      props.applicationTable.grantReadWriteData(apiHandler);
       props.userFeedbackBucket.grantReadWrite(apiHandler);
       props.filesBucket.grantReadWrite(apiHandler);
       props.ragEngines?.uploadBucket.grantReadWrite(apiHandler);
@@ -319,6 +331,7 @@ export class ApiResolvers extends Construct {
             actions: [
               "bedrock:ListFoundationModels",
               "bedrock:ListCustomModels",
+              "bedrock:ListInferenceProfiles",
               "bedrock:InvokeModel",
               "bedrock:InvokeModelWithResponseStream",
             ],

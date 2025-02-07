@@ -17,7 +17,7 @@ Note:
 - You can deploy the solution to a different region from where you requested Base Model access.
 - **While the Base Model access approval is instant, it might take several minutes to get access and see the list of models in the UI.**
 
-![sample](./assets/enable-models.gif "AWS GenAI Chatbot")
+![sample](./assets/enable-models.gif "GenAI Chatbot on AWS")
 
 ## HuggingFace Authentication
 

@@ -1,13 +1,12 @@
 import {
   Box,
-  Container,
   Spinner,
+  Tabs,
+  Textarea,
   TextContent,
-  Button,
-  Popover,
-  StatusIndicator,
 } from "@cloudscape-design/components";
-import { useContext, useEffect, useState, useCallback } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { JsonView, darkStyles } from "react-json-view-lite";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "../../styles/chat.module.scss";
@@ -15,14 +14,18 @@ import {
   ChatBotConfiguration,
   ChatBotHistoryItem,
   ChatBotMessageType,
-  MediaFile,
-  ChabotOutputModality,
+  SessionFile,
+  RagDocument,
+  ChabotInputModality,
 } from "./types";
+
+import "react-json-view-lite/dist/index.css";
+import "../../styles/app.scss";
+import { BaseChatMessage } from "./BaseChatMessage";
+import { CopyWithPopoverButton } from "./CopyButton";
 import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
-import { ChatMessageMetadata } from "./chat-message-metadata";
 import { ChatMessageMediaDisplay } from "./chat-message-media-display";
-import { ChatMessageFeedbackButtons } from "./chat-message-feedback-buttons";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
@@ -32,31 +35,89 @@ export interface ChatMessageProps {
   onThumbsDown: () => void;
 }
 
+function hasMediaFiles(
+  images: SessionFile[],
+  videos: SessionFile[],
+  documents: SessionFile[]
+): boolean {
+  return [images, documents, videos].some(
+    (mediaArray) => mediaArray?.length > 0
+  );
+}
+
+function PromptTabs(props: { prompts: string[] | string[][] }) {
+  const [promptIndex, setPromptIndex] = useState("0");
+  let promptList: string[] = [];
+  if (props.prompts[0][0].length > 1) {
+    promptList = (props.prompts as string[][]).map((p) => p[0]);
+  } else {
+    promptList = props.prompts as string[];
+  }
+  return (
+    <>
+      <div className={styles.btn_chabot_metadata_copy}>
+        <CopyWithPopoverButton
+          onCopy={() => {
+            navigator.clipboard.writeText(promptList[parseInt(promptIndex)]);
+          }}
+        />
+      </div>
+      <Tabs
+        tabs={promptList.map((p, i) => {
+          return {
+            id: `${i}`,
+            label: `Prompt ${promptList.length > 1 ? i + 1 : ""}`,
+            content: <Textarea value={p} readOnly={true} rows={8} />,
+          };
+        })}
+        activeTabId={promptIndex}
+        onChange={({ detail }) => setPromptIndex(detail.activeTabId)}
+      />
+    </>
+  );
+}
+
 export default function ChatMessage(props: ChatMessageProps) {
   const appContext = useContext(AppContext);
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<ChatBotHistoryItem>(props.message);
-  const [files, setFiles] = useState<MediaFile[]>([] as MediaFile[]);
+  const [documents, setDocuments] = useState<SessionFile[]>(
+    [] as SessionFile[]
+  );
+  const [images, setImages] = useState<SessionFile[]>([] as SessionFile[]);
+  const [videos, setVideos] = useState<SessionFile[]>([] as SessionFile[]);
   const [documentIndex, setDocumentIndex] = useState("0");
-  const [promptIndex, setPromptIndex] = useState("0");
-  const [selectedIcon, setSelectedIcon] = useState<1 | 0 | null>(null);
   const [processingAsyncFiles, setProcessingAsyncFiles] =
     useState<boolean>(false);
-  const [asyncFiles, setAsyncFiles] = useState<MediaFile[]>([]);
+  const [asyncFiles, setAsyncFiles] = useState<SessionFile[]>([]);
   const [processedKeys, setProcessedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setMessage(props.message);
   }, [props.message]);
 
+  const isAIResponseLoading = useCallback(() => {
+    if (message.type !== ChatBotMessageType.AI) {
+      return false;
+    }
+    const { images, videos, documents } = props.message.metadata as Record<
+      string,
+      SessionFile[]
+    >;
+    const hasAttachments = hasMediaFiles(images, videos, documents);
+    return hasAttachments ? loading : props.message.content?.length === 0;
+  }, [props.message.metadata, props.message.content, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const getSignedUrl = useCallback(
-    async (apiClient: ApiClient, file: MediaFile): Promise<string | null> => {
+    async (apiClient: ApiClient, file: SessionFile): Promise<string | null> => {
       try {
         const response = await apiClient.sessions.getFileSignedUrl(file.key);
         console.log(`File ${file.key} retrieved: ${response.data?.getFileURL}`);
         return response.data?.getFileURL || null;
       } catch (error) {
-        console.log(`File ${file.key} could not be retrieved ${error}`);
+        console.log(
+          `File ${file.key} could not be retrieved ${JSON.stringify(error)}`
+        );
         return null;
       }
     },
@@ -64,7 +125,7 @@ export default function ChatMessage(props: ChatMessageProps) {
   );
 
   const processPendingFiles = useCallback(
-    async (apiClient: ApiClient, pendingFiles: MediaFile[]) => {
+    async (apiClient: ApiClient, pendingFiles: SessionFile[]) => {
       const retryDelay = 30000;
       const maxRetries = 12;
       let retryCount = 0;
@@ -79,8 +140,8 @@ export default function ChatMessage(props: ChatMessageProps) {
 
       try {
         while (remainingFiles.length > 0 && retryCount < maxRetries) {
-          const stillPending: MediaFile[] = [];
-          const newlyReady: MediaFile[] = [];
+          const stillPending: SessionFile[] = [];
+          const newlyReady: SessionFile[] = [];
 
           await Promise.all(
             remainingFiles.map(async (file) => {
@@ -97,10 +158,12 @@ export default function ChatMessage(props: ChatMessageProps) {
           );
 
           if (newlyReady.length > 0) {
-            setFiles((prev) => {
+            setVideos((prev) => {
               const existingKeys = new Set(prev.map((f) => f.key));
               const uniqueNewFiles = newlyReady.filter(
-                (f) => !existingKeys.has(f.key)
+                (f) =>
+                  !existingKeys.has(f.key) &&
+                  f.type === ChabotInputModality.Video
               );
               return [...prev, ...uniqueNewFiles];
             });
@@ -128,39 +191,61 @@ export default function ChatMessage(props: ChatMessageProps) {
 
   useEffect(() => {
     const processFiles = async () => {
-      if (!appContext || !message.metadata?.files) return;
-      const files = message.metadata.files as MediaFile[];
-      if (files.length === 0) return;
+      const sessionFiles: SessionFile[] = [
+        ...((message.metadata.images || []) as SessionFile[]),
+        ...((message.metadata.videos || []) as SessionFile[]),
+        ...((message.metadata.documents || []) as SessionFile[]),
+      ];
+
+      if (!appContext || sessionFiles.length === 0) return;
 
       const apiClient = new ApiClient(appContext);
       setLoading(true);
 
       try {
-        const pendingFiles: MediaFile[] = [];
-        const immediateFiles: MediaFile[] = [];
-
+        const pendingFiles: SessionFile[] = [];
+        const immediateFiles: SessionFile[] = [];
         await Promise.all(
-          (message.metadata.files as MediaFile[]).map(
-            async (file: MediaFile) => {
-              if (processedKeys.has(file.key)) return;
+          (sessionFiles as SessionFile[]).map(async (file: SessionFile) => {
+            if (processedKeys.has(file.key)) return;
 
-              const signedUrl = await getSignedUrl(apiClient, file);
-              if (signedUrl) {
-                immediateFiles.push({ ...file, url: signedUrl });
-                setProcessedKeys((prev) => new Set([...prev, file.key]));
-              } else if (file.type === ChabotOutputModality.Video) {
-                pendingFiles.push(file);
-              }
+            const signedUrl = await getSignedUrl(apiClient, file);
+            if (signedUrl) {
+              immediateFiles.push({ ...file, url: signedUrl });
+              setProcessedKeys((prev) => new Set([...prev, file.key]));
+            } else if (file.type === ChabotInputModality.Video) {
+              // Video files to be processed asynchronously
+              pendingFiles.push(file);
             }
-          )
+          })
         );
 
-        setFiles((prev) => {
+        setImages((prev: SessionFile[]) => {
           const existingKeys = new Set(prev.map((f) => f.key));
-          const uniqueNewFiles = immediateFiles.filter(
-            (f) => !existingKeys.has(f.key)
+          const uniqueImages = immediateFiles.filter(
+            (f) =>
+              f.type === ChabotInputModality.Image && !existingKeys.has(f.key)
           );
-          return [...prev, ...uniqueNewFiles];
+          return [...prev, ...uniqueImages];
+        });
+
+        setDocuments((prev: SessionFile[]) => {
+          const existingKeys = new Set(prev.map((f) => f.key));
+          const uniqueDocuments = immediateFiles.filter(
+            (f) =>
+              f.type === ChabotInputModality.Document &&
+              !existingKeys.has(f.key)
+          );
+          return [...prev, ...uniqueDocuments];
+        });
+
+        setVideos((prev: SessionFile[]) => {
+          const existingKeys = new Set(prev.map((f) => f.key));
+          const uniqueVideos = immediateFiles.filter(
+            (f) =>
+              f.type === ChabotInputModality.Video && !existingKeys.has(f.key)
+          );
+          return [...prev, ...uniqueVideos];
         });
 
         if (pendingFiles.length > 0) {
@@ -172,9 +257,15 @@ export default function ChatMessage(props: ChatMessageProps) {
         setLoading(false);
       }
     };
-
     processFiles();
-  }, [appContext, message, processPendingFiles, getSignedUrl, processedKeys]);
+  }, [
+    appContext,
+    message,
+    props.message.metadata,
+    processPendingFiles,
+    getSignedUrl,
+    processedKeys,
+  ]);
 
   let content = "";
   if (props.message.content && props.message.content.length > 0) {
@@ -196,134 +287,159 @@ export default function ChatMessage(props: ChatMessageProps) {
   }
 
   return (
-    <div>
-      {props.message?.type === ChatBotMessageType.AI && (
-        <Container
-          data-locator="chatbot-ai-container"
-          footer={
-            ((props?.showMetadata && props.message.metadata) ||
-              (props.message.metadata &&
-                props.configuration?.showMetadata)) && (
-              <ChatMessageMetadata
-                metadata={props.message.metadata}
-                showMetadata={true}
-                documentIndex={documentIndex}
-                promptIndex={promptIndex}
-                setDocumentIndex={setDocumentIndex}
-                setPromptIndex={setPromptIndex}
-              />
-            )
-          }
-        >
-        {props.message.content.length > 0 && (
-          <div className={styles.btn_chabot_message_copy}>
-            <Popover
-              data-locator="copy-clipboard"
-              size="medium"
-              position="top"
-              triggerType="custom"
-              dismissButton={false}
-              content={
-                <StatusIndicator type="success">
-                  Copied to clipboard
-                </StatusIndicator>
-              }
-            >
-              <Button
-                variant="inline-icon"
-                iconName="copy"
-                onClick={() => {
-                  navigator.clipboard.writeText(props.message.content);
+    <div style={{ marginTop: message.type == "ai" ? "0" : "0.5em" }}>
+      <BaseChatMessage
+        data-locator="chatbot-ai-container"
+        role={props.message?.type === ChatBotMessageType.AI ? "ai" : "human"}
+        onCopy={() => {
+          navigator.clipboard.writeText(props.message.content);
+        }}
+        waiting={isAIResponseLoading()}
+        onFeedback={(thumb) => {
+          thumb && thumb === "up" ? props.onThumbsUp() : props.onThumbsDown();
+        }}
+        name={
+          props.message?.type === ChatBotMessageType.Human ? "" : "Assistant"
+        }
+        expandableContent={
+          props.message.type == ChatBotMessageType.AI &&
+          ((props?.showMetadata && props.message.metadata) ||
+            (props.message.metadata && props.configuration?.showMetadata)) ? (
+            <>
+              <JsonView
+                shouldInitiallyExpand={(level) => level < 2}
+                data={JSON.parse(
+                  JSON.stringify(props.message.metadata).replace(
+                    /\\n/g,
+                    "\\\\n"
+                  )
+                )}
+                style={{
+                  ...darkStyles,
+                  stringValue: "jsonStrings",
+                  numberValue: "jsonNumbers",
+                  booleanValue: "jsonBool",
+                  nullValue: "jsonNull",
+                  container: "jsonContainer",
                 }}
               />
-            </Popover>
-          </div>
-        )}
-          {loading ||
-          (content.length === 0 && !processingAsyncFiles && !files.length) ? (
+              {props.message.metadata.documents &&
+                (props.message.metadata.documents as RagDocument[]).length >
+                  0 && (
+                  <>
+                    <div className={styles.btn_chabot_metadata_copy}>
+                      <CopyWithPopoverButton
+                        onCopy={() => {
+                          navigator.clipboard.writeText(
+                            (props.message.metadata.documents as RagDocument[])[
+                              parseInt(documentIndex)
+                            ].page_content
+                          );
+                        }}
+                      />
+                    </div>
+                    <Tabs
+                      tabs={(
+                        props.message.metadata.documents as RagDocument[]
+                      ).map((p: RagDocument, i) => {
+                        return {
+                          id: `${i}`,
+                          label:
+                            p.metadata.path?.split("/").at(-1) ??
+                            p.metadata.title ??
+                            p.metadata.document_id.slice(-8),
+                          content: (
+                            <Textarea
+                              value={p.page_content}
+                              readOnly={true}
+                              rows={8}
+                            />
+                          ),
+                        };
+                      })}
+                      activeTabId={documentIndex}
+                      onChange={({ detail }) =>
+                        setDocumentIndex(detail.activeTabId)
+                      }
+                    />
+                  </>
+                )}
+              {props.message.metadata.prompts &&
+                (props.message.metadata.prompts as string[]).length > 0 && (
+                  <PromptTabs
+                    prompts={props.message.metadata.prompts as string[]}
+                  />
+                )}
+            </>
+          ) : undefined
+        }
+      >
+        <>
+          {!loading && hasMediaFiles(images, documents, videos) && (
+            <ChatMessageMediaDisplay
+              images={images}
+              documents={documents}
+              videos={videos}
+              isAIMessage={
+                props.message?.type === ChatBotMessageType.AI ? true : false
+              }
+            />
+          )}
+          <ReactMarkdown
+            className={styles.markdown}
+            remarkPlugins={[remarkGfm]}
+            components={{
+              pre(props) {
+                const { children, ...rest } = props;
+                return (
+                  <pre {...rest} className={styles.codeMarkdown}>
+                    {children}
+                  </pre>
+                );
+              },
+              table(props) {
+                const { children, ...rest } = props;
+                return (
+                  <table {...rest} className={styles.markdownTable}>
+                    {children}
+                  </table>
+                );
+              },
+              th(props) {
+                const { children, ...rest } = props;
+                return (
+                  <th {...rest} className={styles.markdownTableCell}>
+                    {children}
+                  </th>
+                );
+              },
+              td(props) {
+                const { children, ...rest } = props;
+                return (
+                  <td {...rest} className={styles.markdownTableCell}>
+                    {children}
+                  </td>
+                );
+              },
+            }}
+          >
+            {content?.trim()}
+          </ReactMarkdown>
+          {processingAsyncFiles && (
             <Box>
+              <TextContent>
+                <small>
+                  {asyncFiles.map((file) => file.type).join(" and ")}{" "}
+                  {asyncFiles.length > 1 ? "are" : "is"} being generated. This
+                  might take few minutes. You can keep using the app and come
+                  back later.
+                </small>
+              </TextContent>
               <Spinner />
             </Box>
-          ) : (
-            <>
-              {content && (
-                <ReactMarkdown
-                  children={content}
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    pre(props) {
-                      const { children, ...rest } = props;
-                      return (
-                        <pre {...rest} className={styles.codeMarkdown}>
-                          {children}
-                        </pre>
-                      );
-                    },
-                    table(props) {
-                      const { children, ...rest } = props;
-                      return (
-                        <table {...rest} className={styles.markdownTable}>
-                          {children}
-                        </table>
-                      );
-                    },
-                    th(props) {
-                      const { children, ...rest } = props;
-                      return (
-                        <th {...rest} className={styles.markdownTableCell}>
-                          {children}
-                        </th>
-                      );
-                    },
-                    td(props) {
-                      const { children, ...rest } = props;
-                      return (
-                        <td {...rest} className={styles.markdownTableCell}>
-                          {children}
-                        </td>
-                      );
-                    },
-                  }}
-                />
-              )}
-
-              <ChatMessageMediaDisplay files={files} isAIMessage={true} />
-
-              {processingAsyncFiles && (
-                <Box margin={{ top: "s" }}>
-                  <TextContent>
-                    <small>
-                      {asyncFiles.map((file) => file.type).join(" and ")}{" "}
-                      {asyncFiles.length > 1 ? "are" : "is"} being generated.
-                      This might take few minutes. You can keep using the app
-                      and come back later.
-                    </small>
-                  </TextContent>
-                  <Spinner />
-                </Box>
-              )}
-
-              <ChatMessageFeedbackButtons
-                selectedIcon={selectedIcon}
-                onThumbsUp={props.onThumbsUp}
-                onThumbsDown={props.onThumbsDown}
-                setSelectedIcon={setSelectedIcon}
-              />
-            </>
           )}
-        </Container>
-      )}
-
-      {props.message?.type === ChatBotMessageType.Human && (
-        <>
-          {(!processingAsyncFiles || files.length > 0) && (
-            <TextContent>
-              <strong>{props.message.content}</strong>
-            </TextContent>
-          )}
-          <ChatMessageMediaDisplay files={files} isAIMessage={false} />
         </>
-      )}
+      </BaseChatMessage>
     </div>
   );
 }

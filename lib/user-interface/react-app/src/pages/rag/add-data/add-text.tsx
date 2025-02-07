@@ -126,6 +126,7 @@ export default function AddText(props: AddTextProps) {
             <FormField label="Title" errorText={errors.title}>
               <Input
                 placeholder="My Document"
+                data-locator="document-title"
                 disabled={props.submitting}
                 value={data.title}
                 onChange={({ detail: { value } }) => onChange({ title: value })}
@@ -134,6 +135,7 @@ export default function AddText(props: AddTextProps) {
             <FormField label="Content" errorText={errors.content}>
               <Textarea
                 disabled={props.submitting}
+                data-locator="document-content"
                 value={data.content}
                 rows={15}
                 onChange={({ detail: { value } }) =>
