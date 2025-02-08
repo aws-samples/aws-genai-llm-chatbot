@@ -29,6 +29,7 @@ export interface ChatBotApiProps {
   readonly ragEngines?: RagEngines;
   readonly userPool: cognito.UserPool;
   readonly modelsParameter: ssm.StringParameter;
+  readonly bedrockEnabledModelsParameter: ssm.StringParameter;
   readonly models: SageMakerModelEndpoint[];
 }
 

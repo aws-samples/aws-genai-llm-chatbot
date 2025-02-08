@@ -58,6 +58,7 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       ragEngines: ragEngines,
       userPool: authentication.userPool,
       modelsParameter: models.modelsParameter,
+      bedrockEnabledModelsParameter: models.bedrockEnabledModelsParameter,
       models: models.models,
     });
 
