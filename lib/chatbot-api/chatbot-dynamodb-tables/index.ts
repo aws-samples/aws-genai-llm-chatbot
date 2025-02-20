@@ -5,6 +5,7 @@ import * as kms from "aws-cdk-lib/aws-kms";
 
 export interface ChatBotDynamoDBTablesProps {
   readonly retainOnDelete?: boolean;
+  readonly deletionProtection?: boolean;
   readonly kmsKey?: kms.Key;
 }
 
@@ -34,6 +35,7 @@ export class ChatBotDynamoDBTables extends Construct {
           ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
           : cdk.RemovalPolicy.DESTROY,
       pointInTimeRecovery: true,
+      deletionProtection: props.deletionProtection,
     });
 
     sessionsTable.addGlobalSecondaryIndex({

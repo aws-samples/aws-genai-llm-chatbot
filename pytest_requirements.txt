@@ -9,7 +9,7 @@ black==24.8.0
 flake8==7.1.0
 selenium==4.16
 pdfplumber==0.11.0
-pyopenssl==24.2.1
-cryptography==43.0.1
+pyopenssl==24.3.0
+cryptography==44.0.1
 boto3
 -r lib/shared/layers/common/requirements.txt --find-links=lib/shared/layers/common

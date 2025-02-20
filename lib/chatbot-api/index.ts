@@ -49,6 +49,7 @@ export class ChatBotApi extends Construct {
     const chatTables = new ChatBotDynamoDBTables(this, "ChatDynamoDBTables", {
       kmsKey: props.shared.kmsKey,
       retainOnDelete: props.config.retainOnDelete,
+      deletionProtection: props.config.ddbDeletionProtection,
     });
     const chatBuckets = new ChatBotS3Buckets(this, "ChatBuckets", {
       kmsKey: props.shared.kmsKey,
@@ -60,6 +61,7 @@ export class ChatBotApi extends Construct {
       {
         kmsKey: props.shared.kmsKey,
         retainOnDelete: props.config.retainOnDelete,
+        deletionProtection: props.config.ddbDeletionProtection,
       }
     );
     const loggingRole = new iam.Role(this, "apiLoggingRole", {

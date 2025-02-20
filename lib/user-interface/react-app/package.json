@@ -44,23 +44,24 @@
     "@types/zen-observable": "^0.8.5",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^1.3.2",
     "autoprefixer": "^10.4.14",
     "cross-env": "^7.0.3",
-    "esbuild": "0.21.5",
+    "esbuild": "0.25.0",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "postcss": "^8.4.27",
     "sass": "^1.65.1",
     "typescript": "^5.0.2",
-    "vite": "^4.5.3",
+    "vite": "^6.1.1",
     "zen-observable": "^0.10.0"
   },
   "overrides": {
     "@aws-amplify/geo@2.3.12": {
       "fast-xml-parser": "4.4.1"
     },
-    "cookie": "^0.7.0"
+    "cookie": "^0.7.0",
+    "esbuild": "0.25.0"
   }
 }

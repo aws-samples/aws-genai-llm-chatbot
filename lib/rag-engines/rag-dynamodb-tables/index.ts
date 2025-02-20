@@ -5,6 +5,7 @@ import { Construct } from "constructs";
 
 export interface RagDynamoDBTablesProps {
   readonly retainOnDelete?: boolean;
+  readonly deletionProtection?: boolean;
   readonly kmsKey?: kms.Key;
 }
 
@@ -39,6 +40,7 @@ export class RagDynamoDBTables extends Construct {
         props.retainOnDelete === true
           ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
           : cdk.RemovalPolicy.DESTROY,
+      deletionProtection: props.deletionProtection,
     });
 
     workspacesTable.addGlobalSecondaryIndex({
@@ -72,6 +74,7 @@ export class RagDynamoDBTables extends Construct {
         props.retainOnDelete === true
           ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
           : cdk.RemovalPolicy.DESTROY,
+      deletionProtection: props.deletionProtection,
     });
 
     documentsTable.addGlobalSecondaryIndex({

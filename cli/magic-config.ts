@@ -154,6 +154,7 @@ const embeddingModels: ModelConfig[] = [
       options.prefix = config.prefix;
       options.createCMKs = config.createCMKs;
       options.retainOnDelete = config.retainOnDelete;
+      options.ddbDeletionProtection = config.ddbDeletionProtection;
       options.vpcId = config.vpc?.vpcId;
       options.bedrockEnable = config.bedrock?.enabled;
       options.bedrockRegion = config.bedrock?.region;
@@ -320,6 +321,14 @@ async function processCreateOptions(options: any): Promise<void> {
         "Do you want to retain data stores on cleanup of the project (Logs, S3, Tables, Indexes, Cognito User pools)?",
       initial: options.retainOnDelete ?? true,
       hint: "It reduces the risk of deleting data. It will however not delete all the resources on cleanup (would require manual removal if relevant)",
+    },
+    {
+      type: "confirm",
+      name: "ddbDeletionProtection",
+      message:
+        "Do you want to enable delete protection for your DynamoDB tables?",
+      initial: options.ddbDeletionProtection ?? false,
+      hint: "It reduces the risk of accidental deleting your DDB tables. It will however not delete your DDB tables on cleanup.",
     },
     {
       type: "confirm",
@@ -1200,6 +1209,7 @@ async function processCreateOptions(options: any): Promise<void> {
     prefix: answers.prefix,
     createCMKs: answers.createCMKs,
     retainOnDelete: answers.retainOnDelete,
+    ddbDeletionProtection: answers.ddbDeletionProtection,
     vpc: answers.existingVpc
       ? {
           vpcId: answers.vpcId.toLowerCase(),

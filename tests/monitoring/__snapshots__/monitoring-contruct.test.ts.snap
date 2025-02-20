@@ -176,6 +176,35 @@ exports[`snapshot test 1`] = `
       },
       "Type": "AWS::SNS::Topic",
     },
+    "MonitoringCompositeAlarmTopicPolicy4E3F3A3C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": {
+                "Ref": "MonitoringCompositeAlarmTopicA8B720C7",
+              },
+              "Sid": "AllowPublishThroughSSLOnly",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "MonitoringCompositeAlarmTopicA8B720C7",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
+    },
     "MonitoringGenAIChatbotDashboardGenAIChatbotDashboardAppSyncFaultCountCritical74762E0C": {
       "Properties": {
         "ActionsEnabled": true,

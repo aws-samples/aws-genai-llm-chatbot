@@ -194,10 +194,9 @@ export class Shared extends Construct {
         ) {
           if (props.config.bedrock?.region !== cdk.Stack.of(this).region) {
             throw new Error(
-              `Bedrock is only supported in the same region as the stack when using private website (Bedrock region: ${props
-                .config.bedrock?.region}, Stack region: ${
-                cdk.Stack.of(this).region
-              }).`
+              `Bedrock is only supported in the same region as the stack when using private website (Bedrock region: ${
+                props.config.bedrock?.region
+              }, Stack region: ${cdk.Stack.of(this).region}).`
             );
           }
 
