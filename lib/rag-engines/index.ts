@@ -41,6 +41,7 @@ export class RagEngines extends Construct {
     const tables = new RagDynamoDBTables(this, "RagDynamoDBTables", {
       kmsKey: props.shared.kmsKey,
       retainOnDelete: props.config.retainOnDelete,
+      deletionProtection: props.config.ddbDeletionProtection,
     });
 
     let sageMakerRagModels: SageMakerRagModels | null = null;

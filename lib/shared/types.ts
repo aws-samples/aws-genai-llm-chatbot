@@ -81,6 +81,7 @@ export interface SystemConfig {
   prefix: string;
   createCMKs?: boolean;
   retainOnDelete?: boolean;
+  ddbDeletionProtection?: boolean;
   vpc?: {
     vpcId?: string;
     createVpcEndpoints?: boolean;

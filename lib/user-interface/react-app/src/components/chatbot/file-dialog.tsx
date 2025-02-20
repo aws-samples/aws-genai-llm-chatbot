@@ -94,8 +94,8 @@ export default function FileDialog(props: FileDialogProps) {
       [props.modality === ChabotInputModality.Image
         ? "images"
         : props.modality === ChabotInputModality.Video
-        ? "videos"
-        : "documents"]: files,
+          ? "videos"
+          : "documents"]: files,
       filesBlob,
     });
     setFiles([]);

@@ -84,8 +84,8 @@ export default function MultiChatInputPanel(props: MultiChatInputPanelProps) {
             listening
               ? "Listening..."
               : props.running
-              ? "Generating a response"
-              : "Send a message"
+                ? "Generating a response"
+                : "Send a message"
           }
           maxRows={6}
           minRows={1}

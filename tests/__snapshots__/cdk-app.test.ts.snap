@@ -2,7 +2,7 @@
 
 exports[`snapshot test with CMK 1`] = `
 {
-  "Description": "Description: (uksb-1tupboc45) (version:0.1.122) (tag:C1:0,C2:0,C3:0,C4:0,C5:0,C6:2,C7:0,C8:0) ",
+  "Description": "Description: (uksb-1tupboc45) (version:0.1.293) (tag:C4:0,C5:0,C6:2,C7:0) ",
   "Mappings": {
     "RagEnginesSageMakerModelImageRepositoryCfnMappingF3891114": {
       "af-south-1": {
@@ -2758,6 +2758,35 @@ schema {
         "TracingConfig": "PassThrough",
       },
       "Type": "AWS::SNS::Topic",
+    },
+    "ChatBotApiRealtimeMessagesTopicPolicy24C750B2": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": {
+                "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+              },
+              "Sid": "AllowPublishThroughSSLOnly",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
     },
     "ChatBotApiRealtimeOutgoingMessagesDLQ07751960": {
       "DeletionPolicy": "Delete",
@@ -9076,6 +9105,16 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": "lambda:GetFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "RagEnginesAuroraPgVectorDatabaseSetupFunction3EAE1D9D",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -15545,6 +15584,16 @@ schema {
               ],
             },
             {
+              "Action": "lambda:GetFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "RagEnginesSageMakerModelMultiAB24AOnEventHandler3AAD1104",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
               "Resource": [
@@ -15569,6 +15618,16 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": "lambda:GetFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerDF048AE3",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -15681,6 +15740,16 @@ schema {
               ],
             },
             {
+              "Action": "lambda:GetFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "RagEnginesSageMakerModelMultiAB24AOnEventHandler3AAD1104",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
               "Resource": [
@@ -15705,6 +15774,16 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": "lambda:GetFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerDF048AE3",
+                  "Arn",
+                ],
+              },
             },
             {
               "Action": "states:StartExecution",
@@ -15933,6 +16012,16 @@ schema {
               ],
             },
             {
+              "Action": "lambda:GetFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "RagEnginesSageMakerModelMultiAB24AOnEventHandler3AAD1104",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
               "Resource": [
@@ -15957,6 +16046,16 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": "lambda:GetFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "RagEnginesSageMakerModelMultiAB24AIsCompleteHandlerDF048AE3",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
