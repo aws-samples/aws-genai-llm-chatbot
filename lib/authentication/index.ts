@@ -26,7 +26,8 @@ export class Authentication extends Construct {
           : cdk.RemovalPolicy.DESTROY,
       selfSignUpEnabled: false,
       mfa: cognito.Mfa.OPTIONAL,
-      advancedSecurityMode: cognito.AdvancedSecurityMode.ENFORCED,
+      featurePlan: cognito.FeaturePlan.PLUS,
+      standardThreatProtectionMode: cognito.StandardThreatProtectionMode.FULL_FUNCTION,
       autoVerify: { email: true, phone: true },
       signInAliases: {
         email: true,
