@@ -27,7 +27,8 @@ export class Authentication extends Construct {
       selfSignUpEnabled: false,
       mfa: cognito.Mfa.OPTIONAL,
       featurePlan: cognito.FeaturePlan.PLUS,
-      standardThreatProtectionMode: cognito.StandardThreatProtectionMode.FULL_FUNCTION,
+      standardThreatProtectionMode:
+        cognito.StandardThreatProtectionMode.FULL_FUNCTION,
       autoVerify: { email: true, phone: true },
       signInAliases: {
         email: true,
