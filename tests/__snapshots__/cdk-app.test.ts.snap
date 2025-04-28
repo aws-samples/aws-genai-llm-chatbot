@@ -395,6 +395,7 @@ exports[`snapshot test with CMK 1`] = `
         "UserPoolAddOns": {
           "AdvancedSecurityMode": "ENFORCED",
         },
+        "UserPoolTier": "PLUS",
         "UsernameAttributes": [
           "email",
         ],
@@ -3159,6 +3160,19 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "kms:GenerateDataKey",
                 "kms:Decrypt",
               ],
@@ -5810,6 +5824,19 @@ schema {
             },
             {
               "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "kms:Encrypt",
                 "kms:ReEncrypt*",
                 "kms:GenerateDataKey*",
@@ -6836,6 +6863,19 @@ schema {
               "Effect": "Allow",
               "Resource": {
                 "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+              },
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
               },
             },
             {
@@ -21231,6 +21271,10 @@ schema {
               "Ref": "AWS::Region",
             },
           },
+        ],
+        "SourceMarkersConfig": [
+          {},
+          {},
         ],
         "SourceObjectKeys": [
           "Dummy",
