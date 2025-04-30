@@ -799,8 +799,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 listening
                   ? "Listening..."
                   : props.running
-                    ? "Generating a response"
-                    : "Send a message"
+                  ? "Generating a response"
+                  : "Send a message"
               }
               actionButtonAriaLabel="Send"
               maxRows={6}
@@ -1006,9 +1006,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                     readyState === ReadyState.OPEN
                       ? "success"
                       : readyState === ReadyState.CONNECTING ||
-                          readyState === ReadyState.UNINSTANTIATED
-                        ? "in-progress"
-                        : "error"
+                        readyState === ReadyState.UNINSTANTIATED
+                      ? "in-progress"
+                      : "error"
                   }
                 >
                   {readyState === ReadyState.OPEN
