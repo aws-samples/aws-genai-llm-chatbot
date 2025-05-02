@@ -13,3 +13,4 @@ pyopenssl==24.3.0
 cryptography==44.0.1
 boto3
 -r lib/shared/layers/common/requirements.txt --find-links=lib/shared/layers/common
+-r lib/chatbot-api/functions/resolvers/send-query-lambda-resolver/requirements.txt
