@@ -34,7 +34,9 @@ export class ChatBotDynamoDBTables extends Construct {
         props.retainOnDelete === true
           ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
           : cdk.RemovalPolicy.DESTROY,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
       deletionProtection: props.deletionProtection,
     });
 

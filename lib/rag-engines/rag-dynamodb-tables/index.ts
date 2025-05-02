@@ -35,7 +35,9 @@ export class RagDynamoDBTables extends Construct {
         ? dynamodb.TableEncryption.CUSTOMER_MANAGED
         : dynamodb.TableEncryption.AWS_MANAGED,
       encryptionKey: props.kmsKey,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
       removalPolicy:
         props.retainOnDelete === true
           ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
@@ -69,7 +71,9 @@ export class RagDynamoDBTables extends Construct {
         ? dynamodb.TableEncryption.CUSTOMER_MANAGED
         : dynamodb.TableEncryption.AWS_MANAGED,
       encryptionKey: props.kmsKey,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
       removalPolicy:
         props.retainOnDelete === true
           ? cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
