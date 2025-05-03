@@ -11,6 +11,7 @@ import {
   SystemConfig,
   SupportedBedrockRegion,
   ModelConfig,
+  SupportedBedrockKnowledgeBaseRegion,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version.js";
 import * as fs from "fs";
@@ -787,11 +788,13 @@ async function processCreateOptions(options: any): Promise<void> {
         type: "autocomplete",
         limit: 8,
         name: "region",
-        choices: ["us-east-1", "us-west-2"],
+        choices: Object.values(SupportedBedrockKnowledgeBaseRegion),
         message: `Region of the Bedrock Knowledge Base index${
           existingIndex?.region ? " (" + existingIndex?.region + ")" : ""
         }`,
-        initial: ["us-east-1", "us-west-2"].indexOf(existingIndex?.region),
+        initial: Object.values(SupportedBedrockKnowledgeBaseRegion).indexOf(
+          existingIndex?.region
+        ),
       },
       {
         type: "input",
