@@ -118,6 +118,7 @@ exports[`snapshot test 1`] = `
         "UserPoolAddOns": {
           "AdvancedSecurityMode": "ENFORCED",
         },
+        "UserPoolTier": "PLUS",
         "UsernameAttributes": [
           "email",
         ],
