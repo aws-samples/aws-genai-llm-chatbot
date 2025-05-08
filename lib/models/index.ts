@@ -28,11 +28,13 @@ export interface ModelsProps {
 export class Models extends Construct {
   public readonly models: SageMakerModelEndpoint[];
   public readonly modelsParameter: ssm.StringParameter;
+  public readonly bedrockEnabledModelsParameter: ssm.StringParameter;
 
   constructor(scope: Construct, id: string, props: ModelsProps) {
     super(scope, id);
 
     const models: SageMakerModelEndpoint[] = [];
+    const bedrockEnabledModels: string[] = ['anthropic.claude-3-haiku-20240307-v1:0', 'anthropic.claude-3-sonnet-20240229-v1:0'];
 
     let hfTokenSecret: secretsmanager.Secret | undefined;
     if (props.config.llms.huggingfaceApiSecretArn) {
@@ -422,8 +424,15 @@ export class Models extends Construct {
       ),
     });
 
+    const bedrockEnabledModelsParameter = new ssm.StringParameter(this, "BedrockEnabledModelsParameter", {
+      stringValue: JSON.stringify(
+        bedrockEnabledModels
+      ),
+    });
+
     this.models = models;
     this.modelsParameter = modelsParameter;
+    this.bedrockEnabledModelsParameter = bedrockEnabledModelsParameter;
 
     if (models.length > 0 && props.config.llms?.sagemakerSchedule?.enabled) {
       const schedulerRole: iam.Role = new iam.Role(this, "SchedulerRole", {

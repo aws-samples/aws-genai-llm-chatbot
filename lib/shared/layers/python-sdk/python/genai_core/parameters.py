@@ -5,6 +5,7 @@ X_ORIGIN_VERIFY_SECRET_ARN = os.environ.get("X_ORIGIN_VERIFY_SECRET_ARN")
 API_KEYS_SECRETS_ARN = os.environ.get("API_KEYS_SECRETS_ARN")
 CONFIG_PARAMETER_NAME = os.environ.get("CONFIG_PARAMETER_NAME")
 MODELS_PARAMETER_NAME = os.environ.get("MODELS_PARAMETER_NAME")
+BEDROCK_ENABLED_MODELS_PARAMETER_NAME = os.environ.get("BEDROCK_ENABLED_MODELS_PARAMETER_NAME")
 
 
 def get_external_api_key(name: str):
@@ -32,3 +33,6 @@ def get_config():
 
 def get_sagemaker_models():
     return parameters.get_parameter(MODELS_PARAMETER_NAME, transform="json", max_age=30)
+
+def get_enabled_bedrock_models():
+    return parameters.get_parameter(BEDROCK_ENABLED_MODELS_PARAMETER_NAME, transform="json", max_age=30)
