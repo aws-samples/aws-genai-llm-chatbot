@@ -122,11 +122,19 @@ exports[`snapshot test with CMK 1`] = `
   },
   "Outputs": {
     "AuthenticationUserPoolIdF0D106F7": {
+      "Description": "User pool id for the chatbot application.",
+      "Export": {
+        "Name": "ChatbotUserPoolId",
+      },
       "Value": {
         "Ref": "AuthenticationUserPool28698864",
       },
     },
     "AuthenticationUserPoolLink55CE7EC4": {
+      "Description": "Link to user pool of the chatbot application.",
+      "Export": {
+        "Name": "ChatbotUserPoolLink",
+      },
       "Value": {
         "Fn::Join": [
           "",
@@ -141,23 +149,34 @@ exports[`snapshot test with CMK 1`] = `
       },
     },
     "AuthenticationUserPoolWebClientId80D5526A": {
+      "Description": "App client id for the chatbot application.",
+      "Export": {
+        "Name": "ChatbotUserPoolClientId",
+      },
       "Value": {
         "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
       },
     },
-    "ChatBotApiGraphqlAPIURL702C0AD7": {
-      "Value": {
-        "Fn::GetAtt": [
-          "ChatBotApiChatbotApiBABF9B87",
-          "GraphQLUrl",
-        ],
+    "ChatBotApiGraphQLApiIdD57A1352": {
+      "Export": {
+        "Name": "GraphQLApiId",
       },
-    },
-    "ChatBotApiGraphqlapiIdF7B33EFE": {
       "Value": {
         "Fn::GetAtt": [
           "ChatBotApiChatbotApiBABF9B87",
           "ApiId",
+        ],
+      },
+    },
+    "ChatBotApiGraphQLApiUrl60848283": {
+      "Description": "Graphql API URL",
+      "Export": {
+        "Name": "GraphQLApiUrl",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ChatBotApiChatbotApiBABF9B87",
+          "GraphQLUrl",
         ],
       },
     },
@@ -184,6 +203,9 @@ exports[`snapshot test with CMK 1`] = `
       },
     },
     "SharedApiKeysSecretName3D265ECA": {
+      "Export": {
+        "Name": "ApiKeysSecretName",
+      },
       "Value": {
         "Fn::Join": [
           "-",
@@ -238,10 +260,18 @@ exports[`snapshot test with CMK 1`] = `
         ],
       },
     },
-    "UserInterfacePrivateWebsiteDomain028FEE0A": {
+    "UserInterfacePrivateWebsiteprefixDomain13BCE3B9": {
+      "Description": "URL of the private website",
+      "Export": {
+        "Name": "prefixDomain",
+      },
       "Value": "https://undefined",
     },
-    "UserInterfacePrivateWebsiteLoadBalancerDNSA116C894": {
+    "UserInterfacePrivateWebsiteprefixLoadBalancerDNSF12B0663": {
+      "Description": "DNS of the ALB",
+      "Export": {
+        "Name": "prefixLoadBalancerDNS",
+      },
       "Value": {
         "Fn::GetAtt": [
           "UserInterfacePrivateWebsiteALB67ED856F",
@@ -496,7 +526,7 @@ exports[`snapshot test with CMK 1`] = `
     "AuthenticationWorkspaceManagerGroupB3DA7503": {
       "Properties": {
         "Description": "Workspace managers group",
-        "GroupName": "workspace_manager",
+        "GroupName": "workspace-manager",
         "UserPoolId": {
           "Ref": "AuthenticationUserPool28698864",
         },
@@ -18010,7 +18040,7 @@ schema {
     "SharedConfig358B4A20": {
       "Properties": {
         "Type": "String",
-        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]","Idefics_80b (Multimodal) [ml.g5.48xlarge]"]},"rag":{"crossEncodingEnabled":true,"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true},"knowledgeBase":{"enabled":false}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]},"createCMKs":true,"retainOnDelete":true}",
+        "Value": "{"prefix":"prefix","privateWebsite":true,"certificate":"","cfGeoRestrictEnable":true,"cfGeoRestrictList":[],"bedrock":{"enabled":true,"region":"us-east-1"},"nexus":{"enabled":false,"gatewayUrl":"https://example-nexus-gateway.com","clientId":"test-client-id","clientSecret":"test-client-secret"},"llms":{"sagemaker":["FalconLite [ml.g5.12xlarge]","Idefics_80b (Multimodal) [ml.g5.48xlarge]"]},"rag":{"crossEncodingEnabled":true,"enabled":true,"engines":{"aurora":{"enabled":true},"opensearch":{"enabled":true},"kendra":{"enabled":true,"createIndex":true,"enterprise":true},"knowledgeBase":{"enabled":false}},"embeddingsModels":[{"provider":"sagemaker","name":"intfloat/multilingual-e5-large","dimensions":1024},{"provider":"sagemaker","name":"sentence-transformers/all-MiniLM-L6-v2","dimensions":384},{"provider":"bedrock","name":"amazon.titan-embed-text-v1","dimensions":1536},{"provider":"bedrock","name":"amazon.titan-embed-image-v1","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-english-v3","dimensions":1024},{"provider":"bedrock","name":"cohere.embed-multilingual-v3","dimensions":1024,"default":true},{"provider":"openai","name":"text-embedding-ada-002","dimensions":1536}],"crossEncoderModels":[{"provider":"sagemaker","name":"cross-encoder/ms-marco-MiniLM-L-12-v2","default":true}]},"createCMKs":true,"retainOnDelete":true}",
       },
       "Type": "AWS::SSM::Parameter",
     },

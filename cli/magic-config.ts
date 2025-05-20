@@ -6,13 +6,13 @@
 import { Command } from "commander";
 import * as enquirer from "enquirer";
 import {
+  ModelConfig,
+  SupportedBedrockRegion,
   SupportedRegion,
   SupportedSageMakerModels,
   SystemConfig,
-  SupportedBedrockRegion,
-  ModelConfig,
 } from "../lib/shared/types";
-import { LIB_VERSION } from "./version.js";
+import { LIB_VERSION } from "./version";
 import * as fs from "fs";
 import { AWSCronValidator } from "./aws-cron-validator";
 import { tz } from "moment-timezone";
@@ -24,22 +24,20 @@ import { StringUtils } from "turbocommons-ts";
 
 function getTimeZonesWithCurrentTime(): { message: string; name: string }[] {
   const timeZones = tz.names(); // Get a list of all timezones
-  const timeZoneData = timeZones.map((zone) => {
+  return timeZones.map((zone) => {
     // Get current time in each timezone
     const currentTime = tz(zone).format("YYYY-MM-DD HH:mm");
     return { message: `${zone}: ${currentTime}`, name: zone };
   });
-  return timeZoneData;
 }
 
 function getCountryCodesAndNames(): { message: string; name: string }[] {
   // Use country-list to get an array of countries with their codes and names
   const countries = getData();
   // Map the country data to match the desired output structure
-  const countryInfo = countries.map(({ code, name }) => {
+  return countries.map(({ code, name }) => {
     return { message: `${name} (${code})`, name: code };
   });
-  return countryInfo;
 }
 
 function isValidDate(dateString: string): boolean {
@@ -68,11 +66,7 @@ function isValidDate(dateString: string): boolean {
   // Check if the date is in the future compared to the current date at 00:00:00
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  if (date <= today) {
-    return false;
-  }
-
-  return true;
+  return date > today;
 }
 
 const timeZoneData = getTimeZonesWithCurrentTime();
@@ -134,6 +128,57 @@ const embeddingModels: ModelConfig[] = [
   },
 ];
 
+// Helper functions for environment variable handling
+function getEnvVar(
+  name: string | undefined,
+  envPrefix?: string
+): string | undefined {
+  if (!name) return undefined;
+
+  // Check for prefixed version if prefix is provided, then fall back to direct name
+  const prefixedName = envPrefix ? `${envPrefix}${name}` : undefined;
+  return prefixedName
+    ? (process.env[prefixedName] ?? process.env[name])
+    : process.env[name];
+}
+
+// Parse boolean environment variables
+function parseBool(value: string | undefined): boolean {
+  return (value ?? "").toLowerCase() === "true";
+}
+
+// Parse JSON environment variables
+function parseJson<T>(value: string | undefined, defaultValue: T): T {
+  if (!value) return defaultValue;
+  try {
+    return JSON.parse(value) as T;
+  } catch (e) {
+    console.warn(`Failed to parse JSON from env var: ${value}`);
+    return defaultValue;
+  }
+}
+
+// Get environment variable with type conversion
+function getTypedEnvVar<T>(
+  name: string,
+  defaultValue: T,
+  envPrefix?: string
+): T {
+  const value = getEnvVar(name, envPrefix);
+  if (value === undefined) return defaultValue;
+
+  switch (typeof defaultValue) {
+    case "boolean":
+      return parseBool(value) as unknown as T;
+    case "number":
+      return Number(value) as unknown as T;
+    case "object":
+      return parseJson(value, defaultValue);
+    default:
+      return value as unknown as T;
+  }
+}
+
 /**
  * Main entry point
  */
@@ -145,6 +190,15 @@ const embeddingModels: ModelConfig[] = [
   program.version(LIB_VERSION);
 
   program.option("-p, --prefix <prefix>", "The prefix for the stack");
+  program.option(
+    "--non-interactive",
+    "Run in non-interactive mode for SeedFarmer deployment"
+  );
+  program.option("--deployment-type <type>", "Deployment type (e.g., 'nexus')");
+  program.option(
+    "--env-prefix <prefix>",
+    "Environment variable prefix for non-interactive mode"
+  );
 
   program.action(async (options) => {
     if (fs.existsSync("./bin/config.json")) {
@@ -161,6 +215,11 @@ const embeddingModels: ModelConfig[] = [
       options.bedrockRoleArn = config.bedrock?.roleArn;
       options.guardrailsEnable = config.bedrock?.guardrails?.enabled;
       options.guardrails = config.bedrock?.guardrails;
+      options.nexusEnable = config.nexus?.enabled;
+      options.nexusGatewayUrl = config.nexus?.gatewayUrl;
+      options.nexusTokenUrl = config.nexus?.tokenUrl;
+      options.nexusAuthClientId = config.nexus?.clientId;
+      options.nexusAuthClientSecret = config.nexus?.clientSecret;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
@@ -244,7 +303,434 @@ const embeddingModels: ModelConfig[] = [
       options.cfGeoRestrictEnable = config.cfGeoRestrictEnable;
       options.cfGeoRestrictList = config.cfGeoRestrictList;
     }
+
     try {
+      // SeedFarmer deployment detection
+      if (
+        options.nonInteractive ||
+        process.env.SEEDFARMER_DEPLOYMENT === "true"
+      ) {
+        console.log(
+          "Running in non-interactive mode for SeedFarmer deployment"
+        );
+
+        // Create a base config structure
+        const defaultConfig: SystemConfig = {
+          prefix: getTypedEnvVar<string>(
+            "PREFIX",
+            "genai-chatbot",
+            options.envPrefix
+          ),
+          createCMKs: getTypedEnvVar<boolean>(
+            "CREATE_CMKS",
+            false,
+            options.envPrefix
+          ),
+          retainOnDelete: getTypedEnvVar<boolean>(
+            "RETAIN_ON_DELETE",
+            false,
+            options.envPrefix
+          ),
+          ddbDeletionProtection: getTypedEnvVar<boolean>(
+            "DDB_DELETION_PROTECTION",
+            false,
+            options.envPrefix
+          ),
+
+          // VPC Configuration
+          vpc: getTypedEnvVar<string>("VPC_ID", "", options.envPrefix)
+            ? {
+                vpcId: getTypedEnvVar<string>("VPC_ID", "", options.envPrefix),
+                createVpcEndpoints: getTypedEnvVar<boolean>(
+                  "CREATE_VPC_ENDPOINTS",
+                  false,
+                  options.envPrefix
+                ),
+              }
+            : undefined,
+
+          // Advanced settings
+          advancedMonitoring: getTypedEnvVar<boolean>(
+            "ADVANCED_MONITORING",
+            false,
+            options.envPrefix
+          ),
+          logRetention: getTypedEnvVar<number>(
+            "LOG_RETENTION",
+            7,
+            options.envPrefix
+          ),
+          rateLimitPerIP: getTypedEnvVar<number>(
+            "RATE_LIMIT_PER_IP",
+            400,
+            options.envPrefix
+          ),
+          privateWebsite: getTypedEnvVar<boolean>(
+            "PRIVATE_WEBSITE",
+            false,
+            options.envPrefix
+          ),
+          certificate: getTypedEnvVar<string>(
+            "CERTIFICATE_ARN",
+            "",
+            options.envPrefix
+          ),
+          domain: getTypedEnvVar<string>("DOMAIN_NAME", "", options.envPrefix),
+          cfGeoRestrictEnable: getTypedEnvVar<boolean>(
+            "CF_GEO_RESTRICT_ENABLE",
+            false,
+            options.envPrefix
+          ),
+          cfGeoRestrictList: getTypedEnvVar<string>(
+            "CF_GEO_RESTRICT_LIST",
+            "",
+            options.envPrefix
+          )
+            ? getTypedEnvVar<string>(
+                "CF_GEO_RESTRICT_LIST",
+                "",
+                options.envPrefix
+              )
+                .split(",")
+                .map((country) => country.trim())
+            : ([] as string[]),
+
+          // LLM Configuration
+          llms: {
+            sagemaker: getTypedEnvVar<string>(
+              "SAGEMAKER_MODELS",
+              "",
+              options.envPrefix
+            )
+              ? getTypedEnvVar<string>(
+                  "SAGEMAKER_MODELS",
+                  "",
+                  options.envPrefix
+                )
+                  .split(",")
+                  .map((model) => model.trim() as SupportedSageMakerModels)
+              : [],
+            rateLimitPerIP: getTypedEnvVar<number>(
+              "LLM_RATE_LIMIT_PER_IP",
+              100,
+              options.envPrefix
+            ),
+            huggingfaceApiSecretArn: getTypedEnvVar<string>(
+              "HUGGINGFACE_API_SECRET_ARN",
+              "",
+              options.envPrefix
+            ),
+            sagemakerSchedule: getTypedEnvVar<boolean>(
+              "SAGEMAKER_SCHEDULE_ENABLE",
+              false,
+              options.envPrefix
+            )
+              ? {
+                  enabled: true,
+                  timezonePicker: getTypedEnvVar<string>(
+                    "SAGEMAKER_SCHEDULE_TIMEZONE",
+                    "UTC",
+                    options.envPrefix
+                  ),
+                  enableCronFormat: getTypedEnvVar<boolean>(
+                    "SAGEMAKER_SCHEDULE_CRON_FORMAT",
+                    false,
+                    options.envPrefix
+                  ),
+                  sagemakerCronStartSchedule: getTypedEnvVar<string>(
+                    "SAGEMAKER_CRON_START_SCHEDULE",
+                    "0 8 ? * MON-FRI *",
+                    options.envPrefix
+                  ),
+                  sagemakerCronStopSchedule: getTypedEnvVar<string>(
+                    "SAGEMAKER_CRON_STOP_SCHEDULE",
+                    "0 18 ? * MON-FRI *",
+                    options.envPrefix
+                  ),
+                  daysForSchedule: getTypedEnvVar<string>(
+                    "SAGEMAKER_SCHEDULE_DAYS",
+                    "MON,TUE,WED,THU,FRI",
+                    options.envPrefix
+                  ),
+                  scheduleStartTime: getTypedEnvVar<string>(
+                    "SAGEMAKER_SCHEDULE_START_TIME",
+                    "08:00",
+                    options.envPrefix
+                  ),
+                  scheduleStopTime: getTypedEnvVar<string>(
+                    "SAGEMAKER_SCHEDULE_STOP_TIME",
+                    "18:00",
+                    options.envPrefix
+                  ),
+                  enableScheduleEndDate: getTypedEnvVar<boolean>(
+                    "SAGEMAKER_SCHEDULE_END_DATE_ENABLE",
+                    false,
+                    options.envPrefix
+                  ),
+                  startScheduleEndDate: getTypedEnvVar<string>(
+                    "SAGEMAKER_SCHEDULE_END_DATE",
+                    "",
+                    options.envPrefix
+                  ),
+                }
+              : undefined,
+          },
+
+          // RAG Configuration
+          rag: {
+            enabled: getTypedEnvVar<boolean>(
+              "RAG_ENABLE",
+              false,
+              options.envPrefix
+            ),
+            deployDefaultSagemakerModels: getTypedEnvVar<boolean>(
+              "RAG_DEPLOY_DEFAULT_SAGEMAKER_MODELS",
+              false,
+              options.envPrefix
+            ),
+            crossEncodingEnabled: getTypedEnvVar<boolean>(
+              "RAG_CROSS_ENCODING_ENABLE",
+              false,
+              options.envPrefix
+            ),
+            engines: {
+              aurora: {
+                enabled: getTypedEnvVar<boolean>(
+                  "RAG_AURORA_ENABLE",
+                  false,
+                  options.envPrefix
+                ),
+              },
+              opensearch: {
+                enabled: getTypedEnvVar<boolean>(
+                  "RAG_OPENSEARCH_ENABLE",
+                  false,
+                  options.envPrefix
+                ),
+              },
+              kendra: {
+                enabled: getTypedEnvVar<boolean>(
+                  "RAG_KENDRA_ENABLE",
+                  false,
+                  options.envPrefix
+                ),
+                createIndex: getTypedEnvVar<boolean>(
+                  "RAG_KENDRA_CREATE_INDEX",
+                  false,
+                  options.envPrefix
+                ),
+                external: getTypedEnvVar<any[]>(
+                  "RAG_KENDRA_EXTERNAL",
+                  [],
+                  options.envPrefix
+                ),
+                enterprise: getTypedEnvVar<boolean>(
+                  "RAG_KENDRA_ENTERPRISE",
+                  false,
+                  options.envPrefix
+                ),
+              },
+              knowledgeBase: {
+                enabled: getTypedEnvVar<boolean>(
+                  "RAG_KNOWLEDGE_BASE_ENABLE",
+                  false,
+                  options.envPrefix
+                ),
+                external: getTypedEnvVar<any[]>(
+                  "RAG_KNOWLEDGE_BASE_EXTERNAL",
+                  [],
+                  options.envPrefix
+                ),
+              },
+            },
+            embeddingsModels: [],
+            crossEncoderModels: [],
+          },
+        };
+
+        // Add conditional configurations
+
+        // Bedrock Configuration
+        if (
+          getTypedEnvVar<boolean>("BEDROCK_ENABLE", false, options.envPrefix)
+        ) {
+          defaultConfig.bedrock = {
+            enabled: true,
+            region: getTypedEnvVar<string>(
+              "BEDROCK_REGION",
+              "us-east-1",
+              options.envPrefix
+            ) as SupportedRegion,
+            roleArn: getTypedEnvVar<string>(
+              "BEDROCK_ROLE_ARN",
+              "",
+              options.envPrefix
+            ),
+          };
+
+          // Add guardrails if enabled
+          if (
+            getTypedEnvVar<boolean>(
+              "BEDROCK_GUARDRAILS_ENABLE",
+              false,
+              options.envPrefix
+            )
+          ) {
+            defaultConfig.bedrock.guardrails = {
+              enabled: true,
+              identifier: getTypedEnvVar<string>(
+                "BEDROCK_GUARDRAILS_ID",
+                "",
+                options.envPrefix
+              ),
+              version: getTypedEnvVar<string>(
+                "BEDROCK_GUARDRAILS_VERSION",
+                "DRAFT",
+                options.envPrefix
+              ),
+            };
+          }
+        }
+
+        // Nexus Gateway Configuration
+        if (getTypedEnvVar<boolean>("NEXUS_ENABLE", false, options.envPrefix)) {
+          defaultConfig.nexus = {
+            enabled: true,
+            gatewayUrl: getTypedEnvVar<string>(
+              "NEXUS_GATEWAY_URL",
+              "",
+              options.envPrefix
+            ),
+            tokenUrl: getTypedEnvVar<string>(
+              "NEXUS_AUTH_TOKEN_URL",
+              "",
+              options.envPrefix
+            ),
+            clientId: getTypedEnvVar<string>(
+              "NEXUS_AUTH_CLIENT_ID",
+              "",
+              options.envPrefix
+            ),
+            clientSecret: getTypedEnvVar<string>(
+              "NEXUS_AUTH_CLIENT_SECRET",
+              "",
+              options.envPrefix
+            ),
+          };
+        }
+
+        // Cognito Federation
+        if (
+          getTypedEnvVar<boolean>(
+            "COGNITO_FEDERATION_ENABLE",
+            false,
+            options.envPrefix
+          )
+        ) {
+          defaultConfig.cognitoFederation = {
+            enabled: true,
+            autoRedirect: getTypedEnvVar<boolean>(
+              "COGNITO_AUTO_REDIRECT",
+              false,
+              options.envPrefix
+            ),
+            customProviderName: getTypedEnvVar<string>(
+              "COGNITO_CUSTOM_PROVIDER_NAME",
+              "",
+              options.envPrefix
+            ),
+            customProviderType: getTypedEnvVar<string>(
+              "COGNITO_CUSTOM_PROVIDER_TYPE",
+              "",
+              options.envPrefix
+            ),
+            cognitoDomain: getTypedEnvVar<string>(
+              "COGNITO_DOMAIN",
+              `llm-cb-${randomBytes(8).toString("hex")}`,
+              options.envPrefix
+            ),
+          };
+
+          // Add SAML or OIDC config based on provider type
+          if (defaultConfig.cognitoFederation.customProviderType === "SAML") {
+            defaultConfig.cognitoFederation.customSAML = {
+              metadataDocumentUrl: getTypedEnvVar<string>(
+                "COGNITO_CUSTOM_PROVIDER_SAML_METADATA",
+                "",
+                options.envPrefix
+              ),
+            };
+          } else if (
+            defaultConfig.cognitoFederation.customProviderType === "OIDC"
+          ) {
+            defaultConfig.cognitoFederation.customOIDC = {
+              OIDCClient: getTypedEnvVar<string>(
+                "COGNITO_CUSTOM_PROVIDER_OIDC_CLIENT",
+                "",
+                options.envPrefix
+              ),
+              OIDCSecret: getTypedEnvVar<string>(
+                "COGNITO_CUSTOM_PROVIDER_OIDC_SECRET",
+                "",
+                options.envPrefix
+              ),
+              OIDCIssuerURL: getTypedEnvVar<string>(
+                "COGNITO_CUSTOM_PROVIDER_OIDC_ISSUER_URL",
+                "",
+                options.envPrefix
+              ),
+            };
+          }
+        }
+
+        // Configure embedding models if RAG is enabled
+        if (defaultConfig.rag.enabled) {
+          if (defaultConfig.rag.deployDefaultSagemakerModels) {
+            defaultConfig.rag.crossEncoderModels = [
+              {
+                provider: "sagemaker",
+                name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
+                default: true,
+              },
+            ];
+            defaultConfig.rag.embeddingsModels = embeddingModels;
+          } else {
+            defaultConfig.rag.embeddingsModels = embeddingModels.filter(
+              (model) => model.provider !== "sagemaker"
+            );
+          }
+
+          // Set default embedding model if specified
+          const defaultEmbeddingName = getTypedEnvVar<string>(
+            "RAG_DEFAULT_EMBEDDING_MODEL",
+            "",
+            options.envPrefix
+          );
+          if (
+            defaultEmbeddingName &&
+            defaultConfig.rag.embeddingsModels.length > 0
+          ) {
+            for (const model of defaultConfig.rag.embeddingsModels) {
+              model.default = model.name === defaultEmbeddingName;
+            }
+          }
+        }
+
+        // Apply any additional environment-specific configuration
+        if (
+          options.deploymentType === "default" ||
+          process.env.DEPLOYMENT_TYPE === "default"
+        ) {
+          console.log("Using default deployment configuration");
+          // Use base configuration - no special settings needed
+        }
+
+        // Write the configuration file
+        createConfig(defaultConfig);
+        return;
+      }
+
+      // Interactive mode (original functionality)
       await processCreateOptions(options);
     } catch (err) {
       console.error("Could not complete the operation.");
@@ -289,7 +775,7 @@ async function processCreateOptions(options: any): Promise<void> {
       name: "existingVpc",
       message:
         "Do you want to use existing vpc? (selecting false will create a new vpc)",
-      initial: options.vpcId ? true : false,
+      initial: !!options.vpcId,
     },
     {
       type: "input",
@@ -388,6 +874,61 @@ async function processCreateOptions(options: any): Promise<void> {
         return !(this as any).state.answers.guardrailsEnable;
       },
       initial: options.guardrails?.version ?? "DRAFT",
+    },
+    {
+      type: "confirm",
+      name: "nexusEnable",
+      message:
+        "Do you want to enable the Nexus Gateway for model access? (If enabled, this will be used exclusively for all model providers)",
+      initial: options.nexusEnable ?? false,
+    },
+    {
+      type: "input",
+      name: "nexusGatewayUrl",
+      message: "Nexus Gateway URL",
+      validate(v: string) {
+        return (this as any).skipped || (v && v.length > 0);
+      },
+      skip() {
+        return !(this as any).state.answers.nexusEnable;
+      },
+      initial: options.nexusGatewayUrl ?? "",
+    },
+    {
+      type: "input",
+      name: "nexusTokenUrl",
+      message: "Nexus Auth Token URL",
+      validate(v: string) {
+        return (this as any).skipped || (v && v.length > 0);
+      },
+      skip() {
+        return !(this as any).state.answers.nexusEnable;
+      },
+      initial: options.nexusTokenUrl ?? "",
+    },
+    {
+      type: "input",
+      name: "nexusAuthClientId",
+      message: "Nexus Gateway Authentication Client ID",
+      validate(v: string) {
+        return (this as any).skipped || (v && v.length > 0);
+      },
+      skip() {
+        return !(this as any).state.answers.nexusEnable;
+      },
+      initial: options.nexusAuthClientId ?? "",
+    },
+    {
+      type: "input",
+      name: "nexusAuthClientSecret",
+      message: "Nexus Gateway Authentication Client Secret",
+      validate(v: string) {
+        return (this as any).skipped || (v && v.length > 0);
+      },
+      skip() {
+        return !(this as any).state.answers.nexusEnable;
+      },
+      initial: options.nexusAuthClientSecret ?? "",
     },
     {
       type: "confirm",
@@ -956,7 +1497,7 @@ async function processCreateOptions(options: any): Promise<void> {
       name: "customPublicDomain",
       message:
         "Do you want to provide a custom domain name and corresponding certificate arn for the public website ?",
-      initial: options.domain ? true : false,
+      initial: !!options.domain,
       skip(): boolean {
         return (this as any).state.answers.privateWebsite;
       },
@@ -1266,6 +1807,15 @@ async function processCreateOptions(options: any): Promise<void> {
             identifier: answers.guardrailsIdentifier,
             version: answers.guardrailsVersion,
           },
+        }
+      : undefined,
+    nexus: answers.nexusEnable
+      ? {
+          enabled: answers.nexusEnable,
+          gatewayUrl: answers.nexusGatewayUrl,
+          tokenUrl: answers.nexusTokenUrl,
+          clientId: answers.nexusAuthClientId,
+          clientSecret: answers.nexusAuthClientSecret,
         }
       : undefined,
     llms: {

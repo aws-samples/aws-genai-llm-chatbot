@@ -1,0 +1,37 @@
+# AWS GenAI LLM Chatbot Configuration
+# --------------------------------
+# This file contains the configuration parameters for the AWS GenAI LLM Chatbot deployment.
+# Modify the values below to customize your deployment.
+
+# Core parameters
+# ------------------------------
+TARGET_ACCOUNT: 123456789012 # Your AWS Account ID
+PREFIX: chatbot           # Prefix for all resources (max 16 chars)
+BEDROCK_REGION: us-east-1 # AWS region for Amazon Bedrock
+
+DEPLOYMENT_TYPE: default  # Deployment type (default or custom)
+RETAIN_ON_DELETE: false    # Retain resources on delete
+CREATE_CMKS: false         # Create customer managed KMS keys
+
+# Bedrock integration
+# ------------------------------
+BEDROCK_ENABLE: false      # Enable Amazon Bedrock integration
+
+# RAG capabilities
+# ------------------------------
+RAG_ENABLE: false          # Enable RAG capabilities
+# RAG_OPENSEARCH_ENABLE: true # Use OpenSearch as vector store
+# RAG_AURORA_ENABLE: false  # Enable Aurora as RAG engine
+# RAG_KENDRA_ENABLE: false  # Enable Kendra as RAG engine
+# RAG_KENDRA_CREATE_INDEX: false # Create a new Kendra index
+# RAG_KENDRA_ENTERPRISE: false # Use Kendra Enterprise edition
+# RAG_KNOWLEDGE_BASE_ENABLE: false # Enable Knowledge Base as RAG engine
+# RAG_CROSS_ENCODING_ENABLE: false # Enable cross-encoding for RAG
+
+# Nexus integration (if needed)
+# ------------------------------
+NEXUS_ENABLE: false      # Enable Nexus integration
+# NEXUS_GATEWAY_URL: https://your-nexus-gateway.example.com # Nexus Gateway URL
+# NEXUS_AUTH_CLIENT_ID: client-12345    # Nexus Auth Client ID
+# NEXUS_AUTH_CLIENT_SECRET: secret-xyz  # Nexus Auth Client Secret
+# NEXUS_AUTH_TOKEN_URL: https://your-token-url.example.com  # Nexus Auth Token URL

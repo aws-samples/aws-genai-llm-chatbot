@@ -2,7 +2,7 @@
 // You might want to add this to the previous line --experimental-specifier-resolution=node
 
 import { Command } from "commander";
-import { LIB_VERSION } from "./version.js";
+import { LIB_VERSION } from "./version";
 
 (async () => {
   const program = new Command();

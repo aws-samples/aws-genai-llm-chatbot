@@ -4,11 +4,19 @@ exports[`snapshot test 1`] = `
 {
   "Outputs": {
     "AuthenticationConstructUserPoolId1F16F432": {
+      "Description": "User pool id for the chatbot application.",
+      "Export": {
+        "Name": "ChatbotUserPoolId",
+      },
       "Value": {
         "Ref": "AuthenticationConstructUserPoolFE5ABE04",
       },
     },
     "AuthenticationConstructUserPoolLinkD2A7A02D": {
+      "Description": "Link to user pool of the chatbot application.",
+      "Export": {
+        "Name": "ChatbotUserPoolLink",
+      },
       "Value": {
         "Fn::Join": [
           "",
@@ -30,6 +38,10 @@ exports[`snapshot test 1`] = `
       },
     },
     "AuthenticationConstructUserPoolWebClientId09F05333": {
+      "Description": "App client id for the chatbot application.",
+      "Export": {
+        "Name": "ChatbotUserPoolClientId",
+      },
       "Value": {
         "Ref": "AuthenticationConstructUserPoolUserPoolClientDCD6FB5B",
       },
@@ -205,7 +217,7 @@ exports[`snapshot test 1`] = `
     "AuthenticationConstructWorkspaceManagerGroup00E7A4D7": {
       "Properties": {
         "Description": "Workspace managers group",
-        "GroupName": "workspace_manager",
+        "GroupName": "workspace-manager",
         "UserPoolId": {
           "Ref": "AuthenticationConstructUserPoolFE5ABE04",
         },

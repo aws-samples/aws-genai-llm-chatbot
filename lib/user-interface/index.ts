@@ -5,8 +5,8 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
 import {
-  ExecSyncOptionsWithBufferEncoding,
   execSync,
+  ExecSyncOptionsWithBufferEncoding,
 } from "node:child_process";
 import * as path from "node:path";
 import { Shared } from "../shared";

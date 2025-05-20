@@ -461,3 +461,20 @@ lib/user-interface/react-app/src/graphql/subscriptions.ts
 /.project
 /.pydevproject
 /outputs.json
+
+# Hatch
+.hatch/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.env*
+.envrc.local
+.env.local
+node_modules
+.amazonq
+AmazonQ.md
+.DS_Store
+cdk-exports.json

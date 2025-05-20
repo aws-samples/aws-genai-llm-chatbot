@@ -1,23 +1,27 @@
-import os
 import json
-import time
+import os
 import random
-from aws_lambda_powertools import Logger
+import time
+from typing import Optional
+
 import botocore
 import numpy as np
-from genai_core.types import EmbeddingsModel, CommonError, Provider, Task
+from aws_lambda_powertools import Logger
+
 import genai_core.clients
 import genai_core.parameters
-from typing import List, Optional
+from genai_core.model_providers import get_model_provider
+from genai_core.types import CommonError, Task
+from genai_core.types import EmbeddingsModel, Provider
 
 SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
 logger = Logger()
 
 
 def generate_embeddings(
-    model: EmbeddingsModel, input: List[str], task: str = "store", batch_size: int = 50
-) -> List[List[float]]:
-    input = list(map(lambda x: x[:10000], input))
+    model: EmbeddingsModel, input: list[str], task: str = "store", batch_size: int = 50
+) -> list[list[float]]:
+    input = [x[:10000] for x in input]
 
     ret_value = []
     batch_split = [input[i : i + batch_size] for i in range(0, len(input), batch_size)]
@@ -36,39 +40,26 @@ def generate_embeddings(
 
 
 def get_embeddings_models():
-    config = genai_core.parameters.get_config()
-    models = config["rag"]["embeddingsModels"]
-
-    if not SAGEMAKER_RAG_MODELS_ENDPOINT:
-        models = list(filter(lambda x: x["provider"] != "sagemaker", models))
-
-    return models
+    return get_model_provider().get_embedding_models()
 
 
 def get_embeddings_model(provider: Provider, name: str) -> Optional[EmbeddingsModel]:
-    config = genai_core.parameters.get_config()
-    models = config["rag"]["embeddingsModels"]
-
-    for model in models:
-        if model["provider"] == provider and model["name"] == name:
-            return EmbeddingsModel(**model)
-
-    return None
+    return get_model_provider().get_embeddings_model(provider, name)
 
 
-def _generate_embeddings_openai(model: EmbeddingsModel, input: List[str]):
+def _generate_embeddings_openai(model: EmbeddingsModel, input: list[str]):
     openai = genai_core.clients.get_openai_client()
 
     if not openai:
         raise CommonError("OpenAI API is not available. Please set OPENAI_API_KEY.")
 
     data = openai.embeddings.create(input=input, model=model.name).data
-    ret_value = list(map(lambda x: x.embedding, data))
+    ret_value = [x.embedding for x in data]
 
     return ret_value
 
 
-def _generate_embeddings_bedrock(model: EmbeddingsModel, input: List[str], task: Task):
+def _generate_embeddings_bedrock(model: EmbeddingsModel, input: list[str], task: Task):
     bedrock = genai_core.clients.get_bedrock_client()
 
     if not bedrock:
@@ -83,7 +74,7 @@ def _generate_embeddings_bedrock(model: EmbeddingsModel, input: List[str], task:
         raise CommonError(f'Unknown embeddings provider "{model_provider}"')
 
 
-def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedrock):
+def _generate_embeddings_amazon(model: EmbeddingsModel, input: list[str], bedrock):
     ret_value = []
     for value in input:
         body = json.dumps({"inputText": value})
@@ -105,7 +96,7 @@ def _generate_embeddings_amazon(model: EmbeddingsModel, input: List[str], bedroc
 
 
 def _generate_embeddings_cohere(
-    model: EmbeddingsModel, input: List[str], task: Task, bedrock
+    model: EmbeddingsModel, input: list[str], task: Task, bedrock
 ):
     input_type = (
         Task.SEARCH_QUERY.value if task == Task.RETRIEVE else Task.SEARCH_DOCUMENT.value
@@ -123,7 +114,7 @@ def _generate_embeddings_cohere(
     return embeddings
 
 
-def _generate_embeddings_sagemaker(model: EmbeddingsModel, input: List[str]):
+def _generate_embeddings_sagemaker(model: EmbeddingsModel, input: list[str]):
     client = genai_core.clients.get_sagemaker_client()
 
     max_retries = 5

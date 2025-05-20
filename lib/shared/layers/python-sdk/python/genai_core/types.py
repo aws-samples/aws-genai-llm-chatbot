@@ -13,6 +13,8 @@ class EmbeddingsModel(BaseModel):
     name: str
     default: Optional[bool] = None
     dimensions: int
+    max_input_length: Optional[int] = None
+    original_provider: Optional[str] = None
 
 
 class CrossEncoderModel(BaseModel):
@@ -43,6 +45,13 @@ class Provider(Enum):
 
 
 class Modality(Enum):
+    TEXT = "TEXT"
+    IMAGE = "IMAGE"
+    EMBEDDING = "EMBEDDING"
+    VIDEO = "VIDEO"
+
+
+class ModelModality(Enum):
     TEXT = "TEXT"
     IMAGE = "IMAGE"
     EMBEDDING = "EMBEDDING"
