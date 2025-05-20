@@ -33,7 +33,8 @@
     "react-use-websocket": "^4.5.0",
     "regenerator-runtime": "^0.14.0",
     "remark-gfm": "^4.0.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "vite": "6.3.5"
   },
   "devDependencies": {
     "@types/luxon": "^3.3.2",
@@ -54,7 +55,6 @@
     "postcss": "^8.4.27",
     "sass": "^1.65.1",
     "typescript": "^5.0.2",
-    "vite": "^6.1.1",
     "zen-observable": "^0.10.0"
   },
   "overrides": {
