@@ -1,0 +1,46 @@
+{
+  "prefix": "genai-chatbot",
+  "createCMKs": false,
+  "retainOnDelete": false,
+  "bedrock": {
+    "enabled": false,
+    "region": "us-east-1"
+  },
+  "nexus": {
+    "enabled": false,
+    "gatewayUrl": "",
+    "tokenUrl": "",
+    "clientId": "",
+    "clientSecret": ""
+  },
+  "llms": {
+    "sagemaker": [],
+    "rateLimitPerIP": 100
+  },
+  "rag": {
+    "enabled": false,
+    "engines": {
+      "aurora": {
+        "enabled": false
+      },
+      "opensearch": {
+        "enabled": false
+      },
+      "kendra": {
+        "enabled": false,
+        "createIndex": false,
+        "external": [{}],
+        "enterprise": false
+      },
+      "knowledgeBase": {
+        "enabled": false,
+        "external": [{}]
+      }
+    },
+    "embeddingsModels": [],
+    "crossEncodingEnabled": false,
+    "crossEncoderModels": []
+  },
+  "cfGeoRestrictEnable": false,
+  "cfGeoRestrictList": []
+}

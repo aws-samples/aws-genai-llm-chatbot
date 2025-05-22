@@ -9,9 +9,10 @@ import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { Construct } from "constructs";
 import * as path from "path";
 import { Layer } from "../layer";
-import { SystemConfig, SupportedBedrockRegion } from "./types";
+import { SupportedBedrockRegion, SystemConfig } from "./types";
 import { SharedAssetBundler } from "./shared-asset-bundler";
 import { NagSuppressions } from "cdk-nag";
+import { getConstructId } from "../utils";
 
 const pythonRuntime = lambda.Runtime.PYTHON_3_11;
 const lambdaArchitecture = lambda.Architecture.X86_64;
@@ -253,7 +254,7 @@ export class Shared extends Construct {
 
     this.webACLRules = this.createWafRules(props.config.rateLimitPerIP ?? 400);
 
-    const configParameter = new ssm.StringParameter(this, "Config", {
+    this.configParameter = new ssm.StringParameter(this, "Config", {
       stringValue: JSON.stringify(props.config),
     });
 
@@ -301,14 +302,14 @@ export class Shared extends Construct {
     });
 
     this.vpc = vpc;
-    this.configParameter = configParameter;
     this.xOriginVerifySecret = xOriginVerifySecret;
     this.apiKeysSecret = apiKeysSecret;
     this.powerToolsLayer = powerToolsLayer;
     this.commonLayer = commonLayer.layer;
 
-    new cdk.CfnOutput(this, "ApiKeysSecretName", {
+    new cdk.CfnOutput(this, getConstructId("ApiKeysSecretName", props.config), {
       value: apiKeysSecret.secretName,
+      exportName: getConstructId("ApiKeysSecretName", props.config),
     });
 
     /**

@@ -9,6 +9,7 @@ import { Shared } from "../shared";
 import { SystemConfig } from "../shared/types";
 import { ChatBotApi } from "../chatbot-api";
 import { NagSuppressions } from "cdk-nag";
+import { getConstructId } from "../utils";
 
 export interface PublicWebsiteProps {
   readonly config: SystemConfig;
@@ -38,7 +39,7 @@ export class PublicWebsite extends Construct {
 
     const distributionLogsBucket = new s3.Bucket(
       this,
-      "DistributionLogsBucket",
+      getConstructId("DistributionLogsBucket", props.config),
       {
         objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -182,8 +183,10 @@ export class PublicWebsite extends Construct {
     // ###################################################
     // Outputs
     // ###################################################
-    new cdk.CfnOutput(this, "UserInterfaceDomainName", {
+    new cdk.CfnOutput(this, `${props.config.prefix}UserInterfaceDomainName`, {
       value: `https://${distribution.distributionDomainName}`,
+      description: "User Interface Domain Name",
+      exportName: `${props.config.prefix}ChatbotWebsiteUrl`,
     });
 
     NagSuppressions.addResourceSuppressions(distributionLogsBucket, [

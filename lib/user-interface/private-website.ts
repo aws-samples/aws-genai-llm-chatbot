@@ -229,12 +229,16 @@ export class PrivateWebsite extends Construct {
     // ###################################################
     // Outputs
     // ###################################################
-    new cdk.CfnOutput(this, "Domain", {
+    new cdk.CfnOutput(this, `${props.config.prefix}Domain`, {
       value: `https://${props.config.domain}`,
+      description: "URL of the private website",
+      exportName: `${props.config.prefix}Domain`,
     });
 
-    new cdk.CfnOutput(this, "LoadBalancerDNS", {
+    new cdk.CfnOutput(this, `${props.config.prefix}LoadBalancerDNS`, {
       value: loadBalancer.loadBalancerDnsName,
+      description: "DNS of the ALB",
+      exportName: `${props.config.prefix}LoadBalancerDNS`,
     });
 
     NagSuppressions.addResourceSuppressions(albSecurityGroup, [

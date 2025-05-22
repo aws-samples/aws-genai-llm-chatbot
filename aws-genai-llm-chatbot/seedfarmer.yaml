@@ -1,0 +1,3 @@
+project: nexus
+description: AWS GenAI LLM Chatbot with RAG capabilities
+readme: README.md

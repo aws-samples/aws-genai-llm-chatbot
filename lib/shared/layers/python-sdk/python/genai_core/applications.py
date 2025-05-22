@@ -102,7 +102,7 @@ def create_application(
 
     validate_request(workspace=workspace, roles=roles, model=model)
 
-    output_modalities = genai_core.models._get_model_modalities(model)
+    output_modalities = genai_core.models.get_model_modalities(model)
     item = {
         "Id": application_id,
         "Name": name,
@@ -159,7 +159,7 @@ def update_application(
 
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     validate_request(workspace=workspace, roles=roles, model=model)
-    output_modalities = genai_core.models._get_model_modalities(model)
+    output_modalities = genai_core.models.get_model_modalities(model)
     item = {
         "Id": id,
         "Name": name,

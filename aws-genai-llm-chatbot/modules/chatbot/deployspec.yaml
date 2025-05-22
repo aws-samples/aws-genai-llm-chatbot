@@ -1,0 +1,19 @@
+deploy:
+  phases:
+    install:
+      commands:
+       - npm ci
+    build:
+      commands:
+        - env | grep NEXUS | sort | awk -F= '{printf "%-30s = %s\n", $1, $2}'
+        - npm run tsc
+        - npm run config -- --non-interactive --env-prefix NEXUS_PARAMETER_
+        - npm run deploy -- --require-approval never --progress events --outputs-file ./cdk-exports.json -v
+        - cat cdk-exports.json
+        - seedfarmer metadata convert -f cdk-exports.json || true
+destroy:
+  phases:
+    build:
+      commands:
+        - npm install -g aws-cdk
+        - cdk destroy --force

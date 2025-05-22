@@ -1,0 +1,13 @@
+name: ${DEPLOYMENT_NAME}
+toolchainRegion: ${AWS_REGION}
+targetAccountMappings:
+  - alias: primary
+    accountId: ${TARGET_ACCOUNT}
+    default: true
+    regionMappings:
+      - region: ${BEDROCK_REGION}
+        default: true
+groups:
+  - name: chatbot
+    path: modules/chatbot/module.yaml
+forceDependencyRedeploy: True

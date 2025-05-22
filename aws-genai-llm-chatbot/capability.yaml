@@ -1,0 +1,102 @@
+path: aws-genai-llm-chatbot
+version: 5.0.0
+type: SeedFarmer
+name: AWS GenAI LLM Chatbot
+description: Enterprise-ready generative AI chatbot with RAG capabilities
+exampleInputPath: assets/example-input.yaml
+labels:
+  - GenAI
+  - LLM
+  - Chatbot
+  - RAG
+  - Bedrock
+  - Claude
+  - Anthropic
+input:
+  - name: TARGET_ACCOUNT
+    type: String
+    description: AWS Account ID for deployment
+    label: AWS Account ID
+    isRequired: true
+  - name: PREFIX
+    type: String
+    description: Prefix to be used for all resources
+    defaultValue: genai-chatbot
+    label: Resource Prefix
+    isRequired: true
+  - name: BEDROCK_REGION
+    type: String
+    description: AWS Region where Bedrock is available
+    defaultValue: us-east-1
+    label: Bedrock Region
+    isRequired: true
+  - name: BEDROCK_ENABLE
+    type: Boolean
+    description: Enable Bedrock integration
+    defaultValue: false
+    label: Enable Bedrock
+    isRequired: false
+  - name: CREATE_CMKS
+    type: Boolean
+    description: Create Customer Managed Keys for encryption
+    defaultValue: false
+    label: Create Customer Managed Keys
+    isRequired: false
+  - name: RETAIN_ON_DELETE
+    type: Boolean
+    description: Retain resources on delete
+    defaultValue: false
+    label: Retain Resources on Delete
+    isRequired: false
+  - name: RAG_ENABLE
+    type: Boolean
+    description: Enable RAG capabilities
+    defaultValue: false
+    label: Enable RAG
+    isRequired: false
+  - name: DEPLOYMENT_TYPE
+    type: String
+    description: Deployment type (default or custom)
+    defaultValue: default
+    label: Deployment Type
+    isRequired: false
+  - name: RAG_OPENSEARCH_ENABLE
+    type: Boolean
+    description: Use OpenSearch as vector store
+    defaultValue: false
+    label: Enable OpenSearch for RAG
+    isRequired: false
+  - name: NEXUS_ENABLE
+    type: Boolean
+    description: Enable Nexus Gateway integration
+    defaultValue: false
+    label: Enable Nexus Gateway
+    isRequired: false
+  - name: NEXUS_GATEWAY_URL
+    type: String
+    description: URL of the Nexus Gateway API
+    defaultValue: ""
+    label: Nexus Gateway URL
+    isRequired: false
+  - name: NEXUS_AUTH_CLIENT_ID
+    type: String
+    description: Client ID for Nexus Gateway authentication
+    defaultValue: ""
+    label: Nexus Auth Client ID
+    isRequired: false
+  - name: NEXUS_AUTH_CLIENT_SECRET
+    type: String
+    description: Client secret for Nexus Gateway authentication
+    defaultValue: ""
+    label: Nexus Auth Client Secret
+    isRequired: false
+  - name: NEXUS_AUTH_TOKEN_URL
+    type: String
+    description: Token URL for Nexus Gateway authentication
+    defaultValue: ""
+    label: Nexus Auth Token URL
+    isRequired: false
+environments:
+  - name: DEPLOYMENT
+    description: Entire Capability Environment
+    label: Capability Deployment Environment

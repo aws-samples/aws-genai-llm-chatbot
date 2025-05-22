@@ -1,0 +1,67 @@
+name: chatbot
+path: modules/chatbot
+parameters:
+  - name: PREFIX
+    value: ${PREFIX}
+  - name: BEDROCK_REGION
+    value: ${BEDROCK_REGION}
+  - name: BEDROCK_ENABLE
+    value: ${BEDROCK_ENABLE}
+    required: true
+  - name: CREATE_CMKS
+    value: ${CREATE_CMKS}
+    required: true
+  - name: RETAIN_ON_DELETE
+    value: ${RETAIN_ON_DELETE}
+  - name: RAG_ENABLE
+    value: ${RAG_ENABLE}
+    required: true
+  - name: DEPLOYMENT_TYPE
+    value: ${DEPLOYMENT_TYPE}
+    required: true
+  - name: RAG_OPENSEARCH_ENABLE
+    value: ${RAG_OPENSEARCH_ENABLE}
+  - name: NEXUS_ENABLE
+    value: ${NEXUS_ENABLE}
+    required: true
+  - name: NEXUS_GATEWAY_URL
+    value: ${NEXUS_GATEWAY_URL}
+  - name: NEXUS_AUTH_CLIENT_ID
+    value: ${NEXUS_AUTH_CLIENT_ID}
+  - name: NEXUS_AUTH_CLIENT_SECRET
+    value: ${NEXUS_AUTH_CLIENT_SECRET}
+  - name: NEXUS_AUTH_TOKEN_URL
+    value: ${NEXUS_AUTH_TOKEN_URL}
+deploy:
+  stack: ${PREFIX}-chatbot
+outputs:
+  - name: webUrl
+    description: "URL of the deployed web interface"
+    exportName: ${PREFIX}UserInterfaceDomainName
+  - name: userPoolId
+    description: "Cognito User Pool ID"
+    exportName: ${PREFIX}ChatbotUserPoolId
+  - name: userPoolClientId
+    description: "Cognito User Pool Web Client ID"
+    exportName: ${PREFIX}ChatbotUserPoolClientId
+  - name: userPoolConsoleLink
+    description: "Link to manage users in the AWS Console"
+    exportName: ${PREFIX}ChatbotUserPoolLink
+  - name: graphqlApiUrl
+    description: "GraphQL API URL for the chatbot"
+    exportName: ${PREFIX}ChatbotGraphqlApiUrl
+  - name: graphqlApiId
+    description: "GraphQL API ID for the chatbot"
+    exportName: ${PREFIX}GraphQLApiId
+  - name: apiKeysSecretName
+    description: "Api Secret Key"
+    exportName: ${PREFIX}ApiKeysSecretName
+  - name: loadBalancerDNS
+    description: "DNS of the ALB"
+    exportName: ${PREFIX}LoadBalancerDNS
+  - name: domain
+    description: "URL of the private website"
+    exportName: ${PREFIX}Domain
+  - name: alarmTopic
+    description: "SNS Topic for composite alarms"
+    exportName: ${PREFIX}CompositeAlarmTopicOutput
