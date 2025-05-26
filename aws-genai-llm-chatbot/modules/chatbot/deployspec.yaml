@@ -3,6 +3,7 @@ deploy:
     install:
       commands:
        - npm ci
+       - npx @aws-amplify/cli codegen add --yes
     build:
       commands:
         - env | grep NEXUS | sort | awk -F= '{printf "%-30s = %s\n", $1, $2}'

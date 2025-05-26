@@ -35,6 +35,10 @@ show_usage() {
 
 # Function to prepare for vending (copy files)
 pre_vend() {
+  npx @aws-amplify/cli codegen --yes
+  npx rimraf lib/**/*.js.map
+  npx rimraf ./**/node_modules
+
   # Check if module directory exists
   if [ ! -d "$MODULE_DIR" ]; then
     echo "Module directory does not exist: $MODULE_DIR"
