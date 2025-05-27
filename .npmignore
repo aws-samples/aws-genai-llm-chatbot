@@ -1,6 +1,85 @@
+# Development files
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+jest.config.js
+coverage/
+
+# Source maps and TypeScript sources (we only need compiled JS)
+*.map
 *.ts
 !*.d.ts
+# Keep GraphQL generated TypeScript files
+!lib/user-interface/react-app/src/API.ts
+!lib/user-interface/react-app/src/graphql/*.ts
 
-# CDK asset staging directory
-.cdk.staging
-cdk.out
+# Documentation (except README.md which is needed)
+docs/
+documentation/
+*.md
+!README.md
+!aws-genai-llm-chatbot/README.md
+
+# Build artifacts and config files
+.github/
+.gitlab/
+.circleci/
+.travis.yml
+.eslintrc*
+.prettierrc*
+tsconfig.json
+tslint.json
+.vscode/
+.idea/
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Temporary files
+.DS_Store
+.env
+.env.*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.cache/
+
+# Build directories
+.aws-sam/
+.cdk.staging/
+cdk.out/
+dist/
+build/
+
+# Large directories that can be rebuilt
+node_modules
+lib/user-interface/react-app/node_modules
+aws-genai-llm-chatbot/modules/chatbot/lib/user-interface/react-app/node_modules
+
+# Scripts directory (except essential scripts)
+scripts/
+!scripts/vend-prep.sh
+
+# Examples and samples
+examples/
+samples/
+
+# CI/CD configuration
+buildspec.yml
+.npmrc
+.nvmrc
+
+# Backup files
+*.bak
+*~
+*.swp
+*.swo
+
+# Unnecessary package files
+package-lock.json
+yarn.lock

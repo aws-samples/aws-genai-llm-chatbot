@@ -8,7 +8,14 @@
   "engines": {
     "node": ">=18.0.0 <21.0.0"
   },
+  "files": [
+    "aws-genai-llm-chatbot",
+    "bin",
+    "lib",
+    "cdk.json"
+  ],
   "scripts": {
+    "tsc": "tsc",
     "build": "amplify codegen && tsc",
     "cdk": "cdk",
     "deploy": "npx cdk deploy",
@@ -16,8 +23,8 @@
     "watch": "cdk watch",
     "test": "jest",
     "pytest": "pytest tests/",
-    "prevend": "./scripts/vend-prep.sh --pre",
-    "postvend": "./scripts/vend-prep.sh --post",
+    "prepack": "./scripts/vend-prep.sh --pre",
+    "postpack": "./scripts/vend-prep.sh --post",
     "test-all": "npm run test && npm run pytest",
     "integtest": "pytest integtests/",
     "test:integration": "python -m pytest tests/integration/ -xvs",
