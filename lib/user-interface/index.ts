@@ -31,6 +31,7 @@ export interface UserInterfaceProps {
 export class UserInterface extends Construct {
   public readonly publishedDomain: string;
   public readonly cloudFrontDistribution?: cf.IDistribution;
+  public readonly privateWebsite?: PrivateWebsite;
 
   constructor(scope: Construct, id: string, props: UserInterfaceProps) {
     super(scope, id);
@@ -73,7 +74,7 @@ export class UserInterface extends Construct {
     let redirectSignIn: string;
 
     if (props.config.privateWebsite) {
-      new PrivateWebsite(this, "PrivateWebsite", {
+      this.privateWebsite = new PrivateWebsite(this, "PrivateWebsite", {
         ...props,
         websiteBucket: websiteBucket,
       });

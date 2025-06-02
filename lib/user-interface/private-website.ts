@@ -22,6 +22,8 @@ export interface PrivateWebsiteProps {
 }
 
 export class PrivateWebsite extends Construct {
+  public readonly loadBalancer: elbv2.ApplicationLoadBalancer;
+
   constructor(scope: Construct, id: string, props: PrivateWebsiteProps) {
     super(scope, id);
 
@@ -154,6 +156,7 @@ export class PrivateWebsite extends Construct {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       }),
     });
+    this.loadBalancer = loadBalancer;
 
     const albLogBucket = new s3.Bucket(this, "ALBLoggingBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
