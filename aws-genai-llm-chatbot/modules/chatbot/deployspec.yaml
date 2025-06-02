@@ -11,7 +11,7 @@ deploy:
         - npm run config -- --non-interactive --env-prefix NEXUS_PARAMETER_
         - npm run deploy -- --require-approval never --progress events --outputs-file ./cdk-exports.json -v
         - cat cdk-exports.json
-        - seedfarmer metadata convert -f cdk-exports.json || true
+        - seedfarmer metadata convert -f cdk-exports.json -jq .${NEXUS_PARAMETER_PREFIX}GenAIChatBotStack.metadata || true
 destroy:
   phases:
     build:

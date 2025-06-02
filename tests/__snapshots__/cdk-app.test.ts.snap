@@ -279,6 +279,103 @@ exports[`snapshot test with CMK 1`] = `
         ],
       },
     },
+    "metadata": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "{"ChatbotUserInterfaceDomainName":"","ChatbotUserPoolId":"",
+            {
+              "Ref": "AuthenticationUserPool28698864",
+            },
+            "","ChatbotUserPoolClientId":"",
+            {
+              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+            },
+            "","ChatbotUserPoolLink":"https://us-east-1.console.aws.amazon.com/cognito/v2/idp/user-pools/",
+            {
+              "Ref": "AuthenticationUserPool28698864",
+            },
+            "/users?region=us-east-1","ChatbotGraphqlApiUrl":"",
+            {
+              "Fn::GetAtt": [
+                "ChatBotApiChatbotApiBABF9B87",
+                "GraphQLUrl",
+              ],
+            },
+            "","ChatbotGraphQLApiId":"",
+            {
+              "Fn::GetAtt": [
+                "ChatBotApiChatbotApiBABF9B87",
+                "ApiId",
+              ],
+            },
+            "","ChatbotApiKeysSecretName":"",
+            {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Fn::Select": [
+                      0,
+                      {
+                        "Fn::Split": [
+                          "-",
+                          {
+                            "Fn::Select": [
+                              6,
+                              {
+                                "Fn::Split": [
+                                  ":",
+                                  {
+                                    "Ref": "SharedApiKeysSecret9EA666ED",
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    "Fn::Select": [
+                      1,
+                      {
+                        "Fn::Split": [
+                          "-",
+                          {
+                            "Fn::Select": [
+                              6,
+                              {
+                                "Fn::Split": [
+                                  ":",
+                                  {
+                                    "Ref": "SharedApiKeysSecret9EA666ED",
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              ],
+            },
+            "","ChatbotLoadBalancerDNS":"",
+            {
+              "Fn::GetAtt": [
+                "UserInterfacePrivateWebsiteALB67ED856F",
+                "DNSName",
+              ],
+            },
+            "","ChatbotDomain":"","ChatbotCompositeAlarmTopicOutput":""}",
+          ],
+        ],
+      },
+    },
   },
   "Parameters": {
     "BootstrapVersion": {

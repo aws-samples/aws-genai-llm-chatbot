@@ -626,5 +626,28 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         ]
       );
     }
+
+    new cdk.CfnOutput(this, "metadata", {
+      value: JSON.stringify({
+        ChatbotUserInterfaceDomainName: userInterface.cloudFrontDistribution
+          ?.distributionDomainName
+          ? `https://${userInterface.cloudFrontDistribution?.distributionDomainName}`
+          : "",
+        ChatbotUserPoolId: authentication.userPool.userPoolId,
+        ChatbotUserPoolClientId: authentication.userPoolClient.userPoolClientId,
+        ChatbotUserPoolLink: `https://${cdk.Stack.of(this).region}.console.aws.amazon.com/cognito/v2/idp/user-pools/${authentication.userPool.userPoolId}/users?region=${cdk.Stack.of(this).region}`,
+        ChatbotGraphqlApiUrl: chatBotApi.graphqlApi.graphqlUrl,
+        ChatbotGraphQLApiId: chatBotApi.graphqlApi.apiId,
+        ChatbotApiKeysSecretName: shared.apiKeysSecret.secretName,
+        ChatbotLoadBalancerDNS: userInterface.privateWebsite
+          ? userInterface.privateWebsite?.loadBalancer.loadBalancerDnsName
+          : "",
+        ChatbotDomain: userInterface.publishedDomain,
+        ChatbotCompositeAlarmTopicOutput:
+          monitoringConstruct.compositeAlarmTopic
+            ? monitoringConstruct.compositeAlarmTopic.topicName
+            : "",
+      }),
+    });
   }
 }
