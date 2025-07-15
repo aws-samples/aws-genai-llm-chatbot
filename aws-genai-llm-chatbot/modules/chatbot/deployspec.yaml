@@ -6,10 +6,11 @@ deploy:
        - npx @aws-amplify/cli codegen add --yes
     build:
       commands:
+        - mkdir -p /root/.cdk/cache
         - env | grep NEXUS | sort | awk -F= '{printf "%-30s = %s\n", $1, $2}'
         - npm run tsc
         - npm run config -- --non-interactive --env-prefix NEXUS_PARAMETER_
-        - npm run deploy -- --require-approval never --progress events --outputs-file ./cdk-exports.json -v
+        - npm run deploy -- --require-approval never --progress events --outputs-file ./cdk-exports.json -v --no-notices
         - cat cdk-exports.json
         - seedfarmer metadata convert -f cdk-exports.json -jq .${NEXUS_PARAMETER_PREFIX}GenAIChatBotStack.metadata || true
 destroy:

@@ -97,15 +97,18 @@ export class Monitoring extends Construct {
         ])
       )
     );
-    monitoring.addSegment(
-      new SingleWidgetDashboardSegment(
-        this.getLogsWidget(
-          "LLM Request Handlers Logs:",
-          props.llmRequestHandlersLogGroups,
-          []
+    // Only add LLM Request Handlers Logs widget if there are log groups
+    if (props.llmRequestHandlersLogGroups.length > 0) {
+      monitoring.addSegment(
+        new SingleWidgetDashboardSegment(
+          this.getLogsWidget(
+            "LLM Request Handlers Logs:",
+            props.llmRequestHandlersLogGroups,
+            []
+          )
         )
-      )
-    );
+      );
+    }
 
     if (props.advancedMonitoring) {
       this.addMetricFilter(
