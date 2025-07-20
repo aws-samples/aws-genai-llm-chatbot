@@ -47,7 +47,7 @@ export class Authentication extends Construct {
       getConstructId("WorkspaceManagerGroup", config),
       {
         userPoolId: userPool.userPoolId,
-        groupName: getConstructId("workspace-manager", config),
+        groupName: getConstructId("workspace_manager", config),
         description: "Workspace managers group",
       }
     );
