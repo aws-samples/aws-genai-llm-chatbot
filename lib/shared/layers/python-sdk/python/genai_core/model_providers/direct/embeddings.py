@@ -16,25 +16,85 @@ SAGEMAKER_RAG_MODELS_ENDPOINT = os.environ.get("SAGEMAKER_RAG_MODELS_ENDPOINT")
 logger = Logger()
 
 
+def get_model_token_limit(model_name):
+    # Extract provider from model name
+    model_provider = model_name.split(".")[0]
+
+    # https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html
+    # https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/embeddings
+    # https://docs.cohere.com/v2/docs/cohere-embed
+    PROVIDER_TOKEN_LIMITS = {
+        Provider.AMAZON.value: 8000,  # Amazon Titan models
+        Provider.COHERE.value: 512,  # Cohere models
+        Provider.OPENAI.value: 8191,  # OpenAI models
+        "default": 2500,  # Default fallback (2500 * 4 = 10000)
+    }
+
+    return PROVIDER_TOKEN_LIMITS.get(model_provider, PROVIDER_TOKEN_LIMITS["default"])
+
+
 def generate_embeddings(
     model: EmbeddingsModel, input: list[str], task: str = "store", batch_size: int = 50
 ) -> list[list[float]]:
-    input = [x[:10000] for x in input]
+    try:
+        # Get model-specific token limit
+        token_limit = get_model_token_limit(model.name)
+        char_limit = min(token_limit * 4, 10000)  # Use existing 10000 char limit as max
 
-    ret_value = []
-    batch_split = [input[i : i + batch_size] for i in range(0, len(input), batch_size)]
+        # Chunk inputs and track mapping
+        chunked_input = []
+        chunk_mapping = []
+        current_idx = 0
 
-    for batch in batch_split:
-        if model.provider == Provider.OPENAI.value:
-            ret_value.extend(_generate_embeddings_openai(model, batch))
-        elif model.provider == Provider.BEDROCK.value:
-            ret_value.extend(_generate_embeddings_bedrock(model, batch, task))
-        elif model.provider == Provider.SAGEMAKER.value:
-            ret_value.extend(_generate_embeddings_sagemaker(model, batch))
-        else:
-            raise CommonError(f"Unknown provider: {model.provider}")
+        for text in input:
+            # Split text into chunks if it exceeds the limit
+            if len(text) <= char_limit:
+                chunks = [text]
+            else:
+                chunks = [
+                    text[i : i + char_limit] for i in range(0, len(text), char_limit)
+                ]
 
-    return ret_value
+            # Track which chunks belong to which original input using a chunk map
+            chunk_indices = list(range(current_idx, current_idx + len(chunks)))
+            chunk_mapping.append(chunk_indices)
+            current_idx += len(chunks)
+
+            chunked_input.extend(chunks)
+
+        ret_value = []
+        batch_split = [
+            chunked_input[i : i + batch_size]
+            for i in range(0, len(chunked_input), batch_size)
+        ]
+
+        for batch in batch_split:
+            if model.provider == Provider.OPENAI.value:
+                ret_value.extend(_generate_embeddings_openai(model, batch))
+            elif model.provider == Provider.BEDROCK.value:
+                ret_value.extend(_generate_embeddings_bedrock(model, batch, task))
+            elif model.provider == Provider.SAGEMAKER.value:
+                ret_value.extend(_generate_embeddings_sagemaker(model, batch))
+            else:
+                raise CommonError(f"Unknown provider: {model.provider}")
+
+        # Combine embeddings from the same original input
+        final_embeddings = []
+        for chunks_idx in chunk_mapping:
+            if len(chunks_idx) == 1:
+                final_embeddings.append(ret_value[chunks_idx[0]])
+            else:
+                # Average the embeddings
+                chunk_embeddings = [ret_value[idx] for idx in chunks_idx]
+                avg_embedding = [
+                    sum(values) / len(values) for values in zip(*chunk_embeddings)
+                ]
+                final_embeddings.append(avg_embedding)
+
+        return final_embeddings
+    except Exception as e:
+        logger.error(f"Error in generate_embeddings: {str(e)}")
+        raise CommonError(f"Failed to generate embeddings: {str(e)}")
 
 
 def get_embeddings_models():

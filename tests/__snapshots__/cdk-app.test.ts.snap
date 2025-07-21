@@ -401,7 +401,7 @@ exports[`snapshot test with CMK 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
@@ -5088,7 +5088,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -5240,6 +5240,9 @@ schema {
         "IdeficsInterfaceChatbotFilesPrivateApifolderAFB6ED45",
         "IdeficsInterfaceChatbotFilesPrivateApiValidateRequest8E2961DC",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -7153,7 +7156,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -7813,7 +7816,7 @@ schema {
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-111111111-us-east-1/6bfd4d8a926f67663ab67101b78331bf1876d3676e313af98eaa66725c4ae111.json",
+              "/cdk-hnb659fds-assets-111111111-us-east-1/6d4aba5a12be2297b15b6358e902ebb31e4cb7c2d515de2924dcf6a34bbd3b07.json",
             ],
           ],
         },
@@ -9100,13 +9103,17 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEventServiceRoleD8C445F8",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -15628,13 +15635,17 @@ schema {
           },
         },
         "Handler": "framework.isComplete",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkisCompleteServiceRole839AE1FE",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -15840,13 +15851,17 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonEventServiceRoleF3392DDD",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -16056,13 +16071,17 @@ schema {
           },
         },
         "Handler": "framework.onTimeout",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonTimeoutServiceRole080F6A31",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -16287,22 +16306,6 @@ schema {
             ],
           ],
         },
-        "LoggingConfiguration": {
-          "Destinations": [
-            {
-              "CloudWatchLogsLogGroup": {
-                "LogGroupArn": {
-                  "Fn::GetAtt": [
-                    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01",
-                    "Arn",
-                  ],
-                },
-              },
-            },
-          ],
-          "IncludeExecutionData": false,
-          "Level": "ERROR",
-        },
         "RoleArn": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2",
@@ -16311,29 +16314,6 @@ schema {
         },
       },
       "Type": "AWS::StepFunctions::StateMachine",
-    },
-    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "RagEnginesSageMakerModelMultiAB24ACodeBuildProjectE6650C61",
-      ],
-      "Properties": {
-        "LogGroupName": {
-          "Fn::Join": [
-            "",
-            [
-              "/aws/vendedlogs/states/waiter-state-machine-",
-              {
-                "Ref": "RagEnginesSageMakerModelMultiAB24AProviderframeworkisComplete0D14240D",
-              },
-              "-c8db3e9c81ac5aa76d78a859f97c714abb206fdb93",
-            ],
-          ],
-        },
-        "RetentionInDays": 731,
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2": {
       "DependsOn": [
@@ -16435,22 +16415,6 @@ schema {
                   ],
                 },
               ],
-            },
-            {
-              "Action": [
-                "logs:CreateLogDelivery",
-                "logs:CreateLogStream",
-                "logs:GetLogDelivery",
-                "logs:UpdateLogDelivery",
-                "logs:DeleteLogDelivery",
-                "logs:ListLogDeliveries",
-                "logs:PutLogEvents",
-                "logs:PutResourcePolicy",
-                "logs:DescribeResourcePolicies",
-                "logs:DescribeLogGroups",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
