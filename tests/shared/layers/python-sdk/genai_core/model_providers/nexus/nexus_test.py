@@ -62,8 +62,10 @@ def test_nexus_client_initialization(mock_config):
 def test_list_models(mock_config, mock_nexus_models):
     """Test that list_models returns transformed models from the client"""
     # Set up mocks for config and client
-    with patch("genai_core.parameters.get_config") as mock_get_config, \
-         patch("genai_core.model_providers.nexus.nexus._nexus_client") as mock_func:
+    with (
+        patch("genai_core.parameters.get_config") as mock_get_config,
+        patch("genai_core.model_providers.nexus.nexus._nexus_client") as mock_func,
+    ):
         # Configure the mock client to return test models
         mock_client = MagicMock()
         mock_client.list_application_models.return_value = mock_nexus_models
@@ -100,8 +102,10 @@ def test_list_models(mock_config, mock_nexus_models):
 def test_list_models_error_handling(mock_config):
     """Test that list_models handles errors gracefully"""
     # Set up mocks for config and client
-    with patch("genai_core.parameters.get_config") as mock_get_config, \
-         patch("genai_core.model_providers.nexus.nexus._nexus_client") as mock_func:
+    with (
+        patch("genai_core.parameters.get_config") as mock_get_config,
+        patch("genai_core.model_providers.nexus.nexus._nexus_client") as mock_func,
+    ):
         # Configure the mock client to raise an exception
         mock_client = MagicMock()
         mock_client.list_application_models.side_effect = Exception("API error")
@@ -122,8 +126,10 @@ def test_list_models_error_handling(mock_config):
 def test_get_model_modalities(mock_config, mock_nexus_models):
     """Test that get_model_modalities returns correct modalities"""
     # Set up mocks for config and client
-    with patch("genai_core.parameters.get_config") as mock_get_config, \
-         patch("genai_core.model_providers.nexus.nexus._nexus_client") as mock_func:
+    with (
+        patch("genai_core.parameters.get_config") as mock_get_config,
+        patch("genai_core.model_providers.nexus.nexus._nexus_client") as mock_func,
+    ):
         # Configure the mock client to return test models
         mock_client = MagicMock()
         mock_client.list_application_models.return_value = mock_nexus_models

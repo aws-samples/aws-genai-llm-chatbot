@@ -12,12 +12,12 @@ class MockModelAdapter(ModelAdapter):
 
 @pytest.fixture
 def model_adapter():
-    with patch("genai_core.langchain.DynamoDBChatMessageHistory"), patch(
-        "genai_core.clients.get_bedrock_client"
-    ), patch("langchain.chains.conversation.base.ConversationChain"), patch(
-        "langchain.chains.ConversationalRetrievalChain"
-    ), patch(
-        "langchain_aws.ChatBedrockConverse.__init__", return_value=None
+    with (
+        patch("genai_core.langchain.DynamoDBChatMessageHistory"),
+        patch("genai_core.clients.get_bedrock_client"),
+        patch("langchain.chains.conversation.base.ConversationChain"),
+        patch("langchain.chains.ConversationalRetrievalChain"),
+        patch("langchain_aws.ChatBedrockConverse.__init__", return_value=None),
     ):
         adapter = MockModelAdapter(
             session_id="test_session",
