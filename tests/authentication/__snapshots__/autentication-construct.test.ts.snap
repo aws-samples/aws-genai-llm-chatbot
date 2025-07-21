@@ -217,7 +217,7 @@ exports[`snapshot test 1`] = `
     "AuthenticationConstructWorkspaceManagerGroup00E7A4D7": {
       "Properties": {
         "Description": "Workspace managers group",
-        "GroupName": "workspace-manager",
+        "GroupName": "workspace_manager",
         "UserPoolId": {
           "Ref": "AuthenticationConstructUserPoolFE5ABE04",
         },
