@@ -35,6 +35,9 @@ exports[`snapshot test 1`] = `
       "ap-southeast-4": {
         "value": "457447274322",
       },
+      "ap-southeast-6": {
+        "value": "633930458069",
+      },
       "ca-central-1": {
         "value": "763104351884",
       },
@@ -91,137 +94,6 @@ exports[`snapshot test 1`] = `
       },
       "us-west-2": {
         "value": "763104351884",
-      },
-    },
-    "LatestNodeRuntimeMap": {
-      "af-south-1": {
-        "value": "nodejs22.x",
-      },
-      "ap-east-1": {
-        "value": "nodejs22.x",
-      },
-      "ap-east-2": {
-        "value": "nodejs22.x",
-      },
-      "ap-northeast-1": {
-        "value": "nodejs22.x",
-      },
-      "ap-northeast-2": {
-        "value": "nodejs22.x",
-      },
-      "ap-northeast-3": {
-        "value": "nodejs22.x",
-      },
-      "ap-south-1": {
-        "value": "nodejs22.x",
-      },
-      "ap-south-2": {
-        "value": "nodejs22.x",
-      },
-      "ap-southeast-1": {
-        "value": "nodejs22.x",
-      },
-      "ap-southeast-2": {
-        "value": "nodejs22.x",
-      },
-      "ap-southeast-3": {
-        "value": "nodejs22.x",
-      },
-      "ap-southeast-4": {
-        "value": "nodejs22.x",
-      },
-      "ap-southeast-5": {
-        "value": "nodejs22.x",
-      },
-      "ap-southeast-7": {
-        "value": "nodejs22.x",
-      },
-      "ca-central-1": {
-        "value": "nodejs22.x",
-      },
-      "ca-west-1": {
-        "value": "nodejs22.x",
-      },
-      "cn-north-1": {
-        "value": "nodejs22.x",
-      },
-      "cn-northwest-1": {
-        "value": "nodejs22.x",
-      },
-      "eu-central-1": {
-        "value": "nodejs22.x",
-      },
-      "eu-central-2": {
-        "value": "nodejs22.x",
-      },
-      "eu-isoe-west-1": {
-        "value": "nodejs18.x",
-      },
-      "eu-north-1": {
-        "value": "nodejs22.x",
-      },
-      "eu-south-1": {
-        "value": "nodejs22.x",
-      },
-      "eu-south-2": {
-        "value": "nodejs22.x",
-      },
-      "eu-west-1": {
-        "value": "nodejs22.x",
-      },
-      "eu-west-2": {
-        "value": "nodejs22.x",
-      },
-      "eu-west-3": {
-        "value": "nodejs22.x",
-      },
-      "eusc-de-east-1": {
-        "value": "nodejs22.x",
-      },
-      "il-central-1": {
-        "value": "nodejs22.x",
-      },
-      "me-central-1": {
-        "value": "nodejs22.x",
-      },
-      "me-south-1": {
-        "value": "nodejs22.x",
-      },
-      "mx-central-1": {
-        "value": "nodejs22.x",
-      },
-      "sa-east-1": {
-        "value": "nodejs22.x",
-      },
-      "us-east-1": {
-        "value": "nodejs22.x",
-      },
-      "us-east-2": {
-        "value": "nodejs22.x",
-      },
-      "us-gov-east-1": {
-        "value": "nodejs22.x",
-      },
-      "us-gov-west-1": {
-        "value": "nodejs22.x",
-      },
-      "us-iso-east-1": {
-        "value": "nodejs18.x",
-      },
-      "us-iso-west-1": {
-        "value": "nodejs18.x",
-      },
-      "us-isob-east-1": {
-        "value": "nodejs18.x",
-      },
-      "us-isob-west-1": {
-        "value": "nodejs18.x",
-      },
-      "us-west-1": {
-        "value": "nodejs22.x",
-      },
-      "us-west-2": {
-        "value": "nodejs22.x",
       },
     },
     "RagEnginesSageMakerModelImageRepositoryCfnMappingF3891114": {
@@ -4945,15 +4817,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -4999,15 +4863,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -6688,15 +6544,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -13191,15 +13039,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -13373,15 +13213,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -13559,15 +13391,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",

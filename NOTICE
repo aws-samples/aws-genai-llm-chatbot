@@ -6,7 +6,7 @@ The following Python packages may be included in this product:
 - cfnresponse==1.1.2
 - opensearch-py==2.3.1
 - openai==0.28.0
-- requests==2.32.0
+- requests==2.32.4
 - huggingface-hub
 - hf-transfer
 - aws_xray_sdk==2.12.1
@@ -817,7 +817,7 @@ Agreement.
 
 The following Python packages may be included in this product:
 
-- urllib3<2
+- urllib3==2.5.0
 
 These packages each contain the following license and notice below:
 

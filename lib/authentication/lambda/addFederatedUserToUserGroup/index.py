@@ -72,7 +72,7 @@ def add_user_to_group(cognito, username, group_name, user_pool_id):
 
 def handler(event, context):
     print(f"Event received: {event}")
-    
+
     # Handle different trigger types with different event structures
     if "request" in event and "userAttributes" in event["request"]:
         # POST_AUTHENTICATION trigger
@@ -88,18 +88,30 @@ def handler(event, context):
         new_group = user_attributes.get("custom:chatbot_role")
         user_pool_id = event["userPoolId"]
         trigger_type = "PRE_AUTHENTICATION"
-    elif "request" in event and "userAttributes" in event["request"] and "validationData" in event["request"]:
+    elif (
+        "request" in event
+        and "userAttributes" in event["request"]
+        and "validationData" in event["request"]
+    ):
         # POST_CONFIRMATION trigger
         user_attributes = event["request"]["userAttributes"]
         username = user_attributes.get("sub") or user_attributes.get("username")
         new_group = user_attributes.get("custom:chatbot_role")
         user_pool_id = event["userPoolId"]
         trigger_type = "POST_CONFIRMATION"
-    elif "request" in event and "userAttributes" in event["request"] and "validationData" not in event["request"]:
+    elif (
+        "request" in event
+        and "userAttributes" in event["request"]
+        and "validationData" not in event["request"]
+    ):
         # PRE_SIGN_UP trigger
         user_attributes = event["request"]["userAttributes"]
         # For Pre sign-up, username might be in different fields
-        username = user_attributes.get("sub") or user_attributes.get("username") or user_attributes.get("email")
+        username = (
+            user_attributes.get("sub")
+            or user_attributes.get("username")
+            or user_attributes.get("email")
+        )
         new_group = user_attributes.get("custom:chatbot_role")
         user_pool_id = event["userPoolId"]
         trigger_type = "PRE_SIGN_UP"
@@ -115,7 +127,7 @@ def handler(event, context):
 
     # Get default group from environment variable or use 'user' as fallback
     default_group = os.environ.get("DEFAULT_USER_GROUP", "user")
-    
+
     # If no custom:chatbot_role is provided, use default group
     if not new_group:
         new_group = default_group
@@ -125,18 +137,22 @@ def handler(event, context):
     if trigger_type == "PRE_SIGN_UP":
         print("Pre sign-up trigger - user will be created after this trigger completes")
         print(f"Will assign user to group: {new_group}")
-        print("Note: Group assignment will happen in a separate trigger (POST_CONFIRMATION)")
-        
+        print(
+            "Note: Group assignment will happen in a separate \
+            trigger (POST_CONFIRMATION)"
+        )
+
         # For Pre sign-up, we can only validate or modify the sign-up request
         # We cannot assign groups yet as the user doesn't exist
-        # The group assignment will need to happen in POST_CONFIRMATION or PRE_AUTHENTICATION
-        
+        # The group assignment will need to happen in
+        # POST_CONFIRMATION or PRE_AUTHENTICATION
+
         # You might want to add the group information to the user attributes
         # so it can be used later in POST_CONFIRMATION
         if "custom:chatbot_role" not in user_attributes:
             user_attributes["custom:chatbot_role"] = new_group
             print(f"Added custom:chatbot_role attribute: {new_group}")
-        
+
         return event
 
     # For other triggers (PRE_AUTHENTICATION, POST_AUTHENTICATION, POST_CONFIRMATION)
