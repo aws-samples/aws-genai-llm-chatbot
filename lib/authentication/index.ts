@@ -308,18 +308,34 @@ export class Authentication extends Construct {
           role: lambdaRoleAddUserToGroup,
           logRetention: config.logRetention ?? logs.RetentionDays.ONE_WEEK,
           loggingFormat: lambda.LoggingFormat.JSON,
+          environment: {
+            DEFAULT_USER_GROUP: getConstructId("user", config),
+          },
         }
       );
 
       addFederatedUserToUserGroupLambda.addPermission(
-        "CognitoPostAuthTrigger",
+        "CognitoPreSignUpTrigger",
         {
           principal: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
           sourceArn: userPool.userPoolArn,
         }
       );
       userPool.addTrigger(
-        cognito.UserPoolOperation.POST_AUTHENTICATION,
+        cognito.UserPoolOperation.PRE_SIGN_UP,
+        addFederatedUserToUserGroupLambda
+      );
+
+      // Add a second trigger for POST_CONFIRMATION to handle group assignment
+      addFederatedUserToUserGroupLambda.addPermission(
+        "CognitoPostConfirmationTrigger",
+        {
+          principal: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
+          sourceArn: userPool.userPoolArn,
+        }
+      );
+      userPool.addTrigger(
+        cognito.UserPoolOperation.POST_CONFIRMATION,
         addFederatedUserToUserGroupLambda
       );
 
