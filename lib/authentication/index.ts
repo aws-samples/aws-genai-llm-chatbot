@@ -34,6 +34,9 @@ export class Authentication extends Construct {
       signInAliases: {
         email: true,
       },
+      customAttributes: {
+        chatbot_role: new cognito.StringAttribute({ mutable: true }),
+      },
     });
 
     new cognito.CfnUserPoolGroup(this, "AdminGroup", {
