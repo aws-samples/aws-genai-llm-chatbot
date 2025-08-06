@@ -45,8 +45,8 @@ import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
 import LLMConfigDialog from "./llm-config-dialog";
 import styles from "../../styles/chat.module.scss";
 import { useNavigate } from "react-router-dom";
-import { receiveMessages } from "../../graphql/subscriptions";
-import { sendQuery } from "../../graphql/mutations.ts";
+import { receiveMessages } from "../../subscriptions";
+import { sendQuery } from "../../mutations";
 import { Utils } from "../../common/utils";
 
 export interface ChatSession {

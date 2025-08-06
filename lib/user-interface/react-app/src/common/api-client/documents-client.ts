@@ -5,7 +5,7 @@ import {
   listDocuments,
   getUploadFileURL,
   getRSSPosts,
-} from "../../graphql/queries";
+} from "../../queries";
 import {
   addQnADocument,
   addRssFeed,
@@ -14,7 +14,7 @@ import {
   addWebsite,
   setDocumentSubscriptionStatus,
   deleteDocument,
-} from "../../graphql/mutations";
+} from "../../mutations";
 import {
   AddQnADocumentMutation,
   AddRssFeedMutation,

@@ -1,11 +1,11 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listApplications, getApplication } from "../../graphql/queries";
+import { listApplications, getApplication } from "../../queries";
 import {
   createApplication,
   deleteApplication,
   updateApplication,
-} from "../../graphql/mutations";
+} from "../../mutations";
 import {
   ListApplicationsQuery,
   GetApplicationQuery,

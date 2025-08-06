@@ -57,9 +57,9 @@ import {
   ChatBotToken,
   ChabotOutputModality,
 } from "./types";
-import { sendQuery } from "../../graphql/mutations";
+import { sendQuery } from "../../mutations";
+import { receiveMessages } from "../../subscriptions";
 import { getSelectedModelMetadata, updateMessageHistoryRef } from "./utils";
-import { receiveMessages } from "../../graphql/subscriptions";
 import { Utils } from "../../common/utils";
 import FileDialog from "./file-dialog";
 

@@ -1,7 +1,7 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listKendraIndexes, isKendraDataSynching } from "../../graphql/queries";
-import { startKendraDataSync } from "../../graphql/mutations";
+import { listKendraIndexes, isKendraDataSynching } from "../../queries";
+import { startKendraDataSync } from "../../mutations";
 import {
   ListKendraIndexesQuery,
   IsKendraDataSynchingQuery,

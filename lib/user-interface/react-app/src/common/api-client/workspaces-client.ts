@@ -1,13 +1,13 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listWorkspaces, getWorkspace } from "../../graphql/queries";
+import { listWorkspaces, getWorkspace } from "../../queries";
 import {
   createAuroraWorkspace,
   createKendraWorkspace,
   createOpenSearchWorkspace,
   createBedrockKBWorkspace,
   deleteWorkspace,
-} from "../../graphql/mutations";
+} from "../../mutations";
 import {
   ListWorkspacesQuery,
   GetWorkspaceQuery,
