@@ -4,7 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "GenAI Chatbot on AWS",
   description: "Building RAG use cases with GenAI Chatbot on AWS",
-  base: "/aws-genai-llm-chatbot/",
+  base: "/",
   outDir: '../dist',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
