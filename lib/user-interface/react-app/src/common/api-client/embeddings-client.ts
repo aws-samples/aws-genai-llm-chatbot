@@ -3,7 +3,7 @@ import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
 import {
   listEmbeddingModels,
   calculateEmbeddings,
-} from "../../graphql/queries";
+} from "../../queries";
 import { ListEmbeddingModelsQuery, CalculateEmbeddingsQuery } from "../../API";
 
 export class EmbeddingsClient {

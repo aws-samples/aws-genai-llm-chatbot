@@ -5,8 +5,8 @@ import {
   getSession,
   getUploadFileURL,
   getFileURL,
-} from "../../graphql/queries";
-import { deleteSession, deleteUserSessions } from "../../graphql/mutations";
+} from "../../queries";
+import { deleteSession, deleteUserSessions } from "../../mutations";
 import {
   ListSessionsQuery,
   GetSessionQuery,

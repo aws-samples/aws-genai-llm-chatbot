@@ -1,6 +1,6 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { performSemanticSearch } from "../../graphql/queries";
+import { performSemanticSearch } from "../../queries";
 import { PerformSemanticSearchQuery } from "../../API";
 
 export class SemanticSearchClient {

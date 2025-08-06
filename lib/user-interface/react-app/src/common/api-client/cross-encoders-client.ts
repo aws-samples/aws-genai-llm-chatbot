@@ -1,6 +1,6 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listCrossEncoders, rankPassages } from "../../graphql/queries";
+import { listCrossEncoders, rankPassages } from "../../queries";
 import { ListCrossEncodersQuery, RankPassagesQuery } from "../../API";
 
 export class CrossEncodersClient {

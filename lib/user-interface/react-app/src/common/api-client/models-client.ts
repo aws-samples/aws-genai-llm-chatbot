@@ -1,6 +1,6 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listModels } from "../../graphql/queries";
+import { listModels } from "../../queries";
 import { ListModelsQuery } from "../../API";
 
 export class ModelsClient {

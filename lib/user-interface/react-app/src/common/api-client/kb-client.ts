@@ -1,6 +1,6 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listBedrockKnowledgeBases } from "../../graphql/queries";
+import { listBedrockKnowledgeBases } from "../../queries";
 import { ListBedrockKnowledgeBasesQuery } from "../../API";
 
 export class BedrockKBClient {

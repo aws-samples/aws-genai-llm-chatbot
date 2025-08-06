@@ -1,6 +1,6 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listRoles } from "../../graphql/queries";
+import { listRoles } from "../../queries";
 import { ListRolesQuery } from "../../API";
 
 export class RolesClient {

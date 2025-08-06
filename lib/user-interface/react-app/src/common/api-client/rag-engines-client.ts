@@ -1,6 +1,6 @@
 import { API } from "aws-amplify";
 import { GraphQLQuery, GraphQLResult } from "@aws-amplify/api";
-import { listRagEngines } from "../../graphql/queries";
+import { listRagEngines } from "../../queries";
 import { ListRagEnginesQuery } from "../../API";
 
 export class RagEnginesClient {

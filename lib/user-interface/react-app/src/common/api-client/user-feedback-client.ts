@@ -1,7 +1,7 @@
 import { GraphQLResult } from "@aws-amplify/api-graphql";
 import { API, GraphQLQuery } from "@aws-amplify/api";
 import { AddUserFeedbackMutation } from "../../API.ts";
-import { addUserFeedback } from "../../graphql/mutations.ts";
+import { addUserFeedback } from "../../mutations";
 import { FeedbackData } from "../../components/chatbot/types.ts";
 
 export class UserFeedbackClient {
