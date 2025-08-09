@@ -17,6 +17,10 @@ jobs:
           npm ci
           cd -
           npm run lint
+      - name: Update CDK CLI
+        run: |
+          npm install -g aws-cdk@latest
+          cdk --version
       - name: Backend
         run: |
           npm ci
