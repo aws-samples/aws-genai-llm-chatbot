@@ -1,6 +1,7 @@
 import os
 import json
 import boto3
+from botocore.config import Config
 import genai_core.utils.json
 import genai_core.websites.crawler
 
@@ -8,7 +9,7 @@ PROCESSING_BUCKET_NAME = os.environ["INPUT_BUCKET_NAME"]
 WORKSPACE_ID = os.environ["WORKSPACE_ID"]
 DOCUMENT_ID = os.environ["DOCUMENT_ID"]
 OBJECT_KEY = os.environ["INPUT_OBJECT_KEY"]
-s3_client = boto3.client("s3")
+s3_client = boto3.client("s3", region_name = os.environ['AWS_REGION'], config = Config(signature_version = 's3v4'))
 
 
 def main():
