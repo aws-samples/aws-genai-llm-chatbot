@@ -11,7 +11,7 @@ from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 import adapters  # noqa: F401 Needed to register the adapters
-from genai_core.utils.websocket import send_to_client
+from genai_core.utils.websocket import send_to_client, CustomJSONEncoder
 from genai_core.types import ChatbotAction
 
 processor = BatchProcessor(event_type=EventType.SQS)

@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
+import * as iam from "aws-cdk-lib/aws-iam";
 import {
   Code,
   Function as LambdaFunction,
@@ -11,6 +12,7 @@ import {
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { Construct } from "constructs";
 import { Shared } from "../shared";
+import { SystemConfig } from "../shared/types";
 import { IQueue } from "aws-cdk-lib/aws-sqs";
 import { ITopic } from "aws-cdk-lib/aws-sns";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
@@ -29,6 +31,7 @@ interface RealtimeResolversProps {
   readonly logRetention?: number;
   readonly advancedMonitoring?: boolean;
   readonly applicationTable: dynamodb.Table;
+  readonly config?: SystemConfig;
 }
 
 export class RealtimeResolvers extends Construct {
@@ -58,6 +61,12 @@ export class RealtimeResolvers extends Construct {
         ...props.shared.defaultEnvironmentVariables,
         SNS_TOPIC_ARN: props.topic.topicArn,
         APPLICATIONS_TABLE_NAME: props.applicationTable.tableName,
+        ...(props.config?.bedrock?.agent?.enabled
+          ? {
+              BEDROCK_AGENT_ID: props.config.bedrock.agent.agentId,
+              BEDROCK_AGENT_VERSION: props.config.bedrock.agent.agentVersion,
+            }
+          : {}),
       },
       logRetention: props.logRetention,
       loggingFormat: LoggingFormat.JSON,
@@ -100,6 +109,20 @@ export class RealtimeResolvers extends Construct {
         resolverFunction.role,
         "kms:GenerateDataKey",
         "kms:Decrypt"
+      );
+    }
+    
+    // Grant permissions to invoke Bedrock agent if enabled
+    if (props.config?.bedrock?.agent?.enabled && resolverFunction.role) {
+      resolverFunction.addToRolePolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: [
+            "bedrock:InvokeAgent",
+            "bedrock:InvokeAgentAlias",
+          ],
+          resources: ["*"],
+        })
       );
     }
 

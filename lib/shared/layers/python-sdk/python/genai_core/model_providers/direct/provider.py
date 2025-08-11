@@ -39,6 +39,11 @@ class DirectModelProvider(ModelProvider, ABC):
         fine_tuned_models = _list_bedrock_finetuned_models()
         if fine_tuned_models:
             models.extend(fine_tuned_models)
+            
+        # Get Bedrock agent models
+        bedrock_agent_models = _list_bedrock_agent_models()
+        if bedrock_agent_models:
+            models.extend(bedrock_agent_models)
 
         # Get SageMaker models
         sagemaker_models = _list_sagemaker_models()
@@ -276,6 +281,36 @@ def _list_bedrock_finetuned_models():
         return models
     except Exception as e:
         logger.error(f"Error listing fine-tuned Bedrock models: {e}")
+        return None
+
+
+def _list_bedrock_agent_models():
+    """
+    List Bedrock agent models if enabled in the config
+    
+    Returns:
+        list[dict[str, Any]]: List of Bedrock agent model information dictionaries
+    """
+    try:
+        config = genai_core.parameters.get_config()
+        if not config.get("bedrock", {}).get("agent", {}).get("enabled", False):
+            return None
+        
+        # Only add the "agent" model, not the specific agent ID
+        return [
+            {
+                "provider": Provider.BEDROCK.value,
+                "name": "bedrock_agent",
+                "streaming": False,  # Agents don't support streaming
+                "inputModalities": [Modality.TEXT.value],
+                "outputModalities": [Modality.TEXT.value],
+                "interface": ModelInterface.LANGCHAIN.value,
+                "ragSupported": True,
+                "bedrockGuardrails": True,
+            }
+        ]
+    except Exception as e:
+        logger.error(f"Error listing Bedrock agent models: {e}")
         return None
 
 

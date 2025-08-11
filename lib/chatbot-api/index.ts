@@ -152,6 +152,7 @@ export class ChatBotApi extends Construct {
       logRetention: props.config.logRetention,
       advancedMonitoring: props.config.advancedMonitoring,
       applicationTable: applicationTables.applicationTable,
+      config: props.config,
     });
 
     this.resolvers.push(realtimeBackend.resolvers.sendQueryHandler);
