@@ -3,7 +3,7 @@ name: Deploy VitePress site to Pages
 on:
   # Runs on pushes targeting the `main` branch. Should be default branch
   push:
-    branches: [main]
+    branches: [eea_ai_dev]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
