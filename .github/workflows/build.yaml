@@ -7,9 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Install latest CDK CLI
+        run: |
+          npm install -g aws-cdk@latest
+          cdk --version
       - name: Formatting
         run: |
           npm ci
@@ -23,7 +27,7 @@ jobs:
           npm audit
           npm run build
           npm run test
-          npx cdk synth
+          cdk synth
       - name: PyTests
         # Suppression of pip audit failure until langchain is upgraded.
         run: |

@@ -8,6 +8,9 @@ exports[`snapshot test 1`] = `
       "ap-east-1": {
         "value": "871362719292",
       },
+      "ap-east-2": {
+        "value": "975050140332",
+      },
       "ap-northeast-1": {
         "value": "763104351884",
       },
@@ -31,6 +34,9 @@ exports[`snapshot test 1`] = `
       },
       "ap-southeast-4": {
         "value": "457447274322",
+      },
+      "ap-southeast-6": {
+        "value": "633930458069",
       },
       "ca-central-1": {
         "value": "763104351884",
@@ -65,6 +71,9 @@ exports[`snapshot test 1`] = `
       "eu-west-3": {
         "value": "763104351884",
       },
+      "eusc-de-east-1": {
+        "value": "204133271717",
+      },
       "me-central-1": {
         "value": "914824155844",
       },
@@ -85,128 +94,6 @@ exports[`snapshot test 1`] = `
       },
       "us-west-2": {
         "value": "763104351884",
-      },
-    },
-    "LatestNodeRuntimeMap": {
-      "af-south-1": {
-        "value": "nodejs20.x",
-      },
-      "ap-east-1": {
-        "value": "nodejs20.x",
-      },
-      "ap-northeast-1": {
-        "value": "nodejs20.x",
-      },
-      "ap-northeast-2": {
-        "value": "nodejs20.x",
-      },
-      "ap-northeast-3": {
-        "value": "nodejs20.x",
-      },
-      "ap-south-1": {
-        "value": "nodejs20.x",
-      },
-      "ap-south-2": {
-        "value": "nodejs20.x",
-      },
-      "ap-southeast-1": {
-        "value": "nodejs20.x",
-      },
-      "ap-southeast-2": {
-        "value": "nodejs20.x",
-      },
-      "ap-southeast-3": {
-        "value": "nodejs20.x",
-      },
-      "ap-southeast-4": {
-        "value": "nodejs20.x",
-      },
-      "ap-southeast-5": {
-        "value": "nodejs20.x",
-      },
-      "ap-southeast-7": {
-        "value": "nodejs20.x",
-      },
-      "ca-central-1": {
-        "value": "nodejs20.x",
-      },
-      "ca-west-1": {
-        "value": "nodejs20.x",
-      },
-      "cn-north-1": {
-        "value": "nodejs20.x",
-      },
-      "cn-northwest-1": {
-        "value": "nodejs20.x",
-      },
-      "eu-central-1": {
-        "value": "nodejs20.x",
-      },
-      "eu-central-2": {
-        "value": "nodejs20.x",
-      },
-      "eu-isoe-west-1": {
-        "value": "nodejs18.x",
-      },
-      "eu-north-1": {
-        "value": "nodejs20.x",
-      },
-      "eu-south-1": {
-        "value": "nodejs20.x",
-      },
-      "eu-south-2": {
-        "value": "nodejs20.x",
-      },
-      "eu-west-1": {
-        "value": "nodejs20.x",
-      },
-      "eu-west-2": {
-        "value": "nodejs20.x",
-      },
-      "eu-west-3": {
-        "value": "nodejs20.x",
-      },
-      "il-central-1": {
-        "value": "nodejs20.x",
-      },
-      "me-central-1": {
-        "value": "nodejs20.x",
-      },
-      "me-south-1": {
-        "value": "nodejs20.x",
-      },
-      "mx-central-1": {
-        "value": "nodejs20.x",
-      },
-      "sa-east-1": {
-        "value": "nodejs20.x",
-      },
-      "us-east-1": {
-        "value": "nodejs20.x",
-      },
-      "us-east-2": {
-        "value": "nodejs20.x",
-      },
-      "us-gov-east-1": {
-        "value": "nodejs20.x",
-      },
-      "us-gov-west-1": {
-        "value": "nodejs20.x",
-      },
-      "us-iso-east-1": {
-        "value": "nodejs18.x",
-      },
-      "us-iso-west-1": {
-        "value": "nodejs18.x",
-      },
-      "us-isob-east-1": {
-        "value": "nodejs18.x",
-      },
-      "us-west-1": {
-        "value": "nodejs20.x",
-      },
-      "us-west-2": {
-        "value": "nodejs20.x",
       },
     },
     "RagEnginesSageMakerModelImageRepositoryCfnMappingF3891114": {
@@ -4930,15 +4817,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -4984,15 +4863,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -6663,21 +6534,17 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEventServiceRoleD8C445F8",
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -13162,21 +13029,17 @@ schema {
           },
         },
         "Handler": "framework.isComplete",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkisCompleteServiceRole839AE1FE",
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -13340,21 +13203,17 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonEventServiceRoleF3392DDD",
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -13522,21 +13381,17 @@ schema {
           },
         },
         "Handler": "framework.onTimeout",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonTimeoutServiceRole080F6A31",
             "Arn",
           ],
         },
-        "Runtime": {
-          "Fn::FindInMap": [
-            "LatestNodeRuntimeMap",
-            {
-              "Ref": "AWS::Region",
-            },
-            "value",
-          ],
-        },
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -13695,22 +13550,6 @@ schema {
             ],
           ],
         },
-        "LoggingConfiguration": {
-          "Destinations": [
-            {
-              "CloudWatchLogsLogGroup": {
-                "LogGroupArn": {
-                  "Fn::GetAtt": [
-                    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01",
-                    "Arn",
-                  ],
-                },
-              },
-            },
-          ],
-          "IncludeExecutionData": false,
-          "Level": "ERROR",
-        },
         "RoleArn": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2",
@@ -13719,29 +13558,6 @@ schema {
         },
       },
       "Type": "AWS::StepFunctions::StateMachine",
-    },
-    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "RagEnginesSageMakerModelMultiAB24ACodeBuildProjectE6650C61",
-      ],
-      "Properties": {
-        "LogGroupName": {
-          "Fn::Join": [
-            "",
-            [
-              "/aws/vendedlogs/states/waiter-state-machine-",
-              {
-                "Ref": "RagEnginesSageMakerModelMultiAB24AProviderframeworkisComplete0D14240D",
-              },
-              "-c8fa6a758f1922894c130edb0f5ead18b402e7fd31",
-            ],
-          ],
-        },
-        "RetentionInDays": 731,
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2": {
       "DependsOn": [
@@ -13821,22 +13637,6 @@ schema {
                   ],
                 },
               ],
-            },
-            {
-              "Action": [
-                "logs:CreateLogDelivery",
-                "logs:CreateLogStream",
-                "logs:GetLogDelivery",
-                "logs:UpdateLogDelivery",
-                "logs:DeleteLogDelivery",
-                "logs:ListLogDeliveries",
-                "logs:PutLogEvents",
-                "logs:PutResourcePolicy",
-                "logs:DescribeResourcePolicies",
-                "logs:DescribeLogGroups",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",

@@ -14,9 +14,8 @@ permissions = UserPermissions(router)
 
 @router.resolver(field_name="listModels")
 @tracer.capture_method
-@permissions.approved_roles([
-    permissions.ADMIN_ROLE,
-    permissions.WORKSPACES_MANAGER_ROLE
-])
+@permissions.approved_roles(
+    [permissions.ADMIN_ROLE, permissions.WORKSPACES_MANAGER_ROLE]
+)
 def models() -> list[dict[str, Any]]:
     return genai_core.models.list_models()

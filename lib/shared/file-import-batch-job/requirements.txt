@@ -1,4 +1,4 @@
-boto3==1.28.57
+boto3==1.40.13
 aws-lambda-powertools==2.25.1
 numpy==1.26.4
 cfnresponse==1.1.2
@@ -6,13 +6,13 @@ aws_requests_auth==0.4.3
 requests-aws4auth==1.2.3
 langchain==0.3.7
 langchain-community==0.3.3
-opensearch-py==2.3.1
-psycopg2-binary==2.9.7
+opensearch-py==3.0.0
+psycopg2-binary==2.9.10
 pgvector==0.2.2
-urllib3<2
+urllib3==2.5.0
 openai==1.47.0
 beautifulsoup4==4.12.2
-requests==2.32.2
+requests==2.32.4
 attrs==23.1.0
 feedparser==6.0.11
 PyJWT==2.9.0

@@ -12,16 +12,16 @@ mock_config = {
                 "name": "titan-embed",
                 "provider": "bedrock",
                 "dimensions": 1536,
-                "maxInputLength": 8000
+                "maxInputLength": 8000,
             },
             {
                 "name": "cohere-embed",
                 "provider": "bedrock",
                 "dimensions": 1024,
-                "maxInputLength": 4000
-            }
+                "maxInputLength": 4000,
+            },
         ]
-    }
+    },
 }
 
 # Set environment variables needed by the code

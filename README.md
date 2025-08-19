@@ -27,6 +27,16 @@ This blueprint deploys the complete AWS GenAI LLM Chatbot solution in your AWS a
 - AWS CLI configured with credentials
 - Node.js 18+ and npm
 - Python 3.8+
+- AWS CDK CLI version compatible with aws-cdk-lib 2.206.0 or later
+  ```bash
+  # Install or update the CDK CLI globally
+  npm install -g aws-cdk@latest
+  
+  # Verify the installed version
+  cdk --version
+  ```
+
+> **Important**: The CDK CLI version must be compatible with the aws-cdk-lib version used in this project (currently 2.206.0). If you encounter a "Cloud assembly schema version mismatch" error during deployment, update your CDK CLI to the latest version using the command above.
 
 ### Deployment
 

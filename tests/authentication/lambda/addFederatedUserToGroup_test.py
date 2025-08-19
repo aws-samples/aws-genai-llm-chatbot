@@ -141,7 +141,19 @@ def test_handler_no_chatbot_role(mock_cognito):
         "userPoolId": "us-east-1_testpool",
     }
 
+    # Mock the response to prevent infinite pagination
+    mock_cognito.admin_list_groups_for_user.return_value = {
+        "Groups": []  # User has no current groups
+    }
+
     result = handler(event, None)
 
     assert result == event
-    mock_cognito.admin_list_groups_for_user.assert_not_called()
+    # Should call admin_list_groups_for_user once to check current groups
+    mock_cognito.admin_list_groups_for_user.assert_called_once()
+    # Should add user to default group since they have no custom:chatbot_role
+    mock_cognito.admin_add_user_to_group.assert_called_once_with(
+        UserPoolId="us-east-1_testpool",
+        Username="test-user-123",
+        GroupName="user",  # default group
+    )
