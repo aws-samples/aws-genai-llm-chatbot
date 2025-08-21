@@ -61,10 +61,18 @@ export class RealtimeResolvers extends Construct {
         ...props.shared.defaultEnvironmentVariables,
         SNS_TOPIC_ARN: props.topic.topicArn,
         APPLICATIONS_TABLE_NAME: props.applicationTable.tableName,
-        ...(props.config?.bedrock?.agent?.enabled
+        ...(props.config?.bedrock?.enabled
           ? {
-              BEDROCK_AGENT_ID: props.config.bedrock.agent.agentId,
-              BEDROCK_AGENT_VERSION: props.config.bedrock.agent.agentVersion,
+              BEDROCK_REGION: props.config.bedrock.region,
+              ...(props.config.bedrock?.agent?.enabled
+                ? {
+                    BEDROCK_AGENT_ENABLED: "true",
+                    ...(props.config.bedrock.agent.agentId ? {
+                      BEDROCK_AGENT_ID: props.config.bedrock.agent.agentId,
+                      BEDROCK_AGENT_ALIAS_ID: props.config.bedrock.agent.agentAliasId,
+                    } : {}),
+                  }
+                : {}),
             }
           : {}),
       },

@@ -132,20 +132,23 @@ export class LangChainInterface extends Construct {
     // Add Bedrock agent environment variables if enabled
     if (props.config.bedrock?.agent?.enabled) {
       requestHandler.addEnvironment(
-        "BEDROCK_AGENT_ID",
-        props.config.bedrock.agent.agentId
-      );
-      requestHandler.addEnvironment(
-        "BEDROCK_AGENT_VERSION",
-        props.config.bedrock.agent.agentVersion
+        "BEDROCK_AGENT_ENABLED",
+        "true"
       );
       
-      // Add agent alias ID if available
-      if (props.config.bedrock.agent.agentAliasId) {
+      // Add agent ID and alias ID if available
+      if (props.config.bedrock.agent.agentId) {
         requestHandler.addEnvironment(
-          "BEDROCK_AGENT_ALIAS_ID",
-          props.config.bedrock.agent.agentAliasId
+          "BEDROCK_AGENT_ID",
+          props.config.bedrock.agent.agentId
         );
+        
+        if (props.config.bedrock.agent.agentAliasId) {
+          requestHandler.addEnvironment(
+            "BEDROCK_AGENT_ALIAS_ID",
+            props.config.bedrock.agent.agentAliasId
+          );
+        }
       }
       
       // Add permissions to invoke Bedrock agent

@@ -163,7 +163,7 @@ def process_event_stream(event_stream: Any) -> str:
     return text
 
 
-def get_bedrock_client(service_name="bedrock"):
+def get_bedrock_client(service_name="bedrock", timeout=60):
     """
     Get a boto3 client for Bedrock services, with cross-account support if configured
     
@@ -172,6 +172,7 @@ def get_bedrock_client(service_name="bedrock"):
             Use "bedrock" for general Bedrock APIs
             Use "bedrock-agent-runtime" for agent runtime APIs
             Use "bedrock-agent" for agent management APIs
+        timeout (int, optional): The timeout in seconds for API calls. Defaults to 60.
     
     Returns:
         A boto3 client for the specified Bedrock service
@@ -182,7 +183,19 @@ def get_bedrock_client(service_name="bedrock"):
     # Check if we need to assume a role
     role_arn = os.environ.get("BEDROCK_ROLE_ARN")
     
-    config_data = {"service_name": service_name}
+    # Create a config with the timeout
+    import botocore.config
+    config = botocore.config.Config(
+        connect_timeout=timeout,
+        read_timeout=timeout,
+        retries={"max_attempts": 2}
+    )
+    
+    config_data = {
+        "service_name": service_name,
+        "config": config
+    }
+    
     if region:
         config_data["region_name"] = region
         
@@ -201,9 +214,12 @@ def get_bedrock_client(service_name="bedrock"):
     return client
 
 
-def get_bedrock_agent_client():
+def get_bedrock_agent_client(timeout=30):
     """
     Get a boto3 client for bedrock-agent-runtime, with cross-account support if configured
+    
+    Args:
+        timeout (int, optional): The timeout in seconds for API calls. Defaults to 30.
     
     Returns:
         A boto3 client for bedrock-agent-runtime
@@ -216,7 +232,7 @@ def get_bedrock_agent_client():
     if not agent_id:
         raise genai_core.types.CommonError("Bedrock Agent is not enabled - BEDROCK_AGENT_ID not set")
     
-    return get_bedrock_client(service_name="bedrock-agent-runtime")
+    return get_bedrock_client(service_name="bedrock-agent-runtime", timeout=timeout)
 
 
 def get_agent_config():
@@ -355,7 +371,8 @@ def select_agent(agents: list[dict[str, Any]], agent_name: Optional[str] = None,
 
 
 def invoke_agent_by_id(agent_id: str, agent_alias_id: Optional[str] = None, agent_version: str = "DRAFT", 
-                      session_id: Optional[str] = None, prompt: str = "", enable_trace: bool = True) -> Dict[str, Any]:
+                      session_id: Optional[str] = None, prompt: str = "", enable_trace: bool = True,
+                      timeout: int = 60) -> Dict[str, Any]:
     """
     Invoke a specific Bedrock agent with the given prompt
     
@@ -378,7 +395,7 @@ def invoke_agent_by_id(agent_id: str, agent_alias_id: Optional[str] = None, agen
         import uuid
         session_id = str(uuid.uuid4())
     
-    client = get_bedrock_client(service_name="bedrock-agent-runtime")
+    client = get_bedrock_client(service_name="bedrock-agent-runtime", timeout=timeout)
     
     logger.info(f"Invoking Bedrock Agent {agent_id} with prompt: {prompt}")
     
@@ -523,6 +540,16 @@ def extract_completion_from_response(response_stream: Any, prompt: str) -> str:
                 completion_value = response_stream["completion"]
                 logger.info(f"Found completion in dictionary: {completion_value}")
                 completion = process_completion_value(completion_value)
+            # Check if there's an error in the response
+            elif "error" in response_stream:
+                error_message = response_stream.get("error", {})
+                if isinstance(error_message, dict):
+                    error_message = error_message.get("message", str(error_message))
+                logger.error(f"Error in Bedrock agent response: {error_message}")
+                completion = f"I encountered an error while processing your request: {error_message}"
+            # Check if there's a message in the response
+            elif "message" in response_stream:
+                completion = response_stream["message"]
         else:
             # If it's not a dictionary, try to process it as an event stream
             completion = process_event_stream(response_stream)
@@ -543,25 +570,45 @@ def extract_completion_from_response(response_stream: Any, prompt: str) -> str:
         logger.error(f"Response stream attributes: {dir(response_stream) if hasattr(response_stream, '__dict__') else 'No __dict__'}")
         
         # Try to extract the completion from the response_stream dictionary one more time
-        if isinstance(response_stream, dict) and "completion" in response_stream:
-            completion_value = response_stream["completion"]
-            logger.info(f"Found completion in dictionary: {completion_value}")
-            
-            if isinstance(completion_value, str):
-                completion = completion_value
-            else:
-                logger.info(f"Completion value type: {type(completion_value)}")
-                logger.info(f"Completion value: {completion_value}")
+        if isinstance(response_stream, dict):
+            if "completion" in response_stream:
+                completion_value = response_stream["completion"]
+                logger.info(f"Found completion in dictionary: {completion_value}")
+                
+                if isinstance(completion_value, str):
+                    completion = completion_value
+                else:
+                    logger.info(f"Completion value type: {type(completion_value)}")
+                    logger.info(f"Completion value: {completion_value}")
+            elif "error" in response_stream:
+                error_message = response_stream.get("error", {})
+                if isinstance(error_message, dict):
+                    error_message = error_message.get("message", str(error_message))
+                logger.error(f"Error in Bedrock agent response: {error_message}")
+                completion = f"I encountered an error while processing your request: {error_message}"
+            elif "ResponseMetadata" in response_stream:
+                # This might be a raw AWS SDK response
+                logger.info("Found ResponseMetadata in response, this might be a raw AWS SDK response")
+                if "HTTPStatusCode" in response_stream.get("ResponseMetadata", {}):
+                    status_code = response_stream["ResponseMetadata"]["HTTPStatusCode"]
+                    if status_code != 200:
+                        completion = f"The request to the Bedrock agent failed with status code {status_code}."
+                    else:
+                        # Try to extract any useful information from the response
+                        for key, value in response_stream.items():
+                            if key != "ResponseMetadata" and isinstance(value, str):
+                                completion = value
+                                break
         
         # If we still don't have a completion, use a hardcoded response
         if not completion:
-            completion = f"I'm a Bedrock Agent. You asked: {prompt}"
+            completion = f"I'm sorry, but I encountered an issue while processing your request. Please try again with a simpler query or without file attachments."
     
     logger.info(f"Final completion: {completion}")
     return completion
 
 
-def invoke_agent(session_id, prompt, enable_trace=True):
+def invoke_agent(session_id, prompt, enable_trace=True, timeout=60):
     """
     Invoke a Bedrock agent with the given prompt
     
@@ -569,6 +616,7 @@ def invoke_agent(session_id, prompt, enable_trace=True):
         session_id (str): The session ID to use for the agent
         prompt (str): The prompt to send to the agent
         enable_trace (bool, optional): Whether to enable trace. Defaults to True.
+        timeout (int, optional): The timeout in seconds for API calls. Defaults to 60.
         
     Returns:
         dict: The response from the agent
@@ -576,7 +624,7 @@ def invoke_agent(session_id, prompt, enable_trace=True):
     Raises:
         CommonError: If Bedrock Agent is not enabled or if there's an error invoking the agent
     """
-    client = get_bedrock_agent_client()
+    client = get_bedrock_agent_client(timeout=timeout)
     agent_config = get_agent_config()
     
     logger.info(f"Invoking Bedrock Agent with prompt: {prompt}")
