@@ -29,6 +29,24 @@ def get_sagemaker_client() -> Any:
     return client
 
 
+# Cache for bedrock-agentcore client
+_agentcore_client = None
+
+
+def get_agentcore_client() -> Any:
+    """
+    Get bedrock-agentcore client with caching for optimal Lambda performance
+    
+    Returns:
+        boto3.client: Cached bedrock-agentcore client
+    """
+    global _agentcore_client
+    if _agentcore_client is None:
+        config = Config(retries={"max_attempts": 15, "mode": "adaptive"})
+        _agentcore_client = boto3.client("bedrock-agentcore", config=config)
+    return _agentcore_client
+
+
 def get_bedrock_client(service_name: str = "bedrock-runtime") -> Any:
     """
     Get a boto3 client for Bedrock services

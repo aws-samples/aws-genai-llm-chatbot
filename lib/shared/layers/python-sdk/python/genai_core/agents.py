@@ -4,6 +4,7 @@ from datetime import datetime
 
 import genai_core.clients
 from aws_lambda_powertools import Logger
+from botocore.exceptions import ClientError, BotoCoreError
 
 logger = Logger()
 
@@ -30,6 +31,16 @@ def list_agents() -> list[dict[str, Any]]:
                     agent[key] = value.isoformat()
         
         return agents
+    except ClientError as e:
+        error_code = e.response.get("Error", {}).get("Code", "Unknown")
+        logger.error(f"AWS client error listing agents: {error_code} - {str(e)}")
+        return []
+    except BotoCoreError as e:
+        logger.error(f"AWS service error listing agents: {str(e)}")
+        return []
+    except (KeyError, AttributeError) as e:
+        logger.error(f"Data structure error listing agents: {str(e)}")
+        return []
     except Exception as e:
-        logger.error(f"Error listing agents: {str(e)}")
+        logger.error(f"Unexpected error listing agents: {type(e).__name__} - {str(e)}")
         return []

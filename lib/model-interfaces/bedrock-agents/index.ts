@@ -77,8 +77,7 @@ export class BedrockAgentsInterface extends Construct {
           "bedrock-agentcore:ListAgentRuntimes",
         ],
         resources: [
-          `arn:${cdk.Aws.PARTITION}:bedrock-agentcore:*:${cdk.Aws.ACCOUNT_ID}:agent-runtime/*`,
-          "*"
+          `arn:${cdk.Aws.PARTITION}:bedrock-agentcore:*:${cdk.Aws.ACCOUNT_ID}:runtime/*`,
         ],
       })
     );
