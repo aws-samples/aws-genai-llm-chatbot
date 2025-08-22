@@ -10,6 +10,7 @@ import { RagEngines } from "./rag-engines";
 import { Models } from "./models";
 import { LangChainInterface } from "./model-interfaces/langchain";
 import { IdeficsInterface } from "./model-interfaces/idefics";
+import { BedrockAgentsInterface } from "./model-interfaces/bedrock-agents";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -105,6 +106,32 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           langchainInterface.addSageMakerEndpoint(model);
         }
       }
+    }
+
+    // Bedrock Agents Interface
+    let bedrockAgentsInterface: BedrockAgentsInterface | undefined;
+    if (props.config.bedrock?.enabled) {
+      bedrockAgentsInterface = new BedrockAgentsInterface(this, "BedrockAgentsInterface", {
+        shared,
+        config: props.config,
+        messagesTopic: chatBotApi.messagesTopic,
+        sessionsTable: chatBotApi.sessionsTable,
+        byUserIdIndex: chatBotApi.byUserIdIndex,
+        chatbotFilesBucket: chatBotApi.filesBucket,
+      });
+
+      // Route agent messages to bedrock agents interface
+      chatBotApi.messagesTopic.addSubscription(
+        new subscriptions.SqsSubscription(bedrockAgentsInterface.ingestionQueue, {
+          filterPolicyWithMessageBody: {
+            modelInterface: sns.FilterOrPolicy.filter(
+              sns.SubscriptionFilter.stringFilter({
+                allowlist: ["agent"],
+              })
+            ),
+          },
+        })
+      );
     }
 
     // IDEFICS Interface Construct
@@ -246,12 +273,13 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         ...[
           ideficsInterface?.requestHandler,
           langchainInterface?.requestHandler,
+          bedrockAgentsInterface?.requestHandler,
         ]
           .filter((i) => i)
           .map((r) => {
             return LogGroup.fromLogGroupName(
               monitoringStack,
-              "Log" + (r as lambda.Function).node.id,
+              "Log" + (r as lambda.Function).functionName.replace(/[^a-zA-Z0-9]/g, ""),
               "/aws/lambda/" + (r as lambda.Function).functionName
             );
           }),
@@ -357,6 +385,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
               `/${this.stackName}/LangchainInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
             ]
           : []),
+        ...(bedrockAgentsInterface
+          ? [
+              `/${this.stackName}/BedrockAgentsInterface/RequestHandler/ServiceRole/Resource`,
+              `/${this.stackName}/BedrockAgentsInterface/RequestHandler/ServiceRole/DefaultPolicy/Resource`,
+            ]
+          : []),
         ...(ideficsModels.length > 0
           ? [
               `/${this.stackName}/IdeficsInterface/ChatbotFilesPrivateApi/CloudWatchRole/Resource`,
@@ -375,6 +409,23 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         },
       ]
     );
+
+    // Bedrock Agents Interface NAG suppressions
+    if (bedrockAgentsInterface) {
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        [
+          `/${this.stackName}/BedrockAgentsInterface/IngestionQueue/Resource`,
+          `/${this.stackName}/BedrockAgentsInterface/IngestionDLQ/Resource`,
+        ],
+        [
+          {
+            id: "AwsSolutions-SQS4",
+            reason: "SQS queue is used internally and does not require SSL.",
+          },
+        ]
+      );
+    }
 
     if (ideficsModels.length > 0) {
       NagSuppressions.addResourceSuppressionsByPath(

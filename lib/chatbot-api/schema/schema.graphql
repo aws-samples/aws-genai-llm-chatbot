@@ -180,6 +180,16 @@ type Model @aws_cognito_user_pools {
   bedrockGuardrails: Boolean
 }
 
+type Agent @aws_cognito_user_pools {
+  agentRuntimeArn: String!
+  agentRuntimeId: String!
+  agentRuntimeName: String!
+  agentRuntimeVersion: String!
+  description: String
+  lastUpdatedAt: AWSDateTime!
+  status: String!
+}
+
 type PassageRank @aws_cognito_user_pools {
   score: Float!
   passage: String!
@@ -394,60 +404,79 @@ type Mutation {
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  deleteWorkspace(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  deleteDocument(input: DeleteDocumentInput!): DeleteDocumentResult 
-  @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  startKendraDataSync(workspaceId: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  deleteWorkspace(workspaceId: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  deleteDocument(input: DeleteDocumentInput!): DeleteDocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   addTextDocument(input: TextDocumentInput!): DocumentResult
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  addUserFeedback(input: UserFeedbackInput!): UserFeedbackResult @aws_cognito_user_pools
+  addUserFeedback(input: UserFeedbackInput!): UserFeedbackResult
+    @aws_cognito_user_pools
   addQnADocument(input: QnADocumentInput!): DocumentResult
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   setDocumentSubscriptionStatus(
     input: DocumentSubscriptionStatusInput!
-  ): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  addWebsite(input: WebsiteInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  addRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  updateRssFeed(input: UpdateRssFeedInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  ): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  addWebsite(input: WebsiteInput!): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  addRssFeed(input: RssFeedInput!): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  updateRssFeed(input: UpdateRssFeedInput!): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   deleteUserSessions: [DeleteSessionResult!] @aws_cognito_user_pools
   deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
   # Real-time
   sendQuery(data: String): String @aws_cognito_user_pools
   publishResponse(sessionId: String, userId: String, data: String): Channel
     @aws_iam
-  createApplication(input: ManageApplicationInput!): Application! 
-  @aws_cognito_user_pools(cognito_groups: ["admin"])
-  updateApplication(input: ManageApplicationInput!): Application! 
-  @aws_cognito_user_pools(cognito_groups: ["admin"])
-  deleteApplication(id: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin"])
+  createApplication(input: ManageApplicationInput!): Application!
+    @aws_cognito_user_pools(cognito_groups: ["admin"])
+  updateApplication(input: ManageApplicationInput!): Application!
+    @aws_cognito_user_pools(cognito_groups: ["admin"])
+  deleteApplication(id: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin"])
 }
 
 type Query {
   checkHealth: Boolean @aws_cognito_user_pools
   getUploadFileURL(input: FileUploadInput!): FileUploadResult
     @aws_cognito_user_pools
-  getFileURL(fileName: String!): String
-    @aws_cognito_user_pools
-  listModels: [Model!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listWorkspaces: [Workspace!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listRagEngines: [RagEngine!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getFileURL(fileName: String!): String @aws_cognito_user_pools
+  listModels: [Model!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listAgents: [Agent!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listWorkspaces: [Workspace!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getWorkspace(workspaceId: String!): Workspace
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listRagEngines: [RagEngine!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   performSemanticSearch(input: SemanticSearchInput!): SemanticSearchResult!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listSessions: [Session!]! @aws_cognito_user_pools
-  listEmbeddingModels: [EmbeddingModel!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listEmbeddingModels: [EmbeddingModel!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   calculateEmbeddings(input: CalculateEmbeddingsInput!): [Embedding]!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   getSession(id: String!): Session @aws_cognito_user_pools
-  listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listBedrockKnowledgeBases: [BedrockKB!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listKendraIndexes: [KendraIndex!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listBedrockKnowledgeBases: [BedrockKB!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  isKendraDataSynching(workspaceId: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listDocuments(input: ListDocumentsInput!): DocumentsResult!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  getDocument(input: GetDocumentInput!): Document @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult 
-  @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getDocument(input: GetDocumentInput!): Document
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listCrossEncoders: [CrossEncoderData!]
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   rankPassages(input: RankPassagesInput!): [PassageRank!]!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listRoles: [Role!]! @aws_cognito_user_pools(cognito_groups: ["admin"])

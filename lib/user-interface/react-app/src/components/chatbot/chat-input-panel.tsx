@@ -104,8 +104,10 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     value: "",
     selectedModel: null,
     selectedModelMetadata: null,
+    selectedAgent: null,
     selectedWorkspace: workspaceDefaultOptions[0],
     modelsStatus: "loading",
+    agentsStatus: "loading",
     workspacesStatus: "loading",
     applicationStatus: "loading",
   });
@@ -282,6 +284,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             modelsResult = await apiClient.models.getModels();
           }
 
+          const agentsResult = await apiClient.agents.getAgents();
+          const agents = agentsResult.data ? agentsResult.data.listAgents : [];
+
           const models = modelsResult.data ? modelsResult.data.listModels : [];
 
           const selectedModelOption = getSelectedModelOption(models);
@@ -302,11 +307,13 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
           setState((state) => ({
             ...state,
             models,
+            agents,
             workspaces,
             selectedModel: selectedModelOption,
             selectedModelMetadata,
             selectedWorkspace: selectedWorkspaceOption,
             modelsStatus: "finished",
+            agentsStatus: "finished",
             workspacesStatus: workspacesStatus,
           }));
         } catch (error) {
@@ -438,13 +445,87 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   };
 
   const handleSendMessage = async (): Promise<void> => {
-    if (!state.selectedModel && !props.applicationId) return;
+    if (!state.selectedModel && !state.selectedAgent && !props.applicationId) return;
     if (props.running) return;
     if (readyState !== ReadyState.OPEN) return;
     ChatScrollState.userHasScrolled = false;
 
     let name, provider;
     if (!props.applicationId) {
+      if (state.selectedAgent) {
+        // Agent request
+        const value = state.value.trim();
+        let modelName, provider;
+        if (state.selectedModel) {
+          ({ name: modelName, provider } = OptionsHelper.parseValue(
+            state.selectedModel.value
+          ));
+        }
+        
+        const request: ChatBotRunRequest = {
+          action: ChatBotAction.Run,
+          modelInterface: "agent",
+          data: {
+            mode: getChatBotMode(outputModality),
+            text: value,
+            agentId: state.selectedAgent.value,
+            sessionId: props.session.id,
+            documents: [],
+            images: [],
+            videos: [],
+            modelName,
+            provider,
+            modelKwargs: {
+              streaming: props.configuration.streaming,
+              maxTokens: props.configuration.maxTokens,
+              temperature: props.configuration.temperature,
+              topP: props.configuration.topP,
+            },
+          },
+        };
+
+        setState((state) => ({
+          ...state,
+          value: "",
+        }));
+
+        props.setRunning(true);
+        messageHistoryRef.current = [
+          ...messageHistoryRef.current,
+          {
+            type: ChatBotMessageType.Human,
+            content: value,
+            metadata: {},
+            tokens: [],
+          },
+          {
+            type: ChatBotMessageType.AI,
+            tokens: [],
+            content: "",
+            metadata: {},
+          },
+        ];
+
+        props.setMessageHistory(messageHistoryRef.current);
+
+        try {
+          await API.graphql({
+            query: sendQuery,
+            variables: {
+              data: JSON.stringify(request),
+            },
+          });
+        } catch (err) {
+          console.log(Utils.getErrorMessage(err));
+          props.setRunning(false);
+          messageHistoryRef.current[messageHistoryRef.current.length - 1].content =
+            "**Error**, Unable to process the request: " +
+            Utils.getErrorMessage(err);
+          props.setMessageHistory(messageHistoryRef.current);
+        }
+        return;
+      }
+
       ({ name, provider } = OptionsHelper.parseValue(
         state.selectedModel?.value
       ));
@@ -883,8 +964,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               }
               disableActionButton={
                 readyState !== ReadyState.OPEN ||
-                (!state.models?.length && !props.applicationId) ||
-                (!state.selectedModel && !props.applicationId) ||
+                (!state.models?.length && !state.agents?.length && !props.applicationId) ||
+                (!state.selectedModel && !state.selectedAgent && !props.applicationId) ||
                 props.running ||
                 state.value.trim().length === 0 ||
                 props.session.loading
@@ -948,6 +1029,26 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                   }
                 }}
                 options={modelsOptions}
+              />
+              <Select
+                data-locator="select-agent"
+                disabled={props.running}
+                statusType={state.agentsStatus}
+                loadingText="Loading agents..."
+                placeholder="Select an agent (optional)"
+                empty="No agents available"
+                filteringType="auto"
+                selectedOption={state.selectedAgent}
+                onChange={({ detail }) => {
+                  setState((state) => ({
+                    ...state,
+                    selectedAgent: detail.selectedOption,
+                  }));
+                }}
+                options={state.agents?.map(agent => ({
+                  label: agent.agentRuntimeName || agent.agentRuntimeId,
+                  value: agent.agentRuntimeId,
+                })) || []}
               />
               {appContext?.config.rag_enabled && (
                 <Select

@@ -25,10 +25,13 @@ export interface ChatInputState {
   value: string;
   workspaces?: Workspace[];
   models?: Model[];
+  agents?: any[];
   selectedModel: SelectProps.Option | null;
   selectedModelMetadata: Model | null;
+  selectedAgent: SelectProps.Option | null;
   selectedWorkspace: SelectProps.Option | null;
   modelsStatus: LoadingStatus;
+  agentsStatus: LoadingStatus;
   workspacesStatus: LoadingStatus;
   applicationStatus?: LoadingStatus;
 }
@@ -84,6 +87,7 @@ export interface ChatBotRunRequest {
   data?: {
     modelName?: string;
     provider?: string;
+    agentId?: string;
     sessionId: string;
     documents: SessionFile[] | null;
     images: SessionFile[] | null;

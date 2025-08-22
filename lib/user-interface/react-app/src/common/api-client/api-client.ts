@@ -4,6 +4,7 @@ import { EmbeddingsClient } from "./embeddings-client";
 import { RagEnginesClient } from "./rag-engines-client";
 import { HealthClient } from "./health-client";
 import { ModelsClient } from "./models-client";
+import { AgentsClient } from "./agents-client";
 import { WorkspacesClient } from "./workspaces-client";
 import { SessionsClient } from "./sessions-client";
 import { SemanticSearchClient } from "./semantic-search-client";
@@ -20,6 +21,7 @@ export class ApiClient {
   private _embeddingsClient?: EmbeddingsClient;
   private _crossEncodersClient?: CrossEncodersClient;
   private _modelsClient?: ModelsClient;
+  private _agentsClient?: AgentsClient;
   private _workspacesClient?: WorkspacesClient;
   private _sessionsClient?: SessionsClient;
   private _semanticSearchClient?: SemanticSearchClient;
@@ -68,6 +70,14 @@ export class ApiClient {
     }
 
     return this._modelsClient;
+  }
+
+  public get agents() {
+    if (!this._agentsClient) {
+      this._agentsClient = new AgentsClient();
+    }
+
+    return this._agentsClient;
   }
 
   public get workspaces() {

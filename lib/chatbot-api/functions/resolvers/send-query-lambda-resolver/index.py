@@ -43,6 +43,7 @@ class DataFieldValidation(BaseModel):
     modelName: Optional[str] = Field(
         min_length=0, max_length=500, pattern=r"^[A-Za-z0-9-_. /:]*$", default=None
     )
+    agentId: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
     provider: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
     sessionId: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
     workspaceId: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL

@@ -46,7 +46,7 @@ export type RagDocumentType =
   | "rssfeed"
   | "rsspost";
 export type Modality = "TEXT" | "IMAGE" | "VIDEO";
-export type ModelInterface = "langchain" | "multimodal";
+export type ModelInterface = "langchain" | "multimodal" | "agent";
 
 export interface DocumentSubscriptionToggleResult {
   id: string;
