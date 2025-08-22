@@ -130,6 +130,20 @@ export class ApiResolvers extends Construct {
           RSS_FEED_INGESTOR_FUNCTION:
             props.ragEngines?.dataImport.rssIngestorFunction?.functionArn ?? "",
           COGNITO_USER_POOL_ID: props.userPool.userPoolId,
+          ...(props.config?.bedrock?.enabled
+            ? {
+                BEDROCK_REGION: props.config.bedrock.region,
+                ...(props.config.bedrock?.agent?.enabled
+                  ? {
+                      BEDROCK_AGENT_ENABLED: "true",
+                      ...(props.config.bedrock.agent.agentId ? {
+                        BEDROCK_AGENT_ID: props.config.bedrock.agent.agentId,
+                        BEDROCK_AGENT_ALIAS_ID: props.config.bedrock.agent.agentAliasId,
+                      } : {}),
+                    }
+                  : {}),
+              }
+            : {}),
         },
       }
     );
@@ -338,6 +352,20 @@ export class ApiResolvers extends Construct {
             resources: ["*"],
           })
         );
+        
+        // Add permissions for Bedrock agent operations if agent is enabled
+        if (props.config.bedrock?.agent?.enabled) {
+          apiHandler.addToRolePolicy(
+            new iam.PolicyStatement({
+              actions: [
+                "bedrock:ListAgents",
+                "bedrock:ListAgentAliases",
+                "bedrock:InvokeAgent",
+              ],
+              resources: ["*"],
+            })
+          );
+        }
 
         if (props.config.bedrock?.roleArn) {
           apiHandler.addToRolePolicy(
