@@ -21332,34 +21332,115 @@ schema {
           {},
           {
             "<<marker:0xbaba:0>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:1>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:2>>": {
-              "Ref": "AuthenticationUserPool28698864",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPool28698864",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:3>>": {
-              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:4>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:5>>": {
-              "Ref": "AuthenticationUserPool28698864",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPool28698864",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:6>>": {
-              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:7>>": {
-              "Fn::GetAtt": [
-                "ChatBotApiChatbotApiBABF9B87",
-                "GraphQLUrl",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Fn::GetAtt": [
+                      "ChatBotApiChatbotApiBABF9B87",
+                      "GraphQLUrl",
+                    ],
+                  },
+                  """,
+                ],
               ],
             },
             "<<marker:0xbaba:8>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
           },
         ],
