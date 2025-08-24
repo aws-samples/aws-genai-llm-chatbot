@@ -52,7 +52,9 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
 
         if response and "Item" in response:
             items = response["Item"].get("History", [])
-            self.start_time = response["Item"].get("StartTime", datetime.now().isoformat())
+            self.start_time = response["Item"].get(
+                "StartTime", datetime.now().isoformat()
+            )
         else:
             items = []
 

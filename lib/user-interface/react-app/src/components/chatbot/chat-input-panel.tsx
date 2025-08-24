@@ -445,7 +445,8 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
   };
 
   const handleSendMessage = async (): Promise<void> => {
-    if (!state.selectedModel && !state.selectedAgent && !props.applicationId) return;
+    if (!state.selectedModel && !state.selectedAgent && !props.applicationId)
+      return;
     if (props.running) return;
     if (readyState !== ReadyState.OPEN) return;
     ChatScrollState.userHasScrolled = false;
@@ -461,7 +462,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
             state.selectedModel.value
           ));
         }
-        
+
         const request: ChatBotRunRequest = {
           action: ChatBotAction.Run,
           modelInterface: "agent",
@@ -518,7 +519,9 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
         } catch (err) {
           console.log(Utils.getErrorMessage(err));
           props.setRunning(false);
-          messageHistoryRef.current[messageHistoryRef.current.length - 1].content =
+          messageHistoryRef.current[
+            messageHistoryRef.current.length - 1
+          ].content =
             "**Error**, Unable to process the request: " +
             Utils.getErrorMessage(err);
           props.setMessageHistory(messageHistoryRef.current);
@@ -964,8 +967,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
               }
               disableActionButton={
                 readyState !== ReadyState.OPEN ||
-                (!state.models?.length && !state.agents?.length && !props.applicationId) ||
-                (!state.selectedModel && !state.selectedAgent && !props.applicationId) ||
+                (!state.models?.length &&
+                  !state.agents?.length &&
+                  !props.applicationId) ||
+                (!state.selectedModel &&
+                  !state.selectedAgent &&
+                  !props.applicationId) ||
                 props.running ||
                 state.value.trim().length === 0 ||
                 props.session.loading
@@ -1045,10 +1052,12 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                     selectedAgent: detail.selectedOption,
                   }));
                 }}
-                options={state.agents?.map(agent => ({
-                  label: agent.agentRuntimeName || agent.agentRuntimeId,
-                  value: agent.agentRuntimeId,
-                })) || []}
+                options={
+                  state.agents?.map((agent) => ({
+                    label: agent.agentRuntimeName || agent.agentRuntimeId,
+                    value: agent.agentRuntimeId,
+                  })) || []
+                }
               />
               {appContext?.config.rag_enabled && (
                 <Select

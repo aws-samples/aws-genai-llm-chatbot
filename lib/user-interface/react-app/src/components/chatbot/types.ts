@@ -2,6 +2,17 @@ import { Model, Workspace } from "../../API";
 import { LoadingStatus, ModelInterface } from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
 
+export interface Agent {
+  __typename: "Agent";
+  agentRuntimeArn: string;
+  agentRuntimeId: string;
+  agentRuntimeName: string;
+  agentRuntimeVersion: string;
+  description?: string | null;
+  lastUpdatedAt: string;
+  status: string;
+}
+
 export interface ChatBotConfiguration {
   streaming: boolean;
   showMetadata: boolean;
@@ -25,7 +36,7 @@ export interface ChatInputState {
   value: string;
   workspaces?: Workspace[];
   models?: Model[];
-  agents?: any[];
+  agents?: Agent[];
   selectedModel: SelectProps.Option | null;
   selectedModelMetadata: Model | null;
   selectedAgent: SelectProps.Option | null;

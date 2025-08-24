@@ -4,6 +4,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
@@ -17,14 +18,18 @@ interface BedrockAgentsInterfaceProps {
   readonly messagesTopic: sns.Topic;
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
-  readonly chatbotFilesBucket: any;
+  readonly chatbotFilesBucket: s3.Bucket;
 }
 
 export class BedrockAgentsInterface extends Construct {
   public readonly ingestionQueue: sqs.Queue;
   public readonly requestHandler: lambda.Function;
 
-  constructor(scope: Construct, id: string, props: BedrockAgentsInterfaceProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: BedrockAgentsInterfaceProps
+  ) {
     super(scope, id);
 
     const ingestionQueue = new sqs.Queue(this, "IngestionQueue", {

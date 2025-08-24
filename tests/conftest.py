@@ -3,7 +3,9 @@ import os
 
 here = os.path.dirname(__file__)
 # Prioritize bedrock-agents path first to avoid conflicts
-sys.path.insert(0, here + "/../lib/model-interfaces/bedrock-agents/functions/request-handler")
+sys.path.insert(
+    0, here + "/../lib/model-interfaces/bedrock-agents/functions/request-handler"
+)
 sys.path.append(here + "/../lib/chatbot-api/functions/api-handler")
 sys.path.append(here + "/../lib/model-interfaces/langchain/functions/request-handler")
 sys.path.append(here + "/../lib/shared/layers/python-sdk/python")

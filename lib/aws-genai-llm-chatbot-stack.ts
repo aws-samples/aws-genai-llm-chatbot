@@ -111,26 +111,33 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
     // Bedrock Agents Interface
     let bedrockAgentsInterface: BedrockAgentsInterface | undefined;
     if (props.config.bedrock?.enabled) {
-      bedrockAgentsInterface = new BedrockAgentsInterface(this, "BedrockAgentsInterface", {
-        shared,
-        config: props.config,
-        messagesTopic: chatBotApi.messagesTopic,
-        sessionsTable: chatBotApi.sessionsTable,
-        byUserIdIndex: chatBotApi.byUserIdIndex,
-        chatbotFilesBucket: chatBotApi.filesBucket,
-      });
+      bedrockAgentsInterface = new BedrockAgentsInterface(
+        this,
+        "BedrockAgentsInterface",
+        {
+          shared,
+          config: props.config,
+          messagesTopic: chatBotApi.messagesTopic,
+          sessionsTable: chatBotApi.sessionsTable,
+          byUserIdIndex: chatBotApi.byUserIdIndex,
+          chatbotFilesBucket: chatBotApi.filesBucket,
+        }
+      );
 
       // Route agent messages to bedrock agents interface
       chatBotApi.messagesTopic.addSubscription(
-        new subscriptions.SqsSubscription(bedrockAgentsInterface.ingestionQueue, {
-          filterPolicyWithMessageBody: {
-            modelInterface: sns.FilterOrPolicy.filter(
-              sns.SubscriptionFilter.stringFilter({
-                allowlist: ["agent"],
-              })
-            ),
-          },
-        })
+        new subscriptions.SqsSubscription(
+          bedrockAgentsInterface.ingestionQueue,
+          {
+            filterPolicyWithMessageBody: {
+              modelInterface: sns.FilterOrPolicy.filter(
+                sns.SubscriptionFilter.stringFilter({
+                  allowlist: ["agent"],
+                })
+              ),
+            },
+          }
+        )
       );
     }
 
@@ -279,7 +286,11 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
           .map((r) => {
             return LogGroup.fromLogGroupName(
               monitoringStack,
-              "Log" + (r as lambda.Function).functionName.replace(/[^a-zA-Z0-9]/g, ""),
+              "Log" +
+                (r as lambda.Function).functionName.replace(
+                  /[^a-zA-Z0-9]/g,
+                  ""
+                ),
               "/aws/lambda/" + (r as lambda.Function).functionName
             );
           }),
