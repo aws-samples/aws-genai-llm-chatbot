@@ -20,9 +20,13 @@ TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN", "")
 
 MAX_STR_INPUT_LENGTH = 1000000
 SAFE_STR_REGEX = r"^[A-Za-z0-9-_. ]*$"
+ARN_REGEX = r"^[A-Za-z0-9-_.:/ ]*$"  # Allow ARN format with colons and slashes
 SAFE_SHORT_STR_VALIDATION = Field(min_length=0, max_length=500, pattern=SAFE_STR_REGEX)
 SAFE_SHORT_STR_VALIDATION_OPTIONAL = Field(
     min_length=0, max_length=500, pattern=SAFE_STR_REGEX, default=None
+)
+ARN_VALIDATION_OPTIONAL = Field(
+    min_length=0, max_length=500, pattern=ARN_REGEX, default=None
 )
 
 
@@ -43,7 +47,7 @@ class DataFieldValidation(BaseModel):
     modelName: Optional[str] = Field(
         min_length=0, max_length=500, pattern=r"^[A-Za-z0-9-_. /:]*$", default=None
     )
-    agentId: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
+    agentRuntimeArn: Optional[str] = ARN_VALIDATION_OPTIONAL
     provider: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
     sessionId: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL
     workspaceId: Optional[str] = SAFE_SHORT_STR_VALIDATION_OPTIONAL

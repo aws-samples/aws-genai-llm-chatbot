@@ -18,17 +18,11 @@ def validate_agent_id(agent_id: str) -> bool:
     if not agent_id or not isinstance(agent_id, str):
         return False
 
-    # Allow alphanumeric, hyphens, underscores, and ARN format
-    if agent_id.startswith("arn:"):
-        # ARN format validation - match the test expectation
-        arn_pattern = (
-            r"^arn:aws:bedrock-agentcore:[a-z0-9-]+:\d{12}:runtime/[a-zA-Z0-9_-]+$"
-        )
-        return bool(re.match(arn_pattern, agent_id))
-    else:
-        # Simple agent ID format
-        pattern = r"^[a-zA-Z0-9_-]+$"
-        return bool(re.match(pattern, agent_id)) and len(agent_id) <= 50
+    # Only accept full ARN format
+    arn_pattern = (
+        r"^arn:aws:bedrock-agentcore:[a-z0-9-]+:\d{12}:runtime/[a-zA-Z0-9_-]+$"
+    )
+    return bool(re.match(arn_pattern, agent_id))
 
 
 def get_conversation_history(session_id, user_id, max_messages=20):
@@ -50,10 +44,19 @@ def get_conversation_history(session_id, user_id, max_messages=20):
                 f"Found {len(messages)} total messages, "
                 f"using {len(recent_messages)} recent messages"
             )
-            return recent_messages
+            messages = recent_messages
         else:
             logger.info(f"Found {len(messages)} messages (within limit)")
-            return messages
+
+        # Convert langchain messages to JSON-serializable format
+        history = []
+        for msg in messages:
+            if hasattr(msg, "type") and hasattr(msg, "content"):
+                role = "user" if msg.type == "human" else "assistant"
+                history.append({"role": role, "content": msg.content})
+
+        logger.info(f"Converted {len(history)} messages for AgentCore")
+        return history
 
     except Exception as e:
         logger.error(f"Error loading conversation history: {str(e)}")
@@ -71,11 +74,21 @@ def save_session_history(session_id, user_id, prompt, response_content):
             user_id=user_id,
         )
 
-        # Add user message
+        # Add user message with metadata
+        user_metadata = {
+            "provider": "bedrock-agents",
+            "sessionId": session_id,
+        }
         chat_history.add_user_message(prompt)
+        chat_history.add_metadata(user_metadata)
 
-        # Add assistant response
+        # Add AI message with metadata
+        ai_metadata = {
+            "provider": "bedrock-agents",
+            "sessionId": session_id,
+        }
         chat_history.add_ai_message(response_content)
+        chat_history.add_metadata(ai_metadata)
 
         logger.info("Session history saved successfully")
         return True
@@ -88,11 +101,36 @@ def save_session_history(session_id, user_id, prompt, response_content):
             if chat_history:
                 # Try to save at least the response
                 chat_history.add_ai_message(f"Error occurred: {str(e)}")
+                chat_history.add_metadata(
+                    {
+                        "provider": "bedrock-agents",
+                        "sessionId": session_id,
+                        "error_recovery": True,
+                    }
+                )
                 logger.info("Saved error message to session history")
         except Exception as recovery_error:
             logger.error(f"Error recovery failed: {str(recovery_error)}")
 
         return False
+
+
+def create_response_metadata(agent_id, session_id, response=None):
+    """Create metadata for agent responses"""
+    metadata = {
+        "agentRuntimeArn": agent_id,
+        "sessionId": session_id,
+    }
+
+    if response:
+        if "runtimeSessionId" in response:
+            metadata["runtimeSessionId"] = response["runtimeSessionId"]
+        if "traceId" in response:
+            metadata["traceId"] = response["traceId"]
+        if "metrics" in response:
+            metadata["metrics"] = response["metrics"]
+
+    return metadata
 
 
 def handle_heartbeat(record):
@@ -118,7 +156,7 @@ def handle_run(record, context):
     user_id = record["userId"]
     user_groups = record["userGroups"]
     data = record["data"]
-    agent_id = data["agentId"]
+    agent_id = data["agentRuntimeArn"]
     prompt = data["text"]
     session_id = data.get("sessionId")
 
@@ -138,22 +176,8 @@ def handle_run(record, context):
         conversation_history = get_conversation_history(session_id, user_id)
         logger.info(f"Loaded {len(conversation_history)} messages from history")
 
-        # Convert agent ID to full ARN format
-        if not agent_id.startswith("arn:"):
-            region = os.environ.get("AWS_REGION")
-            account_id = context.invoked_function_arn.split(":")[4]
-            agent_runtime_arn = (
-                f"arn:aws:bedrock-agentcore:{region}:{account_id}:runtime/{agent_id}"
-            )
-        else:
-            agent_runtime_arn = agent_id
+        logger.info(f"Using agent runtime ARN: {agent_id}")
 
-        logger.info(f"Using agent runtime ARN: {agent_runtime_arn}")
-
-        # Always include conversation history (populated or empty list)
-        logger.info(
-            f"Sending {len(conversation_history)} messages in conversation_history"
-        )
         # Add conversation history to the data section
         enhanced_record = record.copy()
         enhanced_record["data"] = {
@@ -164,7 +188,7 @@ def handle_run(record, context):
 
         bedrock_agentcore = genai_core.clients.get_agentcore_client()
         response = bedrock_agentcore.invoke_agent_runtime(
-            agentRuntimeArn=agent_runtime_arn,
+            agentRuntimeArn=agent_id,
             runtimeSessionId=session_id,
             payload=payload,
         )
@@ -230,12 +254,9 @@ def handle_run(record, context):
                         "sessionId": session_id,
                         "type": "text",
                         "content": accumulated_content,
-                        "metadata": {
-                            "agentId": agent_id,
-                            "sessionId": session_id,
-                            "runtimeSessionId": response.get("runtimeSessionId"),
-                            "traceId": response.get("traceId"),
-                        },
+                        "metadata": create_response_metadata(
+                            agent_id, session_id, response
+                        ),
                     },
                 }
             )
@@ -268,20 +289,6 @@ def handle_run(record, context):
 
             logger.info(f"Extracted content: {content}")
 
-            # Extract metadata from response if available
-            metadata = {
-                "agentId": agent_id,
-                "sessionId": session_id,
-            }
-
-            # Add any additional metadata from the agent response
-            if "runtimeSessionId" in response:
-                metadata["runtimeSessionId"] = response["runtimeSessionId"]
-            if "traceId" in response:
-                metadata["traceId"] = response["traceId"]
-            if "metrics" in response:
-                metadata["metrics"] = response["metrics"]
-
             send_to_client(
                 {
                     "type": "text",
@@ -294,7 +301,9 @@ def handle_run(record, context):
                         "sessionId": session_id,
                         "content": content,
                         "type": "text",
-                        "metadata": metadata,
+                        "metadata": create_response_metadata(
+                            agent_id, session_id, response
+                        ),
                     },
                 }
             )
@@ -304,6 +313,30 @@ def handle_run(record, context):
 
         logger.info("Agent request processed successfully")
 
+    except json.JSONDecodeError as e:
+        # JSON parsing errors - must come before ValueError
+        logger.error(
+            f"JSON parsing error for agent {agent_id}: {str(e)}",
+            extra={
+                "agent_id": agent_id,
+                "session_id": session_id,
+                "error_type": "json_parse",
+            },
+        )
+        send_to_client(
+            {
+                "type": "text",
+                "action": "error",
+                "direction": "OUT",
+                "userId": user_id,
+                "timestamp": str(int(round(datetime.now().timestamp()))),
+                "data": {
+                    "sessionId": session_id,
+                    "content": "Unable to process response. Please try again.",
+                    "type": "text",
+                },
+            }
+        )
     except ValueError as e:
         # Input validation errors
         logger.error(
@@ -348,30 +381,6 @@ def handle_run(record, context):
                 "data": {
                     "sessionId": session_id,
                     "content": "Service temporarily unavailable. Please try again.",
-                    "type": "text",
-                },
-            }
-        )
-    except json.JSONDecodeError as e:
-        # JSON parsing errors
-        logger.error(
-            f"JSON parsing error for agent {agent_id}: {str(e)}",
-            extra={
-                "agent_id": agent_id,
-                "session_id": session_id,
-                "error_type": "json_parse",
-            },
-        )
-        send_to_client(
-            {
-                "type": "text",
-                "action": "error",
-                "direction": "OUT",
-                "userId": user_id,
-                "timestamp": str(int(round(datetime.now().timestamp()))),
-                "data": {
-                    "sessionId": session_id,
-                    "content": "Unable to process response. Please try again.",
                     "type": "text",
                 },
             }

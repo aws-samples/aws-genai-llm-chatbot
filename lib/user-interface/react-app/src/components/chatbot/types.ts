@@ -98,7 +98,7 @@ export interface ChatBotRunRequest {
   data?: {
     modelName?: string;
     provider?: string;
-    agentId?: string;
+    agentRuntimeArn?: string;
     sessionId: string;
     documents: SessionFile[] | null;
     images: SessionFile[] | null;

@@ -469,7 +469,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
           data: {
             mode: getChatBotMode(outputModality),
             text: value,
-            agentId: state.selectedAgent.value,
+            agentRuntimeArn: state.selectedAgent.value,
             sessionId: props.session.id,
             documents: [],
             images: [],
@@ -1055,7 +1055,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
                 options={
                   state.agents?.map((agent) => ({
                     label: agent.agentRuntimeName || agent.agentRuntimeId,
-                    value: agent.agentRuntimeId,
+                    value: agent.agentRuntimeArn,
                   })) || []
                 }
               />
