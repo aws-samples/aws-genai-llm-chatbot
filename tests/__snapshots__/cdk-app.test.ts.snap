@@ -401,7 +401,7 @@ exports[`snapshot test with CMK 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
@@ -629,6 +629,542 @@ exports[`snapshot test with CMK 1`] = `
         },
       },
       "Type": "AWS::Cognito::UserPoolGroup",
+    },
+    "BedrockAgentsInterfaceIngestionDLQ5FCC542B": {
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-SQS4",
+              "reason": "SQS queue is used internally and does not require SSL.",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "BedrockAgentsInterfaceIngestionQueueDA7BCA4C": {
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-SQS4",
+              "reason": "SQS queue is used internally and does not require SSL.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "BedrockAgentsInterfaceIngestionDLQ5FCC542B",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "VisibilityTimeout": 960,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "BedrockAgentsInterfaceIngestionQueuePolicy123B9C90": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BedrockAgentsInterfaceIngestionQueueDA7BCA4C",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "BedrockAgentsInterfaceIngestionQueueDA7BCA4C",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "BedrockAgentsInterfaceIngestionQueueprefixGenAIChatBotStackChatBotApiRealtimeMessagesTopic54DE4F29798AAB64": {
+      "DependsOn": [
+        "BedrockAgentsInterfaceIngestionQueuePolicy123B9C90",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "BedrockAgentsInterfaceIngestionQueueDA7BCA4C",
+            "Arn",
+          ],
+        },
+        "FilterPolicy": {
+          "modelInterface": [
+            "agent",
+          ],
+        },
+        "FilterPolicyScope": "MessageBody",
+        "Protocol": "sqs",
+        "TopicArn": {
+          "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+    "BedrockAgentsInterfaceRequestHandler236EF437": {
+      "DependsOn": [
+        "BedrockAgentsInterfaceRequestHandlerServiceRoleDefaultPolicy6C4B27E8",
+        "BedrockAgentsInterfaceRequestHandlerServiceRoleEEC42243",
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+        "SharedVPCprivateSubnet3DefaultRoute3BBCF55F",
+        "SharedVPCprivateSubnet3RouteTableAssociation4181A59C",
+      ],
+      "Properties": {
+        "Architectures": [
+          "x86_64",
+        ],
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-111111111-us-east-1",
+          "S3Key": "Dummy",
+        },
+        "Environment": {
+          "Variables": {
+            "AWS_XRAY_SDK_ENABLED": "false",
+            "CHATBOT_FILES_BUCKET_NAME": {
+              "Ref": "ChatBotApiChatBucketsFilesBucket1D4E273A",
+            },
+            "LOG_LEVEL": "INFO",
+            "MESSAGES_TOPIC_ARN": {
+              "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+            },
+            "POWERTOOLS_DEV": "false",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "false",
+            "POWERTOOLS_SERVICE_NAME": "chatbot",
+            "POWERTOOLS_TRACE_DISABLED": "true",
+            "SESSIONS_BY_USER_ID_INDEX_NAME": "byUserId",
+            "SESSIONS_TABLE_NAME": {
+              "Ref": "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
+            },
+          },
+        },
+        "Handler": "index.handler",
+        "Layers": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":lambda:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:2",
+              ],
+            ],
+          },
+          {
+            "Ref": "SharedCommonLayerFC89CBCE",
+          },
+        ],
+        "Role": {
+          "Fn::GetAtt": [
+            "BedrockAgentsInterfaceRequestHandlerServiceRoleEEC42243",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.11",
+        "Timeout": 900,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "BedrockAgentsInterfaceRequestHandlerSecurityGroupC6ADA70C",
+                "GroupId",
+              ],
+            },
+          ],
+          "SubnetIds": [
+            {
+              "Ref": "SharedVPCprivateSubnet1Subnet5A4C2616",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet2SubnetF203CD06",
+            },
+            {
+              "Ref": "SharedVPCprivateSubnet3SubnetB484AE12",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BedrockAgentsInterfaceRequestHandlerLogRetention9CC6AC15": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+        "SharedVPCprivateSubnet3DefaultRoute3BBCF55F",
+        "SharedVPCprivateSubnet3RouteTableAssociation4181A59C",
+      ],
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "BedrockAgentsInterfaceRequestHandler236EF437",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 7,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
+    },
+    "BedrockAgentsInterfaceRequestHandlerSecurityGroupC6ADA70C": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+        "SharedVPCprivateSubnet3DefaultRoute3BBCF55F",
+        "SharedVPCprivateSubnet3RouteTableAssociation4181A59C",
+      ],
+      "Properties": {
+        "GroupDescription": "Automatic security group for Lambda Function prefixGenAIChatBotStackBedrockAgentsInterfaceRequestHandlerAE09D382",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "SharedVPC6716DA5E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "BedrockAgentsInterfaceRequestHandlerServiceRoleDefaultPolicy6C4B27E8": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+        "SharedVPCprivateSubnet3DefaultRoute3BBCF55F",
+        "SharedVPCprivateSubnet3RouteTableAssociation4181A59C",
+      ],
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-IAM4",
+              "reason": "IAM role implicitly created by CDK.",
+            },
+            {
+              "id": "AwsSolutions-IAM5",
+              "reason": "IAM role implicitly created by CDK.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BedrockAgentsInterfaceIngestionQueueDA7BCA4C",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "ChatBotApiChatDynamoDBTablesSessionsTable92B891E3",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "ChatBotApiChatBucketsFilesBucket1D4E273A",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "ChatBotApiChatBucketsFilesBucket1D4E273A",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ChatBotApiRealtimeMessagesTopicCC5C5EA4",
+              },
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "bedrock-agentcore:InvokeAgentRuntime",
+                "bedrock-agentcore:ListAgentRuntimes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":bedrock-agentcore:*:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":runtime/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BedrockAgentsInterfaceRequestHandlerServiceRoleDefaultPolicy6C4B27E8",
+        "Roles": [
+          {
+            "Ref": "BedrockAgentsInterfaceRequestHandlerServiceRoleEEC42243",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BedrockAgentsInterfaceRequestHandlerServiceRoleEEC42243": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+        "SharedVPCprivateSubnet3DefaultRoute3BBCF55F",
+        "SharedVPCprivateSubnet3RouteTableAssociation4181A59C",
+      ],
+      "Metadata": {
+        "cdk_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "AwsSolutions-IAM4",
+              "reason": "IAM role implicitly created by CDK.",
+            },
+            {
+              "id": "AwsSolutions-IAM5",
+              "reason": "IAM role implicitly created by CDK.",
+            },
+          ],
+        },
+      },
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BedrockAgentsInterfaceRequestHandlerSqsEventSourceprefixGenAIChatBotStackBedrockAgentsInterfaceIngestionQueue0D59417B57DA623D": {
+      "DependsOn": [
+        "SharedVPCprivateSubnet1DefaultRoute608F3753",
+        "SharedVPCprivateSubnet1RouteTableAssociation83D920FA",
+        "SharedVPCprivateSubnet2DefaultRoute4387C202",
+        "SharedVPCprivateSubnet2RouteTableAssociation6788E94C",
+        "SharedVPCprivateSubnet3DefaultRoute3BBCF55F",
+        "SharedVPCprivateSubnet3RouteTableAssociation4181A59C",
+      ],
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "BedrockAgentsInterfaceIngestionQueueDA7BCA4C",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "BedrockAgentsInterfaceRequestHandler236EF437",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "MaximumBatchingWindowInSeconds": 5,
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
     },
     "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691": {
       "DependsOn": [
@@ -1493,6 +2029,16 @@ type Model @aws_cognito_user_pools {
   bedrockGuardrails: Boolean
 }
 
+type Agent @aws_cognito_user_pools {
+  agentRuntimeArn: String!
+  agentRuntimeId: String!
+  agentRuntimeName: String!
+  agentRuntimeVersion: String!
+  description: String
+  lastUpdatedAt: AWSDateTime!
+  status: String!
+}
+
 type PassageRank @aws_cognito_user_pools {
   score: Float!
   passage: String!
@@ -1707,60 +2253,79 @@ type Mutation {
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   createAuroraWorkspace(input: CreateWorkspaceAuroraInput!): Workspace!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  startKendraDataSync(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  deleteWorkspace(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  deleteDocument(input: DeleteDocumentInput!): DeleteDocumentResult 
-  @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  startKendraDataSync(workspaceId: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  deleteWorkspace(workspaceId: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  deleteDocument(input: DeleteDocumentInput!): DeleteDocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   addTextDocument(input: TextDocumentInput!): DocumentResult
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  addUserFeedback(input: UserFeedbackInput!): UserFeedbackResult @aws_cognito_user_pools
+  addUserFeedback(input: UserFeedbackInput!): UserFeedbackResult
+    @aws_cognito_user_pools
   addQnADocument(input: QnADocumentInput!): DocumentResult
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   setDocumentSubscriptionStatus(
     input: DocumentSubscriptionStatusInput!
-  ): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  addWebsite(input: WebsiteInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  addRssFeed(input: RssFeedInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  updateRssFeed(input: UpdateRssFeedInput!): DocumentResult @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  ): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  addWebsite(input: WebsiteInput!): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  addRssFeed(input: RssFeedInput!): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  updateRssFeed(input: UpdateRssFeedInput!): DocumentResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   deleteUserSessions: [DeleteSessionResult!] @aws_cognito_user_pools
   deleteSession(id: String!): DeleteSessionResult @aws_cognito_user_pools
   # Real-time
   sendQuery(data: String): String @aws_cognito_user_pools
   publishResponse(sessionId: String, userId: String, data: String): Channel
     @aws_iam
-  createApplication(input: ManageApplicationInput!): Application! 
-  @aws_cognito_user_pools(cognito_groups: ["admin"])
-  updateApplication(input: ManageApplicationInput!): Application! 
-  @aws_cognito_user_pools(cognito_groups: ["admin"])
-  deleteApplication(id: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin"])
+  createApplication(input: ManageApplicationInput!): Application!
+    @aws_cognito_user_pools(cognito_groups: ["admin"])
+  updateApplication(input: ManageApplicationInput!): Application!
+    @aws_cognito_user_pools(cognito_groups: ["admin"])
+  deleteApplication(id: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin"])
 }
 
 type Query {
   checkHealth: Boolean @aws_cognito_user_pools
   getUploadFileURL(input: FileUploadInput!): FileUploadResult
     @aws_cognito_user_pools
-  getFileURL(fileName: String!): String
-    @aws_cognito_user_pools
-  listModels: [Model!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listWorkspaces: [Workspace!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  getWorkspace(workspaceId: String!): Workspace @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listRagEngines: [RagEngine!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getFileURL(fileName: String!): String @aws_cognito_user_pools
+  listModels: [Model!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listAgents: [Agent!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listWorkspaces: [Workspace!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getWorkspace(workspaceId: String!): Workspace
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listRagEngines: [RagEngine!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   performSemanticSearch(input: SemanticSearchInput!): SemanticSearchResult!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listSessions: [Session!]! @aws_cognito_user_pools
-  listEmbeddingModels: [EmbeddingModel!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listEmbeddingModels: [EmbeddingModel!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   calculateEmbeddings(input: CalculateEmbeddingsInput!): [Embedding]!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   getSession(id: String!): Session @aws_cognito_user_pools
-  listKendraIndexes: [KendraIndex!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listBedrockKnowledgeBases: [BedrockKB!]! @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  isKendraDataSynching(workspaceId: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listKendraIndexes: [KendraIndex!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listBedrockKnowledgeBases: [BedrockKB!]!
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  isKendraDataSynching(workspaceId: String!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listDocuments(input: ListDocumentsInput!): DocumentsResult!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  getDocument(input: GetDocumentInput!): Document @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult 
-  @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
-  listCrossEncoders: [CrossEncoderData!] @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getDocument(input: GetDocumentInput!): Document
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  getRSSPosts(input: GetRSSPostsInput!): DocumentsResult
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
+  listCrossEncoders: [CrossEncoderData!]
+    @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   rankPassages(input: RankPassagesInput!): [PassageRank!]!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
   listRoles: [Role!]! @aws_cognito_user_pools(cognito_groups: ["admin"])
@@ -2253,6 +2818,25 @@ schema {
         },
         "DataSourceName": "proxyResolverFunction",
         "FieldName": "isKendraDataSynching",
+        "Kind": "UNIT",
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "ChatBotApiChatbotApilistAgentsresolverD0AF55FA": {
+      "DependsOn": [
+        "ChatBotApiChatbotApiproxyResolverFunction257648DA",
+        "ChatBotApiChatbotApiSchemaAB63459C",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "ChatBotApiChatbotApiBABF9B87",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "proxyResolverFunction",
+        "FieldName": "listAgents",
         "Kind": "UNIT",
         "TypeName": "Query",
       },
@@ -4601,6 +5185,7 @@ schema {
                 "bedrock:ListInferenceProfiles",
                 "bedrock:InvokeModel",
                 "bedrock:InvokeModelWithResponseStream",
+                "bedrock-agentcore:ListAgentRuntimes",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -5088,7 +5673,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -5240,9 +5825,6 @@ schema {
         "IdeficsInterfaceChatbotFilesPrivateApifolderAFB6ED45",
         "IdeficsInterfaceChatbotFilesPrivateApiValidateRequest8E2961DC",
       ],
-      "Metadata": {
-        "aws:cdk:do-not-refactor": true,
-      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -7156,7 +7738,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -7684,6 +8266,9 @@ schema {
           "referencetoprefixGenAIChatBotStackAuthenticationUserPoolUserPoolClientE65D4656Ref": {
             "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
           },
+          "referencetoprefixGenAIChatBotStackBedrockAgentsInterfaceRequestHandlerBEFA4B79Ref": {
+            "Ref": "BedrockAgentsInterfaceRequestHandler236EF437",
+          },
           "referencetoprefixGenAIChatBotStackChatBotApiAppDynamoDBTablesApplicationsTable7875DBBCRef": {
             "Ref": "ChatBotApiAppDynamoDBTablesApplicationsTableDE001556",
           },
@@ -7816,7 +8401,7 @@ schema {
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-111111111-us-east-1/6d4aba5a12be2297b15b6358e902ebb31e4cb7c2d515de2924dcf6a34bbd3b07.json",
+              "/cdk-hnb659fds-assets-111111111-us-east-1/906913454e70aaf4e3dfe3b49e939b223cf3d4d627e936ac5ba1290527805e36.json",
             ],
           ],
         },
@@ -9103,17 +9688,13 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
-        "LoggingConfig": {
-          "ApplicationLogLevel": "FATAL",
-          "LogFormat": "JSON",
-        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEventServiceRoleD8C445F8",
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 900,
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -15635,17 +16216,13 @@ schema {
           },
         },
         "Handler": "framework.isComplete",
-        "LoggingConfig": {
-          "ApplicationLogLevel": "FATAL",
-          "LogFormat": "JSON",
-        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkisCompleteServiceRole839AE1FE",
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -15851,17 +16428,13 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
-        "LoggingConfig": {
-          "ApplicationLogLevel": "FATAL",
-          "LogFormat": "JSON",
-        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonEventServiceRoleF3392DDD",
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -16071,17 +16644,13 @@ schema {
           },
         },
         "Handler": "framework.onTimeout",
-        "LoggingConfig": {
-          "ApplicationLogLevel": "FATAL",
-          "LogFormat": "JSON",
-        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonTimeoutServiceRole080F6A31",
             "Arn",
           ],
         },
-        "Runtime": "nodejs22.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -16306,6 +16875,22 @@ schema {
             ],
           ],
         },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": false,
+          "Level": "ERROR",
+        },
         "RoleArn": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2",
@@ -16314,6 +16899,29 @@ schema {
         },
       },
       "Type": "AWS::StepFunctions::StateMachine",
+    },
+    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RagEnginesSageMakerModelMultiAB24ACodeBuildProjectE6650C61",
+      ],
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/vendedlogs/states/waiter-state-machine-",
+              {
+                "Ref": "RagEnginesSageMakerModelMultiAB24AProviderframeworkisComplete0D14240D",
+              },
+              "-c8db3e9c81ac5aa76d78a859f97c714abb206fdb93",
+            ],
+          ],
+        },
+        "RetentionInDays": 731,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2": {
       "DependsOn": [
@@ -16415,6 +17023,22 @@ schema {
                   ],
                 },
               ],
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:CreateLogStream",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutLogEvents",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -21332,115 +21956,34 @@ schema {
           {},
           {
             "<<marker:0xbaba:0>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AWS::Region",
             },
             "<<marker:0xbaba:1>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AWS::Region",
             },
             "<<marker:0xbaba:2>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AuthenticationUserPool28698864",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AuthenticationUserPool28698864",
             },
             "<<marker:0xbaba:3>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
             },
             "<<marker:0xbaba:4>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AWS::Region",
             },
             "<<marker:0xbaba:5>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AuthenticationUserPool28698864",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AuthenticationUserPool28698864",
             },
             "<<marker:0xbaba:6>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
             },
             "<<marker:0xbaba:7>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Fn::GetAtt": [
-                      "ChatBotApiChatbotApiBABF9B87",
-                      "GraphQLUrl",
-                    ],
-                  },
-                  """,
-                ],
+              "Fn::GetAtt": [
+                "ChatBotApiChatbotApiBABF9B87",
+                "GraphQLUrl",
               ],
             },
             "<<marker:0xbaba:8>>": {
-              "Fn::Join": [
-                "",
-                [
-                  """,
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  """,
-                ],
-              ],
+              "Ref": "AWS::Region",
             },
           },
         ],

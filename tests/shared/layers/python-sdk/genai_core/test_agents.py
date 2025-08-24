@@ -4,7 +4,7 @@ from botocore.exceptions import ClientError
 from genai_core.agents import list_agents
 
 
-@patch("genai_core.clients.get_bedrock_client")
+@patch("genai_core.clients.get_agentcore_control_client")
 def test_list_agents_success(mock_client):
     mock_bedrock = Mock()
     mock_bedrock.list_agent_runtimes.return_value = {
@@ -15,10 +15,9 @@ def test_list_agents_success(mock_client):
     result = list_agents()
     assert len(result) == 1
     assert result[0]["agentRuntimeId"] == "test-agent"
-    mock_client.assert_called_with(service_name="bedrock-agentcore-control")
 
 
-@patch("genai_core.clients.get_bedrock_client")
+@patch("genai_core.clients.get_agentcore_control_client")
 def test_list_agents_client_error(mock_client):
     mock_bedrock = Mock()
     mock_bedrock.list_agent_runtimes.side_effect = ClientError(

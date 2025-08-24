@@ -43,7 +43,7 @@ def test_agent_conversation_single_turn(
     client: AppSyncClient, available_agent, agent_session_id
 ):
     """Test basic agent query → response flow"""
-    agent_id = available_agent["agentRuntimeId"]
+    agent_id = available_agent["agentRuntimeArn"]
 
     request = {
         "action": "run",
@@ -51,7 +51,7 @@ def test_agent_conversation_single_turn(
         "data": {
             "mode": "chain",
             "text": "Hello, what can you help me with?",
-            "agentId": agent_id,
+            "agentRuntimeArn": agent_id,
             "sessionId": agent_session_id,
             "documents": [],
             "images": [],
@@ -84,7 +84,7 @@ def test_agent_conversation_multi_turn(
     client: AppSyncClient, available_agent, agent_session_id
 ):
     """Test conversation context preservation"""
-    agent_id = available_agent["agentRuntimeId"]
+    agent_id = available_agent["agentRuntimeArn"]
 
     # First message
     request1 = {
@@ -93,7 +93,7 @@ def test_agent_conversation_multi_turn(
         "data": {
             "mode": "chain",
             "text": "My name is John. What's the weather?",
-            "agentId": agent_id,
+            "agentRuntimeArn": agent_id,
             "sessionId": agent_session_id,
             "documents": [],
             "images": [],
@@ -121,7 +121,7 @@ def test_agent_conversation_multi_turn(
         "data": {
             "mode": "chain",
             "text": "Do you remember my name?",
-            "agentId": agent_id,
+            "agentRuntimeArn": agent_id,
             "sessionId": agent_session_id,
             "documents": [],
             "images": [],
@@ -156,7 +156,7 @@ def test_agent_conversation_error_handling(client: AppSyncClient, agent_session_
         "data": {
             "mode": "chain",
             "text": "Test message",
-            "agentId": "invalid-agent-id-12345",
+            "agentRuntimeArn": "invalid-agent-id-12345",
             "sessionId": agent_session_id,
             "documents": [],
             "images": [],
@@ -192,7 +192,7 @@ def test_agent_conversation_session_persistence(
     client: AppSyncClient, available_agent, agent_session_id
 ):
     """Test conversation persistence over time"""
-    agent_id = available_agent["agentRuntimeId"]
+    agent_id = available_agent["agentRuntimeArn"]
 
     messages = [
         "What is 2 + 2?",
@@ -207,7 +207,7 @@ def test_agent_conversation_session_persistence(
             "data": {
                 "mode": "chain",
                 "text": message,
-                "agentId": agent_id,
+                "agentRuntimeArn": agent_id,
                 "sessionId": agent_session_id,
                 "documents": [],
                 "images": [],
@@ -243,7 +243,7 @@ def test_agent_conversation_session_persistence(
 def test_agent_conversation_cleanup(client: AppSyncClient, available_agent):
     """Test session deletion"""
     cleanup_session_id = str(uuid.uuid4())
-    agent_id = available_agent["agentRuntimeId"]
+    agent_id = available_agent["agentRuntimeArn"]
 
     # Create conversation
     request = {
@@ -252,7 +252,7 @@ def test_agent_conversation_cleanup(client: AppSyncClient, available_agent):
         "data": {
             "mode": "chain",
             "text": "Test message for cleanup",
-            "agentId": agent_id,
+            "agentRuntimeArn": agent_id,
             "sessionId": cleanup_session_id,
             "documents": [],
             "images": [],

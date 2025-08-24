@@ -16,7 +16,7 @@ def test_create_application(client: AppSyncClient):
     pytest.application = client.create_application(
         input={
             "name": "INTEG_TEST_APP",
-            "model": "bedrock::anthropic.claude-instant-v1",
+            "model": "bedrock::anthropic.claude-3-haiku-20240307-v1:0",
             "roles": ["user"],
             "allowImageInput": True,
             "allowVideoInput": True,
@@ -103,7 +103,7 @@ def test_update_application(client: AppSyncClient):
         input={
             "id": pytest.application.get("id"),
             "name": "INTEG_TEST_APP",
-            "model": "bedrock::anthropic.claude-instant-v1",
+            "model": "bedrock::anthropic.claude-3-haiku-20240307-v1:0",
             "roles": ["user", "admin"],
             "allowImageInput": False,
             "allowVideoInput": False,
