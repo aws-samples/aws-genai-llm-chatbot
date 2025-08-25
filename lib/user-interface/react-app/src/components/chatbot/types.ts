@@ -57,6 +57,7 @@ export enum ChatBotAction {
   Run = "run",
   FinalResponse = "final_response",
   LLMNewToken = "llm_new_token",
+  ThinkingStep = "thinking_step",
   Error = "error",
 }
 
@@ -149,6 +150,8 @@ export interface ChatBotHistoryItem {
     | ChatBotFilesBlob
   >;
   tokens?: ChatBotToken[];
+  thinkingSteps?: string[];
+  isThinking?: boolean;
 }
 
 export interface ChatBotMessageResponse {

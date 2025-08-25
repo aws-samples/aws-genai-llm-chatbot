@@ -178,6 +178,21 @@ def handle_run(record, context):
 
         logger.info(f"Using agent runtime ARN: {agent_id}")
 
+        # Send initial thinking step
+        send_to_client(
+            {
+                "type": "text",
+                "action": ChatbotAction.THINKING_STEP.value,
+                "timestamp": str(int(round(datetime.now().timestamp()))),
+                "userId": user_id,
+                "data": {
+                    "sessionId": session_id,
+                    "content": "Starting agent...",
+                    "step": "initialization",
+                },
+            }
+        )
+
         # Add conversation history to the data section
         enhanced_record = record.copy()
         enhanced_record["data"] = {
@@ -208,40 +223,87 @@ def handle_run(record, context):
                         # Parse the outer JSON string
                         outer_data = json.loads(line)
                         # Parse the inner data string
-                        if outer_data.startswith("data: "):
+                        if isinstance(outer_data, str) and outer_data.startswith(
+                            "data: "
+                        ):
                             inner_data = outer_data[6:].strip()
                             chunk_data = json.loads(inner_data)
+                        else:
+                            # If outer_data is already parsed or doesn't have "data: " prefix
+                            chunk_data = (
+                                outer_data
+                                if isinstance(outer_data, dict)
+                                else json.loads(outer_data)
+                            )
 
-                            if "event" in chunk_data:
-                                chunk_content = chunk_data["event"]
+                        # Handle thinking steps
+                        if "thinking" in chunk_data:
+                            thinking_content = chunk_data["thinking"]
+                            if thinking_content:
+                                send_to_client(
+                                    {
+                                        "type": "text",
+                                        "action": ChatbotAction.THINKING_STEP.value,
+                                        "timestamp": str(
+                                            int(round(datetime.now().timestamp()))
+                                        ),
+                                        "userId": user_id,
+                                        "data": {
+                                            "sessionId": sehission_id,
+                                            "content": thinking_content,
+                                            "step": "thinking",
+                                        },
+                                    }
+                                )
 
-                                if chunk_content:
-                                    sequence_number += 1
-                                    accumulated_content += chunk_content
-                                    # Send streaming token to client
-                                    send_to_client(
-                                        {
-                                            "type": "text",
-                                            "action": ChatbotAction.LLM_NEW_TOKEN.value,
-                                            "timestamp": str(
-                                                int(round(datetime.now().timestamp()))
-                                            ),
-                                            "userId": user_id,
-                                            "data": {
-                                                "sessionId": session_id,
-                                                "token": {
-                                                    "runId": session_id,
-                                                    "sequenceNumber": sequence_number,
-                                                    "value": chunk_content,
-                                                },
+                        # Handle regular response content
+                        if "event" in chunk_data:
+                            chunk_content = chunk_data["event"]
+
+                            if chunk_content:
+                                sequence_number += 1
+                                accumulated_content += chunk_content
+                                # Send streaming token to client
+                                send_to_client(
+                                    {
+                                        "type": "text",
+                                        "action": ChatbotAction.LLM_NEW_TOKEN.value,
+                                        "timestamp": str(
+                                            int(round(datetime.now().timestamp()))
+                                        ),
+                                        "userId": user_id,
+                                        "data": {
+                                            "sessionId": session_id,
+                                            "token": {
+                                                "runId": session_id,
+                                                "sequenceNumber": sequence_number,
+                                                "value": chunk_content,
                                             },
-                                        }
-                                    )
+                                        },
+                                    }
+                                )
                     except json.JSONDecodeError:
                         continue
 
             # Send final response with accumulated content
             logger.info("Sending final response to end streaming")
+
+            # Send done thinking step if we had thinking steps
+            if accumulated_content:
+                send_to_client(
+                    {
+                        "type": "text",
+                        "action": ChatbotAction.THINKING_STEP.value,
+                        "timestamp": str(int(round(datetime.now().timestamp()))),
+                        "userId": user_id,
+                        "data": {
+                            "sessionId": session_id,
+                            "content": "Done",
+                            "step": "completion",
+                        },
+                    }
+                )
+
             send_to_client(
                 {
                     "type": "text",

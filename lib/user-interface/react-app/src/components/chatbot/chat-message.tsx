@@ -26,6 +26,7 @@ import { CopyWithPopoverButton } from "./CopyButton";
 import { AppContext } from "../../common/app-context";
 import { ApiClient } from "../../common/api-client/api-client";
 import { ChatMessageMediaDisplay } from "./chat-message-media-display";
+import { ThinkingSteps } from "./thinking-steps";
 
 export interface ChatMessageProps {
   message: ChatBotHistoryItem;
@@ -33,6 +34,7 @@ export interface ChatMessageProps {
   showMetadata?: boolean;
   onThumbsUp: () => void;
   onThumbsDown: () => void;
+  isThinking?: boolean;
 }
 
 function hasMediaFiles(
@@ -383,6 +385,14 @@ export default function ChatMessage(props: ChatMessageProps) {
               isAIMessage={
                 props.message?.type === ChatBotMessageType.AI ? true : false
               }
+            />
+          )}
+          {props.message?.type === ChatBotMessageType.AI && 
+           props.message.thinkingSteps && 
+           props.message.thinkingSteps.length > 0 && (
+            <ThinkingSteps 
+              steps={props.message.thinkingSteps} 
+              isThinking={props.message.isThinking}
             />
           )}
           <ReactMarkdown

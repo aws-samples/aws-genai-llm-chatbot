@@ -22,6 +22,7 @@ export function updateMessageHistory(
   if (
     response.action === ChatBotAction.LLMNewToken ||
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     const content = response.data?.content;
@@ -124,6 +125,7 @@ export function updateMessageHistoryRef(
   if (
     response.action === ChatBotAction.LLMNewToken ||
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     const content = response.data?.content;
@@ -161,13 +163,36 @@ export function updateMessageHistoryRef(
         metadata = lastMessage.metadata;
       }
 
+      // Handle thinking steps
+      if (response.action === ChatBotAction.ThinkingStep && content) {
+        const currentThinkingSteps = lastMessage.thinkingSteps || [];
+        lastMessage.thinkingSteps = [...currentThinkingSteps, content];
+        // Set thinking to false if this is the "Done" step, otherwise true
+        lastMessage.isThinking = content !== "Done";
+      }
+
+      // Clear thinking state on final response
+      if (response.action === ChatBotAction.FinalResponse) {
+        lastMessage.isThinking = false;
+      }
+
       if (hasContent || lastMessage.content.length > 0) {
+        // For LLMNewToken, build content from tokens if no direct content
+        let messageContent = content ?? lastMessage.content;
+        if (response.action === ChatBotAction.LLMNewToken && !hasContent && hasToken) {
+          // Accumulate token content
+          const allTokens = hasToken ? [...(lastMessage.tokens || []), token] : lastMessage.tokens || [];
+          messageContent = allTokens.map(t => t.value).join('');
+        }
+        
         messageHistory[messageHistory.length - 1] = {
           ...lastMessage,
           type: ChatBotMessageType.AI,
-          content: content ?? lastMessage.content,
+          content: messageContent,
           metadata,
-          tokens: lastMessage.tokens,
+          tokens: hasToken ? [...(lastMessage.tokens || []), token] : lastMessage.tokens,
+          thinkingSteps: lastMessage.thinkingSteps,
+          isThinking: lastMessage.isThinking,
         };
       } else {
         messageHistory[messageHistory.length - 1] = {
@@ -175,25 +200,44 @@ export function updateMessageHistoryRef(
           type: ChatBotMessageType.AI,
           content: "",
           metadata,
-          tokens: lastMessage.tokens,
+          tokens: hasToken ? [...(lastMessage.tokens || []), token] : lastMessage.tokens,
+          thinkingSteps: lastMessage.thinkingSteps,
+          isThinking: lastMessage.isThinking,
         };
       }
     } else {
-      if (hasContent) {
+      // Only create new messages for actual content or tokens, not thinking steps
+      if (hasContent && response.action !== ChatBotAction.ThinkingStep) {
         const tokens = hasToken ? [token] : [];
-        messageHistory.push({
+        const newMessage = {
           type: ChatBotMessageType.AI,
           content,
           metadata,
           tokens,
-        });
+          thinkingSteps: [],
+          isThinking: false,
+        };
+        messageHistory.push(newMessage);
       } else if (typeof token !== "undefined") {
         messageHistory.push({
           type: ChatBotMessageType.AI,
           content: token.value,
           metadata,
           tokens: [token],
+          thinkingSteps: [],
+          isThinking: false,
         });
+      } else if (response.action === ChatBotAction.ThinkingStep && content) {
+        // Create a new message for thinking steps if no message exists
+        const newMessage = {
+          type: ChatBotMessageType.AI,
+          content: "",
+          metadata,
+          tokens: [],
+          thinkingSteps: [content],
+          isThinking: content !== "Done",
+        };
+        messageHistory.push(newMessage);
       }
     }
   } else {
@@ -210,6 +254,7 @@ export function updateChatSessions(
   const messageHistory = chatSession.messageHistory;
   if (
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     chatSession.running = false;
@@ -217,6 +262,7 @@ export function updateChatSessions(
   if (
     response.action === ChatBotAction.LLMNewToken ||
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     const content = response.data?.content;
