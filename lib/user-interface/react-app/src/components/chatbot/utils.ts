@@ -179,18 +179,26 @@ export function updateMessageHistoryRef(
       if (hasContent || lastMessage.content.length > 0) {
         // For LLMNewToken, build content from tokens if no direct content
         let messageContent = content ?? lastMessage.content;
-        if (response.action === ChatBotAction.LLMNewToken && !hasContent && hasToken) {
+        if (
+          response.action === ChatBotAction.LLMNewToken &&
+          !hasContent &&
+          hasToken
+        ) {
           // Accumulate token content
-          const allTokens = hasToken ? [...(lastMessage.tokens || []), token] : lastMessage.tokens || [];
-          messageContent = allTokens.map(t => t.value).join('');
+          const allTokens = hasToken
+            ? [...(lastMessage.tokens || []), token]
+            : lastMessage.tokens || [];
+          messageContent = allTokens.map((t) => t.value).join("");
         }
-        
+
         messageHistory[messageHistory.length - 1] = {
           ...lastMessage,
           type: ChatBotMessageType.AI,
           content: messageContent,
           metadata,
-          tokens: hasToken ? [...(lastMessage.tokens || []), token] : lastMessage.tokens,
+          tokens: hasToken
+            ? [...(lastMessage.tokens || []), token]
+            : lastMessage.tokens,
           thinkingSteps: lastMessage.thinkingSteps,
           isThinking: lastMessage.isThinking,
         };
@@ -200,7 +208,9 @@ export function updateMessageHistoryRef(
           type: ChatBotMessageType.AI,
           content: "",
           metadata,
-          tokens: hasToken ? [...(lastMessage.tokens || []), token] : lastMessage.tokens,
+          tokens: hasToken
+            ? [...(lastMessage.tokens || []), token]
+            : lastMessage.tokens,
           thinkingSteps: lastMessage.thinkingSteps,
           isThinking: lastMessage.isThinking,
         };

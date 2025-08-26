@@ -1,7 +1,4 @@
-import {
-  Box,
-  TextContent,
-} from "@cloudscape-design/components";
+import { Box, TextContent } from "@cloudscape-design/components";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -19,17 +16,20 @@ export function ThinkingSteps({ steps, isThinking }: ThinkingStepsProps) {
     return null;
   }
 
-  const headerText = isThinking ? "Thinking..." : `Thought process (${steps.length} steps)`;
-  const currentStep = isThinking && steps.length > 0 ? steps[steps.length - 1] : null;
+  const headerText = isThinking
+    ? "Thinking..."
+    : `Thought process (${steps.length} steps)`;
+  const currentStep =
+    isThinking && steps.length > 0 ? steps[steps.length - 1] : null;
 
   return (
     <Box margin={{ bottom: "s" }} className={styles.thinking_container}>
-      <div 
+      <div
         className={styles.thinking_header}
         onClick={() => setExpanded(!expanded)}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: "pointer" }}
       >
-        <span className={styles.expand_icon}>{expanded ? '▼' : '▶'}</span>
+        <span className={styles.expand_icon}>{expanded ? "▼" : "▶"}</span>
         {headerText}
       </div>
       {isThinking && currentStep && (

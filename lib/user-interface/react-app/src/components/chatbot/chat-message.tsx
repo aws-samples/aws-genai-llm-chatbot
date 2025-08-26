@@ -387,14 +387,14 @@ export default function ChatMessage(props: ChatMessageProps) {
               }
             />
           )}
-          {props.message?.type === ChatBotMessageType.AI && 
-           props.message.thinkingSteps && 
-           props.message.thinkingSteps.length > 0 && (
-            <ThinkingSteps 
-              steps={props.message.thinkingSteps} 
-              isThinking={props.message.isThinking}
-            />
-          )}
+          {props.message?.type === ChatBotMessageType.AI &&
+            props.message.thinkingSteps &&
+            props.message.thinkingSteps.length > 0 && (
+              <ThinkingSteps
+                steps={props.message.thinkingSteps}
+                isThinking={props.message.isThinking}
+              />
+            )}
           <ReactMarkdown
             className={styles.markdown}
             remarkPlugins={[remarkGfm]}

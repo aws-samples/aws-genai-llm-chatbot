@@ -35,7 +35,7 @@ def _wait_for_session(
             pass
         time.sleep(1)
     raise TimeoutError(
-        f"Session {session_id} did not reach {expected_messages} messages within {timeout}s"
+        f"{session_id} did not reach {expected_messages} messages within {timeout}s"
     )
 
 

@@ -229,7 +229,6 @@ def handle_run(record, context):
                             inner_data = outer_data[6:].strip()
                             chunk_data = json.loads(inner_data)
                         else:
-                            # If outer_data is already parsed or doesn't have "data: " prefix
                             chunk_data = (
                                 outer_data
                                 if isinstance(outer_data, dict)
@@ -249,7 +248,7 @@ def handle_run(record, context):
                                         ),
                                         "userId": user_id,
                                         "data": {
-                                            "sessionId": sehission_id,
+                                            "sessionId": session_id,
                                             "content": thinking_content,
                                             "step": "thinking",
                                         },
