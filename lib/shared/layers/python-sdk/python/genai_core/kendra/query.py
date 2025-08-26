@@ -21,6 +21,7 @@ def query_workspace_kendra(
 
     kendra = get_kendra_client_for_index(kendra_index_id)
     limit = max(1, min(100, limit))
+    query = query.strip()[0:999]
 
     if kendra_index_external or kendra_use_all_data:
         result = kendra.retrieve(
