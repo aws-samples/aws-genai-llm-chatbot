@@ -235,9 +235,9 @@ def handle_run(record, context):
                                 else json.loads(outer_data)
                             )
 
-                        # Handle thinking steps
-                        if "thinking" in chunk_data:
-                            thinking_content = chunk_data["thinking"]
+                        # Handle thinking events
+                        if chunk_data.get("type") == "thinking":
+                            thinking_content = chunk_data.get("content")
                             if thinking_content:
                                 send_to_client(
                                     {
@@ -255,9 +255,9 @@ def handle_run(record, context):
                                     }
                                 )
 
-                        # Handle regular response content
-                        if "event" in chunk_data:
-                            chunk_content = chunk_data["event"]
+                        # Handle content events
+                        elif chunk_data.get("type") == "content":
+                            chunk_content = chunk_data.get("content")
 
                             if chunk_content:
                                 sequence_number += 1

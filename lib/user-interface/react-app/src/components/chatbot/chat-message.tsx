@@ -392,7 +392,10 @@ export default function ChatMessage(props: ChatMessageProps) {
             props.message.thinkingSteps.length > 0 && (
               <ThinkingSteps
                 steps={props.message.thinkingSteps}
-                isThinking={props.message.isThinking}
+                isThinking={
+                  !props.message.isFinalized &&
+                  props.message.thinkingSteps.length > 0
+                }
               />
             )}
           <ReactMarkdown

@@ -2,7 +2,7 @@ import { Box, TextContent } from "@cloudscape-design/components";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import styles from "./thinking-steps.module.scss";
+import styles from "../../styles/thinking-steps.module.scss";
 
 interface ThinkingStepsProps {
   steps: string[];

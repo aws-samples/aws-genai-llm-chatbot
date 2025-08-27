@@ -167,40 +167,56 @@ export function updateMessageHistoryRef(
       if (response.action === ChatBotAction.ThinkingStep && content) {
         const currentThinkingSteps = lastMessage.thinkingSteps || [];
         lastMessage.thinkingSteps = [...currentThinkingSteps, content];
-        // Set thinking to false if this is the "Done" step, otherwise true
-        lastMessage.isThinking = content !== "Done";
       }
 
-      // Clear thinking state on final response
+      // Mark message as finalized on final response
       if (response.action === ChatBotAction.FinalResponse) {
-        lastMessage.isThinking = false;
+        lastMessage.isFinalized = true;
+      }
+
+      // Don't process LLM tokens if message is already finalized
+      if (response.action === ChatBotAction.LLMNewToken && lastMessage.isFinalized) {
+        return;
       }
 
       if (hasContent || lastMessage.content.length > 0) {
-        // For LLMNewToken, build content from tokens if no direct content
-        let messageContent = content ?? lastMessage.content;
-        if (
-          response.action === ChatBotAction.LLMNewToken &&
-          !hasContent &&
-          hasToken
-        ) {
-          // Accumulate token content
-          const allTokens = hasToken
-            ? [...(lastMessage.tokens || []), token]
-            : lastMessage.tokens || [];
-          messageContent = allTokens.map((t) => t.value).join("");
+        // Always build content from tokens to avoid duplication
+        let messageContent;
+        const allTokens = [...(lastMessage.tokens || [])];
+        
+        // Add new token if it doesn't already exist
+        if (hasToken) {
+          const existingToken = allTokens.find(t => t.sequenceNumber === token.sequenceNumber);
+          if (!existingToken) {
+            allTokens.push(token);
+          }
         }
+        
+        // Sort tokens by sequence number
+        allTokens.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+        
+        // Remove consecutive duplicate values
+        const deduplicatedTokens = [];
+        for (let i = 0; i < allTokens.length; i++) {
+          const currentToken = allTokens[i];
+          const prevToken = deduplicatedTokens[deduplicatedTokens.length - 1];
+          
+          // Only add if value is different from previous token
+          if (!prevToken || currentToken.value !== prevToken.value) {
+            deduplicatedTokens.push(currentToken);
+          }
+        }
+        
+        messageContent = deduplicatedTokens.map((t) => t.value).join("");
 
         messageHistory[messageHistory.length - 1] = {
           ...lastMessage,
           type: ChatBotMessageType.AI,
           content: messageContent,
           metadata,
-          tokens: hasToken
-            ? [...(lastMessage.tokens || []), token]
-            : lastMessage.tokens,
+          tokens: allTokens,
           thinkingSteps: lastMessage.thinkingSteps,
-          isThinking: lastMessage.isThinking,
+          
         };
       } else {
         messageHistory[messageHistory.length - 1] = {
@@ -212,7 +228,7 @@ export function updateMessageHistoryRef(
             ? [...(lastMessage.tokens || []), token]
             : lastMessage.tokens,
           thinkingSteps: lastMessage.thinkingSteps,
-          isThinking: lastMessage.isThinking,
+          
         };
       }
     } else {
@@ -225,7 +241,6 @@ export function updateMessageHistoryRef(
           metadata,
           tokens,
           thinkingSteps: [],
-          isThinking: false,
         };
         messageHistory.push(newMessage);
       } else if (typeof token !== "undefined") {
@@ -235,7 +250,6 @@ export function updateMessageHistoryRef(
           metadata,
           tokens: [token],
           thinkingSteps: [],
-          isThinking: false,
         });
       } else if (response.action === ChatBotAction.ThinkingStep && content) {
         // Create a new message for thinking steps if no message exists
@@ -245,7 +259,6 @@ export function updateMessageHistoryRef(
           metadata,
           tokens: [],
           thinkingSteps: [content],
-          isThinking: content !== "Done",
         };
         messageHistory.push(newMessage);
       }

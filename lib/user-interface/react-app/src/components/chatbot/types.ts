@@ -116,6 +116,7 @@ export interface ChatBotToken {
   sequenceNumber: number;
   runId?: string;
   value: string;
+  type?: 'content' | 'thinking';
 }
 
 export interface RagDocument {
@@ -151,7 +152,7 @@ export interface ChatBotHistoryItem {
   >;
   tokens?: ChatBotToken[];
   thinkingSteps?: string[];
-  isThinking?: boolean;
+  isFinalized?: boolean;
 }
 
 export interface ChatBotMessageResponse {
