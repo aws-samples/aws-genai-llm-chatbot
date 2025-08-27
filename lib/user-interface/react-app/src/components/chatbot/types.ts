@@ -116,7 +116,7 @@ export interface ChatBotToken {
   sequenceNumber: number;
   runId?: string;
   value: string;
-  type?: 'content' | 'thinking';
+  type?: "content" | "thinking";
 }
 
 export interface RagDocument {

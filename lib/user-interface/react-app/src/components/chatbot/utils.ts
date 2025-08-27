@@ -175,39 +175,43 @@ export function updateMessageHistoryRef(
       }
 
       // Don't process LLM tokens if message is already finalized
-      if (response.action === ChatBotAction.LLMNewToken && lastMessage.isFinalized) {
+      if (
+        response.action === ChatBotAction.LLMNewToken &&
+        lastMessage.isFinalized
+      ) {
         return;
       }
 
       if (hasContent || lastMessage.content.length > 0) {
         // Always build content from tokens to avoid duplication
-        let messageContent;
         const allTokens = [...(lastMessage.tokens || [])];
-        
+
         // Add new token if it doesn't already exist
         if (hasToken) {
-          const existingToken = allTokens.find(t => t.sequenceNumber === token.sequenceNumber);
+          const existingToken = allTokens.find(
+            (t) => t.sequenceNumber === token.sequenceNumber
+          );
           if (!existingToken) {
             allTokens.push(token);
           }
         }
-        
+
         // Sort tokens by sequence number
         allTokens.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
-        
+
         // Remove consecutive duplicate values
         const deduplicatedTokens = [];
         for (let i = 0; i < allTokens.length; i++) {
           const currentToken = allTokens[i];
           const prevToken = deduplicatedTokens[deduplicatedTokens.length - 1];
-          
+
           // Only add if value is different from previous token
           if (!prevToken || currentToken.value !== prevToken.value) {
             deduplicatedTokens.push(currentToken);
           }
         }
-        
-        messageContent = deduplicatedTokens.map((t) => t.value).join("");
+
+        const messageContent = deduplicatedTokens.map((t) => t.value).join("");
 
         messageHistory[messageHistory.length - 1] = {
           ...lastMessage,
@@ -216,7 +220,6 @@ export function updateMessageHistoryRef(
           metadata,
           tokens: allTokens,
           thinkingSteps: lastMessage.thinkingSteps,
-          
         };
       } else {
         messageHistory[messageHistory.length - 1] = {
@@ -228,7 +231,6 @@ export function updateMessageHistoryRef(
             ? [...(lastMessage.tokens || []), token]
             : lastMessage.tokens,
           thinkingSteps: lastMessage.thinkingSteps,
-          
         };
       }
     } else {

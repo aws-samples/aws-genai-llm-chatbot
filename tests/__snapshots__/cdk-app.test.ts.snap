@@ -401,7 +401,7 @@ exports[`snapshot test with CMK 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
@@ -5673,7 +5673,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -5825,6 +5825,9 @@ schema {
         "IdeficsInterfaceChatbotFilesPrivateApifolderAFB6ED45",
         "IdeficsInterfaceChatbotFilesPrivateApiValidateRequest8E2961DC",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -7738,7 +7741,7 @@ schema {
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -8401,7 +8404,7 @@ schema {
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-111111111-us-east-1/906913454e70aaf4e3dfe3b49e939b223cf3d4d627e936ac5ba1290527805e36.json",
+              "/cdk-hnb659fds-assets-111111111-us-east-1/3ca0117cffec09973858b281a291f050fe21d319bba0fd8848c02a1a36d64240.json",
             ],
           ],
         },
@@ -9688,13 +9691,17 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesAuroraPgVectorDatabaseSetupProviderframeworkonEventServiceRoleD8C445F8",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -16216,13 +16223,17 @@ schema {
           },
         },
         "Handler": "framework.isComplete",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkisCompleteServiceRole839AE1FE",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -16428,13 +16439,17 @@ schema {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonEventServiceRoleF3392DDD",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -16644,13 +16659,17 @@ schema {
           },
         },
         "Handler": "framework.onTimeout",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderframeworkonTimeoutServiceRole080F6A31",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -16875,22 +16894,6 @@ schema {
             ],
           ],
         },
-        "LoggingConfiguration": {
-          "Destinations": [
-            {
-              "CloudWatchLogsLogGroup": {
-                "LogGroupArn": {
-                  "Fn::GetAtt": [
-                    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01",
-                    "Arn",
-                  ],
-                },
-              },
-            },
-          ],
-          "IncludeExecutionData": false,
-          "Level": "ERROR",
-        },
         "RoleArn": {
           "Fn::GetAtt": [
             "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2",
@@ -16899,29 +16902,6 @@ schema {
         },
       },
       "Type": "AWS::StepFunctions::StateMachine",
-    },
-    "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineLogGroup98223E01": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "RagEnginesSageMakerModelMultiAB24ACodeBuildProjectE6650C61",
-      ],
-      "Properties": {
-        "LogGroupName": {
-          "Fn::Join": [
-            "",
-            [
-              "/aws/vendedlogs/states/waiter-state-machine-",
-              {
-                "Ref": "RagEnginesSageMakerModelMultiAB24AProviderframeworkisComplete0D14240D",
-              },
-              "-c8db3e9c81ac5aa76d78a859f97c714abb206fdb93",
-            ],
-          ],
-        },
-        "RetentionInDays": 731,
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Retain",
     },
     "RagEnginesSageMakerModelMultiAB24AProviderwaiterstatemachineRole7414E6C2": {
       "DependsOn": [
@@ -17023,22 +17003,6 @@ schema {
                   ],
                 },
               ],
-            },
-            {
-              "Action": [
-                "logs:CreateLogDelivery",
-                "logs:CreateLogStream",
-                "logs:GetLogDelivery",
-                "logs:UpdateLogDelivery",
-                "logs:DeleteLogDelivery",
-                "logs:ListLogDeliveries",
-                "logs:PutLogEvents",
-                "logs:PutResourcePolicy",
-                "logs:DescribeResourcePolicies",
-                "logs:DescribeLogGroups",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -21956,34 +21920,115 @@ schema {
           {},
           {
             "<<marker:0xbaba:0>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:1>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:2>>": {
-              "Ref": "AuthenticationUserPool28698864",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPool28698864",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:3>>": {
-              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:4>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:5>>": {
-              "Ref": "AuthenticationUserPool28698864",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPool28698864",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:6>>": {
-              "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AuthenticationUserPoolUserPoolClient8AE1704E",
+                  },
+                  """,
+                ],
+              ],
             },
             "<<marker:0xbaba:7>>": {
-              "Fn::GetAtt": [
-                "ChatBotApiChatbotApiBABF9B87",
-                "GraphQLUrl",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Fn::GetAtt": [
+                      "ChatBotApiChatbotApiBABF9B87",
+                      "GraphQLUrl",
+                    ],
+                  },
+                  """,
+                ],
               ],
             },
             "<<marker:0xbaba:8>>": {
-              "Ref": "AWS::Region",
+              "Fn::Join": [
+                "",
+                [
+                  """,
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  """,
+                ],
+              ],
             },
           },
         ],
