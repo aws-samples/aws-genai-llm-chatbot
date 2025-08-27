@@ -11,6 +11,8 @@ import { SelectProps } from "@cloudscape-design/components";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { Model } from "../../API";
 
+const MAX_THINKING_STEPS = 50;
+
 export function updateMessageHistory(
   sessionId: string,
   messageHistory: ChatBotHistoryItem[],
@@ -165,8 +167,12 @@ export function updateMessageHistoryRef(
 
       // Handle thinking steps
       if (response.action === ChatBotAction.ThinkingStep && content) {
-        const currentThinkingSteps = (lastMessage.thinkingSteps || []).slice(-49);
-        lastMessage.thinkingSteps = [...currentThinkingSteps, content];
+        const steps = lastMessage.thinkingSteps || [];
+        if (steps.length >= MAX_THINKING_STEPS) {
+          steps.shift();
+        }
+        steps.push(content);
+        lastMessage.thinkingSteps = steps;
       }
 
       // Mark message as finalized on final response
