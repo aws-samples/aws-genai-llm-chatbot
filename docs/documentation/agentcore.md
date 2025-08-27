@@ -1,13 +1,12 @@
 # AgentCore Integration
 
-AgentCore enables the chatbot to interact with Amazon Bedrock Agents, providing advanced reasoning capabilities with visible thinking processes.
+Amazon Bedrock AgentCore enables you to deploy and operate highly capable AI agents securely, at scale. It offers infrastructure purpose-built for dynamic agent workloads, powerful tools to enhance agents, and essential controls for real-world deployment. AgentCore services can be used together or independently and work with any framework including CrewAI, LangGraph, LlamaIndex, and Strands Agents, as well as any foundation model in or outside of Amazon Bedrock, giving you ultimate flexibility. AgentCore eliminates the undifferentiated heavy lifting of building specialized agent infrastructure, so you can accelerate agents to production.
 
 ![AgentCore Demo](assets/agent-demo.gif)
 
 ## Prerequisites
 
-1. **Deploy Bedrock Agents** in your AWS account
-2. **Agent ARNs**: Must be in format `arn:aws:bedrock-agentcore:region:account:runtime/agent-id`
+1. **Deploy Amazon Bedrock AgentCore Agent Runtime** in your AWS account
 
 The CDK deployment automatically configures the required IAM permissions (`bedrock-agentcore:InvokeAgentRuntime` and `bedrock-agentcore:ListAgentRuntimes`).
 
@@ -22,7 +21,7 @@ Agents are automatically discovered using the `listAgents` GraphQL query, which 
 In the chat interface:
 
 - Agents appear in a separate dropdown labeled "Select an agent (optional)"
-- Agents display using `agentRuntimeName` (or `agentRuntimeId` as fallback) as the label
+- Agents display using `agentRuntimeName` as the label
 - The `agentRuntimeArn` is used as the value
 - Agent selection is optional - you can use regular models instead
 
@@ -114,7 +113,7 @@ data: {"type": "content", "content": "42"}
 
 - **Thinking Events**: `type: "thinking"` events are displayed in the expandable thinking steps section
 - **Content Events**: `type: "content"` events are accumulated to build the final response
-- **Visual Indicators**: Thinking steps include emoji indicators for different agent actions:
+- **Visual Indicators**: Thinking steps support emoji indicators for different agent actions (needs to be sent by the agent):
   - 💭 Message start/thinking
   - 🔧 Tool usage
   - 🧠 Reasoning content
@@ -123,13 +122,18 @@ data: {"type": "content", "content": "42"}
   - ⏸️ Tool execution
   - 🏁 Response complete
 
+The above are CoverseStream events sent by a Amazon Bedrock [more info here](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ConverseStream.html#API_runtime_ConverseStream_ResponseSyntax)
+
 ### Security
 
-- **ARN Validation**: Only accepts ARNs matching `^arn:aws:bedrock-agentcore:[a-z0-9-]+:\d{12}:runtime/[a-zA-Z0-9_-]+$`
-- **Session Isolation**: Each conversation maintains separate session state
+- **Session Isolation**: Each conversation maintains separate session state (Handled by AgentCore)
 - **Error Handling**: Graceful fallback with error recovery for session history
 
-## Simple Agent Example
+## Getting Started
+
+[QuickStart: Your First Agent in 5 Minutes! 🚀](https://aws.github.io/bedrock-agentcore-starter-toolkit/user-guide/runtime/quickstart.html)
+
+### Simple Agent Example
 
 Here's a minimal agent implementation that demonstrates the core concepts:
 
@@ -142,7 +146,7 @@ from strands.models import BedrockModel
 from strands_tools import calculator, current_time
 
 app = BedrockAgentCoreApp()
-session = boto3.Session()
+session = boto3.Session(region_name='il-central-1')
 bedrock_model = BedrockModel(boto_session=session)
 
 agent = Agent(
