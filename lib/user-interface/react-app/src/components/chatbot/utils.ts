@@ -165,7 +165,7 @@ export function updateMessageHistoryRef(
 
       // Handle thinking steps
       if (response.action === ChatBotAction.ThinkingStep && content) {
-        const currentThinkingSteps = lastMessage.thinkingSteps || [];
+        const currentThinkingSteps = (lastMessage.thinkingSteps || []).slice(-49);
         lastMessage.thinkingSteps = [...currentThinkingSteps, content];
       }
 
