@@ -5,7 +5,7 @@ cfnresponse==1.1.2
 aws_requests_auth==0.4.3
 requests-aws4auth==1.2.3
 langchain==0.3.7
-langchain-community==0.3.3
+langchain-community==0.3.27
 opensearch-py==3.0.0
 psycopg2-binary==2.9.10
 pgvector==0.2.2
