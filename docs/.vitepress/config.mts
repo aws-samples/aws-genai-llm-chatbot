@@ -53,6 +53,7 @@ export default defineConfig({
         text: 'Documentation',
         items: [
           { text: 'Access Control', link: '/documentation/access-control' },
+          { text: 'AgentCore Integration', link: '/documentation/agentcore' },
           { text: 'Applications', link: '/documentation/applications' },
           { text: 'AppSync', link: '/documentation/appsync' },
           { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },

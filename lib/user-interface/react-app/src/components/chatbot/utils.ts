@@ -11,6 +11,8 @@ import { SelectProps } from "@cloudscape-design/components";
 import { OptionsHelper } from "../../common/helpers/options-helper";
 import { Model } from "../../API";
 
+const MAX_THINKING_STEPS = 50;
+
 export function updateMessageHistory(
   sessionId: string,
   messageHistory: ChatBotHistoryItem[],
@@ -22,6 +24,7 @@ export function updateMessageHistory(
   if (
     response.action === ChatBotAction.LLMNewToken ||
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     const content = response.data?.content;
@@ -124,6 +127,7 @@ export function updateMessageHistoryRef(
   if (
     response.action === ChatBotAction.LLMNewToken ||
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     const content = response.data?.content;
@@ -161,13 +165,67 @@ export function updateMessageHistoryRef(
         metadata = lastMessage.metadata;
       }
 
+      // Handle thinking steps
+      if (response.action === ChatBotAction.ThinkingStep && content) {
+        const steps = lastMessage.thinkingSteps || [];
+        if (steps.length >= MAX_THINKING_STEPS) {
+          steps.shift();
+        }
+        steps.push(content);
+        lastMessage.thinkingSteps = steps;
+      }
+
+      // Mark message as finalized on final response
+      if (response.action === ChatBotAction.FinalResponse) {
+        lastMessage.isFinalized = true;
+      }
+
+      // Don't process LLM tokens if message is already finalized
+      if (
+        response.action === ChatBotAction.LLMNewToken &&
+        lastMessage.isFinalized
+      ) {
+        return;
+      }
+
       if (hasContent || lastMessage.content.length > 0) {
+        // Always build content from tokens to avoid duplication
+        const allTokens = [...(lastMessage.tokens || [])];
+
+        // Add new token if it doesn't already exist
+        if (hasToken) {
+          const existingToken = allTokens.find(
+            (t) => t.sequenceNumber === token.sequenceNumber
+          );
+          if (!existingToken) {
+            allTokens.push(token);
+          }
+        }
+
+        // Sort tokens by sequence number
+        allTokens.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+
+        // Remove consecutive duplicate values
+        const deduplicatedTokens = [];
+        for (let i = 0; i < allTokens.length; i++) {
+          const currentToken = allTokens[i];
+          const prevToken = deduplicatedTokens[deduplicatedTokens.length - 1];
+
+          // Only add if value is different from previous token
+          if (!prevToken || currentToken.value !== prevToken.value) {
+            deduplicatedTokens.push(currentToken);
+          }
+        }
+
+        const messageContent = deduplicatedTokens.map((t) => t.value).join("");
+
         messageHistory[messageHistory.length - 1] = {
           ...lastMessage,
           type: ChatBotMessageType.AI,
-          content: content ?? lastMessage.content,
+          content: messageContent,
           metadata,
-          tokens: lastMessage.tokens,
+          tokens: allTokens,
+          thinkingSteps: lastMessage.thinkingSteps,
         };
       } else {
         messageHistory[messageHistory.length - 1] = {
@@ -175,25 +233,42 @@ export function updateMessageHistoryRef(
           type: ChatBotMessageType.AI,
           content: "",
           metadata,
-          tokens: lastMessage.tokens,
+          tokens: hasToken
+            ? [...(lastMessage.tokens || []), token]
+            : lastMessage.tokens,
+          thinkingSteps: lastMessage.thinkingSteps,
         };
       }
     } else {
-      if (hasContent) {
+      // Only create new messages for actual content or tokens, not thinking steps
+      if (hasContent && response.action !== ChatBotAction.ThinkingStep) {
         const tokens = hasToken ? [token] : [];
-        messageHistory.push({
+        const newMessage = {
           type: ChatBotMessageType.AI,
           content,
           metadata,
           tokens,
-        });
+          thinkingSteps: [],
+        };
+        messageHistory.push(newMessage);
       } else if (typeof token !== "undefined") {
         messageHistory.push({
           type: ChatBotMessageType.AI,
           content: token.value,
           metadata,
           tokens: [token],
+          thinkingSteps: [],
         });
+      } else if (response.action === ChatBotAction.ThinkingStep && content) {
+        // Create a new message for thinking steps if no message exists
+        const newMessage = {
+          type: ChatBotMessageType.AI,
+          content: "",
+          metadata,
+          tokens: [],
+          thinkingSteps: [content],
+        };
+        messageHistory.push(newMessage);
       }
     }
   } else {
@@ -210,6 +285,7 @@ export function updateChatSessions(
   const messageHistory = chatSession.messageHistory;
   if (
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     chatSession.running = false;
@@ -217,6 +293,7 @@ export function updateChatSessions(
   if (
     response.action === ChatBotAction.LLMNewToken ||
     response.action === ChatBotAction.FinalResponse ||
+    response.action === ChatBotAction.ThinkingStep ||
     response.action === ChatBotAction.Error
   ) {
     const content = response.data?.content;

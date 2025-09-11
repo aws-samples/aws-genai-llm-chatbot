@@ -52,6 +52,22 @@ class AppSyncClient:
         )
         return self.client.execute(query).get("listModels")
 
+    def list_agents(self):
+        query = dsl_gql(
+            DSLQuery(
+                self.schema.Query.listAgents.select(
+                    self.schema.Agent.agentRuntimeArn,
+                    self.schema.Agent.agentRuntimeId,
+                    self.schema.Agent.agentRuntimeName,
+                    self.schema.Agent.agentRuntimeVersion,
+                    self.schema.Agent.description,
+                    self.schema.Agent.lastUpdatedAt,
+                    self.schema.Agent.status,
+                )
+            )
+        )
+        return self.client.execute(query).get("listAgents")
+
     def list_rag_engines(self):
         query = dsl_gql(
             DSLQuery(

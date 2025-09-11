@@ -2,6 +2,17 @@ import { Model, Workspace } from "../../API";
 import { LoadingStatus, ModelInterface } from "../../common/types";
 import { SelectProps } from "@cloudscape-design/components";
 
+export interface Agent {
+  __typename: "Agent";
+  agentRuntimeArn: string;
+  agentRuntimeId: string;
+  agentRuntimeName: string;
+  agentRuntimeVersion: string;
+  description?: string | null;
+  lastUpdatedAt: string;
+  status: string;
+}
+
 export interface ChatBotConfiguration {
   streaming: boolean;
   showMetadata: boolean;
@@ -25,10 +36,13 @@ export interface ChatInputState {
   value: string;
   workspaces?: Workspace[];
   models?: Model[];
+  agents?: Agent[];
   selectedModel: SelectProps.Option | null;
   selectedModelMetadata: Model | null;
+  selectedAgent: SelectProps.Option | null;
   selectedWorkspace: SelectProps.Option | null;
   modelsStatus: LoadingStatus;
+  agentsStatus: LoadingStatus;
   workspacesStatus: LoadingStatus;
   applicationStatus?: LoadingStatus;
 }
@@ -43,6 +57,7 @@ export enum ChatBotAction {
   Run = "run",
   FinalResponse = "final_response",
   LLMNewToken = "llm_new_token",
+  ThinkingStep = "thinking_step",
   Error = "error",
 }
 
@@ -84,6 +99,7 @@ export interface ChatBotRunRequest {
   data?: {
     modelName?: string;
     provider?: string;
+    agentRuntimeArn?: string;
     sessionId: string;
     documents: SessionFile[] | null;
     images: SessionFile[] | null;
@@ -100,6 +116,7 @@ export interface ChatBotToken {
   sequenceNumber: number;
   runId?: string;
   value: string;
+  type?: "content" | "thinking";
 }
 
 export interface RagDocument {
@@ -134,6 +151,8 @@ export interface ChatBotHistoryItem {
     | ChatBotFilesBlob
   >;
   tokens?: ChatBotToken[];
+  thinkingSteps?: string[];
+  isFinalized?: boolean;
 }
 
 export interface ChatBotMessageResponse {

@@ -334,6 +334,7 @@ export class ApiResolvers extends Construct {
               "bedrock:ListInferenceProfiles",
               "bedrock:InvokeModel",
               "bedrock:InvokeModelWithResponseStream",
+              "bedrock-agentcore:ListAgentRuntimes",
             ],
             resources: ["*"],
           })
