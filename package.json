@@ -95,7 +95,7 @@
     "moment-timezone": "^0.5.45",
     "source-map-support": "^0.5.21",
     "turbocommons-ts": "^3.10.0",
-    "vite": "^6.3.5"
+    "vite": "^6.3.6"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.6.1"
