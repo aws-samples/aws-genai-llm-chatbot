@@ -5,7 +5,9 @@ import pytest
 import requests
 from genai_core.model_providers.nexus.nexus_client import NexusGatewayClient
 from genai_core.model_providers.nexus.types import (
-    ApiError, ModelResponse, NexusGatewayConfig
+    ApiError,
+    ModelResponse,
+    NexusGatewayConfig,
 )
 
 
@@ -184,8 +186,10 @@ def test_get_access_token_invalid_response(mock_config):
 
 def test_list_models(mock_config, mock_token_response, mock_models_response):
     """Test that list_application_models returns models from API"""
-    with patch("requests.post") as mock_token_post, \
-         patch("requests.request") as mock_request:
+    with (
+        patch("requests.post") as mock_token_post,
+        patch("requests.request") as mock_request,
+    ):
         # Configure token response
         token_response = MagicMock()
         token_response.status_code = 200
@@ -218,8 +222,10 @@ def test_list_models(mock_config, mock_token_response, mock_models_response):
 
 def test_list_application_models_error(mock_config, mock_token_response):
     """Test that list_application_models handles errors gracefully"""
-    with patch("requests.post") as mock_token_post, \
-         patch("requests.request") as mock_request:
+    with (
+        patch("requests.post") as mock_token_post,
+        patch("requests.request") as mock_request,
+    ):
         # Configure token response
         token_response = MagicMock()
         token_response.status_code = 200
@@ -241,8 +247,10 @@ def test_list_application_models_error(mock_config, mock_token_response):
 
 def test_make_request_success(mock_config, mock_token_response):
     """Test that _make_request successfully makes API requests"""
-    with patch("requests.post") as mock_token_post, \
-         patch("requests.request") as mock_request:
+    with (
+        patch("requests.post") as mock_token_post,
+        patch("requests.request") as mock_request,
+    ):
         # Configure token response
         token_response = MagicMock()
         token_response.status_code = 200
@@ -271,8 +279,10 @@ def test_make_request_success(mock_config, mock_token_response):
 
 def test_make_request_error(mock_config, mock_token_response):
     """Test that _make_request handles errors gracefully"""
-    with patch("requests.post") as mock_token_post, \
-         patch("requests.request") as mock_request:
+    with (
+        patch("requests.post") as mock_token_post,
+        patch("requests.request") as mock_request,
+    ):
         # Configure token response
         token_response = MagicMock()
         token_response.status_code = 200
@@ -295,8 +305,10 @@ def test_make_request_error(mock_config, mock_token_response):
 
 def test_make_request_http_error(mock_config, mock_token_response):
     """Test that _make_request handles HTTP errors gracefully"""
-    with patch("requests.post") as mock_token_post, \
-         patch("requests.request") as mock_request:
+    with (
+        patch("requests.post") as mock_token_post,
+        patch("requests.request") as mock_request,
+    ):
         # Configure token response
         token_response = MagicMock()
         token_response.status_code = 200

@@ -70,7 +70,7 @@ def unauthenticated_client(config):
 
 @pytest.fixture(scope="session")
 def default_model():
-    return "anthropic.claude-instant-v1"
+    return "anthropic.claude-3-haiku-20240307-v1:0"
 
 
 @pytest.fixture(scope="session")

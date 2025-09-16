@@ -51,8 +51,10 @@ class DynamoDBChatMessageHistory(BaseChatMessageHistory):
                 logger.exception(error)
 
         if response and "Item" in response:
-            items = response["Item"]["History"]
-            self.start_time = response["Item"]["StartTime"]
+            items = response["Item"].get("History", [])
+            self.start_time = response["Item"].get(
+                "StartTime", datetime.now().isoformat()
+            )
         else:
             items = []
 

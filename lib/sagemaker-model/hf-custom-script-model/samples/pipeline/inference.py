@@ -37,7 +37,7 @@ class SimpleLLMPipeline(Pipeline):
                 input_ids=input_ids.to(self.model.device),
                 attention_mask=attention_mask.to(self.model.device),
                 return_dict_in_generate=True,
-                **kwargs
+                **kwargs,
             )
 
         return {"input_ids": input_ids, "outputs": outputs}

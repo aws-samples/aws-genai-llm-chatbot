@@ -1,0 +1,105 @@
+@use "@cloudscape-design/design-tokens/index" as awsui;
+
+.thinking_container {
+  margin: awsui.$space-scaled-s 0;
+}
+
+.thinking_header {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: normal;
+  margin-bottom: awsui.$space-scaled-xs;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: awsui.$space-scaled-xs;
+}
+
+.thinking_header:hover {
+  color: #666;
+}
+
+.expand_icon {
+  font-size: 0.7rem;
+  color: #aaa;
+  font-style: normal;
+}
+
+.current_step {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: awsui.$space-scaled-xs;
+  padding-left: awsui.$space-scaled-s;
+  position: relative;
+  animation: shine 1.5s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(0, 115, 187, 0.5);
+    color: #0073bb;
+  }
+}
+
+.current_step p {
+  margin: 0;
+  line-height: 1.3;
+}
+
+.current_step * {
+  font-size: 0.8rem !important;
+  color: #666 !important;
+}
+
+.thinking_step_container {
+  display: flex;
+  align-items: flex-start;
+  gap: awsui.$space-scaled-xs;
+  margin-bottom: awsui.$space-scaled-xxs;
+  opacity: 0.7;
+  position: relative;
+  padding-left: awsui.$space-scaled-s;
+}
+
+.thinking_step_container::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: -4px;
+  width: 1px;
+  background-color: #ddd;
+}
+
+.thinking_step_container:last-child::before {
+  bottom: 50%;
+}
+
+.step_indicator {
+  color: #888;
+  font-size: 0.7rem;
+  font-weight: normal;
+  min-width: 16px;
+  text-align: left;
+}
+
+.step_content {
+  flex: 1;
+  font-family: awsui.$font-family-base;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.step_content p {
+  margin: 0;
+  line-height: 1.3;
+}
+
+.step_content * {
+  font-size: 0.8rem !important;
+  color: #666 !important;
+}

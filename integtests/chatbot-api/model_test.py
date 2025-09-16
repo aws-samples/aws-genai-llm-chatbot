@@ -6,11 +6,11 @@ def test_list_models(client: AppSyncClient, default_model):
     assert len(models) > 10
     model = next(i for i in models if i.get("name") == default_model)
     assert model == {
-        "name": "anthropic.claude-instant-v1",
+        "name": "anthropic.claude-3-haiku-20240307-v1:0",
         "provider": "bedrock",
         "interface": "langchain",
         "ragSupported": True,
-        "inputModalities": ["TEXT", "DOCUMENT"],
+        "inputModalities": ["TEXT", "IMAGE", "DOCUMENT"],
         "outputModalities": ["TEXT"],
         "streaming": True,
     }
