@@ -215,6 +215,10 @@ function getTypedEnvVar<T>(
       options.bedrockRoleArn = config.bedrock?.roleArn;
       options.guardrailsEnable = config.bedrock?.guardrails?.enabled;
       options.guardrails = config.bedrock?.guardrails;
+      options.bedrockAgentEnable = config.bedrock?.agent?.enabled;
+      options.bedrockAgentId = config.bedrock?.agent?.agentId;
+      options.bedrockAgentVersion = config.bedrock?.agent?.agentVersion;
+      options.bedrockAgentAliasId = config.bedrock?.agent?.agentAliasId;
       options.nexusEnable = config.nexus?.enabled;
       options.nexusGatewayUrl = config.nexus?.gatewayUrl;
       options.nexusTokenUrl = config.nexus?.tokenUrl;
@@ -590,6 +594,34 @@ function getTypedEnvVar<T>(
               ),
             };
           }
+          
+          // Add agent if enabled
+          if (
+            getTypedEnvVar<boolean>(
+              "BEDROCK_AGENT_ENABLE",
+              false,
+              options.envPrefix
+            )
+          ) {
+            defaultConfig.bedrock.agent = {
+              enabled: true,
+              agentId: getTypedEnvVar<string>(
+                "BEDROCK_AGENT_ID",
+                "",
+                options.envPrefix
+              ),
+              agentVersion: getTypedEnvVar<string>(
+                "BEDROCK_AGENT_VERSION",
+                "DRAFT",
+                options.envPrefix
+              ),
+              agentAliasId: getTypedEnvVar<string>(
+                "BEDROCK_AGENT_ALIAS_ID",
+                "",
+                options.envPrefix
+              ),
+            };
+          }
         }
 
         // Nexus Gateway Configuration
@@ -874,6 +906,45 @@ async function processCreateOptions(options: any): Promise<void> {
         return !(this as any).state.answers.guardrailsEnable;
       },
       initial: options.guardrails?.version ?? "DRAFT",
+    },
+    {
+      type: "confirm",
+      name: "bedrockAgentEnable",
+      message: "Do you want to enable Amazon Bedrock Agent?",
+      initial: options.bedrockAgentEnable ?? false,
+      skip() {
+        return !(this as any).state.answers.bedrockEnable;
+      },
+    },
+    {
+      type: "input",
+      name: "bedrockAgentId",
+      message: "Amazon Bedrock Agent ID",
+      validate(v: string) {
+        return (this as any).skipped || v.length > 0;
+      },
+      skip() {
+        return !(this as any).state.answers.bedrockAgentEnable;
+      },
+      initial: options.bedrockAgentId ?? "",
+    },
+    {
+      type: "input",
+      name: "bedrockAgentVersion",
+      message: "Amazon Bedrock Agent Version (e.g., DRAFT or a specific version)",
+      skip() {
+        return !(this as any).state.answers.bedrockAgentEnable;
+      },
+      initial: options.bedrockAgentVersion ?? "DRAFT",
+    },
+    {
+      type: "input",
+      name: "bedrockAgentAliasId",
+      message: "Amazon Bedrock Agent Alias ID",
+      skip() {
+        return !(this as any).state.answers.bedrockAgentEnable;
+      },
+      initial: options.bedrockAgentAliasId ?? "",
     },
     {
       type: "confirm",
@@ -1807,6 +1878,14 @@ async function processCreateOptions(options: any): Promise<void> {
             identifier: answers.guardrailsIdentifier,
             version: answers.guardrailsVersion,
           },
+          agent: answers.bedrockAgentEnable
+            ? {
+                enabled: answers.bedrockAgentEnable,
+                agentId: answers.bedrockAgentId,
+                agentVersion: answers.bedrockAgentVersion,
+                agentAliasId: answers.bedrockAgentAliasId,
+              }
+            : undefined,
         }
       : undefined,
     nexus: answers.nexusEnable
