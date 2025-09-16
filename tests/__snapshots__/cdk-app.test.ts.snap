@@ -509,13 +509,6 @@ exports[`snapshot test with CMK 1`] = `
           "SMS_MFA",
         ],
         "MfaConfiguration": "OPTIONAL",
-        "Schema": [
-          {
-            "AttributeDataType": "String",
-            "Mutable": true,
-            "Name": "chatbot_role",
-          },
-        ],
         "SmsConfiguration": {
           "ExternalId": "prefixGenAIChatBotStackAuthenticationUserPoolAD499457",
           "SnsCallerArn": {

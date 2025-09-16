@@ -117,13 +117,6 @@ exports[`snapshot test 1`] = `
           "SMS_MFA",
         ],
         "MfaConfiguration": "OPTIONAL",
-        "Schema": [
-          {
-            "AttributeDataType": "String",
-            "Mutable": true,
-            "Name": "chatbot_role",
-          },
-        ],
         "SmsConfiguration": {
           "ExternalId": "AuthenticationConstructUserPoolE66A108F",
           "SnsCallerArn": {
