@@ -280,6 +280,79 @@ export class Authentication extends Construct {
       this.updateUserPoolClient = updateUserPoolClientLambda;
     }
 
+    // Always create POST_CONFIRMATION trigger for Application record creation
+    const lambdaRoleCreateUserRecord = new iam.Role(
+      this,
+      "lambdaRoleCreateUserRecord",
+      {
+        assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+      }
+    );
+
+    lambdaRoleCreateUserRecord.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName(
+        "service-role/AWSLambdaBasicExecutionRole"
+      )
+    );
+
+    lambdaRoleCreateUserRecord.addToPolicy(
+      new iam.PolicyStatement({
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: ["*"],
+      })
+    );
+
+    const createUserRecordLambda = new lambda.Function(
+      this,
+      "createUserRecord",
+      {
+        runtime: lambda.Runtime.PYTHON_3_12,
+        handler: "index.handler",
+        code: lambda.Code.fromAsset(
+          "lib/authentication/lambda/addFederatedUserToUserGroup"
+        ),
+        description:
+          "Create Application record for new users during POST_CONFIRMATION.",
+        role: lambdaRoleCreateUserRecord,
+        logRetention: config.logRetention ?? logs.RetentionDays.ONE_WEEK,
+        loggingFormat: lambda.LoggingFormat.JSON,
+        environment: {
+          DEFAULT_USER_GROUP: getConstructId("user", config),
+        },
+      }
+    );
+
+    createUserRecordLambda.addPermission(
+      "CognitoPostConfirmationTrigger",
+      {
+        principal: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
+        sourceArn: userPool.userPoolArn,
+      }
+    );
+
+    userPool.addTrigger(
+      cognito.UserPoolOperation.POST_CONFIRMATION,
+      createUserRecordLambda
+    );
+
+    lambdaRoleCreateUserRecord.attachInlinePolicy(
+      new iam.Policy(this, "CreateUserRecordPolicy", {
+        statements: [
+          new iam.PolicyStatement({
+            actions: [
+              "dynamodb:ListTables",
+              "dynamodb:PutItem",
+            ],
+            resources: ["*"], // Need wildcard for ListTables and table discovery
+          }),
+        ],
+      })
+    );
+
     if (config.cognitoFederation?.enabled) {
       const lambdaRoleAddUserToGroup = new iam.Role(
         this,
