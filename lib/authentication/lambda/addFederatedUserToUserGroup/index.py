@@ -1,6 +1,56 @@
 import boto3
 from botocore.exceptions import ClientError
 import os
+import uuid
+from datetime import datetime
+
+
+def create_user_application_record(username, user_attributes):
+    """Create an Application record for the user in DynamoDB"""
+    try:
+        # Construct the Applications table name based on the stack naming pattern
+        # The table name follows the pattern: GenAIChatBotStack-ChatBotApiAppDynamoDBTablesApplicationsTable*
+        # We'll use boto3 to list tables and find the one that matches the pattern
+        dynamodb = boto3.client("dynamodb")
+        
+        # List all tables and find the Applications table
+        response = dynamodb.list_tables()
+        applications_table_name = None
+        
+        for table_name in response.get("TableNames", []):
+            if "ApplicationsTable" in table_name and "GenAIChatBotStack" in table_name:
+                applications_table_name = table_name
+                break
+        
+        if not applications_table_name:
+            print("Applications table not found")
+            return
+
+        # Use DynamoDB resource for easier item operations
+        dynamodb_resource = boto3.resource("dynamodb")
+        table = dynamodb_resource.Table(applications_table_name)
+        
+        # Get user email for the application name
+        email = user_attributes.get("email", username)
+        application_name = f"Application for {email}"
+        
+        # Create application record
+        timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        application_record = {
+            "Id": username,  # Use username as ID to match user
+            "userId": username,
+            "email": email,
+            "name": application_name,  # Add the required name field
+            "role": "admin",  # Default role
+            "createdAt": timestamp,
+            "updatedAt": timestamp,
+        }
+        
+        table.put_item(Item=application_record)
+        print(f"Created application record for user {username} in table {applications_table_name}")
+        
+    except Exception as e:
+        print(f"Error creating application record for user {username}: {str(e)}")
 
 
 def get_user_groups(cognito, username, user_pool_id):
@@ -180,6 +230,10 @@ def handler(event, context):
             )
         else:
             print(f"User {username} is already in group {new_group}")
+
+        # Create Application record for POST_CONFIRMATION trigger
+        if trigger_type == "POST_CONFIRMATION":
+            create_user_application_record(username, user_attributes)
     else:
         print("No username found in user attributes, skipping group assignment")
 

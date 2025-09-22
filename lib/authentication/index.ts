@@ -355,6 +355,13 @@ export class Authentication extends Construct {
               ],
               resources: [userPool.userPoolArn],
             }),
+            new iam.PolicyStatement({
+              actions: [
+                "dynamodb:ListTables",
+                "dynamodb:PutItem",
+              ],
+              resources: ["*"], // Need wildcard for ListTables and table discovery
+            }),
           ],
         })
       );
