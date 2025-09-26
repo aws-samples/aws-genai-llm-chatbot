@@ -120,6 +120,12 @@ export interface SystemConfig {
       identifier: string;
       version: string;
     };
+    agent?: {
+      enabled: boolean;
+      agentId: string;
+      agentVersion: string;
+      agentAliasId?: string;
+    };
   };
   nexus?: {
     enabled?: boolean;

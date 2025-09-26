@@ -3684,6 +3684,7 @@ schema {
               "Ref": "ChatBotApiAppDynamoDBTablesApplicationsTableDE001556",
             },
             "AWS_XRAY_SDK_ENABLED": "false",
+            "BEDROCK_REGION": "us-east-1",
             "LOG_LEVEL": "INFO",
             "POWERTOOLS_DEV": "false",
             "POWERTOOLS_LOGGER_LOG_EVENT": "false",
@@ -4275,6 +4276,7 @@ schema {
             },
             "AURORA_DB_USER": "aurora_db_iam_write",
             "AWS_XRAY_SDK_ENABLED": "false",
+            "BEDROCK_REGION": "us-east-1",
             "CHATBOT_FILES_BUCKET_NAME": {
               "Ref": "ChatBotApiChatBucketsFilesBucket1D4E273A",
             },
@@ -7008,6 +7010,7 @@ schema {
             },
             "AURORA_DB_USER": "aurora_db_iam_read",
             "AWS_XRAY_SDK_ENABLED": "false",
+            "BEDROCK_REGION": "us-east-1",
             "CHATBOT_FILES_BUCKET_NAME": {
               "Ref": "ChatBotApiChatBucketsFilesBucket1D4E273A",
             },
