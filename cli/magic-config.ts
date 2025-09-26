@@ -594,7 +594,7 @@ function getTypedEnvVar<T>(
               ),
             };
           }
-          
+
           // Add agent if enabled
           if (
             getTypedEnvVar<boolean>(
@@ -931,7 +931,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "input",
       name: "bedrockAgentVersion",
-      message: "Amazon Bedrock Agent Version (e.g., DRAFT or a specific version)",
+      message:
+        "Amazon Bedrock Agent Version (e.g., DRAFT or a specific version)",
       skip() {
         return !(this as any).state.answers.bedrockAgentEnable;
       },

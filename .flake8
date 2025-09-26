@@ -8,3 +8,4 @@ exclude =
     cdk.out/
     dist/
     node_modules/
+    .venv/

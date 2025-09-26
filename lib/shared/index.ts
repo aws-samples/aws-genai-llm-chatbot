@@ -208,13 +208,13 @@ export class Shared extends Construct {
           vpc.addInterfaceEndpoint("BedrockRuntimeEndpoint", {
             service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
           });
-          
+
           // Create VPC Endpoint for Bedrock Agent if enabled
           if (props.config.bedrock?.agent?.enabled) {
             vpc.addInterfaceEndpoint("BedrockAgentEndpoint", {
               service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_AGENT,
             });
-            
+
             vpc.addInterfaceEndpoint("BedrockAgentRuntimeEndpoint", {
               service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_AGENT_RUNTIME,
             });

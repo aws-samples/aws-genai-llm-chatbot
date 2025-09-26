@@ -67,10 +67,13 @@ export class RealtimeResolvers extends Construct {
               ...(props.config.bedrock?.agent?.enabled
                 ? {
                     BEDROCK_AGENT_ENABLED: "true",
-                    ...(props.config.bedrock.agent.agentId ? {
-                      BEDROCK_AGENT_ID: props.config.bedrock.agent.agentId,
-                      BEDROCK_AGENT_ALIAS_ID: props.config.bedrock.agent.agentAliasId,
-                    } : {}),
+                    ...(props.config.bedrock.agent.agentId
+                      ? {
+                          BEDROCK_AGENT_ID: props.config.bedrock.agent.agentId,
+                          BEDROCK_AGENT_ALIAS_ID:
+                            props.config.bedrock.agent.agentAliasId,
+                        }
+                      : {}),
                   }
                 : {}),
             }
@@ -119,16 +122,13 @@ export class RealtimeResolvers extends Construct {
         "kms:Decrypt"
       );
     }
-    
+
     // Grant permissions to invoke Bedrock agent if enabled
     if (props.config?.bedrock?.agent?.enabled && resolverFunction.role) {
       resolverFunction.addToRolePolicy(
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          actions: [
-            "bedrock:InvokeAgent",
-            "bedrock:InvokeAgentAlias",
-          ],
+          actions: ["bedrock:InvokeAgent", "bedrock:InvokeAgentAlias"],
           resources: ["*"],
         })
       );

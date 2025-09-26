@@ -13,10 +13,10 @@ sns = boto3.client("sns")
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, bytes):
-            return base64.b64encode(obj).decode('utf-8')
+            return base64.b64encode(obj).decode("utf-8")
         elif isinstance(obj, Decimal):
             return float(obj)
-        elif hasattr(obj, '__dict__'):
+        elif hasattr(obj, "__dict__"):
             # Handle objects with __dict__ attribute (like EventStream)
             return str(obj)
         return super().default(obj)
