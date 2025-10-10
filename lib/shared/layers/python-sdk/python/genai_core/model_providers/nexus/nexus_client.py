@@ -114,7 +114,7 @@ class NexusGatewayClient:
         # Use client credentials
         token = self._ensure_valid_token()
         if token:
-            request_headers["Authorization"] = f"Bearer {token}"
+            request_headers["authorization-token"] = f"Bearer {token}"
         else:
             logger.error("Failed to get access token for Nexus Gateway")
             return ApiError(

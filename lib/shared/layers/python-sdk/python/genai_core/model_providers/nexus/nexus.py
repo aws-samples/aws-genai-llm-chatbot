@@ -7,7 +7,7 @@ from abc import ABC
 from functools import lru_cache
 from typing import Any, Optional, Union
 
-from genai_core.types import EmbeddingsModel, Provider
+from genai_core.types import EmbeddingsModel, Provider, ModelInterface
 
 from ... import parameters
 from .. import ModelProvider
@@ -156,4 +156,5 @@ def _transform_nexus_model(
         "streaming": streaming,
         "inputModalities": input_modalities,
         "outputModalities": output_modalities,
+        "interface": ModelInterface.LANGCHAIN.value,
     }
