@@ -9,12 +9,17 @@ from typing import Any, Optional, Union
 
 from genai_core.types import EmbeddingsModel, Provider, ModelInterface
 
-from ... import parameters
 from .. import ModelProvider
-from .nexus_client import NexusGatewayClient
+from .nexus_client import get_nexus_gateway_client
 from .types import ModelResponse
 
 logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=1)
+def _nexus_client():
+    """Get cached Nexus Gateway client."""
+    return get_nexus_gateway_client()
 
 
 class NexusModelProvider(ModelProvider, ABC):
@@ -95,15 +100,6 @@ class NexusModelProvider(ModelProvider, ABC):
         except Exception as e:
             logger.error(f"Error getting embedding models: {e!s}")
             return []
-
-
-@lru_cache(maxsize=1)
-def _nexus_client() -> Optional[NexusGatewayClient]:
-    config = parameters.get_config()
-    nexus_config = config.get("nexus", {})
-    if not nexus_config.get("enabled", False):
-        return None
-    return NexusGatewayClient(nexus_config)
 
 
 def _transform_nexus_model(

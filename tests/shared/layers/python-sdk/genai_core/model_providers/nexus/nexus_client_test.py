@@ -328,6 +328,10 @@ def test_make_request_http_error(mock_config, mock_token_response):
 
         assert isinstance(result, ApiError)
         assert result.error_type == "HTTP 404"
-        assert result.message == "Not Found"
+        assert (
+            result.message
+            == "The requested model is not available. Please try a different model."
+        )
+        assert result.status_code == 404
         assert result.status_code == 404
         mock_request.assert_called_once()
