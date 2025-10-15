@@ -122,7 +122,7 @@ def _transform_nexus_model(
 
     # Extract provider information
     provider_info = model_dict.get("modelProvider", {})
-    provider_name = provider_info.get("modelProviderName", "Unknown Provider")
+    provider_name = "nexus"
     provider_model_name = provider_info.get("model", model_name)
 
     # Determine model mode

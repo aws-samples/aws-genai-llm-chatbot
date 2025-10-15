@@ -154,6 +154,7 @@ class NexusGatewayClient:
         # Use client credentials
         token = self._ensure_valid_token()
         if token:
+            # Nexus gateway requires both custom auth and default HTTP Auth headers
             request_headers["authorization-token"] = f"Bearer {token}"
             request_headers["Authorization"] = f"Bearer {token}"
         else:

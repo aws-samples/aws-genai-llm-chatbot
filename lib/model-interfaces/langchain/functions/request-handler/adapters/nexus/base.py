@@ -198,9 +198,6 @@ class NexusGatewayAdapter(ModelAdapter):
         if "system" in message_body:
             body["system"] = message_body["system"]
 
-        if self.model_kwargs:
-            body["additionalModelRequestFields"] = self.model_kwargs
-
         return body
 
     def format_response(
