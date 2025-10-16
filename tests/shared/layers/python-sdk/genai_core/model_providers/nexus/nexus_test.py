@@ -84,15 +84,15 @@ def test_list_models(mock_config, mock_nexus_models):
 
         # Check first model (chat model)
         assert models[0]["name"] == "claude-3-sonnet"
-        assert models[0]["provider"] == "anthropic"
-        assert models[0]["ragSupported"]
+        assert models[0]["provider"] == "nexus"
+        assert models[0]["ragSupported"] == False
         assert models[0]["streaming"]
         assert models[0]["inputModalities"] == ["text"]
         assert models[0]["outputModalities"] == ["text"]
 
         # Check embedding model
         embedding_model = next(m for m in models if m["name"] == "titan-embed")
-        assert embedding_model["provider"] == "bedrock"
+        assert embedding_model["provider"] == "nexus"
         assert not embedding_model["ragSupported"]
         assert not embedding_model["streaming"]
         assert embedding_model["inputModalities"] == ["text"]
@@ -168,9 +168,9 @@ def test_transform_nexus_model():
     transformed = nexus._transform_nexus_model(chat_model)
 
     assert transformed["name"] == "claude-3-sonnet"
-    assert transformed["provider"] == "anthropic"
+    assert transformed["provider"] == "nexus"
     assert transformed["providerModelName"] == "claude-3-sonnet"
-    assert transformed["ragSupported"]
+    assert transformed["ragSupported"] == False
     assert transformed["streaming"]
     assert transformed["inputModalities"] == ["text"]
     assert transformed["outputModalities"] == ["text"]
@@ -188,7 +188,7 @@ def test_transform_nexus_model():
     transformed = nexus._transform_nexus_model(embedding_model)
 
     assert transformed["name"] == "titan-embed"
-    assert transformed["provider"] == "bedrock"
+    assert transformed["provider"] == "nexus"
     assert transformed["providerModelName"] == "amazon.titan-embed-text-v1"
     assert not transformed["ragSupported"]
     assert not transformed["streaming"]
@@ -201,4 +201,4 @@ def test_transform_nexus_model():
     transformed = nexus._transform_nexus_model(incomplete_model)
 
     assert transformed["name"] == "Unknown Model"
-    assert transformed["provider"] == "Unknown Provider"
+    assert transformed["provider"] == "nexus"

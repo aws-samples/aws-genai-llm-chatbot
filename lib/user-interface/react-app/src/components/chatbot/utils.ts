@@ -188,11 +188,21 @@ export function updateMessageHistoryRef(
         return;
       }
 
-      if (hasContent || lastMessage.content.length > 0) {
-        // Always build content from tokens to avoid duplication
+      if (response.action === ChatBotAction.FinalResponse && hasContent) {
+        // For final response, use the provided complete content
+        messageHistory[messageHistory.length - 1] = {
+          ...lastMessage,
+          type: ChatBotMessageType.AI,
+          content: content,
+          metadata,
+          tokens: lastMessage.tokens || [],
+          thinkingSteps: lastMessage.thinkingSteps,
+          isFinalized: true,
+        };
+      } else if (hasToken || lastMessage.tokens?.length > 0) {
+        // For streaming tokens, build content from tokens
         const allTokens = [...(lastMessage.tokens || [])];
 
-        // Add new token if it doesn't already exist
         if (hasToken) {
           const existingToken = allTokens.find(
             (t) => t.sequenceNumber === token.sequenceNumber
@@ -202,18 +212,16 @@ export function updateMessageHistoryRef(
           }
         }
 
-        // Sort tokens by sequence number
         allTokens.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
 
-        // Remove consecutive duplicate values
         const deduplicatedTokens = [];
-        for (let i = 0; i < allTokens.length; i++) {
-          const currentToken = allTokens[i];
-          const prevToken = deduplicatedTokens[deduplicatedTokens.length - 1];
+        const seenSequenceNumbers = new Set();
 
-          // Only add if value is different from previous token
-          if (!prevToken || currentToken.value !== prevToken.value) {
-            deduplicatedTokens.push(currentToken);
+        for (let i = allTokens.length - 1; i >= 0; i--) {
+          const currentToken = allTokens[i];
+          if (!seenSequenceNumbers.has(currentToken.sequenceNumber)) {
+            seenSequenceNumbers.add(currentToken.sequenceNumber);
+            deduplicatedTokens.unshift(currentToken);
           }
         }
 
@@ -224,7 +232,7 @@ export function updateMessageHistoryRef(
           type: ChatBotMessageType.AI,
           content: messageContent,
           metadata,
-          tokens: allTokens,
+          tokens: deduplicatedTokens,
           thinkingSteps: lastMessage.thinkingSteps,
         };
       } else {

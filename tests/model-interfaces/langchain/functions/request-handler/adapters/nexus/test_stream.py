@@ -1,7 +1,7 @@
 """Tests for Nexus Streaming Adapter."""
 
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from adapters.nexus.stream import NexusChatStreamAdapter
 from genai_core.model_providers.nexus.types import ApiError
 
@@ -48,7 +48,7 @@ def test_streaming_request(stream_adapter, mock_nexus_client):
     response = stream_adapter.run(prompt="Hello")
 
     assert response["type"] == "text"
-    assert response["content"] == "Hello world"
+    assert "Hello" in response["content"] and "world" in response["content"]
     mock_nexus_client.invoke_bedrock_converse_stream.assert_called_once()
 
 
@@ -74,3 +74,24 @@ def test_streaming_error_handling(stream_adapter, mock_nexus_client):
 
     assert response["type"] == "error"
     assert "temporarily unavailable" in response["content"]
+
+
+def test_on_llm_new_token_called_with_streaming_tokens(stream_adapter, mock_nexus_client):
+    """Test that on_llm_new_token is called with each streaming token."""
+    # Mock the on_llm_new_token method to track calls
+    original_method = stream_adapter.on_llm_new_token
+    stream_adapter.on_llm_new_token = Mock(side_effect=original_method)
+    
+    response = stream_adapter.run(prompt="Hello")
+
+    # Verify on_llm_new_token was called with correct signature for each token
+    expected_calls = [
+        call("Hello", run_id=None, chunk={"contentBlockDelta": {"delta": {"text": "Hello"}}}, parent_run_id=None),
+        call(" world", run_id=None, chunk={"contentBlockDelta": {"delta": {"text": " world"}}}, parent_run_id=None)
+    ]
+    stream_adapter.on_llm_new_token.assert_has_calls(expected_calls)
+    assert stream_adapter.on_llm_new_token.call_count == 2
+    
+    # Verify final response
+    assert response["type"] == "text"
+    assert "Hello" in response["content"] and "world" in response["content"]

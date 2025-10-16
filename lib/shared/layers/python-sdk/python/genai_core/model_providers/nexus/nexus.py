@@ -134,7 +134,7 @@ def _transform_nexus_model(
 
     if mode == "chat" or mode == "completion":
         output_modalities = ["text"]
-        rag_supported = True
+        rag_supported = False
         streaming = True
     elif mode == "embedding":
         rag_supported = False

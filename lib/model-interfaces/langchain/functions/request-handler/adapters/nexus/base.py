@@ -3,6 +3,7 @@ Base adapter for Nexus Gateway integration with AWS GenAI LLM Chatbot.
 """
 
 import re
+from abc import abstractmethod
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from aws_lambda_powertools import Logger
@@ -29,6 +30,11 @@ class NexusGatewayAdapter(ModelAdapter):
             if self._nexus_client is None:
                 raise ValueError("Nexus Gateway client is not configured")
         return self._nexus_client
+
+    @abstractmethod
+    def on_llm_new_token(
+        self, token, run_id=None, chunk=None, parent_run_id=None, *args, **kwargs
+    ) -> None: ...
 
     def get_llm(
         self, model_kwargs: Dict[str, Any] = None, extra: Dict[str, Any] = None

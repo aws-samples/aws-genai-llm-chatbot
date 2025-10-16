@@ -66,6 +66,7 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
             # Check if streaming is enabled and supported
             if self.model_kwargs.get("streaming", False) and not self.disable_streaming:
                 # Use streaming
+                logger.info("Invoking bedrock streaming endpoint")
                 response = self.nexus_client.invoke_bedrock_converse_stream(
                     model_id=self.model_id, body=request_body
                 )
@@ -124,7 +125,11 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
                         if "contentBlockDelta" in chunk:
                             delta = chunk["contentBlockDelta"]
                             if "delta" in delta and "text" in delta["delta"]:
-                                full_response += delta["delta"]["text"]
+                                token = delta["delta"]["text"]
+                                self.on_llm_new_token(
+                                    token, run_id=None, chunk=chunk, parent_run_id=None
+                                )
+                                full_response += token
                     return full_response
 
                 # Handle real response with content attribute
@@ -153,10 +158,19 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
                                         break
 
                             try:
+                                logger.info("Sending stream events to on_llm_new_token")
                                 json_str = part[json_start:json_end]
                                 data = json.loads(json_str)
                                 if "delta" in data and "text" in data["delta"]:
-                                    full_response += data["delta"]["text"]
+                                    token = data["delta"]["text"]
+                                    # Call token callback for real-time streaming
+                                    self.on_llm_new_token(
+                                        token,
+                                        run_id=None,
+                                        chunk=data,
+                                        parent_run_id=None,
+                                    )
+                                    full_response += token
                             except json.JSONDecodeError:
                                 continue
 
