@@ -4,10 +4,12 @@ Simplified Nexus Gateway client that handles authentication transparently.
 
 import logging
 import time
+from functools import lru_cache
 from typing import Any, Optional, Union
 
 import requests
 
+from ... import parameters
 from .types import (
     ApiError,
     ListApplicationModelsResponse,
@@ -76,6 +78,43 @@ class NexusGatewayClient:
             )
             return []
 
+    def invoke_bedrock_converse(
+        self, model_id: str, body: dict[str, Any]
+    ) -> Union[dict[str, Any], ApiError]:
+        """
+        Invoke the bedrock converse model with the given body
+
+        Args:
+            model_id: The model ID to invoke
+            body: The request body
+
+        Returns:
+            The model response or an ApiError
+        """
+        return self._make_request(
+            "POST", f"bedrock/model/{model_id}/converse", json_data=body
+        )
+
+    def invoke_bedrock_converse_stream(
+        self, model_id: str, body: dict[str, Any]
+    ) -> Union[dict[str, Any], ApiError]:
+        """
+        Invoke the bedrock converse model with streaming response
+
+        Args:
+            model_id: The model ID to invoke
+            body: The request body
+
+        Returns:
+            The streaming model response or an ApiError
+        """
+        return self._make_request(
+            "POST",
+            f"bedrock/model/{model_id}/converse-stream",
+            json_data=body,
+            stream=True,
+        )
+
     def _make_request(
         self,
         method: str,
@@ -83,6 +122,7 @@ class NexusGatewayClient:
         params: Optional[dict[str, Any]] = None,
         json_data: Optional[dict[str, Any]] = None,
         headers: Optional[dict[str, str]] = None,
+        stream: bool = False,
     ) -> Union[dict[str, Any], ApiError]:
         """
         Make a request to the Nexus Gateway API with automatic authentication
@@ -114,7 +154,9 @@ class NexusGatewayClient:
         # Use client credentials
         token = self._ensure_valid_token()
         if token:
+            # Nexus gateway requires both custom auth and default HTTP Auth headers
             request_headers["authorization-token"] = f"Bearer {token}"
+            request_headers["Authorization"] = f"Bearer {token}"
         else:
             logger.error("Failed to get access token for Nexus Gateway")
             return ApiError(
@@ -132,17 +174,25 @@ class NexusGatewayClient:
                 json=json_data,
                 headers=request_headers,
                 timeout=30,
+                stream=stream,
             )
 
             if response.status_code >= 400:
+                error_message = self._get_user_friendly_error_message(
+                    response.status_code, response.text
+                )
                 logger.error(
                     f"API request failed: {response.status_code} {response.text}"
                 )
                 return ApiError(
                     error_type=f"HTTP {response.status_code}",
-                    message=response.text,
+                    message=error_message,
                     status_code=response.status_code,
                 )
+
+            # Handle streaming responses
+            if stream:
+                return {"stream": response}
 
             return response.json()
 
@@ -167,6 +217,7 @@ class NexusGatewayClient:
 
         # If token is expired or not set, get a new one
         if not self._access_token or current_time >= self._token_expiry:
+            logger.info("Nexus access token is expired or not set, obtaining a new one")
             return self._get_client_credentials_token()
 
         return self._access_token
@@ -234,6 +285,41 @@ class NexusGatewayClient:
             logger.exception("Failed to get client credentials token: Unexpected error")
             return None
 
+    def _get_user_friendly_error_message(
+        self, status_code: int, response_text: str
+    ) -> str:
+        """Convert Gateway error responses to user-friendly messages."""
+        if status_code == 429:
+            return (
+                "I'm currently experiencing high demand. "
+                "Please wait a moment and try again."
+            )
+        elif status_code == 401:
+            return "Authentication failed. Please contact your administrator."
+        elif status_code == 403:
+            return "Access denied. You may not have permission to use " "this model."
+        elif status_code == 404:
+            return (
+                "The requested model is not available. " "Please try a different model."
+            )
+        elif status_code == 500:
+            return (
+                "The service is temporarily unavailable. "
+                "Please try again in a few moments."
+            )
+        elif "token" in response_text.lower() and (
+            "limit" in response_text.lower() or "quota" in response_text.lower()
+        ):
+            return (
+                "Token limit exceeded. Please try a shorter message or "
+                "contact your administrator."
+            )
+        else:
+            return (
+                "I apologize, but I encountered an error while processing "
+                "your request. Please try again."
+            )
+
     def get_access_token(self, force_refresh: bool = False) -> Optional[str]:
         """
         Get an OAuth access token for use with the Nexus Gateway
@@ -247,3 +333,12 @@ class NexusGatewayClient:
         if force_refresh:
             return self._get_client_credentials_token()
         return self._ensure_valid_token()
+
+
+@lru_cache(maxsize=1)
+def get_nexus_gateway_client() -> Optional[NexusGatewayClient]:
+    config = parameters.get_config()
+    nexus_config = config.get("nexus", {})
+    if not nexus_config.get("enabled", False):
+        return None
+    return NexusGatewayClient(nexus_config)

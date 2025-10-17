@@ -221,7 +221,7 @@ def handler(event, context: LambdaContext):
 
     for message in processed_messages:
         logger.info(
-            "Request compelte with status " + message[0],
+            "Request complete with status " + message[0],
             status=message[0],
             cause=message[1],
         )
