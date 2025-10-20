@@ -26,6 +26,7 @@ export class Layer extends Construct {
     const layerAsset = new s3assets.Asset(this, "LayerAsset", {
       path,
       bundling: {
+        bundlingFileAccess: cdk.BundlingFileAccess.VOLUME_COPY,
         image: runtime.bundlingImage,
         platform: architecture.dockerPlatform,
         command: [
