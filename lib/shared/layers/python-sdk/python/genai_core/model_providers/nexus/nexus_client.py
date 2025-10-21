@@ -8,6 +8,7 @@ from functools import lru_cache
 from typing import Any, Optional, Union
 
 import requests
+import aiohttp
 
 from ... import parameters
 from .types import (
@@ -115,6 +116,46 @@ class NexusGatewayClient:
             stream=True,
         )
 
+    def invoke_openai_chat(
+        self, body: dict[str, Any], streaming: bool = False
+    ) -> Union[dict[str, Any], ApiError]:
+        """
+        Invoke the openai chat with the given body
+
+        Args:
+            body: The request body
+
+        Returns:
+            The model response or an ApiError
+        """
+        return self._make_request(
+            "POST",
+            "openai-proxy/v1/chat/completions",
+            json_data=body,
+            stream=streaming,
+        )
+
+    def invoke_openai_stream_chat(
+        self, body: dict[str, Any]
+    ) -> Union[dict[str, Any], ApiError]:
+        """
+        Invoke the openai chat with the given body asynchronously
+
+        Args:
+            body: The request body
+            streaming: Whether to stream the response
+
+        Returns:
+            The model response or an ApiError
+        """
+        import asyncio
+
+        return asyncio.run(
+            self._make_async_request(
+                "POST", "openai-proxy/v1/chat/completions", json_data=body
+            )
+        )
+
     def _make_request(
         self,
         method: str,
@@ -124,48 +165,10 @@ class NexusGatewayClient:
         headers: Optional[dict[str, str]] = None,
         stream: bool = False,
     ) -> Union[dict[str, Any], ApiError]:
-        """
-        Make a request to the Nexus Gateway API with automatic authentication
-
-        Args:
-            method: HTTP method (GET, POST, etc.)
-            path: API path (without leading slash)
-            params: Query parameters
-            json_data: JSON body data
-            headers: Additional headers to include
-
-        Returns:
-            API response as dictionary or ApiError
-        """
-        if not self.config.gateway_url:
-            error_msg = "Gateway URL not configured"
-            logger.error(error_msg)
-            return ApiError(error_type="ConfigurationError", message=error_msg)
-
-        url = f"{self.config.gateway_url}/{path}"
-
-        # Prepare headers with authentication
-        request_headers = headers.copy() if headers else {}
-
-        # Set Content-Type if not provided
-        if "Content-Type" not in request_headers:
-            request_headers["Content-Type"] = "application/json"
-
-        # Use client credentials
-        token = self._ensure_valid_token()
-        if token:
-            # Nexus gateway requires both custom auth and default HTTP Auth headers
-            request_headers["authorization-token"] = f"Bearer {token}"
-            request_headers["Authorization"] = f"Bearer {token}"
-        else:
-            logger.error("Failed to get access token for Nexus Gateway")
-            return ApiError(
-                error_type="AuthenticationError", message="Failed to get access token"
-            )
-
+        """Make a request to the Nexus Gateway API with automatic authentication"""
         try:
+            url, request_headers = self._prepare_request(path, headers)
             logger.debug(f"Making {method} request to {url}")
-            logger.debug(f"Headers: {request_headers}")
 
             response = requests.request(
                 method=method,
@@ -178,19 +181,8 @@ class NexusGatewayClient:
             )
 
             if response.status_code >= 400:
-                error_message = self._get_user_friendly_error_message(
-                    response.status_code, response.text
-                )
-                logger.error(
-                    f"API request failed: {response.status_code} {response.text}"
-                )
-                return ApiError(
-                    error_type=f"HTTP {response.status_code}",
-                    message=error_message,
-                    status_code=response.status_code,
-                )
+                return self._handle_error_response(response.status_code, response.text)
 
-            # Handle streaming responses
             if stream:
                 return {"stream": response}
 
@@ -205,6 +197,106 @@ class NexusGatewayClient:
         except Exception as e:
             logger.exception(f"Unexpected error: {e!s}")
             return ApiError(error_type="UnexpectedError", message=str(e))
+
+    async def _make_async_request(
+        self,
+        method: str,
+        path: str,
+        params: Optional[dict[str, Any]] = None,
+        json_data: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, str]] = None,
+    ) -> Union[dict[str, Any], ApiError]:
+        """
+        Make an async request to the Nexus Gateway API with automatic authentication
+        Used for OpenAI streaming requests
+        """
+        try:
+            url, request_headers = self._prepare_request(path, headers)
+            logger.debug(f"Making async {method} request to {url}")
+
+            async with aiohttp.ClientSession() as session:
+                async with session.request(
+                    method=method,
+                    url=url,
+                    params=params,
+                    json=json_data,
+                    headers=request_headers,
+                    timeout=aiohttp.ClientTimeout(total=30),
+                ) as response:
+
+                    if response.status >= 400:
+                        response_text = await response.text()
+                        return self._handle_error_response(
+                            response.status, response_text
+                        )
+
+                    content = await response.read()
+                    return self._process_openai_stream(content)
+
+        except aiohttp.ClientError as e:
+            logger.exception(f"Async request error: {e!s}")
+            return ApiError(error_type="RequestError", message=str(e))
+        except ValueError as e:
+            logger.exception(f"JSON parsing error: {e!s}")
+            return ApiError(error_type="ResponseParsingError", message=str(e))
+        except Exception as e:
+            logger.exception(f"Unexpected error: {e!s}")
+            return ApiError(error_type="UnexpectedError", message=str(e))
+
+    def _prepare_request(
+        self, path: str, headers: Optional[dict[str, str]] = None
+    ) -> tuple[str, dict[str, str]]:
+        """Prepare URL and headers for request"""
+        if not self.config.gateway_url:
+            raise ValueError("Gateway URL not configured")
+
+        url = f"{self.config.gateway_url}/{path}"
+        request_headers = headers.copy() if headers else {}
+
+        if "Content-Type" not in request_headers:
+            request_headers["Content-Type"] = "application/json"
+
+        token = self._ensure_valid_token()
+        if not token:
+            raise ValueError("Failed to get access token")
+
+        request_headers["authorization-token"] = f"Bearer {token}"
+        request_headers["Authorization"] = f"Bearer {token}"
+
+        return url, request_headers
+
+    def _process_openai_stream(self, content: bytes) -> dict[str, Any]:
+        """Process OpenAI streaming response"""
+        chunks = []
+        for line in content.decode("utf-8").split("\n"):
+            line = line.strip()
+            if line.startswith("data: "):
+                data_str = line[6:]
+                if data_str == "[DONE]":
+                    break
+                try:
+                    import json
+
+                    chunk_data = json.loads(data_str)
+                    if "choices" in chunk_data and len(chunk_data["choices"]) > 0:
+                        delta = chunk_data["choices"][0].get("delta", {})
+                        if "content" in delta:
+                            chunks.append(delta["content"])
+                except json.JSONDecodeError:
+                    continue
+        return {"chunks": chunks, "stream": True}
+
+    def _handle_error_response(self, status_code: int, response_text: str) -> ApiError:
+        """Handle error response and return ApiError"""
+        error_message = self._get_user_friendly_error_message(
+            status_code, response_text
+        )
+        logger.error(f"API request failed: {status_code} {response_text}")
+        return ApiError(
+            error_type=f"HTTP {status_code}",
+            message=error_message,
+            status_code=status_code,
+        )
 
     def _ensure_valid_token(self) -> Optional[str]:
         """

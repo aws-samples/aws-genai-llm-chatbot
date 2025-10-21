@@ -110,6 +110,77 @@ class TestNexusGatewayClientIntegration:
         ),
         reason="Real Nexus credentials and test model not provided",
     )
+    def test_real_openai_chat(self, nexus_client):
+        """Test real openai chat request"""
+        model_id = os.getenv("NEXUS_TEST_MODEL_ID")
+        body = {
+            "messages": [{"role": "user", "content": "Hello, how are you?"}],
+            "model": model_id,
+            "max_tokens": 100,
+            "temperature": 0.7,
+        }
+
+        response = nexus_client.invoke_openai_chat(body)
+        print(f"Response: {response}")
+
+        assert response is not None
+        assert "choices" in response
+        assert len(response["choices"]) > 0
+        assert "message" in response["choices"][0]
+        assert "content" in response["choices"][0]["message"]
+        print(f"Response content: {response['choices'][0]['message']['content']}")
+
+    @pytest.mark.skipif(
+        not all(
+            [
+                os.getenv("NEXUS_GATEWAY_URL"),
+                os.getenv("NEXUS_AUTH_CLIENT_ID"),
+                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
+                os.getenv("NEXUS_AUTH_TOKEN_URL"),
+                os.getenv("NEXUS_TEST_MODEL_ID"),
+            ]
+        ),
+        reason="Real Nexus credentials and test model not provided",
+    )
+    def test_real_openai_chat_stream(self, nexus_client):
+        """Test real openai chat request"""
+        model_id = os.getenv("NEXUS_TEST_MODEL_ID")
+        body = {
+            "messages": [
+                {"role": "user", "content": "Hello, Im John"},
+                {"role": "assistant", "content": ""},
+                {"role": "user", "content": "what's your name?"},
+            ],
+            "model": model_id,
+            "max_completion_tokens": 512,
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "stream": True,
+        }
+
+        response = nexus_client.invoke_openai_stream_chat(body)
+        print(f"Response: {response}")
+
+        assert response is not None
+        if "chunks" in response:
+            chunks = response["chunks"]
+            print(f"Received {len(chunks)} chunks")
+            combined_content = "".join(chunks)
+            print(f"Combined content: {combined_content}")
+            assert len(chunks) > 0
+
+    @pytest.mark.skipif(
+        not all(
+            [
+                os.getenv("NEXUS_GATEWAY_URL"),
+                os.getenv("NEXUS_AUTH_CLIENT_ID"),
+                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
+                os.getenv("NEXUS_AUTH_TOKEN_URL"),
+                os.getenv("NEXUS_TEST_MODEL_ID"),
+            ]
+        ),
+        reason="Real Nexus credentials and test model not provided",
+    )
     def test_real_bedrock_converse_stream(self, nexus_client):
         """Test real bedrock converse stream request"""
         model_id = os.getenv("NEXUS_TEST_MODEL_ID")
