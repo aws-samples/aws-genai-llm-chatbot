@@ -84,7 +84,7 @@ def test_list_models(mock_config, mock_nexus_models):
 
         # Check first model (chat model)
         assert models[0]["name"] == "claude-3-sonnet"
-        assert models[0]["provider"] == "nexus"
+        assert models[0]["provider"] == "nexus.anthropic"
         assert models[0]["ragSupported"] == False
         assert models[0]["streaming"]
         assert models[0]["inputModalities"] == ["text"]
@@ -92,7 +92,7 @@ def test_list_models(mock_config, mock_nexus_models):
 
         # Check embedding model
         embedding_model = next(m for m in models if m["name"] == "titan-embed")
-        assert embedding_model["provider"] == "nexus"
+        assert embedding_model["provider"] == "nexus.bedrock"
         assert not embedding_model["ragSupported"]
         assert not embedding_model["streaming"]
         assert embedding_model["inputModalities"] == ["text"]
@@ -168,7 +168,7 @@ def test_transform_nexus_model():
     transformed = nexus._transform_nexus_model(chat_model)
 
     assert transformed["name"] == "claude-3-sonnet"
-    assert transformed["provider"] == "nexus"
+    assert transformed["provider"] == "nexus.anthropic"
     assert transformed["providerModelName"] == "claude-3-sonnet"
     assert transformed["ragSupported"] == False
     assert transformed["streaming"]
@@ -188,7 +188,7 @@ def test_transform_nexus_model():
     transformed = nexus._transform_nexus_model(embedding_model)
 
     assert transformed["name"] == "titan-embed"
-    assert transformed["provider"] == "nexus"
+    assert transformed["provider"] == "nexus.bedrock"
     assert transformed["providerModelName"] == "amazon.titan-embed-text-v1"
     assert not transformed["ragSupported"]
     assert not transformed["streaming"]

@@ -10,13 +10,14 @@ from .base import NexusGatewayAdapter
 logger = Logger()
 
 
-class NexusChatStreamAdapter(NexusGatewayAdapter):
-    """Streaming chat adapter for Nexus Gateway integration."""
+class NexusChatAdapter(NexusGatewayAdapter):
+    """
+    Chat adapter for Nexus Gateway integration
+    handles streaming and non streaming models
+    """
 
     def __init__(self, model_id: str, *args, **kwargs):
-        logger.info(f"Initializing NexusChatStreamAdapter with model_id: {model_id}")
-        # Enable streaming in model kwargs
-        kwargs.setdefault("model_kwargs", {})["streaming"] = True
+        logger.info(f"Initializing NexusChatAdapter with model_id: {model_id}")
 
         super().__init__(model_id, *args, **kwargs)
 
@@ -30,22 +31,21 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
         videos: Optional[List[Dict[str, str]]] = None,
         system_prompts: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
-        """Run streaming chat with Nexus Gateway -
-        returns complete response after streaming."""
+        """Run chat with Nexus Gateway - returns complete chat response."""
         try:
             logger.info(
-                f"""Processing streaming chat request for model: {self.model_id},
+                f"""Processing chat request for model: {self.model_id},
                 session: {self.session_id}"""
             )
 
             # Validate unsupported features
             if images or documents or videos:
                 raise ValueError(
-                    "NexusChatStreamAdapter does not support file attachments yet"
+                    "NexusChatAdapter does not support file attachments yet"
                 )
             if workspace_id:
                 raise ValueError(
-                    """NexusChatStreamAdapter does not support
+                    """NexusChatAdapter does not support
                     workspace/RAG functionality yet"""
                 )
 
@@ -66,7 +66,7 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
             # Check if streaming is enabled and supported
             if self.model_kwargs.get("streaming", False) and not self.disable_streaming:
                 # Use streaming
-                logger.info("Invoking bedrock streaming endpoint")
+                logger.info("Invoking GenAIEH bedrock streaming endpoint")
                 response = self.nexus_client.invoke_bedrock_converse_stream(
                     model_id=self.model_id, body=request_body
                 )
@@ -82,6 +82,7 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
                 full_response = self._process_streaming_response(response)
             else:
                 # Fall back to non-streaming
+                logger.info("Invoking GenAIEH bedrock non-streaming endpoint")
                 response = self.nexus_client.invoke_bedrock_converse(
                     model_id=self.model_id, body=request_body
                 )
@@ -93,22 +94,23 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
                         "metadata": {"sessionId": self.session_id},
                     }
 
-                full_response = self.extract_response_content(response)
+                full_response = self.extract_bedrock_response_content(response)
 
             # Update chat history and log usage
             self.update_chat_history(prompt, full_response)
             self.log_token_usage(response)
 
             logger.info(
-                f"Successfully processed streaming chat request for session: "
+                f"Successfully processed GenAIEH bedrock chat request for session: "
                 f"{self.session_id}"
             )
             return self.format_response(full_response, user_groups)
 
+        except ValueError:
+            # Re-raise validation errors (unsupported features)
+            raise
         except Exception as e:
-            logger.error(
-                f"Error in NexusChatStreamAdapter.run: {str(e)}", exc_info=True
-            )
+            logger.error(f"Error in NexusChatAdapter.run: {str(e)}", exc_info=True)
             return self.handle_nexus_error(e, "streaming chat processing")
 
     def _process_streaming_response(self, response: Dict[str, Any]) -> str:
@@ -179,7 +181,7 @@ class NexusChatStreamAdapter(NexusGatewayAdapter):
                 full_response = ""
         elif "output" in response:
             # Fallback to non-streaming format
-            full_response = self.extract_response_content(response)
+            full_response = self.extract_bedrock_response_content(response)
         else:
             full_response = str(response)
 
