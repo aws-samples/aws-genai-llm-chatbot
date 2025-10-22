@@ -5,7 +5,6 @@
 
 # Core parameters
 # ------------------------------
-TARGET_ACCOUNT: 123456789012 # Your AWS Account ID
 PREFIX: chatbot           # Prefix for all resources (max 16 chars)
 BEDROCK_REGION: us-east-1 # AWS region for Amazon Bedrock
 

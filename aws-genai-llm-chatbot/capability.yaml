@@ -13,11 +13,6 @@ labels:
   - Claude
   - Anthropic
 input:
-  - name: TARGET_ACCOUNT
-    type: String
-    description: AWS Account ID for deployment
-    label: AWS Account ID
-    isRequired: true
   - name: PREFIX
     type: String
     description: Prefix to be used for all resources
