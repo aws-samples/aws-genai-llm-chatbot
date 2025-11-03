@@ -3,6 +3,7 @@ import {
   BundlingOutput,
   DockerImage,
   aws_s3_assets,
+  BundlingFileAccess,
 } from "aws-cdk-lib";
 import { Code, S3Code } from "aws-cdk-lib/aws-lambda";
 import { Asset } from "aws-cdk-lib/aws-s3-assets";
@@ -57,6 +58,7 @@ export class SharedAssetBundler extends Construct {
       {
         path: assetPath,
         bundling: {
+          bundlingFileAccess: BundlingFileAccess.VOLUME_COPY,
           image:
             process.env.NODE_ENV === "test"
               ? DockerImage.fromRegistry("dummy-skip-build-in-test")
