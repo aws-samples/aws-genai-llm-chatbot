@@ -69,9 +69,13 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       (model) => model.interface === ModelInterface.LangChain
     );
 
-    // check if any deployed model requires langchain interface or if bedrock is enabled from config
+    // check if any deployed model requires langchain interface or if bedrock or nexus is enabled from config
     let langchainInterface: LangChainInterface | undefined;
-    if (langchainModels.length > 0 || props.config.bedrock?.enabled) {
+    if (
+      langchainModels.length > 0 ||
+      props.config.bedrock?.enabled ||
+      props.config.nexus?.enabled
+    ) {
       langchainInterface = new LangChainInterface(this, "LangchainInterface", {
         shared,
         config: props.config,
