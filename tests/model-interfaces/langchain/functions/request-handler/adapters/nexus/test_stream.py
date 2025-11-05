@@ -1,8 +1,8 @@
-"""Tests for Nexus Streaming Adapter."""
+"""Tests for Nexus Chat Adapter for streaming models"""
 
 import pytest
 from unittest.mock import Mock, call
-from adapters.nexus.stream import NexusChatStreamAdapter
+from adapters.nexus.bedrock_chat import NexusChatAdapter
 from genai_core.model_providers.nexus.types import ApiError
 
 
@@ -25,22 +25,15 @@ def mock_nexus_client():
 @pytest.fixture
 def stream_adapter(mock_nexus_client):
     """Create streaming adapter with mocked dependencies."""
-    adapter = NexusChatStreamAdapter(
+    adapter = NexusChatAdapter(
         model_id="test-model", session_id="test-session", user_id="test-user"
     )
     adapter.chat_history = Mock()
     adapter.chat_history.messages = []
     adapter.disable_streaming = False
+    adapter.model_kwargs = {"streaming": True}
     adapter._nexus_client = mock_nexus_client
     return adapter
-
-
-def test_streaming_adapter_initialization():
-    """Test streaming adapter initialization."""
-    adapter = NexusChatStreamAdapter(
-        model_id="test-model", session_id="test-session", user_id="test-user"
-    )
-    assert adapter.model_kwargs["streaming"] is True
 
 
 def test_streaming_request(stream_adapter, mock_nexus_client):

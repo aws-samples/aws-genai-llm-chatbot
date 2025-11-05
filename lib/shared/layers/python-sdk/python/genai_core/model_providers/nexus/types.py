@@ -101,14 +101,32 @@ class ModelProvider:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ModelProvider":
+        # Find the active provider (non-null value)
+        provider_name = None
+        provider_config = {}
+
+        for key, value in data.items():
+            if (
+                key in ["openai", "bedrock", "anthropic", "cohere", "ai21", "mistral"]
+                and value is not None
+            ):
+                provider_name = key
+                provider_config = value if isinstance(value, dict) else {}
+                break
+
+        # Fallback to old structure if no provider found
+        if not provider_name:
+            provider_name = data.get("modelProviderName", "bedrock")
+            provider_config = data
+
         return cls(
-            model_provider_name=data.get("modelProviderName", "bedrock"),
-            model=data.get("model", ""),
-            api_access_key_id=data.get("apiAccessKeyId"),
-            api_access_key=data.get("apiAccessKey"),
-            api_endpoint=data.get("apiEndpoint"),
-            api_version=data.get("apiVersion"),
-            region_name=data.get("regionName"),
+            model_provider_name=provider_name,
+            model=provider_config.get("model", ""),
+            api_access_key_id=provider_config.get("apiAccessKeyId"),
+            api_access_key=provider_config.get("apiAccessKey"),
+            api_endpoint=provider_config.get("apiEndpoint"),
+            api_version=provider_config.get("apiVersion"),
+            region_name=provider_config.get("regionName"),
         )
 
 

@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock
-from adapters.nexus.chat import NexusChatAdapter
+from adapters.nexus.bedrock_chat import NexusChatAdapter
 from genai_core.model_providers.nexus.types import ApiError
 
 

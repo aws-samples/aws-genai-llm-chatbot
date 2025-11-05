@@ -73,22 +73,87 @@ class NexusGatewayAdapter(ModelAdapter):
 
         return message_body
 
+    def build_openai_message_body(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        history: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
+        """Build message body for OpenAI Chat API."""
+        messages = []
+
+        # Add system prompt
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        # Add conversation history - convert from Bedrock format if needed
+        if history:
+            converted_history = self.convert_bedrock_to_openai_format(history)
+            messages.extend(converted_history)
+
+        # Add current user message
+        messages.append({"role": "user", "content": prompt})
+
+        return {"messages": messages}
+
     def build_inference_config(
         self,
+        provider: str = "bedrock",
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
         stop_sequences: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """Build inference configuration."""
+        """Build inference configuration for specified provider."""
         config = {
-            "temperature": temperature,
-            "topP": top_p,
-            "maxTokens": max_tokens,
-            "stopSequences": stop_sequences,
+            "temperature": temperature or self.model_kwargs.get("temperature", None),
         }
 
+        max_tokens = max_tokens or self.model_kwargs.get("maxTokens", None)
+        top_p = top_p or self.model_kwargs.get("topP", None)
+        stop_sequences = stop_sequences or self.model_kwargs.get("stopSequences", None)
+
+        if provider == "openai":
+            config.update(
+                {
+                    "top_p": top_p,
+                    "max_completion_tokens": max_tokens,
+                }
+            )
+        else:
+            config.update(
+                {
+                    "topP": top_p,
+                    "maxTokens": max_tokens,
+                    "stopSequences": stop_sequences,
+                }
+            )
+
         return config
+
+    def convert_bedrock_to_openai_format(
+        self, history: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Convert Bedrock format messages to OpenAI format."""
+        converted_history = []
+
+        for message in history:
+            if isinstance(message, dict) and "role" in message and "content" in message:
+                role = message["role"]
+                content = message["content"]
+
+                # Convert Bedrock nested content format to OpenAI string format
+                if isinstance(content, list) and len(content) > 0:
+                    if isinstance(content[0], dict) and "text" in content[0]:
+                        content = content[0]["text"]
+                    else:
+                        content = str(content[0])
+                elif not isinstance(content, str):
+                    content = str(content)
+
+                converted_history.append({"role": role, "content": content})
+
+        return converted_history
 
     def get_conversation_history(self) -> List[Dict[str, Any]]:
         """Get existing conversation history formatted for Nexus Gateway."""
@@ -128,7 +193,7 @@ class NexusGatewayAdapter(ModelAdapter):
         except Exception as e:
             logger.error(f"Error updating chat history: {str(e)}")
 
-    def extract_response_content(
+    def extract_bedrock_response_content(
         self, response: Union[Dict[str, Any], ApiError]
     ) -> str:
         """Extract text content from Nexus Gateway response."""
@@ -179,8 +244,12 @@ class NexusGatewayAdapter(ModelAdapter):
                     self.callback_handler.usage.update(
                         {
                             "total_tokens": total_tokens,
-                            "input_tokens": usage.get("inputTokens", 0),
-                            "output_tokens": usage.get("outputTokens", 0),
+                            "input_tokens": usage.get("inputTokens")
+                            or usage.get("prompt_tokens")
+                            or 0,
+                            "output_tokens": usage.get("outputTokens")
+                            or usage.get("completion_tokens")
+                            or 0,
                         }
                     )
         except Exception as e:
@@ -205,6 +274,25 @@ class NexusGatewayAdapter(ModelAdapter):
             body["system"] = message_body["system"]
 
         return body
+
+    def build_openai_request_body(
+        self,
+        model_id: str,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        history: Optional[List[Dict[str, Any]]] = None,
+    ):
+        """Build request body for Nexus OpenAI Chat API."""
+        message_body = self.build_openai_message_body(prompt, system_prompt, history)
+        inference_config = self.build_inference_config(provider="openai")
+
+        return {
+            "model": model_id,
+            "messages": message_body["messages"],
+            "stream": self.model_kwargs.get("streaming", False)
+            and not self.disable_streaming,
+            **inference_config,
+        }
 
     def format_response(
         self,
