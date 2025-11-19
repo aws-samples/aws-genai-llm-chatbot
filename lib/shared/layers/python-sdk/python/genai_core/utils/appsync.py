@@ -36,7 +36,6 @@ def query(user_id, session_id, data_object):
 
 @tracer.capture_method
 def direct_send_to_client(data):
-    logger.info("Received message to send to client", data=data)
     query_string = query(
         user_id=data["userId"],
         session_id=data["data"]["sessionId"],
@@ -75,17 +74,13 @@ def direct_send_to_client(data):
             data=payload,
             timeout=5,
         )
-        logger.info("Request URL", url=url)
-        logger.info("Request Payload", payload=payload)
-        logger.info("Response Status", status=response.status_code)
-        logger.info("Response Body", body=json.loads(response.content.decode("utf-8")))
-
+        
         if response.status_code != 200:
-            logger.error("Error Response Headers", headers=response.headers)
-            for header, value in response.headers.items():
-                logger.error(f"{header}: {value}")
+            logger.error("AppSync request failed", 
+                        status=response.status_code,
+                        error=response.text)
 
         return response
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error("AppSync request exception", error=str(e))
         raise
