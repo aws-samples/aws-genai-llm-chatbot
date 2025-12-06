@@ -12,7 +12,7 @@ langchain-text-splitters==0.3.11
 opensearch-py==2.4.2
 psycopg2-binary==2.9.7
 pgvector==0.2.2
-urllib3==2.5.0
+urllib3==2.6.0
 beautifulsoup4==4.12.2
 requests==2.32.5
 attrs==23.1.0
