@@ -42,11 +42,13 @@ class BedrockChatAdapter(ModelAdapter):
     def _requires_single_sampling_param(self) -> bool:
         """
         Some newer Claude models only allow one sampling parameter at a time.
-        Returns True if the model requires choosing between temperature OR top_p.
+        Returns True if the model requires choosing between temperature OR
+        top_p.
 
-        Claude 4.x models (Sonnet 4, Opus 4, Haiku 4) require only one sampling parameter.
-        Handles regional prefixes (us., global., eu., etc.)
-        Reference: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html
+        Claude 4.x models (Sonnet 4, Opus 4, Haiku 4) require only one
+        sampling parameter. Handles regional prefixes (us., global., eu.).
+        Reference: https://docs.aws.amazon.com/bedrock/latest/userguide/
+        model-parameters-anthropic-claude-messages.html
         """
         # Models that only support one sampling parameter
         # Pattern matches any regional prefix (us., global., eu., etc.)
@@ -66,7 +68,7 @@ class BedrockChatAdapter(ModelAdapter):
             if file_extension == "jpg" or file_extension == "jpeg":
                 file_extension = "jpeg"
             elif file_extension != "png":
-                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html  # noqa
                 raise Exception("Unsupported format " + file_extension)
 
             self.chat_history.add_temporary_message(
@@ -104,7 +106,7 @@ class BedrockChatAdapter(ModelAdapter):
                 "md",
             ]
             if file_extension not in supported:
-                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_DocumentBlock.html
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_DocumentBlock.html  # noqa
                 raise Exception("Unsupported format " + file_extension)
             self.chat_history.add_temporary_message(
                 HumanMessage(
@@ -131,7 +133,7 @@ class BedrockChatAdapter(ModelAdapter):
             filename, file_extension = os.path.splitext(video["key"])
             file_extension = file_extension.lower().replace(".", "")
             if file_extension != "mp4":
-                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_VideoBlock.html
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_VideoBlock.html  # noqa
                 raise Exception("Unsupported format " + file_extension)
             self.chat_history.add_temporary_message(
                 HumanMessage(

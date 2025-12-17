@@ -145,7 +145,8 @@ def _list_azure_openai_models():
 
 
 # Based on the table (Need to support both document and sytem prompt)
-# https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference-supported-models-features.html
+# https://docs.aws.amazon.com/bedrock/latest/userguide/
+# conversation-inference-supported-models-features.html
 def _does_model_support_documents(model_name):
     return (
         not re.match(r"^ai21.jamba*", model_name)
