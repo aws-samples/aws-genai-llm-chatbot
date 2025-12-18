@@ -41,7 +41,7 @@ dependencies = [
     "requests-aws4auth>=1.2.3",
     
     # Web and parsing
-    "urllib3==2.5.0",
+    "urllib3==2.6.0",
     "beautifulsoup4>=4.12.2",
     "requests>=2.32.4",
     "attrs>=23.1.0",

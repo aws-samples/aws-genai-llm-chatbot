@@ -9,7 +9,7 @@ langchain-community==0.3.31
 opensearch-py==3.0.0
 psycopg2-binary==2.9.10
 pgvector==0.2.2
-urllib3==2.5.0
+urllib3==2.6.0
 openai==1.47.0
 beautifulsoup4==4.12.2
 requests==2.32.5
