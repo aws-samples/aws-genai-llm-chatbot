@@ -2,11 +2,12 @@ import os
 import uuid
 from aws_lambda_powertools import Logger
 import boto3
+from botocore.config import Config
 import json
 from datetime import datetime
 
 dynamodb = boto3.resource("dynamodb")
-s3_client = boto3.client("s3")
+s3_client = boto3.client("s3", region_name = os.environ['AWS_REGION'], config = Config(signature_version = 's3v4'))
 logger = Logger()
 
 USER_FEEDBACK_BUCKET_NAME = os.environ.get("USER_FEEDBACK_BUCKET_NAME")
