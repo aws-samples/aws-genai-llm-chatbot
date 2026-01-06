@@ -39,6 +39,28 @@ class BedrockChatAdapter(ModelAdapter):
         else:
             return False
 
+    def _requires_single_sampling_param(self) -> bool:
+        """
+        Some newer Claude models only allow one sampling parameter at a time.
+        Returns True if the model requires choosing between temperature OR
+        top_p.
+
+        Claude 4.x models (Sonnet 4, Opus 4, Haiku 4) require only one
+        sampling parameter. Handles regional prefixes (us., global., eu.).
+        Reference: https://docs.aws.amazon.com/bedrock/latest/userguide/
+        model-parameters-anthropic-claude-messages.html
+        """
+        # Models that only support one sampling parameter
+        # Pattern matches any regional prefix (us., global., eu., etc.)
+        single_param_model_patterns = [
+            "anthropic.claude-sonnet-4",  # Claude Sonnet 4.x (any region)
+            "anthropic.claude-opus-4",    # Claude Opus 4.x (any region)
+            "anthropic.claude-haiku-4",   # Claude Haiku 4.x (any region)
+        ]
+
+        model_lower = self.model_id.lower()
+        return any(pattern in model_lower for pattern in single_param_model_patterns)
+
     def add_files_to_message_history(self, images=[], documents=[], videos=[]):
         for image in images:
             filename, file_extension = os.path.splitext(image["key"])
@@ -46,7 +68,7 @@ class BedrockChatAdapter(ModelAdapter):
             if file_extension == "jpg" or file_extension == "jpeg":
                 file_extension = "jpeg"
             elif file_extension != "png":
-                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html  # noqa
                 raise Exception("Unsupported format " + file_extension)
 
             self.chat_history.add_temporary_message(
@@ -84,7 +106,7 @@ class BedrockChatAdapter(ModelAdapter):
                 "md",
             ]
             if file_extension not in supported:
-                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_DocumentBlock.html
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_DocumentBlock.html  # noqa
                 raise Exception("Unsupported format " + file_extension)
             self.chat_history.add_temporary_message(
                 HumanMessage(
@@ -111,7 +133,7 @@ class BedrockChatAdapter(ModelAdapter):
             filename, file_extension = os.path.splitext(video["key"])
             file_extension = file_extension.lower().replace(".", "")
             if file_extension != "mp4":
-                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_VideoBlock.html
+                # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_VideoBlock.html  # noqa
                 raise Exception("Unsupported format " + file_extension)
             self.chat_history.add_temporary_message(
                 HumanMessage(
@@ -243,10 +265,21 @@ class BedrockChatAdapter(ModelAdapter):
         top_p = model_kwargs.get("topP")
         max_tokens = model_kwargs.get("maxTokens")
 
-        if temperature is not None:
-            params["temperature"] = temperature
-        if top_p:
-            params["top_p"] = top_p
+        # Handle sampling parameters based on model requirements
+        if self._requires_single_sampling_param():
+            # For Claude 4.x+ models: only set temperature OR top_p, not both
+            # Prioritize temperature if both are provided
+            if temperature is not None:
+                params["temperature"] = temperature
+            elif top_p:
+                params["top_p"] = top_p
+        else:
+            # For older models (Claude 3.x, etc.): allow both parameters
+            if temperature is not None:
+                params["temperature"] = temperature
+            if top_p:
+                params["top_p"] = top_p
+
         if max_tokens:
             params["max_tokens"] = max_tokens
 
