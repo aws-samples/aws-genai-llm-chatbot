@@ -145,7 +145,8 @@ def _list_azure_openai_models():
 
 
 # Based on the table (Need to support both document and sytem prompt)
-# https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference-supported-models-features.html
+# https://docs.aws.amazon.com/bedrock/latest/userguide/
+# conversation-inference-supported-models-features.html
 def _does_model_support_documents(model_name):
     return (
         not re.match(r"^ai21.jamba*", model_name)
@@ -182,32 +183,47 @@ def _list_cross_region_inference_profiles():
     bedrock = genai_core.clients.get_bedrock_client(service_name="bedrock")
     response = bedrock.list_inference_profiles()
 
-    return {
-        inference_profile["models"][0]["modelArn"].split("/")[1]: inference_profile[
-            "inferenceProfileId"
-        ]
+    # Return list of profiles instead of dict to avoid collisions
+    # (multiple regional variants can have the same base model ID)
+    return [
+        inference_profile
         for inference_profile in response.get("inferenceProfileSummaries", [])
         if (
             inference_profile.get("status") == "ACTIVE"
             and inference_profile.get("type") == "SYSTEM_DEFINED"
         )
-    }
+    ]
 
 
 def _list_bedrock_cris_models():
     try:
-        cross_region_profiles = _list_cross_region_inference_profiles()
+        inference_profiles = _list_cross_region_inference_profiles()
         bedrock_client = genai_core.clients.get_bedrock_client(service_name="bedrock")
         all_models = bedrock_client.list_foundation_models()["modelSummaries"]
 
-        return [
-            _create_bedrock_model_profile(
-                model, cross_region_profiles[model["modelId"]]
-            )
+        # Create dict of base models for lookup
+        models_by_id = {
+            model["modelId"]: model
             for model in all_models
             if genai_core.types.InferenceType.INFERENCE_PROFILE.value
             in model["inferenceTypesSupported"]
-        ]
+        }
+
+        # Return all inference profiles (including multiple regional variants)
+        result = []
+        for profile in inference_profiles:
+            base_model_id = profile["models"][0]["modelArn"].split("/")[1]
+            profile_id = profile["inferenceProfileId"]
+
+            if base_model_id in models_by_id:
+                result.append(
+                    _create_bedrock_model_profile(
+                        models_by_id[base_model_id],
+                        profile_id
+                    )
+                )
+
+        return result
     except Exception as e:
         logger.error(f"Error listing cross region inference profiles models: {e}")
         return None
