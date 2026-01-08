@@ -12,7 +12,7 @@ selenium==4.16
 pdfplumber==0.11.8
 pyopenssl==24.3.0
 cryptography==44.0.1
-urllib3==2.6.0
+urllib3==2.6.3
 langchain-core==0.3.80
 pdfminer.six==20251107
 boto3
