@@ -206,6 +206,7 @@ function getTypedEnvVar<T>(
         fs.readFileSync("./bin/config.json").toString("utf8")
       );
       options.prefix = config.prefix;
+      options.directSend = config.directSend;
       options.createCMKs = config.createCMKs;
       options.retainOnDelete = config.retainOnDelete;
       options.ddbDeletionProtection = config.ddbDeletionProtection;
@@ -801,6 +802,12 @@ async function processCreateOptions(options: any): Promise<void> {
           ? true
           : "Only letters, numbers, and dashes are allowed. The max length is 10 characters.";
       },
+    },
+    {
+      type: "confirm",
+      name: "directSend",
+      message: "Do you want lambda handlers to send directly to client",
+      initial: options.directSend ?? false,
     },
     {
       type: "confirm",
@@ -1820,6 +1827,7 @@ async function processCreateOptions(options: any): Promise<void> {
   // Create the config object
   const config = {
     prefix: answers.prefix,
+    directSend: answers.directSend,
     createCMKs: answers.createCMKs,
     retainOnDelete: answers.retainOnDelete,
     ddbDeletionProtection: answers.ddbDeletionProtection,
