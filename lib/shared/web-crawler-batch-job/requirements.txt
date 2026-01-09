@@ -8,7 +8,7 @@ langchain==0.3.27
 opensearch-py==3.0.0
 psycopg2-binary==2.9.10
 pgvector==0.2.2
-urllib3==2.6.0
+urllib3==2.6.3
 openai==0.28.0
 beautifulsoup4==4.12.2
 requests==2.32.5
