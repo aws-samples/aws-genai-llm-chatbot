@@ -8,7 +8,7 @@ langchain==0.3.27
 opensearch-py==3.0.0
 psycopg2-binary==2.9.10
 pgvector==0.2.2
-urllib3==2.5.0
+urllib3==2.6.0
 openai==0.28.0
 beautifulsoup4==4.12.2
 requests==2.32.5
@@ -16,4 +16,5 @@ attrs==23.1.0
 feedparser==6.0.11
 aws_xray_sdk==2.14.0
 defusedxml==0.7.1
-pdfplumber==0.11.0
+pdfplumber==0.11.8
+pdfminer.six==20251107

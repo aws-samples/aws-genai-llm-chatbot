@@ -1,6 +1,7 @@
-pytest==7.4.0
+pytest==9.0.2
 pytest-xdist==3.6.1
 pytest-mock==3.11.1
+pytest-asyncio>=1.3.0
 gql==3.4.1
 aws_lambda_powertools==2.42.0
 bandit==1.7.9
@@ -8,9 +9,12 @@ pip-audit==2.7.3
 black==24.8.0
 flake8==7.1.0
 selenium==4.16
-pdfplumber==0.11.0
+pdfplumber==0.11.8
 pyopenssl==24.3.0
 cryptography==44.0.1
+urllib3==2.6.0
+langchain-core==0.3.80
+pdfminer.six==20251107
 boto3
 -r lib/shared/layers/common/requirements.txt --find-links=lib/shared/layers/common
 -r lib/chatbot-api/functions/resolvers/send-query-lambda-resolver/requirements.txt
