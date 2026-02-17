@@ -218,8 +218,7 @@ def _list_bedrock_cris_models():
             if base_model_id in models_by_id:
                 result.append(
                     _create_bedrock_model_profile(
-                        models_by_id[base_model_id],
-                        profile_id
+                        models_by_id[base_model_id], profile_id
                     )
                 )
 
