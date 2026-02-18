@@ -54,8 +54,8 @@ class BedrockChatAdapter(ModelAdapter):
         # Pattern matches any regional prefix (us., global., eu., etc.)
         single_param_model_patterns = [
             "anthropic.claude-sonnet-4",  # Claude Sonnet 4.x (any region)
-            "anthropic.claude-opus-4",    # Claude Opus 4.x (any region)
-            "anthropic.claude-haiku-4",   # Claude Haiku 4.x (any region)
+            "anthropic.claude-opus-4",  # Claude Opus 4.x (any region)
+            "anthropic.claude-haiku-4",  # Claude Haiku 4.x (any region)
         ]
 
         model_lower = self.model_id.lower()

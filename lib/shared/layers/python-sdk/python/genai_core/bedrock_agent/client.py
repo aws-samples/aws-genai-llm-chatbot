@@ -251,8 +251,16 @@ def get_agent_config():
             "Bedrock Agent is not enabled - BEDROCK_AGENT_ID not set"
         )
 
-    agent_version = os.environ.get("BEDROCK_AGENT_VERSION", "DRAFT")
+    agent_version = os.environ.get("BEDROCK_AGENT_VERSION")
+    if not agent_version:
+        logger.info("Agent version not set, defaulting to DRAFT")
+        agent_version = "DRAFT"
+
     agent_alias_id = os.environ.get("BEDROCK_AGENT_ALIAS_ID")
+    if not agent_alias_id:
+        # https://docs.aws.amazon.com/bedrock/latest/userguide/agents-test.html#test-your-agent
+        logger.info("Agent alias ID not set, defaulting to draft alias TSTALIASID")
+        agent_alias_id = "TSTALIASID"
 
     return {
         "agentId": agent_id,
@@ -683,28 +691,15 @@ def invoke_agent(session_id, prompt, enable_trace=True, timeout=60):
     logger.info(f"Agent config: {agent_config}")
 
     try:
-        # Invoke the agent with the appropriate alias ID
-        if agent_config.get("agentAliasId"):
-            logger.info(f"Using agent alias ID: {agent_config['agentAliasId']}")
-            response_stream = client.invoke_agent(
-                agentId=agent_config["agentId"],
-                agentAliasId=agent_config["agentAliasId"],
-                sessionId=session_id,
-                inputText=prompt,
-                enableTrace=enable_trace,
-            )
-        else:
-            logger.info(
-                f"Using agent version as alias ID: {agent_config['agentVersion']}"
-            )
-            response_stream = client.invoke_agent(
-                agentId=agent_config["agentId"],
-                agentAliasId=agent_config["agentVersion"],
-                sessionId=session_id,
-                inputText=prompt,
-                enableTrace=enable_trace,
-            )
-
+        # Invoke the agent
+        logger.info(f"Using agent alias ID: {agent_config['agentAliasId']}")
+        response_stream = client.invoke_agent(
+            agentId=agent_config["agentId"],
+            agentAliasId=agent_config["agentAliasId"],
+            sessionId=session_id,
+            inputText=prompt,
+            enableTrace=enable_trace,
+        )
         logger.info(f"Response stream type: {type(response_stream)}")
 
         # Extract completion and metadata from the response

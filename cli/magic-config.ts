@@ -617,7 +617,7 @@ function getTypedEnvVar<T>(
               ),
               agentAliasId: getTypedEnvVar<string>(
                 "BEDROCK_AGENT_ALIAS_ID",
-                "",
+                "TSTALIASID",
                 options.envPrefix
               ),
             };
@@ -919,7 +919,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "input",
       name: "bedrockAgentId",
-      message: "Amazon Bedrock Agent ID",
+      message:
+        "Amazon Bedrock Agent ID (leave empty to fetch all agents from account)",
       validate(v: string) {
         return (this as any).skipped || v.length > 0;
       },
@@ -941,7 +942,8 @@ async function processCreateOptions(options: any): Promise<void> {
     {
       type: "input",
       name: "bedrockAgentAliasId",
-      message: "Amazon Bedrock Agent Alias ID",
+      message:
+        "Amazon Bedrock Agent Alias ID (defaults to draft alias TSTALIASID)",
       skip() {
         return !(this as any).state.answers.bedrockAgentEnable;
       },

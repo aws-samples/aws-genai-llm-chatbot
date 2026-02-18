@@ -249,7 +249,7 @@ class TestBedrockClients:
         assert result == {
             "agentId": "test-agent-id",
             "agentVersion": "DRAFT",
-            "agentAliasId": None,
+            "agentAliasId": "TSTALIASID",
         }
 
     def test_get_agent_config_no_agent_id(self):
