@@ -8440,7 +8440,7 @@ schema {
         },
         "EnableIAMDatabaseAuthentication": true,
         "Engine": "aurora-postgresql",
-        "EngineVersion": "15.7",
+        "EngineVersion": "15.10",
         "KmsKeyId": {
           "Fn::GetAtt": [
             "SharedKMSKey7BCBB616",
