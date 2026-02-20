@@ -156,6 +156,11 @@ export class Shared extends Construct {
       });
 
       if (props.config.privateWebsite) {
+        // Create VPC Endpoint for Cognito IDP
+        vpc.addInterfaceEndpoint("CognitoIDPEndpoint", {
+          service: ec2.InterfaceVpcEndpointAwsService.COGNITO_IDP,
+        });
+        
         // Create VPC Endpoint for AppSync
         vpc.addInterfaceEndpoint("AppSyncEndpoint", {
           service: ec2.InterfaceVpcEndpointAwsService.APP_SYNC,
