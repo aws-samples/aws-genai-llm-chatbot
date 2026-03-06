@@ -56,6 +56,7 @@ export default defineConfig({
           { text: 'AgentCore Integration', link: '/documentation/agentcore' },
           { text: 'Applications', link: '/documentation/applications' },
           { text: 'AppSync', link: '/documentation/appsync' },
+          { text: 'Bedrock Agents', link: '/documentation/bedrock-agents' },
           { text: 'CloudFront Geo Restriction', link: '/documentation/cf-geo-restriction' },
           {
             text: 'Cognito Federation', items: [
