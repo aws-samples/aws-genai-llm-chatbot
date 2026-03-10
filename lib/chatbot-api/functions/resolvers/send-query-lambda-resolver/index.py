@@ -93,46 +93,94 @@ def handler(event, context: LambdaContext):
         ):
             raise RuntimeError("User is not authorized to access this application")
         logger.info("Application item 2", applicationItem=application_item)
-        provider = application_item.get("Model").split("::")[0]
-        modelName = application_item.get("Model").split("::")[1]
-        workspace_value = application_item.get("Workspace")
         allow_images = application_item.get("AllowImageInput")
         allow_videos = application_item.get("AllowVideoInput")
         allow_documents = application_item.get("AllowDocumentInput")
-        workspaceId = workspace_value.split("::")[-1] if workspace_value else None
 
-        modelKwargs = {
-            "streaming": application_item.get("Streaming", False),
-            "maxTokens": int(application_item.get("MaxTokens", 512)),
-            "temperature": float(application_item.get("Temperature", 0.6)),
-            "topP": float(application_item.get("TopP", 0.9)),
-        }
-        system_prompts = {
-            "systemPrompt": application_item.get("SystemPrompt", ""),
-            "systemPromptRag": application_item.get("SystemPromptRag", ""),
-            "condenseSystemPrompt": application_item.get("CondenseSystemPrompt", ""),
-        }
-        message = {
-            "action": request["action"],
-            "modelInterface": request["modelInterface"],
-            "direction": "IN",
-            "timestamp": str(int(round(datetime.now().timestamp()))),
-            "userId": event["identity"]["sub"],
-            "userGroups": user_roles,
-            "systemPrompts": system_prompts,
-            "data": {
-                "mode": request["data"]["mode"] or "chain",
+        agent_runtime_arn = application_item.get("AgentRuntimeArn")
+
+        if agent_runtime_arn:
+            # Agent-based application
+            model_value = application_item.get("Model")
+            modelKwargs = {
+                "streaming": application_item.get("Streaming", False),
+                "maxTokens": int(application_item.get("MaxTokens", 512)),
+                "temperature": float(application_item.get("Temperature", 0.6)),
+                "topP": float(application_item.get("TopP", 0.9)),
+            }
+            data = {
+                "mode": "chain",
                 "text": request["data"]["text"],
                 "images": request["data"]["images"] if allow_images else [],
                 "videos": request["data"]["videos"] if allow_videos else [],
-                "documents": request["data"]["documents"] if allow_documents else [],
-                "modelName": modelName,
-                "provider": provider,
+                "documents": (
+                    request["data"]["documents"] if allow_documents else []
+                ),
+                "agentRuntimeArn": agent_runtime_arn,
                 "sessionId": request["data"]["sessionId"],
-                "workspaceId": workspaceId,
                 "modelKwargs": modelKwargs,
-            },
-        }
+            }
+            if model_value:
+                data["modelName"] = model_value.split("::")[1]
+                data["provider"] = model_value.split("::")[0]
+            message = {
+                "action": request["action"],
+                "modelInterface": "agent",
+                "direction": "IN",
+                "timestamp": str(int(round(datetime.now().timestamp()))),
+                "userId": event["identity"]["sub"],
+                "userGroups": user_roles,
+                "data": data,
+            }
+        else:
+            # Model-based application
+            provider = application_item.get("Model").split("::")[0]
+            modelName = application_item.get("Model").split("::")[1]
+            workspace_value = application_item.get("Workspace")
+            workspaceId = (
+                workspace_value.split("::")[-1] if workspace_value else None
+            )
+
+            modelKwargs = {
+                "streaming": application_item.get("Streaming", False),
+                "maxTokens": int(application_item.get("MaxTokens", 512)),
+                "temperature": float(application_item.get("Temperature", 0.6)),
+                "topP": float(application_item.get("TopP", 0.9)),
+            }
+            system_prompts = {
+                "systemPrompt": application_item.get("SystemPrompt", ""),
+                "systemPromptRag": application_item.get("SystemPromptRag", ""),
+                "condenseSystemPrompt": application_item.get(
+                    "CondenseSystemPrompt", ""
+                ),
+            }
+            message = {
+                "action": request["action"],
+                "modelInterface": "langchain",
+                "direction": "IN",
+                "timestamp": str(int(round(datetime.now().timestamp()))),
+                "userId": event["identity"]["sub"],
+                "userGroups": user_roles,
+                "systemPrompts": system_prompts,
+                "data": {
+                    "mode": request["data"]["mode"] or "chain",
+                    "text": request["data"]["text"],
+                    "images": (
+                        request["data"]["images"] if allow_images else []
+                    ),
+                    "videos": (
+                        request["data"]["videos"] if allow_videos else []
+                    ),
+                    "documents": (
+                        request["data"]["documents"] if allow_documents else []
+                    ),
+                    "modelName": modelName,
+                    "provider": provider,
+                    "sessionId": request["data"]["sessionId"],
+                    "workspaceId": workspaceId,
+                    "modelKwargs": modelKwargs,
+                },
+            }
     else:
         if not ("admin" in user_roles or "workspace_manager" in user_roles):
             raise RuntimeError("User is not authorized to access this application")

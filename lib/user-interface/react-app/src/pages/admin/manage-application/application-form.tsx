@@ -17,7 +17,7 @@ import {
 import { ApplicationManageInput, LoadingStatus } from "../../../common/types";
 import { useContext, useEffect, useState } from "react";
 import { Utils } from "../../../common/utils";
-import { Model, Role, Workspace } from "../../../API";
+import { Agent, Model, Role, Workspace } from "../../../API";
 import { AppContext } from "../../../common/app-context";
 import { ApiClient } from "../../../common/api-client/api-client";
 import { getSelectedModelMetadata } from "../../../components/chatbot/utils";
@@ -64,6 +64,10 @@ export default function ApplicationForm(props: ApplicationFormProps) {
     useState<Model | null>();
   const [rolesStatus, setRolesStatus] = useState<LoadingStatus>("loading");
   const [roles, setRoles] = useState<Role[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentsStatus, setAgentsStatus] = useState<LoadingStatus>("loading");
+  const [selectedAgent, setSelectedAgent] =
+    useState<SelectProps.Option | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
   const [outputModality, setOutputModality] = useState<ChabotOutputModality>();
 
@@ -73,13 +77,13 @@ export default function ApplicationForm(props: ApplicationFormProps) {
     (async () => {
       const apiClient = new ApiClient(appContext);
       try {
-        const [modelsResult, workspacesResult, rolesResult] = await Promise.all(
-          [
+        const [modelsResult, workspacesResult, rolesResult, agentsResult] =
+          await Promise.all([
             apiClient.models.getModels(),
             apiClient.workspaces.getWorkspaces(),
             apiClient.roles.getRoles(),
-          ]
-        );
+            apiClient.agents.getAgents(),
+          ]);
 
         const models = modelsResult.data ? modelsResult.data.listModels : [];
         setModels(models);
@@ -94,6 +98,10 @@ export default function ApplicationForm(props: ApplicationFormProps) {
         const roles = rolesResult.data ? rolesResult.data.listRoles : [];
         setRoles(roles);
         setRolesStatus("finished");
+
+        const agentsList = agentsResult.data?.listAgents || [];
+        setAgents(agentsList);
+        setAgentsStatus("finished");
 
         setLoading(false);
       } catch (error) {
@@ -124,13 +132,25 @@ export default function ApplicationForm(props: ApplicationFormProps) {
             props.data.id
           );
           if (!result.data?.getApplication?.model) {
-            setModelsStatus("error");
+            if (!result.data?.getApplication?.agentRuntimeArn) {
+              setModelsStatus("error");
+            }
           } else {
             const selectedModelOption = {
               label: result.data?.getApplication?.model.split("::")[1],
               value: result.data?.getApplication?.model,
             };
             setSelectedModel(selectedModelOption);
+          }
+
+          if (result.data?.getApplication?.agentRuntimeArn) {
+            const agentArn = result.data.getApplication.agentRuntimeArn;
+            const agentOption = {
+              label: agentArn.split("/").pop() ?? agentArn,
+              value: agentArn,
+            };
+            setSelectedAgent(agentOption);
+            props.onChange({ selectedAgent: agentOption });
           }
 
           if (result.data?.getApplication?.workspace) {
@@ -158,6 +178,16 @@ export default function ApplicationForm(props: ApplicationFormProps) {
     ...OptionsHelper.getSelectOptions(workspaces ?? []),
   ];
   const rolesOptions = OptionsHelper.getSelectOptions(roles);
+  const agentOptions: SelectProps.Option[] = [
+    { label: "No agent", value: "", iconName: "close" },
+    ...agents
+      .filter((a) => a.status === "READY")
+      .map((a) => ({
+        label: a.agentRuntimeName,
+        value: a.agentRuntimeArn,
+        description: a.description ?? undefined,
+      })),
+  ];
   // When not using a bedrock models, the guardrails (Bedrock ApplyGuardrail API) is called after the full response
   // This prevents streaming capabilities.
   // For bedrock models, streaming is possible but delayed
@@ -205,10 +235,35 @@ export default function ApplicationForm(props: ApplicationFormProps) {
               />
             </FormField>
 
+            <FormField
+              label="Agent"
+              description="Select an AgentCore agent. When set, the agent handles the conversation instead of a direct LLM model."
+              errorText={props.errors.selectedAgent}
+            >
+              <Select
+                disabled={props.submitting}
+                selectedAriaLabel="Selected"
+                placeholder="No agent (use model directly)"
+                statusType={agentsStatus}
+                loadingText="Loading agents..."
+                selectedOption={selectedAgent}
+                options={agentOptions}
+                onChange={({ detail: { selectedOption } }) => {
+                  const hasAgent = !!selectedOption?.value;
+                  setSelectedAgent(hasAgent ? selectedOption : null);
+                  props.onChange({
+                    selectedAgent: hasAgent ? selectedOption : null,
+                  });
+                }}
+              />
+            </FormField>
+
             {appContext?.config.rag_enabled && (
               <FormField label="Workspace" errorText={props.errors.workspace}>
                 <Select
-                  disabled={!selectedModelMetadata?.ragSupported}
+                  disabled={
+                    !selectedModelMetadata?.ragSupported
+                  }
                   loadingText="Loading workspaces (might take few seconds)..."
                   statusType={workspacesStatus}
                   placeholder="Select a workspace (RAG data source)"
