@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 from common.constant import (
     ID_FIELD_VALIDATION,
     SAFE_PROMPT_STR_REGEX,
@@ -24,11 +25,17 @@ logger = Logger()
 permissions = UserPermissions(router)
 
 name_regex = r"^[\w\s+_-]+$"
+ARN_REGEX = r"^[A-Za-z0-9-_.:/]+$"
 
 
 class CreateApplicationRequest(BaseModel):
     name: str = Field(min_length=1, max_length=100, pattern=name_regex)
-    model: str = SAFE_SHORT_STR_VALIDATION
+    model: Optional[str] = Field(
+        None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
+    agentRuntimeArn: Optional[str] = Field(
+        None, max_length=500, pattern=ARN_REGEX
+    )
     workspace: str = Field(None, max_length=512, pattern=SAFE_STR_REGEX)
     systemPrompt: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
     systemPromptRag: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
@@ -49,7 +56,12 @@ class CreateApplicationRequest(BaseModel):
 class UpdateApplicationRequest(BaseModel):
     id: str = ID_FIELD_VALIDATION
     name: str = Field(min_length=1, max_length=100, pattern=name_regex)
-    model: str = SAFE_SHORT_STR_VALIDATION
+    model: Optional[str] = Field(
+        None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
+    agentRuntimeArn: Optional[str] = Field(
+        None, max_length=500, pattern=ARN_REGEX
+    )
     workspace: str = Field(None, max_length=512, pattern=SAFE_STR_REGEX)
     systemPrompt: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
     systemPromptRag: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
@@ -96,6 +108,7 @@ def list_applications():
                 "id": app.get("Id"),
                 "name": app.get("Name"),
                 "model": app.get("Model"),
+                "agentRuntimeArn": app.get("AgentRuntimeArn"),
                 "workspace": app.get("Workspace"),
                 "outputModalities": app.get("OutputModalities"),
                 "systemPrompt": app.get("SystemPrompt"),
@@ -150,6 +163,7 @@ def get_application(id: str):
             "id": app.get("Id"),
             "name": app.get("Name"),
             "model": app.get("Model"),
+            "agentRuntimeArn": app.get("AgentRuntimeArn"),
             "workspace": app.get("Workspace"),
             "outputModalities": app.get("OutputModalities"),
             "systemPrompt": app.get("SystemPrompt"),
@@ -224,12 +238,14 @@ def update_application(input: dict):
         request.maxTokens,
         request.temperature,
         request.topP,
+        agentRuntimeArn=request.agentRuntimeArn,
     )
 
     return {
         "id": application.get("Id"),
         "name": application.get("Name"),
         "model": application.get("Model"),
+        "agentRuntimeArn": application.get("AgentRuntimeArn"),
         "workspace": application.get("Workspace"),
         "systemPrompt": application.get("SystemPrompt"),
         "systemPromptRag": application.get("SystemPromptRag"),
@@ -265,12 +281,14 @@ def _create_application(request: CreateApplicationRequest):
         request.maxTokens,
         request.temperature,
         request.topP,
+        agentRuntimeArn=request.agentRuntimeArn,
     )
 
     return {
         "id": application.get("Id"),
         "name": application.get("Name"),
         "model": application.get("Model"),
+        "agentRuntimeArn": application.get("AgentRuntimeArn"),
         "workspace": application.get("Workspace"),
         "systemPrompt": application.get("SystemPrompt"),
         "systemPromptRag": application.get("SystemPromptRag"),

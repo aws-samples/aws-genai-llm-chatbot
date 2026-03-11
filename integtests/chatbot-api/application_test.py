@@ -134,3 +134,81 @@ def test_update_application(client: AppSyncClient):
 def test_delete_application(client: AppSyncClient):
     result = client.delete_application(pytest.application.get("id"))
     assert result == True
+
+
+# --- Agent application integration test ---
+
+AGENT_RUNTIME_ARN = "arn:aws:bedrock-agentcore:eu-central-1:481665129290:runtime/rapidRed_Agent-0S40yv5Brf"
+
+
+def test_create_agent_application(client: AppSyncClient):
+    pytest.agent_application = client.create_application(
+        input={
+            "name": "INTEG_TEST_AGENT_APP",
+            "agentRuntimeArn": AGENT_RUNTIME_ARN,
+            "roles": ["user"],
+            "allowImageInput": False,
+            "allowVideoInput": False,
+            "allowDocumentInput": False,
+            "enableGuardrails": False,
+            "streaming": True,
+            "maxTokens": 512,
+            "temperature": 0.6,
+            "topP": 0.9,
+        }
+    )
+
+    assert pytest.agent_application.get("id") is not None
+    assert pytest.agent_application.get("name") == "INTEG_TEST_AGENT_APP"
+    assert pytest.agent_application.get("agentRuntimeArn") == AGENT_RUNTIME_ARN
+
+
+def test_get_agent_application(client: AppSyncClient):
+    application = client.get_application(pytest.agent_application.get("id"))
+    assert application.get("agentRuntimeArn") == AGENT_RUNTIME_ARN
+    assert application.get("name") == "INTEG_TEST_AGENT_APP"
+
+
+def test_query_agent_application(client: AppSyncClient):
+    """Test that an agent-based application routes messages to the agent
+    and creates a session with both user and AI messages."""
+    session_id = str(uuid.uuid4())
+    request = {
+        "action": "run",
+        "modelInterface": "agent",
+        "applicationId": pytest.agent_application.get("id"),
+        "data": {
+            "mode": "chain",
+            "text": "What is 2 + 2?",
+            "images": [],
+            "documents": [],
+            "videos": [],
+            "sessionId": session_id,
+        },
+    }
+
+    client.send_query(json.dumps(request))
+
+    found = False
+    retries = 0
+    while not found and retries < 20:
+        time.sleep(5)
+        retries += 1
+        session = client.get_session(session_id)
+
+        if (
+            session is not None
+            and len(session.get("history", [])) >= 2
+            and session.get("history")[0].get("type") == "human"
+            and session.get("history")[1].get("type") == "ai"
+            and len(session.get("history")[1].get("content", "")) > 0
+        ):
+            found = True
+            break
+    client.delete_session(session_id)
+    assert found is True, f"Agent response empty or missing. Session: {session}"
+
+
+def test_delete_agent_application(client: AppSyncClient):
+    result = client.delete_application(pytest.agent_application.get("id"))
+    assert result is True
