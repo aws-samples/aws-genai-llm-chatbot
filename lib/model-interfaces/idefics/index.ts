@@ -10,6 +10,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import { CfnEndpoint } from "aws-cdk-lib/aws-sagemaker";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as appsync from "aws-cdk-lib/aws-appsync";
 import { Construct } from "constructs";
 import * as path from "path";
 import { Shared } from "../../shared";
@@ -23,6 +24,7 @@ interface IdeficsInterfaceProps {
   readonly sessionsTable: dynamodb.Table;
   readonly byUserIdIndex: string;
   readonly chatbotFilesBucket: s3.Bucket;
+  readonly graphqlApi: appsync.GraphqlApi;
 }
 
 export class IdeficsInterface extends Construct {
@@ -68,6 +70,8 @@ export class IdeficsInterface extends Construct {
           MESSAGES_TOPIC_ARN: props.messagesTopic.topicArn,
           CHATBOT_FILES_BUCKET_NAME: props.chatbotFilesBucket.bucketName,
           CHATBOT_FILES_PRIVATE_API: api?.url ?? "",
+          APPSYNC_ENDPOINT: props.graphqlApi.graphqlUrl,
+          DIRECT_SEND: props.config.directSend ? "true" : "false",
         },
       }
     );
@@ -79,7 +83,8 @@ export class IdeficsInterface extends Construct {
         })
       );
     }
-
+    props.graphqlApi.grantQuery(requestHandler);
+    props.graphqlApi.grantMutation(requestHandler);
     props.chatbotFilesBucket.grantReadWrite(requestHandler);
     props.sessionsTable.grantReadWriteData(requestHandler);
     props.messagesTopic.grantPublish(requestHandler);

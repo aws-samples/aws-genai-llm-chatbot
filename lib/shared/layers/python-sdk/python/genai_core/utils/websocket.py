@@ -4,9 +4,15 @@ import base64
 from decimal import Decimal
 
 import boto3
+
+from genai_core.utils.appsync import direct_send_to_client
+from genai_core.types import ChatbotAction
 from ..types import Direction
 
 sns = boto3.client("sns")
+
+topic_arn = os.environ["MESSAGES_TOPIC_ARN"]
+direct = os.environ.get("DIRECT_SEND", "false").lower() == "true"
 
 
 # Custom JSON encoder to handle bytes, EventStream, and other non-serializable types
@@ -29,7 +35,10 @@ def send_to_client(detail, topic_arn=None):
     if not topic_arn:
         topic_arn = os.environ["MESSAGES_TOPIC_ARN"]
 
-    sns.publish(
-        TopicArn=topic_arn,
-        Message=json.dumps(detail, cls=CustomJSONEncoder),
-    )
+    if direct and detail["action"] == ChatbotAction.LLM_NEW_TOKEN.value:
+        direct_send_to_client(detail)
+    else:
+        sns.publish(
+            TopicArn=topic_arn,
+            Message=json.dumps(detail, cls=CustomJSONEncoder),
+        )

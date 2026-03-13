@@ -79,6 +79,7 @@ export interface ModelConfig {
 
 export interface SystemConfig {
   prefix: string;
+  directSend?: boolean;
   createCMKs?: boolean;
   retainOnDelete?: boolean;
   ddbDeletionProtection?: boolean;
