@@ -60,6 +60,11 @@ class DirectModelProvider(ModelProvider, ABC):
         if azure_openai_models:
             models.extend(azure_openai_models)
 
+        # Get MiniMax models
+        minimax_models = _list_minimax_models()
+        if minimax_models:
+            models.extend(minimax_models)
+
         return models
 
     def get_embedding_models(self) -> list[dict[str, Any]]:
@@ -388,4 +393,44 @@ def _list_sagemaker_models():
             "bedrockGuardrails": model["interface"] != "multimodal",
         }
         for model in models
+    ]
+
+
+# MiniMax models use the OpenAI-compatible API at https://api.minimax.io/v1
+_MINIMAX_MODELS = [
+    {
+        "id": "MiniMax-M2.7",
+        "name": "MiniMax-M2.7",
+        "description": "MiniMax M2.7 — latest flagship model with 1M context",
+    },
+    {
+        "id": "MiniMax-M2.5",
+        "name": "MiniMax-M2.5",
+        "description": "MiniMax M2.5 — 204K context, strong reasoning",
+    },
+    {
+        "id": "MiniMax-M2.5-highspeed",
+        "name": "MiniMax-M2.5-highspeed",
+        "description": "MiniMax M2.5 high-speed variant — 204K context, faster",
+    },
+]
+
+
+def _list_minimax_models():
+    api_key = genai_core.parameters.get_external_api_key("MINIMAX_API_KEY")
+    if not api_key:
+        return None
+
+    return [
+        {
+            "provider": Provider.MINIMAX.value,
+            "name": model["id"],
+            "streaming": True,
+            "inputModalities": [Modality.TEXT.value],
+            "outputModalities": [Modality.TEXT.value],
+            "interface": ModelInterface.LANGCHAIN.value,
+            "ragSupported": True,
+            "bedrockGuardrails": False,
+        }
+        for model in _MINIMAX_MODELS
     ]
