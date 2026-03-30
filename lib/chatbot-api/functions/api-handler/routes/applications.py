@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional
 from common.constant import (
     ID_FIELD_VALIDATION,
@@ -25,7 +25,7 @@ logger = Logger()
 permissions = UserPermissions(router)
 
 name_regex = r"^[\w\s+_-]+$"
-ARN_REGEX = r"^[A-Za-z0-9-_.:/]+$"
+ARN_REGEX = r"^arn:aws(-[a-z]+)*:bedrock-agentcore:[a-z0-9-]+:\d{12}:runtime/[\w-]+$"
 
 
 class CreateApplicationRequest(BaseModel):
@@ -36,6 +36,7 @@ class CreateApplicationRequest(BaseModel):
     agentRuntimeArn: Optional[str] = Field(
         None, max_length=500, pattern=ARN_REGEX
     )
+
     workspace: str = Field(None, max_length=512, pattern=SAFE_STR_REGEX)
     systemPrompt: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
     systemPromptRag: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
@@ -51,6 +52,14 @@ class CreateApplicationRequest(BaseModel):
     maxTokens: int = Field(ge=1, le=8192)
     temperature: Decimal = Field(ge=0, le=1)
     topP: Decimal = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def check_model_or_agent(self):
+        if self.model and self.agentRuntimeArn:
+            raise ValueError("Specify either model or agentRuntimeArn, not both")
+        if not self.model and not self.agentRuntimeArn:
+            raise ValueError("Either model or agentRuntimeArn must be provided")
+        return self
 
 
 class UpdateApplicationRequest(BaseModel):
@@ -77,6 +86,14 @@ class UpdateApplicationRequest(BaseModel):
     maxTokens: int = Field(ge=1, le=8192)
     temperature: Decimal = Field(ge=0, le=1)
     topP: Decimal = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def check_model_or_agent(self):
+        if self.model and self.agentRuntimeArn:
+            raise ValueError("Specify either model or agentRuntimeArn, not both")
+        if not self.model and not self.agentRuntimeArn:
+            raise ValueError("Either model or agentRuntimeArn must be provided")
+        return self
 
 
 @router.resolver(field_name="listApplications")

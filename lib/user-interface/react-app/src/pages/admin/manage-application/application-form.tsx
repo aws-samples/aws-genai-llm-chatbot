@@ -122,14 +122,15 @@ export default function ApplicationForm(props: ApplicationFormProps) {
     }
   }, [selectedModel, models]);
 
+  const { data: propsData, onChange: propsOnChange } = props;
   useEffect(() => {
     if (!appContext?.config) return;
     const fetchApplication = async () => {
-      if (props.data && props.data.id && initialLoad) {
+      if (propsData && propsData.id && initialLoad) {
         const apiClient = new ApiClient(appContext);
         try {
           const result = await apiClient.applications.getApplication(
-            props.data.id
+            propsData.id
           );
           if (!result.data?.getApplication?.model) {
             if (!result.data?.getApplication?.agentRuntimeArn) {
@@ -150,7 +151,7 @@ export default function ApplicationForm(props: ApplicationFormProps) {
               value: agentArn,
             };
             setSelectedAgent(agentOption);
-            props.onChange({ selectedAgent: agentOption });
+            propsOnChange({ selectedAgent: agentOption });
           }
 
           if (result.data?.getApplication?.workspace) {
@@ -169,7 +170,7 @@ export default function ApplicationForm(props: ApplicationFormProps) {
     };
 
     fetchApplication();
-  }, [appContext, props.data, initialLoad]);
+  }, [appContext, propsData, propsOnChange, initialLoad]);
 
   const langchainModels = models.filter((m) => m.interface === "langchain");
   const modelsOptions = OptionsHelper.getSelectOptionGroups(langchainModels);

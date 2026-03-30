@@ -138,7 +138,7 @@ def test_delete_application(client: AppSyncClient):
 
 # --- Agent application integration test ---
 
-AGENT_RUNTIME_ARN = "arn:aws:bedrock-agentcore:eu-central-1:481665129290:runtime/rapidRed_Agent-0S40yv5Brf"
+AGENT_RUNTIME_ARN = "arn:aws:bedrock-agentcore:eu-central-1:123456789012:runtime/test-Agent-0S40yv5Brf"
 
 
 def test_create_agent_application(client: AppSyncClient):
