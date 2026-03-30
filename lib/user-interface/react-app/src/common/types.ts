@@ -108,6 +108,7 @@ export interface ApplicationManageInput {
   condenseSystemPrompt: string;
   selectedRoles: readonly SelectProps.Option[];
   selectedModel: SelectProps.Option | null;
+  selectedAgent: SelectProps.Option | null;
   selectedWorkspace: SelectProps.Option | null;
   allowImageInput: boolean;
   allowDocumentInput: boolean;
