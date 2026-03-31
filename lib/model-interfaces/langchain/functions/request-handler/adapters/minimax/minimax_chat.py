@@ -37,4 +37,4 @@ class MinimaxChatAdapter(ModelAdapter):
 
 
 # Register the adapter
-registry.register(r"^minimax*", MinimaxChatAdapter)
+registry.register(r"^minimax.*", MinimaxChatAdapter)

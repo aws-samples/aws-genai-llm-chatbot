@@ -22,7 +22,7 @@ def mock_models():
 def test_registry_matches_minimax_models():
     """Test that the registry correctly matches minimax model patterns."""
     reg = AdapterRegistry()
-    reg.register(r"^minimax*", MinimaxChatAdapter)
+    reg.register(r"^minimax.*", MinimaxChatAdapter)
 
     adapter_class = reg._get_adapter("minimax.MiniMax-M2.7")
     assert adapter_class is MinimaxChatAdapter
@@ -37,7 +37,7 @@ def test_registry_matches_minimax_models():
 def test_registry_does_not_match_other_providers():
     """Test that minimax pattern does not match other providers."""
     reg = AdapterRegistry()
-    reg.register(r"^minimax*", MinimaxChatAdapter)
+    reg.register(r"^minimax.*", MinimaxChatAdapter)
 
     with pytest.raises(ValueError):
         reg._get_adapter("openai.gpt-4")
