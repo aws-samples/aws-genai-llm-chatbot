@@ -21,6 +21,17 @@ def get_openai_client() -> Optional[Any]:
     return openai
 
 
+def get_minimax_client() -> Optional[openai.OpenAI]:
+    api_key = genai_core.parameters.get_external_api_key("MINIMAX_API_KEY")
+    if not api_key:
+        return None
+
+    return openai.OpenAI(
+        api_key=api_key,
+        base_url="https://api.minimax.io/v1",
+    )
+
+
 def get_sagemaker_client() -> Any:
     config = Config(retries={"max_attempts": 15, "mode": "adaptive"})
 
