@@ -1,3 +1,4 @@
+import genai_core.boto_config  # noqa: F401 - RevTel telemetry
 import boto3
 from botocore.exceptions import ClientError
 import os
