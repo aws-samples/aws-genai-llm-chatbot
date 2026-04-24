@@ -1,3 +1,4 @@
+import genai_core.boto_config  # noqa: F401 - RevTel telemetry
 import json
 import logging
 import boto3
