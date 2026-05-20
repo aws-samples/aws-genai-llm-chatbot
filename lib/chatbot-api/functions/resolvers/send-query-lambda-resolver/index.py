@@ -76,7 +76,7 @@ def handler(event, context: LambdaContext):
         arguments=event["arguments"],
         identify=event["identity"],
     )
-    user_roles = event.get("identity", {}).get("claims").get("cognito:groups")
+    user_roles = event.get("identity", {}).get("claims", {}).get("cognito:groups") or []
 
     request = json.loads(event["arguments"]["data"])
     if request.get("applicationId"):

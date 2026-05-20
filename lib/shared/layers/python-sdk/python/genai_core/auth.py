@@ -9,10 +9,10 @@ def get_user_id(router):
 
 def get_user_roles(router):
     user_groups = (
-        router.current_event.get("identity", {}).get("claims").get("cognito:groups")
+        router.current_event.get("identity", {}).get("claims", {}).get("cognito:groups")
     )
 
-    return user_groups
+    return user_groups or []
 
 
 class UserPermissions:
