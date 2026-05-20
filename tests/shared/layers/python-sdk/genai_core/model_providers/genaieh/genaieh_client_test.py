@@ -3,11 +3,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
-from genai_core.model_providers.nexus.nexus_client import NexusGatewayClient
-from genai_core.model_providers.nexus.types import (
+from genai_core.model_providers.genaieh.genaieh_client import GenAIEHGatewayClient
+from genai_core.model_providers.genaieh.types import (
     ApiError,
     ModelResponse,
-    NexusGatewayConfig,
+    GenAIEHGatewayConfig,
 )
 
 
@@ -15,10 +15,10 @@ from genai_core.model_providers.nexus.types import (
 def mock_config():
     return {
         "enabled": True,
-        "gatewayUrl": "https://nexus-gateway.example.com",
+        "gatewayUrl": "https://genaieh-gateway.example.com",
         "clientId": "test-client-id",
         "clientSecret": "test-client-secret",
-        "tokenUrl": "https://nexus-auth.example.com/token",
+        "tokenUrl": "https://genaieh-auth.example.com/token",
     }
 
 
@@ -56,47 +56,47 @@ def mock_models_response():
 
 
 def test_client_initialization(mock_config):
-    """Test that NexusGatewayClient initializes correctly"""
-    client = NexusGatewayClient(mock_config)
+    """Test that GenAIEHGatewayClient initializes correctly"""
+    client = GenAIEHGatewayClient(mock_config)
 
-    assert client.config.gateway_url == "https://nexus-gateway.example.com"
+    assert client.config.gateway_url == "https://genaieh-gateway.example.com"
     assert client.config.client_id == "test-client-id"
     assert client.config.client_secret == "test-client-secret"
-    assert client.config.token_url == "https://nexus-auth.example.com/token"
+    assert client.config.token_url == "https://genaieh-auth.example.com/token"
     assert client._access_token is None
     assert client._token_expiry == 0
 
 
 def test_client_initialization_with_trailing_slash(mock_config):
     """Test that trailing slash is removed from gateway URL"""
-    mock_config["gatewayUrl"] = "https://nexus-gateway.example.com/"
-    client = NexusGatewayClient(mock_config)
+    mock_config["gatewayUrl"] = "https://genaieh-gateway.example.com/"
+    client = GenAIEHGatewayClient(mock_config)
 
-    assert client.config.gateway_url == "https://nexus-gateway.example.com"
+    assert client.config.gateway_url == "https://genaieh-gateway.example.com"
 
 
 def test_client_initialization_with_missing_config():
     """Test that client handles missing configuration gracefully"""
-    error_msg = "Nexus Gateway URL is required but not configured"
+    error_msg = "GenAIEH Gateway URL is required but not configured"
     with pytest.raises(ValueError, match=error_msg):
-        NexusGatewayClient({})
+        GenAIEHGatewayClient({})
 
 
 def test_client_initialization_with_config_object():
-    """Test that client can be initialized with a NexusGatewayConfig object"""
-    config = NexusGatewayConfig(
-        gateway_url="https://nexus-gateway.example.com",
+    """Test that client can be initialized with a GenAIEHGatewayConfig object"""
+    config = GenAIEHGatewayConfig(
+        gateway_url="https://genaieh-gateway.example.com",
         client_id="test-client-id",
         client_secret="test-client-secret",
-        token_url="https://nexus-auth.example.com/token",
+        token_url="https://genaieh-auth.example.com/token",
         enabled=True,
     )
-    client = NexusGatewayClient(config)
+    client = GenAIEHGatewayClient(config)
 
-    assert client.config.gateway_url == "https://nexus-gateway.example.com"
+    assert client.config.gateway_url == "https://genaieh-gateway.example.com"
     assert client.config.client_id == "test-client-id"
     assert client.config.client_secret == "test-client-secret"
-    assert client.config.token_url == "https://nexus-auth.example.com/token"
+    assert client.config.token_url == "https://genaieh-auth.example.com/token"
     assert client.config.enabled is True
 
 
@@ -109,7 +109,7 @@ def test_get_access_token(mock_config, mock_token_response):
         mock_response.json.return_value = mock_token_response
         mock_post.return_value = mock_response
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # First call should fetch token
         token = client.get_access_token()
@@ -136,7 +136,7 @@ def test_get_access_token_force_refresh(mock_config, mock_token_response):
         mock_response.json.return_value = mock_token_response
         mock_post.return_value = mock_response
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # First call should fetch token
         token = client.get_access_token()
@@ -157,7 +157,7 @@ def test_get_access_token_error(mock_config):
         # Configure mock response for error
         mock_post.side_effect = requests.exceptions.RequestException("Connection error")
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # Call should return None on error
         token = client.get_access_token()
@@ -175,7 +175,7 @@ def test_get_access_token_invalid_response(mock_config):
         mock_response.json.return_value = {"token_type": "Bearer"}  # No access_token
         mock_post.return_value = mock_response
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # Call should return None on invalid response
         token = client.get_access_token()
@@ -202,7 +202,7 @@ def test_list_models(mock_config, mock_token_response, mock_models_response):
         models_response.json.return_value = {"models": mock_models_response}
         mock_request.return_value = models_response
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # Call list_application_models
         models = client.list_application_models()
@@ -235,7 +235,7 @@ def test_list_application_models_error(mock_config, mock_token_response):
         # Configure models response for error
         mock_request.side_effect = requests.exceptions.RequestException("API error")
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # Call should return empty list on error
         models = client.list_application_models()
@@ -263,7 +263,7 @@ def test_make_request_success(mock_config, mock_token_response):
         request_response.json.return_value = {"data": "result"}
         mock_request.return_value = request_response
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # Make request
         result = client._make_request("GET", "test/endpoint")
@@ -292,7 +292,7 @@ def test_make_request_error(mock_config, mock_token_response):
         # Configure request error
         mock_request.side_effect = requests.exceptions.RequestException("API error")
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # Make request
         result = client._make_request("GET", "test/endpoint")
@@ -321,7 +321,7 @@ def test_make_request_http_error(mock_config, mock_token_response):
         error_response.text = "Not Found"
         mock_request.return_value = error_response
 
-        client = NexusGatewayClient(mock_config)
+        client = GenAIEHGatewayClient(mock_config)
 
         # Make request
         result = client._make_request("GET", "test/endpoint")

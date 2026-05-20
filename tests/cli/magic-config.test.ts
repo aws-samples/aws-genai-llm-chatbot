@@ -106,17 +106,17 @@ describe("magic-config CLI in non-interactive mode", () => {
     expect(config.rag.engines.aurora.enabled).toBe(false);
   });
 
-  it("should configure Nexus integration when NEXUS_ENABLE is true", async () => {
-    // Set up environment variables for Nexus
+  it("should configure GenAIEH integration when GENAIEH_ENABLE is true", async () => {
+    // Set up environment variables for GenAIEH
     const env = {
       ...process.env,
       SEEDFARMER_DEPLOYMENT: "true",
       PREFIX: "test-prefix",
-      NEXUS_ENABLE: "true",
-      NEXUS_GATEWAY_URL: "https://test-gateway.example.com",
-      NEXUS_AUTH_CLIENT_ID: "test-client-id",
-      NEXUS_AUTH_CLIENT_SECRET: "test-client-secret",
-      NEXUS_AUTH_TOKEN_URL: "https://test-token.example.com",
+      GENAIEH_ENABLE: "true",
+      GENAIEH_GATEWAY_URL: "https://test-gateway.example.com",
+      GENAIEH_AUTH_CLIENT_ID: "test-client-id",
+      GENAIEH_AUTH_CLIENT_SECRET: "test-client-secret",
+      GENAIEH_AUTH_TOKEN_URL: "https://test-token.example.com",
     };
 
     // Run the CLI in non-interactive mode
@@ -126,12 +126,12 @@ describe("magic-config CLI in non-interactive mode", () => {
     const configContent = fs.readFileSync(TEST_CONFIG_PATH, "utf-8");
     const config: SystemConfig = JSON.parse(configContent);
 
-    // Verify Nexus configuration
-    expect(config.nexus?.enabled).toBe(true);
-    expect(config.nexus?.gatewayUrl).toBe("https://test-gateway.example.com");
-    expect(config.nexus?.clientId).toBe("test-client-id");
-    expect(config.nexus?.clientSecret).toBe("test-client-secret");
-    expect(config.nexus?.tokenUrl).toBe("https://test-token.example.com");
+    // Verify GenAIEH configuration
+    expect(config.genaieh?.enabled).toBe(true);
+    expect(config.genaieh?.gatewayUrl).toBe("https://test-gateway.example.com");
+    expect(config.genaieh?.clientId).toBe("test-client-id");
+    expect(config.genaieh?.clientSecret).toBe("test-client-secret");
+    expect(config.genaieh?.tokenUrl).toBe("https://test-token.example.com");
   });
 
   it("should handle boolean environment variables correctly", async () => {
@@ -177,10 +177,10 @@ describe("magic-config CLI in non-interactive mode", () => {
       RAG_OPENSEARCH_ENABLE: "true",
       RAG_AURORA_ENABLE: "true",
       RAG_KENDRA_ENABLE: "false",
-      NEXUS_ENABLE: "true",
-      NEXUS_GATEWAY_URL: "https://test-gateway.example.com",
-      NEXUS_AUTH_CLIENT_ID: "test-client-id",
-      NEXUS_AUTH_CLIENT_SECRET: "test-client-secret",
+      GENAIEH_ENABLE: "true",
+      GENAIEH_GATEWAY_URL: "https://test-gateway.example.com",
+      GENAIEH_AUTH_CLIENT_ID: "test-client-id",
+      GENAIEH_AUTH_CLIENT_SECRET: "test-client-secret",
       ADVANCED_MONITORING: "true",
       LOG_RETENTION: "14",
       RATE_LIMIT_PER_IP: "500",
@@ -208,9 +208,9 @@ describe("magic-config CLI in non-interactive mode", () => {
     expect(config.rag.engines.aurora.enabled).toBe(true);
     expect(config.rag.engines.kendra.enabled).toBe(false);
 
-    // Nexus config
-    expect(config.nexus?.enabled).toBe(true);
-    expect(config.nexus?.gatewayUrl).toBe("https://test-gateway.example.com");
+    // GenAIEH config
+    expect(config.genaieh?.enabled).toBe(true);
+    expect(config.genaieh?.gatewayUrl).toBe("https://test-gateway.example.com");
 
     // Advanced settings
     expect(config.advancedMonitoring).toBe(true);

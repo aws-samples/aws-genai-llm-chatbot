@@ -1,6 +1,6 @@
 {
   "name": "@awssolutions/aws-genai-llm-chatbot",
-  "description": "Enterprise-ready generative AI chatbot solution with Retrieval Augmented Generation (RAG) capabilities. Supports multiple LLM providers including Amazon Bedrock, SageMaker, and Nexus Gateway. Features comprehensive RAG implementation, conversation memory, enterprise security, and a modern React interface. Deployable via AWS CDK with flexible configuration options.",
+  "description": "Enterprise-ready generative AI chatbot solution with Retrieval Augmented Generation (RAG) capabilities. Supports multiple LLM providers including Amazon Bedrock, SageMaker, and GenAIEH Gateway. Features comprehensive RAG implementation, conversation memory, enterprise security, and a modern React interface. Deployable via AWS CDK with flexible configuration options.",
   "version": "5.0.0",
   "bin": {
     "aws-genai-llm-chatbot": "bin/aws-genai-llm-chatbot.js"
@@ -28,11 +28,11 @@
     "test-all": "npm run test && npm run pytest",
     "integtest": "pytest integtests/",
     "test:integration": "python -m pytest tests/integration/ -xvs",
-    "test:integration:beta": "source .env.beta && python -m pytest tests/integration/nexus/test_nexus_model_transform.py tests/integration/nexus/test_graphql_integration.py -vs",
-    "test:nexus": "source .env.beta && NEXUS_ENABLE=true python -m pytest tests/integration/nexus/ -xvs",
-    "test:nexus:beta": "source .env.beta && python -m pytest tests/integration/nexus/ -xvs",
-    "test:nexus:alpha": "source .env.alpha &&python -m pytest tests/integration/nexus/ -xvs",
-    "test:nexus:transform": "source .env.beta && python -m pytest tests/integration/nexus/test_nexus_model_transform.py tests/integration/nexus/test_graphql_integration.py -v",
+    "test:integration:beta": "source .env.beta && python -m pytest tests/integration/genaieh/test_genaieh_model_transform.py tests/integration/genaieh/test_graphql_integration.py -vs",
+    "test:genaieh": "source .env.beta && GENAIEH_ENABLE=true python -m pytest tests/integration/genaieh/ -xvs",
+    "test:genaieh:beta": "source .env.beta && python -m pytest tests/integration/genaieh/ -xvs",
+    "test:genaieh:alpha": "source .env.alpha &&python -m pytest tests/integration/genaieh/ -xvs",
+    "test:genaieh:transform": "source .env.beta && python -m pytest tests/integration/genaieh/test_genaieh_model_transform.py tests/integration/genaieh/test_graphql_integration.py -v",
     "gen": "amplify codegen",
     "create": "node ./dist/cli/magic.js config",
     "config": "node ./dist/cli/magic.js config",

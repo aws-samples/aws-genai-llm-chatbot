@@ -6,7 +6,7 @@
     "enabled": false,
     "region": "us-east-1"
   },
-  "nexus": {
+  "genaieh": {
     "enabled": false,
     "gatewayUrl": "",
     "tokenUrl": "",

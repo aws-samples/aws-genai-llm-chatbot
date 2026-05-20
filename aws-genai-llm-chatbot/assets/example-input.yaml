@@ -27,10 +27,10 @@ RAG_ENABLE: false          # Enable RAG capabilities
 # RAG_KNOWLEDGE_BASE_ENABLE: false # Enable Knowledge Base as RAG engine
 # RAG_CROSS_ENCODING_ENABLE: false # Enable cross-encoding for RAG
 
-# Nexus integration (if needed)
+# GenAIEH integration (if needed)
 # ------------------------------
-NEXUS_ENABLE: false      # Enable Nexus integration
-# NEXUS_GATEWAY_URL: https://your-nexus-gateway.example.com # Nexus Gateway URL
-# NEXUS_AUTH_CLIENT_ID: client-12345    # Nexus Auth Client ID
-# NEXUS_AUTH_CLIENT_SECRET: secret-xyz  # Nexus Auth Client Secret
-# NEXUS_AUTH_TOKEN_URL: https://your-token-url.example.com  # Nexus Auth Token URL
+GENAIEH_ENABLE: false      # Enable GenAIEH integration
+# GENAIEH_GATEWAY_URL: https://your-genaieh-gateway.example.com # GenAIEH Gateway URL
+# GENAIEH_AUTH_CLIENT_ID: client-12345    # GenAIEH Auth Client ID
+# GENAIEH_AUTH_CLIENT_SECRET: secret-xyz  # GenAIEH Auth Client Secret
+# GENAIEH_AUTH_TOKEN_URL: https://your-token-url.example.com  # GenAIEH Auth Token URL

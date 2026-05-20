@@ -1,15 +1,15 @@
-"""Tests for Nexus OpenAI Chat Adapter."""
+"""Tests for GenAIEH OpenAI Chat Adapter."""
 
 import pytest
 import json
 from unittest.mock import Mock
-from adapters.nexus.openai_chat import NexusOpenAIChatAdapter
-from genai_core.model_providers.nexus.types import ApiError
+from adapters.genaieh.openai_chat import GenAIEHOpenAIChatAdapter
+from genai_core.model_providers.genaieh.types import ApiError
 
 
 @pytest.fixture
-def mock_nexus_client():
-    """Mock Nexus Gateway client for OpenAI."""
+def mock_genaieh_client():
+    """Mock GenAIEH Gateway client for OpenAI."""
     client = Mock()
     client.invoke_openai_chat.return_value = json.dumps(
         {
@@ -28,20 +28,20 @@ def mock_nexus_client():
 
 
 @pytest.fixture
-def openai_adapter(mock_nexus_client):
+def openai_adapter(mock_genaieh_client):
     """Create OpenAI chat adapter with mocked dependencies."""
-    adapter = NexusOpenAIChatAdapter(
+    adapter = GenAIEHOpenAIChatAdapter(
         model_id="gpt-4", session_id="test-session", user_id="test-user"
     )
     adapter.chat_history = Mock()
     adapter.chat_history.messages = []
-    adapter._nexus_client = mock_nexus_client
+    adapter._genaieh_client = mock_genaieh_client
     return adapter
 
 
 def test_openai_adapter_initialization():
     """Test OpenAI chat adapter initialization."""
-    adapter = NexusOpenAIChatAdapter(
+    adapter = GenAIEHOpenAIChatAdapter(
         model_id="gpt-4", session_id="test-session", user_id="test-user"
     )
     assert adapter.model_id == "gpt-4"
@@ -50,7 +50,7 @@ def test_openai_adapter_initialization():
     assert adapter.model_kwargs.get("streaming") is True
 
 
-def test_successful_openai_chat_request(openai_adapter, mock_nexus_client):
+def test_successful_openai_chat_request(openai_adapter, mock_genaieh_client):
     """Test successful OpenAI chat request."""
     # Disable streaming for this test
     openai_adapter.model_kwargs["streaming"] = False
@@ -66,10 +66,10 @@ def test_successful_openai_chat_request(openai_adapter, mock_nexus_client):
     assert response["type"] == "text"
     assert response["content"] == "Test OpenAI response"
     assert response["sessionId"] == "test-session"
-    mock_nexus_client.invoke_openai_chat.assert_called_once()
+    mock_genaieh_client.invoke_openai_chat.assert_called_once()
 
 
-def test_successful_openai_streaming_request(openai_adapter, mock_nexus_client):
+def test_successful_openai_streaming_request(openai_adapter, mock_genaieh_client):
     """Test successful OpenAI streaming chat request."""
     # Mock callback handler properly
     openai_adapter.callback_handler = Mock()
@@ -82,12 +82,12 @@ def test_successful_openai_streaming_request(openai_adapter, mock_nexus_client):
     assert response["type"] == "text"
     assert response["content"] == "Test OpenAI streaming response"
     assert response["sessionId"] == "test-session"
-    mock_nexus_client.invoke_openai_stream_chat.assert_called_once()
+    mock_genaieh_client.invoke_openai_stream_chat.assert_called_once()
 
 
-def test_openai_api_error_handling(openai_adapter, mock_nexus_client):
+def test_openai_api_error_handling(openai_adapter, mock_genaieh_client):
     """Test OpenAI API error handling."""
-    mock_nexus_client.invoke_openai_chat.return_value = ApiError(
+    mock_genaieh_client.invoke_openai_chat.return_value = ApiError(
         error_type="HTTP 429", message="Rate limit exceeded. Please try again later."
     )
 
@@ -100,9 +100,9 @@ def test_openai_api_error_handling(openai_adapter, mock_nexus_client):
     assert "Rate limit exceeded" in response["content"]
 
 
-def test_openai_streaming_api_error_handling(openai_adapter, mock_nexus_client):
+def test_openai_streaming_api_error_handling(openai_adapter, mock_genaieh_client):
     """Test OpenAI streaming API error handling."""
-    mock_nexus_client.invoke_openai_stream_chat.return_value = ApiError(
+    mock_genaieh_client.invoke_openai_stream_chat.return_value = ApiError(
         error_type="HTTP 500", message="Internal server error"
     )
 
@@ -175,7 +175,7 @@ def test_openai_process_streaming_response(openai_adapter):
     assert openai_adapter.on_llm_new_token.call_count == 3
 
 
-def test_openai_conversation_history_handling(openai_adapter, mock_nexus_client):
+def test_openai_conversation_history_handling(openai_adapter, mock_genaieh_client):
     """Test conversation history handling in OpenAI requests."""
     # Test that conversation history is properly retrieved and formatted
     # For this test, we'll mock the get_conversation_history method directly
@@ -196,8 +196,8 @@ def test_openai_conversation_history_handling(openai_adapter, mock_nexus_client)
     openai_adapter.run(prompt="New message")
 
     # Verify the request was made with conversation history
-    mock_nexus_client.invoke_openai_chat.assert_called_once()
-    call_args = mock_nexus_client.invoke_openai_chat.call_args[1]
+    mock_genaieh_client.invoke_openai_chat.assert_called_once()
+    call_args = mock_genaieh_client.invoke_openai_chat.call_args[1]
     messages = call_args["body"]["messages"]
 
     # Should have 3 messages: 2 from history + 1 new (converted to OpenAI format)
@@ -214,7 +214,7 @@ def test_openai_conversation_history_handling(openai_adapter, mock_nexus_client)
     assert messages[2]["content"] == "New message"
 
 
-def test_openai_system_prompt_handling(openai_adapter, mock_nexus_client):
+def test_openai_system_prompt_handling(openai_adapter, mock_genaieh_client):
     """Test system prompt handling in OpenAI requests."""
     openai_adapter.model_kwargs["streaming"] = False
 
@@ -222,7 +222,7 @@ def test_openai_system_prompt_handling(openai_adapter, mock_nexus_client):
         prompt="Hello", system_prompts={"system_prompt": "You are a helpful assistant"}
     )
 
-    call_args = mock_nexus_client.invoke_openai_chat.call_args[1]
+    call_args = mock_genaieh_client.invoke_openai_chat.call_args[1]
     request_body = call_args["body"]
 
     # OpenAI uses messages format, system prompt should be in the request body
@@ -231,7 +231,7 @@ def test_openai_system_prompt_handling(openai_adapter, mock_nexus_client):
     # which adds it to the message body structure
 
 
-def test_openai_token_usage_logging(openai_adapter, mock_nexus_client):
+def test_openai_token_usage_logging(openai_adapter, mock_genaieh_client):
     """Test token usage logging for OpenAI responses."""
     openai_adapter.callback_handler = Mock()
     openai_adapter.callback_handler.prompts = []
@@ -239,7 +239,7 @@ def test_openai_token_usage_logging(openai_adapter, mock_nexus_client):
     openai_adapter.model_kwargs["streaming"] = False
 
     # Mock response with usage data - return dict instead of JSON string
-    mock_nexus_client.invoke_openai_chat.return_value = {
+    mock_genaieh_client.invoke_openai_chat.return_value = {
         "choices": [{"message": {"content": "Test response"}}],
         "usage": {"total_tokens": 150, "prompt_tokens": 50, "completion_tokens": 100},
     }

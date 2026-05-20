@@ -1,1 +1,0 @@
-# Nexus adapter tests

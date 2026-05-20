@@ -120,7 +120,7 @@ env-vars = {"PYTHONPATH" = "{root}:{root}/lib/shared/layers/python-sdk/python"}
 run = "pytest {args:tests}"
 coverage = "pytest --cov=lib {args:tests}"
 
-[tool.hatch.envs.nexus]
+[tool.hatch.envs.genaieh]
 python = "3.9"
 features = []
 dependencies = [
@@ -133,19 +133,19 @@ dependencies = [
 ]
 env-vars = {"PYTHONPATH" = "{root}:{root}/lib/shared/layers/python-sdk/python"}
 
-[tool.hatch.envs.nexus.scripts]
+[tool.hatch.envs.genaieh.scripts]
 # Define helper scripts that output the paths
-nexus-src-paths = "echo lib/shared/layers/python-sdk/python/genai_core/model_providers lib/shared/layers/python-sdk/python/genai_core/models.py lib/shared/layers/python-sdk/python/genai_core/clients.py lib/chatbot-api/functions/api-handler/routes/models.py"
-nexus-test-paths = "echo tests/shared/layers/python-sdk/genai_core/model_providers"
-nexus-all-paths = "echo $(hatch -e nexus run nexus-src-paths) $(hatch -e nexus run nexus-test-paths)"
+genaieh-src-paths = "echo lib/shared/layers/python-sdk/python/genai_core/model_providers lib/shared/layers/python-sdk/python/genai_core/models.py lib/shared/layers/python-sdk/python/genai_core/clients.py lib/chatbot-api/functions/api-handler/routes/models.py"
+genaieh-test-paths = "echo tests/shared/layers/python-sdk/genai_core/model_providers"
+genaieh-all-paths = "echo $(hatch -e genaieh run genaieh-src-paths) $(hatch -e genaieh run genaieh-test-paths)"
 
 # Use the helper scripts in the main commands
 lint = [
-  "ruff check $(hatch -e nexus run nexus-all-paths) --fix",
-  "mypy $(hatch -e nexus run nexus-src-paths)"
+  "ruff check $(hatch -e genaieh run genaieh-all-paths) --fix",
+  "mypy $(hatch -e genaieh run genaieh-src-paths)"
 ]
-format = "ruff format $(hatch -e nexus run nexus-all-paths)"
-test = "pytest $(hatch -e nexus run nexus-test-paths)"
+format = "ruff format $(hatch -e genaieh run genaieh-all-paths)"
+test = "pytest $(hatch -e genaieh run genaieh-test-paths)"
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"

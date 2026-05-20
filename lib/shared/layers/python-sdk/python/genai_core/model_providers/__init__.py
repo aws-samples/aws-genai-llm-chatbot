@@ -14,19 +14,19 @@ def get_model_provider() -> ModelProvider:
     """
     # Import here to avoid circular imports
     from .direct.provider import DirectModelProvider
-    from .nexus import NexusModelProvider
+    from .genaieh import GenAIEHModelProvider
 
-    return NexusModelProvider() if _is_nexus_enabled() else DirectModelProvider()
+    return GenAIEHModelProvider() if _is_genaieh_enabled() else DirectModelProvider()
 
 
-def _is_nexus_enabled() -> bool:
+def _is_genaieh_enabled() -> bool:
     """
-    Check if Nexus integration is enabled in the configuration
+    Check if GenAIEH integration is enabled in the configuration
 
     Returns:
-        bool: True if Nexus is enabled, False otherwise
+        bool: True if GenAIEH is enabled, False otherwise
     """
     config = parameters.get_config()
-    nexus_config = config.get("nexus", {})
+    genaieh_config = config.get("genaieh", {})
 
-    return bool(nexus_config.get("enabled", False))
+    return bool(genaieh_config.get("enabled", False))

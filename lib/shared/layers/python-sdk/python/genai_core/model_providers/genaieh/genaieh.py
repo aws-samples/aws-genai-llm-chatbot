@@ -1,5 +1,5 @@
 """
-Nexus Gateway provider implementation.
+GenAIEH Gateway provider implementation.
 """
 
 import logging
@@ -10,40 +10,40 @@ from typing import Any, Optional, Union
 from genai_core.types import EmbeddingsModel, Provider, ModelInterface
 
 from .. import ModelProvider
-from .nexus_client import get_nexus_gateway_client
+from .genaieh_client import get_genaieh_gateway_client
 from .types import ModelResponse
 
 logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)
-def _nexus_client():
-    """Get cached Nexus Gateway client."""
-    return get_nexus_gateway_client()
+def _genaieh_client():
+    """Get cached GenAIEH Gateway client."""
+    return get_genaieh_gateway_client()
 
 
-class NexusModelProvider(ModelProvider, ABC):
-    """Provider for accessing models through the Nexus Gateway"""
+class GenAIEHModelProvider(ModelProvider, ABC):
+    """Provider for accessing models through the GenAIEH Gateway"""
 
     def list_models(self) -> list[dict[str, Any]]:
         """
-        list all available models from the Nexus Gateway
+        list all available models from the GenAIEH Gateway
 
         Returns:
             list of model information dictionaries
         """
         try:
             # Get models from the client
-            client = _nexus_client()
+            client = _genaieh_client()
             if client is None:
                 return []
 
             models = client.list_application_models()
 
             # Transform models to the expected format
-            return [_transform_nexus_model(model) for model in models]
+            return [_transform_genaieh_model(model) for model in models]
         except Exception as e:
-            logger.error(f"Error listing models from Nexus Gateway: {e!s}")
+            logger.error(f"Error listing models from GenAIEH Gateway: {e!s}")
             return []
 
     def get_model_modalities(self, model_name: str) -> list[str]:
@@ -102,14 +102,14 @@ class NexusModelProvider(ModelProvider, ABC):
             return []
 
 
-def _transform_nexus_model(
+def _transform_genaieh_model(
     model: Union[dict[str, Any], ModelResponse]
 ) -> dict[str, Any]:
     """
-    Transform a Nexus model to the format expected by the application
+    Transform a GenAIEH model to the format expected by the application
 
     Args:
-        model: Nexus model data
+        model: GenAIEH model data
 
     Returns:
         Transformed model data
@@ -123,7 +123,7 @@ def _transform_nexus_model(
     # Extract provider information
     provider_info = model_dict.get("modelProvider", {})
     provider_name = provider_info.get("modelProviderName", None)
-    provider_name = f"nexus.{provider_name}" if provider_name else "nexus"
+    provider_name = f"genaieh.{provider_name}" if provider_name else "genaieh"
     provider_model_name = provider_info.get("model", model_name)
 
     # Determine model mode

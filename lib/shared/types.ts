@@ -1,6 +1,6 @@
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 
-export type ModelProvider = "sagemaker" | "bedrock" | "openai" | "nexus";
+export type ModelProvider = "sagemaker" | "bedrock" | "openai" | "genaieh";
 
 export enum SupportedSageMakerModels {
   FalconLite = "FalconLite [ml.g5.12xlarge]",
@@ -127,7 +127,7 @@ export interface SystemConfig {
       agentAliasId?: string;
     };
   };
-  nexus?: {
+  genaieh?: {
     enabled?: boolean;
     gatewayUrl?: string;
     tokenUrl?: string;

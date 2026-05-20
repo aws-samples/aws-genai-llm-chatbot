@@ -21,17 +21,17 @@ parameters:
     required: true
   - name: RAG_OPENSEARCH_ENABLE
     value: ${RAG_OPENSEARCH_ENABLE}
-  - name: NEXUS_ENABLE
-    value: ${NEXUS_ENABLE}
+  - name: GENAIEH_ENABLE
+    value: ${GENAIEH_ENABLE}
     required: true
-  - name: NEXUS_GATEWAY_URL
-    value: ${NEXUS_GATEWAY_URL}
-  - name: NEXUS_AUTH_CLIENT_ID
-    value: ${NEXUS_AUTH_CLIENT_ID}
-  - name: NEXUS_AUTH_CLIENT_SECRET
-    value: ${NEXUS_AUTH_CLIENT_SECRET}
-  - name: NEXUS_AUTH_TOKEN_URL
-    value: ${NEXUS_AUTH_TOKEN_URL}
+  - name: GENAIEH_GATEWAY_URL
+    value: ${GENAIEH_GATEWAY_URL}
+  - name: GENAIEH_AUTH_CLIENT_ID
+    value: ${GENAIEH_AUTH_CLIENT_ID}
+  - name: GENAIEH_AUTH_CLIENT_SECRET
+    value: ${GENAIEH_AUTH_CLIENT_SECRET}
+  - name: GENAIEH_AUTH_TOKEN_URL
+    value: ${GENAIEH_AUTH_TOKEN_URL}
 deploy:
   stack: ${PREFIX}-chatbot
 outputs:

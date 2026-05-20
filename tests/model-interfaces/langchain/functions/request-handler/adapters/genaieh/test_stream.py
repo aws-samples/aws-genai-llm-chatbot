@@ -1,14 +1,14 @@
-"""Tests for Nexus Chat Adapter for streaming models"""
+"""Tests for GenAIEH Chat Adapter for streaming models"""
 
 import pytest
 from unittest.mock import Mock, call
-from adapters.nexus.bedrock_chat import NexusChatAdapter
-from genai_core.model_providers.nexus.types import ApiError
+from adapters.genaieh.bedrock_chat import GenAIEHChatAdapter
+from genai_core.model_providers.genaieh.types import ApiError
 
 
 @pytest.fixture
-def mock_nexus_client():
-    """Mock Nexus Gateway client."""
+def mock_genaieh_client():
+    """Mock GenAIEH Gateway client."""
     client = Mock()
     client.invoke_bedrock_converse_stream.return_value = {
         "stream": [
@@ -23,41 +23,41 @@ def mock_nexus_client():
 
 
 @pytest.fixture
-def stream_adapter(mock_nexus_client):
+def stream_adapter(mock_genaieh_client):
     """Create streaming adapter with mocked dependencies."""
-    adapter = NexusChatAdapter(
+    adapter = GenAIEHChatAdapter(
         model_id="test-model", session_id="test-session", user_id="test-user"
     )
     adapter.chat_history = Mock()
     adapter.chat_history.messages = []
     adapter.disable_streaming = False
     adapter.model_kwargs = {"streaming": True}
-    adapter._nexus_client = mock_nexus_client
+    adapter._genaieh_client = mock_genaieh_client
     return adapter
 
 
-def test_streaming_request(stream_adapter, mock_nexus_client):
+def test_streaming_request(stream_adapter, mock_genaieh_client):
     """Test streaming request processing."""
     response = stream_adapter.run(prompt="Hello")
 
     assert response["type"] == "text"
     assert "Hello" in response["content"] and "world" in response["content"]
-    mock_nexus_client.invoke_bedrock_converse_stream.assert_called_once()
+    mock_genaieh_client.invoke_bedrock_converse_stream.assert_called_once()
 
 
-def test_fallback_to_non_streaming(stream_adapter, mock_nexus_client):
+def test_fallback_to_non_streaming(stream_adapter, mock_genaieh_client):
     """Test fallback to non-streaming when disabled."""
     stream_adapter.disable_streaming = True
 
     response = stream_adapter.run(prompt="Hello")
 
     assert response["content"] == "Fallback response"
-    mock_nexus_client.invoke_bedrock_converse.assert_called_once()
+    mock_genaieh_client.invoke_bedrock_converse.assert_called_once()
 
 
-def test_streaming_error_handling(stream_adapter, mock_nexus_client):
+def test_streaming_error_handling(stream_adapter, mock_genaieh_client):
     """Test streaming error handling."""
-    mock_nexus_client.invoke_bedrock_converse_stream.return_value = ApiError(
+    mock_genaieh_client.invoke_bedrock_converse_stream.return_value = ApiError(
         error_type="HTTP 500",
         message="""The service is temporarily unavailable.
         Please try again in a few moments.""",
@@ -70,7 +70,7 @@ def test_streaming_error_handling(stream_adapter, mock_nexus_client):
 
 
 def test_on_llm_new_token_called_with_streaming_tokens(
-    stream_adapter, mock_nexus_client
+    stream_adapter, mock_genaieh_client
 ):
     """Test that on_llm_new_token is called with each streaming token."""
     # Mock the on_llm_new_token method to track calls
