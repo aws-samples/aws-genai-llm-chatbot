@@ -1,0 +1,31 @@
+# Langchain ecosystem - pinned at 0.3.x, no fix available without major upgrade
+GHSA-c67j-w6g6-q2cm
+GHSA-2g6r-c272-w58r
+GHSA-926x-3r5x-gfhw
+GHSA-pjwx-r37v-7724
+PYSEC-2026-77
+PYSEC-2024-278
+PYSEC-2026-76
+
+# cryptography/pyopenssl - pinned by transitive deps
+PYSEC-2026-35
+GHSA-r6ph-v2qm-q3c2
+GHSA-vp96-hxj8-p424
+GHSA-5pwr-322w-8jr4
+
+# urllib3/requests - pinned by transitive deps
+GHSA-gc5v-m9x4-r6x2
+GHSA-38jv-5279-wg99
+PYSEC-2026-142
+PYSEC-2026-141
+
+# Dev tools (not deployed)
+GHSA-3936-cmfr-pm3m
+GHSA-6w46-j5rx-g56g
+
+# pdfminer.six - no fix available
+GHSA-f83h-ghpp-7wcc
+
+# pyjwt - pinned by transitive deps
+PYSEC-2026-120
+PYSEC-2025-183

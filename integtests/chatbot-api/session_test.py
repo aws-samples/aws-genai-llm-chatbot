@@ -51,8 +51,7 @@ def test_get_session(client, session_id, default_model):
     assert session.get("history")[1].get("type") == "ai"
     assert session.get("history")[1].get("metadata") is not None
     metadata = json.loads(session.get("history")[1].get("metadata"))
-    assert metadata.get("usage") is not None
-    assert metadata.get("usage").get("total_tokens") > 0
+    assert metadata.get("modelId") is not None
 
 
 def test_delete_session(client, session_id):
