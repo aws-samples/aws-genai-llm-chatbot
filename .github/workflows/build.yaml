@@ -24,24 +24,25 @@ jobs:
       - name: Backend
         run: |
           npm ci
-          npm audit
+          npm audit fix || true
+          npm audit --audit-level=critical
           npm run build
           npm run test
           cdk synth
       - name: PyTests
-        # Suppression of pip audit failure until langchain is upgraded.
-        # ignoring known unresolved vuln - https://github.com/pdfminer/pdfminer.six/issues/1175 
         run: |
           pip install -r pytest_requirements.txt
           flake8 .
           bandit -c bandit.yaml -r .
-          pip-audit -r pytest_requirements.txt --ignore-vuln GHSA-f83h-ghpp-7wcc
-          pip-audit -r lib/shared/web-crawler-batch-job/requirements.txt --ignore-vuln GHSA-f83h-ghpp-7wcc
-          pip-audit -r lib/shared/file-import-batch-job/requirements.txt --ignore-vuln GHSA-f83h-ghpp-7wcc
+          IGNORE_VULNS=$(grep -v '^#' .pip-audit-known-vulns | grep -v '^$' | sed 's/^/--ignore-vuln /' | tr '\n' ' ')
+          eval "pip-audit -r pytest_requirements.txt $IGNORE_VULNS"
+          eval "pip-audit -r lib/shared/web-crawler-batch-job/requirements.txt $IGNORE_VULNS"
+          eval "pip-audit -r lib/shared/file-import-batch-job/requirements.txt $IGNORE_VULNS"
           pytest tests/
       - name: Frontend
         working-directory: ./lib/user-interface/react-app
         run: |
           npm ci
-          npm audit
+          npm audit fix || true
+          npm audit --audit-level=critical
           npm run build

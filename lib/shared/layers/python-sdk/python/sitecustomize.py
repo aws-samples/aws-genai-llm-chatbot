@@ -1,4 +1,5 @@
 """Site customization - automatically imported by Python on startup."""
+
 # This file is automatically imported by Python before any user code runs
 # Perfect place to set up telemetry that needs to be active before boto3 is used
 
