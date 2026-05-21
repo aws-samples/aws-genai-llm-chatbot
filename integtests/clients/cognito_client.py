@@ -49,9 +49,10 @@ class CognitoClient:
                 MessageAction="SUPPRESS",
             )
 
-            response = self.cognito_idp_client.admin_add_user_to_group(
-                UserPoolId=self.user_pool_id, Username=email, GroupName=role
-            )
+        # Always ensure user is in the correct group
+        self.cognito_idp_client.admin_add_user_to_group(
+            UserPoolId=self.user_pool_id, Username=email, GroupName=role
+        )
 
         password = self.get_password()
         self.cognito_idp_client.admin_set_user_password(

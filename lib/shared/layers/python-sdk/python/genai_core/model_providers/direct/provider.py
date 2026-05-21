@@ -175,7 +175,8 @@ def _create_bedrock_model_profile(bedrock_model: dict, model_name: str) -> dict:
     }
 
     if _does_model_support_documents(model["name"]):
-        model["inputModalities"].append("DOCUMENT")
+        if "DOCUMENT" not in model["inputModalities"]:
+            model["inputModalities"].append("DOCUMENT")
     return model
 
 

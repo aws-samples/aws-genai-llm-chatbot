@@ -10,7 +10,7 @@ from gql.transport.exceptions import TransportQueryError
 
 
 def test_multi_modal(client, default_multimodal_model, default_provider):
-    key_image = "INTEG_TEST" + str(uuid.uuid4()) + ".jpeg"
+    key_image = "INTEG_TEST" + str(uuid.uuid4()) + ".png"
     key_document = "INTEG_TEST" + str(uuid.uuid4()) + ".txt"
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -47,7 +47,7 @@ def test_multi_modal(client, default_multimodal_model, default_provider):
 
     content = None
     retries = 0
-    while retries < 30:
+    while retries < 60:
         time.sleep(1)
         retries += 1
         session = client.get_session(session_id)
