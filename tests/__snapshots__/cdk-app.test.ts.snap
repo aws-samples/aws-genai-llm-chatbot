@@ -642,8 +642,49 @@ exports[`snapshot test with CMK 1`] = `
           ],
         },
       },
+      "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
+      },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "BedrockAgentsInterfaceIngestionDLQPolicy50A62F61": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BedrockAgentsInterfaceIngestionDLQ5FCC542B",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "BedrockAgentsInterfaceIngestionDLQ5FCC542B",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
     "BedrockAgentsInterfaceIngestionQueueDA7BCA4C": {
       "DeletionPolicy": "Delete",
@@ -658,6 +699,12 @@ exports[`snapshot test with CMK 1`] = `
         },
       },
       "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::GetAtt": [
+            "SharedKMSKey7BCBB616",
+            "Arn",
+          ],
+        },
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
@@ -676,6 +723,24 @@ exports[`snapshot test with CMK 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BedrockAgentsInterfaceIngestionQueueDA7BCA4C",
+                  "Arn",
+                ],
+              },
+            },
             {
               "Action": "sqs:SendMessage",
               "Condition": {
@@ -917,6 +982,16 @@ exports[`snapshot test with CMK 1`] = `
               "Resource": {
                 "Fn::GetAtt": [
                   "BedrockAgentsInterfaceIngestionQueueDA7BCA4C",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SharedKMSKey7BCBB616",
                   "Arn",
                 ],
               },
@@ -19649,6 +19724,17 @@ schema {
                     "Arn",
                   ],
                 },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
               },
               "Resource": "*",
             },

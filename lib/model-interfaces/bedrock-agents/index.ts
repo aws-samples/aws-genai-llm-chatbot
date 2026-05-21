@@ -35,10 +35,20 @@ export class BedrockAgentsInterface extends Construct {
     const ingestionQueue = new sqs.Queue(this, "IngestionQueue", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       visibilityTimeout: cdk.Duration.minutes(16),
+      encryption: props.shared.kmsKey
+        ? sqs.QueueEncryption.KMS
+        : sqs.QueueEncryption.SQS_MANAGED,
+      encryptionMasterKey: props.shared.kmsKey,
+      enforceSSL: true,
       deadLetterQueue: {
         maxReceiveCount: 3,
         queue: new sqs.Queue(this, "IngestionDLQ", {
           removalPolicy: cdk.RemovalPolicy.DESTROY,
+          encryption: props.shared.kmsKey
+            ? sqs.QueueEncryption.KMS
+            : sqs.QueueEncryption.SQS_MANAGED,
+          encryptionMasterKey: props.shared.kmsKey,
+          enforceSSL: true,
         }),
       },
     });
