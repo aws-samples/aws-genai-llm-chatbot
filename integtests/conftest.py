@@ -70,7 +70,7 @@ def unauthenticated_client(config):
 
 @pytest.fixture(scope="session")
 def default_model():
-    return "anthropic.claude-3-haiku-20240307-v1:0"
+    return "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 
 
 @pytest.fixture(scope="session")
@@ -80,7 +80,7 @@ def default_embed_model():
 
 @pytest.fixture(scope="session")
 def default_multimodal_model():
-    return "anthropic.claude-3-haiku-20240307-v1:0"
+    return "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 
 
 @pytest.fixture(scope="session")
