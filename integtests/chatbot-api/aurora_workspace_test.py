@@ -101,9 +101,10 @@ def test_add_rss(client: AppSyncClient):
     assert ready == True
 
     # Wait for at least one each post to be processed
+    # RSS ingestor runs every 15 min, crawler every 5 min
     ready = False
     retries = 0
-    while not ready and retries < 10:
+    while not ready and retries < 25:
         time.sleep(60)
         retries += 1
         posts = client.get_rss_posts(
