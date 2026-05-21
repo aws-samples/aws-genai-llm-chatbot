@@ -56,7 +56,7 @@ def test_agent_conversation_single_turn(
             "documents": [],
             "images": [],
             "videos": [],
-            "modelName": "anthropic.claude-3-haiku-20240307-v1:0",
+            "modelName": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
             "provider": "bedrock",
             "modelKwargs": {
                 "streaming": False,
@@ -98,7 +98,7 @@ def test_agent_conversation_multi_turn(
             "documents": [],
             "images": [],
             "videos": [],
-            "modelName": "anthropic.claude-3-haiku-20240307-v1:0",
+            "modelName": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
             "provider": "bedrock",
             "modelKwargs": {
                 "streaming": False,
@@ -126,7 +126,7 @@ def test_agent_conversation_multi_turn(
             "documents": [],
             "images": [],
             "videos": [],
-            "modelName": "anthropic.claude-3-haiku-20240307-v1:0",
+            "modelName": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
             "provider": "bedrock",
             "modelKwargs": {
                 "streaming": False,
@@ -161,7 +161,7 @@ def test_agent_conversation_error_handling(client: AppSyncClient, agent_session_
             "documents": [],
             "images": [],
             "videos": [],
-            "modelName": "anthropic.claude-3-haiku-20240307-v1:0",
+            "modelName": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
             "provider": "bedrock",
             "modelKwargs": {
                 "streaming": False,
@@ -212,7 +212,7 @@ def test_agent_conversation_session_persistence(
                 "documents": [],
                 "images": [],
                 "videos": [],
-                "modelName": "anthropic.claude-3-haiku-20240307-v1:0",
+                "modelName": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
                 "provider": "bedrock",
                 "modelKwargs": {
                     "streaming": False,
@@ -257,7 +257,7 @@ def test_agent_conversation_cleanup(client: AppSyncClient, available_agent):
             "documents": [],
             "images": [],
             "videos": [],
-            "modelName": "anthropic.claude-3-haiku-20240307-v1:0",
+            "modelName": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
             "provider": "bedrock",
             "modelKwargs": {
                 "streaming": False,
