@@ -11,7 +11,7 @@ def run_before_and_after_tests(client: AppSyncClient):
         if (
             workspace.get("name") == "INTEG_TEST_AURORA"
             or workspace.get("name") == "INTEG_TEST_AURORA_WITHOUT_RERANK"
-        ) and workspace.get("status") == "ready":
+        ) and workspace.get("status") in ("ready", "error"):
             client.delete_workspace(workspace.get("id"))
 
 
