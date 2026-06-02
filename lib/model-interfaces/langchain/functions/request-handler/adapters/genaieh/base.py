@@ -96,6 +96,22 @@ class GenAIEHGatewayAdapter(ModelAdapter):
 
         return {"messages": messages}
 
+    def _requires_single_sampling_param(self) -> bool:
+        """Whether the model rejects both ``temperature`` and ``top_p``.
+
+        Claude 4.x family (Sonnet 4, Opus 4, Haiku 4) only accepts one
+        sampling parameter at a time. Mirrors the logic in the direct
+        Bedrock adapter; pattern handles regional prefixes like ``us.``,
+        ``global.``, ``eu.``.
+        """
+        single_param_model_patterns = [
+            "anthropic.claude-sonnet-4",
+            "anthropic.claude-opus-4",
+            "anthropic.claude-haiku-4",
+        ]
+        model_lower = (self.model_id or "").lower()
+        return any(p in model_lower for p in single_param_model_patterns)
+
     def build_inference_config(
         self,
         provider: str = "bedrock",
@@ -105,13 +121,17 @@ class GenAIEHGatewayAdapter(ModelAdapter):
         stop_sequences: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Build inference configuration for specified provider."""
-        config = {
-            "temperature": temperature or self.model_kwargs.get("temperature", None),
-        }
-
+        temperature = temperature or self.model_kwargs.get("temperature", None)
         max_tokens = max_tokens or self.model_kwargs.get("maxTokens", None)
         top_p = top_p or self.model_kwargs.get("topP", None)
         stop_sequences = stop_sequences or self.model_kwargs.get("stopSequences", None)
+
+        # Claude 4.x rejects both temperature and top_p. Prefer temperature
+        # if both are set, matching the direct-Bedrock adapter behaviour.
+        if self._requires_single_sampling_param() and temperature is not None:
+            top_p = None
+
+        config = {"temperature": temperature}
 
         if provider == "openai":
             config.update(
