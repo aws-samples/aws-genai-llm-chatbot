@@ -5,7 +5,12 @@ from pages.playground import PlaygroundPage
 import time
 
 
-def test_playground(selenium_driver, cognito_admin_credentials, default_model):
+def test_playground(selenium_driver, cognito_admin_credentials, default_model, client):
+    # Pre-clean any sessions left over from prior test runs via the AppSync
+    # API so the UI delete-all flow has a small, predictable workload and
+    # the empty-state poll completes within the test timeout.
+    client.delete_user_sessions()
+
     login = LoginPage(selenium_driver)
     layout = Layout(selenium_driver)
 

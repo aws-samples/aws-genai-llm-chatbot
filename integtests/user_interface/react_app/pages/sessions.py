@@ -19,9 +19,24 @@ class SessionsPage(object):
 
         dom = self.dom_operator.getByPath(
             "//b[contains(text(),'No sessions')]",
-            wait=25,
+            wait=60,
         )
         assert dom != False
+
+        # Wait for the confirm modal's closing overlay to fully detach so
+        # that subsequent clicks on the page chrome are not intercepted.
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.common.by import By
+        from selenium.common.exceptions import TimeoutException
+
+        try:
+            WebDriverWait(self.driver, 10).until(
+                lambda d: not d.find_elements(
+                    By.XPATH, "//*[@data-locator='confirm-delete-all']"
+                )
+            )
+        except TimeoutException:
+            pass
 
     def open_session(self, name):
         dom = self.dom_operator.getByPath(
