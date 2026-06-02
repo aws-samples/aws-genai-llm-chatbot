@@ -1,23 +1,23 @@
 """
-Nexus Gateway Streaming Chat Adapter for AWS GenAI LLM Chatbot.
+GenAIEH Gateway Streaming Chat Adapter for AWS GenAI LLM Chatbot.
 """
 
 from typing import Dict, List, Optional, Any
 from aws_lambda_powertools import Logger
-from genai_core.model_providers.nexus.types import ApiError
-from .base import NexusGatewayAdapter
+from genai_core.model_providers.genaieh.types import ApiError
+from .base import GenAIEHGatewayAdapter
 
 logger = Logger()
 
 
-class NexusChatAdapter(NexusGatewayAdapter):
+class GenAIEHChatAdapter(GenAIEHGatewayAdapter):
     """
-    Chat adapter for Nexus Gateway integration
+    Chat adapter for GenAIEH Gateway integration
     handles streaming and non streaming models
     """
 
     def __init__(self, model_id: str, *args, **kwargs):
-        logger.info(f"Initializing NexusChatAdapter with model_id: {model_id}")
+        logger.info(f"Initializing GenAIEHChatAdapter with model_id: {model_id}")
 
         super().__init__(model_id, *args, **kwargs)
 
@@ -31,7 +31,7 @@ class NexusChatAdapter(NexusGatewayAdapter):
         videos: Optional[List[Dict[str, str]]] = None,
         system_prompts: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
-        """Run chat with Nexus Gateway - returns complete chat response."""
+        """Run chat with GenAIEH Gateway - returns complete chat response."""
         try:
             logger.info(
                 f"""Processing chat request for model: {self.model_id},
@@ -41,11 +41,11 @@ class NexusChatAdapter(NexusGatewayAdapter):
             # Validate unsupported features
             if images or documents or videos:
                 raise ValueError(
-                    "NexusChatAdapter does not support file attachments yet"
+                    "GenAIEHChatAdapter does not support file attachments yet"
                 )
             if workspace_id:
                 raise ValueError(
-                    """NexusChatAdapter does not support
+                    """GenAIEHChatAdapter does not support
                     workspace/RAG functionality yet"""
                 )
 
@@ -67,7 +67,7 @@ class NexusChatAdapter(NexusGatewayAdapter):
             if self.model_kwargs.get("streaming", False) and not self.disable_streaming:
                 # Use streaming
                 logger.info("Invoking GenAIEH bedrock streaming endpoint")
-                response = self.nexus_client.invoke_bedrock_converse_stream(
+                response = self.genaieh_client.invoke_bedrock_converse_stream(
                     model_id=self.model_id, body=request_body
                 )
                 if isinstance(response, ApiError):
@@ -83,7 +83,7 @@ class NexusChatAdapter(NexusGatewayAdapter):
             else:
                 # Fall back to non-streaming
                 logger.info("Invoking GenAIEH bedrock non-streaming endpoint")
-                response = self.nexus_client.invoke_bedrock_converse(
+                response = self.genaieh_client.invoke_bedrock_converse(
                     model_id=self.model_id, body=request_body
                 )
                 if isinstance(response, ApiError):
@@ -110,14 +110,14 @@ class NexusChatAdapter(NexusGatewayAdapter):
             # Re-raise validation errors (unsupported features)
             raise
         except Exception as e:
-            logger.error(f"Error in NexusChatAdapter.run: {str(e)}", exc_info=True)
-            return self.handle_nexus_error(e, "streaming chat processing")
+            logger.error(f"Error in GenAIEHChatAdapter.run: {str(e)}", exc_info=True)
+            return self.handle_genaieh_error(e, "streaming chat processing")
 
     def _process_streaming_response(self, response: Dict[str, Any]) -> str:
         """Process streaming response and return complete text."""
         full_response = ""
 
-        # Handle Nexus Gateway streaming response
+        # Handle GenAIEH Gateway streaming response
         if "stream" in response:
             stream_resp = response["stream"]
             try:

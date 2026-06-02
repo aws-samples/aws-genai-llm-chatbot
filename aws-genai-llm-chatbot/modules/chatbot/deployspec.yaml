@@ -7,7 +7,7 @@ deploy:
     build:
       commands:
         - mkdir -p /root/.cdk/cache
-        - env | grep NEXUS | sort | awk -F= '{printf "%-30s = %s\n", $1, $2}'
+        - env | grep GENAIEH | sort | awk -F= '{printf "%-30s = %s\n", $1, $2}'
         - npm run tsc
         - npm run config -- --non-interactive --env-prefix SEEDFARMER_PARAMETER_
         - npm run deploy -- --require-approval never --progress events --outputs-file ./cdk-exports.json -v --no-notices

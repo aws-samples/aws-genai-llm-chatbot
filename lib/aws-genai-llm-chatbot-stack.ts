@@ -69,12 +69,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
       (model) => model.interface === ModelInterface.LangChain
     );
 
-    // check if any deployed model requires langchain interface or if bedrock or nexus is enabled from config
+    // check if any deployed model requires langchain interface or if bedrock or genaieh is enabled from config
     let langchainInterface: LangChainInterface | undefined;
     if (
       langchainModels.length > 0 ||
       props.config.bedrock?.enabled ||
-      props.config.nexus?.enabled
+      props.config.genaieh?.enabled
     ) {
       langchainInterface = new LangChainInterface(this, "LangchainInterface", {
         shared,
@@ -272,12 +272,12 @@ export class AwsGenAILLMChatbotStack extends cdk.Stack {
         );
       }),
       llmRequestHandlersLogGroups: [
-        ...(props.config.nexus?.enabled
+        ...(props.config.genaieh?.enabled
           ? [
               LogGroup.fromLogGroupName(
                 this,
-                `LogNexusGatewayIntegration${props.config.prefix}`,
-                `/aws/lambda/${props.config.prefix}-nexus-gateway-integration`
+                `LogGenAIEHGatewayIntegration${props.config.prefix}`,
+                `/aws/lambda/${props.config.prefix}-genaieh-gateway-integration`
               ),
             ]
           : []),

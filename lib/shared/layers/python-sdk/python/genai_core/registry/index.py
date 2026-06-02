@@ -23,7 +23,7 @@ class AdapterRegistry:
     def get_adapter(self, model: str):
         logger.info(f"Getting adapter for model {model}")
         provider_model_name = _get_provider_name(model)
-        is_nexus_enabled, _ = genai_core.clients.is_nexus_configured()
+        is_genaieh_enabled, _ = genai_core.clients.is_genaieh_configured()
         return self._get_adapter(provider_model_name)
 
     def _get_adapter(self, model):
@@ -39,15 +39,15 @@ class AdapterRegistry:
 
 
 def _get_provider_name(model_provider_and_name: str) -> Optional[str]:
-    # Check if Nexus is configured and enabled
+    # Check if GenAIEH is configured and enabled
     logger.info(f"Getting provider name for model {model_provider_and_name}")
-    is_nexus_enabled, _ = genai_core.clients.is_nexus_configured()
-    if not is_nexus_enabled:
+    is_genaieh_enabled, _ = genai_core.clients.is_genaieh_configured()
+    if not is_genaieh_enabled:
         return model_provider_and_name
     model_provider = model_provider_and_name.split(".")[0]
     logger.info(f"Model provider {model_provider}")
-    nexus_model = get_model_by_name(model_provider_and_name)
-    logger.info(f"Found model {model_provider_and_name} {json.dumps(nexus_model)}")
-    if not nexus_model:
+    genaieh_model = get_model_by_name(model_provider_and_name)
+    logger.info(f"Found model {model_provider_and_name} {json.dumps(genaieh_model)}")
+    if not genaieh_model:
         return model_provider_and_name
-    return f"{model_provider}.{nexus_model.get('providerModelName')}"
+    return f"{model_provider}.{genaieh_model.get('providerModelName')}"

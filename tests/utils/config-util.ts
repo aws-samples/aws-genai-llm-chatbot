@@ -16,9 +16,9 @@ export function getTestConfig(): SystemConfig {
       enabled: true,
       region: SupportedRegion.US_EAST_1,
     },
-    nexus: {
+    genaieh: {
       enabled: false,
-      gatewayUrl: "https://example-nexus-gateway.com",
+      gatewayUrl: "https://example-genaieh-gateway.com",
       clientId: "test-client-id",
       clientSecret: "test-client-secret",
     },

@@ -6,7 +6,7 @@ import pytest
 # Mock configuration for tests
 mock_config = {
     "bedrock": {"region": "us-east-1"},
-    "nexus": {"enabled": False},
+    "genaieh": {"enabled": False},
     "rag": {
         "embeddingsModels": [
             {
@@ -67,11 +67,11 @@ def mock_aws_services():
     mock_get_sagemaker_models.return_value = []
     patches.append(get_sagemaker_models_patch)
 
-    # Patch genai_core.clients.is_nexus_configured
-    is_nexus_configured_patch = patch("genai_core.clients.is_nexus_configured")
-    mock_is_nexus_configured = is_nexus_configured_patch.start()
-    mock_is_nexus_configured.return_value = (False, {})
-    patches.append(is_nexus_configured_patch)
+    # Patch genai_core.clients.is_genaieh_configured
+    is_genaieh_configured_patch = patch("genai_core.clients.is_genaieh_configured")
+    mock_is_genaieh_configured = is_genaieh_configured_patch.start()
+    mock_is_genaieh_configured.return_value = (False, {})
+    patches.append(is_genaieh_configured_patch)
 
     # Patch genai_core.clients.get_bedrock_client
     get_bedrock_client_patch = patch("genai_core.clients.get_bedrock_client")

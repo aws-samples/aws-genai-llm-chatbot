@@ -8,16 +8,16 @@ import time
 @pytest.mark.skipif(
     not all(
         [
-            os.getenv("NEXUS_GATEWAY_URL"),
-            os.getenv("NEXUS_AUTH_CLIENT_ID"),
-            os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-            os.getenv("NEXUS_AUTH_TOKEN_URL"),
+            os.getenv("GENAIEH_GATEWAY_URL"),
+            os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+            os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+            os.getenv("GENAIEH_AUTH_TOKEN_URL"),
         ]
     ),
-    reason="Nexus Gateway credentials not configured",
+    reason="GenAIEH Gateway credentials not configured",
 )
-def test_nexus_chat_request(client, nexus_model):
-    """Test chat request using Nexus model through chatbot API"""
+def test_genaieh_chat_request(client, genaieh_model):
+    """Test chat request using GenAIEH model through chatbot API"""
     session_id = str(uuid.uuid4())
 
     request = {
@@ -27,8 +27,8 @@ def test_nexus_chat_request(client, nexus_model):
             "mode": "chain",
             "text": "Hello, please respond with just 'Hi there!'",
             "files": [],
-            "modelName": nexus_model,
-            "provider": "nexus",
+            "modelName": genaieh_model,
+            "provider": "genaieh",
             "sessionId": session_id,
         },
     }
@@ -52,7 +52,7 @@ def test_nexus_chat_request(client, nexus_model):
     assert session.get("history")[1].get("type") == "ai"
     assert len(session.get("history")[1].get("content", "")) > 0
 
-    print(f"Nexus chat response: {session['history'][1]['content']}")
+    print(f"GenAIEH chat response: {session['history'][1]['content']}")
 
     # Cleanup
     client.delete_session(session_id)
@@ -61,16 +61,16 @@ def test_nexus_chat_request(client, nexus_model):
 @pytest.mark.skipif(
     not all(
         [
-            os.getenv("NEXUS_GATEWAY_URL"),
-            os.getenv("NEXUS_AUTH_CLIENT_ID"),
-            os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-            os.getenv("NEXUS_AUTH_TOKEN_URL"),
+            os.getenv("GENAIEH_GATEWAY_URL"),
+            os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+            os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+            os.getenv("GENAIEH_AUTH_TOKEN_URL"),
         ]
     ),
-    reason="Nexus Gateway credentials not configured",
+    reason="GenAIEH Gateway credentials not configured",
 )
-def test_nexus_streaming_request(client, nexus_model):
-    """Test streaming chat request using Nexus model"""
+def test_genaieh_streaming_request(client, genaieh_model):
+    """Test streaming chat request using GenAIEH model"""
     session_id = str(uuid.uuid4())
 
     request = {
@@ -80,8 +80,8 @@ def test_nexus_streaming_request(client, nexus_model):
             "mode": "chain",
             "text": "Count from 1 to 5",
             "files": [],
-            "modelName": nexus_model,
-            "provider": "nexus",
+            "modelName": genaieh_model,
+            "provider": "genaieh",
             "sessionId": session_id,
             "streaming": True,
         },
@@ -106,7 +106,7 @@ def test_nexus_streaming_request(client, nexus_model):
     assert session.get("history")[1].get("type") == "ai"
     assert len(session.get("history")[1].get("content", "")) > 0
 
-    print(f"Nexus streaming response: {session['history'][1]['content']}")
+    print(f"GenAIEH streaming response: {session['history'][1]['content']}")
 
     # Cleanup
     client.delete_session(session_id)
@@ -115,16 +115,16 @@ def test_nexus_streaming_request(client, nexus_model):
 @pytest.mark.skipif(
     not all(
         [
-            os.getenv("NEXUS_GATEWAY_URL"),
-            os.getenv("NEXUS_AUTH_CLIENT_ID"),
-            os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-            os.getenv("NEXUS_AUTH_TOKEN_URL"),
+            os.getenv("GENAIEH_GATEWAY_URL"),
+            os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+            os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+            os.getenv("GENAIEH_AUTH_TOKEN_URL"),
         ]
     ),
-    reason="Nexus Gateway credentials not configured",
+    reason="GenAIEH Gateway credentials not configured",
 )
-def test_nexus_conversation_history(client, nexus_model):
-    """Test conversation history with Nexus model"""
+def test_genaieh_conversation_history(client, genaieh_model):
+    """Test conversation history with GenAIEH model"""
     session_id = str(uuid.uuid4())
 
     # First message
@@ -135,8 +135,8 @@ def test_nexus_conversation_history(client, nexus_model):
             "mode": "chain",
             "text": "My name is Alice",
             "files": [],
-            "modelName": nexus_model,
-            "provider": "nexus",
+            "modelName": genaieh_model,
+            "provider": "genaieh",
             "sessionId": session_id,
         },
     }
@@ -160,8 +160,8 @@ def test_nexus_conversation_history(client, nexus_model):
             "mode": "chain",
             "text": "What is my name?",
             "files": [],
-            "modelName": nexus_model,
-            "provider": "nexus",
+            "modelName": genaieh_model,
+            "provider": "genaieh",
             "sessionId": session_id,
         },
     }
@@ -194,6 +194,6 @@ def test_nexus_conversation_history(client, nexus_model):
 
 
 @pytest.fixture(scope="session")
-def nexus_model():
-    """Get Nexus model name from environment or use default"""
-    return os.getenv("NEXUS_TEST_MODEL_NAME", "gpt-3.5-turbo")
+def genaieh_model():
+    """Get GenAIEH model name from environment or use default"""
+    return os.getenv("GENAIEH_TEST_MODEL_NAME", "gpt-3.5-turbo")

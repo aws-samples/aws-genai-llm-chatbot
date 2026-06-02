@@ -1,5 +1,5 @@
 """
-Type definitions for the Nexus Gateway API based on Smithy definitions.
+Type definitions for the GenAIEH Gateway API based on Smithy definitions.
 """
 
 from dataclasses import dataclass, field
@@ -14,8 +14,8 @@ ApplicationStatus = Literal["OPEN", "APPROVED", "REJECTED"]
 
 
 @dataclass
-class NexusGatewayConfig:
-    """Configuration for the Nexus Gateway client"""
+class GenAIEHGatewayConfig:
+    """Configuration for the GenAIEH Gateway client"""
 
     gateway_url: Optional[str] = None
     client_id: Optional[str] = None
@@ -24,7 +24,7 @@ class NexusGatewayConfig:
     enabled: bool = False
 
     @classmethod
-    def from_dict(cls, config: dict[str, Any]) -> "NexusGatewayConfig":
+    def from_dict(cls, config: dict[str, Any]) -> "GenAIEHGatewayConfig":
         """Create a configuration object from a dictionary"""
         gateway_url = config.get("gatewayUrl")
         if gateway_url and gateway_url.endswith("/"):

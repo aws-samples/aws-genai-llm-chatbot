@@ -1,5 +1,5 @@
 """
-Simplified Nexus Gateway client that handles authentication transparently.
+Simplified GenAIEH Gateway client that handles authentication transparently.
 """
 
 import logging
@@ -15,25 +15,25 @@ from .types import (
     ApiError,
     ListApplicationModelsResponse,
     ModelResponse,
-    NexusGatewayConfig,
+    GenAIEHGatewayConfig,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class NexusGatewayClient:
-    """Client for interacting with the Nexus Gateway API with simplified auth"""
+class GenAIEHGatewayClient:
+    """Client for interacting with the GenAIEH Gateway API with simplified auth"""
 
-    def __init__(self, config: Union[dict[str, Any], NexusGatewayConfig]):
+    def __init__(self, config: Union[dict[str, Any], GenAIEHGatewayConfig]):
         """
-        Initialize the Nexus Gateway client
+        Initialize the GenAIEH Gateway client
 
         Args:
-            config: Configuration dictionary or NexusGatewayConfig object
+            config: Configuration dictionary or GenAIEHGatewayConfig object
         """
         # Convert dictionary to config object if needed
         if isinstance(config, dict):
-            self.config = NexusGatewayConfig.from_dict(config)
+            self.config = GenAIEHGatewayConfig.from_dict(config)
         else:
             self.config = config
 
@@ -43,16 +43,16 @@ class NexusGatewayClient:
 
         # Validate configuration
         if not self.config.gateway_url:
-            logger.error("Nexus Gateway URL not configured")
-            raise ValueError("Nexus Gateway URL is required but not configured")
+            logger.error("GenAIEH Gateway URL not configured")
+            raise ValueError("GenAIEH Gateway URL is required but not configured")
         if not self.config.client_id or not self.config.client_secret:
-            logger.error("Missing client credentials for Nexus Gateway")
+            logger.error("Missing client credentials for GenAIEH Gateway")
             raise ValueError(
-                "Client ID and Client Secret are required for Nexus Gateway auth"
+                "Client ID and Client Secret are required for GenAIEH Gateway auth"
             )
         if not self.config.token_url:
-            logger.error("Token URL not configured for Nexus Gateway")
-            raise ValueError("Token URL is required for Nexus Gateway auth")
+            logger.error("Token URL not configured for GenAIEH Gateway")
+            raise ValueError("Token URL is required for GenAIEH Gateway auth")
 
     def list_application_models(self) -> list[ModelResponse]:
         """
@@ -165,7 +165,7 @@ class NexusGatewayClient:
         headers: Optional[dict[str, str]] = None,
         stream: bool = False,
     ) -> Union[dict[str, Any], ApiError]:
-        """Make a request to the Nexus Gateway API with automatic authentication"""
+        """Make a request to the GenAIEH Gateway API with automatic authentication"""
         try:
             url, request_headers = self._prepare_request(path, headers)
             logger.debug(f"Making {method} request to {url}")
@@ -207,7 +207,7 @@ class NexusGatewayClient:
         headers: Optional[dict[str, str]] = None,
     ) -> Union[dict[str, Any], ApiError]:
         """
-        Make an async request to the Nexus Gateway API with automatic authentication
+        Make an async request to the GenAIEH Gateway API with automatic authentication
         Used for OpenAI streaming requests
         """
         try:
@@ -309,7 +309,9 @@ class NexusGatewayClient:
 
         # If token is expired or not set, get a new one
         if not self._access_token or current_time >= self._token_expiry:
-            logger.info("Nexus access token is expired or not set, obtaining a new one")
+            logger.info(
+                "GenAIEH access token is expired or not set, obtaining a new one"
+            )
             return self._get_client_credentials_token()
 
         return self._access_token
@@ -414,7 +416,7 @@ class NexusGatewayClient:
 
     def get_access_token(self, force_refresh: bool = False) -> Optional[str]:
         """
-        Get an OAuth access token for use with the Nexus Gateway
+        Get an OAuth access token for use with the GenAIEH Gateway
 
         Args:
             force_refresh: Force refresh the token even if cached
@@ -428,9 +430,9 @@ class NexusGatewayClient:
 
 
 @lru_cache(maxsize=1)
-def get_nexus_gateway_client() -> Optional[NexusGatewayClient]:
+def get_genaieh_gateway_client() -> Optional[GenAIEHGatewayClient]:
     config = parameters.get_config()
-    nexus_config = config.get("nexus", {})
-    if not nexus_config.get("enabled", False):
+    genaieh_config = config.get("genaieh", {})
+    if not genaieh_config.get("enabled", False):
         return None
-    return NexusGatewayClient(nexus_config)
+    return GenAIEHGatewayClient(genaieh_config)

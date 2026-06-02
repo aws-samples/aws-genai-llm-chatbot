@@ -1,5 +1,5 @@
 """
-Base adapter for Nexus Gateway integration with AWS GenAI LLM Chatbot.
+Base adapter for GenAIEH Gateway integration with AWS GenAI LLM Chatbot.
 """
 
 import re
@@ -8,28 +8,28 @@ from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from aws_lambda_powertools import Logger
 from adapters.base import ModelAdapter
-from genai_core.model_providers.nexus.nexus_client import get_nexus_gateway_client
-from genai_core.model_providers.nexus.types import ApiError
+from genai_core.model_providers.genaieh.genaieh_client import get_genaieh_gateway_client
+from genai_core.model_providers.genaieh.types import ApiError
 
 logger = Logger()
 
 
-class NexusGatewayAdapter(ModelAdapter):
-    """Base adapter for Nexus Gateway integration."""
+class GenAIEHGatewayAdapter(ModelAdapter):
+    """Base adapter for GenAIEH Gateway integration."""
 
     def __init__(self, model_id: str, *args, **kwargs):
         self.model_id = model_id
         super().__init__(*args, **kwargs)
-        self._nexus_client = None
+        self._genaieh_client = None
 
     @property
-    def nexus_client(self):
-        """Lazy initialization of Nexus Gateway client."""
-        if self._nexus_client is None:
-            self._nexus_client = get_nexus_gateway_client()
-            if self._nexus_client is None:
-                raise ValueError("Nexus Gateway client is not configured")
-        return self._nexus_client
+    def genaieh_client(self):
+        """Lazy initialization of GenAIEH Gateway client."""
+        if self._genaieh_client is None:
+            self._genaieh_client = get_genaieh_gateway_client()
+            if self._genaieh_client is None:
+                raise ValueError("GenAIEH Gateway client is not configured")
+        return self._genaieh_client
 
     @abstractmethod
     def on_llm_new_token(
@@ -39,7 +39,7 @@ class NexusGatewayAdapter(ModelAdapter):
     def get_llm(
         self, model_kwargs: Dict[str, Any] = None, extra: Dict[str, Any] = None
     ):
-        """Not used for Nexus Gateway - uses direct API calls."""
+        """Not used for GenAIEH Gateway - uses direct API calls."""
         return None
 
     def build_message_body(
@@ -156,7 +156,7 @@ class NexusGatewayAdapter(ModelAdapter):
         return converted_history
 
     def get_conversation_history(self) -> List[Dict[str, Any]]:
-        """Get existing conversation history formatted for Nexus Gateway."""
+        """Get existing conversation history formatted for GenAIEH Gateway."""
         history = []
 
         try:
@@ -196,10 +196,10 @@ class NexusGatewayAdapter(ModelAdapter):
     def extract_bedrock_response_content(
         self, response: Union[Dict[str, Any], ApiError]
     ) -> str:
-        """Extract text content from Nexus Gateway response."""
+        """Extract text content from GenAIEH Gateway response."""
         if isinstance(response, ApiError):
             raise ValueError(
-                f"Nexus Gateway API error: {response.error_type} - {response.message}"
+                f"GenAIEH Gateway API error: {response.error_type} - {response.message}"
             )
 
         # Handle Bedrock Converse response format
@@ -261,7 +261,7 @@ class NexusGatewayAdapter(ModelAdapter):
         system_prompt: Optional[str] = None,
         history: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
-        """Build complete request body for Nexus Gateway."""
+        """Build complete request body for GenAIEH Gateway."""
         message_body = self.build_message_body(prompt, system_prompt, history)
         inference_config = self.build_inference_config()
 
@@ -282,7 +282,7 @@ class NexusGatewayAdapter(ModelAdapter):
         system_prompt: Optional[str] = None,
         history: Optional[List[Dict[str, Any]]] = None,
     ):
-        """Build request body for Nexus OpenAI Chat API."""
+        """Build request body for GenAIEH OpenAI Chat API."""
         message_body = self.build_openai_message_body(prompt, system_prompt, history)
         inference_config = self.build_inference_config(provider="openai")
 
@@ -333,12 +333,14 @@ class NexusGatewayAdapter(ModelAdapter):
 
         return response
 
-    def handle_nexus_error(self, error: Exception, context: str = "") -> Dict[str, Any]:
-        """Handle Nexus Gateway errors."""
+    def handle_genaieh_error(
+        self, error: Exception, context: str = ""
+    ) -> Dict[str, Any]:
+        """Handle GenAIEH Gateway errors."""
         error_msg = (
-            f"Nexus Gateway error in {context}: {str(error)}"
+            f"GenAIEH Gateway error in {context}: {str(error)}"
             if context
-            else f"Nexus Gateway error: {str(error)}"
+            else f"GenAIEH Gateway error: {str(error)}"
         )
         logger.error(error_msg, exc_info=True)
 

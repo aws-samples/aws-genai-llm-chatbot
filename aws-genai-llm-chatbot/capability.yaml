@@ -61,35 +61,35 @@ input:
     defaultValue: false
     label: Enable OpenSearch for RAG
     isRequired: false
-  - name: NEXUS_ENABLE
+  - name: GENAIEH_ENABLE
     type: Boolean
-    description: Enable Nexus Gateway integration
+    description: Enable GenAIEH Gateway integration
     defaultValue: false
-    label: Enable Nexus Gateway
+    label: Enable GenAIEH Gateway
     isRequired: false
-  - name: NEXUS_GATEWAY_URL
+  - name: GENAIEH_GATEWAY_URL
     type: String
-    description: URL of the Nexus Gateway API
+    description: URL of the GenAIEH Gateway API
     defaultValue: ""
-    label: Nexus Gateway URL
+    label: GenAIEH Gateway URL
     isRequired: false
-  - name: NEXUS_AUTH_CLIENT_ID
+  - name: GENAIEH_AUTH_CLIENT_ID
     type: String
-    description: Client ID for Nexus Gateway authentication
+    description: Client ID for GenAIEH Gateway authentication
     defaultValue: ""
-    label: Nexus Auth Client ID
+    label: GenAIEH Auth Client ID
     isRequired: false
-  - name: NEXUS_AUTH_CLIENT_SECRET
+  - name: GENAIEH_AUTH_CLIENT_SECRET
     type: String
-    description: Client secret for Nexus Gateway authentication
+    description: Client secret for GenAIEH Gateway authentication
     defaultValue: ""
-    label: Nexus Auth Client Secret
+    label: GenAIEH Auth Client Secret
     isRequired: false
-  - name: NEXUS_AUTH_TOKEN_URL
+  - name: GENAIEH_AUTH_TOKEN_URL
     type: String
-    description: Token URL for Nexus Gateway authentication
+    description: Token URL for GenAIEH Gateway authentication
     defaultValue: ""
-    label: Nexus Auth Token URL
+    label: GenAIEH Auth Token URL
     isRequired: false
 environments:
   - name: DEPLOYMENT

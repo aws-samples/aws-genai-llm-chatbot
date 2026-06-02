@@ -4,17 +4,17 @@ EH Gateway Chat Adapter for OpenAI Models.
 
 from typing import Dict, List, Optional, Any
 from aws_lambda_powertools import Logger
-from genai_core.model_providers.nexus.types import ApiError
-from .base import NexusGatewayAdapter
+from genai_core.model_providers.genaieh.types import ApiError
+from .base import GenAIEHGatewayAdapter
 
 logger = Logger()
 
 
-class NexusOpenAIChatAdapter(NexusGatewayAdapter):
+class GenAIEHOpenAIChatAdapter(GenAIEHGatewayAdapter):
     """OpenAI chat adapter for EH Gateway integration."""
 
     def __init__(self, model_id: str, *args, **kwargs):
-        logger.info(f"Initializing NexusOpenAIChatAdapter with model_id: {model_id}")
+        logger.info(f"Initializing GenAIEHOpenAIChatAdapter with model_id: {model_id}")
         # Enable streaming in model kwargs
         kwargs.setdefault("model_kwargs", {})["streaming"] = True
 
@@ -30,7 +30,7 @@ class NexusOpenAIChatAdapter(NexusGatewayAdapter):
         videos: Optional[List[Dict[str, str]]] = None,
         system_prompts: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
-        """Run streaming chat with Nexus Gateway -
+        """Run streaming chat with GenAIEH Gateway -
         returns complete response after streaming."""
         try:
             logger.info(
@@ -41,11 +41,11 @@ class NexusOpenAIChatAdapter(NexusGatewayAdapter):
             # Validate unsupported features
             if images or documents or videos:
                 raise ValueError(
-                    "NexusOpenAIChatAdapter does not support file attachments yet"
+                    "GenAIEHOpenAIChatAdapter does not support file attachments yet"
                 )
             if workspace_id:
                 raise ValueError(
-                    """NexusOpenAIChatAdapter does not support
+                    """GenAIEHOpenAIChatAdapter does not support
                     workspace/RAG functionality yet"""
                 )
 
@@ -66,7 +66,7 @@ class NexusOpenAIChatAdapter(NexusGatewayAdapter):
             # Check if streaming is enabled and supported
             if self.model_kwargs.get("streaming", False) and not self.disable_streaming:
                 logger.info("Invoking openai streaming chat endpoint")
-                response = self.nexus_client.invoke_openai_stream_chat(
+                response = self.genaieh_client.invoke_openai_stream_chat(
                     body=request_body
                 )
                 if isinstance(response, ApiError):
@@ -80,7 +80,7 @@ class NexusOpenAIChatAdapter(NexusGatewayAdapter):
                 full_response = self._process_openai_streaming_response(response)
             else:
                 logger.info("Invoking openai non-streaming chat endpoint")
-                response = self.nexus_client.invoke_openai_chat(body=request_body)
+                response = self.genaieh_client.invoke_openai_chat(body=request_body)
                 if isinstance(response, ApiError):
                     return {
                         "sessionId": self.session_id,
@@ -105,9 +105,9 @@ class NexusOpenAIChatAdapter(NexusGatewayAdapter):
             raise
         except Exception as e:
             logger.error(
-                f"Error in NexusOpenAIChatAdapter.run: {str(e)}", exc_info=True
+                f"Error in GenAIEHOpenAIChatAdapter.run: {str(e)}", exc_info=True
             )
-            return self.handle_nexus_error(e, "open ai chat processing")
+            return self.handle_genaieh_error(e, "open ai chat processing")
 
     def _process_openai_streaming_response(self, response: Dict[str, Any]) -> str:
         """Process openai response and return complete text."""

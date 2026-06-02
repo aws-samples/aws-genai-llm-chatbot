@@ -194,7 +194,10 @@ function getTypedEnvVar<T>(
     "--non-interactive",
     "Run in non-interactive mode for SeedFarmer deployment"
   );
-  program.option("--deployment-type <type>", "Deployment type (e.g., 'nexus')");
+  program.option(
+    "--deployment-type <type>",
+    "Deployment type (e.g., 'genaieh')"
+  );
   program.option(
     "--env-prefix <prefix>",
     "Environment variable prefix for non-interactive mode"
@@ -219,11 +222,11 @@ function getTypedEnvVar<T>(
       options.bedrockAgentId = config.bedrock?.agent?.agentId;
       options.bedrockAgentVersion = config.bedrock?.agent?.agentVersion;
       options.bedrockAgentAliasId = config.bedrock?.agent?.agentAliasId;
-      options.nexusEnable = config.nexus?.enabled;
-      options.nexusGatewayUrl = config.nexus?.gatewayUrl;
-      options.nexusTokenUrl = config.nexus?.tokenUrl;
-      options.nexusAuthClientId = config.nexus?.clientId;
-      options.nexusAuthClientSecret = config.nexus?.clientSecret;
+      options.genaiehEnable = config.genaieh?.enabled;
+      options.genaiehGatewayUrl = config.genaieh?.gatewayUrl;
+      options.genaiehTokenUrl = config.genaieh?.tokenUrl;
+      options.genaiehAuthClientId = config.genaieh?.clientId;
+      options.genaiehAuthClientSecret = config.genaieh?.clientSecret;
       options.sagemakerModels = config.llms?.sagemaker ?? [];
       options.enableSagemakerModels = config.llms?.sagemaker
         ? config.llms?.sagemaker.length > 0
@@ -624,27 +627,29 @@ function getTypedEnvVar<T>(
           }
         }
 
-        // Nexus Gateway Configuration
-        if (getTypedEnvVar<boolean>("NEXUS_ENABLE", false, options.envPrefix)) {
-          defaultConfig.nexus = {
+        // GenAIEH Gateway Configuration
+        if (
+          getTypedEnvVar<boolean>("GENAIEH_ENABLE", false, options.envPrefix)
+        ) {
+          defaultConfig.genaieh = {
             enabled: true,
             gatewayUrl: getTypedEnvVar<string>(
-              "NEXUS_GATEWAY_URL",
+              "GENAIEH_GATEWAY_URL",
               "",
               options.envPrefix
             ),
             tokenUrl: getTypedEnvVar<string>(
-              "NEXUS_AUTH_TOKEN_URL",
+              "GENAIEH_AUTH_TOKEN_URL",
               "",
               options.envPrefix
             ),
             clientId: getTypedEnvVar<string>(
-              "NEXUS_AUTH_CLIENT_ID",
+              "GENAIEH_AUTH_CLIENT_ID",
               "",
               options.envPrefix
             ),
             clientSecret: getTypedEnvVar<string>(
-              "NEXUS_AUTH_CLIENT_SECRET",
+              "GENAIEH_AUTH_CLIENT_SECRET",
               "",
               options.envPrefix
             ),
@@ -951,58 +956,58 @@ async function processCreateOptions(options: any): Promise<void> {
     },
     {
       type: "confirm",
-      name: "nexusEnable",
+      name: "genaiehEnable",
       message:
-        "Do you want to enable the Nexus Gateway for model access? (If enabled, this will be used exclusively for all model providers)",
-      initial: options.nexusEnable ?? false,
+        "Do you want to enable the GenAIEH Gateway for model access? (If enabled, this will be used exclusively for all model providers)",
+      initial: options.genaiehEnable ?? false,
     },
     {
       type: "input",
-      name: "nexusGatewayUrl",
-      message: "Nexus Gateway URL",
+      name: "genaiehGatewayUrl",
+      message: "GenAIEH Gateway URL",
       validate(v: string) {
         return (this as any).skipped || (v && v.length > 0);
       },
       skip() {
-        return !(this as any).state.answers.nexusEnable;
+        return !(this as any).state.answers.genaiehEnable;
       },
-      initial: options.nexusGatewayUrl ?? "",
+      initial: options.genaiehGatewayUrl ?? "",
     },
     {
       type: "input",
-      name: "nexusTokenUrl",
-      message: "Nexus Auth Token URL",
+      name: "genaiehTokenUrl",
+      message: "GenAIEH Auth Token URL",
       validate(v: string) {
         return (this as any).skipped || (v && v.length > 0);
       },
       skip() {
-        return !(this as any).state.answers.nexusEnable;
+        return !(this as any).state.answers.genaiehEnable;
       },
-      initial: options.nexusTokenUrl ?? "",
+      initial: options.genaiehTokenUrl ?? "",
     },
     {
       type: "input",
-      name: "nexusAuthClientId",
-      message: "Nexus Gateway Authentication Client ID",
+      name: "genaiehAuthClientId",
+      message: "GenAIEH Gateway Authentication Client ID",
       validate(v: string) {
         return (this as any).skipped || (v && v.length > 0);
       },
       skip() {
-        return !(this as any).state.answers.nexusEnable;
+        return !(this as any).state.answers.genaiehEnable;
       },
-      initial: options.nexusAuthClientId ?? "",
+      initial: options.genaiehAuthClientId ?? "",
     },
     {
       type: "input",
-      name: "nexusAuthClientSecret",
-      message: "Nexus Gateway Authentication Client Secret",
+      name: "genaiehAuthClientSecret",
+      message: "GenAIEH Gateway Authentication Client Secret",
       validate(v: string) {
         return (this as any).skipped || (v && v.length > 0);
       },
       skip() {
-        return !(this as any).state.answers.nexusEnable;
+        return !(this as any).state.answers.genaiehEnable;
       },
-      initial: options.nexusAuthClientSecret ?? "",
+      initial: options.genaiehAuthClientSecret ?? "",
     },
     {
       type: "confirm",
@@ -1891,13 +1896,13 @@ async function processCreateOptions(options: any): Promise<void> {
             : undefined,
         }
       : undefined,
-    nexus: answers.nexusEnable
+    genaieh: answers.genaiehEnable
       ? {
-          enabled: answers.nexusEnable,
-          gatewayUrl: answers.nexusGatewayUrl,
-          tokenUrl: answers.nexusTokenUrl,
-          clientId: answers.nexusAuthClientId,
-          clientSecret: answers.nexusAuthClientSecret,
+          enabled: answers.genaiehEnable,
+          gatewayUrl: answers.genaiehGatewayUrl,
+          tokenUrl: answers.genaiehTokenUrl,
+          clientId: answers.genaiehAuthClientId,
+          clientSecret: answers.genaiehAuthClientSecret,
         }
       : undefined,
     llms: {

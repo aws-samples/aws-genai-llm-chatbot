@@ -1,11 +1,11 @@
-"""Integration tests for Nexus Gateway Client"""
+"""Integration tests for GenAIEH Gateway Client"""
 
 import os
 import pytest
 import sys
 
-from genai_core.model_providers.nexus.nexus_client import NexusGatewayClient
-from genai_core.model_providers.nexus.types import NexusGatewayConfig
+from genai_core.model_providers.genaieh.genaieh_client import GenAIEHGatewayClient
+from genai_core.model_providers.genaieh.types import GenAIEHGatewayConfig
 
 # Add the python-sdk to the path
 sys.path.insert(
@@ -13,39 +13,39 @@ sys.path.insert(
 )
 
 
-class TestNexusGatewayClientIntegration:
-    """Real integration tests for NexusGatewayClient"""
+class TestGenAIEHGatewayClientIntegration:
+    """Real integration tests for GenAIEHGatewayClient"""
 
     @pytest.fixture
-    def nexus_config(self):
+    def genaieh_config(self):
         """Create configuration from environment variables"""
-        return NexusGatewayConfig(
-            gateway_url=os.getenv("NEXUS_GATEWAY_URL"),
-            client_id=os.getenv("NEXUS_AUTH_CLIENT_ID"),
-            client_secret=os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-            token_url=os.getenv("NEXUS_AUTH_TOKEN_URL"),
+        return GenAIEHGatewayConfig(
+            gateway_url=os.getenv("GENAIEH_GATEWAY_URL"),
+            client_id=os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+            client_secret=os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+            token_url=os.getenv("GENAIEH_AUTH_TOKEN_URL"),
             enabled=True,
         )
 
     @pytest.fixture
-    def nexus_client(self, nexus_config):
-        """Create NexusGatewayClient instance"""
-        return NexusGatewayClient(nexus_config)
+    def genaieh_client(self, genaieh_config):
+        """Create GenAIEHGatewayClient instance"""
+        return GenAIEHGatewayClient(genaieh_config)
 
     @pytest.mark.skipif(
         not all(
             [
-                os.getenv("NEXUS_GATEWAY_URL"),
-                os.getenv("NEXUS_AUTH_CLIENT_ID"),
-                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-                os.getenv("NEXUS_AUTH_TOKEN_URL"),
+                os.getenv("GENAIEH_GATEWAY_URL"),
+                os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+                os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+                os.getenv("GENAIEH_AUTH_TOKEN_URL"),
             ]
         ),
-        reason="Real Nexus credentials not provided",
+        reason="Real GenAIEH credentials not provided",
     )
-    def test_real_token_request(self, nexus_client):
-        """Test real token request to Nexus Gateway"""
-        token = nexus_client.get_access_token()
+    def test_real_token_request(self, genaieh_client):
+        """Test real token request to GenAIEH Gateway"""
+        token = genaieh_client.get_access_token()
         assert token is not None
         assert isinstance(token, str)
         assert len(token) > 0
@@ -54,17 +54,17 @@ class TestNexusGatewayClientIntegration:
     @pytest.mark.skipif(
         not all(
             [
-                os.getenv("NEXUS_GATEWAY_URL"),
-                os.getenv("NEXUS_AUTH_CLIENT_ID"),
-                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-                os.getenv("NEXUS_AUTH_TOKEN_URL"),
+                os.getenv("GENAIEH_GATEWAY_URL"),
+                os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+                os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+                os.getenv("GENAIEH_AUTH_TOKEN_URL"),
             ]
         ),
-        reason="Real Nexus credentials not provided",
+        reason="Real GenAIEH credentials not provided",
     )
-    def test_real_list_application_models(self, nexus_client):
+    def test_real_list_application_models(self, genaieh_client):
         """Test real list_application_models request"""
-        models = nexus_client.list_application_models()
+        models = genaieh_client.list_application_models()
         assert isinstance(models, list)
         print(f"Found {len(models)} models")
         if models:
@@ -73,18 +73,18 @@ class TestNexusGatewayClientIntegration:
     @pytest.mark.skipif(
         not all(
             [
-                os.getenv("NEXUS_GATEWAY_URL"),
-                os.getenv("NEXUS_AUTH_CLIENT_ID"),
-                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-                os.getenv("NEXUS_AUTH_TOKEN_URL"),
-                os.getenv("NEXUS_TEST_MODEL_ID"),
+                os.getenv("GENAIEH_GATEWAY_URL"),
+                os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+                os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+                os.getenv("GENAIEH_AUTH_TOKEN_URL"),
+                os.getenv("GENAIEH_TEST_MODEL_ID"),
             ]
         ),
-        reason="Real Nexus credentials and test model not provided",
+        reason="Real GenAIEH credentials and test model not provided",
     )
-    def test_real_bedrock_converse(self, nexus_client):
+    def test_real_bedrock_converse(self, genaieh_client):
         """Test real bedrock converse request"""
-        model_id = os.getenv("NEXUS_TEST_MODEL_ID")
+        model_id = os.getenv("GENAIEH_TEST_MODEL_ID")
         body = {
             "messages": [
                 {"role": "user", "content": [{"text": "Hello, how are you?"}]}
@@ -92,7 +92,7 @@ class TestNexusGatewayClientIntegration:
             "inferenceConfig": {"maxTokens": 100, "temperature": 0.7},
         }
 
-        response = nexus_client.invoke_bedrock_converse(model_id, body)
+        response = genaieh_client.invoke_bedrock_converse(model_id, body)
         print(f"Response: {response}")
 
         assert response is not None
@@ -101,18 +101,18 @@ class TestNexusGatewayClientIntegration:
     @pytest.mark.skipif(
         not all(
             [
-                os.getenv("NEXUS_GATEWAY_URL"),
-                os.getenv("NEXUS_AUTH_CLIENT_ID"),
-                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-                os.getenv("NEXUS_AUTH_TOKEN_URL"),
-                os.getenv("NEXUS_TEST_MODEL_ID"),
+                os.getenv("GENAIEH_GATEWAY_URL"),
+                os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+                os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+                os.getenv("GENAIEH_AUTH_TOKEN_URL"),
+                os.getenv("GENAIEH_TEST_MODEL_ID"),
             ]
         ),
-        reason="Real Nexus credentials and test model not provided",
+        reason="Real GenAIEH credentials and test model not provided",
     )
-    def test_real_openai_chat(self, nexus_client):
+    def test_real_openai_chat(self, genaieh_client):
         """Test real openai chat request"""
-        model_id = os.getenv("NEXUS_TEST_MODEL_ID")
+        model_id = os.getenv("GENAIEH_TEST_MODEL_ID")
         body = {
             "messages": [{"role": "user", "content": "Hello, how are you?"}],
             "model": model_id,
@@ -120,7 +120,7 @@ class TestNexusGatewayClientIntegration:
             "temperature": 0.7,
         }
 
-        response = nexus_client.invoke_openai_chat(body)
+        response = genaieh_client.invoke_openai_chat(body)
         print(f"Response: {response}")
 
         assert response is not None
@@ -133,18 +133,18 @@ class TestNexusGatewayClientIntegration:
     @pytest.mark.skipif(
         not all(
             [
-                os.getenv("NEXUS_GATEWAY_URL"),
-                os.getenv("NEXUS_AUTH_CLIENT_ID"),
-                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-                os.getenv("NEXUS_AUTH_TOKEN_URL"),
-                os.getenv("NEXUS_TEST_MODEL_ID"),
+                os.getenv("GENAIEH_GATEWAY_URL"),
+                os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+                os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+                os.getenv("GENAIEH_AUTH_TOKEN_URL"),
+                os.getenv("GENAIEH_TEST_MODEL_ID"),
             ]
         ),
-        reason="Real Nexus credentials and test model not provided",
+        reason="Real GenAIEH credentials and test model not provided",
     )
-    def test_real_openai_chat_stream(self, nexus_client):
+    def test_real_openai_chat_stream(self, genaieh_client):
         """Test real openai chat request"""
-        model_id = os.getenv("NEXUS_TEST_MODEL_ID")
+        model_id = os.getenv("GENAIEH_TEST_MODEL_ID")
         body = {
             "messages": [
                 {"role": "user", "content": "Hello, Im John"},
@@ -158,7 +158,7 @@ class TestNexusGatewayClientIntegration:
             "stream": True,
         }
 
-        response = nexus_client.invoke_openai_stream_chat(body)
+        response = genaieh_client.invoke_openai_stream_chat(body)
         print(f"Response: {response}")
 
         assert response is not None
@@ -172,24 +172,24 @@ class TestNexusGatewayClientIntegration:
     @pytest.mark.skipif(
         not all(
             [
-                os.getenv("NEXUS_GATEWAY_URL"),
-                os.getenv("NEXUS_AUTH_CLIENT_ID"),
-                os.getenv("NEXUS_AUTH_CLIENT_SECRET"),
-                os.getenv("NEXUS_AUTH_TOKEN_URL"),
-                os.getenv("NEXUS_TEST_MODEL_ID"),
+                os.getenv("GENAIEH_GATEWAY_URL"),
+                os.getenv("GENAIEH_AUTH_CLIENT_ID"),
+                os.getenv("GENAIEH_AUTH_CLIENT_SECRET"),
+                os.getenv("GENAIEH_AUTH_TOKEN_URL"),
+                os.getenv("GENAIEH_TEST_MODEL_ID"),
             ]
         ),
-        reason="Real Nexus credentials and test model not provided",
+        reason="Real GenAIEH credentials and test model not provided",
     )
-    def test_real_bedrock_converse_stream(self, nexus_client):
+    def test_real_bedrock_converse_stream(self, genaieh_client):
         """Test real bedrock converse stream request"""
-        model_id = os.getenv("NEXUS_TEST_MODEL_ID")
+        model_id = os.getenv("GENAIEH_TEST_MODEL_ID")
         body = {
             "messages": [{"role": "user", "content": [{"text": "Count from 1 to 3"}]}],
             "inferenceConfig": {"maxTokens": 100, "temperature": 0.7},
         }
 
-        response = nexus_client.invoke_bedrock_converse_stream(model_id, body)
+        response = genaieh_client.invoke_bedrock_converse_stream(model_id, body)
         print(f"Streaming response: {response}")
 
         assert response is not None
