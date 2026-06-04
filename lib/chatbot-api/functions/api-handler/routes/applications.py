@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+from typing import Optional
 from common.constant import (
     ID_FIELD_VALIDATION,
     SAFE_PROMPT_STR_REGEX,
@@ -24,11 +25,18 @@ logger = Logger()
 permissions = UserPermissions(router)
 
 name_regex = r"^[\w\s+_-]+$"
+ARN_REGEX = r"^arn:aws(-[a-z]+)*:bedrock-agentcore:[a-z0-9-]+:\d{12}:runtime/[\w-]+$"
 
 
 class CreateApplicationRequest(BaseModel):
     name: str = Field(min_length=1, max_length=100, pattern=name_regex)
-    model: str = SAFE_SHORT_STR_VALIDATION
+    model: Optional[str] = Field(
+        None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
+    agentRuntimeArn: Optional[str] = Field(
+        None, max_length=500, pattern=ARN_REGEX
+    )
+
     workspace: str = Field(None, max_length=512, pattern=SAFE_STR_REGEX)
     systemPrompt: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
     systemPromptRag: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
@@ -44,12 +52,25 @@ class CreateApplicationRequest(BaseModel):
     maxTokens: int = Field(ge=1, le=8192)
     temperature: Decimal = Field(ge=0, le=1)
     topP: Decimal = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def check_model_or_agent(self):
+        if self.model and self.agentRuntimeArn:
+            raise ValueError("Specify either model or agentRuntimeArn, not both")
+        if not self.model and not self.agentRuntimeArn:
+            raise ValueError("Either model or agentRuntimeArn must be provided")
+        return self
 
 
 class UpdateApplicationRequest(BaseModel):
     id: str = ID_FIELD_VALIDATION
     name: str = Field(min_length=1, max_length=100, pattern=name_regex)
-    model: str = SAFE_SHORT_STR_VALIDATION
+    model: Optional[str] = Field(
+        None, min_length=1, max_length=100, pattern=SAFE_STR_REGEX
+    )
+    agentRuntimeArn: Optional[str] = Field(
+        None, max_length=500, pattern=ARN_REGEX
+    )
     workspace: str = Field(None, max_length=512, pattern=SAFE_STR_REGEX)
     systemPrompt: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
     systemPromptRag: str = Field(None, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
@@ -65,6 +86,14 @@ class UpdateApplicationRequest(BaseModel):
     maxTokens: int = Field(ge=1, le=8192)
     temperature: Decimal = Field(ge=0, le=1)
     topP: Decimal = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def check_model_or_agent(self):
+        if self.model and self.agentRuntimeArn:
+            raise ValueError("Specify either model or agentRuntimeArn, not both")
+        if not self.model and not self.agentRuntimeArn:
+            raise ValueError("Either model or agentRuntimeArn must be provided")
+        return self
 
 
 @router.resolver(field_name="listApplications")
@@ -96,6 +125,7 @@ def list_applications():
                 "id": app.get("Id"),
                 "name": app.get("Name"),
                 "model": app.get("Model"),
+                "agentRuntimeArn": app.get("AgentRuntimeArn"),
                 "workspace": app.get("Workspace"),
                 "outputModalities": app.get("OutputModalities"),
                 "systemPrompt": app.get("SystemPrompt"),
@@ -150,6 +180,7 @@ def get_application(id: str):
             "id": app.get("Id"),
             "name": app.get("Name"),
             "model": app.get("Model"),
+            "agentRuntimeArn": app.get("AgentRuntimeArn"),
             "workspace": app.get("Workspace"),
             "outputModalities": app.get("OutputModalities"),
             "systemPrompt": app.get("SystemPrompt"),
@@ -224,12 +255,14 @@ def update_application(input: dict):
         request.maxTokens,
         request.temperature,
         request.topP,
+        agentRuntimeArn=request.agentRuntimeArn,
     )
 
     return {
         "id": application.get("Id"),
         "name": application.get("Name"),
         "model": application.get("Model"),
+        "agentRuntimeArn": application.get("AgentRuntimeArn"),
         "workspace": application.get("Workspace"),
         "systemPrompt": application.get("SystemPrompt"),
         "systemPromptRag": application.get("SystemPromptRag"),
@@ -265,12 +298,14 @@ def _create_application(request: CreateApplicationRequest):
         request.maxTokens,
         request.temperature,
         request.topP,
+        agentRuntimeArn=request.agentRuntimeArn,
     )
 
     return {
         "id": application.get("Id"),
         "name": application.get("Name"),
         "model": application.get("Model"),
+        "agentRuntimeArn": application.get("AgentRuntimeArn"),
         "workspace": application.get("Workspace"),
         "systemPrompt": application.get("SystemPrompt"),
         "systemPromptRag": application.get("SystemPromptRag"),

@@ -27,6 +27,7 @@ const customPromptRegex = /^[A-Za-z0-9-_., !?]*$/;
 const defaults: ApplicationManageInput = {
   name: "",
   selectedModel: null,
+  selectedAgent: null,
   selectedWorkspace: null,
   systemPrompt: "",
   systemPromptRag: "",
@@ -84,6 +85,7 @@ export default function ManageApplication() {
             selectedModel: OptionsHelper.getSelectOption(
               application.model ?? ""
             ),
+            selectedAgent: null,
             selectedWorkspace: OptionsHelper.getSelectOption(
               application.workspace || ""
             ),
@@ -119,8 +121,8 @@ export default function ManageApplication() {
           "Application name can only contain letters, numbers, underscores, whitespaces and dashes";
       }
 
-      if (!form.selectedModel) {
-        errors.model = "Model is required";
+      if (!form.selectedModel && !form.selectedAgent) {
+        errors.model = "Model or Agent is required";
       }
 
       if (!form.selectedRoles || form.selectedRoles.length === 0) {
@@ -161,7 +163,7 @@ export default function ManageApplication() {
     if (
       applicationId &&
       application &&
-      application.model &&
+      (application.model || application.agentRuntimeArn) &&
       application.roles &&
       application.roles.length > 0 &&
       application.allowImageInput !== undefined &&
@@ -171,7 +173,15 @@ export default function ManageApplication() {
       const initialValues = {
         id: applicationId,
         name: application.name,
-        selectedModel: OptionsHelper.getSelectOption(application.model),
+        selectedModel: application.model
+          ? OptionsHelper.getSelectOption(application.model)
+          : null,
+        selectedAgent: application.agentRuntimeArn
+          ? {
+              label: application.agentRuntimeArn.split("/").pop() ?? "",
+              value: application.agentRuntimeArn,
+            }
+          : null,
         selectedWorkspace: OptionsHelper.getSelectOption(
           application.workspace || ""
         ),
@@ -200,11 +210,16 @@ export default function ManageApplication() {
     setGlobalError(undefined);
     setSubmitting(true);
 
-    const selectedModel = OptionsHelper.parseValue(data.selectedModel?.value);
+    const selectedModel = data.selectedModel?.value
+      ? OptionsHelper.parseValue(data.selectedModel.value)
+      : null;
 
     const newApplicationObj = {
       name: data.name.trim(),
-      model: selectedModel.provider + "::" + selectedModel.name,
+      model: selectedModel
+        ? selectedModel.provider + "::" + selectedModel.name
+        : undefined,
+      agentRuntimeArn: data.selectedAgent?.value || undefined,
       workspace: data.selectedWorkspace?.value
         ? OptionsHelper.parseWorkspaceValue(data.selectedWorkspace)
         : "",
@@ -246,13 +261,18 @@ export default function ManageApplication() {
     setGlobalError(undefined);
     setSubmitting(true);
 
-    const selectedModel = OptionsHelper.parseValue(data.selectedModel?.value);
+    const selectedModel = data.selectedModel?.value
+      ? OptionsHelper.parseValue(data.selectedModel.value)
+      : null;
     if (!applicationId) return;
 
     const newApplicationObj = {
       id: applicationId || application?.id || "",
       name: data.name.trim(),
-      model: selectedModel.provider + "::" + selectedModel.name,
+      model: selectedModel
+        ? selectedModel.provider + "::" + selectedModel.name
+        : undefined,
+      agentRuntimeArn: data.selectedAgent?.value || undefined,
       workspace: data.selectedWorkspace?.value
         ? OptionsHelper.parseWorkspaceValue(data.selectedWorkspace)
         : "",

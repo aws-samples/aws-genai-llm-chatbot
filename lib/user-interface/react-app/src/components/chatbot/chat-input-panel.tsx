@@ -538,7 +538,7 @@ export default function ChatInputPanel(props: ChatInputPanelProps) {
     const request: ChatBotRunRequest = props.applicationId
       ? {
           action: ChatBotAction.Run,
-          modelInterface: "langchain", // We allow only langchain models in app creation
+          modelInterface: application?.agentRuntimeArn ? "agent" : "langchain",
           data: {
             mode: getChatBotMode(outputModality),
             text: value,

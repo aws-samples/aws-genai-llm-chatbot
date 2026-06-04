@@ -239,7 +239,8 @@ input SemanticSearchInput {
 input ManageApplicationInput {
   id: String
   name: String!
-  model: String!
+  model: String
+  agentRuntimeArn: String
   workspace: String
   systemPrompt: String
   systemPromptRag: String
@@ -376,6 +377,7 @@ type Application @aws_cognito_user_pools {
   id: String!
   name: String!
   model: String
+  agentRuntimeArn: String
   workspace: String
   systemPrompt: String
   systemPromptRag: String

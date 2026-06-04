@@ -50,6 +50,38 @@ create_application_input = {
     "maxTokens": 1024,
 }
 
+agent_application = {
+    "Id": "agent_app_id",
+    "Name": "agent app",
+    "AgentRuntimeArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:runtime/my-agent",
+    "OutputModalities": ["text"],
+    "Roles": ["role1"],
+    "AllowImageInput": False,
+    "AllowVideoInput": False,
+    "AllowDocumentInput": False,
+    "EnableGuardrails": False,
+    "Streaming": False,
+    "Temperature": 0.7,
+    "TopP": 1.0,
+    "MaxTokens": 1024,
+    "CreateTime": now,
+    "UpdateTime": now,
+}
+
+create_agent_application_input = {
+    "name": "agent app",
+    "agentRuntimeArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:runtime/my-agent",
+    "roles": ["role1"],
+    "allowImageInput": False,
+    "allowVideoInput": False,
+    "allowDocumentInput": False,
+    "enableGuardrails": False,
+    "streaming": False,
+    "temperature": 0.7,
+    "topP": 1.0,
+    "maxTokens": 1024,
+}
+
 
 def test_list_applications(mocker):
     mocker.patch(
@@ -186,11 +218,10 @@ def test_create_application_invalid_input(mocker):
 
     invalid_input_2 = create_application_input.copy()
     invalid_input_2["model"] = None
-    with pytest.raises(ValidationError) as exc_info:
+    # model=None is valid at Pydantic level (Optional), but validate_request
+    # raises CommonError when neither model nor agentRuntimeArn is provided
+    with pytest.raises(CommonError, match="Either model or agentRuntimeArn"):
         create_application(invalid_input_2)
-    error_messages = str(exc_info.value)
-    assert "Input should be a valid string" in error_messages
-    assert "type=string_type, input_value=None, input_type=NoneType" in error_messages
 
     invalid_input_3 = create_application_input.copy()
     invalid_input_3["roles"] = None
@@ -200,7 +231,7 @@ def test_create_application_invalid_input(mocker):
     assert "Input should be a valid list" in error_messages
     assert "type=list_type, input_value=None, input_type=NoneType" in error_messages
 
-    with pytest.raises(ValidationError, match="10 validation error"):
+    with pytest.raises(ValidationError, match="9 validation error"):
         create_application({})
 
     with pytest.raises(ValidationError, match="3 validation error"):
@@ -209,3 +240,85 @@ def test_create_application_invalid_input(mocker):
         invalid_input_4["systemPromptRag"] = ">"
         invalid_input_4["condenseSystemPrompt"] = ">"
         create_application(invalid_input_4)
+
+
+# --- Agent application tests ---
+
+
+def test_create_agent_application(mocker):
+    mock = mocker.patch(
+        "genai_core.applications.create_application", return_value=agent_application
+    )
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
+
+    response = create_application(create_agent_application_input.copy())
+    assert response.get("id") == agent_application.get("Id")
+    assert response.get("agentRuntimeArn") == agent_application.get("AgentRuntimeArn")
+    assert response.get("model") is None
+    assert mock.call_count == 1
+    # Verify agentRuntimeArn was passed through
+    call_kwargs = mock.call_args
+    assert call_kwargs.kwargs["agentRuntimeArn"] == create_agent_application_input["agentRuntimeArn"]
+
+
+def test_update_agent_application(mocker):
+    mock = mocker.patch(
+        "genai_core.applications.update_application", return_value=agent_application
+    )
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
+
+    update_input = create_agent_application_input.copy()
+    update_input["id"] = "agent_app_id"
+
+    response = update_application(update_input)
+    assert response.get("id") == agent_application.get("Id")
+    assert response.get("agentRuntimeArn") == agent_application.get("AgentRuntimeArn")
+    assert mock.call_count == 1
+
+
+def test_list_applications_includes_agent_arn(mocker):
+    mocker.patch(
+        "genai_core.applications.list_applications",
+        return_value=[application, agent_application],
+    )
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
+
+    response = list_applications()
+    assert len(response) == 2
+    # Model-based app
+    assert response[0].get("agentRuntimeArn") is None
+    assert response[0].get("model") == "model"
+    # Agent-based app
+    assert response[1].get("agentRuntimeArn") == agent_application.get("AgentRuntimeArn")
+
+
+def test_get_agent_application(mocker):
+    mocker.patch(
+        "genai_core.applications.get_application", return_value=agent_application
+    )
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
+
+    response = get_application("agent_app_id")
+    assert response.get("agentRuntimeArn") == agent_application.get("AgentRuntimeArn")
+    assert response.get("model") is None
+
+
+def test_create_application_no_model_no_agent(mocker):
+    """Neither model nor agent provided — should fail at validate_request"""
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
+
+    invalid_input = create_agent_application_input.copy()
+    del invalid_input["agentRuntimeArn"]
+    # No model, no agent
+    with pytest.raises(CommonError, match="Either model or agentRuntimeArn"):
+        create_application(invalid_input)
+
+
+def test_create_application_invalid_agent_arn(mocker):
+    """Invalid ARN format should fail Pydantic or validate_request"""
+    mocker.patch("genai_core.auth.get_user_roles", return_value=["user", "admin"])
+
+    invalid_input = create_agent_application_input.copy()
+    invalid_input["agentRuntimeArn"] = "not-a-valid-arn"
+    with pytest.raises(CommonError, match="Invalid agent runtime ARN format"):
+        create_application(invalid_input)
