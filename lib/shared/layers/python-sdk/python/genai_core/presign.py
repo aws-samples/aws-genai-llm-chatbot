@@ -12,6 +12,7 @@ MAX_FILE_SIZE = 10 * 1000 * 1000  # 10Mb
 
 s3_client = boto3.client(
     "s3",
+    region_name = os.environ['AWS_REGION'],
     config=botocore.config.Config(
         # Presign URLs only work with CMK if sigv4 is used
         # (boto3 default to v2 in some cases)

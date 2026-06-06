@@ -7,12 +7,13 @@ import genai_core.workspaces
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.data_classes import SQSEvent, event_source
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from botocore.config import Config
 
 logger = Logger()
 tracer = Tracer()
 
 sfn_client = boto3.client("stepfunctions")
-s3 = boto3.client("s3")
+s3 = boto3.client("s3", region_name = os.environ['AWS_REGION'], config = Config(signature_version = 's3v4'))
 
 FILE_IMPORT_WORKFLOW_ARN = os.environ.get("FILE_IMPORT_WORKFLOW_ARN")
 PROCESSING_BUCKET_NAME = os.environ.get("PROCESSING_BUCKET_NAME")
