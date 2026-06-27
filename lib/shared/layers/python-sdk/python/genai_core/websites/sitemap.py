@@ -50,5 +50,4 @@ def extract_urls_from_sitemap(sitemap_url: str):
             print(f"No valid root tag found for sitemap: {sitemap_url}")
     except Exception as e:
         print(f"Error while processing sitemaps for {sitemap_url}", e)
-    else:
-        return urls
+    return urls
