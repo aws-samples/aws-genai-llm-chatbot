@@ -397,6 +397,7 @@ class AppSyncClient:
                 self.schema.Mutation.createApplication.args(input=input).select(
                     self.schema.Application.id,
                     self.schema.Application.name,
+                    self.schema.Application.agentRuntimeArn,
                     self.schema.Application.workspace,
                     self.schema.Application.systemPrompt,
                     self.schema.Application.systemPromptRag,
@@ -423,6 +424,7 @@ class AppSyncClient:
                 self.schema.Mutation.updateApplication.args(input=input).select(
                     self.schema.Application.id,
                     self.schema.Application.name,
+                    self.schema.Application.agentRuntimeArn,
                     self.schema.Application.workspace,
                     self.schema.Application.systemPrompt,
                     self.schema.Application.systemPromptRag,
@@ -449,6 +451,7 @@ class AppSyncClient:
                 self.schema.Query.getApplication.args(id=id).select(
                     self.schema.Application.id,
                     self.schema.Application.name,
+                    self.schema.Application.agentRuntimeArn,
                     self.schema.Application.workspace,
                     self.schema.Application.systemPrompt,
                     self.schema.Application.systemPromptRag,

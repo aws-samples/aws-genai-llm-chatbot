@@ -50,7 +50,8 @@ export class ApplicationsClient {
 
   async createApplication(params: {
     name: string;
-    model: string;
+    model?: string | null;
+    agentRuntimeArn?: string | null;
     workspaceId?: string | null;
     systemPrompt?: string | null;
     systemPromptRag?: string | null;
@@ -78,7 +79,8 @@ export class ApplicationsClient {
   async updateApplication(params: {
     id: string;
     name: string;
-    model: string;
+    model?: string | null;
+    agentRuntimeArn?: string | null;
     workspaceId?: string | null;
     systemPrompt?: string | null;
     systemPromptRag?: string | null;

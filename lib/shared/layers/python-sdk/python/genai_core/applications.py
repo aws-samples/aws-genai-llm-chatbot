@@ -1,6 +1,8 @@
 from decimal import Decimal
 import os
+import re
 import uuid
+from typing import Optional
 from aws_lambda_powertools import Logger
 import boto3
 from datetime import datetime
@@ -96,13 +98,19 @@ def create_application(
     maxTokens: int,
     temperature: Decimal,
     topP: Decimal,
+    agentRuntimeArn: Optional[str] = None,
 ):
     application_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-    validate_request(workspace=workspace, roles=roles, model=model)
+    validate_request(
+        workspace=workspace, roles=roles, model=model,
+        agentRuntimeArn=agentRuntimeArn,
+    )
 
-    output_modalities = genai_core.models.get_model_modalities(model)
+    output_modalities = (
+        genai_core.models.get_model_modalities(model) if model else ["text"]
+    )
     item = {
         "Id": application_id,
         "Name": name,
@@ -124,6 +132,9 @@ def create_application(
         "CreateTime": timestamp,
         "UpdateTime": timestamp,
     }
+
+    if agentRuntimeArn:
+        item["AgentRuntimeArn"] = agentRuntimeArn
 
     ddb_response = table.put_item(Item=item)
 
@@ -152,14 +163,20 @@ def update_application(
     maxTokens: int,
     temperature: Decimal,
     topP: Decimal,
+    agentRuntimeArn: Optional[str] = None,
 ):
     response = table.get_item(Key={"Id": id})
     if response.get("Item") is None:
         raise genai_core.types.CommonError("Unknown application")
 
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    validate_request(workspace=workspace, roles=roles, model=model)
-    output_modalities = genai_core.models.get_model_modalities(model)
+    validate_request(
+        workspace=workspace, roles=roles, model=model,
+        agentRuntimeArn=agentRuntimeArn,
+    )
+    output_modalities = (
+        genai_core.models.get_model_modalities(model) if model else ["text"]
+    )
     item = {
         "Id": id,
         "Name": name,
@@ -168,7 +185,7 @@ def update_application(
         "Workspace": workspace,
         "SystemPrompt": systemPrompt,
         "SystemPromptRag": systemPromptRag,
-        "ConsiseSystemPrompt": condenseSystemPrompt,
+        "CondenseSystemPrompt": condenseSystemPrompt,
         "Roles": roles,
         "AllowImageInput": allowImageInput,
         "AllowVideoInput": allowVideoInput,
@@ -181,6 +198,9 @@ def update_application(
         "CreateTime": response.get("Item").get("CreateTime"),
         "UpdateTime": timestamp,
     }
+
+    if agentRuntimeArn:
+        item["AgentRuntimeArn"] = agentRuntimeArn
 
     ddb_response = table.put_item(Item=item)
 
@@ -207,19 +227,33 @@ def delete_application(id):
     return True
 
 
-def validate_request(workspace, roles, model):
-    all_models = genai_core.models.list_models()
-    model_found = False
-    model_split = model.split("::")
-    if len(model_split) != 2:
-        raise genai_core.types.CommonError("Model not found")
-    for m in all_models:
-        if m.get("provider") == model_split[0] and m.get("name") == model_split[1]:
-            model_found = True
-            break
+def validate_request(workspace, roles, model, agentRuntimeArn=None):
+    if agentRuntimeArn:
+        arn_pattern = (
+            r"^arn:aws:bedrock-agentcore:[a-z0-9-]+:\d{12}:runtime/[a-zA-Z0-9_-]+$"
+        )
+        if not re.match(arn_pattern, agentRuntimeArn):
+            raise genai_core.types.CommonError("Invalid agent runtime ARN format")
+    elif model:
+        all_models = genai_core.models.list_models()
+        model_found = False
+        model_split = model.split("::")
+        if len(model_split) != 2:
+            raise genai_core.types.CommonError("Model not found")
+        for m in all_models:
+            if (
+                m.get("provider") == model_split[0]
+                and m.get("name") == model_split[1]
+            ):
+                model_found = True
+                break
 
-    if model_found == False:
-        raise genai_core.types.CommonError("Model not found")
+        if model_found is False:
+            raise genai_core.types.CommonError("Model not found")
+    else:
+        raise genai_core.types.CommonError(
+            "Either model or agentRuntimeArn must be provided"
+        )
 
     all_roles = genai_core.roles.list_roles()
     all_roles_names = list(map(lambda o: o.get("name"), all_roles))
