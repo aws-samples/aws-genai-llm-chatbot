@@ -42,6 +42,7 @@ class Provider(Enum):
     SAGEMAKER = "sagemaker"
     AMAZON = "amazon"
     COHERE = "cohere"
+    MINIMAX = "minimax"
 
 
 class Modality(Enum):

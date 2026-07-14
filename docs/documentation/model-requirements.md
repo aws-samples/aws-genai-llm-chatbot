@@ -41,7 +41,7 @@ Usually, an `API_KEY` is required to integrate with 3P models. To do so, the [Mo
 
 These keys will be injected at runtime into the Lambda function Environment Variables; they won't be visible in the AWS Lambda Console.
 
-For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Cohere endpoints:
+For example, if you wish to be able to interact with AI21 Labs., OpenAI's, Cohere and MiniMax endpoints:
 
 - Open the [Model Interface Keys Secret](https://github.com/aws-samples/aws-genai-llm-chatbot/blob/main/lib/model-interfaces/langchain/index.ts#L38) in Secrets Manager. You can find the secret name in the stack output, too.
 - Update the Secrets by adding a key to the JSON
@@ -50,7 +50,8 @@ For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Co
 {
   "AI21_API_KEY": "xxxxx",
   "OPENAI_API_KEY": "sk-xxxxxxxxxxxxxxx",
-  "COHERE_API_KEY": "xxxxx"
+  "COHERE_API_KEY": "xxxxx",
+  "MINIMAX_API_KEY": "xxxxx"
 }
 ```
 
@@ -58,6 +59,26 @@ For example, if you wish to be able to interact with AI21 Labs., OpenAI's and Co
 N.B: In case of no keys needs, the secret value must be an empty JSON `{}`, NOT an empty string `''`.
 
 make sure that the environment variable matches what is expected by the framework in use, like Langchain ([see available langchain integrations](https://python.langchain.com/docs/integrations/llms/)).
+
+### MiniMax integration as third party model
+
+[MiniMax](https://www.minimax.io/) provides OpenAI-compatible LLM APIs. The following models are supported:
+
+| Model | Context Length | Description |
+|-------|---------------|-------------|
+| MiniMax-M2.7 | 1M tokens | Latest flagship model |
+| MiniMax-M2.5 | 204K tokens | Strong reasoning capabilities |
+| MiniMax-M2.5-highspeed | 204K tokens | Faster variant of M2.5 |
+
+To enable MiniMax models, add your API key to the Secrets Manager secret:
+
+```json
+{
+  "MINIMAX_API_KEY": "your-minimax-api-key"
+}
+```
+
+Once added, MiniMax models will automatically appear in the model selection UI.
 
 ### Azure OpenAI integration as third party model
 
