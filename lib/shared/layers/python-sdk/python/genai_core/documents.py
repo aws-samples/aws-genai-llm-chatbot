@@ -3,6 +3,7 @@ import json
 import uuid
 from aws_lambda_powertools import Logger
 import boto3
+from botocore.config import Config
 import botocore
 import feedparser
 import genai_core.types
@@ -35,7 +36,7 @@ DOCUMENTS_BY_STATUS_INDEX = os.environ.get("DOCUMENTS_BY_STATUS_INDEX", "")
 WORKSPACE_OBJECT_TYPE = "workspace"
 
 s3 = boto3.resource("s3")
-s3_client = boto3.client("s3")
+s3_client = boto3.client("s3", region_name = os.environ['AWS_REGION'], config = Config(signature_version = 's3v4'))
 dynamodb = boto3.resource("dynamodb")
 dynamodb_client = boto3.client("dynamodb")
 sfn_client = boto3.client("stepfunctions")
