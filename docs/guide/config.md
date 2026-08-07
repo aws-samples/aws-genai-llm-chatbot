@@ -8,6 +8,17 @@ The configuration will allow you to define what AWS resource to create. To get a
 ### Prefix
 Set a prefix to the resource names including the CloudFormation stack name. It is usefull if you plan to deploy this project multiple times in the same AWS account and region.
 
+### Direct Send
+When enabled, Lambda handlers send tokens directly to clients via AppSync, bypassing the SNS/SQS messaging path. This reduces latency for token streaming in LLM responses.
+
+**Default:** Disabled
+
+**When to enable:**
+- You need lower latency for streaming responses
+- Your deployment has high token throughput requirements
+
+**Note:** This feature requires AppSync GraphQL API permissions for Lambda functions.
+
 ### Use an existing Amazon VPC
 Add the project to an existing [Amazon Virtual Private Cloud (Amazon VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html). Note the VPC has to have private subnets that can connect to the Internet. (For example when crawling a website to populate a RAG Workspace.)
 
